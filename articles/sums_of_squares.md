@@ -1,0 +1,423 @@
+# Sums of Squares in Nonorthogonal Designs
+
+## Why the Question Arises
+
+In a factorial analysis of variance with equal cell sizes, the effects
+are orthogonal: the sum of squares for each main effect and interaction
+is the same no matter what else is in the model, and the effect sums of
+squares add up to the model sum of squares. There is one partition and
+no choice to make.
+
+The moment the cell sizes are unequal, or a continuous covariate enters
+the model, the effects are no longer orthogonal. Each effect now shares
+variation with the others, so its sum of squares depends on what it is
+adjusted for. The “types” of sums of squares (Type I, Type II, and Type
+III, in the labeling that the SAS GLM procedure made standard) are
+nothing more than different conventions for that adjustment. They agree
+for balanced data and can disagree, sometimes sharply, for unbalanced
+data.
+
+Analysis of covariance is nonorthogonal essentially by construction:
+even with equal numbers per group, the covariate is generally not
+orthogonal to the grouping factor, so the covariate-adjusted comparison
+is already an exercise in choosing what each effect is adjusted for.
+
+## A Short History in Psychology
+
+The problem of unequal subclass numbers was posed by Yates (1934). It
+reached applied psychology through Overall and Spiegel (1969), who laid
+out three “methods” of analyzing nonorthogonal data that correspond, in
+order, to what are now called Type III, Type II, and Type I sums of
+squares. Their paper set off an extended methodological exchange:
+Appelbaum and Cramer (1974) clarified which hypotheses each method
+actually tests and warned against choosing a method for convenience
+rather than for the question, and Carlson and Timm (1974) and Herr and
+Gaebelein (1978) carried the argument further. Nelder (1977) framed the
+issue in terms of the principle of marginality, the reasoning behind
+Type II. Maxwell, Delaney, and Kelley (2027, Chapter 7) synthesize this
+literature from the model comparison perspective, which is the cleanest
+way to see what the types are, and the framing used here.
+
+## A Sum of Squares Is a Model Comparison
+
+In the model comparison perspective, every sum of squares is the same
+object: the reduction in error when a fuller model replaces a more
+restricted one,
+
+``` math
+ \mathrm{SS}(\text{effect}) \;=\; E_{\mathrm{restricted}} - E_{\mathrm{full}}, 
+```
+
+where $`E`$ is the error (residual) sum of squares of a model. The
+effect is the set of parameters that the full model has and the
+restricted model does not. A “type” is simply a rule for which full and
+restricted pair to compare for each effect. Once the two models are
+written down, there is nothing mysterious left; the disagreement among
+the types is a disagreement about which models answer the question.
+
+## Type I, Type II, and Type III
+
+Consider a two-factor design with factors $`A`$ and $`B`$ and their
+interaction $`A{:}B`$. Writing $`\mathrm{SS}(X \mid Z)`$ for the effect
+of $`X`$ adjusted for the terms in $`Z`$:
+
+- **Type I (sequential).** Each term is adjusted only for the terms
+  entered before it: $`\mathrm{SS}(A)`$, then $`\mathrm{SS}(B \mid A)`$,
+  then $`\mathrm{SS}(A{:}B \mid A, B)`$. The pieces add to the model sum
+  of squares, but the answer depends on the order the terms are listed.
+  Type I is the right choice only when the terms have a genuine a priori
+  ordering, as when a covariate is entered before the factor it adjusts.
+- **Type II.** Each term is adjusted for every other term that does not
+  contain it, honoring the principle of marginality:
+  $`\mathrm{SS}(A \mid B)`$, $`\mathrm{SS}(B \mid A)`$,
+  $`\mathrm{SS}(A{:}B \mid A, B)`$. Main effects are not adjusted for
+  the interaction. Type II is the most powerful option when the
+  interaction is absent, and it does not depend on how the factors are
+  coded.
+- **Type III.** Each term is adjusted for all other terms, including the
+  higher-order terms that contain it: $`\mathrm{SS}(A \mid B, A{:}B)`$,
+  $`\mathrm{SS}(B \mid A, A{:}B)`$. This is the SAS GLM default and the
+  default of . The main-effect tests concern the unweighted marginal
+  means, which is why they require sum-to-zero contrasts () to test the
+  intended hypothesis; with R’s default treatment contrasts a naive Type
+  III main-effect test is not that hypothesis.
+
+## A Worked Unbalanced Factorial
+
+The types diverge only for nonorthogonal data, so the demonstration
+needs an unbalanced design. The cells below have deliberately unequal
+sizes.
+
+``` r
+set.seed(113)
+cell <- function(a, b, n, mu) data.frame(A = a, B = b, y = rnorm(n, mu, 1))
+d <- rbind(
+  cell("a1", "b1",  8, 10.0), cell("a1", "b2",  5, 11.0), cell("a1", "b3", 12, 10.5),
+  cell("a2", "b1",  6, 10.8), cell("a2", "b2", 11, 11.2), cell("a2", "b3",  4, 12.0)
+)
+d$A <- factor(d$A)
+d$B <- factor(d$B)
+table(d$A, d$B)
+#>     
+#>      b1 b2 b3
+#>   a1  8  5 12
+#>   a2  6 11  4
+```
+
+DMAR’s
+[`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
+computes all three types by model comparison in base R, choosing the
+type through an argument. It reports each effect’s sum of squares, its
+test, and partial and partial with confidence intervals, and it notes
+the type beneath the table.
+
+``` r
+factorial_anova(y ~ A * B, data = d, ss_type = 1)   # sequential
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+```
+
+| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| A | 8.74 | 1 | 7.55 | 0.0090 | 0.159 | 0.00971 | 0.332 | 0.125 | 0.00971 | 0.332 |
+| B | 14.2 | 2 | 6.11 | 0.0048 | 0.234 | 0.0259 | 0.394 | 0.182 | 0.0259 | 0.394 |
+| A:B | 1.47 | 2 | 0.636 | 0.5345 | 0.0308 | 0 | 0.146 | 0 | 0 | 0.146 |
+| Residuals | 46.3 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
+
+Sum of squares: Type I Confidence level: 95%
+
+``` r
+factorial_anova(y ~ A * B, data = d, ss_type = 2)
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+```
+
+| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| A | 7.4 | 1 | 6.39 | 0.0155 | 0.138 | 0.0041 | 0.31 | 0.105 | 0.0041 | 0.31 |
+| B | 14.2 | 2 | 6.11 | 0.0048 | 0.234 | 0.0259 | 0.394 | 0.182 | 0.0259 | 0.394 |
+| A:B | 1.47 | 2 | 0.636 | 0.5345 | 0.0308 | 0 | 0.146 | 0 | 0 | 0.146 |
+| Residuals | 46.3 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
+
+Sum of squares: Type II Confidence level: 95%
+
+``` r
+factorial_anova(y ~ A * B, data = d, ss_type = 3)
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+```
+
+| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| A | 7.64 | 1 | 6.6 | 0.0141 | 0.142 | 0.00504 | 0.314 | 0.108 | 0.00504 | 0.314 |
+| B | 14.7 | 2 | 6.34 | 0.0041 | 0.241 | 0.0292 | 0.4 | 0.188 | 0.0292 | 0.4 |
+| A:B | 1.47 | 2 | 0.636 | 0.5345 | 0.0308 | 0 | 0.146 | 0 | 0 | 0.146 |
+| Residuals | 46.3 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
+
+Sum of squares: Type III Confidence level: 95%
+
+Type I is sequential, so listing the factors in the other order changes
+it, while Type II and Type III do not depend on the order:
+
+``` r
+factorial_anova(y ~ A * B, data = d, ss_type = 1)$SS[1:3]  # A entered first
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1]  8.743295 14.159731  1.474433
+factorial_anova(y ~ B * A, data = d, ss_type = 1)$SS[1:3]  # B first: different
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1] 15.500188  7.402838  1.474433
+```
+
+The main-effect sums of squares differ across the three types here
+precisely because the cells are unequal. The interaction sum of squares
+is the same under all three (it is the highest-order term, so nothing
+contains it), a useful check.
+
+[`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
+does not use the car package, but it agrees with
+[`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html) to numerical
+precision. Type III main-effect tests need sum-to-zero contrasts, which
+[`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
+applies internally and which
+[`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html) needs on the
+refit model:
+
+``` r
+fit_sum <- lm(y ~ A * B, data = d,
+              contrasts = list(A = contr.sum, B = contr.sum))
+car::Anova(fit_sum, type = 3)[c("A", "B", "A:B"), "Sum Sq"]
+#> [1]  7.641891 14.692503  1.474433
+factorial_anova(y ~ A * B, data = d, ss_type = 3)$SS[1:3]   # matches
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1]  7.641891 14.692503  1.474433
+```
+
+## How factorial_anova() Computes the Types
+
+Each sum of squares is a model comparison, and every model in the
+comparison is an ordinary least squares fit to a subset of the columns
+of one model matrix.
+[`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
+builds the full model matrix once, with sum-to-zero contrasts, and for
+each effect it takes the residual sum of squares (through the QR
+decomposition) of the fit that keeps the intercept plus a chosen set of
+terms. The sum of squares for the effect is the restricted residual sum
+of squares minus the full residual sum of squares. No separate analysis
+of variance routine is needed, and the computation does not use the car
+package.
+
+The three types differ only in which columns the restricted and full
+models share:
+
+- **Type I** keeps the terms listed before the effect versus those terms
+  plus the effect, stepping through the formula in order.
+- **Type II** keeps every term that does not contain the effect versus
+  those terms plus the effect. “Contains” is the marginality relation:
+  the term `A:B` contains `A` and `B`, so a main effect is adjusted for
+  the other main effects but not for the interactions built on it.
+- **Type III** starts from the full model and drops only the effect’s
+  own columns, leaving every other term in place, including the
+  interactions that contain the effect. Sum-to-zero contrasts make this
+  the test of the unweighted marginal means, and
+  [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
+  applies them internally so the user does not have to.
+
+The marginality relation is what makes Types II and III general. The
+same rule that adjusts a main effect for the interaction containing it
+in a two-factor design adjusts it for the two-way and three-way
+interactions in a three-factor design, and onward to any number of
+factors and any interaction order. The values agree with
+[`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html) from one-way
+through three-way unbalanced designs, which the package tests verify. A
+three-way check:
+
+``` r
+set.seed(113)
+g <- expand.grid(A = factor(1:2), B = factor(1:2), C = factor(1:3))
+g <- g[rep(seq_len(nrow(g)), c(6, 4, 5, 7, 3, 8, 6, 5, 4, 7, 5, 6)), ]  # unbalanced
+g$y <- rnorm(nrow(g)) + as.numeric(g$A) + 0.5 * as.numeric(g$B)
+gs <- lm(y ~ A * B * C, data = g,
+         contrasts = list(A = contr.sum, B = contr.sum, C = contr.sum))
+
+effs <- c("A", "B", "C", "A:B", "A:C", "B:C", "A:B:C")
+factorial_anova(y ~ A * B * C, data = g, ss_type = 3)$SS[1:7]  # DMAR
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 10
+#> of the effect size confidence intervals; the affected lower limits were clamped
+#> to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1] 13.71618522  8.32810994  1.06755478  0.06162124  0.32821820  2.47361380
+#> [7]  1.02265698
+car::Anova(gs, type = 3)[effs, "Sum Sq"]                        # matches
+#> [1] 13.71618522  8.32810994  1.06755478  0.06162124  0.32821820  2.47361380
+#> [7]  1.02265698
+```
+
+## Balanced Data: The Types Coincide
+
+With equal cell sizes the effects are orthogonal and the question
+disappears.
+
+``` r
+set.seed(113)
+db <- do.call(rbind, lapply(c("a1", "a2"), function(a)
+  do.call(rbind, lapply(c("b1", "b2", "b3"), function(b)
+    data.frame(A = a, B = b, y = rnorm(8, 10.5, 1))))))
+db$A <- factor(db$A); db$B <- factor(db$B)
+
+factorial_anova(y ~ A * B, data = db, ss_type = 1)$SS[1:3]   # Type I
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1] 0.06622407 2.54191761 1.35217335
+factorial_anova(y ~ A * B, data = db, ss_type = 2)$SS[1:3]   # Type II
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1] 0.06622407 2.54191761 1.35217335
+factorial_anova(y ~ A * B, data = db, ss_type = 3)$SS[1:3]   # Type III
+#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of
+#> the effect size confidence intervals; the affected lower limits were clamped to
+#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> [1] 0.06622407 2.54191761 1.35217335
+```
+
+The three sets of sums of squares match to numerical precision. This is
+the deeper point: the type matters only when the design is
+nonorthogonal, so a balanced design sidesteps the whole controversy.
+
+## ANCOVA Is Nonorthogonal by Construction
+
+A covariate makes the design nonorthogonal even with equal group sizes,
+so the covariate-adjusted treatment test is already a choice of
+adjustment. DMAR’s
+[`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md)
+reports the covariate-adjusted (Type III, equivalently Type II for a
+single grouping factor) effect, and records the sum-of-squares type it
+used.
+
+``` r
+res <- ancova(outcome = "iq_8", treatment = "treatment",
+              covariates = "iq_pre", data = pygmalion)
+res[res$term %in% c("F_value", "df_1", "df_2", "p_value",
+                    "sum_of_squares_type"), ]
+```
+
+| term                | value  |
+|:--------------------|:-------|
+| F_value             | 5.38   |
+| df_1                | 1      |
+| df_2                | 307    |
+| p_value             | 0.0210 |
+| sum_of_squares_type | 3      |
+
+Confidence level: 95%
+
+The adjusted matches what
+[`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html) returns at Type
+III (and Type II, which coincides here because there is a single
+factor).
+
+``` r
+dd <- pygmalion[stats::complete.cases(
+  pygmalion[, c("iq_8", "treatment", "iq_pre")]), ]
+dd$treatment <- factor(dd$treatment)
+fit_anc <- lm(iq_8 ~ treatment + iq_pre, data = dd,
+              contrasts = list(treatment = contr.sum))
+car::Anova(fit_anc, type = 3)["treatment", "F value"]
+#> [1] 5.382682
+res$value[res$term == "F_value"]
+#> [1] 5.382682
+```
+
+For a one-way ANCOVA there is nothing to toggle: the covariate-adjusted
+test is the same under Types II and III. The choice of type begins to
+matter only when a second factor or an interaction enters, which is the
+multifactor case above.
+
+## The Multivariate Case: MANOVA and MANCOVA
+
+When the outcome is a vector of correlated dependent variables, the
+scalar sums of squares become sum of squares and cross-products (SSCP)
+matrices: a hypothesis matrix $`\mathbf{H}`$ and an error matrix
+$`\mathbf{E}`$. The type logic is unchanged; it determines which model
+comparison forms $`\mathbf{H}`$ for each effect. The omnibus test is
+then a function of the eigenvalues of $`\mathbf{H}\mathbf{E}^{-1}`$,
+reported as Wilks’ lambda, Pillai’s trace, the Hotelling-Lawley trace,
+or Roy’s largest root. They agree when the effect is one-dimensional and
+diverge as it spreads across dimensions; Pillai’s trace is the most
+robust to assumption violations.
+
+DMAR’s
+[`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md)
+carries out a mixed-design multivariate analysis through
+[`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html), reports all
+four statistics, and defaults to Type III with an `ss_type` argument for
+Type II. Adding covariates turns the analysis into MANCOVA, with
+$`\mathbf{H}`$ and $`\mathbf{E}`$ formed after adjustment for the
+covariates; the same type considerations apply.
+
+## Recommendations
+
+The model comparison perspective dissolves most of the controversy:
+state the full and restricted models you intend to compare, and the sum
+of squares follows. With that in hand:
+
+- For a **balanced** design, the types coincide; report any of them.
+- When there is **no interaction**, Type II is the most powerful test of
+  the main effects and does not depend on the coding of the factors.
+- **Type III** is the common reporting default and corresponds to
+  hypotheses about unweighted marginal means, but it requires
+  sum-to-zero contrasts and is an awkward hypothesis for a main effect
+  that is part of a real interaction.
+- When an **interaction is present**, the marginal main-effect tests of
+  any type are usually the wrong focus; examine the interaction and the
+  simple effects instead (Maxwell, Delaney, and Kelley, 2027).
+
+In DMAR,
+[`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
+carries this out for a between-subjects design: it computes the chosen
+type by model comparison in base R and reports each effect with its
+partial and partial confidence intervals.
+[`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md) and
+[`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md)
+cover the covariate-adjusted and multivariate cases.
+
+The recurring theme, from Overall and Spiegel (1969) through Appelbaum
+and Cramer (1974) to the present, is that the type should follow from
+the question, not the other way around.
+
+## References
+
+Appelbaum, M. I., & Cramer, E. M. (1974). Some problems in the
+nonorthogonal analysis of variance. *Psychological Bulletin, 81*(6),
+335–343.
+
+Carlson, J. E., & Timm, N. H. (1974). Analysis of nonorthogonal
+fixed-effects designs. *Psychological Bulletin, 81*(9), 563–570.
+
+Herr, D. G., & Gaebelein, J. (1978). Nonorthogonal analysis of variance.
+*Psychological Bulletin, 85*(1), 207–216.
+
+Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
+experiments and analyzing data: A model comparison perspective* (4th
+ed.). Routledge. (See Chapter 7 on higher-order designs.)
+
+Nelder, J. A. (1977). A reformulation of linear models. *Journal of the
+Royal Statistical Society, Series A, 140*(1), 48–77.
+
+Overall, J. E., & Spiegel, D. K. (1969). Concerning least squares
+analysis of experimental data. *Psychological Bulletin, 72*(5), 311–322.
+
+Searle, S. R. (1987). *Linear models for unbalanced data*. Wiley.
+
+Yates, F. (1934). The analysis of multiple classifications with unequal
+numbers in the different classes. *Journal of the American Statistical
+Association, 29*(185), 51–66.

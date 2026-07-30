@@ -1,0 +1,908 @@
+# Maximum Likelihood Multiple Regression and Multivariate Regression
+
+``` r
+library(DMAR)
+set.seed(113)
+```
+
+## Purpose
+
+The [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) and
+[`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md)
+functions in DMAR fit multiple regression models by maximum likelihood
+with full information likelihood handling of missing values (FIML). The
+user-visible API mirrors [`lm()`](https://rdrr.io/r/stats/lm.html). The
+aim of this vignette is to clarify when the FIML route is worth the
+extra computation over an ordinary least squares (OLS) fit on the
+listwise-deleted data, and when it is not. The framework I use is the
+standard Rubin (1976) taxonomy of missingness mechanisms, summarized
+below, with explicit recognition that no statistical procedure
+(including FIML) can recover from missing-not-at-random patterns without
+additional modeling assumptions that the data themselves cannot verify
+(see Enders, 2010, ch. 5, for a thorough discussion).
+
+## Rubin’s Missingness Taxonomy
+
+Following Rubin (1976) and the synthesis in Schafer and Graham (2002):
+
+- **Missing completely at random (MCAR).** The probability that a value
+  is missing does not depend on any variables in the analysis, observed
+  or unobserved. Listwise deletion is *unbiased* under MCAR but is
+  *inefficient*, because the rows it discards still carry information
+  about the joint distribution of the variables.
+- **Missing at random (MAR).** The probability of missingness can depend
+  on observed variables but, conditional on those observed variables,
+  does not depend on the missing values themselves. MAR is the
+  assumption FIML and multiple imputation require, and it is testable
+  only in limited senses (Little, 1988); in practice it is justified by
+  design (planned dropout, by-design missingness), by reasoning about
+  the substantive mechanism, and by including auxiliary variables that
+  absorb the channels through which missingness might depend on
+  unobserved values.
+- **Missing not at random (MNAR).** The probability of missingness
+  depends on the missing values themselves even after conditioning on
+  observed variables. FIML does *not* fix MNAR. The accommodations for
+  MNAR are pattern-mixture models, selection models, and sensitivity
+  analyses across plausible MNAR mechanisms (Enders, 2010; Little and
+  Rubin, 2020). When the substantive process suggests MNAR (people drop
+  out *because* they are doing poorly; participants refuse to answer
+  *because* they feel strongly about the item), an analyst should not
+  rely on [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md)
+  alone.
+
+The remainder of this vignette quantifies what FIML buys you under MCAR
+and MAR, how the implications differ from listwise deletion in terms of
+bias, standard errors, *p* values, and the effect sizes one would
+report, and where the gain is largest. The multivariate sibling
+[`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md) is
+introduced toward the end for the case in which the FIML edge over
+listwise is biggest: correlated outcomes where the missingness patterns
+differ across outcomes.
+
+## Scenario 1: Complete Data (the Baseline)
+
+The population for the simulations in this vignette has three predictors
+and a single outcome,
+``` math
+
+Y = 1 + 0.5 X_1 - 0.3 X_2 + 0.2 X_3 + \varepsilon,
+\quad \varepsilon \sim \text{Normal}(0, 1),
+```
+with all $`X_j \sim \text{Normal}(0, 1)`$ mutually independent.
+
+``` r
+sim_complete <- function(N) {
+  X1 <- rnorm(N); X2 <- rnorm(N); X3 <- rnorm(N)
+  Y  <- 1 + 0.5 * X1 - 0.3 * X2 + 0.2 * X3 + rnorm(N)
+  data.frame(Y = Y, X1 = X1, X2 = X2, X3 = X3)
+}
+set.seed(113)
+N <- 200
+d <- sim_complete(N)
+
+# A curated first look at the simulated variables:
+descriptives(d)
+#> $descriptives
+#>   variable    type   n n_missing prop_missing        mean      median        sd
+#> 1        Y numeric 200         0            0  1.15301936  1.25510355 1.2046371
+#> 2       X1 numeric 200         0            0 -0.02187571  0.01465559 0.9890593
+#> 3       X2 numeric 200         0            0 -0.01576503 -0.04711187 0.9907827
+#> 4       X3 numeric 200         0            0  0.12339922  0.17042769 1.0185914
+#>         min      max        q25       q75    skewness    kurtosis
+#> 1 -2.275161 4.820937  0.3775873 1.9439513 -0.14337574  0.09439086
+#> 2 -2.813470 2.489453 -0.6125475 0.5947122 -0.09374149 -0.12704889
+#> 3 -2.653945 2.788548 -0.7521200 0.6905018  0.05125162 -0.12294943
+#> 4 -2.737882 2.726668 -0.5920092 0.7544399 -0.08948530 -0.09264588
+#> 
+#> $correlations
+#> NULL
+
+fit_lm   <- lm(Y ~ X1 + X2 + X3, data = d)
+fit_mlmr <- mlmr(Y ~ X1 + X2 + X3, data = d, ci_method = "wald",
+                 effect_sizes = FALSE)
+
+cbind(lm = coef(fit_lm), mlmr = coef(fit_mlmr))
+#>                     lm       mlmr
+#> (Intercept)  1.1386974  1.1386974
+#> X1           0.5291066  0.5291066
+#> X2          -0.3352737 -0.3352737
+#> X3           0.1670266  0.1670266
+```
+
+Point estimates agree to working precision. With complete data the two
+estimators are algebraically equivalent up to the
+maximum-likelihood-versus-unbiased divisor on the residual variance
+($`N`$ in ML, $`N - K - 1`$ in OLS):
+
+``` r
+ml_div <- sqrt(N / (N - 3 - 1))
+cbind(
+  lm         = sqrt(diag(vcov(fit_lm))),
+  mlmr       = sqrt(diag(vcov(fit_mlmr))),
+  mlmr_x_div = sqrt(diag(vcov(fit_mlmr))) * ml_div
+)
+#>                     lm       mlmr mlmr_x_div
+#> (Intercept) 0.07248673 0.07175820 0.07248673
+#> X1          0.07303356 0.07229953 0.07303356
+#> X2          0.07290628 0.07217354 0.07290628
+#> X3          0.07079629 0.07008475 0.07079629
+```
+
+Rescaling the FIML standard errors by $`\sqrt{N / (N - K - 1)}`$
+recovers the OLS standard errors exactly; the gap is the
+divisor-correction term, not a substantive disagreement.
+
+The *p* values therefore agree to the same precision as well:
+
+``` r
+data.frame(
+  predictor = names(coef(fit_lm))[-1],
+  p_lm      = format_p(summary(fit_lm)$coefficients[-1, "Pr(>|t|)"]),
+  p_mlmr    = format_p(summary(fit_mlmr)$coef_table$p_value[-1])
+)
+#>    predictor     p_lm   p_mlmr
+#> X1        X1 < 0.0001 < 0.0001
+#> X2        X2 < 0.0001 < 0.0001
+#> X3        X3   0.0193   0.0172
+```
+
+The omnibus effect size $`R^2`$, with a noncentral $`F`$ confidence
+interval (Kelley, 2007), is identical from either fit (because the point
+estimate matches and the inversion is the same):
+
+``` r
+ci_R2(R2 = summary(fit_lm)$r.squared, N = N, p = 3, conf_level = 0.95,
+      random_predictors = TRUE)
+```
+
+| term        | value | prob_less | prob_greater |
+|:------------|:------|:----------|:-------------|
+| lower_limit | 0.185 | 0.025     | 0.975        |
+| R2          | 0.298 | NA        | NA           |
+| upper_limit | 0.397 | 0.975     | 0.025        |
+
+Confidence level: 95%
+
+**Is there any reason to prefer the maximum likelihood fit when the data
+are complete?** For inference on the regression coefficients themselves,
+no: OLS gives the same numbers and the same conclusions, more cheaply.
+There are, however, situations in which the ML formulation is the
+natural choice even with complete data. (a) When inference will rely on
+a likelihood ratio test across nested models, the ML fit gives the LR
+statistic directly through `anova(fit_a, fit_b)`. (b) When the same
+model will later be extended to additional outcomes (multivariate
+regression) or embedded in a larger structural model, fitting the
+univariate piece in
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) provides
+a fit object that composes naturally with
+[`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md) or
+[`lavaan::sem()`](https://rdrr.io/pkg/lavaan/man/sem.html) without
+redoing the work. (c) When the analyst plans to compare a complete-data
+result against a later analysis with missing data, using
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) from the
+start keeps the inference machinery (CI method, standard error type,
+estimator) constant across the comparison. For routine complete-data
+regression that ends with the coefficients and an $`R^2`$,
+[`lm()`](https://rdrr.io/r/stats/lm.html) is the right tool.
+
+## Scenario 2: Missing Outcome Under MCAR
+
+Hold the data generating process fixed and delete 20% of the $`Y`$
+values completely at random:
+
+``` r
+set.seed(113)
+d_mcar <- d
+d_mcar$Y[sample.int(nrow(d_mcar), size = round(0.20 * nrow(d_mcar)))] <- NA
+
+fit_lm    <- lm(Y ~ X1 + X2 + X3, data = d_mcar)         # listwise
+fit_mlmr  <- mlmr(Y ~ X1 + X2 + X3, data = d_mcar,
+                  ci_method = "wald", effect_sizes = FALSE)
+fit_lwise <- mlmr(Y ~ X1 + X2 + X3, data = d_mcar,
+                  missing = "listwise", ci_method = "wald",
+                  effect_sizes = FALSE)
+
+cbind(true       = c(`(Intercept)` = 1, X1 = 0.5, X2 = -0.3, X3 = 0.2),
+      lm         = coef(fit_lm),
+      mlmr_fiml  = coef(fit_mlmr),
+      mlmr_lwise = coef(fit_lwise))
+#>             true         lm  mlmr_fiml mlmr_lwise
+#> (Intercept)  1.0  1.1128103  1.1128103  1.1128103
+#> X1           0.5  0.5335531  0.5335531  0.5335531
+#> X2          -0.3 -0.3571380 -0.3571380 -0.3571380
+#> X3           0.2  0.1284247  0.1284247  0.1284247
+```
+
+Listwise OLS is unbiased under MCAR (Rubin, 1976), and the three point
+estimates agree to within the noise expected at this sample size. The
+story is in the standard errors:
+
+``` r
+cbind(
+  N_used = c(lm = nobs(fit_lm), mlmr_fiml = nobs(fit_mlmr),
+             mlmr_lwise = nobs(fit_lwise)),
+  rbind(
+    lm        = sqrt(diag(vcov(fit_lm))),
+    fiml      = sqrt(diag(vcov(fit_mlmr))),
+    listwise  = sqrt(diag(vcov(fit_lwise)))
+  )
+)
+#>            N_used (Intercept)         X1         X2         X3
+#> lm            160  0.07836387 0.07814821 0.08172696 0.07448265
+#> mlmr_fiml     200  0.07737812 0.07716517 0.08069890 0.07354573
+#> mlmr_lwise    160  0.07737812 0.07716517 0.08069890 0.07354573
+```
+
+FIML uses all 200 rows, but the extra rows inform only the marginal
+distribution of the predictors. The coefficients and their standard
+errors are identified entirely by the rows with observed $`Y`$, so the
+FIML and listwise coefficient standard errors coincide to working
+precision (each equals the OLS standard error after the
+$`\sqrt{N / (N - K - 1)}`$ divisor). When only the outcome is missing
+and all predictors are observed, the rows with observed $`X`$ carry no
+information about the conditional regression of $`Y`$ on $`X`$, so FIML
+delivers no efficiency gain over listwise for the slopes. The genuine
+FIML edge appears only once a predictor is missing, or once a correlated
+second outcome carries information about a partly-missing first outcome
+(Scenario 3 and the multivariate case below).
+
+The *p* values differ for the same reason as in the complete-data case
+of Scenario 1: FIML refers the Wald statistic to the normal distribution
+and divides the residual variance by $`N`$ rather than $`N - K - 1`$.
+The difference is the divisor and the reference distribution, not an
+efficiency gain.
+
+``` r
+data.frame(
+  predictor = names(coef(fit_mlmr))[-1],
+  p_lm      = format_p(summary(fit_lm)$coefficients[-1, "Pr(>|t|)"]),
+  p_fiml    = format_p(summary(fit_mlmr)$coef_table$p_value[-1])
+)
+#>    predictor     p_lm   p_fiml
+#> X1        X1 < 0.0001 < 0.0001
+#> X2        X2 < 0.0001 < 0.0001
+#> X3        X3   0.0866   0.0808
+```
+
+Whether the difference matters substantively depends on the size of the
+coefficient and the proportion missing. For a borderline predictor near
+the threshold of significance, even this small
+divisor-and-reference-distribution gap can move *p* across 0.05. For a
+clearly nonzero coefficient (here, $`X_1`$ at the population value 0.5),
+the two routes lead to the same scientific conclusion.
+
+## Scenario 3: Missing Predictor Under MAR (the Bias Case)
+
+This scenario is where the choice of estimator changes the estimates
+themselves. Generate a missingness mechanism for $`X_1`$ that depends on
+the observed outcome $`Y`$ but, given the observed data, not on the
+unobserved value of $`X_1`$ itself. Because $`Y`$ is observed, this is a
+MAR mechanism in Rubin’s (1976) sense:
+
+``` r
+miss_x1_mar <- function(d, threshold = 1) {
+  p_miss <- plogis(1.5 * (d$Y - threshold))
+  d$X1[runif(nrow(d)) < p_miss] <- NA
+  d
+}
+set.seed(113)
+d_mar <- miss_x1_mar(d)
+cat("Rows with X1 missing:", sum(is.na(d_mar$X1)),
+    "/", nrow(d_mar), "\n")
+#> Rows with X1 missing: 100 / 200
+```
+
+Fit both estimators:
+
+``` r
+fit_lm   <- lm(Y ~ X1 + X2 + X3, data = d_mar)
+fit_mlmr <- mlmr(Y ~ X1 + X2 + X3, data = d_mar,
+                 ci_method = "wald", effect_sizes = FALSE)
+
+cbind(true       = c(`(Intercept)` = 1, X1 = 0.5, X2 = -0.3, X3 = 0.2),
+      lm_lwise   = coef(fit_lm),
+      mlmr_fiml  = coef(fit_mlmr))
+#>             true   lm_lwise  mlmr_fiml
+#> (Intercept)  1.0  0.6798652  1.1242950
+#> X1           0.5  0.5183126  0.6211579
+#> X2          -0.3 -0.3176378 -0.3423177
+#> X3           0.2  0.1634849  0.1277616
+```
+
+Listwise OLS is now biased, because deleting the rows where $`X_1`$ is
+missing selects the analysis sample on the outcome $`Y`$, and
+conditioning on $`Y`$ distorts the regression of $`Y`$ on the
+predictors. FIML, modeling the joint distribution of
+$`(X_1, X_2, X_3, Y)`$ under the MAR assumption, recovers estimates
+close to the population values (0.5 on $`X_1`$, $`-0.3`$ on $`X_2`$, and
+0.2 on $`X_3`$).
+
+To make the bias claim quantitative rather than anecdotal, repeat across
+many simulated samples:
+
+``` r
+mar_mc <- function(B, N) {
+  est_lm   <- est_mlmr <- matrix(NA, B, 4,
+                                 dimnames = list(NULL,
+                                                 c("Intercept", "X1", "X2", "X3")))
+  for (b in seq_len(B)) {
+    d <- sim_complete(N)
+    d <- miss_x1_mar(d)
+    f_lm <- lm(Y ~ X1 + X2 + X3, data = d)
+    f_ml <- mlmr(Y ~ X1 + X2 + X3, data = d,
+                 ci_method = "wald", effect_sizes = FALSE)
+    est_lm[b, ]   <- coef(f_lm)
+    est_mlmr[b, ] <- coef(f_ml)
+  }
+  list(lm = est_lm, mlmr = est_mlmr)
+}
+set.seed(113)
+mc <- mar_mc(B = 100, N = 300)
+truth <- c(1, 0.5, -0.3, 0.2)
+
+bias <- rbind(
+  bias_lm    = colMeans(mc$lm)   - truth,
+  bias_mlmr  = colMeans(mc$mlmr) - truth
+)
+round(bias, 3)
+#>           Intercept    X1     X2     X3
+#> bias_lm      -0.525 -0.12  0.067 -0.056
+#> bias_mlmr     0.009  0.01 -0.011 -0.002
+```
+
+Across 100 replicates, the listwise bias is several times the size of
+the FIML bias and is largest on the intercept and the $`X_1`$ slope. The
+pattern is the expected one: when $`X_1`$ is missing as a function of
+the outcome $`Y`$, listwise deletion selects the analysis sample on
+$`Y`$, so the regression of $`Y`$ on $`(X_1, X_2, X_3)`$ fitted on that
+selected sample is distorted. FIML, which uses every row’s contribution
+to the joint likelihood, recovers the conditional regression structure.
+
+The model implied effect size is less distorted than the coefficients,
+but the interval still pays for the lost rows. Compare the model implied
+$`R^2`$ from FIML to the listwise $`R^2`$ from OLS, with a 95%
+noncentral $`F`$ CI on each (the FIML interval uses the FIML estimate of
+the total $`Y`$ variance, the listwise interval uses the listwise
+estimate):
+
+``` r
+R2_lm   <- summary(fit_lm)$r.squared
+R2_fiml <- mlmr(Y ~ X1 + X2 + X3, data = d_mar,
+                ci_method = "wald", effect_sizes = TRUE)$R2
+
+ci_lm   <- ci_R2(R2 = R2_lm,   N = nobs(fit_lm),  p = 3,
+                 conf_level = 0.95, random_predictors = TRUE)
+ci_fiml <- ci_R2(R2 = R2_fiml, N = nrow(d_mar),   p = 3,
+                 conf_level = 0.95, random_predictors = TRUE)
+data.frame(
+  method  = c("lm (listwise)", "mlmr (FIML)"),
+  R2      = c(R2_lm,            R2_fiml),
+  ci_low  = c(ci_lm$value[ci_lm$term == "lower_limit"],
+              ci_fiml$value[ci_fiml$term == "lower_limit"]),
+  ci_high = c(ci_lm$value[ci_lm$term == "upper_limit"],
+              ci_fiml$value[ci_fiml$term == "upper_limit"])
+)
+#>          method        R2    ci_low   ci_high
+#> 1 lm (listwise) 0.3051160 0.1423347 0.4416810
+#> 2   mlmr (FIML) 0.3417592 0.2271124 0.4405671
+```
+
+The two $`R^2`$ point estimates are close here. What differs is the
+interval: listwise deletion keeps only the rows with $`X_1`$ observed,
+so the listwise estimate rests on a fraction of the sample and its
+noncentral $`F`$ interval is correspondingly wider, while FIML uses
+every row’s contribution and yields a tighter interval on the full
+sample.
+
+## Scenario 4: Differential Missingness in a Treatment-Versus-Control Design
+
+Differential dropout is the form missingness most often takes in
+intervention research, and whether it biases the treatment effect
+depends on what is missing and on what the analysis model conditions on.
+This scenario works through three versions of the same randomized study,
+each one MAR, that together mark the boundary between when full
+information maximum likelihood earns its keep and when it correctly does
+nothing. Throughout, the study has a treatment indicator
+$`T \in \{0, 1\}`$, a baseline covariate $`X`$, an outcome $`Y`$ with a
+true treatment effect of $`\delta = 0.5`$, and arms that randomization
+balances at baseline.
+
+### When Only the Outcome Is Missing
+
+In the first version the dropout is heavier in the treatment arm at high
+baseline values (perhaps the high-baseline participants in the treatment
+group found the intervention burdensome), so the only variable with
+missing values is $`Y`$. The missingness depends on the observed
+baseline variables ($`T`$ and $`X`$) but, conditional on those, not on
+$`Y`$ itself, so this is MAR.
+
+``` r
+set.seed(113)
+n_per <- 150
+sim_trial <- function(n_per, delta = 0.5) {
+  T  <- rep(c(0, 1), each = n_per)
+  X  <- rnorm(2 * n_per)
+  Y  <- 0.3 * X + delta * T + rnorm(2 * n_per)
+  data.frame(T = factor(T, levels = c(0, 1),
+                        labels = c("Control", "Treatment")),
+             X = X, Y = Y)
+}
+d_trial <- sim_trial(n_per)
+
+# Differential dropout: treatment-arm participants with high X are
+# missing on Y at a much higher rate than control-arm participants.
+p_miss <- ifelse(d_trial$T == "Treatment",
+                 plogis(2 * (d_trial$X - 0.5)),
+                 0.05)
+d_trial$Y[runif(nrow(d_trial)) < p_miss] <- NA
+table(d_trial$T, is.na(d_trial$Y))
+#>            
+#>             FALSE TRUE
+#>   Control     142    8
+#>   Treatment   101   49
+```
+
+Now fit both estimators and contrast the implied treatment effect:
+
+``` r
+fit_lm   <- lm(Y ~ T + X, data = d_trial)
+fit_mlmr <- mlmr(Y ~ T + X, data = d_trial,
+                 ci_method = "wald", effect_sizes = FALSE)
+
+data.frame(
+  estimator = c("lm (listwise)", "mlmr (FIML)"),
+  beta_T    = c(coef(fit_lm)["TTreatment"],
+                coef(fit_mlmr)["TTreatment"]),
+  se_T      = c(sqrt(vcov(fit_lm)["TTreatment", "TTreatment"]),
+                sqrt(vcov(fit_mlmr)["TTreatment", "TTreatment"])),
+  p_T       = format_p(c(summary(fit_lm)$coefficients["TTreatment",
+                                                      "Pr(>|t|)"],
+                         summary(fit_mlmr)$coef_table$p_value[
+                           summary(fit_mlmr)$coef_table$term == "TTreatment"]))
+)
+#>       estimator  beta_T     se_T      p_T
+#> 1 lm (listwise) 0.58782 0.129351 < 0.0001
+#> 2   mlmr (FIML) 0.58782 0.128550 < 0.0001
+```
+
+The listwise and FIML adjusted treatment effects agree to working
+precision, and both are close to the population value 0.5. This is the
+reassuring case: because the dropout depends only on $`T`$ and $`X`$,
+and both are in the model, conditioning on them leaves the complete-case
+regression of $`Y`$ on $`(T, X)`$ unbiased. Moving from listwise to FIML
+changes nothing here, because the rows lost to dropout carry no
+information about the conditional regression once $`T`$ and $`X`$ are
+held fixed. When the only incomplete variable is the outcome and the
+predictors that drive its missingness are observed and in the model,
+modeling or imputing the missing outcomes recovers no information about
+the regression that the complete cases do not already carry (von Hippel,
+2007; Little & Rubin, 2020), so FIML and listwise coincide for the
+slopes, exactly as in Scenario 2.
+
+The adjusted effect is safe, but the unadjusted standardized mean
+difference is a different matter: it does not condition on the baseline
+covariate $`X`$, so the complete-case comparison still feels the
+$`X`$-selective dropout. Computed on the complete cases, with a
+noncentral $`t`$ confidence interval (Maxwell, Delaney, & Kelley, 2027):
+
+``` r
+# Standardized mean difference (Cohen's d) with a noncentral t CI,
+# from the complete-case subset:
+d_complete <- d_trial[stats::complete.cases(d_trial), ]
+y_ctrl <- d_complete$Y[d_complete$T == "Control"]
+y_trt  <- d_complete$Y[d_complete$T == "Treatment"]
+smd_trial <- smd(group_1 = y_trt, group_2 = y_ctrl)
+smd_trial
+```
+
+| term | value |
+|:-----|:------|
+| smd  | 0.444 |
+
+``` r
+
+n_ctrl <- length(y_ctrl)
+n_trt  <- length(y_trt)
+ncp_t  <- smd_trial$value * sqrt(n_trt * n_ctrl / (n_trt + n_ctrl))
+ci_smd_trial <- ci_smd(ncp = ncp_t, n_1 = n_trt, n_2 = n_ctrl,
+                       conf_level = 0.95)
+ci_smd_trial
+```
+
+| term        | value |
+|:------------|:------|
+| lower_limit | 0.186 |
+| smd         | 0.444 |
+| upper_limit | 0.702 |
+
+Confidence level: 95%
+
+In this complete-case sample the treatment arm exceeds the control arm
+by a standardized mean difference of 0.44, 95% CI \[0.19, 0.70\], but
+this understates the effect. The high-baseline treatment-arm dropouts
+are exactly the participants missing from the comparison, and the
+unadjusted standardized mean difference, unlike the covariate-adjusted
+regression coefficient above, does not correct for that selection. The
+remedy is to adjust for the baseline covariate that drives the dropout:
+FIML and listwise already agree on the adjusted effect, and neither
+rescues the unadjusted one.
+
+### When a Baseline Covariate Is Missing
+
+The picture changes once the missingness reaches a predictor. Keep the
+same trial, but suppose now that the baseline covariate is the variable
+that is incompletely recorded: the records of the lower-scoring
+participants are the ones that went unentered, so $`X`$ is missing as a
+function of the observed outcome $`Y`$. Because $`Y`$ is observed, this
+is still MAR.
+
+``` r
+set.seed(113)
+d_covmiss <- sim_trial(n_per)
+d_covmiss$X[runif(nrow(d_covmiss)) < plogis(1.2 * (d_covmiss$Y - 0.5))] <- NA
+cat("Baseline X missing:", sum(is.na(d_covmiss$X)), "/",
+    nrow(d_covmiss), "\n")
+#> Baseline X missing: 130 / 300
+```
+
+A single fit already shows the two estimators parting:
+
+``` r
+fit_lm_cov   <- lm(Y ~ T + X, data = d_covmiss)
+fit_mlmr_cov <- mlmr(Y ~ T + X, data = d_covmiss,
+                     ci_method = "wald", effect_sizes = FALSE)
+
+cbind(truth       = c(`(Intercept)` = 0, TTreatment = 0.5, X = 0.3),
+      lm_listwise = coef(fit_lm_cov),
+      mlmr_fiml   = coef(fit_mlmr_cov))
+#>             truth lm_listwise mlmr_fiml
+#> (Intercept)   0.0  -0.2160726 0.1138746
+#> TTreatment    0.5   0.3903435 0.5092180
+#> X             0.3   0.2091451 0.2601523
+```
+
+Listwise deletion drops every row with $`X`$ missing, and because those
+rows are selected on $`Y`$, the surviving complete-case regression is
+distorted: the treatment effect is pulled below 0.5 and the covariate
+slope below 0.3. FIML, modeling the joint distribution of $`(X, Y)`$
+under MAR, recovers both. A single sample is suggestive but not proof,
+so average the bias across many simulated trials to separate it from
+sampling noise:
+
+``` r
+trial_mc <- function(B, n_per) {
+  bT <- bX <- matrix(NA, B, 2,
+                     dimnames = list(NULL, c("listwise", "fiml")))
+  for (b in seq_len(B)) {
+    d <- sim_trial(n_per)
+    d$X[runif(nrow(d)) < plogis(1.2 * (d$Y - 0.5))] <- NA
+    cl <- coef(lm(Y ~ T + X, data = d))
+    cm <- coef(mlmr(Y ~ T + X, data = d,
+                    ci_method = "wald", effect_sizes = FALSE))
+    bT[b, ] <- c(cl["TTreatment"], cm["TTreatment"])
+    bX[b, ] <- c(cl["X"], cm["X"])
+  }
+  rbind(beta_T = colMeans(bT) - 0.5,
+        beta_X = colMeans(bX) - 0.3)
+}
+set.seed(113)
+round(trial_mc(B = 100, n_per = 150), 3)
+#>        listwise  fiml
+#> beta_T   -0.080 0.012
+#> beta_X   -0.059 0.000
+```
+
+The listwise column carries a systematic downward bias on both the
+treatment effect and the covariate slope, while the FIML column is
+centered on the population values. This is the trial-context form of
+Scenario 3’s mechanism: once the missingness touches a predictor,
+deletion selects the analysis sample on the outcome, and FIML earns its
+keep (Little & Rubin, 2020; Enders, 2010).
+
+### When Dropout Tracks an Auxiliary Variable
+
+The third version turns on a variable the analyst might not have thought
+to model. Suppose a baseline severity score $`Z`$, measured on everyone
+and correlated with the outcome, is what drives the dropout: the more
+severe participants are likelier to leave before $`Y`$ is recorded.
+Randomization balances $`Z`$ across arms, so $`Z`$ is unrelated to
+$`T`$, and the substantive model is still $`Y \sim T + X`$, which omits
+$`Z`$.
+
+``` r
+set.seed(113)
+sim_trial_aux <- function(n_per, delta = 0.5) {
+  T <- rep(c(0, 1), each = n_per)
+  X <- rnorm(2 * n_per)
+  Z <- rnorm(2 * n_per)               # baseline severity, balanced by arm
+  Y <- 0.3 * X + 0.6 * Z + delta * T + rnorm(2 * n_per)
+  data.frame(T = factor(T, levels = c(0, 1),
+                        labels = c("Control", "Treatment")),
+             X = X, Z = Z, Y = Y)
+}
+d_aux <- sim_trial_aux(n_per)
+d_aux$Y[runif(nrow(d_aux)) < plogis(1.5 * (d_aux$Z - 0.3))] <- NA
+table(d_aux$T, is.na(d_aux$Y))
+#>            
+#>             FALSE TRUE
+#>   Control      82   68
+#>   Treatment    81   69
+```
+
+The dropout is heavy but balanced across arms, because $`Z`$ is balanced
+across arms. Two consequences follow, and keeping them apart is the
+point.
+
+First, the treatment effect is protected. Averaged over many trials, the
+naive listwise, the naive FIML, and the FIML fit that carries $`Z`$ as
+an auxiliary variable (through
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md)’s
+`auxiliary` argument) all put the treatment effect on the population
+value 0.5:
+
+``` r
+aux_mc <- function(B, n_per) {
+  bT <- matrix(NA, B, 3, dimnames = list(NULL,
+              c("lm_naive", "fiml_naive", "fiml_aux")))
+  mY <- matrix(NA, B, 2, dimnames = list(NULL,
+              c("complete_case", "fiml_aux")))
+  se <- numeric(B)                    # fractional SE(beta_T) drop from Z
+  for (b in seq_len(B)) {
+    d <- sim_trial_aux(n_per)
+    d$Y[runif(nrow(d)) < plogis(1.5 * (d$Z - 0.3))] <- NA
+    f0 <- mlmr(Y ~ T + X, data = d, ci_method = "wald",
+               effect_sizes = FALSE)
+    fa <- mlmr(Y ~ T + X, data = d, ci_method = "wald",
+               effect_sizes = FALSE, auxiliary = "Z")
+    bT[b, ] <- c(coef(lm(Y ~ T + X, data = d))["TTreatment"],
+                 coef(f0)["TTreatment"], coef(fa)["TTreatment"])
+    mY[b, ] <- c(mean(d$Y, na.rm = TRUE), mean(predict(fa)))
+    se[b]   <- 1 - sqrt(vcov(fa)["TTreatment", "TTreatment"]) /
+                   sqrt(vcov(f0)["TTreatment", "TTreatment"])
+  }
+  list(beta_T = colMeans(bT), mean_Y = colMeans(mY),
+       se_reduction = mean(se))
+}
+set.seed(113)
+aux <- aux_mc(B = 100, n_per = 150)
+round(aux$beta_T, 3)
+#>   lm_naive fiml_naive   fiml_aux 
+#>      0.511      0.511      0.511
+```
+
+Because $`Z`$ is balanced across arms, dropout that tracks $`Z`$ thins
+both arms alike and leaves the difference between them undisturbed,
+whether or not the fit uses $`Z`$. Randomization, not the missing data
+method, is what protects the contrast.
+
+Second, the outcome levels are not protected. The participants who leave
+are the high-$`Z`$, high-$`Y`$ ones, so the same dropout biases the
+estimated mean of $`Y`$ downward. The auxiliary fit, which uses $`Z`$ to
+satisfy MAR, recovers the population value of 0.25 (half the
+participants receive the treatment, which adds 0.5), while the
+complete-case mean does not:
+
+``` r
+round(aux$mean_Y, 3)
+#> complete_case      fiml_aux 
+#>        -0.031         0.252
+```
+
+Carrying $`Z`$ as an auxiliary also tightens the treatment effect a
+little, here by about 2%. The gain is modest by design: the auxiliary
+informs the estimate through the missing data likelihood rather than by
+entering the regression, so the residual variance of the contrast is
+unchanged and the focal coefficient keeps its meaning.
+
+This is the inclusive analysis strategy: a variable related to the
+missingness or to the incomplete outcome belongs in the analysis even
+when it is of no substantive interest, because it makes MAR hold
+conditional on more of the observed data and recovers information that
+deletion discards (Collins, Schafer, & Kam, 2001; Enders, 2010).
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) carries
+such a variable through its `auxiliary` argument, which enters it as a
+saturated correlate (Graham, 2003): the auxiliary is correlated with the
+outcome residual and with the predictors but is never a predictor
+itself, so the model stays $`Y \sim T + X`$ and its coefficients keep
+their meaning. On complete data the auxiliary changes nothing; under MAR
+the single fit `mlmr(Y ~ T + X, auxiliary = "Z")` both protects the
+contrast and recovers the level.
+
+### Reading the Three Cases Together
+
+The three versions share the MAR assumption and differ only in what is
+missing and in what the model conditions on, yet they read differently:
+
+- Only the outcome is missing, and its missingness is a function of
+  observed predictors that are in the model: listwise and FIML agree,
+  and both are unbiased. FIML buys nothing for the slopes (von Hippel,
+  2007).
+- A predictor is missing: listwise selects the analysis sample on the
+  outcome and is biased, and FIML recovers the regression (Little &
+  Rubin, 2020).
+- An auxiliary variable drives the dropout: in a randomized design the
+  treatment contrast is protected regardless, but the outcome levels are
+  biased unless the auxiliary is included, and including it also
+  tightens the estimate (Collins, Schafer, & Kam, 2001).
+
+The common thread is that likelihood-based estimation recovers
+information only where deletion discards it: through an incomplete
+predictor, through an auxiliary variable, or, as in the multivariate
+case below, through a correlated second outcome. Where the complete
+cases already identify the quantity of interest, as with a missing
+outcome whose mechanism is fully modeled, the FIML and listwise
+estimates coincide, and they should.
+
+## When FIML Cannot Help: MNAR
+
+The simulations above all satisfy MAR by construction. When the
+missingness mechanism depends on the unobserved $`Y`$ values themselves
+(an MNAR mechanism in Rubin’s terms; for example, participants drop out
+*because* their outcomes are low and they are discouraged),
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) does not
+fix the problem. The joint likelihood that
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) maximizes
+does not include the dropout mechanism, and treating an MNAR pattern as
+MAR can leave residual bias in the regression coefficients even at large
+$`N`$.
+
+The literature offers three classes of accommodations for MNAR (see
+Enders, 2010, ch. 9–10, and Little and Rubin, 2020, ch. 15):
+
+- **Selection models** (Heckman, 1979) jointly model the outcome and the
+  missingness indicator and identify the bias through a distributional
+  assumption on the joint residuals. Useful when the missingness
+  mechanism is well-understood, but sensitive to the distributional
+  assumption.
+- **Pattern-mixture models** (Little, 1993) condition on the observed
+  missingness pattern and combine pattern-specific estimates with
+  weights that the analyst must specify. Useful when the data divide
+  naturally into a small number of patterns (early dropout, late
+  dropout, complete) with substantively distinct interpretations.
+- **Sensitivity analyses** repeat the analysis under a grid of MNAR
+  mechanisms (typically a parameter that shifts the distribution of the
+  missing values away from the MAR-implied conditional mean) and report
+  the range of conclusions across the grid. Useful as the default for
+  studies in which the MNAR mechanism is plausible but not
+  well-characterized.
+
+A practical recommendation: when the substantive process suggests MNAR
+(and treatment-arm dropout that depends on the unobserved outcome itself
+is a common MNAR motif), fit
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) *and* a
+sensitivity analysis under a plausible MNAR shift, and report the two
+results side by side. Do not rely on
+[`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) alone.
+
+## Multivariate FIML: When Outcomes Are Correlated
+
+The case in which FIML’s edge over listwise is largest is the
+multivariate case with correlated outcomes and missingness on one or
+more of them. The DMAR function for that case is
+[`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md),
+which fits the joint regression of two or more outcomes on a shared
+predictor set and estimates the residual covariance among outcomes as
+part of the model. Rows with observed $`Y_1`$ but missing $`Y_2`$ inform
+the slopes on $`Y_2`$ through the residual covariance with $`Y_1`$, in a
+way that no univariate route can match.
+
+``` r
+sim_mv <- function(N, rho = 0.7) {
+  X1 <- rnorm(N); X2 <- rnorm(N); X3 <- rnorm(N)
+  E  <- MASS::mvrnorm(N, mu = c(0, 0),
+                      Sigma = matrix(c(1, rho, rho, 1), 2))
+  Y1 <- 1 + 0.5 * X1 - 0.3 * X2 + 0.2 * X3 + E[, 1]
+  Y2 <- 0.5 + 0.4 * X1 + 0.1 * X2 - 0.5 * X3 + E[, 2]
+  data.frame(Y1 = Y1, Y2 = Y2, X1 = X1, X2 = X2, X3 = X3)
+}
+set.seed(113)
+d_mv <- sim_mv(N = 200, rho = 0.7)
+d_mv$Y2[sample.int(nrow(d_mv), 60)] <- NA  # 30% missing on Y2
+
+fit_mv_fiml <- mlmr_mv(cbind(Y1, Y2) ~ X1 + X2 + X3, data = d_mv,
+                       ci_method = "wald", effect_sizes = FALSE)
+fit_mv_lwd  <- mlmr_mv(cbind(Y1, Y2) ~ X1 + X2 + X3, data = d_mv,
+                       missing = "listwise", ci_method = "wald",
+                       effect_sizes = FALSE)
+
+cat("FIML N:", nobs(fit_mv_fiml),
+    " | listwise N:", nobs(fit_mv_lwd), "\n\n")
+#> FIML N: 200  | listwise N: 140
+cat("Slopes on Y2 (the partly-missing outcome):\n")
+#> Slopes on Y2 (the partly-missing outcome):
+rbind(FIML     = fit_mv_fiml$coefficients[, "Y2"],
+      listwise = fit_mv_lwd$coefficients[,  "Y2"])
+#>          (Intercept)        X1         X2         X3
+#> FIML       0.6276320 0.4406017 0.08928923 -0.5510653
+#> listwise   0.6351934 0.4464574 0.12758628 -0.5339337
+cat("\nStandard errors on the Y2 slopes:\n")
+#> 
+#> Standard errors on the Y2 slopes:
+rbind(FIML     = fit_mv_fiml$coef_table$se[
+                   fit_mv_fiml$coef_table$outcome == "Y2"],
+      listwise = fit_mv_lwd$coef_table$se[
+                   fit_mv_lwd$coef_table$outcome == "Y2"])
+#>                [,1]       [,2]       [,3]       [,4]
+#> FIML     0.07170004 0.07167455 0.07173736 0.07052212
+#> listwise 0.07876478 0.07820730 0.07833589 0.07790830
+```
+
+The FIML standard errors on the $`Y_2`$ slopes are smaller than the
+listwise standard errors, because FIML uses the observed $`Y_1`$ values
+together with the joint covariance structure to inform the $`Y_2`$
+regression. Listwise drops every row that is missing on either outcome
+and gets no benefit from the cross-outcome correlation. The size of the
+gain scales directly with the residual correlation between outcomes: at
+$`\rho = 0`$ the multivariate model is equivalent to two univariate
+models; at $`\rho \to 1`$ the partly-missing outcome is nearly observed
+through the other and FIML can be much more efficient.
+
+## Summary
+
+| Scenario | Use [`lm()`](https://rdrr.io/r/stats/lm.html)? | Use [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md)? | Use [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md)? | Where the gain comes from |
+|----|:--:|:--:|:--:|----|
+| Complete data, one outcome | Yes | (equivalent) | (only with MV $`Y`$) | None over [`lm()`](https://rdrr.io/r/stats/lm.html) for coefficients |
+| Missing $`Y`$ only, MCAR | Acceptable | Smaller SEs | (only with MV $`Y`$) | Predictor distribution informed by all rows |
+| Missing $`X`$, MAR | Biased | Consistent | (only with MV $`Y`$) | Joint likelihood under MAR |
+| Trial dropout, only $`Y`$ missing, mechanism in the model (4a) | Acceptable | (equivalent) | (only with MV $`Y`$) | None for the adjusted effect; the contrast is unbiased either way |
+| Trial dropout reaches a baseline predictor, MAR (4b) | Biased | Consistent | (only with MV $`Y`$) | Joint likelihood under MAR; deletion selects on the outcome |
+| Trial dropout tracks an omitted auxiliary, MAR (4c) | Unbiased contrast, biased levels | Unbiased levels once auxiliary included | (only with MV $`Y`$) | Randomization protects the contrast; the auxiliary restores the levels and adds precision |
+| MNAR (missingness depends on unobserved $`Y`$) | Biased | Biased | Biased | Neither tool fixes MNAR; sensitivity analysis required |
+| Multivariate $`Y`$, correlated outcomes, missing on one $`Y`$ | (separate fits, but joint info lost) | (per-outcome only) | Smaller SEs at larger cross-outcome residual correlation | Joint residual covariance carries information across outcomes |
+
+## See Also
+
+- [`?mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md)
+  (univariate FIML regression)
+- [`?mlmr_mv`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md)
+  (multivariate FIML regression)
+- [`lavaan::sem`](https://rdrr.io/pkg/lavaan/man/sem.html) for the
+  general structural equation modeling framework that
+  [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) and
+  [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md)
+  wrap
+
+## References
+
+Collins, L. M., Schafer, J. L., & Kam, C.-M. (2001). A comparison of
+inclusive and restrictive strategies in modern missing data procedures.
+*Psychological Methods, 6*(4), 330–351.
+<https://doi.org/10.1037/1082-989X.6.4.330>
+
+Enders, C. K. (2010). *Applied missing data analysis*. Guilford Press.
+
+Graham, J. W. (2003). Adding missing-data-relevant variables to
+FIML-based structural equation models. *Structural Equation Modeling,
+10*(1), 80–100. <https://doi.org/10.1207/S15328007SEM1001_4>
+
+Heckman, J. J. (1979). Sample selection bias as a specification error.
+*Econometrica, 47*(1), 153–161.
+
+Kelley, K. (2007). Confidence intervals for standardized effect sizes:
+Theory, application, and implementation. *Journal of Statistical
+Software, 20*(8), 1–24. <https://doi.org/10.18637/jss.v020.i08>
+
+Little, R. J. A. (1988). A test of missing completely at random for
+multivariate data with missing values. *Journal of the American
+Statistical Association, 83*(404), 1198–1202.
+
+Little, R. J. A. (1993). Pattern-mixture models for multivariate
+incomplete data. *Journal of the American Statistical Association,
+88*(421), 125–134.
+
+Little, R. J. A., & Rubin, D. B. (2020). *Statistical analysis with
+missing data* (3rd ed.). Wiley.
+
+Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
+experiments and analyzing data: A model comparison perspective* (4th
+ed.). Routledge.
+
+Rubin, D. B. (1976). Inference and missing data. *Biometrika, 63*(3),
+581–592. <https://doi.org/10.1093/biomet/63.3.581>
+
+Schafer, J. L., & Graham, J. W. (2002). Missing data: Our view of the
+state of the art. *Psychological Methods, 7*(2), 147–177.
+
+von Hippel, P. T. (2007). Regression with missing Ys: An improved
+strategy for analyzing multiply imputed data. *Sociological Methodology,
+37*(1), 83–117. <https://doi.org/10.1111/j.1467-9531.2007.00180.x>
