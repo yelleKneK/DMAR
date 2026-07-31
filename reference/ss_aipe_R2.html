@@ -225,20 +225,21 @@ multiple correlation coefficient. <em>Multivariate Behavioral Research, 35</em>,
 <span class="r-in"><span><span class="co">#    closed-form approximation. Slow (minutes), so wrapped in</span></span></span>
 <span class="r-in"><span><span class="co">#    \donttest{}; uncomment to run.</span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># verify_ss = TRUE re-runs a verification simulation and is worth it</span></span></span>
+<span class="r-in"><span><span class="co"># for a real plan; it is omitted here so the example runs quickly.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_R2</span><span class="op">(</span>population_R2 <span class="op">=</span> <span class="fl">.50</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, width <span class="op">=</span> <span class="fl">.10</span>,</span></span>
-<span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, random_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>           verify_ss <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, random_predictors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 771  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 773  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span><span class="fu">ss_aipe_R2</span><span class="op">(</span>population_R2 <span class="op">=</span> <span class="fl">.50</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, width <span class="op">=</span> <span class="fl">.10</span>,</span></span>
 <span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, assurance <span class="op">=</span> <span class="fl">.85</span>,</span></span>
-<span class="r-in"><span>           random_predictors <span class="op">=</span> <span class="cn">FALSE</span>, verify_ss <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>           random_predictors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 622  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 629  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

@@ -309,7 +309,9 @@ legend("topleft", bty = "n",
 ```
 
 ![Familywise Type I error vs number of
-covariates](cv_bryant_paulson_files/figure-html/plot-1.png)
+covariates](cv_bryant_paulson-fig-plot-1.png)
+
+plot of chunk plot
 
 ``` r
 

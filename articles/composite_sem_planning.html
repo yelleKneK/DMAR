@@ -719,7 +719,11 @@ the bold line is the average trajectory.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"The Population the Design Is Planned On"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Individual latent trajectories; the bold line is the average trajectory"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Wave"</span>, y <span class="op">=</span> <span class="st">"Well-being"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_sem_planning_files/figure-html/lgm-trajectories-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_sem_planning-fig-lgm-trajectories-1.png" alt="plot of chunk lgm-trajectories"><p class="caption">
+plot of chunk lgm-trajectories
+</p>
+</div>
 <p>The negative intercept-slope covariance is visible: trajectories that
 start high tend to tilt down relative to the average, so the fan narrows
 over time.</p>
@@ -766,11 +770,11 @@ deliver?</p>
 </tr>
 <tr class="even">
 <td align="left">composite_power</td>
-<td align="left">0.66</td>
+<td align="left">0.64</td>
 </tr>
 <tr class="odd">
 <td align="left">composite_power_mc_se</td>
-<td align="left">0.0474</td>
+<td align="left">0.048</td>
 </tr>
 <tr class="even">
 <td align="left">power_mu_s</td>
@@ -778,7 +782,7 @@ deliver?</p>
 </tr>
 <tr class="odd">
 <td align="left">power_cov_is</td>
-<td align="left">0.66</td>
+<td align="left">0.64</td>
 </tr>
 <tr class="even">
 <td align="left">population_mu_s</td>
@@ -804,8 +808,8 @@ deliver?</p>
 </table>
 <p>The average growth of 0.3 per year is easy to detect
 (<code>power_mu_s</code> is 1), and the composite is governed almost
-entirely by the covariance question: <code>power_cov_is</code> is 0.66,
-and the composite power is 0.66. Planning for the pair:</p>
+entirely by the covariance question: <code>power_cov_is</code> is 0.64,
+and the composite power is 0.64. Planning for the pair:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lgm_plan</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ss_power_composite_sem.html">ss_power_composite_sem</a></span><span class="op">(</span></span>
 <span>  model <span class="op">=</span> <span class="va">lgm_model</span>, pop_model <span class="op">=</span> <span class="va">pop_lgm</span>,</span>
@@ -820,15 +824,15 @@ and the composite power is 0.66. Planning for the pair:</p>
 <tbody>
 <tr class="odd">
 <td align="left">necessary_N</td>
-<td align="left">172</td>
+<td align="left">192</td>
 </tr>
 <tr class="even">
 <td align="left">composite_power</td>
-<td align="left">0.8</td>
+<td align="left">0.81</td>
 </tr>
 <tr class="odd">
 <td align="left">composite_power_mc_se</td>
-<td align="left">0.04</td>
+<td align="left">0.0392</td>
 </tr>
 <tr class="even">
 <td align="left">power_mu_s</td>
@@ -836,7 +840,7 @@ and the composite power is 0.66. Planning for the pair:</p>
 </tr>
 <tr class="odd">
 <td align="left">power_cov_is</td>
-<td align="left">0.8</td>
+<td align="left">0.81</td>
 </tr>
 <tr class="even">
 <td align="left">population_mu_s</td>
@@ -865,7 +869,7 @@ and the composite power is 0.66. Planning for the pair:</p>
 </tbody>
 </table>
 <p>About
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>172</mn></mrow><annotation encoding="application/x-tex">N = 172</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>192</mn></mrow><annotation encoding="application/x-tex">N = 192</annotation></semantics></math>
 participants are needed for both growth questions to be answered
 affirmatively in the same study with probability 0.80, under the stated
 population. A researcher who planned only for the slope mean, the
@@ -896,23 +900,23 @@ in 80 percent of studies:</p>
 <tbody>
 <tr class="odd">
 <td align="left">necessary_N</td>
-<td align="left">217</td>
+<td align="left">221</td>
 </tr>
 <tr class="even">
 <td align="left">composite_assurance</td>
-<td align="left">0.82</td>
+<td align="left">0.91</td>
 </tr>
 <tr class="odd">
 <td align="left">mean_width_mu_s</td>
-<td align="left">0.145</td>
+<td align="left">0.143</td>
 </tr>
 <tr class="even">
 <td align="left">mean_width_cov_is</td>
-<td align="left">0.207</td>
+<td align="left">0.203</td>
 </tr>
 <tr class="odd">
 <td align="left">width_within_desired_mu_s</td>
-<td align="left">0.82</td>
+<td align="left">0.91</td>
 </tr>
 <tr class="even">
 <td align="left">width_within_desired_cov_is</td>
@@ -954,14 +958,14 @@ in 80 percent of studies:</p>
 </table>
 <p>Confidence level: 95%</p>
 <p>The accuracy goal needs
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>217</mn></mrow><annotation encoding="application/x-tex">N = 217</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>221</mn></mrow><annotation encoding="application/x-tex">N = 221</annotation></semantics></math>,
 and the <code>width_within_desired_*</code> rows show which target
 binds: the slope mean’s interval is the harder one to keep narrow at
 this
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>.
 When both existence and magnitude matter, the defensible design uses the
 larger of the power and AIPE sample sizes, here
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>217</mn></mrow><annotation encoding="application/x-tex">N = 217</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mn>221</mn></mrow><annotation encoding="application/x-tex">N = 221</annotation></semantics></math>.</p>
 </div>
 </div>
 <div class="section level2">

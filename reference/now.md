@@ -78,7 +78,7 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Print the current date and time.
 now()
-#> July 31, 2026 (3:31 PM)
+#> July 31, 2026 (5:39 PM)
 
 # Time how long a piece of work takes. The pattern is the same
 # whether the work is a bootstrap, a simulation, or a numeric
@@ -88,7 +88,7 @@ start <- now()
 Sys.sleep(0.5)
 end <- now()
 end - start
-#> Time difference of 0.5019751 secs
+#> Time difference of 0.5019186 secs
 
 # Date only.
 now(time = FALSE)
@@ -101,6 +101,6 @@ now(tidy = TRUE)
 #>     term value
 #> 1    day    31
 #> 2   year  2026
-#> 3   hour     3
-#> 4 minute    31
+#> 3   hour     5
+#> 4 minute    39
 ```

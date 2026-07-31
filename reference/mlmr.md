@@ -505,11 +505,11 @@ rbind(FIML = coef(fit_fiml), listwise = coef(fit_lwd))
 
 # Bootstrap confidence intervals; supply boot_seed for reproducibility.
 fit_boot <- mlmr(mpg ~ wt + hp, data = mtcars,
-                 ci_method = "boot", B = 200, boot_seed = 113)
+                 ci_method = "boot", B = 100, boot_seed = 113)
 confint(fit_boot)
-#>                   2.5 %     97.5 %
-#> (Intercept) 33.27266355 41.2385549
-#> wt          -5.06524754 -2.6284807
-#> hp          -0.04993342 -0.0194477
+#>                   2.5 %      97.5 %
+#> (Intercept) 33.50458027 41.27427337
+#> wt          -5.31416120 -2.74304660
+#> hp          -0.05028086 -0.01939352
 # }
 ```

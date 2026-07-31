@@ -262,7 +262,7 @@ polychoric correlation estimation as a separate tool.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Six 5-category items with a single latent factor.</span></span></span>
-<span class="r-in"><span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">500</span></span></span>
+<span class="r-in"><span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></span>
 <span class="r-in"><span><span class="va">J</span> <span class="op">&lt;-</span> <span class="fl">6</span></span></span>
 <span class="r-in"><span><span class="va">loadings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.7</span>, <span class="va">J</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">eta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span></span></span>
@@ -278,26 +278,30 @@ polychoric correlation estimation as a separate tool.</p>
 <span class="r-in"><span><span class="fu">reliability_omega_categorical</span><span class="op">(</span>data <span class="op">=</span> <span class="va">items</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Categorical omega is reported without a confidence interval by default because its interval is bootstrap based. Request it with ci_method = "bca" (the recommended method) or "percentile"; B = 10000 replications is the default when you do.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.83 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.832</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  se          &lt;NA&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit &lt;NA&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit &lt;NA&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level  0.95 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  N           500  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  500  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N           200  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J           6    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The recommended BCa bootstrap, requested explicitly (reduced B for</span></span></span>
 <span class="r-in"><span><span class="co"># a fast example).</span></span></span>
-<span class="r-in"><span><span class="fu">reliability_omega_categorical</span><span class="op">(</span>data <span class="op">=</span> <span class="va">items</span>, ci_method <span class="op">=</span> <span class="st">"bca"</span>, B <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># The BCa interval is the recommended method for a real analysis</span></span></span>
+<span class="r-in"><span><span class="co"># (with the default B = 10000); the percentile interval at a small B</span></span></span>
+<span class="r-in"><span><span class="co"># keeps this demonstration quick.</span></span></span>
+<span class="r-in"><span><span class="fu">reliability_omega_categorical</span><span class="op">(</span>data <span class="op">=</span> <span class="va">items</span>, ci_method <span class="op">=</span> <span class="st">"percentile"</span>,</span></span>
+<span class="r-in"><span>                              B <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.83  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  se          0.0117</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit 0.8   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit 0.85  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.832 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se          0.0177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit 0.793 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit 0.868 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level  0.95  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  N           500   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  500   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N           200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J           6     </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

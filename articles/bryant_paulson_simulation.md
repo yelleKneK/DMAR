@@ -266,7 +266,9 @@ legend("bottomleft", bty = "n",
 ```
 
 ![Familywise coverage by number of
-covariates](bryant_paulson_simulation_files/figure-html/plot-1.png)
+covariates](bryant_paulson_simulation-fig-plot-1.png)
+
+plot of chunk plot
 
 ``` r
 

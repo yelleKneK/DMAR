@@ -351,40 +351,40 @@ Ken Kelley <kkelley@nd.edu>
 # \donttest{
 # Cluster size needed for a target width, given the number of clusters.
 ss_aipe_crd_es_n_individuals_fixed_width(width = 0.3, 250, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 20)
+  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
 #>  term                                      value
 #>  cluster_size                              2    
-#>  exp_width_of_individual-level_effect_size 0.236
+#>  exp_width_of_individual-level_effect_size 0.216
 #> 
 #> Confidence level: 95%
 
 # The same design questions under a budget rather than a target width.
 ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
-  clus_cost = 0, indiv_cost = 1, nrep = 20, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
+  clus_cost = 0, indiv_cost = 1, nrep = 5, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
 #>  term                                      value
 #>  necessary_n_clusters                      50   
-#>  exp_width_of_individual-level_effect_size 0.337
+#>  exp_width_of_individual-level_effect_size 0.357
 #>  budget                                    1000 
 #> 
 #> Confidence level: 95%
 
 ss_aipe_crd_es_n_individuals_fixed_budget(budget = 1000, n_clusters = 200,
-  clus_cost = 0, indiv_cost = 1, nrep = 20, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
+  clus_cost = 0, indiv_cost = 1, nrep = 5, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
 #>  term                                      value
 #>  cluster_size                              5    
-#>  exp_width_of_individual-level_effect_size 0.204
+#>  exp_width_of_individual-level_effect_size 0.218
 #>  budget                                    1000 
 #> 
 #> Confidence level: 95%
 
 # Both the number of clusters and the cluster size, under a budget.
 ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5, indiv_cost = 1, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 20)
+  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
 #>  term                                      value
-#>  necessary_n_clusters                      111  
-#>  cluster_size                              4    
-#>  exp_width_of_individual-level_effect_size 0.274
-#>  budget                                    999  
+#>  necessary_n_clusters                      112  
+#>  cluster_size                              3    
+#>  exp_width_of_individual-level_effect_size 0.297
+#>  budget                                    896  
 #> 
 #> Confidence level: 95%
 # }
@@ -392,20 +392,20 @@ ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5, indiv_cost = 1, e
 if (FALSE) { # \dontrun{
 # Number of clusters needed for a target width, given the cluster size.
 ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 20)
+  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
 
 # Both quantities under a target width.
 ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5, indiv_cost = 1, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 20)
+  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
 
 # Unequal cluster sizes: diff_size gives each cluster's deviation from
 # n_individuals (additive) or its multiplicative factor.
 ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 20,
+  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5,
   diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))
 
 ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 20,
+  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5,
   diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))
 } # }
 ```

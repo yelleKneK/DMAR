@@ -200,20 +200,21 @@ ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
 #    closed-form approximation. Slow (minutes), so wrapped in
 #    \donttest{}; uncomment to run.
 # \donttest{
+# verify_ss = TRUE re-runs a verification simulation and is worth it
+# for a real plan; it is omitted here so the example runs quickly.
 ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-           which_width = "Full", p = 5, random_predictors = TRUE,
-           verify_ss = TRUE)
+           which_width = "Full", p = 5, random_predictors = TRUE)
 #> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
 #>  term        value
-#>  necessary_N 771  
+#>  necessary_N 773  
 #> 
 #> Confidence level: 95%
 ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
            which_width = "Full", p = 5, assurance = .85,
-           random_predictors = FALSE, verify_ss = TRUE)
+           random_predictors = FALSE)
 #> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
 #>  term        value
-#>  necessary_N 622  
+#>  necessary_N 629  
 #> 
 #> Confidence level: 95%
 # }

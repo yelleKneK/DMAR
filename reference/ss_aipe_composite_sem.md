@@ -300,20 +300,20 @@ analysis_model <- "
 "
 
 # Realized interval widths at N = 200. G is small so the example runs
-# quickly; a real plan is worth G = 1000 or more.
+# quickly; a real plan is worth G = 1000 or more (G = 50 here).
 set.seed(113)
 ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
                       parameters = c("a", "b", "ab"),
-                      desired_width = 0.30, N = 200, G = 100)
+                      desired_width = 0.30, N = 200, G = 50)
 #>  term                    value
 #>  specified_N             200  
 #>  composite_assurance     0    
 #>  mean_width_a            0.343
-#>  mean_width_b            0.368
-#>  mean_width_ab           0.217
-#>  width_within_desired_a  0.11 
-#>  width_within_desired_b  0.03 
-#>  width_within_desired_ab 0.96 
+#>  mean_width_b            0.369
+#>  mean_width_ab           0.215
+#>  width_within_desired_a  0.12 
+#>  width_within_desired_b  0.02 
+#>  width_within_desired_ab 0.98 
 #>  desired_width_a         0.3  
 #>  desired_width_b         0.3  
 #>  desired_width_ab        0.3  
@@ -321,8 +321,8 @@ ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
 #>  population_b            0.5  
 #>  population_ab           0.2  
 #>  conf_level              0.95 
-#>  replications            100  
-#>  converged_replications  100  
+#>  replications            50   
+#>  converged_replications  50   
 #> 
 #> Confidence level: 95%
 
@@ -333,16 +333,16 @@ set.seed(113)
 ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
                       parameters = c("a", "b", "ab"),
                       desired_width = c(a = 0.35, b = 0.35, ab = 0.25),
-                      assurance = 0.80, G = 100)
+                      assurance = 0.80, G = 50)
 #>  term                    value
-#>  necessary_N             273  
-#>  composite_assurance     0.84 
-#>  mean_width_a            0.29 
-#>  mean_width_b            0.322
-#>  mean_width_ab           0.182
-#>  width_within_desired_a  1    
+#>  necessary_N             282  
+#>  composite_assurance     0.82 
+#>  mean_width_a            0.289
+#>  mean_width_b            0.316
+#>  mean_width_ab           0.185
+#>  width_within_desired_a  0.98 
 #>  width_within_desired_b  0.84 
-#>  width_within_desired_ab 0.99 
+#>  width_within_desired_ab 1    
 #>  desired_width_a         0.35 
 #>  desired_width_b         0.35 
 #>  desired_width_ab        0.25 
@@ -350,8 +350,8 @@ ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
 #>  population_b            0.5  
 #>  population_ab           0.2  
 #>  conf_level              0.95 
-#>  replications            100  
-#>  converged_replications  100  
+#>  replications            50   
+#>  converged_replications  50   
 #>  assurance               0.8  
 #> 
 #> Confidence level: 95%

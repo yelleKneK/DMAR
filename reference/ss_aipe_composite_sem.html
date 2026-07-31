@@ -354,20 +354,20 @@ values, rerun the planner with the alternative <code>Sigma</code> or
 <span class="r-in"><span><span class="st">"</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Realized interval widths at N = 200. G is small so the example runs</span></span></span>
-<span class="r-in"><span><span class="co"># quickly; a real plan is worth G = 1000 or more.</span></span></span>
+<span class="r-in"><span><span class="co"># quickly; a real plan is worth G = 1000 or more (G = 50 here).</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_composite_sem</span><span class="op">(</span>model <span class="op">=</span> <span class="va">analysis_model</span>, pop_model <span class="op">=</span> <span class="va">pop_model</span>,</span></span>
 <span class="r-in"><span>                      parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"ab"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                      desired_width <span class="op">=</span> <span class="fl">0.30</span>, N <span class="op">=</span> <span class="fl">200</span>, G <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                      desired_width <span class="op">=</span> <span class="fl">0.30</span>, N <span class="op">=</span> <span class="fl">200</span>, G <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                    value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specified_N             200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  composite_assurance     0    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_a            0.343</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_b            0.368</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_ab           0.217</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_a  0.11 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_b  0.03 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_ab 0.96 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_b            0.369</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_ab           0.215</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_a  0.12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_b  0.02 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_ab 0.98 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_width_a         0.3  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_width_b         0.3  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_width_ab        0.3  </span>
@@ -375,8 +375,8 @@ values, rerun the planner with the alternative <code>Sigma</code> or
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_b            0.5  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_ab           0.2  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level              0.95 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  replications            100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications  100  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  replications            50   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications  50   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
@@ -387,16 +387,16 @@ values, rerun the planner with the alternative <code>Sigma</code> or
 <span class="r-in"><span><span class="fu">ss_aipe_composite_sem</span><span class="op">(</span>model <span class="op">=</span> <span class="va">analysis_model</span>, pop_model <span class="op">=</span> <span class="va">pop_model</span>,</span></span>
 <span class="r-in"><span>                      parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"ab"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                      desired_width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">0.35</span>, b <span class="op">=</span> <span class="fl">0.35</span>, ab <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                      assurance <span class="op">=</span> <span class="fl">0.80</span>, G <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                      assurance <span class="op">=</span> <span class="fl">0.80</span>, G <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                    value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N             273  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_assurance     0.84 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_a            0.29 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_b            0.322</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_ab           0.182</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_a  1    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N             282  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_assurance     0.82 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_a            0.289</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_b            0.316</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_width_ab           0.185</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_a  0.98 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_b  0.84 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_ab 0.99 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width_within_desired_ab 1    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_width_a         0.35 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_width_b         0.35 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_width_ab        0.25 </span>
@@ -404,8 +404,8 @@ values, rerun the planner with the alternative <code>Sigma</code> or
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_b            0.5  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_ab           0.2  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level              0.95 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  replications            100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications  100  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  replications            50   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications  50   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  assurance               0.8  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>

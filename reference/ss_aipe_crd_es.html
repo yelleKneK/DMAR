@@ -345,40 +345,40 @@ estimation in two-group cluster randomized design</em> (Master Thesis). Illinois
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Cluster size needed for a target width, given the number of clusters.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_individuals_fixed_width</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.3</span>, <span class="fl">250</span>, es <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
-<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  cluster_size                              2    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.236</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.216</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The same design questions under a budget rather than a target width.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>,</span></span>
-<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, nrep <span class="op">=</span> <span class="fl">20</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, es <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, nrep <span class="op">=</span> <span class="fl">5</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, es <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters                      50   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.357</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  budget                                    1000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_individuals_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, n_clusters <span class="op">=</span> <span class="fl">200</span>,</span></span>
-<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, nrep <span class="op">=</span> <span class="fl">20</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, es <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, nrep <span class="op">=</span> <span class="fl">5</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, es <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  cluster_size                              5    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.204</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.218</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  budget                                    1000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Both the number of clusters and the cluster size, under a budget.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_both_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, clus_cost <span class="op">=</span> <span class="fl">5</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, es <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
-<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters                      111  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  cluster_size                              4    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.274</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  budget                                    999  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters                      112  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cluster_size                              3    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.297</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  budget                                    896  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
@@ -386,20 +386,20 @@ estimation in two-group cluster randomized design</em> (Master Thesis). Illinois
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Number of clusters needed for a target width, given the cluster size.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_width</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.3</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>, es <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
-<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Both quantities under a target width.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_both_fixed_width</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span>, clus_cost <span class="op">=</span> <span class="fl">5</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, es <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
-<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Unequal cluster sizes: diff_size gives each cluster's deviation from</span></span></span>
 <span class="r-in"><span><span class="co"># n_individuals (additive) or its multiplicative factor.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_width</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.3</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>, es <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
-<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">20</span>,</span></span>
+<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  diff_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="op">-</span><span class="fl">3</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_width</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.3</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>, es <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
-<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">20</span>,</span></span>
+<span class="r-in"><span>  es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">5</span>,</span></span>
 <span class="r-in"><span>  diff_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1.2</span>, <span class="fl">0.8</span>, <span class="fl">1.4</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1.1</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

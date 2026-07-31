@@ -233,7 +233,7 @@ Ken Kelley <kkelley@nd.edu>
 # \donttest{
 set.seed(113)
 # Six 5-category items with a single latent factor.
-N <- 500
+N <- 200
 J <- 6
 loadings <- rep(0.7, J)
 eta <- rnorm(N)
@@ -249,26 +249,30 @@ colnames(items) <- paste0("y", seq_len(J))
 reliability_omega_categorical(data = items)
 #> Categorical omega is reported without a confidence interval by default because its interval is bootstrap based. Request it with ci_method = "bca" (the recommended method) or "percentile"; B = 10000 replications is the default when you do.
 #>  term        value
-#>  estimate    0.83 
+#>  estimate    0.832
 #>  se          <NA> 
 #>  lower_limit <NA> 
 #>  upper_limit <NA> 
 #>  conf_level  0.95 
-#>  N           500  
-#>  N_complete  500  
+#>  N           200  
+#>  N_complete  200  
 #>  J           6    
 
 # The recommended BCa bootstrap, requested explicitly (reduced B for
 # a fast example).
-reliability_omega_categorical(data = items, ci_method = "bca", B = 200)
+# The BCa interval is the recommended method for a real analysis
+# (with the default B = 10000); the percentile interval at a small B
+# keeps this demonstration quick.
+reliability_omega_categorical(data = items, ci_method = "percentile",
+                              B = 100)
 #>  term        value 
-#>  estimate    0.83  
-#>  se          0.0117
-#>  lower_limit 0.8   
-#>  upper_limit 0.85  
+#>  estimate    0.832 
+#>  se          0.0177
+#>  lower_limit 0.793 
+#>  upper_limit 0.868 
 #>  conf_level  0.95  
-#>  N           500   
-#>  N_complete  500   
+#>  N           200   
+#>  N_complete  200   
 #>  J           6     
 # }
 ```

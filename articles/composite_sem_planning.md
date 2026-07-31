@@ -387,7 +387,10 @@ ggplot(traj, aes(wave, wellbeing, group = person)) +
        x = "Wave", y = "Well-being")
 ```
 
-![](composite_sem_planning_files/figure-html/lgm-trajectories-1.png)
+![plot of chunk
+lgm-trajectories](composite_sem_planning-fig-lgm-trajectories-1.png)
+
+plot of chunk lgm-trajectories
 
 The negative intercept-slope covariance is visible: trajectories that
 start high tend to tilt down relative to the average, so the fan narrows
@@ -428,22 +431,22 @@ lgm_at_150 <- ss_power_composite_sem(
 lgm_at_150
 ```
 
-| term                   | value  |
-|:-----------------------|:-------|
-| specified_N            | 150    |
-| composite_power        | 0.66   |
-| composite_power_mc_se  | 0.0474 |
-| power_mu_s             | 1      |
-| power_cov_is           | 0.66   |
-| population_mu_s        | 0.3    |
-| population_cov_is      | -0.15  |
-| alpha_level            | 0.05   |
-| replications           | 100    |
-| converged_replications | 100    |
+| term                   | value |
+|:-----------------------|:------|
+| specified_N            | 150   |
+| composite_power        | 0.64  |
+| composite_power_mc_se  | 0.048 |
+| power_mu_s             | 1     |
+| power_cov_is           | 0.64  |
+| population_mu_s        | 0.3   |
+| population_cov_is      | -0.15 |
+| alpha_level            | 0.05  |
+| replications           | 100   |
+| converged_replications | 100   |
 
 The average growth of 0.3 per year is easy to detect (`power_mu_s` is
 1), and the composite is governed almost entirely by the covariance
-question: `power_cov_is` is 0.66, and the composite power is 0.66.
+question: `power_cov_is` is 0.64, and the composite power is 0.64.
 Planning for the pair:
 
 ``` r
@@ -455,21 +458,21 @@ lgm_plan <- ss_power_composite_sem(
 lgm_plan
 ```
 
-| term                   | value |
-|:-----------------------|:------|
-| necessary_N            | 172   |
-| composite_power        | 0.8   |
-| composite_power_mc_se  | 0.04  |
-| power_mu_s             | 1     |
-| power_cov_is           | 0.8   |
-| population_mu_s        | 0.3   |
-| population_cov_is      | -0.15 |
-| alpha_level            | 0.05  |
-| replications           | 100   |
-| converged_replications | 100   |
-| desired_power          | 0.8   |
+| term                   | value  |
+|:-----------------------|:-------|
+| necessary_N            | 192    |
+| composite_power        | 0.81   |
+| composite_power_mc_se  | 0.0392 |
+| power_mu_s             | 1      |
+| power_cov_is           | 0.81   |
+| population_mu_s        | 0.3    |
+| population_cov_is      | -0.15  |
+| alpha_level            | 0.05   |
+| replications           | 100    |
+| converged_replications | 100    |
+| desired_power          | 0.8    |
 
-About $`N = 172`$ participants are needed for both growth questions to
+About $`N = 192`$ participants are needed for both growth questions to
 be answered affirmatively in the same study with probability 0.80, under
 the stated population. A researcher who planned only for the slope mean,
 the headline effect, would have chosen a far smaller study and then
@@ -495,11 +498,11 @@ lgm_aipe
 
 | term                        | value |
 |:----------------------------|:------|
-| necessary_N                 | 217   |
-| composite_assurance         | 0.82  |
-| mean_width_mu_s             | 0.145 |
-| mean_width_cov_is           | 0.207 |
-| width_within_desired_mu_s   | 0.82  |
+| necessary_N                 | 221   |
+| composite_assurance         | 0.91  |
+| mean_width_mu_s             | 0.143 |
+| mean_width_cov_is           | 0.203 |
+| width_within_desired_mu_s   | 0.91  |
 | width_within_desired_cov_is | 1     |
 | desired_width_mu_s          | 0.15  |
 | desired_width_cov_is        | 0.25  |
@@ -512,11 +515,11 @@ lgm_aipe
 
 Confidence level: 95%
 
-The accuracy goal needs $`N = 217`$, and the `width_within_desired_*`
+The accuracy goal needs $`N = 221`$, and the `width_within_desired_*`
 rows show which target binds: the slope mean’s interval is the harder
 one to keep narrow at this $`N`$. When both existence and magnitude
 matter, the defensible design uses the larger of the power and AIPE
-sample sizes, here $`N = 217`$.
+sample sizes, here $`N = 221`$.
 
 ## Practical Notes
 

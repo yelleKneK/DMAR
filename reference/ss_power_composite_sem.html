@@ -373,41 +373,41 @@ resolution guard applies to <code><a href="ss_aipe_composite_sem.html">ss_aipe_c
 <span class="r-in"><span><span class="st">"</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Realized composite power at N = 200. G is small so the example runs</span></span></span>
-<span class="r-in"><span><span class="co"># quickly; a real plan is worth G = 1000 or more.</span></span></span>
+<span class="r-in"><span><span class="co"># quickly; a real plan is worth G = 1000 or more (G = 50 here).</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">ss_power_composite_sem</span><span class="op">(</span>model <span class="op">=</span> <span class="va">analysis_model</span>, pop_model <span class="op">=</span> <span class="va">pop_model</span>,</span></span>
-<span class="r-in"><span>                       N <span class="op">=</span> <span class="fl">200</span>, G <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                       N <span class="op">=</span> <span class="fl">200</span>, G <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                   value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specified_N            200  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power        0.67 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power_mc_se  0.047</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power        0.68 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power_mc_se  0.066</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  power_a                1    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  power_b                0.89 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  power_c                0.78 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  power_b                0.88 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  power_c                0.8  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_a           0.4  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_b           0.3  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_c           0.25 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  alpha_level            0.05 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  replications           100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications 100  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  replications           50   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications 50   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The necessary N for composite power of 0.80 over the two structural</span></span></span>
 <span class="r-in"><span><span class="co"># paths a and b (c is left out of the composite).</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">ss_power_composite_sem</span><span class="op">(</span>model <span class="op">=</span> <span class="va">analysis_model</span>, pop_model <span class="op">=</span> <span class="va">pop_model</span>,</span></span>
 <span class="r-in"><span>                       parameters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                       desired_power <span class="op">=</span> <span class="fl">0.80</span>, G <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                       desired_power <span class="op">=</span> <span class="fl">0.80</span>, G <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                   value </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N            154   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power        0.88  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power_mc_se  0.0325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  power_a                1     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  power_b                0.88  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N            144   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power        0.84  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  composite_power_mc_se  0.0518</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  power_a                0.98  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  power_b                0.86  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_a           0.4   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  population_b           0.3   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  alpha_level            0.05  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  replications           100   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications 100   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  replications           50    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  converged_replications 50    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  desired_power          0.8   </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

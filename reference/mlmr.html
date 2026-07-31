@@ -552,12 +552,12 @@ data. <em>Sociological Methodology, 30</em>(1), 165–200.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Bootstrap confidence intervals; supply boot_seed for reproducibility.</span></span></span>
 <span class="r-in"><span><span class="va">fit_boot</span> <span class="op">&lt;-</span> <span class="fu">mlmr</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">mtcars</span>,</span></span>
-<span class="r-in"><span>                 ci_method <span class="op">=</span> <span class="st">"boot"</span>, B <span class="op">=</span> <span class="fl">200</span>, boot_seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                 ci_method <span class="op">=</span> <span class="st">"boot"</span>, B <span class="op">=</span> <span class="fl">100</span>, boot_seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_boot</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   2.5 %     97.5 %</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 33.27266355 41.2385549</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> wt          -5.06524754 -2.6284807</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.04993342 -0.0194477</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   2.5 %      97.5 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 33.50458027 41.27427337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wt          -5.31416120 -2.74304660</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.05028086 -0.01939352</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
