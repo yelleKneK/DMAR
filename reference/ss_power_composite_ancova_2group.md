@@ -322,6 +322,7 @@ is the planner: a two-group comparison is the contrast `c(1, -1)` on the
 adjusted means. Naming one term here reproduces it exactly, which is the
 check the tests assert:
 
+
     ss_power_c_ancova(psi = 0.5, c_weights = c(1, -1), sigma = 1, rho = 0.3,
                       n = 30)
     ss_power_composite_ancova_2group(smd = 0.5, rho = 0.3, n = 30,
@@ -339,6 +340,7 @@ For the design with no covariate at all,
 [`ss_power_smd`](https://yelleknek.github.io/DMAR/reference/ss_power_smd.md)
 is the planner, and comparing the two is the cleanest way to see what a
 covariate buys:
+
 
     ss_power_smd(smd = 0.5, n_1 = 30)                    # no covariate
     ss_power_c_ancova(psi = 0.5, c_weights = c(1, -1),

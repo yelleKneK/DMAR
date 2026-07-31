@@ -213,7 +213,7 @@ ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
            random_predictors = FALSE, verify_ss = TRUE)
 #> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
 #>  term        value
-#>  necessary_N 621  
+#>  necessary_N 622  
 #> 
 #> Confidence level: 95%
 # }

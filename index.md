@@ -17,6 +17,7 @@ where the independent or dependent variables involve the person.
 ## Installation
 
 ``` r
+
 # Once on CRAN:
 install.packages("DMAR")
 
@@ -192,6 +193,7 @@ DMAR is organized into a small number of stable function families:
 ### 1. Standardized mean difference with a noncentral-*t* confidence interval
 
 ``` r
+
 library(DMAR)
 
 # From summary statistics:
@@ -203,6 +205,7 @@ smd(mean_1 = 60, mean_2 = 55, s_1 = 10, s_2 = 10, n_1 = 30, n_2 = 30)
 | smd  | 0.5   |
 
 ``` r
+
 
 # CI on the standardized mean difference (Cohen's d) via the noncentral t:
 ci_smd(smd = 0.5, n_1 = 30, n_2 = 30, conf_level = 0.95)
@@ -219,6 +222,7 @@ Confidence level: 95%
 ### 2. R² with a noncentral-*F* confidence interval and AIPE sample size
 
 ``` r
+
 ci_R2(R2 = 0.30, N = 100, p = 4, conf_level = 0.95)
 ```
 
@@ -231,6 +235,7 @@ ci_R2(R2 = 0.30, N = 100, p = 4, conf_level = 0.95)
 Confidence level: 95%
 
 ``` r
+
 
 # What N is needed so the 95% CI on R^2 has full width <= 0.20?
 ss_aipe_R2(population_R2 = 0.30, width = 0.20, p = 4)
@@ -245,6 +250,7 @@ Confidence level: 95%
 ### 3. AIPE planning with a sensitivity check
 
 ``` r
+
 # Plan N for a half-width of .10 on the SMD at delta = 0.40.
 ss_aipe_smd(delta = 0.40, width = 0.20)
 ```
@@ -258,6 +264,7 @@ ss_aipe_smd(delta = 0.40, width = 0.20)
 Confidence level: 95%
 
 ``` r
+
 
 # How does that plan hold up if the truth is actually delta = 0.25?
 set.seed(113)
@@ -286,6 +293,7 @@ Confidence level: 95%
 ### 4. Welch’s *t* test with a tidy return
 
 ``` r
+
 set.seed(113)
 x <- rnorm(20, mean = 100, sd = 15)
 y <- rnorm(20, mean = 110, sd = 25)
@@ -312,6 +320,7 @@ Confidence level: 95%
 ### 5. Reliability with a confidence interval
 
 ``` r
+
 # Cronbach's alpha plus the Bonett (2002) CI from a covariance matrix.
 S <- matrix(
   c(1.0, 0.6, 0.5, 0.5,
@@ -335,6 +344,7 @@ reliability_alpha(S = S, N = 250, ci_method = "bonett")
 ### 6. Kish’s design effect in a clustered sample
 
 ``` r
+
 # 25 schools with attendance ranging from 0 (closed) to 30 (full class),
 # ICC = .10. How much clustering information do we actually have?
 sizes <- c(0, 0, 1, 1, 1, 2, 3, 5, 8, 10, 12, 15, 18, 20, 22,
@@ -390,7 +400,7 @@ and incomplete category sets in
 
 ## Learn more
 
-- **Package website:** <https://yelleknek.github.io/DMAR>
+- **Package website:** <https://yelleknek.github.io/DMAR/>
 - **Start here:**
   [`vignette("DMAR")`](https://yelleknek.github.io/DMAR/articles/DMAR.md)
   (overview),

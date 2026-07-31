@@ -6,14 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Bryant-Paulson Simultaneous Intervals: A Simulation Study • DMAR</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Bryant-Paulson Simultaneous Intervals: A Simulation Study">
 </head>
@@ -67,9 +62,9 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Bryant-Paulson Simultaneous Intervals: A Simulation Study</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">2026-07-30</h4>
+            <h4 data-toc-skip class="date">2026-07-31</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/HEAD/vignettes/bryant_paulson_simulation.Rmd" class="external-link"><code>vignettes/bryant_paulson_simulation.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/bryant_paulson_simulation.Rmd" class="external-link"><code>vignettes/bryant_paulson_simulation.Rmd</code></a></small>
       <div class="d-none name"><code>bryant_paulson_simulation.Rmd</code></div>
     </div>
 
@@ -218,7 +213,7 @@ the covariate is random);</li>
 <strong>Tukey (conditional SE)</strong>: the ordinary
 <code><a href="https://rdrr.io/r/stats/Tukey.html" class="external-link">qtukey()</a></code> value but with the per-pair covariate-augmented
 standard error
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>σ</mi><mo accent="true">̂</mo></mover><msqrt><mrow><mn>1</mn><mi>/</mi><msub><mi>n</mi><mi>i</mi></msub><mo>+</mo><mn>1</mn><mi>/</mi><msub><mi>n</mi><mi>j</mi></msub><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mi>/</mi><mi>S</mi><msub><mi>S</mi><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msub></mrow></msqrt></mrow><annotation encoding="application/x-tex">\hat\sigma\sqrt{1/n_i + 1/n_j + (\bar X_i-\bar X_j)^2/SS_{w(x)}}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>σ</mi><mo accent="true">̂</mo></mover><msqrt><mrow><mn>1</mn><mi>/</mi><msub><mi>n</mi><mi>i</mi></msub><mo>+</mo><mn>1</mn><mi>/</mi><msub><mi>n</mi><mi>j</mi></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mi>j</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mi>/</mi><mi>S</mi><msub><mi>S</mi><mrow><mi>w</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mrow></msqrt></mrow><annotation encoding="application/x-tex">\hat\sigma\sqrt{1/n_i + 1/n_j + (\bar X_i-\bar X_j)^2/SS_{w(x)}}</annotation></semantics></math>,
 the textbook conditional interval.</li>
 </ul>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -402,7 +397,7 @@ perspective</em> (4th ed.). Routledge.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

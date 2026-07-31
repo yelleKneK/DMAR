@@ -71,6 +71,7 @@ variance, so the paths read as standardized effects: $`a = 0.4`$,
 $`b = 0.35`$, $`c' = 0.15`$, and therefore $`ab = 0.14`$.
 
 ``` r
+
 pop_med <- "
   x ~~ 1*x
   m ~ 0.4*x
@@ -92,6 +93,7 @@ and `ab := a*b` defines the indirect effect (its standard error comes
 from the delta method, as in lavaan itself).
 
 ``` r
+
 med_model <- "
   m ~ a*x
   y ~ b*m + cp*x
@@ -107,6 +109,7 @@ plan is worth `G = 1000` or more), and the `seed` makes the result
 reproducible.
 
 ``` r
+
 med_at_100 <- ss_power_composite_sem(
   model = med_model, pop_model = pop_med,
   parameters = c("a", "b", "ab"),
@@ -144,6 +147,7 @@ assumption.
 Planning replaces `N` with `desired_power`:
 
 ``` r
+
 med_plan <- ss_power_composite_sem(
   model = med_model, pop_model = pop_med,
   parameters = c("a", "b", "ab"),
@@ -172,6 +176,7 @@ power reaches 0.80. The result carries the same broom summary as the
 rest of the `ss_power_*` family:
 
 ``` r
+
 generics::tidy(med_plan)
 #>          term estimate power
 #> 1 sample_size       93 0.875
@@ -184,6 +189,7 @@ above. Adding it shows why the choice of the set is a substantive
 decision, not a formality:
 
 ``` r
+
 med_plan_cp <- ss_power_composite_sem(
   model = med_model, pop_model = pop_med,
   parameters = c("a", "b", "cp", "ab"),
@@ -225,6 +231,7 @@ indirect effect, on its smaller scale, is held to a narrower interval
 here.
 
 ``` r
+
 med_aipe <- ss_aipe_composite_sem(
   model = med_model, pop_model = pop_med,
   parameters = c("a", "b", "ab"),
@@ -263,6 +270,7 @@ only about 44 percent of its realizations (the `composite_assurance`
 row). Supplying an assurance plans against that joint event directly:
 
 ``` r
+
 med_aipe_80 <- ss_aipe_composite_sem(
   model = med_model, pop_model = pop_med,
   parameters = c("a", "b", "ab"),
@@ -323,6 +331,7 @@ higher grow less), and residual variance 0.5 at every wave. Every
 parameter, including every intercept and latent mean, is fixed.
 
 ``` r
+
 pop_lgm <- "
   i =~ 1*t1 + 1*t2 + 1*t3 + 1*t4
   s =~ 0*t1 + 1*t2 + 2*t3 + 3*t4
@@ -356,6 +365,7 @@ model implied trajectory, drawn from the population distribution of
 $`(i, s)`$; the bold line is the average trajectory.
 
 ``` r
+
 set.seed(113)
 growth_factors <- MASS::mvrnorm(
   n = 40, mu = c(5, 0.3),
@@ -394,6 +404,7 @@ latent means (this is exactly what
 internally). The two parameters of interest carry labels.
 
 ``` r
+
 lgm_model <- "
   i =~ 1*t1 + 1*t2 + 1*t3 + 1*t4
   s =~ 0*t1 + 1*t2 + 2*t3 + 3*t4
@@ -409,6 +420,7 @@ lgm_model <- "
 First, what does a candidate $`N = 150`$ deliver?
 
 ``` r
+
 lgm_at_150 <- ss_power_composite_sem(
   model = lgm_model, pop_model = pop_lgm,
   parameters = c("mu_s", "cov_is"),
@@ -416,25 +428,26 @@ lgm_at_150 <- ss_power_composite_sem(
 lgm_at_150
 ```
 
-| term                   | value |
-|:-----------------------|:------|
-| specified_N            | 150   |
-| composite_power        | 0.64  |
-| composite_power_mc_se  | 0.048 |
-| power_mu_s             | 1     |
-| power_cov_is           | 0.64  |
-| population_mu_s        | 0.3   |
-| population_cov_is      | -0.15 |
-| alpha_level            | 0.05  |
-| replications           | 100   |
-| converged_replications | 100   |
+| term                   | value  |
+|:-----------------------|:-------|
+| specified_N            | 150    |
+| composite_power        | 0.66   |
+| composite_power_mc_se  | 0.0474 |
+| power_mu_s             | 1      |
+| power_cov_is           | 0.66   |
+| population_mu_s        | 0.3    |
+| population_cov_is      | -0.15  |
+| alpha_level            | 0.05   |
+| replications           | 100    |
+| converged_replications | 100    |
 
 The average growth of 0.3 per year is easy to detect (`power_mu_s` is
 1), and the composite is governed almost entirely by the covariance
-question: `power_cov_is` is 0.64, and the composite power is 0.64.
+question: `power_cov_is` is 0.66, and the composite power is 0.66.
 Planning for the pair:
 
 ``` r
+
 lgm_plan <- ss_power_composite_sem(
   model = lgm_model, pop_model = pop_lgm,
   parameters = c("mu_s", "cov_is"),
@@ -442,21 +455,21 @@ lgm_plan <- ss_power_composite_sem(
 lgm_plan
 ```
 
-| term                   | value  |
-|:-----------------------|:-------|
-| necessary_N            | 192    |
-| composite_power        | 0.81   |
-| composite_power_mc_se  | 0.0392 |
-| power_mu_s             | 1      |
-| power_cov_is           | 0.81   |
-| population_mu_s        | 0.3    |
-| population_cov_is      | -0.15  |
-| alpha_level            | 0.05   |
-| replications           | 100    |
-| converged_replications | 100    |
-| desired_power          | 0.8    |
+| term                   | value |
+|:-----------------------|:------|
+| necessary_N            | 172   |
+| composite_power        | 0.8   |
+| composite_power_mc_se  | 0.04  |
+| power_mu_s             | 1     |
+| power_cov_is           | 0.8   |
+| population_mu_s        | 0.3   |
+| population_cov_is      | -0.15 |
+| alpha_level            | 0.05  |
+| replications           | 100   |
+| converged_replications | 100   |
+| desired_power          | 0.8   |
 
-About $`N = 192`$ participants are needed for both growth questions to
+About $`N = 172`$ participants are needed for both growth questions to
 be answered affirmatively in the same study with probability 0.80, under
 the stated population. A researcher who planned only for the slope mean,
 the headline effect, would have chosen a far smaller study and then
@@ -471,6 +484,7 @@ around an effect of 0.3 per year) and the covariance to 0.25, jointly,
 in 80 percent of studies:
 
 ``` r
+
 lgm_aipe <- ss_aipe_composite_sem(
   model = lgm_model, pop_model = pop_lgm,
   parameters = c("mu_s", "cov_is"),
@@ -481,11 +495,11 @@ lgm_aipe
 
 | term                        | value |
 |:----------------------------|:------|
-| necessary_N                 | 221   |
-| composite_assurance         | 0.91  |
-| mean_width_mu_s             | 0.143 |
-| mean_width_cov_is           | 0.203 |
-| width_within_desired_mu_s   | 0.91  |
+| necessary_N                 | 217   |
+| composite_assurance         | 0.82  |
+| mean_width_mu_s             | 0.145 |
+| mean_width_cov_is           | 0.207 |
+| width_within_desired_mu_s   | 0.82  |
 | width_within_desired_cov_is | 1     |
 | desired_width_mu_s          | 0.15  |
 | desired_width_cov_is        | 0.25  |
@@ -498,11 +512,11 @@ lgm_aipe
 
 Confidence level: 95%
 
-The accuracy goal needs $`N = 221`$, and the `width_within_desired_*`
+The accuracy goal needs $`N = 217`$, and the `width_within_desired_*`
 rows show which target binds: the slope mean’s interval is the harder
 one to keep narrow at this $`N`$. When both existence and magnitude
 matter, the defensible design uses the larger of the power and AIPE
-sample sizes, here $`N = 221`$.
+sample sizes, here $`N = 217`$.
 
 ## Practical Notes
 

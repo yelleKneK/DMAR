@@ -57,10 +57,12 @@ suppression is a deliberate editorial decision rather than an oversight.
 ## Setup
 
 ``` r
+
 library(DMAR)
 ```
 
 ``` r
+
 library(ggplot2)
 ```
 
@@ -81,6 +83,7 @@ post-test:
 | `gpa`           | Cumulative grade-point average | 0–4   |
 
 ``` r
+
 set.seed(113)
 n_per_group <- 60
 
@@ -123,6 +126,7 @@ central tendency, spread, skewness, and excess kurtosis, all in a single
 tidy data frame.
 
 ``` r
+
 desc <- descriptives(
   study_data[, c("motivation", "self_efficacy", "test_anxiety", "gpa")]
 )
@@ -144,6 +148,7 @@ Adding `correlations = TRUE` appends a correlation matrix, which is
 handy during scale development or when checking multicollinearity.
 
 ``` r
+
 desc_cor <- descriptives(
   study_data[, c("motivation", "self_efficacy", "test_anxiety", "gpa")],
   correlations = TRUE
@@ -168,6 +173,7 @@ with a single
 [`geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html) call.
 
 ``` r
+
 library(ggrain)
 
 # Source group colors from DMAR's own colorblind-safe palette engine.
@@ -196,6 +202,7 @@ density, jittered raw scores, and a boxplot summary (Allen et al.,
 2019).
 
 ``` r
+
 ggplot(study_data, aes(x = group, y = test_anxiety, fill = group)) +
   geom_rain(alpha = 0.5) +
   scale_fill_manual(values = group_fills) +
@@ -233,6 +240,7 @@ the biased (Cohen) or unbiased (Hedges) estimate;
 it in a noncentral $`t`$-based confidence interval.
 
 ``` r
+
 # Split the data by group.
 ctrl <- study_data$motivation[study_data$group == "Control"]
 intv <- study_data$motivation[study_data$group == "Intervention"]
@@ -246,6 +254,7 @@ smd(group_1 = intv, group_2 = ctrl, unbiased = TRUE)
 | smd  | 0.207 |
 
 ``` r
+
 
 # 95% confidence interval.
 d_hat <- smd(group_1 = intv, group_2 = ctrl)$value
@@ -262,6 +271,7 @@ d_ci
 Confidence level: 95%
 
 ``` r
+
 
 # The results-section sentence, written by the package so the numbers
 # can never drift from the table they came from.
@@ -286,6 +296,7 @@ visible. A confidence interval and the per-group sample sizes are
 displayed by default.
 
 ``` r
+
 plot_smd(
   group_1      = intv,
   group_2      = ctrl,
@@ -304,6 +315,7 @@ displayed as two unit-variance normal curves separated by the observed
 effect size.
 
 ``` r
+
 # You can also pass a known d and sample sizes directly.
 plot_smd(smd = 0.80, n_1 = 30, n_2 = 30,
          title = "What Does d = 0.80 Look Like?")
@@ -347,6 +359,7 @@ accepts either raw ANOVA summary values or a fitted
 [`aov()`](https://rdrr.io/r/stats/aov.html) object.
 
 ``` r
+
 fit <- aov(motivation ~ group, data = study_data)
 print_anova(summary(fit)[[1]])
 #>              Df     Sum Sq   Mean Sq  F value Pr(>F)
@@ -355,6 +368,7 @@ print_anova(summary(fit)[[1]])
 ```
 
 ``` r
+
 omega_result <- ci_omega_squared(fit)
 #> Warning: The observed F_value is below the alpha_lower critical value of the
 #> central F-distribution; the lower noncentrality limit has been clamped to 0 and
@@ -377,6 +391,7 @@ it automatically extracts effect names, point estimates, confidence
 bounds, and sample sizes.
 
 ``` r
+
 plot_ci(omega_result,
         reference_line = 0,
         xlab  = expression(omega^2),
@@ -395,6 +410,7 @@ For factorial designs,
 produces a multi-row forest plot with one row per effect:
 
 ``` r
+
 # Using the built-in warpbreaks data (2 x 3 factorial).
 fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
 omega_factorial <- ci_omega_squared(fit_factorial)
@@ -412,6 +428,7 @@ omega_factorial
 | wool:tension | 0.106 | 0.00191 | 0.298 | 4.19 | 2 | 48 | 54 |
 
 ``` r
+
 
 plot_ci(omega_factorial,
         reference_line = 0,
@@ -450,6 +467,7 @@ displays this as a horizontal proportion bar, making the magnitude
 immediately interpretable.
 
 ``` r
+
 reg_fit <- lm(gpa ~ motivation + test_anxiety, data = study_data)
 print_summary(reg_fit)
 #> Coefficients:
@@ -472,6 +490,7 @@ same way: `p`, whether in
 it once and pass it along.
 
 ``` r
+
 R2_obs <- summary(reg_fit)$r.squared
 N      <- nrow(study_data)
 p      <- 2  # number of predictors
@@ -488,6 +507,7 @@ ci_R2(R2 = R2_obs, N = N, p = p, random_predictors = TRUE)
 Confidence level: 95%
 
 ``` r
+
 plot_R2(R2 = R2_obs, N = N, p = p,
         title = "GPA ~ Motivation + Test Anxiety")
 ```
@@ -517,6 +537,7 @@ a confidence interval that can be displayed with
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md):
 
 ``` r
+
 R_obs <- sqrt(R2_obs)
 r_ci  <- ci_r(R = R_obs, N = N, p = p)
 r_ci
@@ -531,6 +552,7 @@ r_ci
 Confidence level: 95%
 
 ``` r
+
 
 plot_ci(r_ci,
         estimate = R_obs,
@@ -557,6 +579,7 @@ also accepts explicit vectors, so you can build a side-by-side
 comparison of different effects:
 
 ``` r
+
 # Effect sizes from our study.
 d_motivation  <- smd(group_1 = intv, group_2 = ctrl)$value
 d_self_eff    <- smd(
@@ -609,6 +632,7 @@ reporting. However, for presentations or simplified displays, both can
 be suppressed:
 
 ``` r
+
 plot_smd(smd = 0.50, show_ci = FALSE, show_n = FALSE,
          title = "Minimal Display: d = 0.50")
 ```
@@ -633,6 +657,7 @@ output is a fully editable plot rather than a fixed image. Any layer,
 scale, theme, or annotation supported by `ggplot2` can be added on top.
 
 ``` r
+
 plot_smd(smd = 0.65, n_1 = 80, n_2 = 80,
          group_labels = c("Treatment", "Control"),
          title = "Reading Intervention") +

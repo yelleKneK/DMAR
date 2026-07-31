@@ -40,6 +40,7 @@ Displayed the way an analysis of variance text would display them, with
 the marginal (main effect) means in the margins:
 
 ``` r
+
 mu     <- c(6, 4, 3.1, 2.9)      # Agent varies fastest: HC, MC, HT, MT
 sigma2 <- 2
 sigma  <- sqrt(sigma2)
@@ -61,12 +62,13 @@ knitr::kable(layout_2x2, digits = 2,
 | Column mean |       5 |       3.0 |     4.00 |
 
 Population cell means, with marginal means. Higher scores are better;
-the common within-cell variance is 2.
+the common within-cell variance is 2. {.table}
 
 The same layout as a figure, with the four cells shaded and the margins
 in gray:
 
 ``` r
+
 base <- data.frame(
   Agent     = rep(c("Human", "Machine"), 2),
   Condition = rep(c("Control", "Treatment"), each = 2),
@@ -109,6 +111,7 @@ reminder of the variability each effect must be detected against. On the
 right are the marginal means that the two main effects compare.
 
 ``` r
+
 pop <- expand.grid(Agent = c("Human", "Machine"),
                    Condition = c("Control", "Treatment"))
 pop$mu <- mu
@@ -168,7 +171,6 @@ Slicing by Agent gives the performance cost imposed by the Treatment,
 separately for each type of agent:
 
 ``` math
-
 \begin{aligned}
 \psi_{1} &= \mu_{\text{H,C}} - \mu_{\text{H,T}} = 6.0 - 3.1 = 2.9
    &&\text{(cost of the Treatment for Humans)}\\
@@ -181,7 +183,6 @@ Slicing by Condition gives the human advantage, separately within each
 condition:
 
 ``` math
-
 \begin{aligned}
 \psi_{3} &= \mu_{\text{H,C}} - \mu_{\text{M,C}} = 6.0 - 4.0 = 2.0
    &&\text{(human advantage under Control)}\\
@@ -196,7 +197,6 @@ $`1`$, it is **half** the difference between the two simple effects of a
 factor:
 
 ``` math
-
 \psi_{AB} = \tfrac{1}{2}\big(\psi_{1} - \psi_{2}\big)
           = \tfrac{1}{2}\big(\psi_{3} - \psi_{4}\big)
           = \tfrac{1}{2}(2.9 - 1.1) = 0.9 .
@@ -206,6 +206,7 @@ The figure below annotates the two Treatment-cost simple effects
 directly on the population means.
 
 ``` r
+
 ggplot(pop, aes(Condition, mu, color = Agent, group = Agent)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 3) +
@@ -238,6 +239,7 @@ is directly interpretable as a difference between (possibly averaged)
 means, and effects expressed on different slices remain comparable.
 
 ``` r
+
 contrasts_list <- list(
   "Treatment cost | Human"   = c(  1,   0,  -1,   0),
   "Treatment cost | Machine" = c(  0,   1,   0,  -1),
@@ -263,7 +265,7 @@ knitr::kable(wt, digits = 2,
 | Interaction               | 0.5 | -0.5 | -0.5 |  0.5 |     1 |    -1 | 0.9 |
 
 Contrast weights in normalized form. Positive weights sum to 1, negative
-weights to -1.
+weights to -1. {.table}
 
 Note the interaction row: the weights are $`\pm\tfrac{1}{2}`$ rather
 than $`\pm 1`$, which is what places the interaction on the same
@@ -279,7 +281,6 @@ $`n`$ per cell, the estimated contrast
 $`\hat{\psi} = \sum_j c_j \bar{Y}_j`$ has standard error
 
 ``` math
-
 \mathrm{SE}_{\hat{\psi}} = \sqrt{\dfrac{\sigma^{2} \sum_j c_j^{2}}{n}} .
 ```
 
@@ -289,7 +290,6 @@ when the null hypothesis is true, and a **noncentral** $`t`$
 distribution with the same $`df`$ and noncentrality parameter
 
 ``` math
-
 \lambda = \frac{\psi}{\mathrm{SE}_{\hat{\psi}}}
         = \frac{\psi}{\sqrt{\dfrac{\sigma^{2} \sum_j c_j^{2}}{n}}}
 ```
@@ -298,7 +298,6 @@ when it is false. Power is the probability that a noncentral $`t`$
 variate falls beyond the ordinary two-sided critical value,
 
 ``` math
-
 1 - \beta = \Pr\!\big(T_{df,\lambda} > t_{1-\alpha/2,\,df}\big)
           + \Pr\!\big(T_{df,\lambda} < -t_{1-\alpha/2,\,df}\big).
 ```
@@ -309,7 +308,6 @@ $`1.96 + 0.84`$. Setting $`\lambda = 2.80`$ and solving for $`n`$ gives
 the approximation
 
 ``` math
-
 n \approx \frac{\lambda^{2}\,\sigma^{2}\,\sum_j c_j^{2}}{\psi^{2}} .
 ```
 
@@ -317,6 +315,7 @@ Applying that approximation to all five contrasts, and comparing it with
 the exact noncentral $`t`$ search performed by `ss_power_contrast`:
 
 ``` r
+
 lambda_target <- 2.80
 
 hand <- data.frame(
@@ -343,7 +342,7 @@ knitr::kable(hand, digits = 3, row.names = FALSE,
 | Interaction               | 0.9 |      1 |       20 |      20 |      80 | 0.318 |
 
 Approximate n (from lambda = 2.80) and DMAR’s exact search, for each
-contrast planned alone to power .80.
+contrast planned alone to power .80. {.table}
 
 The approximation and the exact search agree closely; they differ
 slightly because the exact critical value depends on $`df`$, which
@@ -359,6 +358,7 @@ the three effects that can be detected at a common sample size: the two
 Treatment costs and the interaction.
 
 ``` r
+
 targets <- contrasts_list[c("Treatment cost | Human",
                             "Treatment cost | Machine", "Interaction")]
 ss_power_contrast(targets[["Treatment cost | Machine"]],
@@ -385,6 +385,7 @@ $`\lambda`$). Power is the shaded area of the alternative distribution
 beyond the critical value.
 
 ``` r
+
 w_mach <- contrasts_list[["Treatment cost | Machine"]]
 n_m  <- ss_power_contrast(w_mach, mu = mu, sigma_squared = sigma2,
                           desired_power = .80)$value[1]
@@ -423,6 +424,7 @@ most demanding of them, so the required per-cell sample size is the
 largest:
 
 ``` r
+
 per_cell <- sapply(targets, function(w)
   ss_power_contrast(w, mu = mu, sigma_squared = sigma2, desired_power = .80)$value[1])
 n_design <- max(per_cell)
@@ -438,6 +440,7 @@ attains at least $`.80`$. This is its **marginal power**, meaning the
 power of that effect considered on its own:
 
 ``` r
+
 marg_pow <- sapply(targets, function(w)
   ss_power_contrast(w, mu = mu, sigma_squared = sigma2,
                     n_per_group = n_design)$value[3])
@@ -453,6 +456,7 @@ human advantage under Treatment remains near the nominal $`\alpha`$
 level throughout this range.
 
 ``` r
+
 n_grid <- 3:45
 curve_df <- do.call(rbind, Map(function(w, nm) {
   data.frame(effect = nm, n = n_grid,
@@ -505,6 +509,7 @@ population, apply all three tests to each, and record the proportion of
 datasets in which all three reject.
 
 ``` r
+
 composite_power <- function(n, mu, sigma2, reps = 4000, alpha = 0.05, seed = 113) {
   set.seed(seed)
   a <- length(mu); N <- a * n; df <- N - a
@@ -540,6 +545,7 @@ of the marginals, 0.73, is close to the composite but not equal to it,
 since independence does not hold.
 
 ``` r
+
 bar_df <- data.frame(
   quantity = factor(c("Treatment | Human", "Treatment | Machine", "Interaction",
                       "Product (independence)", "Composite (all three)"),
@@ -571,6 +577,7 @@ that the entire predicted pattern is detected, the sample size must
 increase until the simulation reaches that value.
 
 ``` r
+
 n_seq    <- seq(20, 40, by = 2)
 comp_seq <- sapply(n_seq, function(nn) composite_power(nn, mu, sigma2, reps = 3000)$composite)
 weakest  <- sapply(n_seq, function(nn)
@@ -612,7 +619,7 @@ ggplot(comp_plot, aes(n, power, color = curve)) +
 |         38 |     152 |           0.887 |
 |         40 |     160 |           0.911 |
 
-Monte Carlo composite power by sample size.
+Monte Carlo composite power by sample size. {.table}
 
 Composite power reaches $`.80`$ at approximately 32 per cell, a total of
 $`N =`$ 128, compared with the 108 required for each effect
@@ -665,6 +672,7 @@ analysis of covariance, at a cost of one error degree of freedom per
 covariate:
 
 ``` r
+
 rho <- 0.2
 R2  <- rho^2
 f_int <- ss_power_contrast(contrasts_list[["Interaction"]], mu = mu,
@@ -680,6 +688,7 @@ the error variance is reduced by four percent and the interaction’s
 $`f`$ increases from $`0.318`$ to about $`0.325`$:
 
 ``` r
+
 ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
                           f = f_int, covariate_R2 = 0, n_covariates = 0,
                           desired_power = .80)
@@ -700,6 +709,7 @@ ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
 | alpha_level          | 0.05  |
 
 ``` r
+
 ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
                           f = f_int, covariate_R2 = R2, n_covariates = 1,
                           desired_power = .80)
@@ -728,6 +738,7 @@ correlates substantially with the outcome; at $`\rho = .2`$ the
 improvement is negligible relative to the degree of freedom expended.
 
 ``` r
+
 rho_grid <- seq(0, 0.7, by = 0.025)
 cov_pow  <- sapply(rho_grid, function(rr)
   ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
@@ -763,7 +774,6 @@ Effect-code the factors, $`A, B \in \{-\tfrac{1}{2}, +\tfrac{1}{2}\}`$,
 standardize $`M`$, and write
 
 ``` math
-
 Y = \beta_0 + \beta_A A + \beta_B B + \beta_{AB}(AB) + \beta_M M
       + \gamma\,(ABM) + \varepsilon .
 ```
@@ -793,6 +803,7 @@ level increases with $`M`$, and it does so gradually when the three-way
 interaction is small.
 
 ``` r
+
 b0 <- 4; bA <- 1.1; bB <- 2.0; bAB <- 1.8; bM <- 0.38
 
 cell_mean <- function(agent, cond, m, gamma) {
@@ -834,7 +845,6 @@ and $`M`$ is standardized so that $`\mathrm{Var}(ABM) = 0.0625`$ as
 well,
 
 ``` math
-
 f^{2}_{\text{2-way}}
   = \frac{\beta_{AB}^{2}\,\mathrm{Var}(AB)}{\sigma^{2}_{\varepsilon}}
   = \frac{1.8^{2} \times 0.0625}{2} = 0.10125,
@@ -845,6 +855,7 @@ f^{2}_{\text{3-way}}
 ```
 
 ``` r
+
 f2_2way <- bAB^2 * 0.0625 / sigma2
 f2_3way <- function(gamma) 0.03125 * gamma^2
 gamma_small <- 0.8
@@ -863,6 +874,7 @@ each $`f^{2}`$ to `ss_power_reg_coef`, with $`p = 7`$ predictors in the
 full model ($`A`$, $`B`$, $`M`$, $`AB`$, $`AM`$, $`BM`$, $`ABM`$):
 
 ``` r
+
 getN <- function(res) res$value[res$term == "necessary_N"]
 N_2way <- getN(ss_power_reg_coef(cohen_f2 = f2_2way, p = 7, desired_power = .80))
 N_3way <- getN(ss_power_reg_coef(cohen_f2 = f2_3way(gamma_small), p = 7,
@@ -879,6 +891,7 @@ relationship across values of $`\gamma`$ and marks the value adopted
 here.
 
 ``` r
+
 g_grid <- seq(0.5, 2.0, by = 0.05)
 N_grid <- sapply(g_grid, function(g)
   getN(ss_power_reg_coef(cohen_f2 = f2_3way(g), p = 7, desired_power = .80)))
@@ -908,6 +921,7 @@ specified, with $`\beta_M`$ chosen so that $`\mathrm{cor}(M, Y) = .2`$,
 and the model `lm(y ~ A*B*M)` is fitted to each generated sample:
 
 ``` r
+
 simulate_threeway_power <- function(N, gamma, rho = .2, reps = 1500, seed = 113) {
   sigma_e <- sqrt(2)
   varY_less_M <- bA^2*.25 + bB^2*.25 + bAB^2*.0625 + gamma^2*.0625 + sigma_e^2
@@ -939,6 +953,7 @@ sizes locates the value that achieves $`.80`$ in the random-predictor
 case:
 
 ``` r
+
 N_try   <- c(N_3way, 420, 440, 460)
 mc_by_N <- sapply(N_try, function(NN)
   simulate_threeway_power(NN, gamma = gamma_small)["three_way"])
@@ -969,6 +984,7 @@ only 80, is then powered well beyond $`.80`$.
 ## Summary
 
 ``` r
+
 ladder <- data.frame(
   plan = c("Each targeted effect alone (.80)",
            "Composite: all three jointly (.80)",

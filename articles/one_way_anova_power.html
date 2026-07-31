@@ -6,14 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Power and Precision for the One-Way ANOVA: A Model Comparison Perspective • DMAR</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Power and Precision for the One-Way ANOVA: A Model Comparison Perspective">
 </head>
@@ -69,7 +64,7 @@
             
             <h4 data-toc-skip class="date">July 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/HEAD/vignettes/one_way_anova_power.Rmd" class="external-link"><code>vignettes/one_way_anova_power.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/one_way_anova_power.Rmd" class="external-link"><code>vignettes/one_way_anova_power.Rmd</code></a></small>
       <div class="d-none name"><code>one_way_anova_power.Rmd</code></div>
     </div>
 
@@ -106,9 +101,9 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>E</mi><mi>R</mi></msub><annotation encoding="application/x-tex">E_R</annotation></semantics></math>
 the error sums of squares of the full and restricted models, the test
 statistic always has the same shape,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>E</mi><mi>R</mi></msub><mo>−</mo><msub><mi>E</mi><mi>F</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><msub><mi>f</mi><mi>R</mi></msub><mo>−</mo><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>E</mi><mi>F</mi></msub><mi>/</mi><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">F = \frac{(E_R - E_F)/(df_R - df_F)}{E_F/df_F},</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mo>=</mo><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>E</mi><mi>R</mi></msub><mo>−</mo><msub><mi>E</mi><mi>F</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><msub><mi>f</mi><mi>R</mi></msub><mo>−</mo><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msub><mi>E</mi><mi>F</mi></msub><mi>/</mi><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">F = \frac{(E_R - E_F)/(df_R - df_F)}{E_F/df_F},</annotation></semantics></math></p>
 <p>and the effect size is the proportional reduction in error,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>E</mi><mi>R</mi></msub><mo>−</mo><msub><mi>E</mi><mi>F</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msub><mi>E</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">\mathrm{PRE} = (E_R - E_F)/E_R</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>E</mi><mi>R</mi></msub><mo>−</mo><msub><mi>E</mi><mi>F</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><msub><mi>E</mi><mi>R</mi></msub></mrow><annotation encoding="application/x-tex">\mathrm{PRE} = (E_R - E_F)/E_R</annotation></semantics></math>,
 which in the one-way design is the same number as eta squared. Power,
 estimation, and sample size planning all read off these quantities, so
 design and analysis speak one language.</p>
@@ -158,7 +153,7 @@ has caused decades of confusion is the divisor of that variance. The
 variance of the means here is a property of a <em>fixed</em> set of
 parameters, so it divides by <em>a</em>, the number of groups, not by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a - 1</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>m</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>μ</mi><mi>j</mi></msub><mo>−</mo><mi>μ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><mi>a</mi></mfrac><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mi>j</mi></munder><msubsup><mi>α</mi><mi>j</mi><mn>2</mn></msubsup></mrow><mi>a</mi></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">\sigma_m^2 = \frac{\sum_j (\mu_j - \mu)^2}{a} = \frac{\sum_j \alpha_j^2}{a}.</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>m</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mi>j</mi></munder><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>j</mi></msub><mo>−</mo><mi>μ</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mi>a</mi></mfrac><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mi>j</mi></munder><msubsup><mi>α</mi><mi>j</mi><mn>2</mn></msubsup></mrow><mi>a</mi></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">\sigma_m^2 = \frac{\sum_j (\mu_j - \mu)^2}{a} = \frac{\sum_j \alpha_j^2}{a}.</annotation></semantics></math></p>
 <p>By hand:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sigma_squared_m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">alpha_j</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="va">a</span>   <span class="co"># divisor a, not a - 1</span></span>
@@ -186,7 +181,7 @@ user never has to remember whether to divide by <em>a</em> or by
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cohen_f.html">cohen_f</a></span><span class="op">(</span>mu <span class="op">=</span> <span class="va">mu_j</span>, sigma_squared <span class="op">=</span> <span class="va">sigma_squared</span><span class="op">)</span><span class="op">$</span><span class="va">value</span></span></code></pre></div>
 <p>The same effect, expressed as the population proportional reduction
 in error (the population eta squared), is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><msup><mi>f</mi><mn>2</mn></msup><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><msup><mi>f</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{PRE} = f^2 / (1 + f^2)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">R</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><msup><mi>f</mi><mn>2</mn></msup><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><msup><mi>f</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{PRE} = f^2 / (1 + f^2)</annotation></semantics></math>.
 The noncentrality, the proportional reduction in error, and <em>f</em>
 are three views of one quantity, and the <code>convert_*</code> family
 moves among them. Here the noncentrality maps to the population PRE and
@@ -228,7 +223,7 @@ actual scientific quantities rather than to a convention.</p>
 <h2 id="power-for-the-omnibus-test">Power for the Omnibus Test<a class="anchor" aria-label="anchor" href="#power-for-the-omnibus-test"></a>
 </h2>
 <p>The comparison has numerator degrees of freedom
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>R</mi></msub><mo>−</mo><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>a</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">df_R - df_F = (N-1) - (N-a) =
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>R</mi></msub><mo>−</mo><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>a</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">df_R - df_F = (N-1) - (N-a) =
 a - 1</annotation></semantics></math> and denominator degrees of freedom
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>f</mi><mi>F</mi></msub><mo>=</mo><mi>N</mi><mo>−</mo><mi>a</mi></mrow><annotation encoding="application/x-tex">df_F = N - a</annotation></semantics></math>.
 Power is the area of the noncentral <em>F</em> distribution, centered at
@@ -710,7 +705,7 @@ weights must sum to 1 and the negative weights must sum to
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">c_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span><span class="op">)</span>                  <span class="co"># all weights sum to zero</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="co">#&gt; [1] -5.551115e-17</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span><span class="op">[</span><span class="va">c_weights</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span>   <span class="co"># the positive weights sum to 1</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span><span class="op">[</span><span class="va">c_weights</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span>   <span class="co"># the negative weights sum to -1</span></span>
@@ -718,7 +713,7 @@ weights must sum to 1 and the negative weights must sum to
 <p>The population value of the contrast is the discrepancy the
 restriction would erase. The single-degree-of-freedom reduction in error
 is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>ψ</mi><mn>2</mn></msup><mi>/</mi><msub><mo>∑</mo><mi>j</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mi>c</mi><mi>j</mi><mn>2</mn></msubsup><mi>/</mi><msub><mi>n</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\psi^2 / \sum_j (c_j^2 / n_j)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>ψ</mi><mn>2</mn></msup><mi>/</mi><msub><mo>∑</mo><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><msubsup><mi>c</mi><mi>j</mi><mn>2</mn></msubsup><mi>/</mi><msub><mi>n</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\psi^2 / \sum_j (c_j^2 / n_j)</annotation></semantics></math>,
 and dividing by the error variance gives the noncentrality:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">psi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span> <span class="op">*</span> <span class="va">mu_j</span><span class="op">)</span></span>
@@ -1049,7 +1044,7 @@ and contrast analysis. <em>Psychological Methods, 9</em>(2),
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

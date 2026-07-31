@@ -1,5 +1,5 @@
-pandoc: 3.6.3
-pkgdown: 2.2.0
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   aipe_simulation_study: aipe_simulation_study.html
@@ -22,7 +22,7 @@ articles:
   sums_of_squares: sums_of_squares.html
   teacher_expectancy: teacher_expectancy.html
   weighted_kappa: weighted_kappa.html
-last_built: 2026-07-30T20:53Z
+last_built: 2026-07-31T13:52Z
 urls:
   reference: https://yelleknek.github.io/DMAR/reference
   article: https://yelleknek.github.io/DMAR/articles

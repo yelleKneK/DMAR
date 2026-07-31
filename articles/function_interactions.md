@@ -60,6 +60,7 @@ and Rausch (2008); see also Maxwell, Delaney, and Kelley (2027) for the
 model comparison treatment. Concretely:
 
 ``` r
+
 # SMD (Cohen's d):     var_smd        → ss_aipe_smd
 # Pearson r (J = 0):   var_r          → ss_aipe_partial_r (J = 1, simple case)
 # Partial r:           var_partial_r  → ss_aipe_partial_r
@@ -83,6 +84,7 @@ We plan a study where we expect $`\rho \approx 0.30`$ and want a 95% CI
 of full width 0.20.
 
 ``` r
+
 # Step 1: ask the variance utility for the sampling variance at a candidate n.
 var_r(rho = 0.30, n = 100)
 ```
@@ -93,6 +95,7 @@ var_r(rho = 0.30, n = 100)
 | var_fisher_z | 0.0103  |
 
 ``` r
+
 
 # Step 2: the AIPE planner inverts the same family of formulas to give
 # the n needed for the target width. DMAR has no zero-order Pearson-r
@@ -147,6 +150,7 @@ The package’s expected-value functions are:
 ### Worked Example: The Standardized Mean Difference
 
 ``` r
+
 # Population delta = 0.4, planned n = 40 per group.
 # Naive planning assumes the observed d will average 0.40; in fact
 # the sample d will average slightly larger.
@@ -186,6 +190,7 @@ approximation is introduced).
 ### Walked Example at Three Reference d Values
 
 ``` r
+
 for (d in c(0.2, 0.5, 0.8)) {
   cat(sprintf(
     "d = %.1f  ->  PS = %.2f   CLES = %.2f   NNT = %.1f\n",
@@ -232,6 +237,7 @@ $`H`$ is the upper bound that sets the ceiling of what is achievable
 with the same indicators:
 
 ``` r
+
 # Point estimate:      reliability_alpha(), reliability_omega(), reliability_H()
 # CI:                  reliability() (general wrapper)
 # Asymptotic variance: var_alpha()
@@ -252,6 +258,7 @@ For a simple three-variable mediation model $`X \to M \to Y`$ with
 indirect effect $`ab`$:
 
 ``` r
+
 # Asymptotic variance: var_indirect_effect(a, b, var_a, var_b, cov_ab)
 #   - returns Sobel, Aroian, Goodman, and second-order delta variances.
 # AIPE planning:       ss_aipe_indirect_effect(a, b, width, method)
@@ -348,6 +355,7 @@ form can always be reshaped to long with
 ### A. Reporting a Standardized Mean Difference
 
 ``` r
+
 set.seed(113)
 g1 <- rnorm(50, mean = 0, sd = 1)
 g2 <- rnorm(50, mean = 0.5, sd = 1)
@@ -372,6 +380,7 @@ var_smd(delta = 0.5, n_1 = 50, n_2 = 50)
 ### B. Planning a Partial Correlation Study
 
 ``` r
+
 # Anticipated partial r = 0.30, 3 controls, target 95% CI width = 0.20.
 
 # 1. AIPE planner (raw-scale Olkin-Finn variance):
@@ -390,6 +399,7 @@ expected_partial_r(rho = 0.30, n = 80, J = 3)
 ### C. Planning an Omega Squared CI
 
 ``` r
+
 # 3-group one-way ANOVA, anticipated omega² = 0.10, target full width 0.10.
 ss_aipe_omega_squared(population_omega_squared = 0.10,
                       df_effect = 2,
@@ -406,6 +416,7 @@ ci_omega_squared(F_value = F_val, df_effect = 2,
 ### D. Reporting an Indirect (Mediated) Effect
 
 ``` r
+
 # After fitting the X -> M and Y ~ X + M regressions:
 a_hat   <- 0.40; b_hat <- 0.40
 var_a   <- 0.02; var_b <- 0.02
@@ -422,6 +433,7 @@ ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20,
 ### E. Two-Method Agreement Study
 
 ``` r
+
 set.seed(113)
 method_a <- rnorm(40, mean = 100, sd = 15)
 method_b <- method_a + rnorm(40, mean = 2, sd = 5)

@@ -180,7 +180,7 @@ Res.3 <- ss_aipe_smd_sensitivity(true_delta=.5, estimated_delta=.4, desired_widt
 # The effect of the misspecification on mean confidence intervals is:
 Res.3[1,]
 #>  term            value
-#>  mean_full_width 0.301
+#>  mean_full_width 0.302
 #> 
 #> Confidence level: 95%
 ```

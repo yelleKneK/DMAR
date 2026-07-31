@@ -157,8 +157,7 @@ plot_trajectories_fitted(fm_nlme, n_random = 12)
 fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
                       data = lme4::sleepstudy)
 p <- plot_trajectories_fitted(fm_lme4)
-#> Warning: the ‘findbars’ function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainter to do so.
-#> This warning is displayed once per session.
+#> Warning: the ‘findbars’ function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainer to do so.
 attr(p, "quality_of_fit")  # per-subject R^2 and RMSE
 #>    Subject r_squared      rmse
 #> 1      308 0.6815132 43.158406

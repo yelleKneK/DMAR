@@ -6,14 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>How DMAR's Functions Fit Together: A Deep Dive • DMAR</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="How DMAR's Functions Fit Together: A Deep Dive">
 </head>
@@ -69,7 +64,7 @@
             
             <h4 data-toc-skip class="date">July 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/HEAD/vignettes/function_interactions.Rmd" class="external-link"><code>vignettes/function_interactions.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/function_interactions.Rmd" class="external-link"><code>vignettes/function_interactions.Rmd</code></a></small>
       <div class="d-none name"><code>function_interactions.Rmd</code></div>
     </div>
 
@@ -125,11 +120,11 @@ variance / CI / expected value / AIPE planner do I need.”</p>
 <code>ss_aipe_*</code>. For any quantity
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
 with a known asymptotic variance
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{Var}(\hat\theta \mid \theta, n)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{Var}(\hat\theta \mid \theta, n)</annotation></semantics></math>,
 the AIPE planner solves for the smallest
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 such that</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msqrt><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt><mo>≤</mo><mi>w</mi><mi>/</mi><mn>2</mn><mo>,</mo></mrow><annotation encoding="application/x-tex"> z_{1-\alpha/2} \cdot \sqrt{\mathrm{Var}(\hat\theta \mid \theta, n)} \le w/2, </annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mi>/</mi><mn>2</mn></mrow></msub><mo>⋅</mo><msqrt><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>n</mi><mo stretchy="false" form="postfix">)</mo></mrow></msqrt><mo>≤</mo><mi>w</mi><mi>/</mi><mn>2</mn><mo>,</mo></mrow><annotation encoding="application/x-tex"> z_{1-\alpha/2} \cdot \sqrt{\mathrm{Var}(\hat\theta \mid \theta, n)} \le w/2, </annotation></semantics></math></p>
 <p>where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
 is the target full width of the CI. The AIPE framework, planning for a
@@ -219,7 +214,7 @@ and want a 95% CI of full width 0.20.</p>
 </table>
 <p>Confidence level: 95%</p>
 <p>Both sides use the same normal-theory
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>ρ</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><annotation encoding="application/x-tex">(1 - \rho^2)^2</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>ρ</mi><mn>2</mn></msup><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">(1 - \rho^2)^2</annotation></semantics></math>
 variance family (Fisher, 1915; Olkin &amp; Finn, 1995), differing only
 by an off-by-one in the denominator degrees of freedom
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
@@ -235,7 +230,7 @@ for the planner), so the planner’s output is consistent with what
 </h2>
 <p>For estimators with non-trivial bias, the package provides
 <code>expected_*()</code> functions that report
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{E}[\hat\theta \mid \theta, n]</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">[</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>n</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathrm{E}[\hat\theta \mid \theta, n]</annotation></semantics></math>
 and the size of the bias. These are useful in two situations:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -243,7 +238,7 @@ and the size of the bias. These are useful in two situations:</p>
 between
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\theta</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{E}[\hat\theta]</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">[</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathrm{E}[\hat\theta]</annotation></semantics></math>
 tells the analyst how much of the observed value is bias.</li>
 <li>
 <strong>Design-stage planning:</strong> when a sample size planner
@@ -252,7 +247,7 @@ takes
 as input but the realized data will yield a biased sample
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\theta</annotation></semantics></math>,
 substituting
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{E}[\hat\theta]</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">[</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathrm{E}[\hat\theta]</annotation></semantics></math>
 in place of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
 corrects the planner’s prediction.</li>
@@ -330,7 +325,7 @@ corrects the planner’s prediction.</li>
 </tr></tbody>
 </table>
 <p>The reported <code>j_correction</code> is the Hedges (1981) factor
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>𝑑</mi><mi>𝑓</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">J(\mathit{df})</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mo stretchy="false" form="prefix">(</mo><mrow><mi>𝑑</mi><mi>𝑓</mi></mrow><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">J(\mathit{df})</annotation></semantics></math>
 that maps Cohen’s
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
 to Hedges’
@@ -338,7 +333,7 @@ to Hedges’
 The same factor is applied internally by
 <code>smd(..., unbiased = TRUE)</code>, which returns the bias-corrected
 estimate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>=</mo><mi>J</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mi>𝑑</mi><mi>𝑓</mi></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi></mrow><annotation encoding="application/x-tex">g = J(\mathit{df})\,d</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>=</mo><mi>J</mi><mo stretchy="false" form="prefix">(</mo><mrow><mi>𝑑</mi><mi>𝑓</mi></mrow><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi>d</mi></mrow><annotation encoding="application/x-tex">g = J(\mathit{df})\,d</annotation></semantics></math>,
 so the same constant runs throughout the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>-family
 of functions for consistency.</p>
@@ -373,22 +368,22 @@ can be reported on five common scales without losing information:</p>
 <tr class="even">
 <td>Proportion of superiority (Cohen’s
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>U</mi><mn>3</mn></msub><annotation encoding="application/x-tex">U_3</annotation></semantics></math>)</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Φ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Phi(d)</annotation></semantics></math></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Phi(d)</annotation></semantics></math></td>
 <td><code><a href="../reference/proportion_of_superiority.html">proportion_of_superiority()</a></code></td>
 </tr>
 <tr class="odd">
 <td>Common language (independent groups)</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Φ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Phi(d / \sqrt 2)</annotation></semantics></math></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Phi(d / \sqrt 2)</annotation></semantics></math></td>
 <td><code><a href="../reference/cles.html">cles()</a></code></td>
 </tr>
 <tr class="even">
 <td>Success-rate difference</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>Φ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2 \Phi(d / \sqrt 2) - 1</annotation></semantics></math></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2 \Phi(d / \sqrt 2) - 1</annotation></semantics></math></td>
 <td>(intermediate)</td>
 </tr>
 <tr class="odd">
 <td>Number needed to treat</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">[</mo><mn>2</mn><mi>Φ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">1 / [2 \Phi(d / \sqrt 2) - 1]</annotation></semantics></math></td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">[</mo><mn>2</mn><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">1 / [2 \Phi(d / \sqrt 2) - 1]</annotation></semantics></math></td>
 <td><code><a href="../reference/nnt_from_smd.html">nnt_from_smd()</a></code></td>
 </tr>
 </tbody>
@@ -451,7 +446,7 @@ estimators:</p>
 <tr class="odd">
 <td></td>
 <td>Vargha-Delaney
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">A = (\delta + 1)/2</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">A = (\delta + 1)/2</annotation></semantics></math>,
 <code><a href="../reference/vargha_delaney_A.html">vargha_delaney_A()</a></code>
 </td>
 </tr>
@@ -466,11 +461,11 @@ Cliff (1996) U-statistic variance, and
 <code><a href="../reference/probability_of_superiority_paired.html">probability_of_superiority_paired()</a></code> uses the Brunner-Munzel
 (2000) within-pair variance, all with a Fisher-style <span class="math inline">$\arctanh$</span> transformation so the bounds stay
 in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>−</mi><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[-1, 1]</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mi>−</mi><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[-1, 1]</annotation></semantics></math>
 (for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>)
 or
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
 (for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>P</mi><mi>S</mi></msub><annotation encoding="application/x-tex">P_S</annotation></semantics></math>).</p>
 </div>
@@ -787,7 +782,7 @@ battle; the function name and help file complete the picture.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

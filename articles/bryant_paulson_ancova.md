@@ -20,6 +20,7 @@ with the *remaining category movement* in each outlet as a random
 covariate.
 
 ``` r
+
 data(test_market)
 descriptives(test_market[c("brand_movement", "category_movement")])
 #> $descriptives
@@ -43,6 +44,7 @@ published quantities (covariate slope 0.4079, error mean square 0.01326
 on 14 degrees of freedom).
 
 ``` r
+
 fit <- lm(brand_movement ~ panel + block + category_movement, data = test_market)
 
 s_ancova <- summary(fit)$sigma           # ANCOVA error SD = sqrt(MS error)
@@ -59,6 +61,7 @@ The adjusted mean for each panel is the model’s prediction at the
 covariate grand mean, averaged over blocks.
 
 ``` r
+
 xbar <- mean(test_market$category_movement)
 adj_means <- vapply(levels(test_market$panel), function(p) {
   nd <- data.frame(panel = factor(p, levels = levels(test_market$panel)),
@@ -80,6 +83,7 @@ blocks, the standard error of a single adjusted mean is built from
 (the blocked design is not the one-way default `N - k - p`).
 
 ``` r
+
 bp <- ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova,
                      n = 4, num_covariates = 1, df = nu)
 bp
@@ -109,6 +113,7 @@ Every pairwise interval has the same half-width, and the critical
 difference is exactly the 0.278 reported in the paper:
 
 ``` r
+
 attr(bp, "critical_value")                      # q_.05;1,6,14 = 4.83
 #> [1] 4.829856
 unique(round((bp$upper_limit - bp$lower_limit) / 2, 3))   # 0.278
@@ -135,6 +140,7 @@ covariate adjustment as fixed.
 is its familywise, random-covariate counterpart.
 
 ``` r
+
 # Per-comparison interval for panel 1 vs. panel 4 (needs the covariate means
 # and the within-group SS of the covariate).
 cov_means <- tapply(test_market$category_movement, test_market$panel, mean)
@@ -157,6 +163,7 @@ per_comparison
 Confidence level: 95%
 
 ``` r
+
 
 # The same contrast, but as one member of the simultaneous family:
 ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova, n = 4,
@@ -184,6 +191,7 @@ homogeneity-of-regression check) and feeds directly into
 Here is a four-group example.
 
 ``` r
+
 set.seed(113)
 k <- 4; n <- 25
 group <- factor(rep(c("control", "low", "medium", "high"), each = n),
@@ -231,6 +239,7 @@ With one covariate and `N - k - p` error degrees of freedom, the default
 `df` is correct, so it need not be supplied.
 
 ``` r
+
 adj <- fit_tidy$value[grepl("^adjusted_mean", fit_tidy$term)]
 names(adj) <- levels(group)
 
@@ -265,6 +274,7 @@ directly. It is the ANCOVA analogue of
 [`qtukey()`](https://rdrr.io/r/stats/Tukey.html).
 
 ``` r
+
 # 95% critical value for k = 5 groups, p = 2 covariates, nu = 40 error df:
 qbryant_paulson(0.95, num_covariates = 2, num_groups = 5, df = 40)
 #> [1] 4.145129

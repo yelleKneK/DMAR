@@ -6,14 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Performance of Accuracy in Parameter Estimation Sample Size Planning: A 10,000-Replication Monte Carlo Study • DMAR</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Performance of Accuracy in Parameter Estimation Sample Size Planning: A 10,000-Replication Monte Carlo Study">
 </head>
@@ -68,9 +63,9 @@
                         <h4 data-toc-skip class="author">Ken Kelley ·
 University of Notre Dame</h4>
             
-            <h4 data-toc-skip class="date">July 30, 2026</h4>
+            <h4 data-toc-skip class="date">July 31, 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/HEAD/vignettes/aipe_simulation_study.Rmd" class="external-link"><code>vignettes/aipe_simulation_study.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/aipe_simulation_study.Rmd" class="external-link"><code>vignettes/aipe_simulation_study.Rmd</code></a></small>
       <div class="d-none name"><code>aipe_simulation_study.Rmd</code></div>
     </div>
 
@@ -176,7 +171,7 @@ Three planning modes are considered:</p>
 The planner returns the smallest
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mspace width="0.167em"></mspace><mover><mi>W</mi><mo accent="true">̂</mo></mover><mspace width="0.167em"></mspace><mo stretchy="true" form="postfix">]</mo></mrow><mo>≤</mo><mi>ω</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}[\,\widehat W\,] \le
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">[</mo><mspace width="0.167em"></mspace><mover><mi>W</mi><mo accent="true">̂</mo></mover><mspace width="0.167em"></mspace><mo stretchy="false" form="postfix">]</mo><mo>≤</mo><mi>ω</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}[\,\widehat W\,] \le
 \omega</annotation></semantics></math>, where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>W</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\widehat W</annotation></semantics></math>
 is the realized CI width.</li>
@@ -186,14 +181,14 @@ is the realized CI width.</li>
 The planner returns the smallest
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mn>0.80</mn></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega) \ge 0.80</annotation></semantics></math>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo><mo>≥</mo><mn>0.80</mn></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega) \ge 0.80</annotation></semantics></math>.</li>
 <li>
 <strong>99% assurance</strong>:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>0.99</mn></mrow><annotation encoding="application/x-tex">\gamma = 0.99</annotation></semantics></math>.
 The planner returns the smallest
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 such that
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mn>0.99</mn></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega) \ge 0.99</annotation></semantics></math>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo><mo>≥</mo><mn>0.99</mn></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega) \ge 0.99</annotation></semantics></math>.</li>
 </ul>
 </li>
 <li><p><strong>Generate
@@ -216,13 +211,13 @@ replicate, compute the CI, and aggregate:</p>
 </li>
 <li>
 <strong>Coverage probability</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">CI contains target</mtext><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Pr(\text{CI contains target})</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">CI contains target</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Pr(\text{CI contains target})</annotation></semantics></math>,
 which should be at or very near
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><mi>α</mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">1 - \alpha = 0.95</annotation></semantics></math>
 </li>
 <li>
 <strong>Assurance-achievement rate</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega)</annotation></semantics></math>,
 which should be at or very near
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
 (or, when planning under expected width,
@@ -327,11 +322,11 @@ data frame and renders the tables and plots.</p>
 size
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>,
 from
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>δ</mi><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">N(\delta, 1)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mi>δ</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(\delta, 1)</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">N(0, 1)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(0, 1)</annotation></semantics></math>.
 The sample standardized mean difference is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>d</mi><mo accent="true">̂</mo></mover><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mn>1</mn></msub><mo>−</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>/</mi><msub><mi>s</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">\hat d = (\bar X_1 - \bar X_2) / s_p</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>d</mi><mo accent="true">̂</mo></mover><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mn>1</mn></msub><mo>−</mo><msub><mover><mi>X</mi><mo accent="true">‾</mo></mover><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><msub><mi>s</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">\hat d = (\bar X_1 - \bar X_2) / s_p</annotation></semantics></math>,
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>s</mi><mi>p</mi></msub><annotation encoding="application/x-tex">s_p</annotation></semantics></math>
 is the pooled standard deviation, and the CI is the noncentral
@@ -339,7 +334,7 @@ is the pooled standard deviation, and the CI is the noncentral
 <p><strong>Conditions.</strong>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0.20</mn><mo>,</mo><mn>0.50</mn><mo>,</mo><mn>0.80</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\delta \in \{0.20, 0.50, 0.80\}</annotation></semantics></math>
 (evenly spaced at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>δ</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">\Delta\delta = 0.30</annotation></semantics></math>)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>δ</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">\Delta\delta = 0.30</annotation></semantics></math>)
 at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi><mo>=</mo><mn>0.30</mn></mrow><annotation encoding="application/x-tex">\omega = 0.30</annotation></semantics></math>
 across the three planning modes.</p>
@@ -528,11 +523,11 @@ with population correlation matrix
 the outcome
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
 is generated as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mi>′</mi><mi>β</mi><mo>+</mo><mi>ε</mi></mrow><annotation encoding="application/x-tex">Y = X' \beta + \varepsilon</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><msup><mi>X</mi><mo>′</mo></msup><mi>β</mi><mo>+</mo><mi>ε</mi></mrow><annotation encoding="application/x-tex">Y = X' \beta + \varepsilon</annotation></semantics></math>
 with equal standardized
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>s
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><msup><mi>ρ</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\varepsilon \sim N(0, 1 - \rho^2)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ε</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><msup><mi>ρ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\varepsilon \sim N(0, 1 - \rho^2)</annotation></semantics></math>,
 so the population squared multiple correlation is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ρ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\rho^2</annotation></semantics></math>.
 The CI is the random- predictors CI from <code><a href="../reference/ci_R2.html">ci_R2()</a></code> (Lee,
@@ -687,17 +682,17 @@ replications.</caption>
 covariates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>Z</mi><mi>J</mi></msub></mrow><annotation encoding="application/x-tex">Z_1, \ldots, Z_J</annotation></semantics></math>
 are independent
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">N(0, 1)</annotation></semantics></math>.
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>=</mo><mi>Z</mi><mi>′</mi><mi>a</mi><mo>+</mo><msub><mi>ε</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">X = Z' a + \varepsilon_X</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(0, 1)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>=</mo><msup><mi>Z</mi><mo>′</mo></msup><mi>a</mi><mo>+</mo><msub><mi>ε</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">X = Z' a + \varepsilon_X</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>Z</mi><mi>′</mi><mi>b</mi><mo>+</mo><msub><mi>ε</mi><mi>Y</mi></msub></mrow><annotation encoding="application/x-tex">Y = Z' b +
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><msup><mi>Z</mi><mo>′</mo></msup><mi>b</mi><mo>+</mo><msub><mi>ε</mi><mi>Y</mi></msub></mrow><annotation encoding="application/x-tex">Y = Z' b +
 \varepsilon_Y</annotation></semantics></math> where the bivariate
 residual
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>ε</mi><mi>X</mi></msub><mo>,</mo><msub><mi>ε</mi><mi>Y</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\varepsilon_X, \varepsilon_Y)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>ε</mi><mi>X</mi></msub><mo>,</mo><msub><mi>ε</mi><mi>Y</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\varepsilon_X, \varepsilon_Y)</annotation></semantics></math>
 is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>Σ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">N(0, \Sigma)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi mathvariant="normal">Σ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(0, \Sigma)</annotation></semantics></math>
 with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Σ</mi><mn>12</mn></msub><mo>=</mo><mi>ρ</mi></mrow><annotation encoding="application/x-tex">\Sigma_{12} = \rho</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Σ</mi><mn>12</mn></msub><mo>=</mo><mi>ρ</mi></mrow><annotation encoding="application/x-tex">\Sigma_{12} = \rho</annotation></semantics></math>.
 The population partial correlation
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>X</mi><mi>Y</mi><mo>⋅</mo><mi>Z</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{XY \cdot Z}</annotation></semantics></math>
 equals
@@ -706,7 +701,7 @@ The CI is the raw-scale Olkin-Finn (1995) asymptotic CI.</p>
 <p><strong>Conditions.</strong>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0.20</mn><mo>,</mo><mn>0.40</mn><mo>,</mo><mn>0.60</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\rho \in \{0.20, 0.40, 0.60\}</annotation></semantics></math>
 (evenly spaced at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>ρ</mi><mo>=</mo><mn>0.20</mn></mrow><annotation encoding="application/x-tex">\Delta\rho = 0.20</annotation></semantics></math>)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>ρ</mi><mo>=</mo><mn>0.20</mn></mrow><annotation encoding="application/x-tex">\Delta\rho = 0.20</annotation></semantics></math>)
 at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">J = 3</annotation></semantics></math>
 controls,
@@ -895,7 +890,7 @@ replications.</caption>
 covariates and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 as for the partial correlation. Then
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>Z</mi><mi>′</mi><mi>b</mi><mo>+</mo><msub><mi>r</mi><mrow><mi>s</mi><mi>p</mi></mrow></msub><mo>⋅</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">d</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mi>Y</mi></msub></mrow><annotation encoding="application/x-tex">Y = Z' b + r_{sp} \cdot X_{\mathrm{resid}} +
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><msup><mi>Z</mi><mo>′</mo></msup><mi>b</mi><mo>+</mo><msub><mi>r</mi><mrow><mi>s</mi><mi>p</mi></mrow></msub><mo>⋅</mo><msub><mi>X</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">d</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mi>Y</mi></msub></mrow><annotation encoding="application/x-tex">Y = Z' b + r_{sp} \cdot X_{\mathrm{resid}} +
 \varepsilon_Y</annotation></semantics></math>, so the population
 semipartial of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
@@ -907,7 +902,7 @@ The CI is the Olkin-Finn-style raw- scale asymptotic CI.</p>
 <p><strong>Conditions.</strong>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mrow><mi>s</mi><mi>p</mi></mrow></msub><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0.15</mn><mo>,</mo><mn>0.30</mn><mo>,</mo><mn>0.45</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r_{sp} \in \{0.15, 0.30, 0.45\}</annotation></semantics></math>
 (evenly spaced at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><msub><mi>r</mi><mrow><mi>s</mi><mi>p</mi></mrow></msub><mo>=</mo><mn>0.15</mn></mrow><annotation encoding="application/x-tex">\Delta r_{sp} = 0.15</annotation></semantics></math>)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><msub><mi>r</mi><mrow><mi>s</mi><mi>p</mi></mrow></msub><mo>=</mo><mn>0.15</mn></mrow><annotation encoding="application/x-tex">\Delta r_{sp} = 0.15</annotation></semantics></math>)
 at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">J = 3</annotation></semantics></math>
 controls,
@@ -1098,15 +1093,15 @@ subjects each measured at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
 occasions:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>u</mi><mi>i</mi></msub><mo>+</mo><msub><mi>ε</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Y_{ij} = u_i + \varepsilon_{ij}</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>ρ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">u_i \sim N(0, \rho)</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\varepsilon_{ij} \sim N(0, 1 - \rho)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mi>i</mi></msub><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>ρ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">u_i \sim N(0, \rho)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><mi>ρ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\varepsilon_{ij} \sim N(0, 1 - \rho)</annotation></semantics></math>.
 The CI is the Bonett (2002) Fisher-style
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>-transformation
 CI back-transformed to the natural scale.</p>
 <p><strong>Conditions.</strong>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0.10</mn><mo>,</mo><mn>0.30</mn><mo>,</mo><mn>0.50</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\rho \in \{0.10, 0.30, 0.50\}</annotation></semantics></math>
 (evenly spaced at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>ρ</mi><mo>=</mo><mn>0.20</mn></mrow><annotation encoding="application/x-tex">\Delta\rho = 0.20</annotation></semantics></math>)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Δ</mi><mi>ρ</mi><mo>=</mo><mn>0.20</mn></mrow><annotation encoding="application/x-tex">\Delta\rho = 0.20</annotation></semantics></math>)
 at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">k = 5</annotation></semantics></math>
 measurements per subject,
@@ -1438,7 +1433,7 @@ replications.</caption>
 </h3>
 <p><strong>Population model.</strong> Two independent normal samples
 shifted so that the population Cliff’s
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>2</mn><mi>Φ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>μ</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta = 2 \Phi(\mu / \sqrt 2) - 1</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>δ</mi><mo>=</mo><mn>2</mn><mi mathvariant="normal">Φ</mi><mo stretchy="false" form="prefix">(</mo><mi>μ</mi><mi>/</mi><msqrt><mn>2</mn></msqrt><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\delta = 2 \Phi(\mu / \sqrt 2) - 1</annotation></semantics></math>
 takes the target value. The CI is the analytic
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>U</mi><annotation encoding="application/x-tex">U</annotation></semantics></math>-statistic
 CI from <code><a href="../reference/cliff_delta.html">cliff_delta()</a></code> (Cliff, 1996).</p>
@@ -1627,11 +1622,11 @@ replications.</caption>
 <code>ss_aipe_indirect_effect()</code><a class="anchor" aria-label="anchor" href="#indirect-mediated-effect-ss_aipe_indirect_effect"></a>
 </h3>
 <p><strong>Population model.</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X \sim N(0, 1)</annotation></semantics></math>;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">X \sim N(0, 1)</annotation></semantics></math>;
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo>=</mo><mi>a</mi><mi>X</mi><mo>+</mo><msub><mi>ε</mi><mi>M</mi></msub></mrow><annotation encoding="application/x-tex">M = aX + \varepsilon_M</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mi>M</mi></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><msup><mi>a</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\varepsilon_M \sim N(0, 1 - a^2)</annotation></semantics></math>;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mi>M</mi></msub><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><msup><mi>a</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\varepsilon_M \sim N(0, 1 - a^2)</annotation></semantics></math>;
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>b</mi><mi>M</mi><mo>+</mo><msub><mi>ε</mi><mi>Y</mi></msub></mrow><annotation encoding="application/x-tex">Y = bM + \varepsilon_Y</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mi>Y</mi></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\varepsilon_Y \sim N(0, 1 - b^2)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ε</mi><mi>Y</mi></msub><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>−</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\varepsilon_Y \sim N(0, 1 - b^2)</annotation></semantics></math>.
 The population indirect effect is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mi>b</mi></mrow><annotation encoding="application/x-tex">ab</annotation></semantics></math>.
 The CI is the Sobel (1982) first-order normal CI.</p>
@@ -2087,7 +2082,7 @@ the underlying CI procedures, not defects of the planners.</p>
 <p><strong>3. Assurance achievement matches
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
 for most planners.</strong> The assurance-achievement rate,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega)</annotation></semantics></math>,
 sits at or above the requested
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>γ</mi><annotation encoding="application/x-tex">\gamma</annotation></semantics></math>
 wherever the underlying CI is well calibrated: 16 of the 22 cells at
@@ -2148,7 +2143,7 @@ by one at a time, running 10,000 Monte Carlo replications at every
 candidate
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 and recording the empirical assurance
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo>≤</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Pr(\widehat W \le \omega)</annotation></semantics></math>
 at that
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>.
 The walk continues until the empirical assurance falls below the
@@ -2215,7 +2210,7 @@ finishes in seconds rather than minutes. These are
 (<code>ss_aipe_R2</code>, <code>ss_aipe_omega_squared</code>, and
 <code>ss_aipe_cliff_delta</code>) involve either an iterative confidence
 interval inversion or an
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math>
 kernel and are too costly to walk one-by-one through 10,000 replications
 at each
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
@@ -3372,39 +3367,41 @@ patterns are visible in the per-method tables above.</p>
 </h2>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.5.2 (2025-10-31)</span></span>
-<span><span class="co">#&gt; Platform: aarch64-apple-darwin20</span></span>
-<span><span class="co">#&gt; Running under: macOS Tahoe 26.5.2</span></span>
+<span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
+<span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 24.04.4 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
-<span><span class="co">#&gt; BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib </span></span>
-<span><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1</span></span>
+<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
+<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; locale:</span></span>
-<span><span class="co">#&gt; [1] en_US/en_US/en_US/C/en_US/en_US</span></span>
+<span><span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
+<span><span class="co">#&gt;  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   </span></span>
+<span><span class="co">#&gt;  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span></span>
+<span><span class="co">#&gt; [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; time zone: America/Indiana/Indianapolis</span></span>
-<span><span class="co">#&gt; tzcode source: internal</span></span>
+<span><span class="co">#&gt; time zone: UTC</span></span>
+<span><span class="co">#&gt; tzcode source: system (glibc)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; attached base packages:</span></span>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggplot2_4.0.1 DMAR_1.0.0   </span></span>
+<span><span class="co">#&gt; [1] ggplot2_4.0.3 DMAR_1.0.0   </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] gtable_0.3.6       jsonlite_2.0.0     dplyr_1.1.4        compiler_4.5.2    </span></span>
-<span><span class="co">#&gt;  [5] tidyselect_1.2.1   jquerylib_0.1.4    systemfonts_1.3.1  scales_1.4.0      </span></span>
-<span><span class="co">#&gt;  [9] textshaping_1.0.4  yaml_2.3.12        fastmap_1.2.0      R6_2.6.1          </span></span>
-<span><span class="co">#&gt; [13] labeling_0.4.3     generics_0.1.4     knitr_1.51         htmlwidgets_1.6.4 </span></span>
-<span><span class="co">#&gt; [17] MASS_7.3-65        tibble_3.3.0       desc_1.4.3         bslib_0.9.0       </span></span>
-<span><span class="co">#&gt; [21] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.1.6        cachem_1.1.0      </span></span>
-<span><span class="co">#&gt; [25] xfun_0.55          fs_1.6.6           sass_0.4.10        S7_0.2.1          </span></span>
-<span><span class="co">#&gt; [29] otel_0.2.0         cli_3.6.5          withr_3.0.2        pkgdown_2.2.0     </span></span>
-<span><span class="co">#&gt; [33] magrittr_2.0.4     digest_0.6.39      grid_4.5.2         lifecycle_1.0.4   </span></span>
-<span><span class="co">#&gt; [37] vctrs_0.6.5        evaluate_1.0.5     glue_1.8.0         farver_2.1.2      </span></span>
-<span><span class="co">#&gt; [41] ragg_1.5.0         rmarkdown_2.30     tools_4.5.2        pkgconfig_2.0.3   </span></span>
-<span><span class="co">#&gt; [45] htmltools_0.5.9</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1        compiler_4.6.1    </span></span>
+<span><span class="co">#&gt;  [5] tidyselect_1.2.1   jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      </span></span>
+<span><span class="co">#&gt;  [9] textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0      R6_2.6.1          </span></span>
+<span><span class="co">#&gt; [13] labeling_0.4.3     generics_0.1.4     knitr_1.51         MASS_7.3-65       </span></span>
+<span><span class="co">#&gt; [17] tibble_3.3.1       desc_1.4.3         bslib_0.11.0       pillar_1.11.1     </span></span>
+<span><span class="co">#&gt; [21] RColorBrewer_1.1-3 rlang_1.3.0        cachem_1.1.0       xfun_0.60         </span></span>
+<span><span class="co">#&gt; [25] fs_2.1.0           sass_0.4.10        S7_0.2.2           otel_0.2.0        </span></span>
+<span><span class="co">#&gt; [29] cli_3.6.6          pkgdown_2.2.1      withr_3.0.3        magrittr_2.0.5    </span></span>
+<span><span class="co">#&gt; [33] digest_0.6.39      grid_4.6.1         lifecycle_1.0.5    vctrs_0.7.3       </span></span>
+<span><span class="co">#&gt; [37] evaluate_1.0.5     glue_1.8.1         farver_2.1.2       ragg_1.5.2        </span></span>
+<span><span class="co">#&gt; [41] rmarkdown_2.31     tools_4.6.1        pkgconfig_2.0.3    htmltools_0.5.9</span></span></code></pre></div>
 <p>The simulation was run at <code>replications = 10000</code>,
 <code>conf_level = 0.95</code>,
 <code>assurance ∈ {NULL, 0.80, 0.99}</code>, with the per-condition seed
@@ -3461,7 +3458,7 @@ and contrast analysis. <em>Psychological Methods</em>, <em>9</em>(2),
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

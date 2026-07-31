@@ -203,7 +203,7 @@ Useful links:
 
 - <https://kenkelley.org>
 
-- <https://yelleknek.github.io/DMAR>
+- <https://yelleknek.github.io/DMAR/>
 
 - <https://github.com/yelleKneK/DMAR>
 

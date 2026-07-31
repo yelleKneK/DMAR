@@ -1,6 +1,7 @@
 # Moving From MBESS to DMAR: A Migration Guide and a Tour of the New Methods
 
 ``` r
+
 library(DMAR)
 ```
 
@@ -197,6 +198,7 @@ mean difference (Cohen’s $`d`$), its companion AIPE sample size plan,
 and the realized CI width under the plan looks like this in MBESS:
 
 ``` r
+
 # MBESS, classic
 library(MBESS)
 out_ci  <- ci.smd(ncp = 4, n.1 = 30, n.2 = 30, conf.level = 0.95)
@@ -210,6 +212,7 @@ The DMAR equivalent, with tidy returns and the
 route into a unified table:
 
 ``` r
+
 ci  <- ci_smd(ncp = 4, n_1 = 30, n_2 = 30, conf_level = 0.95)
 ss  <- ss_aipe_smd(delta = 0.5, conf_level = 0.95, width = 0.40)
 ci
@@ -224,6 +227,7 @@ ci
 Confidence level: 95%
 
 ``` r
+
 ss
 ```
 
@@ -236,6 +240,7 @@ ss
 Confidence level: 95%
 
 ``` r
+
 generics::tidy(ci)
 #>   term estimate  ci_lower ci_upper conf_level
 #> 1  smd 1.032796 0.4891759 1.568559       0.95

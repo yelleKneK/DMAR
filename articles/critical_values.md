@@ -37,6 +37,7 @@ Bonferroni-spaced levels .05, .05/2, .05/4, .05/6, .05/8, .05/10. Each
 cell is `qt(1 - alpha, df)`:
 
 ``` r
+
 alpha1 <- 0.05 / c(1, 2, 4, 6, 8, 10)
 tab <- sapply(alpha1, function(a) round(qt(1 - a, df = c(5, 10, 20, 60)), 2))
 dimnames(tab) <- list(df = c(5, 10, 20, 60), alpha1 = signif(alpha1, 3))
@@ -64,6 +65,7 @@ Tukey’s studentized range is
 [`cv_tukey_hsd()`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md):
 
 ``` r
+
 # Six groups, 14 error df, alpha = .05: Appendix A.4 prints 4.64.
 qtukey(0.95, nmeans = 6, df = 14)
 #> [1] 4.638538
@@ -78,6 +80,7 @@ a(a-1)/2*, not *a*. So the “Number of Groups” column of a printed SMM
 table maps to `n_comparisons = a * (a - 1) / 2`:
 
 ``` r
+
 # Appendix A.5, alpha = .05, "groups" a = 4, 5, 6 in the large-sample limit.
 a <- c(4, 5, 6)
 data.frame(groups = a, n_comparisons = a * (a - 1) / 2,
@@ -103,6 +106,7 @@ compares each of several treatments to a single control. Its
 where *a* counts all groups including the control:
 
 ``` r
+
 # Two-sided, a = 4 groups (3 treatments vs control), 10 error df: A.6 prints 2.76.
 cv_dunnett(alpha_level = .05, df = 10, n_comparisons = 3, alternative = "not_equal")
 ```
@@ -115,6 +119,7 @@ With one treatment the many-to-one family collapses to a single
 two-sided *t* test, a useful check on the argument mapping:
 
 ``` r
+
 c(dunnett = cv_dunnett(.05, df = 10, n_comparisons = 1,
                        alternative = "not_equal")$value,
   t       = qt(1 - .05/2, df = 10))
@@ -148,6 +153,7 @@ supply it. (For its use in a full ANCOVA analysis see the
 It reproduces the published anchor exactly:
 
 ``` r
+
 # Bryant & Paulson (1976) Table 1a: q_{.05; p=1, a=6, nu=14} = 4.83.
 cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
                   verbose = FALSE)$value
@@ -159,6 +165,7 @@ covariates, alpha = .01) against the printed values shows a single cell
 out of step:
 
 ``` r
+
 a_vals <- c(2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20)
 recomputed <- sapply(a_vals, function(k)
   cv_bryant_paulson(.01, df = 20, groups = k, covariates = 3,
@@ -187,6 +194,7 @@ across the row must decrease; 5.99 keeps them decreasing while 6.09
 forces a reversal:
 
 ``` r
+
 rbind(printed_increments    = diff(printed),
       recomputed_increments = round(diff(recomputed), 2))
 #>                       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
@@ -199,6 +207,7 @@ as the range of *a* standard normals divided by an independent scale,
 agrees with the computed 5.99, not with 6.09:
 
 ``` r
+
 G <- 2e5; a <- 6; nu <- 20; p <- 3
 R   <- apply(matrix(rnorm(G * a), ncol = a), 1, function(z) max(z) - min(z))
 S   <- sqrt(rchisq(G, nu) / nu)

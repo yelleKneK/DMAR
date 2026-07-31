@@ -25,6 +25,7 @@ The 1984 Table 1, at the condition level (Pellegrini & Hicks ran a
 tester-aware and a tester-blind condition):
 
 ``` r
+
 data(teacher_expectancy)
 teacher_expectancy[, c("author", "weeks", "tester", "d", "p_one_tailed")]
 #>                                author weeks tester     d p_one_tailed
@@ -55,6 +56,7 @@ two Pellegrini and Hicks conditions into their study-level values
 [`?teacher_expectancy`](https://yelleknek.github.io/DMAR/reference/teacher_expectancy.md)):
 
 ``` r
+
 s   <- teacher_expectancy[-c(4, 5), ]
 d18 <- append(s$d,             0.52, after = 3)
 p18 <- append(s$p_one_tailed,  .010, after = 3)
@@ -77,6 +79,7 @@ provides in one call. The weights for the Mosteller-Bush weighted method
 are the studies’ degrees of freedom:
 
 ``` r
+
 df18 <- ne18 + nc18 - 2
 combine_p(p18, weights = df18)
 ```
@@ -107,6 +110,7 @@ pupils before the induction, the less credible the deception, the
 smaller the effect.
 
 ``` r
+
 plot(d18 ~ wk18,
      xlab = "Weeks of teacher-student contact before induction",
      ylab = "Effect size d", pch = 16)
@@ -118,6 +122,7 @@ The raw correlation and Raudenbush’s linearized (reciprocal-transformed)
 version:
 
 ``` r
+
 round(c(r = cor(d18, wk18),
         r_transformed = cor(-1 / (1 + d18), -1 / (2 + wk18))), 2)
 #>             r r_transformed 
@@ -130,6 +135,7 @@ weeks of prior contact and the standard large-sample variance for each
 *d*:
 
 ``` r
+
 v18 <- (ne18 + nc18) / (ne18 * nc18) + d18^2 / (2 * (ne18 + nc18))
 meta_contrast(d18, v18, weights = 1 / (wk18 + 2))
 #> Contrast weights mean-centered to sum to zero.
@@ -149,6 +155,7 @@ ANOVA partitions sums of squares: the fixed effect fit gives Cochran’s
 Q,
 
 ``` r
+
 fe <- meta_es(d18, v18, method = "fe")
 fe[fe$term %in% c("Q", "Q_df", "Q_p"), ]
 ```
@@ -166,6 +173,7 @@ heterogeneity the moderator explains (Raudenbush’s 52 percent; the
 package returns 0.51 from these inputs):
 
 ``` r
+
 z_contrast <- meta_contrast(d18, v18, weights = 1 / (wk18 + 2))$value[3]
 #> Contrast weights mean-centered to sum to zero.
 round(z_contrast^2 / fe$value[fe$term == "Q"], 2)
@@ -184,6 +192,7 @@ and Kelley (2027) teach for single studies.
 Dichotomizing at two weeks of prior contact:
 
 ``` r
+
 lo <- wk18 <= 2
 round(c(mean_low = mean(d18[lo]), mean_high = mean(d18[!lo])), 2)
 #>  mean_low mean_high 
@@ -205,6 +214,7 @@ combine_p(p18[lo],  weights = df18[lo])    # 10 low-contact studies
 | k                   | 10        |
 
 ``` r
+
 combine_p(p18[!lo], weights = df18[!lo])   # 8 high-contact studies
 ```
 
@@ -233,6 +243,7 @@ conditions matter, so the analysis runs at the condition level with an
 aware-versus-blind contrast:
 
 ``` r
+
 d  <- teacher_expectancy$d
 ne <- teacher_expectancy$n_experimental
 nc <- teacher_expectancy$n_control
@@ -265,6 +276,7 @@ reports in one table (Hedges’ small-sample correction is on by default;
 the historical analyses above pooled raw *d* values):
 
 ``` r
+
 meta_smd(smd = teacher_expectancy$d,
          n_1 = teacher_expectancy$n_experimental,
          n_2 = teacher_expectancy$n_control)
@@ -300,6 +312,7 @@ diamond sits fractionally left of the Hedges-corrected average in the
 table above):
 
 ``` r
+
 plot_forest(d, vi, labels = teacher_expectancy$author,
             xlab = "Standardized mean difference (d)")
 #> `height` was translated to `width`.

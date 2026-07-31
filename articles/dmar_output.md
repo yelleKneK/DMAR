@@ -14,6 +14,7 @@ Here is a confidence interval for a standardized mean difference
 paper:
 
 ``` r
+
 x <- ci_smd(smd = 0.5, n_1 = 50, n_2 = 50)
 x
 ```
@@ -38,6 +39,7 @@ easy to read, but it never rounds the numbers it stores. Pull a value
 out and you get full precision:
 
 ``` r
+
 x$value[x$term == "smd"]
 #> [1] 0.5
 x$value[x$term == "upper_limit"]
@@ -49,6 +51,7 @@ interval, for example, uses the stored numbers, not the three digits you
 saw on screen:
 
 ``` r
+
 lo <- x$value[x$term == "lower_limit"]
 hi <- x$value[x$term == "upper_limit"]
 hi - lo
@@ -59,6 +62,7 @@ If you want to *see* more (or fewer) digits, ask the display for them.
 This changes only what is shown, not what is stored:
 
 ``` r
+
 print(x, digits = 8)
 #>  term        value     
 #>  lower_limit 0.10058571
@@ -71,6 +75,7 @@ print(x, digits = 8)
 To change the default for the rest of your session, set the option once:
 
 ``` r
+
 options(dmar.digits = 4)
 x
 ```
@@ -84,6 +89,7 @@ x
 Confidence level: 95%
 
 ``` r
+
 options(dmar.digits = 3)  # back to the default
 ```
 
@@ -93,6 +99,7 @@ Because the result is an ordinary data frame, you select from it the
 usual ways. Any of these returns the upper confidence limit:
 
 ``` r
+
 x$value[x$term == "upper_limit"]
 #> [1] 0.8969414
 x[x$term == "upper_limit", "value"]
@@ -115,6 +122,7 @@ be installed.
 `tidy()` returns one row per term with tidy, predictable column names:
 
 ``` r
+
 generics::tidy(x)
 #>   term estimate  ci_lower  ci_upper conf_level
 #> 1  smd      0.5 0.1005857 0.8969414       0.95
@@ -127,6 +135,7 @@ summary is the same one row, because there are no extra model-level
 statistics to add:
 
 ``` r
+
 generics::glance(x)
 #>   term estimate  ci_lower  ci_upper conf_level
 #> 1  smd      0.5 0.1005857 0.8969414       0.95
@@ -165,6 +174,7 @@ confidence limits, the *F* statistic, the degrees of freedom, and the
 sample size:
 
 ``` r
+
 ci_eta_squared(aov(len ~ supp * factor(dose), data = ToothGrowth))
 ```
 

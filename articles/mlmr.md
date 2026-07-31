@@ -1,6 +1,7 @@
 # Maximum Likelihood Multiple Regression and Multivariate Regression
 
 ``` r
+
 library(DMAR)
 set.seed(113)
 ```
@@ -64,13 +65,13 @@ differ across outcomes.
 The population for the simulations in this vignette has three predictors
 and a single outcome,
 ``` math
-
 Y = 1 + 0.5 X_1 - 0.3 X_2 + 0.2 X_3 + \varepsilon,
 \quad \varepsilon \sim \text{Normal}(0, 1),
 ```
 with all $`X_j \sim \text{Normal}(0, 1)`$ mutually independent.
 
 ``` r
+
 sim_complete <- function(N) {
   X1 <- rnorm(N); X2 <- rnorm(N); X3 <- rnorm(N)
   Y  <- 1 + 0.5 * X1 - 0.3 * X2 + 0.2 * X3 + rnorm(N)
@@ -115,6 +116,7 @@ maximum-likelihood-versus-unbiased divisor on the residual variance
 ($`N`$ in ML, $`N - K - 1`$ in OLS):
 
 ``` r
+
 ml_div <- sqrt(N / (N - 3 - 1))
 cbind(
   lm         = sqrt(diag(vcov(fit_lm))),
@@ -135,6 +137,7 @@ divisor-correction term, not a substantive disagreement.
 The *p* values therefore agree to the same precision as well:
 
 ``` r
+
 data.frame(
   predictor = names(coef(fit_lm))[-1],
   p_lm      = format_p(summary(fit_lm)$coefficients[-1, "Pr(>|t|)"]),
@@ -151,6 +154,7 @@ interval (Kelley, 2007), is identical from either fit (because the point
 estimate matches and the inversion is the same):
 
 ``` r
+
 ci_R2(R2 = summary(fit_lm)$r.squared, N = N, p = 3, conf_level = 0.95,
       random_predictors = TRUE)
 ```
@@ -191,6 +195,7 @@ Hold the data generating process fixed and delete 20% of the $`Y`$
 values completely at random:
 
 ``` r
+
 set.seed(113)
 d_mcar <- d
 d_mcar$Y[sample.int(nrow(d_mcar), size = round(0.20 * nrow(d_mcar)))] <- NA
@@ -218,6 +223,7 @@ estimates agree to within the noise expected at this sample size. The
 story is in the standard errors:
 
 ``` r
+
 cbind(
   N_used = c(lm = nobs(fit_lm), mlmr_fiml = nobs(fit_mlmr),
              mlmr_lwise = nobs(fit_lwise)),
@@ -253,6 +259,7 @@ The difference is the divisor and the reference distribution, not an
 efficiency gain.
 
 ``` r
+
 data.frame(
   predictor = names(coef(fit_mlmr))[-1],
   p_lm      = format_p(summary(fit_lm)$coefficients[-1, "Pr(>|t|)"]),
@@ -280,6 +287,7 @@ unobserved value of $`X_1`$ itself. Because $`Y`$ is observed, this is a
 MAR mechanism in Rubin’s (1976) sense:
 
 ``` r
+
 miss_x1_mar <- function(d, threshold = 1) {
   p_miss <- plogis(1.5 * (d$Y - threshold))
   d$X1[runif(nrow(d)) < p_miss] <- NA
@@ -295,6 +303,7 @@ cat("Rows with X1 missing:", sum(is.na(d_mar$X1)),
 Fit both estimators:
 
 ``` r
+
 fit_lm   <- lm(Y ~ X1 + X2 + X3, data = d_mar)
 fit_mlmr <- mlmr(Y ~ X1 + X2 + X3, data = d_mar,
                  ci_method = "wald", effect_sizes = FALSE)
@@ -321,6 +330,7 @@ To make the bias claim quantitative rather than anecdotal, repeat across
 many simulated samples:
 
 ``` r
+
 mar_mc <- function(B, N) {
   est_lm   <- est_mlmr <- matrix(NA, B, 4,
                                  dimnames = list(NULL,
@@ -366,6 +376,7 @@ the total $`Y`$ variance, the listwise interval uses the listwise
 estimate):
 
 ``` r
+
 R2_lm   <- summary(fit_lm)$r.squared
 R2_fiml <- mlmr(Y ~ X1 + X2 + X3, data = d_mar,
                 ci_method = "wald", effect_sizes = TRUE)$R2
@@ -417,6 +428,7 @@ baseline variables ($`T`$ and $`X`$) but, conditional on those, not on
 $`Y`$ itself, so this is MAR.
 
 ``` r
+
 set.seed(113)
 n_per <- 150
 sim_trial <- function(n_per, delta = 0.5) {
@@ -445,6 +457,7 @@ table(d_trial$T, is.na(d_trial$Y))
 Now fit both estimators and contrast the implied treatment effect:
 
 ``` r
+
 fit_lm   <- lm(Y ~ T + X, data = d_trial)
 fit_mlmr <- mlmr(Y ~ T + X, data = d_trial,
                  ci_method = "wald", effect_sizes = FALSE)
@@ -486,6 +499,7 @@ $`X`$-selective dropout. Computed on the complete cases, with a
 noncentral $`t`$ confidence interval (Maxwell, Delaney, & Kelley, 2027):
 
 ``` r
+
 # Standardized mean difference (Cohen's d) with a noncentral t CI,
 # from the complete-case subset:
 d_complete <- d_trial[stats::complete.cases(d_trial), ]
@@ -500,6 +514,7 @@ smd_trial
 | smd  | 0.444 |
 
 ``` r
+
 
 n_ctrl <- length(y_ctrl)
 n_trt  <- length(y_trt)
@@ -537,6 +552,7 @@ function of the observed outcome $`Y`$. Because $`Y`$ is observed, this
 is still MAR.
 
 ``` r
+
 set.seed(113)
 d_covmiss <- sim_trial(n_per)
 d_covmiss$X[runif(nrow(d_covmiss)) < plogis(1.2 * (d_covmiss$Y - 0.5))] <- NA
@@ -548,6 +564,7 @@ cat("Baseline X missing:", sum(is.na(d_covmiss$X)), "/",
 A single fit already shows the two estimators parting:
 
 ``` r
+
 fit_lm_cov   <- lm(Y ~ T + X, data = d_covmiss)
 fit_mlmr_cov <- mlmr(Y ~ T + X, data = d_covmiss,
                      ci_method = "wald", effect_sizes = FALSE)
@@ -570,6 +587,7 @@ so average the bias across many simulated trials to separate it from
 sampling noise:
 
 ``` r
+
 trial_mc <- function(B, n_per) {
   bT <- bX <- matrix(NA, B, 2,
                      dimnames = list(NULL, c("listwise", "fiml")))
@@ -610,6 +628,7 @@ $`T`$, and the substantive model is still $`Y \sim T + X`$, which omits
 $`Z`$.
 
 ``` r
+
 set.seed(113)
 sim_trial_aux <- function(n_per, delta = 0.5) {
   T <- rep(c(0, 1), each = n_per)
@@ -641,6 +660,7 @@ an auxiliary variable (through
 value 0.5:
 
 ``` r
+
 aux_mc <- function(B, n_per) {
   bT <- matrix(NA, B, 3, dimnames = list(NULL,
               c("lm_naive", "fiml_naive", "fiml_aux")))
@@ -683,6 +703,7 @@ participants receive the treatment, which adds 0.5), while the
 complete-case mean does not:
 
 ``` r
+
 round(aux$mean_Y, 3)
 #> complete_case      fiml_aux 
 #>        -0.031         0.252
@@ -787,6 +808,7 @@ the slopes on $`Y_2`$ through the residual covariance with $`Y_1`$, in a
 way that no univariate route can match.
 
 ``` r
+
 sim_mv <- function(N, rho = 0.7) {
   X1 <- rnorm(N); X2 <- rnorm(N); X3 <- rnorm(N)
   E  <- MASS::mvrnorm(N, mu = c(0, 0),

@@ -1,6 +1,7 @@
 # Weighted Kappa: Cohen's 1968 Illustration, Worked in Full
 
 ``` r
+
 library(DMAR)
 ```
 
@@ -28,6 +29,7 @@ each cell: the ratio-scaled disagreement weight, the chance-expected
 proportion (his parenthetical values), and the observed proportion.
 
 ``` r
+
 data(diagnosis_agreement)
 diagnosis_agreement
 #>                judge_b              judge_a frequency disagreement_weight
@@ -66,6 +68,7 @@ A (columns), and each cell’s expected proportion is the product of its
 row and column marginal proportions:
 
 ``` r
+
 with(diagnosis_agreement,
      all.equal(expected_proportion,
                as.numeric(tapply(observed_proportion, judge_b, sum)[judge_b] *
@@ -79,6 +82,7 @@ With every disagreement treated alike, kappa is the proportion of
 agreement corrected for chance (Cohen, 1960):
 
 ``` r
+
 cohen_kappa(table = tab)
 ```
 
@@ -103,6 +107,7 @@ they must be fixed before the data are collected, and weighted kappa is
 invariant to multiplying them by any positive constant.
 
 ``` r
+
 v <- unclass(xtabs(disagreement_weight ~ judge_b + judge_a,
                    data = diagnosis_agreement))
 v
@@ -135,6 +140,7 @@ level in the heavily weighted ones; they disagree least where it matters
 least. Interchanging the 6 and 1 weights reverses the conclusion:
 
 ``` r
+
 v_swap <- v
 v_swap[v == 6] <- 1
 v_swap[v == 1] <- 6
@@ -151,6 +157,7 @@ Confidence level: 95%
 The per-cell quantities behind any result travel with it:
 
 ``` r
+
 attr(res, "cells")
 #>                rater_1              rater_2 observed_proportion
 #> 1 Personality disorder Personality disorder                0.44
@@ -181,6 +188,7 @@ weighted kappa; the arithmetic below reproduces his printed values from
 the data set’s columns.
 
 ``` r
+
 q_o <- with(diagnosis_agreement,
             sum(disagreement_weight * observed_proportion))
 q_c <- with(diagnosis_agreement,
@@ -216,6 +224,7 @@ the agreement-scale counterpart of disagreement weights proportional to
 the squared category distance, $`(i - j)^2`$.
 
 ``` r
+
 df <- as.data.frame(as.table(tab))
 score_b <- rep(as.integer(df$judge_b), df$Freq)
 score_a <- rep(as.integer(df$judge_a), df$Freq)
@@ -237,6 +246,7 @@ of Table 1 the two are close but not equal, with weighted kappa the
 smaller, as Cohen notes:
 
 ``` r
+
 c(kappa_w_quadratic = cohen_kappa(score_b, score_a,
                                   weights = "quadratic")$kappa,
   pearson_r = cor(score_b, score_a))
@@ -247,6 +257,7 @@ c(kappa_w_quadratic = cohen_kappa(score_b, score_a,
 On a table with equal marginals the identity is exact:
 
 ``` r
+
 eq <- matrix(c(40, 10, 10,
                10, 60, 10,
                10, 10, 40), nrow = 3, byrow = TRUE)
@@ -277,6 +288,7 @@ display printed in the paper, which has Panel labeling its columns and
 Computer its rows, matches that prose:
 
 ``` r
+
 v_printed <- matrix(c(0, 1, 4,
                       1, 0, 6,
                       2, 2, 0), nrow = 3, byrow = TRUE,
@@ -300,6 +312,7 @@ gives another. Cohen reports the weighted disagreement sums as .86
 from the same data:
 
 ``` r
+
 # As printed, read with its own row and column labels:
 res_printed <- cohen_kappa(table = tab, weights = v_printed,
                            weight_scaling = "disagreement")

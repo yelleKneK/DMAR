@@ -28,6 +28,7 @@ was measured before the manipulation (`iq_pre`) and again at follow-up
 (`iq_8`).
 
 ``` r
+
 data(pygmalion)
 
 # A curated summary of the substantive IQ variables; the 'type' column
@@ -71,6 +72,7 @@ in every group**. We can look at that assumption directly by fitting
 separate slopes and overlaying them.
 
 ``` r
+
 fit_het <- lm(iq_8 ~ iq_pre * treatment, data = pygmalion)
 round(coef(fit_het), 5)
 #>             (Intercept)                  iq_pre        treatmentBloomer 
@@ -83,6 +85,7 @@ The control slope is 0.778; adding the interaction gives a steeper
 bloomer slope of 0.969.
 
 ``` r
+
 cols <- c(Control = "#1b9e77", Bloomer = "#d95f02")
 plot(pygmalion$iq_pre, pygmalion$iq_8,
      col = cols[pygmalion$treatment], pch = 19, cex = 0.6,
@@ -104,6 +107,7 @@ comparison of the additive (common-slope) model to the separate-slopes
 model:
 
 ``` r
+
 fit_add <- lm(iq_8 ~ iq_pre + treatment, data = pygmalion)
 print_anova(anova(fit_add, fit_het))
 #> Analysis of Variance Table
@@ -125,6 +129,7 @@ noncentral *F* confidence intervals, and the homogeneity-of-regression
 test, all in one tidy data frame.
 
 ``` r
+
 res <- ancova(pygmalion, outcome = "iq_8", treatment = "treatment",
               covariates = "iq_pre")
 as_kable(res)
@@ -151,7 +156,8 @@ as_kable(res)
 | df_homogeneity_of_regression | 1        |
 | p_homogeneity_of_regression  | 0.0498   |
 
-Confidence level: 95%
+Confidence level: 95% {.table .table
+style="width: auto !important; margin-left: auto; margin-right: auto;"}
 
 Note that the `F_homogeneity_of_regression` row reproduces the 1-df
 interaction test above, and that the adjusted means come from the
@@ -169,7 +175,6 @@ Under heterogeneity of regression the estimated treatment effect is not
 a single number: it is a function of the covariate value at which it is
 evaluated,
 ``` math
-
 \widehat{\Delta}(x) \;=\;
 \bigl(\hat\alpha_{\text{Bloomer}} - \hat\alpha_{\text{Control}}\bigr)
 \;+\;
@@ -180,6 +185,7 @@ pretest value. Below we evaluate it at the covariate grand mean and at
 one standard deviation on either side.
 
 ``` r
+
 x_bar <- mean(pygmalion$iq_pre)
 x_sd  <- sd(pygmalion$iq_pre)
 x_at  <- c(low = x_bar - x_sd, mean = x_bar, high = x_bar + x_sd)
@@ -209,6 +215,7 @@ natively as
 [`var_ete()`](https://yelleknek.github.io/DMAR/reference/var_ete.md).
 
 ``` r
+
 # Ingredients for that methodology (cf. var_ete()):
 n_bloomer <- sum(pygmalion$treatment == "Bloomer")
 n_control <- sum(pygmalion$treatment == "Control")

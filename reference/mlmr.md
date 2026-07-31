@@ -475,14 +475,15 @@ summary(fit_mlmr)
 # Likelihood ratio CIs (default).
 confint(fit_mlmr)
 #>                   2.5 %      97.5 %
-#> (Intercept) 34.24420416 40.21033608
-#> wt          -5.05840396 -2.69725753
+#> (Intercept) 34.24420415 40.21033609
+#> wt          -5.05840396 -2.69725752
 #> hp          -0.04862085 -0.01492504
 
 # Auxiliary variable (saturated correlates). qsec is not in the
 # model; it is brought in to inform the likelihood. On complete data
 # the coefficients are unchanged to working precision, and when the
 # outcome is missing as a function of qsec it helps recover them.
+# \donttest{
 fit_aux <- mlmr(mpg ~ wt + hp, data = mtcars, auxiliary = "qsec")
 cbind(no_aux = coef(fit_mlmr), aux = coef(fit_aux))
 #>                  no_aux         aux
@@ -490,7 +491,6 @@ cbind(no_aux = coef(fit_mlmr), aux = coef(fit_aux))
 #> wt          -3.87783074 -3.87783075
 #> hp          -0.03177295 -0.03177295
 
-# \donttest{
 # Demonstrate FIML with missing values on a predictor.
 set.seed(113)
 d <- mtcars
@@ -509,7 +509,7 @@ fit_boot <- mlmr(mpg ~ wt + hp, data = mtcars,
 confint(fit_boot)
 #>                   2.5 %     97.5 %
 #> (Intercept) 33.27266355 41.2385549
-#> wt          -5.06524741 -2.6284807
+#> wt          -5.06524754 -2.6284807
 #> hp          -0.04993342 -0.0194477
 # }
 ```

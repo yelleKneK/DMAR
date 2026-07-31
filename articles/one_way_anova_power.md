@@ -54,6 +54,7 @@ within-group standard deviation of 12), and the plan calls for 20
 participants per group.
 
 ``` r
+
 mu_j          <- c(90, 92, 88, 81)
 sigma_squared <- 144
 sigma         <- sqrt(sigma_squared)
@@ -79,6 +80,7 @@ that drives power:
 ```
 
 ``` r
+
 reduction <- sum(n_j * alpha_j^2)   # population between-groups sum of squares
 lambda    <- reduction / sigma_squared
 lambda
@@ -101,6 +103,7 @@ $`a - 1`$:
 By hand:
 
 ``` r
+
 sigma_squared_m <- sum(alpha_j^2) / a   # divisor a, not a - 1
 sigma_m         <- sqrt(sigma_squared_m)
 f_by_hand       <- sigma_m / sigma
@@ -114,6 +117,7 @@ the population divisor internally, so the user never has to remember
 whether to divide by *a* or by $`a - 1`$:
 
 ``` r
+
 cohen_f(mu = mu_j, sigma_squared = sigma_squared)
 ```
 
@@ -122,6 +126,7 @@ cohen_f(mu = mu_j, sigma_squared = sigma_squared)
 | cohen_f | 0.345 |
 
 ``` r
+
 f <- cohen_f(mu = mu_j, sigma_squared = sigma_squared)$value
 ```
 
@@ -133,6 +138,7 @@ reduction in error, and *f* are three views of one quantity, and the
 population PRE and back:
 
 ``` r
+
 PRE <- f^2 / (1 + f^2)
 PRE
 #> [1] 0.1066305
@@ -145,6 +151,7 @@ convert_lambda_R2(lambda = lambda, N = N)   # lambda to population PRE (= R^2)
 | lambda_r2 | 0.107 |
 
 ``` r
+
 convert_R2_lambda(R2 = PRE,    N = N)       # and back to the noncentrality
 ```
 
@@ -166,6 +173,7 @@ the area of the noncentral *F* distribution, centered at $`\lambda`$,
 that lies beyond the critical value taken from the central *F*. By hand:
 
 ``` r
+
 df_numerator   <- a - 1
 df_denominator <- N - a
 
@@ -182,6 +190,7 @@ two degrees of freedom, and integrates the noncentral *F* beyond the
 central critical value exactly as above:
 
 ``` r
+
 ss_power_one_way_anova(a = a, f = f, N = N, alpha_level = .05)
 ```
 
@@ -199,6 +208,7 @@ sample size that reaches a target power. The function searches over *N*,
 reporting the necessary total sample size and the per-group *n*:
 
 ``` r
+
 ss_power_one_way_anova(a = a, f = f, desired_power = .80, alpha_level = .05)
 ```
 
@@ -223,6 +233,7 @@ is the sample analogue of $`E_R - E_F`$: it asks whether freeing the
 group means improves the fit by more than sampling noise would explain.
 
 ``` r
+
 d <- simulate_anova_data(mu = mu_j, sigma = sigma, a = a, n = n_j)
 head(d)
 #>   group         y
@@ -235,6 +246,7 @@ head(d)
 ```
 
 ``` r
+
 restricted <- mlmr(y ~ 1,     data = d, ci_method = "wald", effect_sizes = FALSE)
 full       <- mlmr(y ~ group, data = d, ci_method = "wald", effect_sizes = FALSE)
 
@@ -259,6 +271,7 @@ story, and its components are the sample $`E_R - E_F`$, $`E_F`$, and the
 degrees of freedom of the comparison:
 
 ``` r
+
 fit_aov <- aov(y ~ group, data = d)
 print_anova(anova(fit_aov))
 #> Analysis of Variance Table
@@ -292,6 +305,7 @@ less biased estimator of the population proportion of variance than eta
 squared, travels with its interval:
 
 ``` r
+
 os_est <- omega_squared(F_value = 11.221, df_effect = 4, df_error = 50,
                         N = 55)
 os_est
@@ -317,6 +331,7 @@ signal to noise ratio $`f^2`$, and as the square root of the signal to
 noise ratio (which is Cohen’s *f*):
 
 ``` r
+
 ci_pvaf(F_value  = 11.221, df_1 = 4, df_2 = 50, N = 55)
 ```
 
@@ -329,6 +344,7 @@ ci_pvaf(F_value  = 11.221, df_1 = 4, df_2 = 50, N = 55)
 Confidence level: 95%
 
 ``` r
+
 ci_snr(F_value   = 11.221, df_1 = 4, df_2 = 50, N = 55)
 ```
 
@@ -340,6 +356,7 @@ ci_snr(F_value   = 11.221, df_1 = 4, df_2 = 50, N = 55)
 Confidence level: 95%
 
 ``` r
+
 ci_srsnr(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55)
 ```
 
@@ -357,6 +374,7 @@ implied *F* internally and returns the interval on Cohen’s *f* that the
 planned design would produce. For the four-group running example:
 
 ``` r
+
 ci_srsnr(means = mu_j, sigma_squared = sigma_squared, n_per_group = n_j)
 #> Warning: The observed F_value is below the alpha_lower critical value of the
 #> central F-distribution; the lower noncentrality limit has been clamped to 0 and
@@ -381,6 +399,7 @@ putting all of the Type I error in the lower tail, then plan the next
 five-group study to that bound:
 
 ``` r
+
 lower_f <- ci_srsnr(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55,
                     alpha_lower = .20, alpha_upper = 0)
 lower_f
@@ -394,6 +413,7 @@ lower_f
 Confidence level: 80%
 
 ``` r
+
 
 f_lower <- lower_f$value[lower_f$term == "lower_limit"]
 ss_power_one_way_anova(a = 5, f = f_lower, desired_power = .80)
@@ -415,6 +435,7 @@ deviation of 100, and 10 participants per group. The same spine applies,
 now stated compactly with DMAR.
 
 ``` r
+
 mu_j_2          <- c(400, 450, 500)
 sigma_2         <- 100
 sigma_squared_2 <- sigma_2^2
@@ -441,6 +462,7 @@ ss_power_one_way_anova(a = a_2, f = f_2, N = N_2, alpha_level = .05)
 
 ``` r
 
+
 # Sample size needed for power .80
 plan2 <- ss_power_one_way_anova(a = a_2, f = f_2, desired_power = .80, alpha_level = .05)
 ```
@@ -449,6 +471,7 @@ The realized power at 10 per group is modest. The sample size needed for
 power .80 is about 21 per group, the value the textbook reaches:
 
 ``` r
+
 plan2
 ```
 
@@ -479,9 +502,10 @@ the positive weights must sum to 1 and the negative weights must sum to
 $`-1`$:
 
 ``` r
+
 c_weights <- c(1/3, 1/3, 1/3, -1)
 sum(c_weights)                  # all weights sum to zero
-#> [1] 0
+#> [1] -5.551115e-17
 sum(c_weights[c_weights > 0])   # the positive weights sum to 1
 #> [1] 1
 sum(c_weights[c_weights < 0])   # the negative weights sum to -1
@@ -494,6 +518,7 @@ $`\psi^2 / \sum_j (c_j^2 / n_j)`$, and dividing by the error variance
 gives the noncentrality:
 
 ``` r
+
 psi <- sum(c_weights * mu_j)
 psi
 #> [1] 9
@@ -520,6 +545,7 @@ takes the *per-group* size in `n_per_group`. Here 20 per group
 corresponds to a total of 80:
 
 ``` r
+
 # Realized power at 20 per group
 ss_power_contrast(c_weights = c_weights, mu = mu_j,
                   sigma_squared = sigma_squared, n_per_group = n_j)
@@ -534,6 +560,7 @@ ss_power_contrast(c_weights = c_weights, mu = mu_j,
 | effect_size_f         | 0.325 |
 
 ``` r
+
 
 # Per-group sample size needed for power .90
 ss_power_contrast(c_weights = c_weights, mu = mu_j,
@@ -555,6 +582,7 @@ standard error is $`s\sqrt{\sum_j c_j^2 / n_j}`$ and *s* is the root
 mean square error (the ANOVA standard deviation, not the variance):
 
 ``` r
+
 ci_c(means = mu_j, s_anova = sigma, c_weights = c_weights,
      n = n_j, N = N, conf_level = .95)
 ```
@@ -574,6 +602,7 @@ degrees of freedom, and a confidence interval, with optional
 multiple-comparison adjustments:
 
 ``` r
+
 contrast_test(fit_aov,
               contrasts = list("avg of 1, 2, 3 vs 4" = c(1/3, 1/3, 1/3, -1)))
 ```
@@ -596,6 +625,7 @@ exaggerates the true effect), and the expected width of the confidence
 interval. Feed it the population contrast and its standard error:
 
 ``` r
+
 se_psi <- sqrt(sigma_squared * sum(c_weights^2 / n_j))
 design_consequences(true_effect = psi, se = se_psi, df = N - a, alpha_level = .05)
 ```
@@ -633,6 +663,7 @@ the goal is an expected 95 percent interval no wider than 6 points, with
 90 percent assurance that the realized interval meets that target:
 
 ``` r
+
 ss_aipe_c(error_variance = sigma_squared, c_weights = c_weights,
           width = 6, conf_level = .95, assurance = .90)
 ```
@@ -657,6 +688,7 @@ because
 uses the correct divisor internally:
 
 ``` r
+
 sigma_squared_m              # population variance of the means (divisor a)
 #> [1] 17.1875
 var(mu_j)                    # sample version (divisor a - 1)

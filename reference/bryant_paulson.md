@@ -182,6 +182,7 @@ qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14) # 4.83
 qtukey(0.95, nmeans = 6, df = 14)                                   # 4.64
 #> [1] 4.638538
 
+# \donttest{
 # With no covariates the Bryant-Paulson distribution is exactly the
 # studentized range:
 pbryant_paulson(4.64, num_covariates = 0, num_groups = 6, df = 14)
@@ -192,4 +193,5 @@ ptukey(4.64, nmeans = 6, df = 14)
 # More covariates -> more estimation uncertainty -> larger critical value.
 qbryant_paulson(0.95, num_covariates = 1:3, num_groups = 4, df = 20)
 #> [1] 4.066658 4.172209 4.275151
+# }
 ```

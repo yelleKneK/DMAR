@@ -48,6 +48,7 @@ achieve a stated assurance probability.
 ## Design
 
 ``` r
+
 library(DMAR)
 # Two-step load path: prefer the installed package, fall back to the
 # package source tree during local development.
@@ -141,6 +142,7 @@ The full simulation code is in
 fresh R session:
 
 ``` r
+
 # From the package directory:
 source("inst/extdata/aipe_simulation_study/run_simulations.R")
 # About 1-2 hours on a 2024 MacBook Pro; produces results.rda in the
@@ -153,6 +155,7 @@ renders the tables and plots.
 ## Results
 
 ``` r
+
 format_assurance <- function(x) {
   ifelse(is.na(x), "expected width",
          ifelse(x == 0.80, "80% assurance", "99% assurance"))
@@ -163,6 +166,7 @@ fmt_int <- function(x) formatC(round(x), format = "d", big.mark = ",")
 ```
 
 ``` r
+
 make_table <- function(fn) {
   sub <- aipe_sim_results[aipe_sim_results$function_name == fn, ]
   data.frame(
@@ -198,6 +202,7 @@ $`\Delta\delta = 0.30`$) at $`\omega = 0.30`$ across the three planning
 modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_smd"),
              caption = "ss_aipe_smd: realized CI behavior over 10,000 replications.")
 ```
@@ -214,7 +219,8 @@ knitr::kable(make_table("ss_aipe_smd"),
 | delta = 0.50 | 0.30 | 99% assurance | 362 | 0.296 | 0.001 | 0.294 | 0.295 | 0.296 | 0.297 | 0.298 | 0.952 | 0.994 |
 | delta = 0.80 | 0.30 | 99% assurance | 383 | 0.294 | 0.002 | 0.291 | 0.293 | 0.294 | 0.296 | 0.298 | 0.952 | 0.991 |
 
-ss_aipe_smd: realized CI behavior over 10,000 replications.
+ss_aipe_smd: realized CI behavior over 10,000 replications. {.table
+style="width:100%;"}
 
 ### Squared Multiple Correlation: `ss_aipe_R2()`
 
@@ -234,6 +240,7 @@ cell was dropped because the optimizer inside
 hits a boundary condition at very small $`\rho^2`$ and 99% assurance.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_R2"),
              caption = "ss_aipe_R2: realized CI behavior over 10,000 replications.")
 ```
@@ -247,7 +254,7 @@ knitr::kable(make_table("ss_aipe_R2"),
 | rho2 = 0.30, p = 5 | 0.20 | 99% assurance | 231 | 0.197 | 0.004 | 0.190 | 0.196 | 0.199 | 0.200 | 0.200 | 0.952 | 1.000 |
 | rho2 = 0.50, p = 5 | 0.20 | 99% assurance | 229 | 0.184 | 0.008 | 0.169 | 0.178 | 0.185 | 0.190 | 0.196 | 0.948 | 0.995 |
 
-ss_aipe_R2: realized CI behavior over 10,000 replications.
+ss_aipe_R2: realized CI behavior over 10,000 replications. {.table}
 
 ### Partial Correlation: `ss_aipe_partial_r()`
 
@@ -264,6 +271,7 @@ $`\Delta\rho = 0.20`$) at $`J = 3`$ controls, $`\omega = 0.20`$, and the
 three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_partial_r"),
              caption = "ss_aipe_partial_r: realized CI behavior over 10,000 replications.")
 ```
@@ -281,6 +289,7 @@ knitr::kable(make_table("ss_aipe_partial_r"),
 | rho = 0.60, J = 3 | 0.20 | 99% assurance | 208 | 0.176 | 0.015 | 0.151 | 0.166 | 0.176 | 0.185 | 0.199 | 0.946 | 0.953 |
 
 ss_aipe_partial_r: realized CI behavior over 10,000 replications.
+{.table style="width:100%;"}
 
 ### Semipartial Correlation: `ss_aipe_semipartial_r()`
 
@@ -295,6 +304,7 @@ $`\Delta r_{sp} = 0.15`$) at $`J = 3`$ controls, $`\omega = 0.20`$, and
 the three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_semipartial_r"),
              caption = "ss_aipe_semipartial_r: realized CI behavior over 10,000 replications.")
 ```
@@ -312,6 +322,7 @@ knitr::kable(make_table("ss_aipe_semipartial_r"),
 | r_sp = 0.45, J = 3 | 0.20 | 99% assurance | 305 | 0.190 | 0.008 | 0.177 | 0.185 | 0.190 | 0.195 | 0.202 | 0.862 | 0.914 |
 
 ss_aipe_semipartial_r: realized CI behavior over 10,000 replications.
+{.table}
 
 ### Intraclass Correlation: `ss_aipe_icc()`
 
@@ -327,6 +338,7 @@ $`\Delta\rho = 0.20`$) at $`k = 5`$ measurements per subject,
 $`\omega = 0.20`$, and the three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_icc"),
              caption = "ss_aipe_icc: realized CI behavior over 10,000 replications.")
 ```
@@ -343,7 +355,8 @@ knitr::kable(make_table("ss_aipe_icc"),
 | rho = 0.30, k = 5 | 0.20 | 99% assurance | 127 | 0.151 | 0.003 | 0.146 | 0.150 | 0.152 | 0.153 | 0.154 | 0.924 | 1.000 |
 | rho = 0.50, k = 5 | 0.20 | 99% assurance | 122 | 0.151 | 0.004 | 0.143 | 0.148 | 0.151 | 0.154 | 0.156 | 0.922 | 1.000 |
 
-ss_aipe_icc: realized CI behavior over 10,000 replications.
+ss_aipe_icc: realized CI behavior over 10,000 replications. {.table
+style="width:100%;"}
 
 ### Omega Squared: `ss_aipe_omega_squared()`
 
@@ -358,6 +371,7 @@ noncentral *F* CI from
 target width $`0.15`$, and the three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_omega_squared"),
              caption = "ss_aipe_omega_squared: realized CI behavior over 10,000 replications.")
 ```
@@ -372,6 +386,7 @@ knitr::kable(make_table("ss_aipe_omega_squared"),
 | omega2 = 0.20, a = 3 | 0.15 | 99% assurance | 372 | 0.136 | 0.005 | 0.126 | 0.133 | 0.137 | 0.140 | 0.142 | 0.950 | 1.000 |
 
 ss_aipe_omega_squared: realized CI behavior over 10,000 replications.
+{.table style="width:100%;"}
 
 ### Cliff’s Delta: `ss_aipe_cliff_delta()`
 
@@ -385,6 +400,7 @@ target value. The CI is the analytic $`U`$-statistic CI from
 $`\omega = 0.20`$ across the three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_cliff_delta"),
              caption = "ss_aipe_cliff_delta: realized CI behavior over 10,000 replications.")
 ```
@@ -402,6 +418,7 @@ knitr::kable(make_table("ss_aipe_cliff_delta"),
 | delta_cliff = 0.45 | 0.20 | 99% assurance | 350 | 0.148 | 0.004 | 0.142 | 0.146 | 0.148 | 0.151 | 0.155 | 0.951 | 1.000 |
 
 ss_aipe_cliff_delta: realized CI behavior over 10,000 replications.
+{.table}
 
 ### Indirect (Mediated) Effect: `ss_aipe_indirect_effect()`
 
@@ -414,6 +431,7 @@ $`ab`$. The CI is the Sobel (1982) first-order normal CI.
 coefficients) at $`\omega = 0.10`$ across the three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_indirect_effect"),
              caption = "ss_aipe_indirect_effect: realized CI behavior over 10,000 replications.")
 ```
@@ -423,6 +441,7 @@ knitr::kable(make_table("ss_aipe_indirect_effect"),
 | a = 0.30, b = 0.30 | 0.10 | expected width | 255 | 0.101 | 0.014 | 0.078 | 0.091 | 0.101 | 0.110 | 0.124 | 0.941 | 0.479 |
 
 ss_aipe_indirect_effect: realized CI behavior over 10,000 replications.
+{.table}
 
 ### TOST on the Standardized Mean Difference: `ss_aipe_tost_smd()`
 
@@ -437,6 +456,7 @@ null, the regime in which TOST is most informative) at $`\omega = 0.30`$
 across the three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_tost_smd"),
              caption = "ss_aipe_tost_smd: realized CI behavior over 10,000 replications.")
 ```
@@ -453,7 +473,8 @@ knitr::kable(make_table("ss_aipe_tost_smd"),
 | delta = 0.05 | 0.30 | 99% assurance | 243 | 0.299 | 0.000 | 0.299 | 0.299 | 0.299 | 0.299 | 0.300 | 0.896 | 0.971 |
 | delta = 0.10 | 0.30 | 99% assurance | 244 | 0.299 | 0.000 | 0.298 | 0.298 | 0.299 | 0.299 | 0.300 | 0.894 | 0.985 |
 
-ss_aipe_tost_smd: realized CI behavior over 10,000 replications.
+ss_aipe_tost_smd: realized CI behavior over 10,000 replications. {.table
+style="width:100%;"}
 
 ### Fixed Effect in a Two-Level Mixed-Effects Model: `ss_aipe_mixed_effects()`
 
@@ -469,6 +490,7 @@ clustering) at cluster size $`m = 20`$, $`\omega = 0.20`$, across the
 three planning modes.
 
 ``` r
+
 knitr::kable(make_table("ss_aipe_mixed_effects"),
              caption = "ss_aipe_mixed_effects: realized CI behavior over 10,000 replications.")
 ```
@@ -479,10 +501,12 @@ knitr::kable(make_table("ss_aipe_mixed_effects"),
 | icc = 0.20, m = 20 | 0.20 | expected width | 16 | 0.198 | 0.039 | 0.137 | 0.170 | 0.196 | 0.223 | 0.266 | 0.925 | 0.540 |
 
 ss_aipe_mixed_effects: realized CI behavior over 10,000 replications.
+{.table}
 
 ## Aggregate Visualizations
 
 ``` r
+
 suppressPackageStartupMessages(library(ggplot2))
 df <- aipe_sim_results
 df$ratio <- df$mean_width / df$width_target
@@ -502,6 +526,7 @@ print(p1)
 ![](aipe_simulation_study_files/figure-html/unnamed-chunk-14-1.png)
 
 ``` r
+
 p2 <- ggplot(df, aes(x = function_name, y = coverage,
                      color = mode, shape = mode)) +
   geom_jitter(width = 0.18, height = 0, size = 1.8, alpha = 0.85) +
@@ -518,6 +543,7 @@ print(p2)
 ![](aipe_simulation_study_files/figure-html/unnamed-chunk-15-1.png)
 
 ``` r
+
 df_assur <- df[!is.na(df$assurance_target), ]
 p3 <- ggplot(df_assur, aes(x = function_name,
                             y = achievement - assurance_target,
@@ -633,6 +659,7 @@ $`n_{\mathrm{method}}`$ and $`n_{\mathrm{ideal}}`$ is visible in the
 tables below.
 
 ``` r
+
 ideal_path <- system.file("extdata", "aipe_simulation_study",
                           "ideal_n_results.rda", package = "DMAR")
 if (!nzchar(ideal_path) || !file.exists(ideal_path)) {
@@ -651,6 +678,7 @@ if (!ideal_loaded)
 ```
 
 ``` r
+
 make_search_table <- function(fn) {
   sub <- aipe_ideal_n_search[aipe_ideal_n_search$function_name == fn, ]
   data.frame(
@@ -692,6 +720,7 @@ context, so the reader can see the empirical-assurance trajectory
 between $`n_{\mathrm{method}}`$ and $`n_{\mathrm{ideal}}`$.
 
 ``` r
+
 make_search_table_phase <- function(fn) {
   sub <- aipe_ideal_n_search[aipe_ideal_n_search$function_name == fn, ]
   data.frame(
@@ -716,6 +745,7 @@ make_search_table_phase <- function(fn) {
 #### `ss_aipe_smd`
 
 ``` r
+
 knitr::kable(make_search_table_phase("ss_aipe_smd"),
              caption = "ss_aipe_smd: downward walk in n. Coarse step = 5; fine step = 1 once below the assurance target.")
 ```
@@ -730,11 +760,12 @@ knitr::kable(make_search_table_phase("ss_aipe_smd"),
 | delta = 0.50 | 0.99 | 0.30 | 5 | 357 | coarse | 0.298 | 0.001 | 0.949 | 0.908 |
 
 ss_aipe_smd: downward walk in n. Coarse step = 5; fine step = 1 once
-below the assurance target.
+below the assurance target. {.table style="width:100%;"}
 
 #### `ss_aipe_partial_r`
 
 ``` r
+
 knitr::kable(make_search_table_phase("ss_aipe_partial_r"),
              caption = "ss_aipe_partial_r: downward walk in n.")
 ```
@@ -751,11 +782,12 @@ knitr::kable(make_search_table_phase("ss_aipe_partial_r"),
 | rho = 0.40, J = 3 | 0.99 | 0.20 | 8 | 327 | fine | 0.183 | 0.008 | 0.948 | 0.988 |
 | rho = 0.40, J = 3 | 0.99 | 0.20 | 10 | 325 | coarse | 0.183 | 0.008 | 0.945 | 0.986 |
 
-ss_aipe_partial_r: downward walk in n.
+ss_aipe_partial_r: downward walk in n. {.table style="width:100%;"}
 
 #### `ss_aipe_semipartial_r`
 
 ``` r
+
 knitr::kable(make_search_table_phase("ss_aipe_semipartial_r"),
              caption = "ss_aipe_semipartial_r: downward walk in n.")
 ```
@@ -775,11 +807,12 @@ knitr::kable(make_search_table_phase("ss_aipe_semipartial_r"),
 | r_sp = 0.30, J = 3 | 0.99 | 0.20 | 19 | 367 | fine | 0.191 | 0.005 | 0.926 | 0.987 |
 | r_sp = 0.30, J = 3 | 0.99 | 0.20 | 20 | 366 | coarse | 0.191 | 0.005 | 0.926 | 0.982 |
 
-ss_aipe_semipartial_r: downward walk in n.
+ss_aipe_semipartial_r: downward walk in n. {.table}
 
 #### `ss_aipe_icc`
 
 ``` r
+
 knitr::kable(make_search_table_phase("ss_aipe_icc"),
              caption = "ss_aipe_icc: downward walk in n.")
 ```
@@ -807,11 +840,12 @@ knitr::kable(make_search_table_phase("ss_aipe_icc"),
 | rho = 0.30, k = 5 | 0.99 | 0.20 | 35 | 92 | coarse | 0.178 | 0.004 | 0.919 | 1.000 |
 | rho = 0.30, k = 5 | 0.99 | 0.20 | 40 | 87 | coarse | 0.182 | 0.004 | 0.920 | 1.000 |
 
-ss_aipe_icc: downward walk in n.
+ss_aipe_icc: downward walk in n. {.table style="width:100%;"}
 
 #### `ss_aipe_tost_smd`
 
 ``` r
+
 knitr::kable(make_search_table_phase("ss_aipe_tost_smd"),
              caption = "ss_aipe_tost_smd: downward walk in n.")
 ```
@@ -825,7 +859,7 @@ knitr::kable(make_search_table_phase("ss_aipe_tost_smd"),
 | delta = 0.05 | 0.99 | 0.30 | 1 | 242 | fine | 0.300 | 0.000 | 0.901 | 0.816 |
 | delta = 0.05 | 0.99 | 0.30 | 5 | 238 | coarse | 0.302 | 0.000 | 0.900 | 0.000 |
 
-ss_aipe_tost_smd: downward walk in n.
+ss_aipe_tost_smd: downward walk in n. {.table style="width:100%;"}
 
 ### Summary of Overshoot
 
@@ -837,6 +871,7 @@ conservative in the sense that the requested assurance could have been
 delivered at a smaller $`n`$.
 
 ``` r
+
 sm <- aipe_ideal_n_summary
 sm <- sm[order(sm$function_name, sm$assurance_target), ]
 knitr::kable(
@@ -871,9 +906,10 @@ knitr::kable(
 | ss_aipe_tost_smd | delta = 0.05 | 0.99 | 0.30 | 243 | 0.973 | NA | 0.973 | NA |
 
 Overshoot of the method-implied sample size relative to the empirical
-ideal at 10,000-replication resolution.
+ideal at 10,000-replication resolution. {.table}
 
 ``` r
+
 sm$mode <- ifelse(sm$assurance_target == 0.80,
                   "80% assurance", "99% assurance")
 ggplot(sm, aes(x = function_name, y = overshoot,
@@ -899,6 +935,7 @@ ggplot(sm, aes(x = function_name, y = overshoot,
 ![](aipe_simulation_study_files/figure-html/unnamed-chunk-23-1.png)
 
 ``` r
+
 ## Empirical-assurance trajectories: for each (function, gamma)
 ## condition, plot Pr(W <= omega) versus the per-group n evaluated.
 tr <- aipe_ideal_n_search
@@ -979,40 +1016,43 @@ per-method tables above.
 ## Reproducibility
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
-#> Platform: aarch64-apple-darwin20
-#> Running under: macOS Tahoe 26.5.2
+#> R version 4.6.1 (2026-06-24)
+#> Platform: x86_64-pc-linux-gnu
+#> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
-#> BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
-#> LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
 #> 
 #> locale:
-#> [1] en_US/en_US/en_US/C/en_US/en_US
+#>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
+#>  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
+#>  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
+#> [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
 #> 
-#> time zone: America/Indiana/Indianapolis
-#> tzcode source: internal
+#> time zone: UTC
+#> tzcode source: system (glibc)
 #> 
 #> attached base packages:
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.1 DMAR_1.0.0   
+#> [1] ggplot2_4.0.3 DMAR_1.0.0   
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6       jsonlite_2.0.0     dplyr_1.1.4        compiler_4.5.2    
-#>  [5] tidyselect_1.2.1   jquerylib_0.1.4    systemfonts_1.3.1  scales_1.4.0      
-#>  [9] textshaping_1.0.4  yaml_2.3.12        fastmap_1.2.0      R6_2.6.1          
-#> [13] labeling_0.4.3     generics_0.1.4     knitr_1.51         htmlwidgets_1.6.4 
-#> [17] MASS_7.3-65        tibble_3.3.0       desc_1.4.3         bslib_0.9.0       
-#> [21] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.1.6        cachem_1.1.0      
-#> [25] xfun_0.55          fs_1.6.6           sass_0.4.10        S7_0.2.1          
-#> [29] otel_0.2.0         cli_3.6.5          withr_3.0.2        pkgdown_2.2.0     
-#> [33] magrittr_2.0.4     digest_0.6.39      grid_4.5.2         lifecycle_1.0.4   
-#> [37] vctrs_0.6.5        evaluate_1.0.5     glue_1.8.0         farver_2.1.2      
-#> [41] ragg_1.5.0         rmarkdown_2.30     tools_4.5.2        pkgconfig_2.0.3   
-#> [45] htmltools_0.5.9
+#>  [1] gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1        compiler_4.6.1    
+#>  [5] tidyselect_1.2.1   jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
+#>  [9] textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0      R6_2.6.1          
+#> [13] labeling_0.4.3     generics_0.1.4     knitr_1.51         MASS_7.3-65       
+#> [17] tibble_3.3.1       desc_1.4.3         bslib_0.11.0       pillar_1.11.1     
+#> [21] RColorBrewer_1.1-3 rlang_1.3.0        cachem_1.1.0       xfun_0.60         
+#> [25] fs_2.1.0           sass_0.4.10        S7_0.2.2           otel_0.2.0        
+#> [29] cli_3.6.6          pkgdown_2.2.1      withr_3.0.3        magrittr_2.0.5    
+#> [33] digest_0.6.39      grid_4.6.1         lifecycle_1.0.5    vctrs_0.7.3       
+#> [37] evaluate_1.0.5     glue_1.8.1         farver_2.1.2       ragg_1.5.2        
+#> [41] rmarkdown_2.31     tools_4.6.1        pkgconfig_2.0.3    htmltools_0.5.9
 ```
 
 The simulation was run at `replications = 10000`, `conf_level = 0.95`,

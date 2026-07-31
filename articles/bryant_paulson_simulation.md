@@ -43,6 +43,7 @@ covariates $`p`$ (more to estimate) and the fewer the error degrees of
 freedom $`\nu`$, the bigger the gap.
 
 ``` r
+
 grid <- expand.grid(p = 1:4, k = 4, n = c(5, 8, 15))
 grid$nu <- grid$k * grid$n - grid$k - grid$p
 grid$q_tukey <- with(grid, qtukey(0.95, nmeans = k, df = nu))
@@ -84,6 +85,7 @@ deviation, and the error degrees of freedom; it is algebraically
 identical to [`lm()`](https://rdrr.io/r/stats/lm.html) (checked below).
 
 ``` r
+
 fast_ancova <- function(y, g, X) {
   X <- as.matrix(X); k <- nlevels(g); N <- length(y); p <- ncol(X)
   yc <- y - ave(y, g)                                   # within-group center
@@ -137,6 +139,7 @@ critical value / standard error:
   the textbook conditional interval.
 
 ``` r
+
 sim_cell <- function(reps, k, n, p, conf = 0.95, sigma = 1, beta = 0.5) {
   g <- factor(rep(seq_len(k), each = n)); N <- k * n; nu <- N - k - p
   qBP <- qbryant_paulson(conf, num_covariates = p, num_groups = k, df = nu)
@@ -171,6 +174,7 @@ sim_cell <- function(reps, k, n, p, conf = 0.95, sigma = 1, beta = 0.5) {
 ```
 
 ``` r
+
 REPS <- 10000
 design <- rbind(
   data.frame(k = 4, n = 5,  p = 1:4),
@@ -197,6 +201,7 @@ results[, c("k","n","p","nu","cover_bp","cover_tk","cover_cond",
 ## What the Simulation Shows
 
 ``` r
+
 mc_se <- sqrt(0.95 * 0.05 / REPS)   # Monte Carlo SE at the nominal rate
 cat(sprintf("Monte Carlo SE at 0.95 (%d reps): +/- %.4f\n", REPS, mc_se))
 #> Monte Carlo SE at 0.95 (10000 reps): +/- 0.0022
@@ -239,6 +244,7 @@ with(results, cat(sprintf(
   prediction to Monte Carlo error; theory and simulation agree.
 
 ``` r
+
 op <- par(mar = c(4.2, 4.4, 2, 1))
 # Source the two data colors from DMAR's own colorblind-safe palette engine.
 pal <- unname(grDevices::palette.colors(2))
@@ -263,6 +269,7 @@ legend("bottomleft", bty = "n",
 covariates](bryant_paulson_simulation_files/figure-html/plot-1.png)
 
 ``` r
+
 par(op)
 ```
 
@@ -275,6 +282,7 @@ critical-value ratio, and that extra width is what buys correct
 coverage.
 
 ``` r
+
 adj  <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)   # test_market adjusted means
 s_yx <- sqrt(0.01326)
 bp   <- ci_c_ancova_bp(adj, s_ancova = s_yx, n = 4, num_covariates = 1, df = 14,

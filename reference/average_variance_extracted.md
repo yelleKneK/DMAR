@@ -145,6 +145,7 @@ average_variance_extracted(fit)
 #>  factor ave  ci_lower ci_upper
 #>  f      0.52 <NA>     <NA>    
 
+# \donttest{
 # A percentile bootstrap interval refits the model per replication.
 average_variance_extracted(fit, ci_method = "percentile", B = 200,
                            seed = 113)
@@ -152,6 +153,7 @@ average_variance_extracted(fit, ci_method = "percentile", B = 200,
 #>  f      0.52 0.463    0.587   
 #> 
 #> Confidence level: 95%
+# }
 
 # The broom verbs: one row per factor.
 generics::tidy(average_variance_extracted(fit))

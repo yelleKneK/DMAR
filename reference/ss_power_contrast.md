@@ -117,9 +117,8 @@ only the appropriate tail contributes.
 
 Cohen's \\f\\ for a one-df contrast is reported as \\f = \|\lambda\| /
 \sqrt{N}\\, equivalently \\f^2 = F\_{\text{pop}} / N\\ (Cohen, 1988, Ch.
-8); this matches the value that
-[`pwr.f2.test`](https://rdrr.io/pkg/pwr/man/pwr.f2.test.html) expects
-when used with `u = 1` and `v = N - a`.
+8); this matches the value that `pwr.f2.test` expects when used with
+`u = 1` and `v = N - a`.
 
 ## References
 

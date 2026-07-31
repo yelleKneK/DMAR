@@ -6,14 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Sums of Squares in Nonorthogonal Designs • DMAR</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Sums of Squares in Nonorthogonal Designs">
 </head>
@@ -69,7 +64,7 @@
             
             <h4 data-toc-skip class="date">July 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/HEAD/vignettes/sums_of_squares.Rmd" class="external-link"><code>vignettes/sums_of_squares.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/sums_of_squares.Rmd" class="external-link"><code>vignettes/sums_of_squares.Rmd</code></a></small>
       <div class="d-none name"><code>sums_of_squares.Rmd</code></div>
     </div>
 
@@ -119,7 +114,7 @@ way to see what the types are, and the framing used here.</p>
 <p>In the model comparison perspective, every sum of squares is the same
 object: the reduction in error when a fuller model replaces a more
 restricted one,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">effect</mtext><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msub><mi>E</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></msub><mo>−</mo><msub><mi>E</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex"> \mathrm{SS}(\text{effect}) \;=\; E_{\mathrm{restricted}} - E_{\mathrm{full}}, </annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">effect</mtext><mo stretchy="false" form="postfix">)</mo><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msub><mi>E</mi><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></msub><mo>−</mo><msub><mi>E</mi><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex"> \mathrm{SS}(\text{effect}) \;=\; E_{\mathrm{restricted}} - E_{\mathrm{full}}, </annotation></semantics></math></p>
 <p>where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>E</mi><annotation encoding="application/x-tex">E</annotation></semantics></math>
 is the error (residual) sum of squares of a model. The effect is the set
@@ -139,7 +134,7 @@ and
 and their interaction
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>:</mo><mi>B</mi></mrow><annotation encoding="application/x-tex">A{:}B</annotation></semantics></math>.
 Writing
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>∣</mo><mi>Z</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(X \mid Z)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>∣</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(X \mid Z)</annotation></semantics></math>
 for the effect of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 adjusted for the terms in
@@ -148,11 +143,11 @@ adjusted for the terms in
 <li>
 <strong>Type I (sequential).</strong> Each term is adjusted only for
 the terms entered before it:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A)</annotation></semantics></math>,
 then
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(B \mid A)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(B \mid A)</annotation></semantics></math>,
 then
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A{:}B \mid A, B)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A{:}B \mid A, B)</annotation></semantics></math>.
 The pieces add to the model sum of squares, but the answer depends on
 the order the terms are listed. Type I is the right choice only when the
 terms have a genuine a priori ordering, as when a covariate is entered
@@ -160,17 +155,17 @@ before the factor it adjusts.</li>
 <li>
 <strong>Type II.</strong> Each term is adjusted for every other term
 that does not contain it, honoring the principle of marginality:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>∣</mo><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A \mid B)</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(B \mid A)</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A{:}B \mid A, B)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>∣</mo><mi>B</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A \mid B)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(B \mid A)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A{:}B \mid A, B)</annotation></semantics></math>.
 Main effects are not adjusted for the interaction. Type II is the most
 powerful option when the interaction is absent, and it does not depend
 on how the factors are coded.</li>
 <li>
 <strong>Type III.</strong> Each term is adjusted for all other
 terms, including the higher-order terms that contain it:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>A</mi><mo>∣</mo><mi>B</mi><mo>,</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A \mid B, A{:}B)</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathrm{SS}(B \mid A, A{:}B)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>A</mi><mo>∣</mo><mi>B</mi><mo>,</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(A \mid B, A{:}B)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">S</mi><mi mathvariant="normal">S</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mi>A</mi><mo>,</mo><mi>A</mi><mo>:</mo><mi>B</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{SS}(B \mid A, A{:}B)</annotation></semantics></math>.
 This is the SAS GLM default and the default of . The main-effect tests
 concern the unweighted marginal means, which is why they require
 sum-to-zero contrasts () to test the intended hypothesis; with R’s
@@ -747,7 +742,7 @@ Statistical Association, 29</em>(185), 51–66.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

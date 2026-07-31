@@ -30,6 +30,7 @@ The population means are built constructively from unit-scaled
 its target *f*:
 
 ``` r
+
 sigma <- 10
 mu0   <- 50
 f_target <- c(A = .10, B = .40, C = .25,
@@ -65,6 +66,7 @@ vector, confirming the construction (this is also how you would compute
 *f* from any hypothesized means in practice):
 
 ``` r
+
 f_from_means <- function(mu, cells, which) {
   dat <- cbind(cells, mu = mu)
   # Marginal (or interaction) deviations by sweeping out lower-order terms.
@@ -112,6 +114,7 @@ reduces to the plain ANOVA planner
 Per-cell sample sizes for power .80, for every named effect:
 
 ``` r
+
 effects <- list(A = 1, B = 2, C = 3,
                 AB = c(1, 2), AC = c(1, 3), BC = c(2, 3),
                 ABC = c(1, 2, 3))
@@ -151,6 +154,7 @@ The total *N* implied by the binding effect (the largest row of each
 column) is what the study must recruit if every named effect matters:
 
 ``` r
+
 apply(tab, 2, function(n_cell) max(n_cell) * 24)
 #>         anova ancova_R2_.10 ancova_R2_.25 
 #>          1392          1248          1032
@@ -164,6 +168,7 @@ and they are uncorrelated), and the residual scaled so the total
 within-cell standard deviation stays at 10:
 
 ``` r
+
 set.seed(113)
 n_cell <- 12
 dat <- cells[rep(seq_len(24), each = n_cell), ]
@@ -188,6 +193,7 @@ all others. Type III requires sum-to-zero contrasts (requires the
 **car** package):
 
 ``` r
+
 op <- options(contrasts = c("contr.sum", "contr.poly"))
 fit <- lm(y ~ A * B * C + x1 + x2, data = dat)
 print_anova(car::Anova(fit, type = 3))
@@ -225,6 +231,7 @@ Covariate-adjusted means (the means the ANCOVA actually tests, here at
 the covariate means) come from the fitted model:
 
 ``` r
+
 grid <- expand.grid(A = levels(dat$A), B = levels(dat$B), C = levels(dat$C),
                     x1 = 0, x2 = 0)
 pr <- predict(fit, newdata = grid, se.fit = TRUE)
@@ -261,6 +268,7 @@ the cell-means parameterization so any comparison among the 24 adjusted
 cell means is a linear combination with an exact standard error:
 
 ``` r
+
 dat$cell <- interaction(dat$A, dat$B, dat$C)
 fit_cm <- lm(y ~ 0 + cell + x1 + x2, data = dat)
 # The 24 cells of coef(fit_cm) run A fastest, then B, then C, which is the
@@ -280,6 +288,7 @@ weights (1/3, 1/3, 1/3, -1): does the average of the first three B
 levels differ from the last level, marginally over A and C?
 
 ``` r
+
 w_B <- c(1/3, 1/3, 1/3, -1)
 L1 <- w_B[cell_grid$B] / (2 * 3)        # spread over the 2 x 3 cells of A x C
 contrast_adjusted(fit_cm, contrast = L1)
@@ -300,6 +309,7 @@ Confidence level: 95%
 interest when, say, C3 is a control condition):
 
 ``` r
+
 L2 <- ifelse(cell_grid$C %in% c(1, 2), w_B[cell_grid$B] / (2 * 2), 0)
 contrast_adjusted(fit_cm, contrast = L2)
 ```

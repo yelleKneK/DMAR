@@ -115,6 +115,7 @@ that matches the question you are trying to answer.
 Use the `ci_*` family.
 
 ``` r
+
 # Confidence interval for omega squared (proportion of variance accounted
 # for) from a one-way ANOVA with F = 11.221 on (4, 50) df, total N = 55.
 ci_omega_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55)
@@ -125,6 +126,7 @@ ci_omega_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55)
 | overall | 0.426         | 0.226       | 0.587       | 11.2    | 4         | 50       | 55  |
 
 ``` r
+
 
 # More naturally, from a fitted model:
 fit <- aov(weight ~ group, data = PlantGrowth)
@@ -167,6 +169,7 @@ Use `ss_power_*` for sufficient power, or `ss_aipe_*` for sufficient
 precision. The same effect can be approached from either angle.
 
 ``` r
+
 # Power-based: per-group n needed for 90% power to detect a contrast among
 # 4 groups with population means (90, 92, 88, 81) and within-group
 # variance 144. The contrast compares the average of the first three
@@ -188,6 +191,7 @@ ss_power_contrast(
 | effect_size_f         | 0.325 |
 
 ``` r
+
 # AIPE-based: n needed so a 95% CI around a standardized mean difference
 # (delta) of 0.50 is no wider than 0.30 units (a tight interval).
 ss_aipe_smd(delta = 0.50, conf_level = 0.95, width = 0.30)
@@ -223,6 +227,7 @@ for arbitrary contrasts in a one-way ANOVA, with optional
 multiple-comparison adjustment.
 
 ``` r
+
 fit <- aov(weight ~ group, data = PlantGrowth)
 # All pairwise comparisons, Tukey-protected family-wise error rate:
 contrast_test(fit, contrasts = "pairwise", adjust = "tukey")
@@ -261,6 +266,7 @@ assumption fails, and
 puts the diagnostic and the correction in one place.
 
 ``` r
+
 if (requireNamespace("nlme", quietly = TRUE)) {
   res <- anova_within(nlme::Orthodont,
                       id = "Subject", time = "age", outcome = "distance")
@@ -290,6 +296,7 @@ and
 returns a tidy summary suitable for screening:
 
 ``` r
+
 descriptives(attitude)$descriptives
 #>     variable    type  n n_missing prop_missing     mean median        sd min
 #> 1     rating numeric 30         0            0 64.63333   65.5 12.172562  40
@@ -316,6 +323,7 @@ export), use
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md):
 
 ``` r
+
 correlations_test(attitude, stars = TRUE)
 #> Correlations (Pearson, 95% CI)
 #> 
@@ -395,6 +403,7 @@ an *F* statistic. Every other argument is lowercase, with the result
 that examples read consistently regardless of discipline:
 
 ``` r
+
 ci_R2(R2 = 0.25, N = 100, p = 5, random_predictors = TRUE)
 ss_power_reg_coef(rho2_Y_X = 0.78, rho2_Y_X_without_j = 0.74,
                   p = 5, desired_power = 0.85)

@@ -71,12 +71,12 @@ ci_proportion(successes = 17, n = 50)
 
 # The Wilson interval stays inside [0, 1] even at the boundary.
 ci_proportion(successes = 0, n = 20)
-#>  term        value
-#>  lower_limit 0    
-#>  proportion  0    
-#>  upper_limit 0.161
-#>  successes   0    
-#>  n           20   
+#>  term        value   
+#>  lower_limit 1.39e-17
+#>  proportion  0       
+#>  upper_limit 0.161   
+#>  successes   0       
+#>  n           20      
 #> 
 #> Confidence level: 95%
 ```

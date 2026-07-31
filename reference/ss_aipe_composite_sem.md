@@ -308,11 +308,11 @@ ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
 #>  term                    value
 #>  specified_N             200  
 #>  composite_assurance     0    
-#>  mean_width_a            0.337
-#>  mean_width_b            0.376
-#>  mean_width_ab           0.216
-#>  width_within_desired_a  0.19 
-#>  width_within_desired_b  0.06 
+#>  mean_width_a            0.343
+#>  mean_width_b            0.368
+#>  mean_width_ab           0.217
+#>  width_within_desired_a  0.11 
+#>  width_within_desired_b  0.03 
 #>  width_within_desired_ab 0.96 
 #>  desired_width_a         0.3  
 #>  desired_width_b         0.3  
@@ -335,14 +335,14 @@ ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
                       desired_width = c(a = 0.35, b = 0.35, ab = 0.25),
                       assurance = 0.80, G = 100)
 #>  term                    value
-#>  necessary_N             270  
-#>  composite_assurance     0.8  
-#>  mean_width_a            0.295
-#>  mean_width_b            0.324
-#>  mean_width_ab           0.19 
-#>  width_within_desired_a  0.97 
-#>  width_within_desired_b  0.83 
-#>  width_within_desired_ab 0.96 
+#>  necessary_N             273  
+#>  composite_assurance     0.84 
+#>  mean_width_a            0.29 
+#>  mean_width_b            0.322
+#>  mean_width_ab           0.182
+#>  width_within_desired_a  1    
+#>  width_within_desired_b  0.84 
+#>  width_within_desired_ab 0.99 
 #>  desired_width_a         0.35 
 #>  desired_width_b         0.35 
 #>  desired_width_ab        0.25 

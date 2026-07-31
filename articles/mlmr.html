@@ -6,14 +6,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Maximum Likelihood Multiple Regression and Multivariate Regression • DMAR</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
-<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="icon" sizes="any" href="../favicon.ico">
-<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Maximum Likelihood Multiple Regression and Multivariate Regression">
 </head>
@@ -69,7 +64,7 @@
             
             <h4 data-toc-skip class="date">July 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/HEAD/vignettes/mlmr.Rmd" class="external-link"><code>vignettes/mlmr.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/mlmr.Rmd" class="external-link"><code>vignettes/mlmr.Rmd</code></a></small>
       <div class="d-none name"><code>mlmr.Rmd</code></div>
     </div>
 
@@ -141,11 +136,11 @@ where the missingness patterns differ across outcomes.</p>
 </h2>
 <p>The population for the simulations in this vignette has three
 predictors and a single outcome,
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mn>1</mn><mo>+</mo><mn>0.5</mn><msub><mi>X</mi><mn>1</mn></msub><mo>−</mo><mn>0.3</mn><msub><mi>X</mi><mn>2</mn></msub><mo>+</mo><mn>0.2</mn><msub><mi>X</mi><mn>3</mn></msub><mo>+</mo><mi>ε</mi><mo>,</mo><mspace width="1.0em"></mspace><mi>ε</mi><mo>∼</mo><mtext mathvariant="normal">Normal</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mn>1</mn><mo>+</mo><mn>0.5</mn><msub><mi>X</mi><mn>1</mn></msub><mo>−</mo><mn>0.3</mn><msub><mi>X</mi><mn>2</mn></msub><mo>+</mo><mn>0.2</mn><msub><mi>X</mi><mn>3</mn></msub><mo>+</mo><mi>ε</mi><mo>,</mo><mspace width="1.0em"></mspace><mi>ε</mi><mo>∼</mo><mtext mathvariant="normal">Normal</mtext><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
 Y = 1 + 0.5 X_1 - 0.3 X_2 + 0.2 X_3 + \varepsilon,
 \quad \varepsilon \sim \text{Normal}(0, 1),
 </annotation></semantics></math> with all
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>j</mi></msub><mo>∼</mo><mtext mathvariant="normal">Normal</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">X_j \sim \text{Normal}(0, 1)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>j</mi></msub><mo>∼</mo><mtext mathvariant="normal">Normal</mtext><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">X_j \sim \text{Normal}(0, 1)</annotation></semantics></math>
 mutually independent.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim_complete</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">N</span><span class="op">)</span> <span class="op">{</span></span>
@@ -204,7 +199,7 @@ in OLS):</p>
 <span><span class="co">#&gt; X2          0.07290628 0.07217354 0.07290628</span></span>
 <span><span class="co">#&gt; X3          0.07079629 0.07008475 0.07079629</span></span></code></pre></div>
 <p>Rescaling the FIML standard errors by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mrow><mi>N</mi><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>K</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt><annotation encoding="application/x-tex">\sqrt{N / (N - K - 1)}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mrow><mi>N</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>K</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msqrt><annotation encoding="application/x-tex">\sqrt{N / (N - K - 1)}</annotation></semantics></math>
 recovers the OLS standard errors exactly; the gap is the
 divisor-correction term, not a substantive disagreement.</p>
 <p>The <em>p</em> values therefore agree to the same precision as
@@ -327,7 +322,7 @@ errors are identified entirely by the rows with observed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>,
 so the FIML and listwise coefficient standard errors coincide to working
 precision (each equals the OLS standard error after the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mrow><mi>N</mi><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>K</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msqrt><annotation encoding="application/x-tex">\sqrt{N / (N - K - 1)}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mrow><mi>N</mi><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mi>K</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msqrt><annotation encoding="application/x-tex">\sqrt{N / (N - K - 1)}</annotation></semantics></math>
 divisor). When only the outcome is missing and all predictors are
 observed, the rows with observed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
@@ -413,7 +408,7 @@ and conditioning on
 distorts the regression of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
 on the predictors. FIML, modeling the joint distribution of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mn>1</mn></msub><mo>,</mo><msub><mi>X</mi><mn>2</mn></msub><mo>,</mo><msub><mi>X</mi><mn>3</mn></msub><mo>,</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X_1, X_2, X_3, Y)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mn>1</mn></msub><mo>,</mo><msub><mi>X</mi><mn>2</mn></msub><mo>,</mo><msub><mi>X</mi><mn>3</mn></msub><mo>,</mo><mi>Y</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X_1, X_2, X_3, Y)</annotation></semantics></math>
 under the MAR assumption, recovers estimates close to the population
 values (0.5 on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mn>1</mn></msub><annotation encoding="application/x-tex">X_1</annotation></semantics></math>,
@@ -464,7 +459,7 @@ listwise deletion selects the analysis sample on
 so the regression of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
 on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mn>1</mn></msub><mo>,</mo><msub><mi>X</mi><mn>2</mn></msub><mo>,</mo><msub><mi>X</mi><mn>3</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X_1, X_2, X_3)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mn>1</mn></msub><mo>,</mo><msub><mi>X</mi><mn>2</mn></msub><mo>,</mo><msub><mi>X</mi><mn>3</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X_1, X_2, X_3)</annotation></semantics></math>
 fitted on that selected sample is distorted. FIML, which uses every
 row’s contribution to the joint likelihood, recovers the conditional
 regression structure.</p>
@@ -599,7 +594,7 @@ and both are in the model, conditioning on them leaves the complete-case
 regression of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
 on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>T</mi><mo>,</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(T, X)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(T, X)</annotation></semantics></math>
 unbiased. Moving from listwise to FIML changes nothing here, because the
 rows lost to dropout carry no information about the conditional
 regression once
@@ -718,7 +713,7 @@ missing, and because those rows are selected on
 the surviving complete-case regression is distorted: the treatment
 effect is pulled below 0.5 and the covariate slope below 0.3. FIML,
 modeling the joint distribution of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X, Y)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>,</mo><mi>Y</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(X, Y)</annotation></semantics></math>
 under MAR, recovers both. A single sample is suggestive but not proof,
 so average the bias across many simulated trials to separate it from
 sampling noise:</p>
@@ -1172,7 +1167,7 @@ Methodology, 37</em>(1), 83–117. <a href="https://doi.org/10.1111/j.1467-9531.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

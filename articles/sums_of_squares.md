@@ -89,6 +89,7 @@ needs an unbalanced design. The cells below have deliberately unequal
 sizes.
 
 ``` r
+
 set.seed(113)
 cell <- function(a, b, n, mu) data.frame(A = a, B = b, y = rnorm(n, mu, 1))
 d <- rbind(
@@ -112,6 +113,7 @@ test, and partial and partial with confidence intervals, and it notes
 the type beneath the table.
 
 ``` r
+
 factorial_anova(y ~ A * B, data = d, ss_type = 1)   # sequential
 #> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
 #> the effect size confidence intervals; the affected lower limits were clamped to
@@ -128,6 +130,7 @@ factorial_anova(y ~ A * B, data = d, ss_type = 1)   # sequential
 Sum of squares: Type I Confidence level: 95%
 
 ``` r
+
 factorial_anova(y ~ A * B, data = d, ss_type = 2)
 #> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
 #> the effect size confidence intervals; the affected lower limits were clamped to
@@ -144,6 +147,7 @@ factorial_anova(y ~ A * B, data = d, ss_type = 2)
 Sum of squares: Type II Confidence level: 95%
 
 ``` r
+
 factorial_anova(y ~ A * B, data = d, ss_type = 3)
 #> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
 #> the effect size confidence intervals; the affected lower limits were clamped to
@@ -163,6 +167,7 @@ Type I is sequential, so listing the factors in the other order changes
 it, while Type II and Type III do not depend on the order:
 
 ``` r
+
 factorial_anova(y ~ A * B, data = d, ss_type = 1)$SS[1:3]  # A entered first
 #> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
 #> the effect size confidence intervals; the affected lower limits were clamped to
@@ -190,6 +195,7 @@ applies internally and which
 refit model:
 
 ``` r
+
 fit_sum <- lm(y ~ A * B, data = d,
               contrasts = list(A = contr.sum, B = contr.sum))
 car::Anova(fit_sum, type = 3)[c("A", "B", "A:B"), "Sum Sq"]
@@ -241,6 +247,7 @@ through three-way unbalanced designs, which the package tests verify. A
 three-way check:
 
 ``` r
+
 set.seed(113)
 g <- expand.grid(A = factor(1:2), B = factor(1:2), C = factor(1:3))
 g <- g[rep(seq_len(nrow(g)), c(6, 4, 5, 7, 3, 8, 6, 5, 4, 7, 5, 6)), ]  # unbalanced
@@ -266,6 +273,7 @@ With equal cell sizes the effects are orthogonal and the question
 disappears.
 
 ``` r
+
 set.seed(113)
 db <- do.call(rbind, lapply(c("a1", "a2"), function(a)
   do.call(rbind, lapply(c("b1", "b2", "b3"), function(b)
@@ -304,6 +312,7 @@ single grouping factor) effect, and records the sum-of-squares type it
 used.
 
 ``` r
+
 res <- ancova(outcome = "iq_8", treatment = "treatment",
               covariates = "iq_pre", data = pygmalion)
 res[res$term %in% c("F_value", "df_1", "df_2", "p_value",
@@ -326,6 +335,7 @@ III (and Type II, which coincides here because there is a single
 factor).
 
 ``` r
+
 dd <- pygmalion[stats::complete.cases(
   pygmalion[, c("iq_8", "treatment", "iq_pre")]), ]
 dd$treatment <- factor(dd$treatment)

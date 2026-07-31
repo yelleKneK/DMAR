@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/yelleKneK/DMAR/blob/HEAD/inst/CITATION)
+[`inst/CITATION`](https://github.com/yelleKneK/DMAR/blob/main/inst/CITATION)
 
 Kelley K (2026). *DMAR: Design, Measurement, and Analysis in R*. R
 package version 1.0.0, <https://github.com/yelleKneK/DMAR>.

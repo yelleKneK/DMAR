@@ -46,6 +46,7 @@ The call mirrors
 with one extra argument, the number of random `covariates`.
 
 ``` r
+
 # Six groups, one covariate, 14 error degrees of freedom, alpha = .05.
 cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1)
 ```
@@ -73,6 +74,7 @@ reports on the pairwise mean-difference scale,
 on the studentized-range scale).
 
 ``` r
+
 c(bp_p0 = cv_bryant_paulson(.05, df = 14, groups = 6, covariates = 0)$value,
   tukey = sqrt(2) * cv_tukey_hsd(.05, df = 14, groups = 6)$value)
 #>    bp_p0    tukey 
@@ -84,6 +86,7 @@ covariate adjustment must be estimated and that estimation adds
 uncertainty:
 
 ``` r
+
 sapply(0:3, function(p)
   cv_bryant_paulson(.05, df = 14, groups = 6, covariates = p, verbose = FALSE)$value)
 #> [1] 4.638538 4.829856 5.013824 5.191221
@@ -95,6 +98,7 @@ Bryant and Bruvold (1980) tabulate the *stepwise* Duncan significant
 ranges (their Table 2). Request them with `procedure = "duncan"`:
 
 ``` r
+
 cv_bryant_paulson(.05, df = 14, groups = 6, covariates = 1, procedure = "duncan")
 ```
 
@@ -112,6 +116,7 @@ The single value Bryant and Bruvold (1980, Section 3) quote from this
 table is $`q_{.05;1,6,14} = 4.83`$:
 
 ``` r
+
 cv_bryant_paulson(.05, df = 14, groups = 6, covariates = 1, verbose = FALSE)$value
 #> [1] 4.829856
 ```
@@ -123,6 +128,7 @@ values read directly from the printed 1976 table, spanning all three
 covariate counts and both error rates:
 
 ``` r
+
 # (p, alpha, nu, k, printed value) read by hand from Bryant & Paulson (1976) Table 1
 anchors <- data.frame(
   p = c(1,1,2,2,3,3), alpha = c(.05,.01,.05,.01,.05,.01),
@@ -168,6 +174,7 @@ recover them to the paper’s tabled precision, with $`R_6`$ coming out to
 within their stated tolerance):
 
 ``` r
+
 scale <- sqrt(0.01326) / sqrt(4)
 R <- sapply(2:6, function(k)
   scale * cv_bryant_paulson(.05, df = 14, groups = k, covariates = 1,
@@ -205,6 +212,7 @@ A fast closed-form one-way ANCOVA (algebraically identical to
 quick.
 
 ``` r
+
 fast_ancova <- function(y, g, X) {
   X <- as.matrix(X); k <- nlevels(g); N <- length(y); p <- ncol(X)
   yc <- y - ave(y, g); Xc <- X
@@ -226,6 +234,7 @@ $`Q = (\max_i \hat\theta_i - \min_i \hat\theta_i) / (\hat\sigma_{y\mid x}\sqrt{1
 exceeds `cv`.
 
 ``` r
+
 sim_fwe <- function(reps, k, n, p, alpha = .05, sigma = 1, beta = 0.5) {
   g <- factor(rep(seq_len(k), each = n)); N <- k * n; nu <- N - k - p
   cv_bp <- cv_bryant_paulson(alpha, df = nu, groups = k, covariates = p,
@@ -264,6 +273,7 @@ results
 ```
 
 ``` r
+
 mc_se <- sqrt(0.05 * 0.95 / REPS)
 cat(sprintf("Nominal alpha = 0.05; Monte Carlo SE ~ %.4f (%d reps)\n\n", mc_se, REPS))
 #> Nominal alpha = 0.05; Monte Carlo SE ~ 0.0022 (10000 reps)
@@ -278,6 +288,7 @@ cat(sprintf("Tukey (naive)  familywise error: mean %.4f (range %.4f-%.4f)\n",
 ```
 
 ``` r
+
 # Source the two data colors from DMAR's own colorblind-safe palette engine.
 pal <- unname(grDevices::palette.colors(2))
 col_tk <- pal[1]
@@ -301,6 +312,7 @@ legend("topleft", bty = "n",
 covariates](cv_bryant_paulson_files/figure-html/plot-1.png)
 
 ``` r
+
 par(op)
 ```
 
@@ -336,6 +348,7 @@ Finally, the end-to-end workflow a user would follow, from data to
 simultaneous intervals, on the Bryant–Bruvold `test_market` data.
 
 ``` r
+
 data(test_market)
 
 # Randomized-block ANCOVA: panel (treatment), block, and the random covariate.
@@ -361,6 +374,7 @@ cv_bryant_paulson(alpha_level = .05, df = nu, groups = 6, covariates = 1)
 | upper_cv | 4.83  | 0.95      | 0.05         |
 
 ``` r
+
 
 # ... and the simultaneous 95% intervals built from it (s = 4 blocks => n = 4).
 ci_c_ancova_bp(adj_means = adj, s_ancova = s_ancova, n = 4,

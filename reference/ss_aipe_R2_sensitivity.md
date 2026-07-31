@@ -231,28 +231,28 @@ ss_aipe_R2_sensitivity(true_R2 = .5, estimated_R2 = .4, w = .10, p = 5, conf_lev
 #> 24 
 #> 25 
 #>  term                     value  
-#>  mean_low_lim_r2          0.443  
-#>  median_low_lim_r2        0.445  
-#>  sd_low_lim_r2            0.024  
-#>  mean_up_lim_r2           0.537  
-#>  median_up_lim_r2         0.539  
-#>  sd_up_lim_r2             0.022  
-#>  mean_r2                  0.493  
-#>  median_r2                0.495  
-#>  sd_r2                    0.023  
-#>  mean_lower_ci_width_r2   0.0506 
-#>  median_lower_ci_width_r2 0.0505 
-#>  sd_lower_ci_width_r2     0.00104
+#>  mean_low_lim_r2          0.444  
+#>  median_low_lim_r2        0.444  
+#>  sd_low_lim_r2            0.0252 
+#>  mean_up_lim_r2           0.538  
+#>  median_up_lim_r2         0.538  
+#>  sd_up_lim_r2             0.0231 
+#>  mean_r2                  0.495  
+#>  median_r2                0.494  
+#>  sd_r2                    0.0242 
+#>  mean_lower_ci_width_r2   0.0505 
+#>  median_lower_ci_width_r2 0.0506 
+#>  sd_lower_ci_width_r2     0.00109
 #>  mean_upper_ci_width_r2   0.0433 
 #>  median_upper_ci_width_r2 0.0433 
-#>  sd_upper_ci_width_r2     0.00103
-#>  mean_ci_width_r2         0.0939 
-#>  median_ci_width_r2       0.0938 
-#>  sd_ci_width_r2           0.00207
+#>  sd_upper_ci_width_r2     0.00109
+#>  mean_ci_width_r2         0.0937 
+#>  median_ci_width_r2       0.0939 
+#>  sd_ci_width_r2           0.00217
 #>  pct_less_w               1      
 #>  pct_ci_miss_low          0      
-#>  pct_ci_miss_high         0      
-#>  total_type_I_error       0      
+#>  pct_ci_miss_high         0.04   
+#>  total_type_I_error       0.04   
 #>  num_probs_with_cis       0      
 #> 
 #> Confidence level: 95%

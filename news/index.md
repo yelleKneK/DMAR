@@ -6,6 +6,19 @@ First public release of DMAR (pronounced “Dee-Mar,” for “Design,
 Measurement, and Analysis in R”), a greatly expanded reimagining of the
 MBESS package.
 
+### The MBCO Likelihood Ratio Is Now Branch-Deterministic
+
+- [`mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)’s
+  null hypothesis for an indirect effect is a union of branches (the
+  product is zero when any factor is), and the constrained search could
+  converge to a worse-fitting branch on some platforms and OpenMx
+  builds, inflating the likelihood ratio statistic. When every
+  constrained algebra is a pure product of free parameters, the branches
+  are now also fit directly as ordinary unconstrained models with one
+  factor fixed to zero, and the reported statistic is defined by the
+  best-fitting branch on every platform. Non-product constraints keep
+  the multi-start constrained search.
+
 ### tidy() and glance() Speak DMAR’s Names, on Every Table
 
 - **The broom verbs now return DMAR’s native column names**: `p_value`,

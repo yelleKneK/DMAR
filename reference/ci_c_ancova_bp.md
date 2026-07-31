@@ -213,6 +213,7 @@ ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
 #> Confidence level: 95%
 # Each pairwise critical difference is 0.278, matching the paper.
 
+# \donttest{
 # A single complex contrast (panels 1-2 vs. 3-6), simultaneous over all
 # contrasts via the allowance form:
 ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326), n = 4, df = 14,
@@ -222,4 +223,5 @@ ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326), n = 4, df = 14,
 #>  contrast_1 -0.921   -1.2        -0.643     
 #> 
 #> Confidence level: 95%
+# }
 ```

@@ -349,13 +349,13 @@ measurement_invariance(
   group = "school"
 )
 #>  level      chi_square df p_chi_square cfi rmsea delta_chi_square delta_df
-#>  configural 5.15e-13   0  <NA>         1   0     <NA>             <NA>    
+#>  configural 7.92e-13   0  <NA>         1   0     <NA>             <NA>    
 #>  metric     1.19       2  0.5521       1   0     1.19             2       
 #>  scalar     3.86       4  0.4251       1   0     2.67             2       
 #>  strict     5.55       7  0.5926       1   0     1.69             3       
 #>  p_value delta_cfi delta_rmsea
 #>  <NA>    <NA>      <NA>       
-#>  0.5521  7.11e-15  0          
+#>  0.5521  1.09e-14  0          
 #>  0.2628  0         0          
 #>  0.6384  0         0          
 
@@ -458,13 +458,13 @@ measurement_invariance(
   model = "visual =~ t1_visual_perception + t2_cubes + t3_paper_form_board",
   group = "school", missing = "fiml")
 #>  level      chi_square df p_chi_square cfi rmsea delta_chi_square delta_df
-#>  configural 1.31e-12   0  <NA>         1   0     <NA>             <NA>    
+#>  configural 7.92e-13   0  <NA>         1   0     <NA>             <NA>    
 #>  metric     1.59       2  0.4524       1   0     1.59             2       
 #>  scalar     3.78       4  0.4359       1   0     2.2              2       
 #>  strict     4.91       7  0.6704       1   0     1.13             3       
 #>  p_value delta_cfi delta_rmsea
 #>  <NA>    <NA>      <NA>       
-#>  0.4524  1.78e-14  0          
+#>  0.4524  1.08e-14  0          
 #>  0.3332  0         0          
 #>  0.7700  0         0          
 # }

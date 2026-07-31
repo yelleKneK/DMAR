@@ -1,6 +1,7 @@
 # Reliability in DMAR: Choosing the Coefficient, Choosing the Interval
 
 ``` r
+
 library(DMAR)
 ```
 
@@ -41,6 +42,7 @@ A six-item congeneric scale with unequal loadings, which is the normal
 state of real items:
 
 ``` r
+
 set.seed(113)
 N <- 300
 lambda <- c(0.4, 0.5, 0.6, 0.7, 0.75, 0.8)
@@ -59,6 +61,7 @@ running example the loadings range from .4 to .8, so alpha sits a little
 below omega:
 
 ``` r
+
 res_alpha <- reliability_alpha(data = items, ci_method = "none")
 res_omega <- reliability_omega(data = items,
                                denominator = "model_implied",
@@ -78,6 +81,7 @@ alpha but not omega, whose signed loadings recover the common variance
 regardless of keying:
 
 ``` r
+
 S_cars <- cov(mtcars[, 1:5])
 a_cars <- reliability_alpha(S = S_cars, N = 32, ci_method = "none")
 o_cars <- reliability_omega(S = S_cars, N = 32,
@@ -126,6 +130,7 @@ When the one-factor model holds, the two agree, as on the running
 example:
 
 ``` r
+
 o_mi <- reliability_omega(data = items,
                           denominator = "model_implied",
                           ci_method = "none")
@@ -141,6 +146,7 @@ factor on the first two items, the sort of minor structure real item
 sets carry:
 
 ``` r
+
 doublet <- rnorm(N)
 items_d <- items
 items_d[, 1] <- items[, 1] + 0.6 * doublet
@@ -182,6 +188,7 @@ The threshold configuration decides how much this matters. First the
 benign case, every item cut at the same thresholds:
 
 ``` r
+
 items_same <- apply(items, 2, function(x)
   as.integer(cut(x, breaks = c(-Inf, -1, -0.2, 0.6, Inf))))
 colnames(items_same) <- colnames(items)
@@ -203,6 +210,7 @@ the same underlying responses with threshold patterns that differ across
 items:
 
 ``` r
+
 breaks_hi <- c(-Inf,  0.5,  1.2,  1.9, Inf)
 breaks_lo <- c(-Inf, -1.9, -1.2, -0.5, Inf)
 breaks_by_item <- list(breaks_hi, breaks_hi, breaks_hi,
@@ -251,6 +259,7 @@ coincide when loadings are equal and diverge as loadings spread, because
 optimal weights exploit the stronger items:
 
 ``` r
+
 std <- cfa_1(S = cov(items), N = N, output = "standardized")
 lam <- std[std$op == "=~", ]
 reliability_H(loadings = lam$est.std, se_loadings = lam$se)
@@ -313,6 +322,7 @@ deliberate accuracy choice, worth the wait for a final analysis and
 worth reducing while exploring.
 
 ``` r
+
 # The default: robust omega, point estimate, with the message naming
 # the bootstrap call.
 reliability_omega(data = items)
@@ -332,6 +342,7 @@ reliability_omega(data = items)
 
 ``` r
 
+
 # The recommended interval, requested explicitly (B reduced here to
 # keep the vignette fast; the default is B = 10000).
 reliability_omega(data = items, ci_method = "percentile",
@@ -350,6 +361,7 @@ reliability_omega(data = items, ci_method = "percentile",
 | J           | 6      |
 
 ``` r
+
 
 # The model implied denominator has a closed form and reports its
 # robust ML Wald interval by default.
@@ -399,6 +411,7 @@ arguments govern the treatment:
   Kam, 2001). Supplying `aux` implies `missing = "fiml"`.
 
 ``` r
+
 # Missingness on y2 that depends on an auxiliary z (MAR given z):
 # listwise deletion is biased here, FIML with z is not.
 z <- eta + rnorm(N, sd = 0.5)
@@ -421,6 +434,7 @@ reliability_alpha(data = d[, paste0("y", 1:6)])
 | J           | 6     |
 
 ``` r
+
 
 # FIML with the auxiliary: every case with at least one observed item
 # contributes, and z informs the estimation.
@@ -461,6 +475,7 @@ family member returns the same tidy shape with `tidy()` and `glance()`
 methods:
 
 ``` r
+
 res <- reliability(data = items, type = "omega",
                    denominator = "model_implied")
 generics::tidy(res)

@@ -363,7 +363,7 @@ ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
   clus_cost = 0, indiv_cost = 1, nrep = 20, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
 #>  term                                      value
 #>  necessary_n_clusters                      50   
-#>  exp_width_of_individual-level_effect_size 0.338
+#>  exp_width_of_individual-level_effect_size 0.337
 #>  budget                                    1000 
 #> 
 #> Confidence level: 95%
@@ -372,7 +372,7 @@ ss_aipe_crd_es_n_individuals_fixed_budget(budget = 1000, n_clusters = 200,
   clus_cost = 0, indiv_cost = 1, nrep = 20, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
 #>  term                                      value
 #>  cluster_size                              5    
-#>  exp_width_of_individual-level_effect_size 0.203
+#>  exp_width_of_individual-level_effect_size 0.204
 #>  budget                                    1000 
 #> 
 #> Confidence level: 95%
