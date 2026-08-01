@@ -259,7 +259,7 @@ ss_aipe_reliability(model = "True Score", type = "Normal Theory", width = .1,
   i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3), conf_level = .95,
   assurance = .85, initial_iter = 50, final_iter = 200)
 #>  term                value
-#>  necessary_N         115  
+#>  necessary_N         113  
 #>  width               0.1  
 #>  specified_assurance 0.85 
 #>  empirical_assurance 0.85 
@@ -272,8 +272,10 @@ ss_aipe_reliability(model = "True Score", type = "Normal Theory", width = .1,
 ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic", width = .15,
   i = 4, lambda = c(.8, .7, .7, .8), psi_square = c(.4, .5, .5, .4),
   conf_level = .95, assurance = .80, initial_iter = 10, final_iter = 20)
+#> Warning: lavaan->lav_object_post_check():  
+#>    some estimated ov variances are negative
 #>  term                value
-#>  necessary_N         60   
+#>  necessary_N         64   
 #>  width               0.15 
 #>  specified_assurance 0.8  
 #>  empirical_assurance 0.8  
@@ -292,7 +294,7 @@ ss_aipe_reliability(model = "True Score", type = "Normal Theory", width = .15,
   S = pop_mat, conf_level = .95, assurance = .85, initial_iter = 50,
   final_iter = 200)
 #>  term                value
-#>  necessary_N         117  
+#>  necessary_N         119  
 #>  width               0.15 
 #>  specified_assurance 0.85 
 #>  empirical_assurance 0.855

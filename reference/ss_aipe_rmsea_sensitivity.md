@@ -171,10 +171,10 @@ ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
 #>  desired_width 0.05 
 #>  mean_width    0.05 
 #>  median_width  0.05 
-#>  assurance     0.64 
-#>  alpha_upper   0.04 
+#>  assurance     0.52 
+#>  alpha_upper   0.08 
 #>  alpha_lower   0    
-#>  alpha         0.04 
+#>  alpha         0.08 
 #>  conf_level    0.95 
 #> 
 #> Confidence level: 95%

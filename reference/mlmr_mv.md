@@ -248,8 +248,8 @@ fit <- mlmr_mv(cbind(mpg, disp) ~ wt + hp, data = mtcars,
                ci_method = "wald")
 coef(fit)              # matrix: rows = predictors, cols = outcomes
 #>                     mpg         disp
-#> (Intercept) 37.22727014 -129.9505493
-#> wt          -3.87783074   82.1125006
+#> (Intercept) 37.22727010 -129.9505541
+#> wt          -3.87783074   82.1125025
 #> hp          -0.03177295    0.6578337
 summary(fit)
 #> 
@@ -272,7 +272,7 @@ summary(fit)
 #> 
 #> --- Outcome: disp ---
 #>              Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept) -129.9505    27.7871  -4.677 2.92e-06 ***
+#> (Intercept) -129.9506    27.7871  -4.677 2.92e-06 ***
 #> wt            82.1125    10.9970   7.467 8.21e-14 ***
 #> hp             0.6578     0.1569   4.192 2.77e-05 ***
 #> ---
@@ -291,8 +291,8 @@ fit$R2                 # per-outcome R^2
 #> 0.8267855 0.8634722 
 fit$residual_cov       # residual covariance among outcomes
 #>            mpg        disp
-#> mpg   6.095242   -1.903663
-#> disp -1.903663 2031.639008
+#> mpg   6.095242   -1.903664
+#> disp -1.903664 2031.639017
 
 # \donttest{
 # FIML versus listwise when one outcome has missing values.
@@ -314,8 +314,8 @@ fit_aux <- mlmr_mv(cbind(mpg, disp) ~ wt + hp, data = d,
                    ci_method = "wald", auxiliary = "qsec")
 coef(fit_aux)
 #>                     mpg         disp
-#> (Intercept) 37.22726587 -128.9695707
-#> wt          -3.87782984   86.2338714
-#> hp          -0.03177294    0.5549624
+#> (Intercept) 37.22726538 -128.9695653
+#> wt          -3.87782974   86.2338690
+#> hp          -0.03177294    0.5549625
 # }
 ```

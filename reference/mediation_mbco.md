@@ -553,7 +553,7 @@ mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
 #>  instruction -> imagery -> recall     indirect_via_imagery 2.13     0.279
 #>  ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
 #>  1.51     2.84     39.9   1  < 0.0001 37.9      34       
-#>  -0.725   0.804    0.0117 1  0.9139   -1.99     -5.9     
+#>  -0.724   0.804    0.0117 1  0.9139   -1.99     -5.9     
 #>  1.61     2.7      71.3   1  < 0.0001 69.3      65.4     
 #> 
 #> Confidence level: 95%
@@ -589,12 +589,12 @@ mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
 #>  instruction -> repetition -> recall            indirect_via_repetition 
 #>  indirect_via_imagery - indirect_via_repetition imagery_minus_repetition
 #>  estimate se    ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
-#>  2.18     0.335 1.53     2.83     39.9   1  < 0.0001 37.9      34       
-#>  0.0943   0.447 -0.789   0.967    0.0445 1  0.8329   -1.96     -5.87    
-#>  2.08     0.356 1.39     2.8      35.4   1  < 0.0001 33.4      29.5     
-#>  2.15     0.286 1.6      2.71     68.1   1  < 0.0001 66.1      62.2     
-#>  -0.0669  0.284 -0.623   0.494    0.0556 1  0.8136   -1.94     -5.86    
-#>  2.22     0.444 1.33     3.08     25.7   1  < 0.0001 23.7      19.8     
+#>  2.18     0.335 1.51     2.84     39.9   1  < 0.0001 37.9      34       
+#>  0.0943   0.447 -0.799   0.978    0.0445 1  0.8329   -1.96     -5.87    
+#>  2.08     0.356 1.4      2.8      35.4   1  < 0.0001 33.4      29.5     
+#>  2.15     0.286 1.6      2.74     68.1   1  < 0.0001 66.1      62.2     
+#>  -0.0669  0.284 -0.61    0.488    0.0556 1  0.8136   -1.94     -5.86    
+#>  2.22     0.444 1.34     3.09     25.7   1  < 0.0001 23.7      19.8     
 #> 
 #> Confidence level: 95%
 # The indirect effect through repetition is near zero (the paper

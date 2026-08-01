@@ -475,8 +475,8 @@ summary(fit_mlmr)
 # Likelihood ratio CIs (default).
 confint(fit_mlmr)
 #>                   2.5 %      97.5 %
-#> (Intercept) 34.24420415 40.21033609
-#> wt          -5.05840396 -2.69725752
+#> (Intercept) 34.24420416 40.21033607
+#> wt          -5.05840396 -2.69725753
 #> hp          -0.04862085 -0.01492504
 
 # Auxiliary variable (saturated correlates). qsec is not in the
@@ -508,8 +508,8 @@ fit_boot <- mlmr(mpg ~ wt + hp, data = mtcars,
                  ci_method = "boot", B = 100, boot_seed = 113)
 confint(fit_boot)
 #>                   2.5 %      97.5 %
-#> (Intercept) 33.50458027 41.27427337
-#> wt          -5.31416120 -2.74304660
+#> (Intercept) 33.50458027 41.27427324
+#> wt          -5.31416113 -2.74304660
 #> hp          -0.05028086 -0.01939352
 # }
 ```

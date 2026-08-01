@@ -325,19 +325,19 @@ analysis_model <- "
 set.seed(113)
 ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
                        N = 200, G = 50)
-#>  term                   value
-#>  specified_N            200  
-#>  composite_power        0.68 
-#>  composite_power_mc_se  0.066
-#>  power_a                1    
-#>  power_b                0.88 
-#>  power_c                0.8  
-#>  population_a           0.4  
-#>  population_b           0.3  
-#>  population_c           0.25 
-#>  alpha_level            0.05 
-#>  replications           50   
-#>  converged_replications 50   
+#>  term                   value 
+#>  specified_N            200   
+#>  composite_power        0.64  
+#>  composite_power_mc_se  0.0679
+#>  power_a                1     
+#>  power_b                0.88  
+#>  power_c                0.76  
+#>  population_a           0.4   
+#>  population_b           0.3   
+#>  population_c           0.25  
+#>  alpha_level            0.05  
+#>  replications           50    
+#>  converged_replications 50    
 
 # The necessary N for composite power of 0.80 over the two structural
 # paths a and b (c is left out of the composite).
@@ -346,10 +346,10 @@ ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
                        parameters = c("a", "b"),
                        desired_power = 0.80, G = 50)
 #>  term                   value 
-#>  necessary_N            144   
-#>  composite_power        0.84  
-#>  composite_power_mc_se  0.0518
-#>  power_a                0.98  
+#>  necessary_N            161   
+#>  composite_power        0.86  
+#>  composite_power_mc_se  0.0491
+#>  power_a                1     
 #>  power_b                0.86  
 #>  population_a           0.4   
 #>  population_b           0.3   

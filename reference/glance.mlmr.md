@@ -38,7 +38,7 @@ Ken Kelley <kkelley@nd.edu>
 fit <- mlmr(mpg ~ wt + hp, data = mtcars, ci_method = "wald")
 generics::glance(fit)
 #>          R2    adj_R2    sigma       f2 statistic     p_value df    logLik
-#> 1 0.8267854 0.8148396 2.468854 4.773187  56.10318 6.56674e-13  9 -289.6083
+#> 1 0.8267855 0.8148396 2.468854 4.773187  56.10318 6.56674e-13  9 -289.6083
 #>        AIC      BIC deviance df_residual nobs
 #> 1 597.2166 610.4082 579.2166          29   32
 ```
