@@ -1,0 +1,239 @@
+url: https://yelleknek.github.io/DMAR
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#0c2340"     # Notre Dame navy
+    secondary: "#d39f10"   # Bright gold
+    border-radius: 0.5rem
+
+home:
+  title: "DMAR: Design, Measurement, and Analysis in R"
+  description: >
+    Design, measurement, and analysis in R, with emphasis on methods for
+    human-centered research. Effect sizes reported with confidence intervals,
+    sample size planning by power analysis and by accuracy in parameter
+    estimation (AIPE), reliability and measurement, mediation analysis with
+    model comparison inference, equivalence testing, meta-analysis, and tidy
+    output. A more modern, more general, and greatly expanded reimagining of MBESS.
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+
+articles:
+- title: Start here
+  navbar: ~
+  contents:
+  - DMAR
+  - dmar_output
+  - mbess_to_dmar
+- title: Core workflows
+  contents:
+  - nonlinear_growth
+  - one_way_anova_power
+  - ancova_2x4x3_power
+  - composite_power_ancova
+  - composite_sem_planning
+  - reliability
+  - mlmr
+  - effect-size-visualization
+  - function_interactions
+  - sums_of_squares
+- title: Case studies
+  contents:
+  - critical_values
+  - pygmalion
+  - teacher_expectancy
+  - bryant_paulson_ancova
+  - weighted_kappa
+
+# Curated, family-structured reference index. pkgdown::check_pkgdown()
+# verifies that every exported topic is listed; run it after adding
+# functions and place each new export in its family below.
+reference:
+- title: Effect sizes
+  desc: Point estimates of standardized effects, their expectations, and corrections.
+  contents:
+  - smd
+  - smd_c
+  - smd_trimmed
+  - starts_with("eta_squared")
+  - starts_with("omega_squared")
+  - cohen_f
+  - cohen_h
+  - cles
+  - cliff_delta
+  - vargha_delaney_A
+  - proportion_of_superiority
+  - probability_of_superiority_paired
+  - nnt_from_smd
+  - responder_analysis
+  - correction_for_attenuation
+  - signal_to_noise_R2
+  - starts_with("expected_")
+  - unbiased_R2
+  - sd_unbiased
+  - descriptives
+  - skewness
+  - kurtosis
+- title: Confidence intervals
+  desc: Confidence intervals for effect sizes and related quantities.
+  contents:
+  - starts_with("ci_")
+- title: Sample size planning, accuracy in parameter estimation (AIPE)
+  contents:
+  - starts_with("ss_aipe_")
+- title: Sample size planning, power
+  contents:
+  - starts_with("ss_power_")
+  - starts_with("power_equivalence")
+  - power_density_equivalence_md
+  - power_fisher_exact
+- title: Design analysis and design utilities
+  contents:
+  - design_consequences
+  - design_effect
+  - effects_coding
+  - helmert_coding
+  - orthogonal_polynomial
+  - is_orthogonal_set
+- title: Minimum risk and sequential estimation
+  contents:
+  - mr_smd
+  - mr_cv
+  - ss_seq_c
+  - ss_seq_c_sensitivity
+- title: Equivalence testing
+  contents:
+  - equivalence_smd
+  - equivalence_r
+  - equivalence_c
+- title: Reliability and agreement
+  contents:
+  - starts_with("reliability")
+  - icc
+  - icc_lmer
+  - R2_mixed_effects
+  - R2_mixed_effects_decomposition
+  - regions_of_significance
+  - cohen_kappa
+  - fleiss_kappa
+  - krippendorff_alpha
+  - gwet_ac
+  - lin_ccc
+  - limits_of_agreement
+  - content_validity_index
+- title: ANOVA, ANCOVA, and contrasts
+  contents:
+  - ancova
+  - factorial_anova
+  - starts_with("anova_within")
+  - mixed_anova
+  - manova_split_plot
+  - pairwise_within
+  - simple_effects_AB
+  - contrast_test
+  - contrast_adjusted
+  - adjusted_means
+  - dunn_test
+  - obrien_test
+  - mauchly_test
+  - epsilon_corrections
+  - welch_t
+  - summary_t_test
+  - correlations_test
+  - randomization_test
+  - randomization_test_paired
+- title: Meta-analysis and evidence synthesis
+  contents:
+  - starts_with("meta_")
+  - combine_p
+- title: Bayesian analyses
+  contents:
+  - starts_with("bayes_")
+- title: Mediation
+  contents:
+  - mediate
+  - mediation_mbco
+- title: Longitudinal change
+  contents:
+  - analysis_of_change
+- title: Maximum likelihood regression (FIML)
+  contents:
+  - mlmr
+  - mlmr_mv
+  - tidy.mlmr_mv
+  - anova.mlmr_mv
+- title: Multivariate and latent variable methods
+  contents:
+  - cfa_1
+  - cfa_2
+  - cfa_k
+  - compare_cov_structures
+  - cov_sem
+  - covmat_from_cfa
+  - procrustes_phi
+  - variance_components_mls
+  - measurement_invariance
+  - htmt
+  - average_variance_extracted
+  - bifactor_indices
+  - common_method_marker
+  - common_method_single_factor
+  - ecvi
+  - simple_structure
+  - measurement_alignment
+  - dmacs
+  - irt_grm
+  - irt_information
+- title: Critical values
+  contents:
+  - starts_with("cv_")
+  - cv
+  - bryant_paulson
+- title: Parameterization conversions
+  contents:
+  - starts_with("convert_")
+- title: Variance utilities
+  contents:
+  - starts_with("var_")
+- title: Noncentral distributions
+  contents:
+  - starts_with("moments_")
+  - starts_with("conf_limits_")
+- title: Data simulation
+  contents:
+  - starts_with("simulate_")
+- title: Plots
+  contents:
+  - starts_with("plot_")
+- title: Display helpers
+  contents:
+  - dmar_tbl
+  - format_p
+  - dmar_output_helpers
+  - print_anova
+  - print_summary
+  - now
+- title: Broom tidiers and model methods
+  desc: tidy() and glance() views of DMAR results, and methods for mlmr fits.
+  contents:
+  - anova.mlmr
+  - starts_with("tidy.")
+  - starts_with("glance.")
+- title: Data sets
+  contents:
+  - bessel_errors
+  - depression_bdi
+  - diagnosis_agreement
+  - drinks_trial
+  - holzinger_swineford
+  - prime_time_achievement
+  - pygmalion
+  - teacher_expectancy
+  - test_market
+- title: The package
+  contents:
+  - DMAR-package

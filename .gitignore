@@ -1,0 +1,43 @@
+# R / RStudio
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+
+# Build artifacts
+*.Rcheck/
+DMAR_*.tar.gz
+DMAR_*.tgz
+
+# pkgdown site and vignette build products (regenerated, not source)
+docs/
+doc/
+Meta/
+inst/doc/
+vignettes/*.html
+vignettes/*.R
+vignettes/*_cache/
+
+# Raw data sources stay local; only the derivation scripts are tracked
+data-raw/*
+!data-raw/*.R
+!data-raw/.gitkeep
+Rplots.pdf
+
+# Local working notes: kept out of git and out of the tarball.
+# Working documents at the root are never tracked; the standard package
+# documents are allowlisted below.
+/*.md
+/*.docx
+/*.txt
+!/README.md
+!/NEWS.md
+!/LICENSE.md
+!/cran-comments.md
+~$*
+
+# testthat scratch output (failed-test snapshots)
+tests/testthat/testthat-problems.rds
+tests/testthat/_problems/
+vignettes/cache/

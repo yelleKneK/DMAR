@@ -1,0 +1,204 @@
+#' Convert Between an \emph{F} Value and a Chi Square Value
+#'
+#' @description
+#' Converts an observed \emph{F} value into a chi square value, and a chi
+#' square value into an \emph{F} value. Both functions return the
+#' converted statistic itself, a single number, not a \emph{p}-value.
+#'
+#' Two conversions are available, selected by \code{df_denominator}.
+#' \itemize{
+#'   \item \strong{Scaling (the default).} With
+#'   \code{df_denominator = Inf}, \code{convert_F_chisq()} returns
+#'   \code{df_numerator * F_value} and \code{convert_chisq_F()} returns
+#'   \code{chi_square / df}. This is the standard conversion between the
+#'   two test statistics and needs no denominator degrees of freedom.
+#'   \item \strong{Probability matching.} With a finite
+#'   \code{df_denominator}, \code{convert_F_chisq()} returns the chi
+#'   square value that has the same upper-tail probability (the same
+#'   \emph{p}-value) as the \emph{F} value, and \code{convert_chisq_F()}
+#'   returns the \emph{F} value with the same upper-tail probability as
+#'   the chi square value.
+#' }
+#'
+#' @details
+#' \strong{Why there are two conversions.} An \emph{F} statistic is the
+#' ratio of two independent chi squares, each divided by its degrees of
+#' freedom,
+#' \deqn{F(\nu_1, \nu_2) = \frac{\chi^2_{\nu_1}/\nu_1}{\chi^2_{\nu_2}/\nu_2},}
+#' where the denominator is the estimated error variance scaled to have a
+#' mean of 1. A chi square is what the numerator becomes when that error
+#' variance is known rather than estimated. This is the entire difference
+#' between the two, and it is why the conversion depends on how the error
+#' variance is treated.
+#'
+#' \strong{Scaling: \code{df_denominator = Inf}.} As the denominator
+#' degrees of freedom grow, the estimated error variance converges to the
+#' true one and \eqn{\nu_1 F \to \chi^2(\nu_1)}. The default therefore
+#' treats the error variance as known and returns exactly
+#' \deqn{\chi^2 = \nu_1 \, F, \qquad F = \chi^2 / \nu_1,}
+#' with \eqn{\nu_1} the numerator degrees of freedom (\code{df_numerator},
+#' which is also the degrees of freedom of the chi square). This is the
+#' value an \emph{F} table prints in its infinite-denominator row, and it
+#' is the usual conversion between a Wald \emph{F} and a Wald chi square.
+#' It involves no probabilities and needs no \code{df_denominator}.
+#'
+#' \strong{Probability matching: finite \code{df_denominator}.} When the
+#' error variance is estimated on \eqn{\nu_2} degrees of freedom, the
+#' scaling above runs high, because \eqn{\nu_1 F} is more dispersed than
+#' \eqn{\chi^2(\nu_1)}. Supplying \code{df_denominator} returns instead the
+#' chi square value at the same upper-tail probability. Writing \code{pf}
+#' and \code{qchisq} for R's distribution and quantile functions, the
+#' computation is exactly
+#' \preformatted{p <- pf(F_value, df_numerator, df_denominator, lower.tail = FALSE)
+#' chi_square <- qchisq(p, df_numerator, lower.tail = FALSE)}
+#' and \code{convert_chisq_F()} composes the same two functions in the
+#' other order. The upper tail is used so the \emph{p}-value is
+#' represented accurately for large statistics (the lower-tail probability
+#' rounds to 1 in double precision by about \eqn{F = 500} at small
+#' \eqn{\nu_2}, which would send \code{qchisq()} to infinity; the
+#' upper-tail value stays accurate past \eqn{F = 10^{20}}). No logarithms
+#' are involved and the returned value is the chi square itself, not the
+#' \emph{p}-value used to find it. The map is strictly increasing and
+#' therefore one to one, and \code{convert_chisq_F()} is its exact
+#' inverse.
+#'
+#' \strong{How much the two differ.} At \eqn{\nu_1 = 3} and
+#' \eqn{F = 2.75}, probability matching gives \eqn{\chi^2 = 6.290} at
+#' \eqn{\nu_2 = 10}, \eqn{7.711} at \eqn{\nu_2 = 50}, and \eqn{8.220} at
+#' \eqn{\nu_2 = 1000}, approaching the scaling value \eqn{\nu_1 F = 8.25}
+#' only as \eqn{\nu_2} grows. Scaling and probability matching agree in
+#' the limit and diverge as \eqn{\nu_2} shrinks; for a small \eqn{\nu_2},
+#' the scaled value understates the \emph{p}-value (with
+#' \eqn{\nu_1 = 3, \nu_2 = 5}, a result whose true \emph{p} is .05 reads as
+#' .001 if \eqn{\nu_1 F} is referred to \eqn{\chi^2}).
+#'
+#' \strong{Noncentrality.} Both conversions are defined by the central
+#' distributions and preserve the \emph{p}-value; neither transports a
+#' noncentrality parameter (a noncentral \emph{F} is not carried to a
+#' noncentral chi square with the same \eqn{\lambda}, except in the
+#' \eqn{\nu_2 \to \infty} limit). For noncentral work use
+#' \code{\link{conf_limits_ncf}} and \code{\link{conf_limits_nc_chisq}}.
+#'
+#' \strong{Special case.} With \eqn{\nu_1 = 1} this is the squared form of
+#' the relation between \emph{t} and \emph{z}, since
+#' \eqn{F(1, \nu) = t(\nu)^2} and \eqn{\chi^2(1) = z^2}.
+#'
+#' @param F_value Observed \emph{F} value. Must be nonnegative.
+#' @param chi_square Observed chi square value. Must be nonnegative.
+#' @param df_numerator Numerator degrees of freedom of the \emph{F}, which
+#'   is also the degrees of freedom of the chi square.
+#' @param df Degrees of freedom of the chi square, which becomes the
+#'   numerator degrees of freedom of the \emph{F}.
+#' @param df_denominator Denominator degrees of freedom of the \emph{F},
+#'   the degrees of freedom on which the error variance is estimated. The
+#'   default, \code{Inf}, treats the error variance as known and gives the
+#'   scaling conversion (\eqn{\chi^2 = \nu_1 F}); a finite value gives the
+#'   probability-matching conversion. See \emph{Details}.
+#'
+#' @return A 1-row \code{data.frame} with columns \code{term} and
+#'   \code{value}. The \code{term} is \code{"chi_square_from_F"} for
+#'   \code{convert_F_chisq} and \code{"F_from_chi_square"} for
+#'   \code{convert_chisq_F}, and \code{value} is the converted statistic
+#'   (a chi square value or an \emph{F} value, respectively; never a
+#'   \emph{p}-value).
+#'
+#' @examples
+#' # Scaling (the default): chi square = df_numerator * F.
+#' convert_F_chisq(2.75, df_numerator = 3)
+#'
+#' # The inverse: F = chi square / df.
+#' convert_chisq_F(8.25, df = 3)
+#'
+#' # Probability matching at 3 and 50 degrees of freedom: the chi square
+#' # with the same p-value as the F.
+#' convert_F_chisq(2.75, df_numerator = 3, df_denominator = 50)
+#'
+#' # The p-value is preserved, which is what probability matching means.
+#' f <- 2.75
+#' x <- convert_F_chisq(f, df_numerator = 3, df_denominator = 50)$value
+#' c(p_from_F = pf(f, 3, 50, lower.tail = FALSE),
+#'   p_from_chi_square = pchisq(x, 3, lower.tail = FALSE))
+#'
+#' @references
+#' Johnson, N. L., Kotz, S., & Balakrishnan, N. (1995).
+#' \emph{Continuous univariate distributions} (2nd ed., Vol. 2). Wiley.
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#' experiments and analyzing data: A model comparison perspective}
+#' (4th ed.). Routledge.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso
+#' \code{\link{cv_f}}, \code{\link{cv_chisq}},
+#' \code{\link{conf_limits_ncf}}, \code{\link{conf_limits_nc_chisq}}
+#'
+#' @keywords distribution
+#'
+#' @family parameterization conversions
+#'
+#' @rdname convert_F_chisq
+#'
+#' @export
+
+convert_F_chisq <- function(F_value, df_numerator, df_denominator = Inf) {
+  .convert_fx_check(F_value, "F_value")
+  .convert_fx_check_df(df_numerator, "df_numerator", allow_infinite = FALSE)
+  .convert_fx_check_df(df_denominator, "df_denominator", allow_infinite = TRUE)
+
+  value <- if (is.infinite(df_denominator)) {
+    # Error variance treated as known: chi square = nu_1 * F, exact.
+    df_numerator * F_value
+  } else {
+    # Same upper-tail probability. Plain (not log) p-value; the upper tail
+    # keeps it accurate where the lower tail would round to 1.
+    p <- stats::pf(F_value, df_numerator, df_denominator, lower.tail = FALSE)
+    stats::qchisq(p, df_numerator, lower.tail = FALSE)
+  }
+  .as_dmar_tbl(data.frame(term = "chi_square_from_F", value = value))
+}
+
+#' @rdname convert_F_chisq
+#' @export
+
+convert_chisq_F <- function(chi_square, df, df_denominator = Inf) {
+  .convert_fx_check(chi_square, "chi_square")
+  .convert_fx_check_df(df, "df", allow_infinite = FALSE)
+  .convert_fx_check_df(df_denominator, "df_denominator", allow_infinite = TRUE)
+
+  value <- if (is.infinite(df_denominator)) {
+    # Inverse of the scaling conversion: F = chi square / nu_1, exact.
+    chi_square / df
+  } else {
+    p <- stats::pchisq(chi_square, df, lower.tail = FALSE)
+    stats::qf(p, df, df_denominator, lower.tail = FALSE)
+  }
+  .as_dmar_tbl(data.frame(term = "F_from_chi_square", value = value))
+}
+
+
+# ---- Input validation shared by the pair ----------------------------
+
+.convert_fx_check <- function(x, name) {
+  if (!is.numeric(x) || length(x) != 1L || is.na(x)) {
+    stop("'", name, "' must be a single non-missing number.", call. = FALSE)
+  }
+  if (x < 0) {
+    stop("'", name, "' must be nonnegative; got ", x, ".", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+.convert_fx_check_df <- function(x, name, allow_infinite) {
+  if (!is.numeric(x) || length(x) != 1L || is.na(x)) {
+    stop("'", name, "' must be a single non-missing number.", call. = FALSE)
+  }
+  if (!allow_infinite && !is.finite(x)) {
+    stop("'", name, "' must be finite.", call. = FALSE)
+  }
+  if (x <= 0) {
+    stop("'", name, "' must be greater than zero; got ", x, ".",
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}

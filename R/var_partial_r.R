@@ -1,0 +1,126 @@
+#' Asymptotic Variance of the Partial Correlation Coefficient
+#'
+#' Computes the large-sample variance of the sample partial correlation
+#' coefficient \eqn{r_{XY \cdot Z_1 \cdots Z_J}} under multivariate normality.
+#' Two formulas are available: the classical asymptotic variance on
+#' the raw \eqn{r} scale (the default), and the variance
+#' \eqn{1/(n - J - 3)} of the Fisher's \emph{Z} transformation (Fisher,
+#' 1921, 1924), which is the appropriate quantity for constructing a
+#' confidence interval by transformation and back-transformation.
+#'
+#' @param r The sample partial correlation coefficient
+#'   \eqn{r_{XY \cdot Z_1 \cdots Z_J}}. Must be in \eqn{[-1, 1]}.
+#' @param n Total sample size.
+#' @param J Number of variables partialled out (i.e., the count of
+#'   \eqn{Z_1, \ldots, Z_J}); must be at least 1. Defaults to 1.
+#' @param fisher_z Logical. If \code{FALSE} (the default), the function
+#'   returns the raw-scale asymptotic variance. If
+#'   \code{TRUE}, it returns the variance of the Fisher's
+#'   \emph{Z} transformation \eqn{Z = \mathrm{arctanh}(r)} under the
+#'   Fisher (1924) reduction.
+#'
+#' @return A one-row \code{data.frame} with columns \code{term}
+#'   (either \code{"var_partial_r"} or \code{"var_fisher_z_partial_r"}) and
+#'   \code{value} (the requested variance).
+#'
+#' @details
+#' \strong{Raw-scale asymptotic variance.} Under multivariate normality the
+#' partial correlation \eqn{\hat r_{XY \cdot Z}} has the large-sample
+#' variance (Fisher, 1924, for the reduction; the simple-correlation
+#' building block is, e.g., Olkin & Finn, 1995, their Equation 3):
+#' \deqn{\mathrm{Var}(\hat r_{XY \cdot Z}) \;\approx\;
+#'         \frac{(1 - \rho^2_{XY \cdot Z})^2}{n - J - 1},}
+#' a direct generalization of the classical asymptotic variance
+#' \eqn{(1 - \rho^2)^2 / (n - 1)} of the simple Pearson correlation (Fisher,
+#' 1915) with the degrees of freedom reduced by the number of partialled
+#' variables. The function evaluates this with \eqn{\hat r} substituted for
+#' \eqn{\rho}.
+#'
+#' \strong{Fisher's \emph{Z} Transformation.} Fisher (1921) showed that
+#' for a Pearson correlation, the transformation
+#' \eqn{Z = \tfrac{1}{2}\log\{(1+r)/(1-r)\} = \mathrm{arctanh}(r)} is
+#' approximately normal with variance \eqn{1/(n - 3)}. Fisher (1924)
+#' showed that the partial correlation based on \eqn{n} observations with
+#' \eqn{J} variables partialled out is distributed as a simple
+#' correlation from a sample reduced in size by \eqn{J}; combined with
+#' the Fisher (1921) variance of \eqn{Z}, the Fisher's
+#' \emph{Z} transformation of \eqn{\hat r_{XY \cdot Z_1 \cdots Z_J}} is
+#' therefore approximately normal with variance \eqn{1/(n - J - 3)}. This is the
+#' standard ingredient for constructing a confidence interval on
+#' \eqn{\rho_{XY \cdot Z}} by transforming, building a Wald interval on
+#' \eqn{Z}, and back-transforming with \eqn{\tanh}.
+#'
+#' @references
+#' Cohen, J., Cohen, P., West, S. G., & Aiken, L. S. (2003).
+#'   \emph{Applied multiple regression/correlation analysis for the
+#'   behavioral sciences} (3rd ed.). Lawrence Erlbaum.
+#'
+#' Fisher, R. A. (1915). Frequency distribution of the values of the
+#'   correlation coefficient in samples from an indefinitely large
+#'   population. \emph{Biometrika, 10}(4), 507--521.
+#'
+#' Fisher, R. A. (1921). On the "probable error" of a coefficient of
+#'   correlation deduced from a small sample. \emph{Metron, 1}, 3--32.
+#'
+#' Fisher, R. A. (1924). The distribution of the partial correlation
+#'   coefficient. \emph{Metron, 3}, 329--332.
+#'
+#' Kelley, K., & Maxwell, S. E. (2003). Sample size for multiple
+#'   regression: Obtaining regression coefficients that are accurate,
+#'   not simply significant. \emph{Psychological Methods, 8}(3),
+#'   305--321. \doi{10.1037/1082-989X.8.3.305}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027).
+#'   \emph{Designing experiments and analyzing data: A model comparison
+#'   perspective} (4th ed.). Routledge. (See Chapter 4 on contrasts,
+#'   Chapter 5 on multiple comparisons, and Chapter 9 on ANCOVA.)
+#'
+#' Olkin, I., & Finn, J. D. (1995). Correlations redux.
+#'   \emph{Psychological Bulletin, 118}(1), 155--164.
+#'   \doi{10.1037/0033-2909.118.1.155}
+#'
+#' @examples
+#' # Olkin-Finn (1995) asymptotic variance for r_p = .35, n = 80,
+#' #     J = 2 control variables.
+#' var_partial_r(r = 0.35, n = 80, J = 2)
+#'
+#' # Variance of Fisher's Z transformation (Fisher, 1921, 1924) for the
+#' #     same setting, useful for building a CI on rho_p.
+#' var_partial_r(r = 0.35, n = 80, J = 2, fisher_z = TRUE)
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{var_semipartial_r}}, \code{\link{var_R2}},
+#'   \code{\link{convert_r_Z}}, \code{\link{ci_r}}
+#'
+#' @keywords design regression
+#'
+#' @export
+var_partial_r <- function(r, n, J = 1, fisher_z = FALSE) {
+  if (!is.numeric(r) || length(r) != 1L || is.na(r) || abs(r) > 1) {
+    stop("'r' must be a single number in [-1, 1].", call. = FALSE)
+  }
+  if (!is.numeric(n) || length(n) != 1L || n <= 0) {
+    stop("'n' must be a single positive integer.", call. = FALSE)
+  }
+  if (!is.numeric(J) || length(J) != 1L || J < 1L) {
+    stop("'J' (number of partialled variables) must be a single integer >= 1.",
+         call. = FALSE)
+  }
+  if (fisher_z) {
+    if (n - J - 3 <= 0) {
+      stop("Need n > J + 3 for the Fisher's Z variance.", call. = FALSE)
+    }
+    value <- 1 / (n - J - 3)
+    term  <- "var_fisher_z_partial_r"
+  } else {
+    if (n - J - 1 <= 0) {
+      stop("Need n > J + 1 for the Olkin-Finn variance.", call. = FALSE)
+    }
+    value <- (1 - r^2)^2 / (n - J - 1)
+    term  <- "var_partial_r"
+  }
+  out <- data.frame(term = term, value = value,
+                    stringsAsFactors = FALSE, row.names = NULL)
+  .as_dmar_tbl(out)
+}

@@ -1,0 +1,40 @@
+citHeader(
+  "When citing DMAR in published work, please cite the package and",
+  "the methodological lineage papers that established MBESS, which",
+  "DMAR is the modern, more general reimplementation and expansion of:"
+)
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "{DMAR}: Design, Measurement, and Analysis in {R}",
+  author   = person("Ken", "Kelley",
+                    email = "kkelley@nd.edu",
+                    comment = c(ORCID = "0000-0002-4756-8360")),
+  year     = sub("-.*", "", meta$Date),
+  note     = sprintf("R package version %s", meta$Version),
+  url      = "https://github.com/yelleKneK/DMAR"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Methods for the behavioral, educational, and social sciences: An R package",
+  author   = person("Ken", "Kelley"),
+  journal  = "Behavior Research Methods",
+  year     = "2007",
+  volume   = "39",
+  number   = "4",
+  pages    = "979--984",
+  doi      = "10.3758/BF03192993"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Confidence intervals for standardized effect sizes: Theory, application, and implementation",
+  author   = person("Ken", "Kelley"),
+  journal  = "Journal of Statistical Software",
+  year     = "2007",
+  volume   = "20",
+  number   = "8",
+  pages    = "1--24",
+  doi      = "10.18637/jss.v020.i08"
+)

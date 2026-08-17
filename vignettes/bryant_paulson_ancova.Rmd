@@ -1,0 +1,200 @@
+---
+title: "Simultaneous Comparison of Adjusted Means in ANCOVA With DMAR"
+author: "Ken Kelley"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Simultaneous Comparison of Adjusted Means in ANCOVA With DMAR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(DMAR)
+```
+
+This vignette shows the end-to-end workflow for comparing covariate-adjusted
+means in the analysis of covariance (ANCOVA): fit the model, read off the
+adjusted means and the error term, and then place **simultaneous** confidence
+intervals on the differences with `ci_c_ancova_bp()`, which uses the
+Bryant--Paulson generalized studentized range (`qbryant_paulson()`). The
+simulation study maintained alongside the package shows **why** the ordinary
+Tukey distribution is the wrong reference when the covariate is random. Here
+we focus on **how** to do the analysis.
+
+## 1. The Worked Example From Bryant & Bruvold (1980)
+
+The `test_market` data ship with DMAR. A company compared six marketing
+strategies ("panels") for a brand across four blocks of retail outlets, with
+the *remaining category movement* in each outlet as a random covariate.
+
+```{r data}
+data(test_market)
+descriptives(test_market[c("brand_movement", "category_movement")])
+```
+
+### Fit the ANCOVA
+
+This is a randomized-block ANCOVA: panel (the treatment of interest), block,
+and the covariate. We fit it with `lm()` and confirm it reproduces the
+published quantities (covariate slope 0.4079, error mean square 0.01326 on
+14 degrees of freedom).
+
+```{r fit}
+fit <- lm(brand_movement ~ panel + block + category_movement, data = test_market)
+
+s_ancova <- summary(fit)$sigma           # ANCOVA error SD = sqrt(MS error)
+nu       <- fit$df.residual              # error degrees of freedom
+c(slope = unname(coef(fit)["category_movement"]),
+  error_MS = s_ancova^2, df = nu)
+```
+
+### Adjusted Panel Means
+
+The adjusted mean for each panel is the model's prediction at the covariate
+grand mean, averaged over blocks.
+
+```{r adj-means}
+xbar <- mean(test_market$category_movement)
+adj_means <- vapply(levels(test_market$panel), function(p) {
+  nd <- data.frame(panel = factor(p, levels = levels(test_market$panel)),
+                   block = factor(1:4, levels = levels(test_market$block)),
+                   category_movement = xbar)
+  mean(predict(fit, nd))
+}, numeric(1))
+round(adj_means, 3)     # 3.595 3.619 4.102 4.515 4.618 4.876
+```
+
+### Simultaneous Bryant--Paulson Intervals
+
+With six panels there are `r choose(6, 2)` pairwise comparisons. We want all of
+them to hold at a *familywise* 95% level. Because the design has `s = 4`
+blocks, the standard error of a single adjusted mean is built from `n = 4`,
+and the error degrees of freedom (14) must be supplied directly (the blocked
+design is not the one-way default `N - k - p`).
+
+```{r bp-ci}
+bp <- ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova,
+                     n = 4, num_covariates = 1, df = nu)
+bp
+```
+
+Every pairwise interval has the same half-width, and the critical difference
+is exactly the 0.278 reported in the paper:
+
+```{r crit-diff}
+attr(bp, "critical_value")                      # q_.05;1,6,14 = 4.83
+unique(round((bp$upper_limit - bp$lower_limit) / 2, 3))   # 0.278
+```
+
+Reading the table: panels 1 and 2 are statistically indistinguishable (their
+interval covers 0), but panel 1 differs from panels 3 through 6, and so on,
+the same conclusions Bryant and Bruvold reached. In substantive terms, the
+best panel (6) outsold the weakest (1) by
+`r round(abs(bp$estimate[bp$contrast == 'group_1 - group_6']), 2)` hundred
+cases (95% simultaneous CI [`r round(abs(bp$upper_limit[bp$contrast == 'group_1 - group_6']), 2)`,
+`r round(abs(bp$lower_limit[bp$contrast == 'group_1 - group_6']), 2)`]), a gap
+the random covariate adjustment was sharp enough to resolve.
+
+## 2. Simultaneous vs. Per-Comparison Intervals
+
+DMAR already provides `ci_c_ancova()` for a **single** contrast of adjusted
+means. It uses a *t* critical value and includes the per-pair covariate term
+in the standard error, correct for one pre-planned comparison, but it does
+**not** protect the familywise error rate across many comparisons, and it
+treats the covariate adjustment as fixed. `ci_c_ancova_bp()` is its
+familywise, random-covariate counterpart.
+
+```{r compare}
+# Per-comparison interval for panel 1 vs. panel 4 (needs the covariate means
+# and the within-group SS of the covariate).
+cov_means <- tapply(test_market$category_movement, test_market$panel, mean)
+SSwx <- sum((test_market$category_movement -
+             ave(test_market$category_movement, test_market$panel))^2)
+
+per_comparison <- ci_c_ancova(
+  adj_means = adj_means, s_ancova = s_ancova,
+  c_weights = c(1, 0, 0, -1, 0, 0), n = 4,
+  cov_means = cov_means, SSwithin_x = SSwx)
+per_comparison
+
+# The same contrast, but as one member of the simultaneous family:
+ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova, n = 4,
+               num_covariates = 1, df = nu,
+               c_weights = c(1, 0, 0, -1, 0, 0))
+```
+
+The simultaneous interval is wider; that is the price of protecting all
+`r choose(6, 2)` comparisons at once rather than just this one.
+
+## 3. A One-Way ANCOVA With `ancova()`
+
+For the common one-way case (a single treatment factor with several levels and
+one or more covariates), DMAR's `ancova()` gives a tidy fit (omnibus *F*,
+effect size CIs, adjusted means, and a homogeneity-of-regression check) and
+feeds directly into `ci_c_ancova_bp()`. Here is a four-group example.
+
+```{r oneway-data}
+set.seed(113)
+k <- 4; n <- 25
+group <- factor(rep(c("control", "low", "medium", "high"), each = n),
+                levels = c("control", "low", "medium", "high"))
+x <- rnorm(k * n, 50, 10)                          # random covariate
+mu <- c(control = 0, low = 1.5, medium = 3, high = 3.2)   # adjusted effects
+y <- 0.5 * (x - 50) + mu[as.integer(group)] + rnorm(k * n, 0, 5)
+dat <- data.frame(group, x, y)
+
+fit_tidy <- ancova(dat, outcome = "y", treatment = "group", covariates = "x")
+fit_tidy
+```
+
+Pull the adjusted means and the ANCOVA error SD out of the tidy table (or any
+fitted model) and pass them to `ci_c_ancova_bp()`. With one covariate and
+`N - k - p` error degrees of freedom, the default `df` is correct, so it need
+not be supplied.
+
+```{r oneway-bp}
+adj <- fit_tidy$value[grepl("^adjusted_mean", fit_tidy$term)]
+names(adj) <- levels(group)
+
+# ANCOVA error SD from the fitted model.
+s_yx <- summary(lm(y ~ group + x, data = dat))$sigma
+
+ci_c_ancova_bp(adj_means = adj, s_ancova = s_yx, n = n, num_covariates = 1)
+```
+
+The intervals that exclude zero identify the groups whose adjusted means
+differ, with familywise 95% protection and, through the Bryant--Paulson
+critical value, an accounting for the extra sampling variability the
+random covariate introduces.
+
+## 4. Critical Values on Their Own
+
+If you only need the critical value (for a table, a power calculation, or a
+hand computation), call `qbryant_paulson()` directly. It is the ANCOVA analogue
+of `qtukey()`.
+
+```{r crit}
+# 95% critical value for k = 5 groups, p = 2 covariates, nu = 40 error df:
+qbryant_paulson(0.95, num_covariates = 2, num_groups = 5, df = 40)
+
+# How much larger than the (incorrect) Tukey value?
+qbryant_paulson(0.95, 2, 5, 40) / qtukey(0.95, nmeans = 5, df = 40)
+```
+
+## References
+
+Bryant, J. L., & Paulson, A. S. (1976). An extension of Tukey's method of
+multiple comparisons to experimental designs with random concomitant
+variables. *Biometrika, 63*, 631--638.
+
+Bryant, J. L., & Bruvold, N. T. (1980). Multiple comparison procedures in the
+analysis of covariance. *Journal of the American Statistical Association,
+75*(372), 874--880.
+
+Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing experiments
+and analyzing data: A model comparison perspective* (4th ed.). Routledge.

@@ -1,0 +1,226 @@
+---
+title: "The Teacher Expectancy Meta-Analysis: Reproducing Raudenbush (1984)"
+author: "Ken Kelley"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The Teacher Expectancy Meta-Analysis: Reproducing Raudenbush (1984)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
+                      fig.width = 7, fig.height = 5)
+library(DMAR)
+```
+
+In 1968, *Pygmalion in the Classroom* (Rosenthal & Jacobson) reported that
+telling teachers certain randomly chosen children were about to bloom
+intellectually raised those children's IQ. The single study (shipped in
+DMAR as `pygmalion`, and the running analysis of covariance example in
+Maxwell, Delaney, and Kelley's *Designing Experiments and Analyzing Data*)
+set off fourteen years of replications with wildly varying results.
+Raudenbush (1984) synthesized 18 of those experiments and asked the
+question that resolved the controversy: not *whether* there is an
+expectancy effect, but *why the studies disagree*. His answer: the longer
+teachers had known their pupils before the expectancy induction, the
+smaller the effect. Credible deception is the Achilles' heel of the
+design.
+
+This vignette reproduces the paper's analyses with DMAR's synthesis
+functions, then reanalyzes the data with modern random effects machinery.
+The single Pygmalion study and this literature are deliberately kept as
+separate data sets: one is a famous experiment, the other is the evidence
+about the claim.
+
+## The Data
+
+The 1984 Table 1, at the condition level (Pellegrini & Hicks ran a
+tester-aware and a tester-blind condition):
+
+```{r}
+data(teacher_expectancy)
+teacher_expectancy[, c("author", "weeks", "tester", "d", "p_one_tailed")]
+```
+
+For the analyses with the 18 *studies* as units, Raudenbush merged the two
+Pellegrini and Hicks conditions into their study-level values
+(`d = 0.52`, one-tailed `p = .010`; see `?teacher_expectancy`):
+
+```{r}
+s   <- teacher_expectancy[-c(4, 5), ]
+d18 <- append(s$d,             0.52, after = 3)
+p18 <- append(s$p_one_tailed,  .010, after = 3)
+wk18 <- append(s$weeks,           0, after = 3)
+ne18 <- append(s$n_experimental, 22, after = 3)
+nc18 <- append(s$n_control,      22, after = 3)
+round(c(mean = mean(d18), sd = sd(d18), max = max(d18), min = min(d18)), 2)
+```
+
+These match the paper's summary exactly (*M* = 0.11, *SD* = 0.20, range
+0.55 to -0.13).
+
+## Are the Studies Significant in Combination? (Table 2)
+
+Raudenbush opened with four classical combined significance tests, which
+`combine_p()` provides in one call. The weights for the Mosteller-Bush
+weighted method are the studies' degrees of freedom:
+
+```{r}
+df18 <- ne18 + nc18 - 2
+combine_p(p18, weights = df18)
+```
+
+Raudenbush's Table 2 reports three of the four rejecting the null:
+Fisher's chi square(36) = 62.17, Edgington's sum of 6.84 (*p* = .04),
+and the adding-Zs test (his z = 2.12, *p* = .017), with only the
+df-weighted variant not rejecting. Recomputed here from the tabled
+one-tailed *p*-values, Fisher (chi square(36) = 62.17, *p* = .0043)
+and adding-Zs (z = 2.20, *p* = .0139) reject as he found, but
+Edgington's sum comes to 6.996 rather than 6.84 and its *p*-value
+lands at .0509, a hair past the line his rounding placed it inside.
+A method whose decision flips with the third decimal of the inputs is
+telling you the evidence is borderline, not settled; the two sturdy
+rejections and the df-weighted non-rejection (z = 0.87, *p* = .19)
+carry the real message. That disagreement is the first finding: the
+larger studies found smaller effects, so something about the studies,
+not just sampling error, drives the variation.
+
+## Why Do the Studies Disagree? The Prior-Contact Contrast
+
+The paper's central hypothesis: the more weeks teachers had known their
+pupils before the induction, the less credible the deception, the smaller
+the effect.
+
+```{r}
+plot(d18 ~ wk18,
+     xlab = "Weeks of teacher-student contact before induction",
+     ylab = "Effect size d", pch = 16)
+```
+
+The raw correlation and Raudenbush's linearized (reciprocal-transformed)
+version:
+
+```{r}
+round(c(r = cor(d18, wk18),
+        r_transformed = cor(-1 / (1 + d18), -1 / (2 + wk18))), 2)
+```
+
+(The paper reports -.55 and -.77.) The formal test is a Rosenthal-Rubin
+contrast among the effect sizes, with weights inversely proportional to
+weeks of prior contact and the standard large-sample variance for each
+*d*:
+
+```{r}
+v18 <- (ne18 + nc18) / (ne18 * nc18) + d18^2 / (2 * (ne18 + nc18))
+meta_contrast(d18, v18, weights = 1 / (wk18 + 2))
+```
+
+The *z* of about 2.75 (one-tailed *p* = .003 in the paper) supports the
+hypothesis. Raudenbush partitioned the total heterogeneity the way an
+ANOVA partitions sums of squares: the fixed effect fit gives Cochran's Q,
+
+```{r}
+fe <- meta_es(d18, v18, method = "fe")
+fe[fe$term %in% c("Q", "Q_df", "Q_p"), ]
+```
+
+and the squared contrast statistic over Q is the proportion of
+heterogeneity the moderator explains (Raudenbush's 52 percent; the package
+returns 0.51 from these inputs):
+
+```{r}
+z_contrast <- meta_contrast(d18, v18, weights = 1 / (wk18 + 2))$value[3]
+round(z_contrast^2 / fe$value[fe$term == "Q"], 2)
+```
+
+Note the instructive subtlety: the omnibus Q (14.9 on 17 df) would not
+itself reject homogeneity. A diffuse test looked at the same data and saw
+nothing; the focused contrast, specified in advance from a substantive
+hypothesis, saw the structure. That lesson, prefer focused model
+comparisons to omnibus tests, is the same one Maxwell, Delaney, and
+Kelley (2027) teach for single studies.
+
+## Low- Versus High-Contact Studies (Table 3)
+
+Dichotomizing at two weeks of prior contact:
+
+```{r}
+lo <- wk18 <= 2
+round(c(mean_low = mean(d18[lo]), mean_high = mean(d18[!lo])), 2)
+combine_p(p18[lo],  weights = df18[lo])    # 10 low-contact studies
+combine_p(p18[!lo], weights = df18[!lo])   # 8 high-contact studies
+```
+
+Every method finds the low-contact studies jointly significant (the paper:
+adding-Zs z = 4.16, weighted 2.52); none finds anything in the
+high-contact studies. Expectancy effects appear when, and only when, the
+teachers barely knew the children.
+
+## Tester Awareness (the Condition-Level Rows)
+
+Could the effect be tester bias? Here the two Pellegrini and Hicks
+conditions matter, so the analysis runs at the condition level with an
+aware-versus-blind contrast:
+
+```{r}
+d  <- teacher_expectancy$d
+ne <- teacher_expectancy$n_experimental
+nc <- teacher_expectancy$n_control
+vi <- (ne + nc) / (ne * nc) + d^2 / (2 * (ne + nc))
+aware <- teacher_expectancy$tester == "aware"
+meta_contrast(d, vi, weights = ifelse(aware, 1 / sum(aware),
+                                      -1 / sum(!aware)))
+```
+
+No main effect of tester awareness (the paper reports z = -0.36), and the
+low-contact effect held in both the aware and blind subsets: the
+prior-contact moderator is not an artifact of who administered the test.
+
+## A Modern Reanalysis
+
+Raudenbush worked with the tools of 1984. The same questions today get a
+random effects model with REML, the Hartung-Knapp adjustment, a
+Q-profile interval for the between-study variance, and a prediction
+interval, all of which `meta_smd()` reports in one table (Hedges'
+small-sample correction is on by default; the historical analyses above
+pooled raw *d* values):
+
+```{r}
+meta_smd(smd = teacher_expectancy$d,
+         n_1 = teacher_expectancy$n_experimental,
+         n_2 = teacher_expectancy$n_control)
+```
+
+And the picture (the forest plot pools the raw *d* values, so its diamond
+sits fractionally left of the Hedges-corrected average in the table above):
+
+```{r forest, fig.height = 6}
+plot_forest(d, vi, labels = teacher_expectancy$author,
+            xlab = "Standardized mean difference (d)")
+```
+
+The pooled average is small and its confidence interval narrow, but the
+summary that respects the heterogeneity is conditional: pooling
+everything answers a question
+("what is the average effect across these heterogeneous inductions?")
+that the moderator analysis showed is the wrong one. Where will the next
+study land? It depends almost entirely on when the expectancy is induced.
+
+## References
+
+Raudenbush, S. W. (1984). Magnitude of teacher expectancy effects on
+pupil IQ as a function of the credibility of expectancy induction: A
+synthesis of findings from 18 experiments. *Journal of Educational
+Psychology, 76*(1), 85--97.
+
+Raudenbush, S. W., & Bryk, A. S. (1985). Empirical Bayes meta-analysis.
+*Journal of Educational Statistics, 10*(2), 75--98.
+
+Rosenthal, R., & Jacobson, L. (1968). *Pygmalion in the classroom*.
+Holt, Rinehart & Winston.
+
+Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
+experiments and analyzing data: A model comparison perspective* (4th
+ed.). Routledge.

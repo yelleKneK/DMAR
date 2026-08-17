@@ -1,0 +1,112 @@
+#' Teacher Expectancy Meta-Analysis Data (Raudenbush, 1984)
+#'
+#' The 19 effect sizes from Raudenbush's (1984) synthesis of 18 experiments
+#' testing the effect of teacher expectancy on pupil IQ, the meta-analysis
+#' that resolved the controversy started by \emph{Pygmalion in the Classroom}
+#' (Rosenthal & Jacobson, 1968; the single famous study is shipped separately
+#' as \code{\link{pygmalion}}). In each experiment, teachers were told that
+#' randomly selected children were likely to bloom intellectually; the
+#' synthesis asks how large the resulting IQ advantage was and, centrally,
+#' why it varied across studies. Raudenbush's hypothesis, strongly supported,
+#' was that the longer teachers had known their pupils before the expectancy
+#' induction, the smaller the effect: credible deception is the Achilles'
+#' heel of the design.
+#'
+#' @format A data frame with 19 rows (18 experiments; Pellegrini and Hicks,
+#' 1972, contributes a tester-aware and a tester-blind condition) and 10
+#' variables.
+#' \describe{
+#'   \item{\code{study}}{Integer identifier, in the order of the paper's
+#'     Table 1.}
+#'   \item{\code{author}}{Study authors (with the Pellegrini and Hicks
+#'     condition noted).}
+#'   \item{\code{year}}{Year of publication.}
+#'   \item{\code{weeks}}{Estimated weeks of teacher-student contact prior to
+#'     the expectancy induction, 0 to 24. The moderator at the heart of the
+#'     paper.}
+#'   \item{\code{testing}}{Factor: \code{group} or \code{individual} IQ
+#'     testing.}
+#'   \item{\code{tester}}{Factor: test administrator \code{aware} of or
+#'     \code{blind} to the expectancy designations.}
+#'   \item{\code{n_experimental}, \code{n_control}}{Per-condition sample
+#'     sizes (from the studies as tabulated in Raudenbush & Bryk, 1985; the
+#'     1984 table does not print them).}
+#'   \item{\code{d}}{Standardized mean difference: the treatment effect in IQ
+#'     points divided by the control group's posttest standard deviation
+#'     (positive when the expectancy children gained more). The 1984 paper's
+#'     Table 1 values.}
+#'   \item{\code{p_one_tailed}}{One-tailed \emph{p}-value reported for the
+#'     study's expectancy effect.}
+#' }
+#'
+#' @details
+#' \strong{The study-level Pellegrini and Hicks values.} For analyses with
+#' the 18 \emph{studies} as units (the combined significance tests, the
+#' contrast on weeks of prior contact, and the heterogeneity statistic),
+#' Raudenbush merged the two Pellegrini and Hicks conditions into a single
+#' study-level entry with \eqn{d = 0.52} and one-tailed \eqn{p = .010}
+#' (Table 1 prints these on the study's header row above the two condition
+#' rows). Replace rows 4 and 5 with that pair to reconstruct his 18-study
+#' analyses, as the teacher expectancy vignette does. For the tester
+#' aware-versus-blind comparisons the two conditions enter separately, which
+#' is why the data ship at the condition level.
+#'
+#' \strong{Relation to the 1985 version.} Raudenbush and Bryk (1985)
+#' re-standardized the same literature for their empirical Bayes analysis
+#' (that version circulates as \code{dat.raudenbush1985} in \pkg{metafor}),
+#' so its effect sizes differ from the \code{d} column here, which preserves
+#' the 1984 paper's metric. The sample sizes are common to both.
+#'
+#' The teacher expectancy vignette
+#' (\code{vignette("teacher_expectancy", package = "DMAR")}) reproduces the
+#' paper's analyses with \code{\link{combine_p}}, \code{\link{meta_contrast}},
+#' and \code{\link{meta_smd}}, and then reanalyzes the data with modern
+#' random effects machinery.
+#'
+#' @source
+#' Raudenbush, S. W. (1984). Magnitude of teacher expectancy effects on
+#' pupil IQ as a function of the credibility of expectancy induction: A
+#' synthesis of findings from 18 experiments. \emph{Journal of
+#' Educational Psychology, 76}(1), 85--97.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @references
+#' Raudenbush, S. W. (1984). Magnitude of teacher expectancy effects on pupil
+#'   IQ as a function of the credibility of expectancy induction: A synthesis
+#'   of findings from 18 experiments. \emph{Journal of Educational
+#'   Psychology, 76}(1), 85--97. \doi{10.1037/0022-0663.76.1.85}
+#'
+#' Raudenbush, S. W., & Bryk, A. S. (1985). Empirical Bayes meta-analysis.
+#'   \emph{Journal of Educational Statistics, 10}(2), 75--98.
+#'
+#' Rosenthal, R., & Jacobson, L. (1968). \emph{Pygmalion in the
+#'   classroom: Teacher expectation and pupils' intellectual development}.
+#'   Holt, Rinehart and Winston.
+#'
+#' @seealso \code{\link{pygmalion}} for the single Rosenthal and Jacobson
+#'   study this literature grew from; \code{\link{meta_smd}},
+#'   \code{\link{meta_contrast}}, and \code{\link{combine_p}} for the
+#'   analyses the vignette reproduces.
+#'
+#' @examples
+#' data(teacher_expectancy)
+#' head(teacher_expectancy)
+#'
+#' # The paper's central picture: effect size against weeks of prior contact.
+#' plot(d ~ weeks, data = teacher_expectancy,
+#'      xlab = "Weeks of teacher-student contact before induction",
+#'      ylab = "Effect size d")
+#'
+#' # The study-level (18-study) data Raudenbush used for the combined tests:
+#' # merge the two Pellegrini & Hicks conditions into their study row.
+#' study_level <- teacher_expectancy[-c(4, 5), ]
+#' ph <- data.frame(study = 4, author = "Pellegrini & Hicks", year = 1972,
+#'                  weeks = 0, testing = "group", tester = "aware",
+#'                  n_experimental = 22, n_control = 22,
+#'                  d = 0.52, p_one_tailed = .010)
+#' study_level <- rbind(study_level[1:3, ], ph, study_level[4:17, ])
+#' round(c(mean = mean(study_level$d), sd = sd(study_level$d)), 2)  # .11, .20
+#'
+#' @keywords datasets
+"teacher_expectancy"

@@ -1,0 +1,154 @@
+#' Bayesian Paired-Samples \emph{t} Analysis
+#'
+#' The Bayesian counterpart of the paired \emph{t} test, the analysis of
+#' \code{\link{bayes_one_sample_t}} applied to the within-pair differences.
+#' It reports the posterior of the standardized difference
+#' \eqn{\delta = \mu_D / \sigma_D} under the default
+#' Jeffreys-Zellner-Siow (JZS) prior, a Cauchy prior on \eqn{\delta} with
+#' Jeffreys priors on the nuisance parameters (the variance), summarized by
+#' its median, mean, a credible interval, and the probability statement
+#' \eqn{P(\delta > 0 \mid \mathrm{data})}. The JZS default Bayes factor
+#' (Rouder, Speckman, Sun, Morey, & Iverson, 2009) is also reported. See
+#' \code{\link{bayes_one_sample_t}} for the model, the package's
+#' interpretive stance, and the computational details (exact quadrature,
+#' no Monte Carlo error).
+#'
+#' @param x,y Numeric vectors of paired observations, the same length, in
+#'   matching order. The analysis is of \code{x - y}. Omit both to supply
+#'   summary statistics of the differences instead.
+#' @param mean_diff,sd_diff,n Summary statistics of the paired
+#'   differences: their mean, their standard deviation, and the number of
+#'   pairs. These are the quantities a paper's paired \emph{t} test
+#'   reports. Supply either raw data or all three summary values, never
+#'   both.
+#' @param prior_location Location of the Cauchy prior on \eqn{\delta}.
+#'   Defaults to 0, the JZS prior; a nonzero value centers the prior on an
+#'   expected effect (Gronau, Ly, & Wagenmakers, 2020).
+#' @param prior_mean,prior_sd Mean and standard deviation of a normal
+#'   prior on \eqn{\delta}, for prior beliefs stated as moments. Supplying
+#'   them selects the normal prior; they cannot be combined with the
+#'   Cauchy arguments. See the prior section of Details.
+#' @param prior_scale The way to adjust the prior. It is the scale (width)
+#'   of the Cauchy prior on the standardized effect \eqn{\delta} (the JZS
+#'   prior), so a user who wants a more or less informative prior sets
+#'   \code{prior_scale}: larger values say larger effects are plausible a
+#'   priori, smaller values concentrate the prior near zero. The default
+#'   \eqn{\sqrt{2}/2 \approx 0.707} is the JZS \dQuote{medium} prior. Fully
+#'   custom or subjective priors beyond the Cauchy family are not supported
+#'   by the \pkg{BayesFactor} engine.
+#' @param conf_level Probability mass of the credible interval.
+#'
+#' @return A \code{data.frame} (class \code{dmar_tbl}) with the same
+#'   rows as \code{\link{bayes_one_sample_t}}, where \eqn{\delta} is the
+#'   standardized within-pair difference and the raw rows are on the
+#'   difference scale; \code{n} is the number of pairs.
+#'
+#'
+#' \strong{Specifying the prior.} The default prior on the standardized
+#' effect \eqn{\delta} is the JZS Cauchy centered at zero. Its
+#' \code{prior_scale} \eqn{r} is not a standard deviation: a Cauchy has
+#' no mean and no variance (those integrals diverge), so beliefs stated
+#' as prior moments cannot be expressed through it. What the scale does
+#' fix is the quartiles: half the prior mass lies within
+#' \eqn{\pm r} of the location, so the default \eqn{r = \sqrt{2}/2}
+#' says a 50 percent prior bet that \eqn{|\delta| < 0.71}. A directional
+#' prior keeps the Cauchy and moves \code{prior_location} (Gronau, Ly, &
+#' Wagenmakers, 2020). A researcher who thinks in prior moments instead
+#' sets \code{prior_mean} and \code{prior_sd}, which use a normal prior
+#' with exactly those moments; the two families are exclusive.
+#'
+#' The families are also linked by an exact identity: a Cauchy with
+#' location \eqn{\mu} and scale \eqn{r} is a normal prior
+#' \eqn{N(\mu, r^2/z^2)} whose \eqn{z} is standard normal, that is, a
+#' normal prior whose variance you are not sure of. Choosing the Cauchy
+#' is therefore choosing a normal prior with built-in doubt about its
+#' own width, which is why its tails are heavier and its Bayes factors
+#' more conservative. A normal matched to the Cauchy's interquartile
+#' range has \code{prior_sd = 1.4826 * prior_scale}. The full posterior
+#' of \eqn{\delta} is returned in the \code{"posterior"} attribute as a
+#' data frame of \code{delta} and \code{density}, so any posterior
+#' probability, not only the reported ones, can be computed from it.
+#'
+#'
+#' @references
+#' Gronau, Q. F., Ly, A., & Wagenmakers, E.-J. (2020). Informed
+#'   Bayesian t-tests. \emph{The American Statistician, 74}(2),
+#'   137--143. \doi{10.1080/00031305.2018.1562983}
+#'
+#' Rouder, J. N., Speckman, P. L., Sun, D., Morey, R. D., & Iverson, G.
+#'   (2009). Bayesian t tests for accepting and rejecting the null
+#'   hypothesis. \emph{Psychonomic Bulletin & Review, 16}(2), 225--237.
+#'   \doi{10.3758/PBR.16.2.225}
+#'
+#' Jeffreys, H. (1961). \emph{Theory of probability} (3rd ed.). Oxford
+#'   University Press.
+#'
+#' Zellner, A., & Siow, A. (1980). Posterior odds ratios for selected
+#'   regression hypotheses. In J. M. Bernardo, M. H. DeGroot, D. V.
+#'   Lindley, & A. F. M. Smith (Eds.), \emph{Bayesian statistics:
+#'   Proceedings of the First International Meeting} (pp. 585--603).
+#'   University of Valencia Press.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{bayes_one_sample_t}} for the model and stance;
+#'   \code{\link{bayes_independent_t}} for unpaired groups;
+#'   \code{\link{probability_of_superiority_paired}} and
+#'   \code{\link{randomization_test_paired}} for other paired analyses.
+#'
+#' @family Bayesian t analyses
+#'
+#' @keywords htest
+#'
+#' @examples
+#' set.seed(113)
+#' before <- rnorm(30, 100, 12)
+#' after  <- before + rnorm(30, 3, 6)
+#' bayes_paired_t(after, before)
+#'
+#' @export
+bayes_paired_t <- function(x = NULL, y = NULL,
+                           mean_diff = NULL, sd_diff = NULL, n = NULL,
+                           prior_location = 0,
+                           prior_scale = sqrt(2) / 2,
+                           prior_mean = NULL, prior_sd = NULL,
+                           conf_level = 0.95) {
+  summaries <- !is.null(mean_diff) || !is.null(sd_diff) || !is.null(n)
+  if (is.null(x) && is.null(y) && summaries) {
+    .bayes_t_check_summaries(mean = mean_diff, sd = sd_diff, n = n,
+                             labels = c("mean_diff", "sd_diff", "n"))
+    if (missing(prior_scale)) {
+      return(bayes_one_sample_t(mean = mean_diff, sd = sd_diff, n = n,
+                                mu_0 = 0, prior_location = prior_location,
+                                prior_mean = prior_mean,
+                                prior_sd = prior_sd,
+                                conf_level = conf_level))
+    }
+    return(bayes_one_sample_t(mean = mean_diff, sd = sd_diff, n = n,
+                              mu_0 = 0, prior_location = prior_location,
+                              prior_scale = prior_scale,
+                              prior_mean = prior_mean, prior_sd = prior_sd,
+                              conf_level = conf_level))
+  }
+  if (summaries) {
+    stop("Supply raw data through 'x' and 'y' or summary statistics ",
+         "through 'mean_diff', 'sd_diff', and 'n', not both.",
+         call. = FALSE)
+  }
+  .bayes_t_check_x(x, "x")
+  .bayes_t_check_x(y, "y")
+  if (length(x) != length(y)) {
+    stop("'x' and 'y' must have the same length (matched pairs).",
+         call. = FALSE)
+  }
+  if (missing(prior_scale)) {
+    return(bayes_one_sample_t(x - y, mu_0 = 0,
+                              prior_location = prior_location,
+                              prior_mean = prior_mean, prior_sd = prior_sd,
+                              conf_level = conf_level))
+  }
+  bayes_one_sample_t(x - y, mu_0 = 0, prior_location = prior_location,
+                     prior_scale = prior_scale,
+                     prior_mean = prior_mean, prior_sd = prior_sd,
+                     conf_level = conf_level)
+}

@@ -1,0 +1,520 @@
+#' Indiana Prime Time Third Grade Achievement Evaluation Data
+#'
+#' The complete student level data file from the 2000 to 2001
+#' Indiana Department of Education program evaluation of Project
+#' Prime Time, reported in Lapsley, Daytner, Kelley, and Maxwell
+#' (2002, ERIC ED466679). The evaluation examined the academic
+#' performance of \emph{N} = 10,927 third grade students in
+#' \emph{n} = 573 classrooms (here 586 by the
+#' \code{paste(corp, school, class)} rule), \emph{n} = 163
+#' schools, \emph{n} = 61 school corporations, and 9 Indiana
+#' educational service regions as a function of class size, pupil
+#' to teacher ratio, and the presence of a Prime Time
+#' instructional assistant. The data have been used as a
+#' multilevel example through chapters 3, 4, 6, 9, and 10 of
+#' Finch, Bolin, and Kelley (2019, \emph{Multilevel Modeling Using
+#' R}, 2nd ed., CRC Press) and are made available here as a
+#' benchmark data set for the design, measurement, and analysis of
+#' nested data.
+#'
+#' @format A data frame with 10,927 observations on 113 variables.
+#' Variables fall into seven blocks: three derived unique cluster
+#' identifiers, student level demographics and ability and
+#' achievement scores, classroom level variables, school level
+#' variables, and school corporation (district) level variables.
+#' Original Indiana DOE variable spellings are preserved, including
+#' the typos \code{calender} (calendar), \code{hispanc1} and
+#' \code{hispanc2} (Hispanic), and \code{rmediate} (remediate), for
+#' code compatibility with Finch, Bolin, and Kelley (2019). The
+#' SPSS variable label from the source file is available as
+#' \code{attr(prime_time_achievement$VAR, "label")} for every
+#' variable carried over from the SPSS file; the one derived recode
+#' without a source label is \code{classize} (see its entry below).
+#' \describe{
+#'   \item{\code{id}}{Student identifier in the source file (not
+#'     guaranteed unique; see \code{class_id} etc. for stable
+#'     cluster keys).}
+#'   \item{\code{region}}{Indiana educational service region, coded
+#'     1 to 9. Sampling stratifier (25\% of corporations per
+#'     region).}
+#'   \item{\code{corp}}{School corporation (district) numeric
+#'     identifier. \strong{Note:} corp 2400 appears in both region
+#'     2 (12 schools) and region 3 (1 school) in the source file,
+#'     so \code{paste(region, corp)} is the cleaner cluster key;
+#'     see \code{corp_id}.}
+#'   \item{\code{school}}{Numeric school identifier (unique within
+#'     corporation).}
+#'   \item{\code{class}}{Classroom number within school, 1 to 8.
+#'     \strong{Not} unique across schools.}
+#'   \item{\code{corp_id}}{Derived. \code{paste(region, corp, sep =
+#'     "_")}. 61 distinct values, matching the count of school
+#'     corporations reported in Lapsley et al. (2002).}
+#'   \item{\code{school_id}}{Derived. \code{paste(corp, school, sep
+#'     = "_")}. 163 distinct values.}
+#'   \item{\code{class_id}}{Derived. \code{paste(corp, school,
+#'     class, sep = "_")}. 586 distinct values. (The published
+#'     report counted 573 classrooms; the small discrepancy
+#'     reflects a different counting convention used in the
+#'     manuscript.)}
+#'   \item{\code{gender}}{1 = Female, 2 = Male. 45 \code{NA}.}
+#'   \item{\code{age}}{Student age in months.}
+#'   \item{\code{race}}{Indiana DOE 6-category ethno-racial code:
+#'     1 = American Indian / Alaskan, 2 = African American, 3 =
+#'     Asian American, 4 = Hispanic American, 5 = Caucasian
+#'     American, 6 = Multi-racial.}
+#'   \item{\code{geread}}{Gates-MacGinitie reading.}
+#'   \item{\code{gevocab}}{Gates-MacGinitie vocabulary.}
+#'   \item{\code{gereadcm}}{Gates-MacGinitie reading composite.}
+#'   \item{\code{gelang}}{Gates-MacGinitie language.}
+#'   \item{\code{gelangmc}}{Gates-MacGinitie language mechanics.}
+#'   \item{\code{gelangcm}}{Gates-MacGinitie language composite.}
+#'   \item{\code{gemath}}{Gates-MacGinitie mathematics.}
+#'   \item{\code{gemathcp}}{Gates-MacGinitie mathematics
+#'     computation.}
+#'   \item{\code{gemathcm}}{Gates-MacGinitie mathematics composite.}
+#'   \item{\code{getotal}}{Gates-MacGinitie total.}
+#'   \item{\code{ncread}}{NCE reading (ISTEP+).}
+#'   \item{\code{ncvocab}}{NCE vocabulary (ISTEP+).}
+#'   \item{\code{ncreadcm}}{NCE reading composite (ISTEP+).}
+#'   \item{\code{nclang}}{NCE language (ISTEP+).}
+#'   \item{\code{nclangmc}}{NCE language mechanics (ISTEP+).}
+#'   \item{\code{nclangcm}}{NCE language composite (ISTEP+).}
+#'   \item{\code{ncmath}}{NCE mathematics (ISTEP+).}
+#'   \item{\code{ncmathcp}}{NCE mathematics computation (ISTEP+).}
+#'   \item{\code{ncmathcm}}{NCE mathematics composite (ISTEP+).}
+#'   \item{\code{nctotal}}{\strong{NCE total composite (ISTEP+)},
+#'     the criterion variable in the Lapsley et al. (2002) HLM
+#'     analyses.}
+#'   \item{\code{aaread}}{AANCE reading.}
+#'   \item{\code{aavocab}}{AANCE vocabulary.}
+#'   \item{\code{aareadcm}}{AANCE reading composite.}
+#'   \item{\code{aalang}}{AANCE language.}
+#'   \item{\code{aalangmc}}{AANCE language mechanics.}
+#'   \item{\code{aalangcm}}{AANCE language composite.}
+#'   \item{\code{aamath}}{AANCE mathematics.}
+#'   \item{\code{aamathcp}}{AANCE mathematics computation.}
+#'   \item{\code{aamathcm}}{AANCE mathematics composite.}
+#'   \item{\code{aatotal}}{AANCE total.}
+#'   \item{\code{npanverb}}{NPA nonverbal reasoning.}
+#'   \item{\code{npamem}}{NPA working memory.}
+#'   \item{\code{npaverb}}{NPA verbal reasoning.}
+#'   \item{\code{npatotal}}{NPA total.}
+#'   \item{\code{csi}}{Cognitive Skills Index (student level).}
+#'   \item{\code{multi}}{Multi-age classroom indicator
+#'     (1 = Yes, 2 = No).}
+#'   \item{\code{typmulti}}{Type of multi-age classroom (1 =
+#'     1st-2nd-3rd grades, 2 = 2nd-3rd, 3 = 3rd-4th, 4 = 2nd-3rd-
+#'     4th; \code{NA} when \code{multi == 2}).}
+#'   \item{\code{clenroll}}{Official class enrollment.}
+#'   \item{\code{classize}}{Project STAR style class size category:
+#'     1 = small (roughly 12-17), 2 = regular (roughly 18-22),
+#'     3 = regular-larger (roughly 23-26), 4 = large (27 or more).
+#'     Boundaries follow the STAR classification (Pate-Bain and
+#'     Achilles, 1986).}
+#'   \item{\code{ptratio}}{Classroom pupil to teacher ratio (IDOE
+#'     formula: enrollment / [1.00 per full time teacher + 0.33 per
+#'     full time aide + 0.165 per part time aide]).}
+#'   \item{\code{ptia}}{Prime Time Instructional Aide status:
+#'     1 = aide present, 2 = no aide, 3 = other assistant listed.
+#'     The focal treatment indicator.}
+#'   \item{\code{ptstatus}}{Status of Prime Time aide: 1 = full
+#'     time in classroom, 2 = part time in classroom; \code{NA}
+#'     when \code{ptia != 1}.}
+#'   \item{\code{locale}}{NCES locale code (1 = large central
+#'     city, 2 = mid-size central city, 3 = urban fringe of large
+#'     city, 4 = urban fringe of mid-size city, 5 = large town,
+#'     6 = small town, 7 = rural).}
+#'   \item{\code{chapter1}}{School receives Title I (legacy
+#'     "Chapter 1") money? 1 = Yes, 2 = No.}
+#'   \item{\code{ses}}{School SES, the IDOE percentage of students
+#'     \emph{not} eligible for subsidized lunch (0 to 100; higher
+#'     = more affluent). The school level SES variable used in the
+#'     Lapsley et al. (2002) HLM analyses.}
+#'   \item{\code{context}}{IDOE contextual rank for the school.}
+#'   \item{\code{calender}}{School calendar type (1 = traditional,
+#'     2 = year round). Typo preserved from source.}
+#'   \item{\code{senroll}}{Building (school) enrollment.}
+#'   \item{\code{sattend}}{Building attendance rate (percent).}
+#'   \item{\code{white1}}{School percent White.}
+#'   \item{\code{black1}}{School percent Black.}
+#'   \item{\code{hispanc1}}{School percent Hispanic (typo preserved).}
+#'   \item{\code{asian1}}{School percent Asian.}
+#'   \item{\code{aindian1}}{School percent American Indian.}
+#'   \item{\code{multi1}}{School percent multi-racial.}
+#'   \item{\code{total1}}{School total percent non-white.}
+#'   \item{\code{noteach}}{Number of teachers in the building (full
+#'     time equivalent).}
+#'   \item{\code{avgage1}}{School average teacher age.}
+#'   \item{\code{avgexp1}}{School average teacher experience
+#'     (years).}
+#'   \item{\code{avgsal1}}{School average teacher salary (dollars).}
+#'   \item{\code{spert}}{School students per teacher.}
+#'   \item{\code{thrdclss}}{Number of third grade classrooms in the
+#'     building.}
+#'   \item{\code{thrdstud}}{Number of third graders who took ISTEP+
+#'     in the building.}
+#'   \item{\code{passla1}}{Building percent passing language arts.}
+#'   \item{\code{passmth1}}{Building percent passing math.}
+#'   \item{\code{passbth1}}{Building percent passing both.}
+#'   \item{\code{tmnnce1}}{Building total battery mean NCE.}
+#'   \item{\code{rmdnce1}}{Building reading \emph{median} NCE.
+#'     \strong{Note:} the 56 rows from one building (\code{corp} 5740,
+#'     \code{school} 6187) carry the source value 7603, an evident
+#'     data-entry error in the Indiana DOE file (an NCE is on the 1 to
+#'     99 scale, and the same building's other median-NCE columns are
+#'     in range). The value is preserved as shipped rather than
+#'     silently corrected, since the true value cannot be recovered;
+#'     drop or set it to \code{NA} before analyzing this column.}
+#'   \item{\code{lamdnce1}}{Building language arts \emph{median}
+#'     NCE.}
+#'   \item{\code{mmdnce1}}{Building mathematics \emph{median} NCE.}
+#'   \item{\code{tmdnce1}}{Building total battery \emph{median}
+#'     NCE.}
+#'   \item{\code{avgcsi1}}{Building average Cognitive Skills Index.}
+#'   \item{\code{geog}}{Geographic category of the corporation
+#'     (1 = urban, 2 = suburban, 3 = town, 4 = rural). Sampling
+#'     stratifier within region.}
+#'   \item{\code{totepp}}{Corporation total expense per pupil
+#'     (1997--1999, dollars).}
+#'   \item{\code{cenroll}}{Corporation enrollment (all grades).}
+#'   \item{\code{cattend}}{Corporation attendance rate (percent).}
+#'   \item{\code{freelnch}}{Corporation percent eligible for free
+#'     lunch.}
+#'   \item{\code{lep}}{Corporation percent with limited English
+#'     proficiency.}
+#'   \item{\code{speced}}{Corporation percent in special education.}
+#'   \item{\code{minority}}{Corporation percent minority.}
+#'   \item{\code{white2}}{Corporation total White public enrollment
+#'     (raw count).}
+#'   \item{\code{black2}}{Corporation total Black public enrollment.}
+#'   \item{\code{hispanc2}}{Corporation total Hispanic public
+#'     enrollment (typo preserved).}
+#'   \item{\code{asian2}}{Corporation total Asian public enrollment.}
+#'   \item{\code{aindian2}}{Corporation total American Indian
+#'     public enrollment.}
+#'   \item{\code{multi2}}{Corporation total multi-racial public
+#'     enrollment.}
+#'   \item{\code{total2}}{Corporation total non-white public
+#'     enrollment.}
+#'   \item{\code{thrdadm}}{Corporation third grade ADM
+#'     (average daily membership).}
+#'   \item{\code{thrdtech}}{Corporation third grade teachers.}
+#'   \item{\code{avgage2}}{Corporation average teacher age.}
+#'   \item{\code{avgexp2}}{Corporation average teacher experience
+#'     (years).}
+#'   \item{\code{avgsal2}}{Corporation average teacher salary
+#'     (dollars).}
+#'   \item{\code{thrdaide}}{Corporation third grade aides.}
+#'   \item{\code{passla2}}{Corporation percent passing language
+#'     arts.}
+#'   \item{\code{passmth2}}{Corporation percent passing math.}
+#'   \item{\code{passbth2}}{Corporation percent passing both.}
+#'   \item{\code{tmnnce2}}{Corporation total battery mean NCE.}
+#'   \item{\code{rmdnce2}}{Corporation reading \emph{median} NCE.}
+#'   \item{\code{lamdnce2}}{Corporation language arts
+#'     \emph{median} NCE.}
+#'   \item{\code{mmdnce2}}{Corporation mathematics \emph{median}
+#'     NCE.}
+#'   \item{\code{tmdnce2}}{Corporation total battery
+#'     \emph{median} NCE.}
+#'   \item{\code{rmediate}}{Corporation remediation funding per
+#'     pupil (dollars). Typo preserved.}
+#' }
+#'
+#' @details
+#' \strong{Study background.} Indiana's Prime Time program, phased
+#' in beginning 1984 to 1985 (Indiana statute; House Bill 1166 of
+#' 2001 codified the modern funding formula), was one of the
+#' earliest state level initiatives in the United States to use a
+#' funding formula to reduce class size and pupil to teacher ratio
+#' in Kindergarten through third grade. Funds were distributed to
+#' school corporations to maintain a corporation average pupil to
+#' teacher ratio of 18:1 in K and grade 1 and 20:1 in grades 2 and
+#' 3; corporations could meet the target by hiring additional
+#' teachers or, more commonly, paraprofessional instructional
+#' assistants. Along with Tennessee's Project STAR
+#' (Pate-Bain and Achilles, 1986; covered by Education Week,
+#' \emph{Research: Sizing Up Small Classes}, February 2001),
+#' Prime Time was a widely cited national model.
+#'
+#' In 1999 the Indiana Department of Education funded a three
+#' year program evaluation of Prime Time. The third year of the
+#' evaluation, conducted by Daniel K. Lapsley and Katrina M.
+#' Daytner (Ball State University and Western Illinois University)
+#' with technical assistance from Ken Kelley and Scott E. Maxwell
+#' (University of Notre Dame), examined the academic performance
+#' of randomly selected Indiana third graders on the state
+#' mandated ISTEP+ standardized achievement test as a function of
+#' class size, pupil to teacher ratio, and the presence of a
+#' Prime Time instructional aide, using hierarchical linear
+#' modeling. The preliminary report and the AERA 2002 paper that
+#' summarizes the analyses are archived as ERIC document ED466679
+#' (Lapsley, Daytner, Kelley, and Maxwell, 2002). An earlier
+#' background report from the same evaluation team, prior to the
+#' Notre Dame group joining the project, is archived as ERIC
+#' document ED455220.
+#'
+#' \strong{Sampling.} School corporations were drawn by stratified
+#' cluster sampling with two rules: 25\% of corporations from each
+#' of the nine Indiana educational service regions, and at least
+#' one urban corporation per region, with the remainder
+#' proportionally allocated across geographic categories (urban,
+#' suburban, town, rural). The achieved sample was 61
+#' corporations (78\% of the target), 163 schools, 573 classrooms
+#' as counted in the manuscript (586 by the
+#' \code{paste(corp, school, class)} rule used here), and 10,927
+#' students (49.6\% female; 85\% Caucasian, 9.2\% African
+#' American, 3.2\% Hispanic). 4,016 students were in classrooms
+#' with a Prime Time instructional assistant (\code{ptia == 1}),
+#' 6,765 in classrooms without (\code{ptia == 2}); the file here
+#' shows 4,021 and 6,789 plus 117 \code{ptia == 3} (other assistant
+#' listed), with the small differences reflecting cleaning rules
+#' applied between the manuscript count and the final SPSS file.
+#'
+#' \strong{Instruments.} Third graders sit for the ISTEP+ (Indiana
+#' Statewide Testing for Educational Progress) in September of
+#' the school term. The ISTEP+ is published by CTB/McGraw-Hill
+#' and includes language arts, reading, and mathematics
+#' assessments. Normal Curve Equivalent (NCE) composite scores
+#' for these domains and for the total are the
+#' \code{ncread / nclang / ncmath / nctotal} columns and were the
+#' criterion variables in the published HLM analyses. NCE scores
+#' have a population mean of 50 and a standard deviation of
+#' approximately 21.06, with percentiles 1, 50, and 99 mapping to
+#' NCE scores of 1, 50, and 99. The
+#' \code{ge*} family is the parallel Gates-MacGinitie battery; the
+#' \code{aa*} family is the African American comparison NCE
+#' (AANCE); the \code{npa*} family is the cognitive abilities
+#' battery used as student level covariates in Finch, Bolin, and
+#' Kelley (2019).
+#'
+#' \strong{Nested data structure.} The natural hierarchy is
+#' student \emph{within} classroom \emph{within} school
+#' \emph{within} corporation \emph{within} region. The derived
+#' identifiers \code{corp_id}, \code{school_id}, and
+#' \code{class_id} are pre-computed and safe to use as grouping
+#' variables; the bare \code{corp} and \code{class} columns are
+#' \emph{not} unique by themselves. Class sizes range from 3 to
+#' 28 students (median 19); schools have 1 to 8 third grade
+#' classrooms (median 3) and 11 to 166 students (median 65);
+#' corporations have 15 to 756 students (median 117). Variance
+#' decomposition for the published outcome
+#' \code{nctotal} based on the three level random intercept null
+#' model \code{lmer(nctotal ~ 1 + (1 | corp_id/school_id))} gives:
+#' between-corporation variance 16.29, between-school within
+#' corporation variance 22.72, and within school residual variance
+#' 240.43, so that
+#' \emph{ICC}\eqn{_{\mathrm{corp}}} \eqn{\approx} 0.058,
+#' \emph{ICC}\eqn{_{\mathrm{school|corp}}} \eqn{\approx} 0.081, and
+#' the combined cluster
+#' \emph{ICC}\eqn{_{\mathrm{cluster}}} \eqn{\approx} 0.140. These
+#' nontrivial intraclass correlations are the methodological
+#' reason multilevel modeling is preferred to ordinary least
+#' squares regression for these data.
+#'
+#' \strong{Level 1, 2, 3 model framework.} For an outcome
+#' \eqn{Y_{ijk}} on student \eqn{i} in classroom \eqn{j} in school
+#' \eqn{k}, with student level predictor \eqn{X^{(1)}_{ijk}},
+#' classroom level predictor \eqn{X^{(2)}_{jk}}, and school level
+#' predictor \eqn{X^{(3)}_k}, the published Lapsley et al. (2002)
+#' family of HLM models has the equations
+#' \deqn{Y_{ijk} = \pi_{0jk} + \pi_{1jk} X^{(1)}_{ijk} + e_{ijk}
+#'   \quad \text{(Level 1)},}
+#' \deqn{\pi_{0jk} = \beta_{00k} + \beta_{01k} X^{(2)}_{jk} +
+#'   r_{0jk},
+#'   \quad \pi_{1jk} = \beta_{10k} + r_{1jk}
+#'   \quad \text{(Level 2)},}
+#' \deqn{\beta_{00k} = \gamma_{000} + \gamma_{001} X^{(3)}_k +
+#'   u_{00k},
+#'   \quad \beta_{01k} = \gamma_{010},
+#'   \quad \beta_{10k} = \gamma_{100}
+#'   \quad \text{(Level 3)},}
+#' with \eqn{e_{ijk} \sim N(0, \sigma^2)}, \eqn{r_{jk} \sim
+#'   N(0, \mathbf{T}_\pi)}, and \eqn{u_{00k} \sim N(0, \tau_{00})}.
+#' Substituting upward, the reduced form is
+#' \deqn{Y_{ijk} = \gamma_{000} + \gamma_{100} X^{(1)}_{ijk} +
+#'   \gamma_{010} X^{(2)}_{jk} + \gamma_{001} X^{(3)}_k +
+#'   u_{00k} + r_{0jk} + r_{1jk} X^{(1)}_{ijk} + e_{ijk},}
+#' which in \pkg{lme4} translates to
+#' \code{lmer(Y ~ X1 + X2 + X3 + (1 + X1 | corp_id/school_id))}.
+#' The examples give concrete fits as commented code, which the help
+#' page therefore does not run; uncomment them to fit them.
+#'
+#' \strong{Suggested benchmark uses.} The data set is intentionally
+#' rich enough to support a wide range of demonstrations and
+#' benchmarks, including:
+#' \itemize{
+#'   \item Two-, three-, and four-level random intercept and
+#'     random slope models with \pkg{lme4}, \pkg{nlme}, or
+#'     \pkg{glmmTMB}.
+#'   \item Cross-level interaction modeling (e.g.,
+#'     race \eqn{\times} class size, ptia \eqn{\times} SES).
+#'   \item ICC, design effect, and cluster level sample size
+#'     calculations.
+#'   \item Comparisons of unweighted vs. design weighted estimators
+#'     for stratified cluster samples.
+#'   \item Bayesian multilevel modeling and prior sensitivity
+#'     (\pkg{brms}, \pkg{MCMCglmm}, \pkg{rstanarm}).
+#'   \item Missing data demonstrations (the \code{ge*}, \code{nc*},
+#'     and \code{aa*} columns have non-trivial missingness; see
+#'     \code{vapply(prime_time_achievement, function(x)
+#'     sum(is.na(x)), integer(1))}).
+#'   \item Multilevel reliability, intraclass correlation, and
+#'     measurement invariance demonstrations across schools,
+#'     corporations, and the categorical predictors.
+#' }
+#'
+#' \strong{Privacy and identifiability.} The student level rows
+#' contain no names, addresses, or other personally identifiable
+#' information. Demographic variables are age in months, gender,
+#' and a six category race code; all other fields are test scores
+#' or aggregated school / corporation statistics. The numeric
+#' \code{corp}, \code{school}, and \code{class} identifiers are
+#' the same administrative numbers used in the original Indiana
+#' Department of Education public files for the 2000 to 2001 school
+#' year; they could in principle be cross referenced to that
+#' public information to identify specific schools or
+#' corporations. No individual student can be identified from any
+#' combination of variables in this file.
+#'
+#' \strong{Missing data convention.} The Indiana DOE source used
+#' \code{999} as the student level missing data code and \code{888}
+#' as the "not applicable" code for \code{typmulti} and
+#' \code{ptstatus}. The build script converts both to \code{NA}
+#' (the SPSS missingness ranges already do most of the recoding on
+#' import). The retained SPSS variable label is available via
+#' \code{attr(prime_time_achievement$X, "label")} on every variable
+#' carried over from the SPSS file (all columns except the derived
+#' recode \code{classize}).
+#'
+#' @author Ken Kelley
+#'
+#' @source
+#' Indiana Department of Education program evaluation of Project
+#' Prime Time, 2000 to 2001 academic year. Sample of 10,927 third
+#' grade students in 586 classrooms in 163 schools in 61
+#' corporations in 9 educational service regions. The records are
+#' public data that the author, a member of the evaluation team, is
+#' authorized to distribute.
+#'
+#' Lapsley, D. K., Daytner, K. M., Kelley, K., and Maxwell, S. E.
+#' (2002). \emph{Teacher aides, class size and academic
+#' achievement: A preliminary evaluation of Indiana's Prime Time}.
+#' Paper presented at the Annual Meeting of the American
+#' Educational Research Association, New Orleans, LA, April 1-5,
+#' 2002. ERIC document ED466679.
+#'
+#' @references
+#' \emph{Primary citation.} Lapsley, D. K., Daytner, K. M., Kelley,
+#' K., and Maxwell, S. E. (2002). \emph{Teacher aides, class size
+#' and academic achievement: A preliminary evaluation of Indiana's
+#' Prime Time}. ERIC document ED466679.
+#' \url{https://eric.ed.gov/?id=ED466679}.
+#'
+#' \emph{Use as a multilevel modeling running example.} Finch, W.
+#' H., Bolin, J. E., and Kelley, K. (2019). \emph{Multilevel
+#' modeling using R} (2nd ed.). CRC Press. The 2nd edition
+#' (Finch, Bolin, and Kelley, 2019) is the edition that uses these
+#' data; later editions are not authored by Kelley and should not
+#' be cited for that use.
+#'
+#' \emph{Background report from the same evaluation team.}
+#' Lapsley, D. K., and Daytner, K. M. (2001). Indiana's class
+#' size reduction initiative: Teacher perspectives on training,
+#' implementation, and pedagogy. ERIC document ED455220.
+#' \url{https://files.eric.ed.gov/fulltext/ED455220.pdf}.
+#'
+#' \emph{Indiana statutory context.} Indiana General Assembly,
+#' House Bill 1166 (2001).
+#' \verb{https://archive.iga.in.gov/2001/bills/IN/IN1166.1.html}.
+#'
+#' \emph{Project STAR background and Education Week coverage.}
+#' Pate-Bain, H., and Achilles, C. M. (1986). Interesting
+#' developments on class size. \emph{Phi Delta Kappan, 67},
+#' 662--665. See also Education Week, \emph{Research: Sizing up
+#' small classes} (February 7, 2001),
+#' \verb{https://www.edweek.org/leadership/research-sizing-up-small-classes/2001/02}.
+#'
+#' \emph{Project STAR teacher aide null result that motivated the
+#' Prime Time evaluation.} Finn, J. D., Gerber, S. B., Farber, S.
+#' L., and Achilles, C. M. (2000). Teacher aides: An alternative
+#' to small classes? In M. C. Wang and J. D. Finn (Eds.),
+#' \emph{How small classes help teachers do their best}
+#' (pp. 131--174). Temple University Center for Research in Human
+#' Development and Education.
+#'
+#' @examples
+#' data(prime_time_achievement)
+#' dim(prime_time_achievement)
+#'
+#' # Variable labels from the SPSS source are preserved on every column:
+#' attr(prime_time_achievement$nctotal, "label")
+#' attr(prime_time_achievement$ptia,    "label")
+#'
+#' # Cluster counts (reconciled with Lapsley et al., 2002):
+#' length(unique(prime_time_achievement$corp_id))    # 61
+#' length(unique(prime_time_achievement$school_id))  # 163
+#' length(unique(prime_time_achievement$class_id))   # 586
+#'
+#' # Reconciling with the manuscript:
+#' table(prime_time_achievement$gender, useNA = "ifany")
+#' table(prime_time_achievement$race,   useNA = "ifany")
+#' table(prime_time_achievement$ptia)
+#' table(prime_time_achievement$classize)
+#'
+#' # ----- Selecting subsets of interest -----
+#'
+#' # Caucasian and African American only (the matched-race
+#' # supplementary analyses in Lapsley et al., 2002):
+#' pt_wb <- subset(prime_time_achievement, race %in% c(2L, 5L))
+#'
+#' # Drop the few "other assistant listed" cases for a clean
+#' # aide / no-aide contrast:
+#' pt_clean <- subset(prime_time_achievement, ptia %in% c(1L, 2L))
+#'
+#' # Only rural corporations (geog == 4), which is what the source
+#' # SPSS file's FILTER_$ variable encoded:
+#' pt_rural <- subset(prime_time_achievement, geog == 4L)
+#'
+#' # Complete cases on the nctotal-on-race-and-class-size analysis:
+#' analysis_vars <- c("nctotal", "race", "classize", "ses",
+#'                    "corp_id", "school_id", "class_id")
+#' pt_complete <- prime_time_achievement[
+#'   complete.cases(prime_time_achievement[, analysis_vars]),
+#'   analysis_vars
+#' ]
+#'
+#' # ----- Multilevel fits -----
+#'
+#' # The three fits below are shown but not run, because each one
+#' # estimates a multilevel model on the full student level file and
+#' # together they cost more time than a help page should take.
+#' # Uncomment to fit them.
+#'
+#' # Three-level null random intercept model. The variance
+#' # decomposition gives the corp, school | corp, and within
+#' # ICCs reported in the Details section.
+#' # m_null <- lme4::lmer(nctotal ~ 1 + (1 | corp_id/school_id),
+#' #                      data = prime_time_achievement)
+#' # summary(m_null)
+#'
+#' # Level-1 (race), level-2 (ptia and classize), and level-3
+#' # (ses) main-effect model. Compare to Lapsley et al. (2002),
+#' # which fit closely related HLM specifications.
+#' # m_main <- lme4::lmer(
+#' #   nctotal ~ factor(race) + factor(ptia) + classize + ses +
+#' #     (1 | corp_id/school_id),
+#' #   data = prime_time_achievement)
+#' # summary(m_main)
+#'
+#' # Cross-level interaction: ptia x ses (the published finding
+#' # was that aide benefit was concentrated in higher-SES
+#' # schools).
+#' # m_inter <- lme4::lmer(
+#' #   nctotal ~ factor(race) + factor(ptia) * ses + classize +
+#' #     (1 | corp_id/school_id),
+#' #   data = prime_time_achievement)
+#' # summary(m_inter)
+#'
+#' @keywords datasets
+"prime_time_achievement"

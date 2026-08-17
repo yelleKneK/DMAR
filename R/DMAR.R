@@ -1,0 +1,195 @@
+#' Design, Measurement, and Analysis in R
+#'
+#' A modern R package for design, measurement, and analysis, 
+#' with special strength in effect sizes, confidence intervals, 
+#' size planning, reliability and agreement, mediation analysis,
+#' equivalence testing, meta-analysis, experimental and quasi-experimental designs, repeated measures, and
+#' model comparison-based inference. DMAR (pronounced \dQuote{Dee-Mar})
+#' is heavily methodological in nature, drawing on the psychometric and
+#' statistical traditions, and is aligned with the methodological and
+#' applied research program and interests of the author.
+#' Many aspects of the package traces to the author's methodological work
+#' and collaborations, including sample size planning via accuracy in
+#' parameter estimation (AIPE; Kelley & Maxwell, 2003;
+#' Kelley & Rausch, 2006; Maxwell, Kelley, &
+#' Rausch, 2008), the definition and communication of effect sizes
+#' (Kelley & Preacher, 2012; Preacher & Kelley, 2011), and the model
+#' comparison perspective of Maxwell, Delaney, and Kelley (2027). It
+#' aims to be methodologically sound and particularly
+#' well-suited to research in which the independent or dependent
+#' variables involve the person, across psychology, sociology,
+#' education, behavioral economics, management,
+#' marketing, and information systems.
+#'
+#' The package makes accessible to researchers a variety of methods
+#' that are easy to use, including from sample estimates or results
+#' reported in published articles: effect size estimation, confidence
+#' intervals for effect sizes, sample size planning, multivariate
+#' methods, factor analysis, and certain latent variable models.
+#' Particular strengths include sample size planning under several
+#' complementary frameworks: accuracy in parameter estimation (AIPE),
+#' power analysis, minimum risk, and equivalence. Most exported
+#' functions return a tidy \code{data.frame} with a \code{term}
+#' column and a numeric \code{value} column (some carry additional
+#' typed columns per term), and \pkg{ggplot2} is used for the plotting
+#' functions. A few functions return the shape their task calls for
+#' instead: model fits such as \code{mlmr} return a richer list-like
+#' object with \code{coef} / \code{vcov} / \code{confint} methods,
+#' \code{descriptives} returns a list of summary tables, and a small
+#' number of scalar utilities such as \code{skewness} and
+#' \code{kurtosis} return a bare numeric. The interface is consistent,
+#' modern, and opinionated, and is designed for clarity and
+#' reproducibility.
+#'
+#' DMAR builds heavily on the \pkg{MBESS} package (Kelley, 2007a,
+#' 2007b), which has been on CRAN for more than two decades. \pkg{MBESS}
+#' was originally framed for the behavioral, educational, and social
+#' sciences, but its use has grown well beyond that scope; DMAR is quite
+#' general, though especially well-aligned with human-centered research.
+#'
+#' \strong{Function families.} A user-facing tour:
+#' \describe{
+#'   \item{Effect sizes}{\code{smd}, \code{smd_c}, \code{smd_trimmed},
+#'     \code{eta_squared}, \code{eta_squared_partial},
+#'     \code{eta_squared_generalized}, \code{omega_squared},
+#'     \code{omega_squared_partial}, \code{cohen_f},
+#'     \code{cles}, \code{cliff_delta}, \code{vargha_delaney_A},
+#'     \code{proportion_of_superiority},
+#'     \code{probability_of_superiority_paired}, \code{lin_ccc}.}
+#'   \item{Confidence intervals on effect sizes}{\code{ci_smd},
+#'     \code{ci_smd_c}, \code{ci_R2}, \code{ci_R}, \code{ci_rc},
+#'     \code{ci_src}, \code{ci_eta_squared} (and partial /
+#'     generalized variants), \code{ci_omega_squared},
+#'     \code{ci_pvaf}, \code{ci_snr}, \code{ci_srsnr},
+#'     \code{ci_mahalanobis}, \code{ci_eigenvalue}, \code{ci_cv},
+#'     \code{ci_sm}, \code{ci_reg_coef}, \code{ci_r},
+#'     \code{ci_rmsea}.}
+#'   \item{Maximum likelihood regression}{\code{mlmr} (univariate
+#'     full information maximum likelihood (FIML), lm-like), \code{mlmr_mv} (multivariate FIML).}
+#'   \item{ANOVA and ANCOVA}{\code{ancova}, \code{anova_within_two_way},
+#'     \code{mixed_anova}, \code{manova_split_plot},
+#'     \code{simple_effects_AB}, \code{contrast_test},
+#'     \code{pairwise_within}, \code{mauchly_test},
+#'     \code{obrien_test}.}
+#'   \item{Reliability and agreement}{\code{reliability},
+#'     \code{reliability_alpha}, \code{reliability_omega} (with a
+#'     model implied or observed total-variance denominator, and a
+#'     \code{reliability_omega_categorical} for ordered items),
+#'     \code{reliability_kr20}, \code{reliability_H},
+#'     \code{cohen_kappa}, \code{fleiss_kappa},
+#'     \code{krippendorff_alpha}, \code{gwet_ac},
+#'     \code{limits_of_agreement}.}
+#'   \item{Mediation}{\code{mediate} (the simple mediation model with
+#'     bootstrap, Monte Carlo, and Sobel intervals),
+#'     \code{mediation_mbco} (likelihood ratio tests of arbitrary
+#'     mediation effects by model-based constrained optimization, with
+#'     multiple groups and moderated mediation probing), and
+#'     \code{plot_mediation_mbco} (conditional effect curves with
+#'     confidence bands).}
+#'   \item{Confirmatory factor and SEM tools}{\code{cfa_1},
+#'     \code{cov_sem}, \code{covmat_from_cfa},
+#'     \code{compare_cov_structures}.}
+#'   \item{Sample size planning (AIPE)}{\code{ss_aipe_smd},
+#'     \code{ss_aipe_R2}, \code{ss_aipe_reg_coef},
+#'     \code{ss_aipe_partial_r}, \code{ss_aipe_omega_squared},
+#'     \code{ss_aipe_icc}, \code{ss_aipe_cv}, \code{ss_aipe_pcm},
+#'     \code{ss_aipe_rmsea}, the cluster-randomized planners
+#'     \code{ss_aipe_crd_*}, plus their Monte Carlo sensitivity
+#'     companions \code{ss_aipe_*_sensitivity}.}
+#'   \item{Sample size planning (power)}{\code{ss_power_smd},
+#'     \code{ss_power_R2}, \code{ss_power_r},
+#'     \code{ss_power_reg_coef}, \code{ss_power_sem},
+#'     \code{ss_power_c}, \code{ss_power_c_ancova},
+#'     \code{ss_power_contrast}, \code{ss_power_factorial_anova},
+#'     \code{ss_power_split_plot_anova}, \code{ss_power_mixed_effects},
+#'     \code{ss_power_one_way_anova}, \code{ss_power_pcm},
+#'     \code{ss_power_rm_anova}, \code{ss_power_sc}.}
+#'   \item{Critical values and tests}{\code{cv_t}, \code{cv_z},
+#'     \code{cv_smm}, \code{cv_scheffe}, \code{cv_tukey_hsd},
+#'     \code{cv_dunnett}, \code{ci_dunnett}, \code{ci_tukey_kramer},
+#'     \code{ci_scheffe}, \code{welch_t}, \code{summary_t_test},
+#'     \code{correlations_test}, \code{power_fisher_exact},
+#'     \code{randomization_test_paired},
+#'     \code{equivalence_smd}, \code{equivalence_r}, \code{power_equivalence_md}.}
+#'   \item{Parameterization conversions}{\code{convert_R2_f} /
+#'     \code{convert_f_R2}, \code{convert_R2_lambda} /
+#'     \code{convert_lambda_R2}, \code{convert_delta_lambda} /
+#'     \code{convert_lambda_delta}, \code{convert_r_Z} /
+#'     \code{convert_Z_r}, \code{convert_cor_cov}.}
+#'   \item{Visualization}{\code{plot_smd}, \code{plot_ci},
+#'     \code{plot_R2}, \code{plot_trajectories},
+#'     \code{plot_trajectories_fitted}.}
+#'   \item{Multilevel and clustering}{\code{icc}, \code{icc_lmer},
+#'     \code{variance_components_mls}, \code{design_effect} (Kish design
+#'     effect), \code{ss_aipe_crd_*}.}
+#'   \item{Data sets}{\code{bessel_errors} (Bessel's 1818 grouped
+#'     distribution of Bradley's astronomical observation errors),
+#'     \code{diagnosis_agreement} (Cohen's 1968 weighted kappa
+#'     illustration), \code{drinks_trial} (Smith, Meyers, and Delaney's 1998
+#'     Community Reinforcement Approach drinking trial),
+#'     \code{holzinger_swineford} (the 1939 factor analysis study),
+#'     \code{prime_time_achievement}
+#'     (the Indiana Prime Time third grade achievement evaluation),
+#'     \code{pygmalion}
+#'     (Rosenthal and Jacobson's 1968 teacher-expectancy data),
+#'     \code{teacher_expectancy} (Raudenbush's 1984 meta-analysis of
+#'     18 teacher-expectancy experiments), and \code{test_market}
+#'     (Bryant and Bruvold's 1980 controlled test-market experiment
+#'     for ANCOVA with a random covariate).}
+#' }
+#'
+#' \strong{Feedback.} Bug reports, feature requests, and suggestions
+#' for new methods are welcomed by email to Ken Kelley
+#' \email{kkelley@@nd.edu} (please put \dQuote{DMAR} in the subject
+#' line). See \url{https://kenkelley.org} for Ken Kelley's web site,
+#' \url{https://kenkelley.org/publications/} for related publications,
+#' and \url{https://github.com/yelleKneK/DMAR} for the project's
+#' GitHub page.
+#'
+#' @references
+#' Kelley, K. (2007a). Confidence intervals for standardized effect
+#' sizes: Theory, application, and implementation. \emph{Journal of
+#' Statistical Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Kelley, K. (2007b). Methods for the behavioral, educational, and
+#' social sciences: An R package. \emph{Behavior Research Methods,
+#' 39}(4), 979--984. \doi{10.3758/BF03192993}
+#'
+#' Kelley, K., & Maxwell, S. E. (2003). Sample size for multiple
+#' regression: Obtaining regression coefficients that are accurate, not
+#' simply significant. \emph{Psychological Methods, 8}(3), 305--321.
+#' \doi{10.1037/1082-989X.8.3.305}
+#'
+#' Kelley, K., & Preacher, K. J. (2012). On effect size.
+#' \emph{Psychological Methods, 17}(2), 137--152. \doi{10.1037/a0028086}
+#'
+#' Kelley, K., & Rausch, J. R. (2006). Sample size planning for the
+#' standardized mean difference: Accuracy in parameter estimation via
+#' narrow confidence intervals. \emph{Psychological Methods, 11}(4),
+#' 363--385. \doi{10.1037/1082-989X.11.4.363}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#' experiments and analyzing data: A model comparison perspective}
+#' (4th ed.). Routledge.
+#'
+#' Maxwell, S. E., Kelley, K., & Rausch, J. R. (2008). Sample size
+#' planning for statistical power and accuracy in parameter estimation.
+#' \emph{Annual Review of Psychology, 59}, 537--563.
+#' \doi{10.1146/annurev.psych.59.103006.093735}
+#'
+#' Preacher, K. J., & Kelley, K. (2011). Effect size measures for
+#' mediation models: Quantitative strategies for communicating indirect
+#' effects. \emph{Psychological Methods, 16}(2), 93--115.
+#' \doi{10.1037/a0022658}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @aliases DMAR dmar
+#' @keywords package
+"_PACKAGE"
+
+# `.data` is the ggplot2/rlang pronoun for tidy-data column references inside
+# aes() mappings (e.g., aes(x = .data[[time_var]])); declaring it here keeps
+# R CMD check's "no visible binding for global variable" check quiet without
+# requiring rlang to be in Imports.
+utils::globalVariables(".data")
