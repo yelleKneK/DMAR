@@ -40,23 +40,25 @@ var_r(rho, n, kurtosis_x = NULL, kurtosis_y = NULL)
 
 A `data.frame` with the rows
 
-- `var_r_normal`, the Fisher (1915) normal-theory asymptotic variance
-  \\(1 - \rho^2)^2 / (n - 1)\\,
+- `var_r_normal`, the normal-theory asymptotic variance \\(1 - \rho^2)^2
+  / (n - 1)\\ (Hotelling, 1953, Section 7),
 
 - `var_r_bonett_wright` (when kurtoses are supplied) the Bonett &
   Wright (2000) kurtosis-corrected variance,
 
-- `var_fisher_z`, the variance of the Fisher \\z\\-transform, \\1/(n -
+- `var_fisher_z`, the variance of the Fisher \\Z\\ transform, \\1/(n -
   3)\\.
 
 ## Details
 
-**Normal-theory variance (default).** Under bivariate normality Fisher
-(1915) showed \$\$\mathrm{Var}(\hat r) \\\approx\\ (1 - \rho^2)^2 / (n -
-1).\$\$ This is the workhorse variance and is exact in the limit; it is
-also what the Fisher \\z\\-CI
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md) uses on the
-transformed scale.
+**Normal-theory variance (default).** Under bivariate normality the
+large-sample variance is \$\$\mathrm{Var}(\hat r) \\\approx\\ (1 -
+\rho^2)^2 / (n - 1),\$\$ the leading term of the exact moment expansion
+(Hotelling, 1953, Section 7; the exact density of \\r\\ is Fisher's,
+1915). This is the workhorse variance and is exact in the limit; it is
+also what Fisher's \\Z\\ CI
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+uses on the transformed scale.
 
 **Bonett-Wright kurtosis correction.** When the marginals are *not*
 normal, the asymptotic variance picks up a kurtosis- dependent
@@ -69,12 +71,12 @@ non-elliptical joints it is a first-order approximation. When the
 kurtosis arguments are `NULL`, only the normal-theory variance is
 returned.
 
-**Connection to Fisher's z transform.** On the variance- stabilized
-scale \\z = \tanh^{-1}(r)\\ the asymptotic variance is \\1/(n-3)\\
-regardless of \\\rho\\ (Fisher, 1915, 1921). This is reported alongside
-the raw-scale variance because it is the natural working scale for CI
+**Connection to Fisher's Z transform.** On the variance- stabilized
+scale \\Z = \tanh^{-1}(r)\\ the asymptotic variance is \\1/(n-3)\\
+regardless of \\\rho\\ (Fisher, 1921). This is reported alongside the
+raw-scale variance because it is the natural working scale for CI
 construction
-([`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md)).
+([`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)).
 
 ## References
 
@@ -90,6 +92,10 @@ population. *Biometrika, 10*(4), 507–521.
 Fisher, R. A. (1921). On the "probable error" of a coefficient of
 correlation deduced from a small sample. *Metron, 1*, 3–32.
 
+Hotelling, H. (1953). New light on the correlation coefficient and its
+transforms. *Journal of the Royal Statistical Society, Series B, 15*(2),
+193–232. (Section 7 gives the exact moments of \\r\\.)
+
 Kelley, K., & Maxwell, S. E. (2003). Sample size for multiple
 regression: Obtaining regression coefficients that are accurate, not
 simply significant. *Psychological Methods, 8*(3), 305–321.
@@ -97,8 +103,7 @@ simply significant. *Psychological Methods, 8*(3), 305–321.
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
-ed.). Routledge. (See Chapter 3 on the one-way ANOVA and Chapter 4 on
-contrasts.)
+ed.). Routledge.
 
 Olkin, I., & Finn, J. D. (1995). Correlations redux. *Psychological
 Bulletin, 118*(1), 155–164.
@@ -107,7 +112,7 @@ Bulletin, 118*(1), 155–164.
 ## See also
 
 [`expected_r`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`var_partial_r`](https://yelleknek.github.io/DMAR/reference/var_partial_r.md),
 [`var_semipartial_r`](https://yelleknek.github.io/DMAR/reference/var_semipartial_r.md)
 

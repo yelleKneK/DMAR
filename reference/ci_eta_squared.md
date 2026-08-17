@@ -53,11 +53,12 @@ ci_eta_squared(
 
 - N:
 
-  Total sample size (ignored if `object` is supplied; derived
-  automatically from a fitted model, via
+  Total sample size, the total number of observations (ignored if
+  `object` is supplied; derived automatically from a fitted model, via
   [`nobs`](https://rdrr.io/r/stats/nobs.html)`(object)` for
-  single-stratum fits, or by summing the degrees of freedom across error
-  strata for `aovlist` fits).
+  single-stratum fits, or, for `aovlist` fits, recovered as one more
+  than the sum of the effect and residual degrees of freedom across
+  every stratum, which is the total number of observations).
 
 - conf_level:
 
@@ -165,14 +166,13 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
 [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -207,20 +207,28 @@ ci_eta_squared(
 #>  effect  eta_squared lower_limit upper_limit F_value df_effect df_error N 
 #>  overall 0.473       0.261       0.565       11.2    4         50       55
 
-# 2. One way ANOVA from a fitted model.
-fit_one <- aov(weight ~ group, data = PlantGrowth)
+# 2. One way ANOVA from a fitted model: mean IQ gain differs across
+#        the six grades of the pygmalion data (N = 310).
+fit_one <- aov(iq_gain ~ factor(grade), data = pygmalion)
 ci_eta_squared(fit_one)
-#>  effect eta_squared lower_limit upper_limit F_value df_effect df_error N 
-#>  group  0.264       0.0099      0.464       4.85    2         27       30
+#>  effect        eta_squared lower_limit upper_limit F_value df_effect df_error
+#>  factor(grade) 0.118       0.0481      0.176       8.16    5         304     
+#>  N  
+#>  310
 
-# 3. Factorial ANOVA: partial eta squared per effect.
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
-ci_eta_squared(fit_factorial)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
-#>  effect       eta_squared lower_limit upper_limit F_value df_effect df_error N 
-#>  wool         0.0727      0           0.222       3.77    1         48       54
-#>  tension      0.261       0.0558      0.411       8.5     2         48       54
-#>  wool:tension 0.149       0.00191     0.298       4.19    2         48       54
+# 3. Two-factor ANOVA: partial eta squared per effect for the
+#        manipulated expectancy treatment and the measured grade
+#        classification (pygmalion data, N = 310). The treatment by
+#        grade interaction is weak here (F = 1.19), so the additive
+#        model is used.
+fit_additive <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
+ci_eta_squared(fit_additive)
+#>  effect        eta_squared lower_limit upper_limit F_value df_effect df_error
+#>  treatment     0.0211      0.00102     0.0619      6.52    1         303     
+#>  factor(grade) 0.044       0.00113     0.082       2.79    5         303     
+#>  N  
+#>  310
+#>  310
 
 # 4. Within-subjects ANOVA. CI computed against the within-subjects
 #        error stratum (the row reports which one via 'stratum').

@@ -4,8 +4,8 @@ Draws a forest-style plot of one or more contrast estimates with their
 100(1 - 2\\\alpha\\)% confidence intervals against the equivalence
 region \\(-\delta_L, \delta_U)\\ and the noninferiority bound
 \\-\delta_L\\, colored by the five-way verdict of
-[`tost_c`](https://yelleknek.github.io/DMAR/reference/tost_c.md): an
-interval entirely inside the region is equivalent; entirely above
+[`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md):
+an interval entirely inside the region is equivalent; entirely above
 \\\delta_U\\, superior; entirely below \\-\delta_L\\, inferior; a lower
 limit above \\-\delta_L\\ with an upper limit past \\\delta_U\\,
 noninferior only; and an interval straddling a bound, inconclusive. The
@@ -34,9 +34,9 @@ plot_equivalence(
 - x:
 
   Either a single result from
-  [`tost_c`](https://yelleknek.github.io/DMAR/reference/tost_c.md) or a
-  list of them (a named list supplies the row labels). Alternatively,
-  supply `estimate`, `lower`, and `upper` directly.
+  [`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
+  or a list of them (a named list supplies the row labels).
+  Alternatively, supply `estimate`, `lower`, and `upper` directly.
 
 - estimate, lower, upper:
 
@@ -50,9 +50,9 @@ plot_equivalence(
 - delta_lower, delta_upper:
 
   Equivalence bounds, as positive magnitudes (the region drawn is
-  \\(-\delta_L, +\delta_U)\\). Taken from `x` when it carries `tost_c`
-  results; required otherwise. If only `delta_upper` is supplied, the
-  bounds are symmetric.
+  \\(-\delta_L, +\delta_U)\\). Taken from `x` when it carries
+  `equivalence_c` results; required otherwise. If only `delta_upper` is
+  supplied, the bounds are symmetric.
 
 - xlab:
 
@@ -79,11 +79,11 @@ are its bounds; the solid line at zero marks exact equality, which is
 the null value of ordinary significance testing and is deliberately
 *not* a decision boundary here. Verdicts are recomputed from the
 supplied limits and bounds, so the plot cannot disagree with
-[`tost_c`](https://yelleknek.github.io/DMAR/reference/tost_c.md).
+[`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md).
 
 ## References
 
-Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, P. J.
+Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, J. J.
 (2025). A sequential approach for noninferiority or equivalence of a
 linear contrast under cost constraints. *Psychological Methods, 30*(2),
 425–439. [doi:10.1037/met0000570](https://doi.org/10.1037/met0000570)
@@ -95,25 +95,27 @@ Biopharmaceutics, 15*(6), 657–680.
 
 ## See also
 
-[`tost_c`](https://yelleknek.github.io/DMAR/reference/tost_c.md),
+[`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
 [`plot_ci`](https://yelleknek.github.io/DMAR/reference/plot_ci.md)
 
 Other equivalence testing:
+[`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`power_density_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_density_equivalence_md.md),
 [`power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_c.md),
 [`power_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md),
 [`power_equivalence_md_plot()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md_plot.md),
-[`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
-[`tost_c()`](https://yelleknek.github.io/DMAR/reference/tost_c.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md)
+[`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md)
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -137,11 +139,11 @@ plot_equivalence(estimate = c(-1.0, 3.5, 7.0, -1.5, -8.0),
                  delta_upper = 5)
 
 
-# From tost_c() results; a named list supplies the labels.
+# From equivalence_c() results; a named list supplies the labels.
 res <- list(
-  "Focal vs. reference" = tost_c(psi_hat = -5.28, se = 2.49,
+  "Focal vs. reference" = equivalence_c(psi_hat = -5.28, se = 2.49,
                                  df_error = 399, delta_upper = 5),
-  "Within pipeline"     = tost_c(psi_hat = -0.53, se = 2.66,
+  "Within pipeline"     = equivalence_c(psi_hat = -0.53, se = 2.66,
                                  df_error = 399, delta_upper = 5)
 )
 plot_equivalence(res)

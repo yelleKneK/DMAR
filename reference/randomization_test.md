@@ -20,7 +20,7 @@ randomization_test(
   group_1 = NULL,
   group_2 = NULL,
   statistic = c("mean", "t"),
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two_sided", "less", "greater"),
   exact = NULL,
   n_resamples = 10000L,
   seed = NULL,
@@ -63,9 +63,10 @@ randomization_test(
 
 - alternative:
 
-  One of `"two.sided"` (default), `"less"`, or `"greater"`. The
-  direction refers to the first group minus the second, the same
-  orientation [`t.test`](https://rdrr.io/r/stats/t.test.html) uses.
+  One of `"two_sided"` (default; the base-R spelling `"two.sided"` is
+  accepted as an alias), `"less"`, or `"greater"`. The direction refers
+  to the first group minus the second, the same orientation
+  [`t.test`](https://rdrr.io/r/stats/t.test.html) uses.
 
 - exact:
 
@@ -307,12 +308,17 @@ parametric and rank-based alternatives;
 for the effect sizes reported here.
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -321,12 +327,8 @@ Other hypothesis tests:
 [`pairwise_within()`](https://yelleknek.github.io/DMAR/reference/pairwise_within.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -397,32 +399,36 @@ randomization_test(group_1 = treatment, group_2 = control,
 #> 
 #> Confidence level: 95%
 
-# 3. Formula interface. With 30 per group there are far too many
-#    reassignments to enumerate, so 10,000 are drawn and the p-value
-#    carries a Monte Carlo standard error.
+# 3. Formula interface: weekly drinking in the two comparable arms of
+#    the drinks_trial data, a right-skewed outcome, which is exactly
+#    where a distribution-free test earns its keep. With 37 and 32
+#    participants there are far too many reassignments to enumerate, so
+#    10,000 are drawn and the p-value carries a Monte Carlo standard
+#    error.
+cra <- droplevels(subset(drinks_trial, treatment != "CRA + Disulfiram"))
 set.seed(113)
-randomization_test(len ~ supp, data = ToothGrowth, seed = 113)
+randomization_test(drinks_per_week ~ treatment, data = cra, seed = 113)
 #>  term                      value  
-#>  mean_difference           3.7    
-#>  statistic                 3.7    
-#>  p_value                   0.0620 
-#>  p_value_se                0.00241
-#>  shift_lower_limit         -0.193 
-#>  shift_upper_limit         7.64   
-#>  normal_theory_lower_limit -0.171 
-#>  normal_theory_upper_limit 7.57   
-#>  smd                       0.495  
-#>  smd_lower_limit           -0.0215
-#>  smd_upper_limit           1.01   
-#>  cles                      0.637  
-#>  cles_lower_limit          0.494  
-#>  cles_upper_limit          0.762  
-#>  cliff_delta               0.279  
-#>  cliff_delta_lower_limit   -0.0281
-#>  cliff_delta_upper_limit   0.538  
-#>  n_1                       30     
-#>  n_2                       30     
-#>  N                         60     
+#>  mean_difference           24.5   
+#>  statistic                 24.5   
+#>  p_value                   0.2784 
+#>  p_value_se                0.00448
+#>  shift_lower_limit         -13    
+#>  shift_upper_limit         63.1   
+#>  normal_theory_lower_limit -15.8  
+#>  normal_theory_upper_limit 64.7   
+#>  smd                       0.282  
+#>  smd_lower_limit           -0.195 
+#>  smd_upper_limit           0.756  
+#>  cles                      0.579  
+#>  cles_lower_limit          0.445  
+#>  cles_upper_limit          0.704  
+#>  cliff_delta               0.3    
+#>  cliff_delta_lower_limit   0.0213 
+#>  cliff_delta_upper_limit   0.535  
+#>  n_1                       37     
+#>  n_2                       32     
+#>  N                         69     
 #>  n_evaluated               10000  
 #>  exact                     0      
 #> 

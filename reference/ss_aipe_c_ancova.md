@@ -60,7 +60,9 @@ ss_aipe_c_ancova(
 
 ## Value
 
-- sample_size:
+A 1-row `data.frame` with columns `term` and `value`:
+
+- necessary_n_per_group:
 
   The necessary sample size *per group*
 

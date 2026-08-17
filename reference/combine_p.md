@@ -61,10 +61,15 @@ variant is \\\sum w_i z_i / \sqrt{\sum w_i^2}\\. All four are reported
 with one-tailed combined *p*-values, matching the directional inputs.
 
 Methods can disagree, and the disagreement is informative: Rosenthal
-(1978) notes there is no uniformly best test, and Raudenbush (1984)
-found three of the four rejecting the null while the df-weighted variant
-did not, an early warning that large studies were finding smaller
-effects.
+(1978) notes there is no uniformly best test. In the published analysis,
+Raudenbush (1984) found three of the four rejecting the null at the .05
+level while the df-weighted variant did not, an early warning that large
+studies were finding smaller effects. Computed from the study-level
+*p*-values as tabled, the example below shows two of the four rejecting:
+Fisher's (\\p = .004\\) and Stouffer's (\\p = .014\\) tests reject,
+Edgington's sits just above the level (\\p = .051\\; the tabled values
+sum to 7.00 where the paper's Table 2, p. 90, prints a sum of 6.84 with
+\\p = .04\\), and the df-weighted variant is not close (\\p = .192\\).
 
 ## References
 
@@ -130,6 +135,6 @@ combine_p(p18, weights = df18)
 #>  stouffer_weighted_z 0.87  
 #>  stouffer_weighted_p 0.1922
 #>  k                   18    
-# Fisher chi square 62.17 on 36 df; Edgington sum near 6.9; Stouffer
+# Fisher chi square 62.17 on 36 df; Edgington sum near 7; Stouffer
 # z near 2.2; and the df-weighted z under 1: the large studies disagree.
 ```

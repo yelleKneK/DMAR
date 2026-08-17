@@ -89,13 +89,13 @@ DMAR is organized into a small number of stable function families:
   [`mr_smd()`](https://yelleknek.github.io/DMAR/reference/mr_smd.md),
   [`mr_cv()`](https://yelleknek.github.io/DMAR/reference/mr_cv.md).
 - **Equivalence testing.**
-  [`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-  [`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-  [`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md).
+  [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
+  [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+  [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md).
 - **Reliability.**
   [`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
   [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md),
-  [`reliability_omega_c()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md),
+  [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md),
   `reliability_omega_h()`,
   [`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md),
   [`reliability_kr20()`](https://yelleknek.github.io/DMAR/reference/reliability_kr20.md),
@@ -120,9 +120,9 @@ DMAR is organized into a small number of stable function families:
   [`epsilon_corrections()`](https://yelleknek.github.io/DMAR/reference/epsilon_corrections.md),
   [`contrast_adjusted()`](https://yelleknek.github.io/DMAR/reference/contrast_adjusted.md).
 - **Multiple-comparison procedures.**
-  [`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
-  [`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
-  [`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
+  [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+  [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
+  [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
   and their critical-value helpers
   [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md),
   [`cv_smm()`](https://yelleknek.github.io/DMAR/reference/cv_smm.md),
@@ -138,7 +138,7 @@ DMAR is organized into a small number of stable function families:
   [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
   [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
   [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-  [`bland_altman_loa()`](https://yelleknek.github.io/DMAR/reference/loa.md).
+  [`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md).
 - **Multilevel and multivariate / latent variable methods.**
   [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
   [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md),
@@ -146,7 +146,7 @@ DMAR is organized into a small number of stable function families:
   [`R2_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/R2_mixed_effects.md),
   [`R2_mixed_effects_decomposition()`](https://yelleknek.github.io/DMAR/reference/R2_mixed_effects_decomposition.md),
   [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
-  [`covmat_from_cfm()`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md),
+  [`covmat_from_cfa()`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md),
   [`cov_sem()`](https://yelleknek.github.io/DMAR/reference/cov_sem.md),
   [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md).
 - **Longitudinal designs.**
@@ -156,8 +156,8 @@ DMAR is organized into a small number of stable function families:
   [`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md),
   [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md).
 - **Design utilities.**
-  [`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md) (Kish’s
-  design effect),
+  [`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md)
+  (Kish’s design effect and DEFT),
   [`effects_coding()`](https://yelleknek.github.io/DMAR/reference/effects_coding.md),
   [`helmert_coding()`](https://yelleknek.github.io/DMAR/reference/helmert_coding.md),
   [`is_orthogonal_set()`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md),
@@ -165,7 +165,7 @@ DMAR is organized into a small number of stable function families:
   [`simulate_ancova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_data.md),
   [`simulate_regression_data()`](https://yelleknek.github.io/DMAR/reference/simulate_regression_data.md).
 - **Parameterization conversions** (`convert_*`). Invertible maps
-  between equivalent metrics (`convert_r_z` / `convert_z_r`,
+  between equivalent metrics (`convert_r_Z` / `convert_Z_r`,
   `convert_R2_f` / `convert_f_R2`, `convert_lambda_R2` /
   `convert_R2_lambda`, `convert_delta_lambda` / `convert_lambda_delta`,
   `convert_cor_cov`, `convert_t_smd`).
@@ -277,16 +277,26 @@ ss_aipe_smd_sensitivity(
 )
 ```
 
-| term               | value    |
-|:-------------------|:---------|
-| mean_full_width    | 0.199    |
-| median_full_width  | 0.199    |
-| sd_full_width      | 0.000324 |
-| pct_less_desired   | 1        |
-| mean_width_lower   | 0.0994   |
-| mean_width_upper   | 0.0994   |
-| type_I_error_upper | 2.5      |
-| type_I_error_lower | 3        |
+| term                | value    |
+|:--------------------|:---------|
+| mean_smd            | 0.253    |
+| median_smd          | 0.249    |
+| sd_smd              | 0.0516   |
+| mean_ci_width       | 0.199    |
+| median_ci_width     | 0.199    |
+| sd_ci_width         | 0.000324 |
+| mean_ci_width_lower | 0.0994   |
+| mean_ci_width_upper | 0.0994   |
+| pct_ci_less_w       | 1        |
+| pct_ci_miss_low     | 0.03     |
+| pct_ci_miss_high    | 0.025    |
+| total_type_I_error  | 0.055    |
+| n_per_group         | 784      |
+| total_N             | 1568     |
+| true_delta          | 0.25     |
+| estimated_delta     | 0.4      |
+| width               | 0.2      |
+| conf_level          | 0.95     |
 
 Confidence level: 95%
 
@@ -331,15 +341,17 @@ S <- matrix(
 reliability_alpha(S = S, N = 250, ci_method = "bonett")
 ```
 
-| term        | value |
-|:------------|:------|
-| estimate    | 0.83  |
-| se          | 0.104 |
-| lower_limit | 0.792 |
-| upper_limit | 0.861 |
-| conf_level  | 0.95  |
-| N           | 250   |
-| J           | 4     |
+| term           | value  |
+|:---------------|:-------|
+| estimate       | 0.83   |
+| se             | 0.0176 |
+| se_transformed | 0.104  |
+| lower_limit    | 0.792  |
+| upper_limit    | 0.861  |
+| conf_level     | 0.95   |
+| N              | 250    |
+| N_complete     | 250    |
+| J              | 4      |
 
 ### 6. Kish’s design effect in a clustered sample
 
@@ -349,7 +361,7 @@ reliability_alpha(S = S, N = 250, ci_method = "bonett")
 # ICC = .10. How much clustering information do we actually have?
 sizes <- c(0, 0, 1, 1, 1, 2, 3, 5, 8, 10, 12, 15, 18, 20, 22,
            22, 25, 26, 28, 28, 30, 30, 30, 30, 30)
-deft(cluster_sizes = sizes, icc = 0.10)
+design_effect(cluster_sizes = sizes, icc = 0.10)
 ```
 
 | term                   | value |
@@ -400,7 +412,7 @@ and incomplete category sets in
 
 ## Learn more
 
-- **Package website:** <https://yelleknek.github.io/DMAR/>
+- **Package website:** <https://yelleknek.github.io/DMAR>
 - **Start here:**
   [`vignette("DMAR")`](https://yelleknek.github.io/DMAR/articles/DMAR.md)
   (overview),
@@ -415,8 +427,8 @@ and incomplete category sets in
 
 ## Relation to MBESS
 
-DMAR is a more modern, more general, and greatly expanded reimagining of
-the **MBESS** package (Kelley, 2007a, *Journal of Statistical Software*,
+DMAR is the modern, more general reimplementation and expansion of the
+**MBESS** package (Kelley, 2007a, *Journal of Statistical Software*,
 20(8), 1–24; 2007b, *Behavior Research Methods*, 39(4), 979–984), which
 has been on CRAN for about two decades. MBESS was originally framed for
 the behavioral, educational, and social sciences; its use has grown well

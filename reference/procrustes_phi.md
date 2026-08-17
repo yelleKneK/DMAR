@@ -29,10 +29,10 @@ procrustes_phi(loadings_1, loadings_2, n_perm = 10000L)
 
 ## Value
 
-A `data.frame` with rows for the point estimate of \\\phi\\, the
-permutation *p*-value (when requested), and the conventional fair / good
-/ excellent congruence interpretation from Lorenzo-Seva & ten Berge
-(2006).
+A `data.frame` (class `dmar_tbl`) in `term` / `value` layout with the
+row `tucker_phi`, the point estimate of \\\phi\\. When `n_perm > 0` the
+table also carries `p_value_perm`, the two-sided permutation *p*-value,
+and `n_perm`, the number of permutations requested.
 
 ## Details
 
@@ -48,21 +48,19 @@ indicate high (anti-)congruence, values near 0 indicate orthogonality.
 **Permutation test.** Under the null hypothesis that the two loading
 patterns are unrelated, randomly permuting one of the loading vectors
 and recomputing \\\phi\\ produces a sampling distribution against which
-the observed \\\phi\\ can be evaluated. We report the two-sided
-*p*-value as the fraction of permuted \\\|\phi\|\\ values that exceed
-the observed \\\|\phi\|\\.
+the observed \\\phi\\ can be evaluated. The two-sided *p*-value is
+\\(r + 1) / (m + 1)\\, where *r* counts the permuted \\\|\phi\|\\ values
+at least as large as the observed \\\|\phi\|\\ and *m* is `n_perm`.
+Adding one to each part counts the observed arrangement, which is itself
+a legitimate permutation; without it a *p*-value of exactly zero could
+be reported, a value a sampled permutation test cannot support (Phipson
+& Smyth, 2010). The smallest reportable *p*-value is therefore \\1 /
+(m + 1)\\.
 
-**Interpretation benchmarks.** Lorenzo-Seva & ten Berge (2006) propose
-the following rough thresholds:
-
-- \\\phi \in \[0.85, 0.94)\\: *fair* similarity,
-
-- \\\phi \in \[0.95, 0.98)\\: *good*,
-
-- \\\phi \in \[0.98, 1.00\]\\: *excellent / identical*.
-
-These are guidelines from a Monte Carlo study and should not be used as
-significance thresholds.
+**Interpretation.** Benchmark values for \\\phi\\ have been proposed in
+the literature (Lorenzo-Seva & ten Berge, 2006), but context always
+matters; this package reports the coefficient with its uncertainty and
+leaves interpretation to the context of the application.
 
 ## References
 
@@ -70,6 +68,12 @@ Lorenzo-Seva, U., & ten Berge, J. M. F. (2006). Tucker's congruence
 coefficient as a meaningful index of factor similarity. *Methodology,
 2*(2), 57–64.
 [doi:10.1027/1614-2241.2.2.57](https://doi.org/10.1027/1614-2241.2.2.57)
+
+Phipson, B., & Smyth, G. K. (2010). Permutation *p*-values should never
+be zero: Calculating exact *p*-values when permutations are randomly
+drawn. *Statistical Applications in Genetics and Molecular Biology,
+9*(1), Article 39.
+[doi:10.2202/1544-6115.1585](https://doi.org/10.2202/1544-6115.1585)
 
 Tucker, L. R. (1951). *A method for synthesis of factor analysis
 studies* (Personnel Research Section Report No. 984). Department of the
@@ -112,7 +116,7 @@ l2 <- c(0.70, 0.62, 0.83, 0.58, 0.66)
 procrustes_phi(l1, l2)
 #>  term         value 
 #>  tucker_phi   0.999 
-#>  p_value_perm 0.0079
+#>  p_value_perm 0.0080
 #>  n_perm       10000 
 
 # 2. Loadings on different factors should show low congruence:

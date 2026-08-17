@@ -184,7 +184,9 @@ Other plotting:
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -198,7 +200,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # First-stage moderated mediation: the effect of x on m depends on
 # w, so the indirect effect of x on y is a line in w; the direct
 # effect is unmoderated and is not drawn.
@@ -209,15 +210,21 @@ w <- rnorm(n)
 m <- 0.5 * x + 0.3 * w + 0.4 * x * w + rnorm(n)
 y <- 0.5 * m + 0.2 * x + 0.1 * w + rnorm(n)
 d_mod <- data.frame(x = x, w = w, m = m, y = y)
-res <- mediation_mbco("m ~ x + w + x:w \n y ~ m + x + w",
-                      data = d_mod, x = "x", y = "y",
-                      moderator = "w", ci_method = "wald")
-plot_mediation_mbco(res, seed = 113)
 
+# Neither the fit nor the plot is run here: every probed effect costs
+# its own constrained null model fit in OpenMx, and the band draws B
+# coefficient vectors from their joint normal approximation. The Wald
+# interval and the two probe values keep a hand run of these lines
+# quick; the default probe values are the moderator's mean and one
+# standard deviation either side, and the curve and its band cover
+# the whole range of w either way. The calls are:
+# res <- mediation_mbco("m ~ x + w + x:w \n y ~ m + x + w",
+#                       data = d_mod, x = "x", y = "y",
+#                       moderator = "w", ci_method = "wald",
+#                       probe_values = c(low = -1, high = 1))
+# plot_mediation_mbco(res, seed = 113)
 
-# Only the indirect pathway, over a chosen moderator range.
-plot_mediation_mbco(res, effects = "indirect_via_m",
-                    from = -2, to = 2, seed = 113)
-
-# }
+# Only the indirect pathway, over a chosen moderator range:
+# plot_mediation_mbco(res, effects = "indirect_via_m",
+#                     from = -2, to = 2, seed = 113)
 ```

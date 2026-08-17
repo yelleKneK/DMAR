@@ -2,27 +2,25 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
-  aipe_simulation_study: aipe_simulation_study.html
   ancova_2x4x3_power: ancova_2x4x3_power.html
   bryant_paulson_ancova: bryant_paulson_ancova.html
-  bryant_paulson_simulation: bryant_paulson_simulation.html
   composite_power_ancova: composite_power_ancova.html
   composite_sem_planning: composite_sem_planning.html
   critical_values: critical_values.html
-  cv_bryant_paulson: cv_bryant_paulson.html
   dmar_output: dmar_output.html
   DMAR: DMAR.html
   effect-size-visualization: effect-size-visualization.html
   function_interactions: function_interactions.html
   mbess_to_dmar: mbess_to_dmar.html
   mlmr: mlmr.html
+  nonlinear_growth: nonlinear_growth.html
   one_way_anova_power: one_way_anova_power.html
   pygmalion: pygmalion.html
   reliability: reliability.html
   sums_of_squares: sums_of_squares.html
   teacher_expectancy: teacher_expectancy.html
   weighted_kappa: weighted_kappa.html
-last_built: 2026-08-01T17:11Z
+last_built: 2026-08-17T12:51Z
 urls:
   reference: https://yelleknek.github.io/DMAR/reference
   article: https://yelleknek.github.io/DMAR/articles

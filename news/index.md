@@ -6,6 +6,677 @@ First public release of DMAR (pronounced “Dee-Mar,” for “Design,
 Measurement, and Analysis in R”), a greatly expanded reimagining of the
 MBESS package.
 
+### An Adversarial Quality Control Pass
+
+- A package-wide audit (numerical verification against complex-step
+  derivatives and Monte Carlo, documentation contracts run rather than
+  read, and mechanical convention gates) closed out with these fixes.
+  [`analysis_of_change()`](https://yelleknek.github.io/DMAR/reference/analysis_of_change.md)
+  now fits an intercept-only polynomial (`order = 0`) under both
+  methods; it previously stopped inside
+  [`stats::poly()`](https://rdrr.io/r/stats/poly.html), and its no-fit
+  message for the polynomial now counts occasions instead of suggesting
+  `start`, which the polynomial rejects.
+
+- The equivalence sensitivity siblings speak their parents’ language:
+  [`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md)
+  takes `delta_lower` / `delta_upper` and
+  [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md)
+  takes `rho_lower` / `rho_upper`, positive magnitudes with the upper
+  bound required and the lower defaulting to symmetric, exactly as in
+  [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md)
+  and
+  [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md).
+  The signed `equivalence_lower` / `equivalence_upper` spellings, and
+  their silent default of plus or minus 0.20, are gone.
+
+- Every AIPE planner that reports an expected interval width names the
+  row `ci_width_expected` and reports the expected full width:
+  [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md)
+  and
+  [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md)
+  previously reported the half-width as `ci_half_width_expected` while
+  [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md)
+  reported the full width, a trap for anyone extracting the row
+  programmatically.
+
+- The equivalence trio attaches the `conf_level` attribute the `ci_*`
+  family always carried, and the
+  [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
+  verdict label is spelled `"Noninferior only"`, matching the solid
+  `noninferior` the rest of its page uses.
+  [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md)
+  now validates raw data (matching lengths, at least 4 complete pairs)
+  the way its summary-statistics path always did.
+  [`convert_r_Z()`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
+  and
+  [`convert_Z_r()`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
+  insist on a single value, as documented; vector input previously
+  recycled the term column into duplicated rows. A follow-up ruling
+  extended the same single-value guard to the whole scalar conversion
+  family
+  ([`convert_R2_f()`](https://yelleknek.github.io/DMAR/reference/convert_R2.md)
+  and its three siblings,
+  [`convert_delta_lambda()`](https://yelleknek.github.io/DMAR/reference/convert_t_smd.md)
+  and its inverse, and
+  [`convert_z_normal()`](https://yelleknek.github.io/DMAR/reference/convert_z_normal.md)),
+  with domain checks where a map’s algebra ends (an `R2` at or past 1, a
+  nonpositive group size), so no conversion can recycle vector input
+  into duplicated rows.
+
+- Documentation corrections from the same audit: the four nonlinear
+  simulators state that the first-order delta method behind
+  `reliability` and `reliability_by_occasion` can drift from the
+  realized variance ratio when random variances are large, and document
+  the `schedule` attribute; the Richards example comment places the
+  delta = 3 inflection at about 63% of total change, per its own
+  formula; the mixed-effects examples on
+  [`?analysis_of_change`](https://yelleknek.github.io/DMAR/reference/analysis_of_change.md)
+  now run live.
+
+### One Prefix for Every Confidence Interval
+
+- The four multiple-comparison interval functions moved into the `ci_*`
+  family: `ci_dunnett`, `ci_scheffe`, `ci_games_howell`, and
+  `ci_tukey_kramer` replace `dunnett_ci`, `scheffe_ci`,
+  `games_howell_ci`, and `tukey_kramer_ci`. The suffix forms were the
+  only four exports naming a confidence interval outside the family
+  prefix, and each function now pairs with its critical-value sibling
+  (`cv_dunnett`, `cv_scheffe`, `cv_tukey_hsd`). The package is
+  unreleased, so the old names are gone rather than aliased.
+
+- The correlation intervals now carry the names of their estimands,
+  matching the rest of the correlation family (`ss_aipe_r`,
+  `ss_power_r`, `var_r`, `expected_r`, `equivalence_r`):
+  [`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  is the confidence interval for the simple Pearson correlation (renamed
+  from the MBESS-heritage `ci_cc()`, with the estimate row renamed from
+  `est_cor` to `r`), and
+  [`ci_R()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  is the interval for the population multiple correlation coefficient
+  (its former lowercase alias spelling is gone). Cross-references across
+  the package were audited against this distinction and every one now
+  points at the interval it meant. Because the two natural file names
+  differ only by case, which case-insensitive filesystems refuse, both
+  functions live in `R/ci_correlation.R` and share the `ci_correlation`
+  help page.
+
+- Kish’s design effect function is
+  [`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md);
+  the abbreviation `deft()` is gone as a function name, while the
+  returned table keeps its `design_effect` and `deft` rows, deft being
+  the standard term for the standard error inflation factor, the square
+  root of the design effect.
+
+- The remaining exported alias pairs were resolved to single names.
+  Fisher’s Z is written with a capital Z throughout the package, because
+  it is the variance-stabilizing transform of a correlation and not a
+  z-score, so the converts are
+  [`convert_r_Z()`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
+  and
+  [`convert_Z_r()`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
+  only (the lowercase spellings are gone) and the prose and math were
+  swept to match. The limits of agreement function is
+  [`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
+  with
+  [`loa()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md)
+  kept as its short alias and `bland_altman_loa()` gone (the method is
+  named for what it computes; Bland and Altman are credited in the
+  references).
+  [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
+  and
+  [`covmat_from_cfa()`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md)
+  are the only names for those functions; the `reliability_omega_c()`
+  and `covmat_from_cfm()` aliases are gone. The dataset alias bindings
+  `HS_Data` and `Prime_Time` are gone as well: every dataset carries
+  exactly one name, the documented snake_case one, and unlike the alias
+  bindings the canonical names work with
+  [`data()`](https://rdrr.io/r/utils/data.html).
+
+### Fitting Change Models, Linear and Nonlinear
+
+- The vocabulary of the longitudinal simulators names what the rows are:
+  the identifier column identifies units (persons, animals, trees,
+  classrooms), `n` counts units, and the former `group` column is
+  `population`, one level per data generating parameter vector.
+
+- Measurement schedules can now be unit-specific, in every simulator: in
+  place of a shared `target_times` grid, `time_range = c(lower, upper)`
+  draws each unit’s own measurement times uniformly between the bounds,
+  with `occasions` fixing the number of times per unit or `c(min, max)`
+  letting it vary, so designs such as age at testing rather than grade
+  at testing are simulated directly. The polynomial simulator
+  additionally requires every unit’s count of occasions to reach
+  `P + 1`, so each simulated trajectory identifies the polynomial it
+  came from.
+
+- [`analysis_of_change()`](https://yelleknek.github.io/DMAR/reference/analysis_of_change.md)
+  closes the loop the simulators open: it fits any of the four nonlinear
+  change models, or a polynomial of any order, to longitudinal data. The
+  default two-stage method fits one curve per unit, from that unit’s
+  data alone, with data-driven starting values, and summarizes the
+  unit-level parameters by their mean, their standard deviation and
+  variance across units (the individual differences), and the standard
+  error of the mean; `method = "mixed"` instead estimates the proper
+  random-coefficients model simultaneously,
+  [`lme4::lmer()`](https://rdrr.io/pkg/lme4/man/lmer.html) for the
+  polynomial and
+  [`nlme::nlme()`](https://rdrr.io/pkg/nlme/man/nlme.html) for the
+  nonlinear curves started at the two-stage estimates, so `sd_units`
+  becomes a variance component purged of estimation noise. The help page
+  positions the function candidly against
+  [`nlme::lmList()`](https://rdrr.io/pkg/nlme/man/lmList.html),
+  [`nlme::nlsList()`](https://rdrr.io/pkg/nlme/man/nlsList.html), and
+  the self-starting `SS*` curves: what it adds is the landmark
+  parameterizations, the simulator match, and one tidy interface across
+  linear and nonlinear change. With a single trajectory (or `id = NULL`)
+  it reduces to one nonlinear least squares fit reported with asymptotic
+  standard errors, so N = 1 is one unit’s change. Non-converging units
+  are dropped with a single counted warning and the effective count
+  travels as the `n_used` attribute; the full matrix of unit-level
+  estimates rides along for plotting or as starting values for a
+  simultaneous [`nlme::nlme()`](https://rdrr.io/pkg/nlme/man/nlme.html)
+  fit, and the help page states plainly that the between-unit spread of
+  estimates includes estimation noise, which a variance-component model
+  separates.
+
+### Nonlinear Growth Curve Simulators
+
+- Four random-coefficients nonlinear change simulators join
+  [`simulate_longitudinal_polynomial()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_polynomial.md),
+  sharing its interface (several populations of units, between-unit
+  parameter variances and correlations, level-one error by variance or
+  by target reliability, error correlation structures, assessment-time
+  jitter) and its long-format return that feeds
+  [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md)
+  and nonlinear mixed-model fitters:
+  [`simulate_longitudinal_negative_exponential()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_negative_exponential.md)
+  (asymptotic regression),
+  [`simulate_longitudinal_logistic()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_logistic.md),
+  [`simulate_longitudinal_gompertz()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_gompertz.md),
+  and
+  [`simulate_longitudinal_richards()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_richards.md),
+  whose shape parameter delta subsumes the logistic (delta = 1) and the
+  Gompertz (delta -\> 0) as special cases, relations the tests pin
+  exactly. The parameterizations are those of Kelley (2005,
+  dissertation; 2008, Methodology), in which every parameter is a
+  landmark of the change process (floor, ceiling, moment of fastest
+  change, curvature, inflection height) and the intercept-shifting zeta
+  frees the lower asymptote from zero; the Richards application follows
+  Guo, Cheng, and Kelley (2016). A new vignette, “Nonlinear Growth
+  Curves and the Meaning of Their Parameters”, illustrates all four
+  curves, the Richards unification, and the polynomial comparison: a
+  ninth-order polynomial needs ten uninterpretable coefficients to track
+  a four parameter Gompertz inside the data and still collapses the
+  moment it extrapolates.
+
+### One Word for the Equivalence Family
+
+- The equivalence tests are named for the question they answer:
+  [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
+  [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+  and
+  [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
+  replace `tost_smd()`, `tost_r()`, and `tost_c()`, and the AIPE
+  planners follow
+  ([`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+  [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+  with their sensitivity siblings). The whole family now speaks the same
+  word as the planning and plotting surfaces that always did
+  ([`power_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md),
+  [`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
+  [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md)).
+  The procedure is unchanged, Schuirmann’s two one-sided tests, and each
+  help page says so by that name; the reported TOST -value keeps its
+  standard `p_tost` term. The old names are gone rather than aliased.
+
+### Sample Size Planning for Correlation Equivalence
+
+- [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md)
+  plans the sample size for an equivalence question about a Pearson
+  correlation: the smallest whose 100(1 - 2 alpha)% Fisher’s interval
+  (the interval
+  [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md)
+  and
+  [`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  invert) has expected width at or below the target, with an optional
+  Monte Carlo assurance correction. At the conservative default planning
+  value of 0 the answer has a closed form, and the tests anchor the
+  search to it. Its Monte Carlo sibling
+  [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md)
+  follows the family API and reports, alongside the family’s width and
+  coverage summaries, the realized proportion of equivalence verdicts
+  inside the chosen bounds. This fills the gap noted when the
+  equivalence family was reviewed: the SMD had an AIPE planner for its
+  equivalence interval and the correlation did not.
+
+### The Examples Teach From the Package’s Own Data
+
+- The help-page examples now use DMAR’s own datasets rather than the
+  base-R teaching sets: Dunnett-style comparisons run on
+  `depression_bdi` with its wait list control, the studentized range
+  procedures on `test_market`’s six panels, the unequal-variance and
+  rank methods on `drinks_trial`’s skewed outcome, the factorial and
+  generalized eta squared examples on `pygmalion`’s manipulated
+  treatment crossed with measured grade, and the correlation,
+  regression, reliability, and multivariate examples on the
+  `holzinger_swineford` battery, whose second-form tests carry real
+  missingness that now powers the FIML demonstrations in
+  [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) and
+  [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md)
+  in place of artificially punched holes. Examples that fit lme4 models
+  keep
+  [`lme4::sleepstudy`](https://rdrr.io/pkg/lme4/man/sleepstudy.html),
+  since those pages require lme4 regardless. The
+  [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md) example
+  and tests likewise moved from lavaan’s copy of the 1939 data to the
+  package’s own `holzinger_swineford`. Numeric claims in example
+  comments were recomputed against the new output throughout.
+- Spell checking is now wired in: DESCRIPTION declares `Language: en-US`
+  and `inst/WORDLIST` carries the package’s technical vocabulary, so
+  `devtools::spell_check()` runs clean.
+
+### A Quieter, Faster Test Suite and ggplot2 4.0 Compatibility
+
+- [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md)
+  no longer passes the `fatten` argument of
+  [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html),
+  which ggplot2 4.0.0 deprecates. The point size is set through the
+  `size` aesthetic at the value that draws the same figure on every
+  supported ggplot2 (\>= 3.4.0), so building the plot under ggplot2 4.0
+  no longer raises a deprecation warning.
+- [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md)
+  and
+  [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
+  now validate their inputs before the courtesy message that a default
+  call reports no confidence interval, so a call that is about to fail
+  with an informative error no longer receives advice first.
+- The test suite runs its files in parallel
+  (`Config/testthat/parallel: true`, with the slowest files scheduled
+  first through `Config/testthat/start-first`; the testthat floor moves
+  to 3.2.0). The heaviest Monte Carlo checks were recalibrated to
+  smaller replication counts whose assertions still hold with room to
+  spare, duplicated planner calls across neighboring tests were
+  consolidated into single calls, and tests no longer leak messages,
+  notes, or printed tables into the run’s output. A full
+  `devtools::test()` on the maintainer’s machine dropped from about 20
+  minutes to about 5, with no warnings and nothing skipped.
+
+### One Return Schema Across the Sensitivity Family
+
+- Every `ss_aipe_*_sensitivity()` member now returns the family’s
+  documented schema: `mean_ci_width` / `median_ci_width` / `sd_ci_width`
+  for the realized interval widths, `pct_ci_less_w` for the proportion
+  of intervals at or below the planning width, `pct_ci_miss_low` /
+  `pct_ci_miss_high` / `total_type_I_error` for the empirical
+  non-coverage (proportions on the 0 to 1 scale, so the total is the sum
+  of its tails), `mean_X` / `median_X` / `sd_X` for the member’s own
+  estimand, and input echoes named for their unit (`total_N` or
+  `n_per_group` for the evaluated size, `true_X`, `estimated_X`,
+  `width`, `conf_level`, and, when one was supplied, `assurance`). The
+  core term vector lives once, as the internal registry constant
+  `.SS_AIPE_SENS_CORE_TERMS` in `R/dmar_tidiers.R`, and a family-wide
+  contract test asserts every member against it. Every member’s
+  `@return` now lists exactly the rows the function returns.
+- The term names that departed from the schema moved to it, loudly (the
+  package is unreleased; no old name survives).
+  [`ss_aipe_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2_sensitivity.md)
+  drops the lowercase `_r2` suffixes and `pct_less_w` (`mean_r2` is
+  `mean_R2`, `mean_ci_width_r2` is `mean_ci_width`, the realized-limit
+  rows are `mean_lower_limit` and siblings, the one-sided widths are
+  `mean_ci_width_lower` / `mean_ci_width_upper`); the four term-matching
+  reads inside
+  [`ss_aipe_R2()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2.md)’s
+  assurance search were updated with it.
+  [`ss_aipe_sc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_sensitivity.md),
+  [`ss_aipe_sc_ancova_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_ancova_sensitivity.md),
+  and
+  [`ss_aipe_sm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sm_sensitivity.md)
+  retire `mean_full_width` and `pct_Width_obs_narrower` /
+  `pct_width_obs_narrower`;
+  [`ss_aipe_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_smd_sensitivity.md)
+  retires `pct_less_desired`;
+  [`ss_aipe_c_ancova_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_ancova_sensitivity.md)
+  retires `width_narrower` and `mean_width_obs` (its standard error
+  comparison is now `mean_se_ratio`);
+  [`ss_aipe_rmsea_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rmsea_sensitivity.md)
+  retires `rmsea_pop`, `desired_width`, `mean_width`, and, most
+  importantly, an output row named `assurance` that actually reported
+  the realized width-attainment proportion, now `pct_ci_less_w` so the
+  name no longer collides with the planning input;
+  [`ss_aipe_sem_path_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path_sensitivity.md)
+  retires `width_less_than_desired` and the `type_I_err*` trio.
+- Four members scaled their non-coverage rows by 100 while the rest of
+  the family reported proportions:
+  [`ss_aipe_sm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sm_sensitivity.md),
+  [`ss_aipe_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_smd_sensitivity.md),
+  [`ss_aipe_sc_ancova_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_ancova_sensitivity.md)
+  (both divisor branches), and
+  [`ss_aipe_c_ancova_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_ancova_sensitivity.md)
+  (which also scaled its width-attainment row). All are now proportions
+  on the 0 to 1 scale, completing the sweep that earlier fixed
+  [`ss_aipe_sc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_sensitivity.md),
+  [`ss_aipe_cv_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv_sensitivity.md),
+  and
+  [`ss_aipe_reg_coef_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md).
+- The family contract test caught a real defect while it was being
+  written: the `divisor = "s_anova"` branch of
+  [`ss_aipe_sc_ancova_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_ancova_sensitivity.md)
+  read the confidence limits out of
+  [`ci_sc_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_sc_ancova.md)
+  by row position (`[2, 2]` and `[4, 2]`) when that function returns
+  three rows, so the branch treated the point estimate as the lower
+  limit and NA as the upper: its realized widths were NA and its “Type I
+  error” rows were nonsense. The limits are now read by term name, as
+  the `s_ancova` branch always did, and the branch’s summaries are
+  meaningful for the first time.
+- Members that reported only width summaries now also report their
+  estimand: `mean_psi` and siblings in the three contrast members,
+  `mean_sm`, `mean_smd`, `mean_rmsea`, and `mean_path`, computed from
+  the same replications the widths come from. The echo rows the schema
+  calls for were added where missing
+  ([`ss_aipe_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2_sensitivity.md),
+  [`ss_aipe_cv_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv_sensitivity.md),
+  [`ss_aipe_reg_coef_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
+  and its `rc` / `src` wrappers, the contrast members, and
+  [`ss_seq_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c_sensitivity.md),
+  which now echoes `half_width`, `true_psi`, `true_sigma`,
+  `alpha_level`, and `m0`).
+- The power siblings joined the sweep:
+  [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md)
+  and
+  [`ss_power_reg_coef_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef_sensitivity.md)
+  echo their planning inputs (`p`, `true_R2` / `true_b_j`,
+  `estimated_R2` / `estimated_b_j`, `desired_power`, NA when a size was
+  specified directly, and `alpha_level`), and their realized-`R^2` rows
+  follow the meaningful-capital rule (`mean_R2`, and in the omnibus
+  member `mean_F` / `F_crit`). `tidy()` and `glance()` for the
+  `dmar_ss_power_sensitivity` class are unchanged; the echoes ride along
+  in `glance()`.
+
+### The ICC Sample Size Planner Now Plans the Average-of-k Forms
+
+- [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
+  accepted and documented the six Shrout-Fleiss `type` labels but
+  planned every one of them on the single-rater scale, so average-of-k
+  plans were materially undersized. The planning value and target width
+  are now interpreted on the scale of the requested form: an
+  average-of-k value is mapped to the single-rater scale through the
+  inverse Spearman-Brown relation and each candidate confidence limit is
+  mapped back (the convention
+  [`var_icc()`](https://yelleknek.github.io/DMAR/reference/var_icc.md)
+  uses), and `type` is now validated, so an unrecognized label fails
+  instead of silently planning `ICC(1,1)`. Average-of-k recommendations
+  move: at `rho = .70`, `k = 3`, and `width = .20`, planning for
+  `ICC(1,k)` now recommends n = 110 (realized mean width .20 across
+  2,000 Monte Carlo replications of the *F*-based interval) where the
+  undersized plan recommended n = 69 (realized width .26); at
+  `width = .10` the recommendation is n = 421, and at `rho = .90`,
+  `width = .10` it is n = 52. Single-rater plans are unchanged. The
+  planned form travels as the `icc_type` attribute on the returned
+  table.
+- [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md)
+  had the matching defect on the generator side: it treated `true_rho`
+  as the single-rater ICC no matter the `type`. For the average-of-k
+  forms it now simulates data whose population ICC at the average-of-k
+  level equals `true_rho`, so the realized estimates, widths, and
+  coverage refer to the form being planned; `type` is validated the same
+  way.
+- The claim in
+  [`?ss_aipe_icc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
+  that the assurance correction over-recommends sample size by 25 to 40
+  subjects was backwards. At the page’s own condition (`rho = .70`,
+  `k = 3`, `width = .20`, `assurance = .80`) the recommended n = 79
+  delivers an empirical assurance of about .77, and n = 81 is the
+  smallest sample size that reaches .80 (10,000 Monte Carlo
+  replications). The Details section now says so and points to
+  [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md)
+  for checking a strict assurance target.
+
+### The Noncentral F Clamp Warning Speaks the Caller’s Language
+
+- When an observed *F* falls below the `alpha_lower` critical value of
+  the central *F*-distribution, the lower noncentrality limit is 0 by
+  construction; that is a normal consequence of a small observed effect,
+  not a failure.
+  [`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+  still warns once in that case, but the message now states the
+  consequence for the interval (the lower confidence limit is 0) instead
+  of describing achieved tail probabilities, and every function that
+  builds its interval by inverting the noncentral *F* through it
+  ([`ci_snr()`](https://yelleknek.github.io/DMAR/reference/ci_snr.md),
+  [`ci_srsnr()`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md),
+  [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+  [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md) with
+  fixed predictors,
+  [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
+  [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
+  [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
+  [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
+  with the parametric method, and
+  [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md))
+  restates it for its own effect size, for example “the lower confidence
+  limit on the signal-to-noise ratio is 0”, at most once per call.
+  Previously
+  [`ci_snr()`](https://yelleknek.github.io/DMAR/reference/ci_snr.md) and
+  [`ci_srsnr()`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md)
+  surfaced the inner wording, which pointed users to a `prob_greater`
+  column those functions do not return. The warning carries the
+  condition class `dmar_ncf_clamp`, which the iterative callers
+  ([`ss_aipe_R2()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2.md),
+  [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
+  [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
+  [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md))
+  now match by class when deduplicating.
+- A genuine failure of the inner root finding is no longer a bare
+  [`uniroot()`](https://rdrr.io/r/stats/uniroot.html) message: the error
+  now names the function that was called, reports the *F*-statistic,
+  degrees of freedom, and tail probabilities involved, and says what to
+  try.
+
+### design_consequences() Now Uses the Exact Noncentral *t* When df Is Finite
+
+- With finite `df`, the significance lens of
+  [`design_consequences()`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
+  (`power`, `type_s_error`, `exaggeration_ratio`) is now computed from
+  the noncentral *t* distribution of the test statistic, the exact
+  distribution when the standard error is estimated from the data and
+  the same sampling model the precision lens already used; the
+  exaggeration ratio integrates the truncated normal moments over the
+  chi distribution of the estimated standard error. The previous code
+  evaluated a location-shifted central *t*, the known-se approximation
+  behind Gelman and Carlin’s `retrodesign()`, so the help page promised
+  the noncentral *t* while the code delivered the approximation.
+  Small-df results move: at *n* = 5 per group with a true effect of *d*
+  = 1, power is now 0.2863 (was 0.2469; a two-million replication Monte
+  Carlo of the design gives 0.2860 with simulation standard error
+  0.0003, and base R’s `power.t.test(strict = TRUE)` agrees exactly),
+  the Type S error is 0.00129 (was 0.00937), and the exaggeration ratio
+  is 1.658 (was 1.915). The differences fade as `df` grows (negligible
+  by about 60 per group), and the `df = Inf` normal case is unchanged.
+
+### The Robust Standardized Mean Difference Scales Correctly at Every Trim
+
+- [`smd_trimmed()`](https://yelleknek.github.io/DMAR/reference/smd_trimmed.md)
+  applied the reciprocal of the Algina-Keselman-Penfield scaling
+  constant at every trimming proportion other than the 0.20 default: the
+  internal constant computed the Winsorized variance of a standard
+  normal correctly and then returned `1 / sqrt(win_var)` where the
+  definition calls for `sqrt(win_var)`, and a hard-coded 0.642 at
+  `trim = 0.20` masked the error at the default while making the
+  estimate discontinuous there (`trim = 0.1999` returned 2.43 times the
+  value `trim = 0.20` returned). The constant is now `sqrt(win_var)` at
+  every trim and the hard-coded branch is gone. At the default the
+  constant moves from the rounded 0.642 to its exact value 0.6419398, so
+  estimates at `trim = 0.20` change by less than one part in ten
+  thousand; at any other trim the correction is substantial (previous
+  estimates were 1.47 times too large at `trim = 0.10`, 4.99 times too
+  large at `trim = 0.30`, and 17.99 times too large at `trim = 0.40`).
+  The help page identity is corrected to match: 0.642 is SD(X_W) /
+  SD(X), that is sqrt(Var(X_W) / Var(X)), for a standard normal
+  Winsorized at 0.20, not Var(X) / Var(X_W).
+
+### The Robust Standardized Mean Difference Interval Now Uses the Yuen-Welch Degrees of Freedom
+
+- [`smd_trimmed()`](https://yelleknek.github.io/DMAR/reference/smd_trimmed.md)’s
+  help page promised a confidence interval on the Yuen-Welch degrees of
+  freedom, but the code inverted the noncentral *t* at `h_1 + h_2 - 2`
+  degrees of freedom with noncentrality
+  `d_R * sqrt(h_1 * h_2 / (h_1 + h_2))`; the Yuen-Welch value was
+  computed, returned in the `df_yuen` row, and never used. The interval
+  now follows the construction in Keselman, Algina, Lix, Wilcox, and
+  Deering (2008): Yuen’s *t*-statistic on the trimmed-mean difference
+  (their Equation 8) is referred to a noncentral *t* distribution with
+  the Yuen-Welch approximate degrees of freedom (their Equation 9), and
+  the noncentrality limits are rescaled to the `d_R` metric. Feeding the
+  summary statistics of the paper’s worked example (their Tables 1
+  and 3) through this construction reproduces the printed robust effect
+  size intervals \[0.31, 3.37\] and \[0.10, 1.11\] (p. 119) to the
+  precision the rounded published inputs support, while `h_1 + h_2 - 2`
+  degrees of freedom give \[0.40, 3.31\] for the first: the paper’s
+  intervals use the Yuen-Welch value. The former noncentrality also
+  understated the observed statistic (by about 16% at the default trim
+  under equal Winsorized variances), so intervals move even where the
+  two degrees of freedom nearly agree: on the help page example the
+  interval is now \[-0.88, 0.08\] where the old construction gave
+  \[-0.97, 0.17\].
+
+### A Consistent Confidence Interval for Lin’s CCC
+
+- [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md)
+  now builds its confidence interval on Lin’s (1989) *z*-transformed
+  standard error, with the correction noted in Lin (2000), and the
+  former default `method = "king_chinchilli"` is removed. The removed
+  variance was not a consistent estimator of the sampling variance of
+  the *z*-transformed CCC: when the two means and variances are equal it
+  inflates the correct asymptotic variance by exactly the square of (1 +
+  rho^2) / (1 - rho^2), already about 2.8-fold at a CCC of .5 and
+  several hundred-fold at .95 (and by a comparable factor otherwise), so
+  its intervals were nearly vacuous. The help page’s own first example
+  returned CCC = .928 with CI \[-0.977, 1.000\]; the same example now
+  returns \[0.871, 0.960\], matching the independent `DescTools::CCC()`
+  *z*-transform interval to ten decimals, and the Lin interval’s
+  simulated coverage is .952 at nominal .95 (bivariate normal, rho = .5,
+  *n* = 50, where the removed default covered .982 with intervals 61%
+  wider). The removed formula was also not King and Chinchilli’s (2001)
+  estimator, so keeping it under that name would have credited a wrong
+  formula to real authors; a correct King-Chinchilli variance may return
+  in a later release. Calls that request `method = "king_chinchilli"`
+  now fail loudly.
+
+### The Fleiss Kappa Test Uses the Corrected Null Variance
+
+- [`fleiss_kappa()`](https://yelleknek.github.io/DMAR/reference/fleiss_kappa.md)
+  computed its *z* statistic and *p*-value from a null variance that
+  treats the category marginals as known constants, not from the
+  estimated-marginals null variance of Fleiss, Nee, and Landis (1979),
+  the correction of the standard errors in Fleiss (1971), even though
+  the help page credited that paper. The two expressions coincide at
+  uniform marginals, which is how the error hid, and diverge as the
+  marginals skew: at *N* = 1000, *m* = 5, and marginals (.85, .10, .05),
+  the old null standard deviation was 3.8 times the empirical one (.0303
+  versus .0080). Because the known-marginals expression is never smaller
+  than the corrected one (they are equal only at uniform marginals),
+  every affected *z* was understated and every affected *p*-value
+  overstated; the test was conservative, never anticonservative. On the
+  help page’s own Fleiss
+  1971. Table 1 example the *z* statistic moves from 15.64 to 17.65, now
+        matching `irr::kappam.fleiss` to ten decimals. The point
+        estimate and the confidence interval do not move: kappa is
+        unchanged, and the `se`, `lower_limit`, and `upper_limit`
+        columns come from the Gwet (2008) linearization, which was
+        correct all along.
+
+### One-Sided Dunnett Intervals Now Contain Their Point Estimates
+
+- `ci_dunnett(alternative = "less")` formed its simultaneous upper
+  bounds with the signed critical value that
+  [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md)
+  reports for that alternative, a negative lower-tail quantile, which
+  placed every bound at `diff - |d| * se`: below the point estimate it
+  was supposed to bound, and in contradiction with the adjusted
+  *p*-values printed beside it (on the PlantGrowth example both “less”
+  rows reported an upper limit below zero, a rejection, beside adjusted
+  *p*-values of 0.162 and 0.989, no rejection). Simultaneous coverage of
+  the true differences measured 0.00115 against the nominal .95 in a
+  balanced null design with four groups and *n* = 10 per group. The
+  critical value’s magnitude is now applied on the side the alternative
+  dictates, so the “less” bound is `diff + |d| * se`; coverage in the
+  same design measures 0.94685, and the PlantGrowth “less” upper limits
+  move from -0.928 and -0.063 to 0.186 and 1.051, agreeing with
+  `multcomp::glht()`’s one-sided limits to about four decimal places
+  (the remaining daylight is multcomp’s simulated-quantile error) and
+  with the adjusted *p*-values on every row. The
+  `alternative = "greater"` interval already used the positive critical
+  value and is unchanged, as are the two-sided intervals and all
+  adjusted *p*-values.
+
+### anova_within_two_way() Declines to Estimate an Inestimable Epsilon
+
+- When an effect’s numerator degrees of freedom exceed n - 1, the
+  covariance matrix of the effect’s orthonormal contrasts is singular
+  and the Greenhouse-Geisser formula returns an artifact bounded above
+  by (n - 1)/df regardless of the population epsilon (even under exact
+  sphericity, where the population value is 1); the Huynh-Feldt value
+  derived from it is equally meaningless.
+  [`anova_within_two_way()`](https://yelleknek.github.io/DMAR/reference/anova_within_two_way.md)
+  previously reported these artifacts as estimates. The
+  Greenhouse-Geisser and Huynh-Feldt rows for such an effect now carry
+  NA in epsilon, the adjusted degrees of freedom, and the *p*-value,
+  with one warning naming the condition;
+  [`car::Anova`](https://rdrr.io/pkg/car/man/Anova.html) likewise
+  declines to report the corrections when the effect’s error matrix is
+  singular. The unadjusted and lower-bound rows are unchanged: the lower
+  bound 1/df is Geisser and Greenhouse’s a priori bound, not an
+  estimate, and remains valid however few the subjects (Maxwell,
+  Delaney, & Kelley, 2027, Chapters 11 and 13).
+
+### ci_r() Now Requires at Least Four Observations
+
+- [`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  accepted any sample size and went quietly wrong below n = 4: at n = 3
+  it returned the vacuous interval \[-1, 1\] (the Fisher’s Z variance
+  1/(n - 3) is infinite there), and at n = 2 it returned NaN limits. The
+  function now stops with an informative error for n \< 4, and the n = 3
+  message explains why no usable interval exists at that boundary.
+- The same unguarded 1/(N - 3) sat behind `ci_method = "fisher"` in
+  [`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
+  [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md),
+  and
+  [`reliability_kr20()`](https://yelleknek.github.io/DMAR/reference/reliability_kr20.md);
+  the Fisher interval there now stops for N \< 4 with the same
+  explanation. The package’s other Fisher’s Z consumers
+  ([`var_r()`](https://yelleknek.github.io/DMAR/reference/var_r.md),
+  [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+  [`meta_r()`](https://yelleknek.github.io/DMAR/reference/meta_r.md),
+  [`ss_power_r()`](https://yelleknek.github.io/DMAR/reference/ss_power_r.md),
+  [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+  [`correction_for_attenuation()`](https://yelleknek.github.io/DMAR/reference/correction_for_attenuation.md),
+  [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md))
+  already validated their sample sizes.
+
+### The AIPE Sensitivity Family Reports Coverage as Proportions
+
+- Three members of the `ss_aipe_*_sensitivity` family scaled some or all
+  of their coverage and width-attainment rows by 100 while the rest of
+  the family reported proportions.
+  [`ss_aipe_sc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_sensitivity.md)
+  reported `type_I_error_upper` and `type_I_error_lower` as percentages;
+  [`ss_aipe_cv_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv_sensitivity.md)
+  reported `pct_ci_less_w`, `pct_ci_miss_low`, and `pct_ci_miss_high` as
+  percentages beside a `total_type_I_error` that was already a
+  proportion, so its own rows did not add up; and
+  [`ss_aipe_reg_coef_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
+  (inherited by
+  [`ss_aipe_rc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc_sensitivity.md)
+  and
+  [`ss_aipe_src_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src_sensitivity.md))
+  scaled all four. These rows are now proportions on the 0 to 1 scale
+  everywhere, so `total_type_I_error` equals the sum of
+  `pct_ci_miss_low` and `pct_ci_miss_high`, and a realized Type I error
+  compares directly to 1 - `conf_level` with no per-function rescaling.
+  Term names are unchanged; only the scale moved.
+
 ### The MBCO Likelihood Ratio Is Now Branch-Deterministic
 
 - [`mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)’s
@@ -87,8 +758,22 @@ MBESS package.
   within-construct correlation nonpositive. Both drop the replication,
   warn once with the count, and stop only when fewer than 100
   replications survive.
-- The five non-SEM composite power pages no longer wrap their examples
-  in `\donttest{}`; each runs in well under a second.
+- **No help page wraps its examples in `\donttest{}` or `\dontrun{}` any
+  more.** Under `R CMD check --as-cran`, one `\donttest{}` block
+  anywhere makes R run the whole example corpus twice, so the wrapper
+  cost time rather than saving it. The examples that were slow are now
+  fast. Replication counts in the cheap demonstrations were lowered,
+  with a comment naming what a reported analysis deserves. **No example
+  runs a bootstrap confidence interval**: those calls are carried as
+  commented code, so the syntax is still on the page for a reader who
+  wants it, and the surrounding prose explains the interval and when to
+  ask for it. The randomization tests keep their resampling, since
+  permuting the data is what those functions do and their examples cost
+  a tenth of a second. Anything else expensive is commented out the same
+  way, each passage introduced by a sentence saying what it does and why
+  it is not run. The data behind every example are unchanged. The
+  slowest help page now takes 0.38 seconds, and all 302 together take 8
+  seconds.
 
 ### The CFA Family: One General Function, Two Convenience Wrappers
 
@@ -276,10 +961,8 @@ MBESS package.
   computes the variance of the estimated treatment effect at selected
   covariate values in a two-group ANCOVA with heterogeneity of
   regression and a random covariate (Li, McLouth, & Delaney, 2020), the
-  reimplementation of
-  [`MBESS::var.ete()`](https://rdrr.io/pkg/MBESS/man/var.ete.html);
-  tested against the MBESS reference on every branch and dogfooded in
-  the Pygmalion vignette.
+  reimplementation of `MBESS::var.ete()`; tested against the MBESS
+  reference on every branch and dogfooded in the Pygmalion vignette.
 
 - **`tidy()` and `glance()` answer on every DMAR result.** Two default
   methods on the `dmar_tbl` class are the floor under the package: any
@@ -321,8 +1004,9 @@ MBESS package.
   Sensitivity outputs echo the evaluated size under its bare unit name
   (`total_N`, `n_per_group`), and the six sensitivity functions whose
   `specified_N` argument actually meant a per-group size now call it
-  `n_per_group` (`ss_aipe_c/sc/sc_ancova/smd/tost_smd/pcm_sensitivity`).
-  Two term names in the cluster family that contained literal spaces are
+  `n_per_group`
+  (`ss_aipe_c/sc/sc_ancova/smd/equivalence_smd/pcm_sensitivity`). Two
+  term names in the cluster family that contained literal spaces are
   underscored. The tidy()/glance() size recognizer no longer accepts the
   legacy names, so a stray old producer fails a test instead of slipping
   through, and a 216-table characterization grid recorded before the
@@ -338,8 +1022,8 @@ MBESS package.
   and
   [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md)
   renamed `J` to `p`, and
-  [`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md) renamed
-  `K` to `p`, matching
+  [`ci_R()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  renamed `K` to `p`, matching
   [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
   [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
   and the rest of the regression family. `J` remains only in the partial
@@ -359,9 +1043,197 @@ MBESS package.
   trailing period, matching base R convention (previously the package
   mixed sentence case and title case).
 
+### Ten Help Pages Now State Exactly What the Code Computes
+
+A numerical audit compared every displayed formula and quoted magnitude
+on these pages against the quantity the function computes. In each case
+the computation was correct and the page was not, so no returned value
+changes; the documentation now matches the code, and new tests recompute
+each corrected expression independently and assert agreement with the
+function output.
+
+- **[`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md)**
+  displayed the expectation with every index one lower than the
+  Olkin-Pratt formula under the n to n - J substitution the code makes;
+  as printed, the formula can exceed 1, an impossible value for the
+  expectation of a correlation. The page now prints E\[r\] = rho
+  2F1(1/2, 1/2; (n - J + 1)/2; rho^2) Gamma((n - J)/2)^2 / (Gamma((n -
+  J - 1)/2) Gamma((n - J + 1)/2)), which matches the function to machine
+  precision. The bias prose also described E\[r\] - rho while the
+  returned `bias` column is rho - E\[r\]; the sign convention now
+  matches the column, and the quoted magnitudes are the true +0.00624
+  (rho = 0.4, n = 30, J = 2) and +0.00888 (J = 10).
+- **[`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md)**
+  quoted bias magnitudes with the wrong sign and size (-0.024 and
+  -0.006); the true values are +0.021 (rho = 0.5, n = 10) and +0.0065 (n
+  = 30), as the page’s own example already reported.
+- **[`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md)**
+  printed the variance of the Bonett (2002) L-transform as 1 / (2 (n -
+  2)), omitting the k / (k - 1) factor the code applies; the page now
+  prints k / (2 (k - 1) (n - 2)). A reader hand-building the interval
+  from the old page at k = 2 would have an SE too small by a factor of
+  sqrt(2) and roughly .84 coverage instead of .95.
+- **[`anova_within_two_way()`](https://yelleknek.github.io/DMAR/reference/anova_within_two_way.md)**
+  printed the lower-bound epsilon as 1 / (df - 1); the code computes 1 /
+  df, the attainable infimum, with df the effect’s numerator degrees of
+  freedom.
+- **[`loa()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md)**
+  printed a symmetric central t interval for the CIs on the limits of
+  agreement; the code computes the Carkeet (2015) exact noncentral t
+  interval, which is asymmetric about the sample LoA. The page now shows
+  the noncentral form: quantiles of the noncentral t with noncentrality
+  parameter k sqrt(n) for the upper LoA and its negative for the lower.
+- **[`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)**
+  printed a symmetric interval with unsquared constants and a -MS_b MS_w
+  / n cross term that appears nowhere in the method; the code computes
+  the genuine Burdick-Graybill (1992, equations 2.4.1–2.4.5) form, and
+  the page now prints V_L and V_U with the squared constants and the
+  G_12 / H_12 cross terms.
+- **[`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md)**
+  printed Var(beta-hat) with a trailing design-effect factor the code
+  does not apply; for the cluster-mean-centered level-1 slope the
+  variance is sigma2_y (1 - rho_I) / (N sigma2_x), and the page now
+  explains why the design effect does not enter.
+- **[`ci_smd()`](https://yelleknek.github.io/DMAR/reference/ci_smd.md)**
+  pointed paired designs to
+  [`ci_smd_c()`](https://yelleknek.github.io/DMAR/reference/ci_smd_c.md),
+  which is the interval for Glass’s estimator (two independent groups,
+  control group SD) and takes no correlation between paired
+  measurements, so following the pointer reproduced essentially the
+  independent groups interval. The page now states plainly that a
+  paired-design SMD interval is not currently provided.
+- **[`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md)**
+  attributed the alternative distribution to Wallenius; the code
+  computes Fisher’s noncentral hypergeometric, the conditional
+  distribution of one binomial count given the total of two independent
+  binomials, which is what conditioning on the margins of the 2 x 2
+  table produces. The prose and references now cite Fisher
+  1935. and Fog’s (2008) sampling-methods paper.
+- **[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md)**
+  said the default returns a - 1 pairwise contrasts; it returns all a
+  (a - 1) / 2 of them, as the sibling pages already stated.
+
+### A Second Documentation Pass: Quoted Values Now Match What Runs
+
+A continuation of the audit above, covering another two dozen help
+pages. As before, the computations were correct and the pages were not;
+no returned value changes, and where a corrected number is load-bearing
+a test now recomputes it independently.
+
+- **Quoted numbers now match what the examples print.**
+  [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md)’s
+  90 percent example described its upper limit as landing below 0.05;
+  the limit is 0.052, just above the Browne and Cudeck close fit
+  threshold, and the page now draws the conclusion that follows (close
+  fit is not established, even though the point estimate sits below the
+  threshold).
+  [`obrien_test()`](https://yelleknek.github.io/DMAR/reference/obrien_test.md)’s
+  Hunter example quoted p = .2595, which matches neither the quoted F =
+  1.29 nor the exact statistic; the page now quotes p = .260, as
+  computed.
+  [`combine_p()`](https://yelleknek.github.io/DMAR/reference/combine_p.md)’s
+  Edgington sum for the Raudenbush example prints 7, not “near 6.9”.
+  [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md)’s
+  hypertension example described 24 subjects across group sizes of 4, 6,
+  5, and 5; it says 20.
+- **[`mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)
+  separates the published memory-example likelihood ratios from what its
+  example computes.** Run from the rounded Table 1 summary statistics,
+  the two null branches give LRT = 71.31 (the best-fitting branch, the
+  statistic reported) and 179.02; the 72.54 and 175.77 the page
+  previously quoted are the full-precision-moments values, and 175.77 is
+  now attributed to Tofighi and Kelley (2020) as the published value,
+  from the worse-fitting branch on which their optimizer stopped. The
+  page notes that the difference comes from running from the published
+  (rounded) summary statistics.
+- **[`ss_power_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_power_indirect_effect.md)’s
+  example no longer equates the approximation with the simulation
+  benchmark.** The joint significance approximation returns
+  `necessary_N` = 65 for a = b = .39 at power .80; raw-data simulation
+  puts the power at 65 nearer .77 and reaches .80 near N = 70, in line
+  with the somewhat larger requirement in Fritz and MacKinnon’s (2007)
+  simulation-based table, and the example comment now says exactly that.
+  The raw-data validation test’s relative tolerance is widened from 0.03
+  to 0.06 with the reason recorded in place: the approximation sits
+  about 3 percent above the simulation at those settings on any seed, so
+  the old tolerance failed on some seeds for the approximation gap
+  alone.
+- **`prime_time_achievement`’s corporation summaries are recomputed from
+  the derived `corp_id` key.** The bare `corp` column merges the two
+  corporations that share code 2400, so the page overstated the largest
+  corporation: corporations have 15 to 756 students (median 117), not 15
+  to 808 (median 124), and the three-level null model decomposition is
+  16.29 / 22.72 / 240.43 with a corporation ICC of 0.058 (previously
+  16.50 / 22.70 / 240.43 and 0.059). The data set’s tests now anchor the
+  corrected values.
+- **`bessel_errors`’ expected counts imply a normal sigma near 0.22, not
+  0.2.** A least squares fit of the half-normal bin probabilities to
+  Bessel’s expected frequencies gives 0.216; at 0.2 the first bin alone
+  is off by about eight observations.
+- **The `which_width` contract of
+  [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
+  [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
+  and
+  [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md)
+  now says what the code does.** The pages described `"Lower"` /
+  `"Upper"` as a one-sided half-width; both settings interpret `width`
+  as half the full width and return the same sample size. The pages now
+  say so, note that an asymmetric interval’s realized half-widths differ
+  from each other and from half the full width, and state that a
+  genuinely one-sided width target is not currently offered.
+- **[`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md)
+  documents the tail arguments its backend accepts.** The page promised
+  that supplying `alpha_lower` and `alpha_upper` recomputes
+  `conf_level`; that call errors, because the tails pass straight
+  through to
+  [`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
+  which refuses a non-NULL `conf_level` beside them. The page now
+  directs users to set `conf_level = NULL` and supply both alphas, and a
+  test pins the contract.
+- **[`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+  and
+  [`conf_limits_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+  state the monotonicity each search actually exploits.** The pages
+  claimed each tail probability is strictly decreasing in the
+  noncentrality parameter; the lower-limit condition works on the upper
+  tail, which is strictly increasing. Each page now gives the direction
+  per tail and notes that both roots are located on the decreasing
+  lower-tail scale.
+- **Smaller contract corrections.**
+  [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md)
+  described an expected half-width target of omega where the code
+  targets omega / 2 (full width omega), and a 1-row return where the
+  table has 5 rows; both now match, and the return’s stale term names
+  are corrected. The stale `sample_size` return term on the
+  [`ss_aipe_c()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c.md),
+  [`ss_aipe_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_ancova.md),
+  and
+  [`ss_aipe_sm()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sm.md)
+  pages now reads `necessary_n_per_group`, `necessary_n_per_group`, and
+  `necessary_N`.
+  [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md)’s
+  `N` is documented as the total number of observations (for `aovlist`
+  fits, one more than the sum of all effect and residual degrees of
+  freedom), matching its Details.
+  [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md)’s
+  `adj_R2` is documented as using the complete cases (`N_complete`),
+  which the code deliberately uses, rather than the lavaan reported N.
+  [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md)’s
+  `contrast_type` entry dropped inline width expressions that omitted
+  the 1/sqrt(2) and sqrt(1/n) factors and now points to the correct
+  display in Details.
+  [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md)’s
+  note no longer contains a sentence directing users to pass the error
+  variance where the argument (and the rest of the page) wants the error
+  standard deviation. The multiplicative `diff_size` illustration on the
+  `ss_aipe_crd_*` pages was a verbatim copy of the additive one; it now
+  works the multiplicative form’s arithmetic (cluster size 25 with
+  `diff_size = c(0.8, 1, 1.2)` gives sizes 20, 25, 30, recycled across
+  clusters).
+
 ### Equivalence and noninferiority for linear contrasts
 
-- **[`tost_c()`](https://yelleknek.github.io/DMAR/reference/tost_c.md)**
+- **[`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)**
   performs the two one-sided tests procedure and the companion
   noninferiority test for a linear contrast of group means against
   bounds stated in raw units of the response, with one pooled error
@@ -394,7 +1266,7 @@ MBESS package.
 - **[`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md)**
   draws contrast estimates and their intervals against the equivalence
   region, colored by the
-  [`tost_c()`](https://yelleknek.github.io/DMAR/reference/tost_c.md)
+  [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
   verdict.
 
 ### Mixed-effects R-squared
@@ -408,9 +1280,8 @@ MBESS package.
   nested two-level models. On split random-slope models
   `performance`/`insight` omits the random-slope variance from its
   marginal and conditional R-squared, so DMAR matches `r2mlm` and the
-  Johnson form there and, by design, not
-  [`performance::r2_nakagawa`](https://easystats.github.io/performance/reference/r2_nakagawa.html);
-  the two agree on random-intercept and correlated-slope models.
+  Johnson form there and, by design, not `performance::r2_nakagawa`; the
+  two agree on random-intercept and correlated-slope models.
 - **[`R2_mixed_effects_decomposition()`](https://yelleknek.github.io/DMAR/reference/R2_mixed_effects_decomposition.md)**
   implements the Rights and Sterba
   2019. integrative framework of mixed-effects model R-squared measures:
@@ -437,9 +1308,9 @@ MBESS package.
   [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
   [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md))
   and the simultaneous-comparison intervals
-  ([`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
-  [`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
-  [`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md)).
+  ([`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+  [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
+  [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md)).
 - **The broom summary now spans the power-based sample size planners.**
   `tidy()` and `glance()` summarize every closed-form `ss_power_*`
   planner that reports one size and one power, from the effect size
@@ -583,8 +1454,7 @@ MBESS package.
   which a raw difference does not.
 - **[`contrast_adjusted()`](https://yelleknek.github.io/DMAR/reference/contrast_adjusted.md)**
   tests an arbitrary contrast among covariate-adjusted cell means in a
-  factorial ANCOVA, matching
-  [`emmeans::contrast()`](https://rvlenth.github.io/emmeans/reference/contrast.html).
+  factorial ANCOVA, matching `emmeans::contrast()`.
 - More estimators now route through the tidy `dmar_tbl` display layer,
   and literature-synonym `@concept` tags (Cohen’s d, Cronbach’s alpha,
   Cohen’s U3, …) make the marquee estimators searchable by their
@@ -635,38 +1505,34 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   to the FIML estimate of the item covariance matrix; the model based
   estimators fit with lavaan’s `missing = "ml"`; robust omega’s observed
   total variance comes from the FIML covariance matrix. MBESS documents
-  an `aux` argument on
-  [`ci.reliability()`](https://rdrr.io/pkg/MBESS/man/ci.reliability.html)
-  that no longer runs (upstream API drift in semTools), so DMAR
-  implements the saturated correlates model directly in lavaan syntax
-  rather than depending on it. The returned table now always carries an
-  `N_complete` row beside `N`, making the cost of listwise deletion
-  visible at a glance, and the treatment is recorded in `missing` and
-  `aux` attributes. Interval methods that cannot be made correct under
-  FIML (the complete-data closed forms, ADF, the profile likelihood) are
-  errors, never silent fallbacks; the bootstrap resamples partially
-  observed rows and refits by FIML. Under MAR missingness driven by an
-  auxiliary, the test suite shows FIML-with-auxiliary reducing the bias
-  of listwise deletion roughly 38-fold across 200 replications, and a
-  hand-specified saturated correlates model in lavaan reproduces the
-  estimates exactly.
+  an `aux` argument on `ci.reliability()` that no longer runs (upstream
+  API drift in semTools), so DMAR implements the saturated correlates
+  model directly in lavaan syntax rather than depending on it. The
+  returned table now always carries an `N_complete` row beside `N`,
+  making the cost of listwise deletion visible at a glance, and the
+  treatment is recorded in `missing` and `aux` attributes. Interval
+  methods that cannot be made correct under FIML (the complete-data
+  closed forms, ADF, the profile likelihood) are errors, never silent
+  fallbacks; the bootstrap resamples partially observed rows and refits
+  by FIML. Under MAR missingness driven by an auxiliary, the test suite
+  shows FIML-with-auxiliary reducing the bias of listwise deletion
+  roughly 38-fold across 200 replications, and a hand-specified
+  saturated correlates model in lavaan reproduces the estimates exactly.
 
 - **[`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md)**
   gains a `denominator` argument selecting how the total variance in the
   denominator of coefficient omega is estimated: `"observed"` (the
   default: robust omega, the variance of the composite estimated
   directly from the data, the coefficient Kelley and Pornprasertmanit,
-  2016, call hierarchical omega and
-  [`MBESS::ci.reliability()`](https://rdrr.io/pkg/MBESS/man/ci.reliability.html)
-  calls type `"hierarchical"`) or `"model_implied"` (the textbook form).
-  The two definitions coincide in the population when the single-factor
-  model is correctly specified; only robust omega retains its
-  interpretation as the proportion of the variance of the composite
-  actually computed when the model is misspecified, which is why it is
-  the default. The help page states the properties of each choice and
-  the distinction from the bifactor omega-hierarchical of Zinbarg,
-  Revelle, Yovel, and Li (2005). The returned object records the choice
-  in a `denominator` attribute.
+  2016, call hierarchical omega and `MBESS::ci.reliability()` calls type
+  `"hierarchical"`) or `"model_implied"` (the textbook form). The two
+  definitions coincide in the population when the single-factor model is
+  correctly specified; only robust omega retains its interpretation as
+  the proportion of the variance of the composite actually computed when
+  the model is misspecified, which is why it is the default. The help
+  page states the properties of each choice and the distinction from the
+  bifactor omega-hierarchical of Zinbarg, Revelle, Yovel, and Li (2005).
+  The returned object records the choice in a `denominator` attribute.
 
 - **[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md)
   accepts ordered-categorical items** (`ordered = TRUE` or a vector of
@@ -765,9 +1631,8 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   fitted factor model.
 
 - **[`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
-  is the categorical omega function’s full name**;
-  [`reliability_omega_c()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
-  remains available as an alias, and the
+  is the categorical omega function’s full name**, and its only name (an
+  earlier `reliability_omega_c()` alias was removed). The
   [`reliability()`](https://yelleknek.github.io/DMAR/reference/reliability.md)
   wrapper’s canonical type is `"omega_categorical"` with `"omega_c"`
   accepted as a shorthand. The coefficient attribute is now
@@ -859,7 +1724,7 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   2016).
 
 - **[`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)**
-  quantifies Thurstonian simple structure in a loading matrix: Hoffman
+  quantifies Thurstonian simple structure in a loading matrix: Hofmann
   item complexity, the hyperplane proportion, and pure/complex item
   counts.
 
@@ -875,6 +1740,11 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   **[`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md)**
   implement the single-common-factor (Harman) screen and the Lindell and
   Whitney (2001) marker-variable adjustment for common method variance.
+  The Harman screen is implemented factor analytically: a one-factor
+  model is fit by maximum likelihood
+  ([`stats::factanal()`](https://rdrr.io/r/stats/factanal.html)) and the
+  reported proportion of variance is the common factor’s, not a
+  principal component’s.
 
 ### ANCOVA multiple comparisons
 
@@ -957,7 +1827,7 @@ stable on CRAN; DMAR is the recommended path forward for new users.
 
 ### Pairwise comparisons without the usual assumptions
 
-- **[`games_howell_ci()`](https://yelleknek.github.io/DMAR/reference/games_howell_ci.md)**:
+- **[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md)**:
   simultaneous confidence intervals for all pairwise comparisons when
   homogeneity of variance is not assumed. Every other all-pairs
   procedure in the package pools the within-group variances into MS_W,
@@ -967,7 +1837,7 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   studentized range, following Maxwell, Delaney, and Kelley (2027,
   Chapter 5, Equations 5.13 and 5.14). It is the heterogeneity-robust
   counterpart of
-  [`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md)
+  [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
   and handles unequal n as a matter of course. With two groups it is
   exactly Welch’s *t* test, which the tests assert against
   `t.test(var.equal = FALSE)`. Implements Games and Howell (1976).
@@ -1050,7 +1920,7 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md)
   is removed: the computation is no longer random, so there is nothing
   to seed. Call sites that passed `seed` should drop it.
-- **[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md)
+- **[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md)
   adjusted *p*-values are now exact.** They were computed from
   [`mvtnorm::pmvt()`](https://rdrr.io/pkg/mvtnorm/man/pmvt.html), a
   Monte Carlo integrator (and, when was absent, from a conservative
@@ -1093,6 +1963,205 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   independently. Values for nu \>= 7 are unchanged.
 
 ### Bug fixes
+
+- **[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md)
+  extracts the full adjusted (least-squares) means table.** From an
+  `lm`/`aov` factorial or ANCOVA fit it returns every cell’s
+  covariate-adjusted mean with SE and CI, or marginal means over chosen
+  factors via `by`, with `weights = "equal"` (the population marginal
+  means of Searle, Speed, and Milliken, 1980) or `"proportional"`
+  (observed frequencies). The reference grid follows the model’s own
+  terms, so transformed covariates and interactions are handled exactly,
+  and nonestimable cells in rank-deficient designs error plainly by
+  name. Validated against emmeans 2.0.3 at 1e-10 across fourteen fits
+  (unbalanced factorials, multiple and transformed covariates, character
+  and ordered predictors, weighted fits, an empty-cell design) for both
+  weightings, with the comparisons pinned in tests and re-run live in
+  tools/oracle_checks.R; also pinned to
+  [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md)’s
+  adjusted means and to
+  [`contrast_adjusted()`](https://yelleknek.github.io/DMAR/reference/contrast_adjusted.md)
+  at 1e-10.
+
+- **[`loa()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md)
+  reports the Carkeet (2015) pair intervals by default.** The exact CIs
+  for the limits of agreement considered as a pair, the construction
+  Carkeet recommends for most uses, replace the per-limit intervals as
+  the default; `method = "individual"` keeps the one-sided
+  tolerance-factor form. Both constructions are anchored in tests to the
+  paper’s printed coefficients and worked example, and a misattributed
+  comment (the Bland and Altman 1999 approximate SE, previously credited
+  to Carkeet) is corrected.
+
+- **Sixteen packages leave Suggests.** DMAR’s test oracles (MBESS,
+  emmeans, semTools, metafor, mirt, sirt, multcomp, performance, r2mlm,
+  irr, irrCAC, psych, BayesFactor, gsl) are no longer dependencies:
+  every live comparison was replaced by its pinned value, with
+  provenance comments naming package, version, and date, and the live
+  comparisons themselves moved to tools/oracle_checks.R, which re-runs
+  all of them against the installed oracles at release time. BiasedUrn
+  is replaced by a self-contained Fisher noncentral hypergeometric
+  density (agreement 1.2e-13), kableExtra by knitr-only HTML and LaTeX
+  table construction, and AMCP by shipping the depression_bdi data
+  directly. Suggests drops from thirty packages to fourteen, none of
+  them needing compiled system libraries beyond what the remaining
+  features genuinely use.
+
+- **The Bayes factor functions take informed priors, stated either
+  way.** The prior on the standardized effect can now be an informed
+  Cauchy, moving `prior_location` off zero (Gronau, Ly, & Wagenmakers,
+  2020), or a normal with `prior_mean` and `prior_sd` for beliefs stated
+  as moments; a Cauchy has no mean and no variance, so moment beliefs
+  could not previously be expressed at all. The two families are
+  exclusive, and the help pages explain what the Cauchy scale fixes (the
+  quartiles: half the prior mass within one scale of the location) and
+  the exact identity linking the families: a Cauchy is a normal prior
+  whose variance is itself uncertain, and the test suite uses that
+  identity to cross-validate the two code paths against each other with
+  no external oracle. Every result now carries the full posterior of the
+  effect in a `"posterior"` attribute (a data frame of `delta` and
+  `density`), so any posterior probability can be computed, not only the
+  reported ones; the prior is echoed in `prior_location` and
+  `prior_scale` rows with the family recorded as an attribute. Default
+  calls reproduce the previous JZS results exactly.
+
+- **The Bayes factor functions accept summary statistics.** The JZS
+  Bayes factor depends on the data only through the *t* statistic and
+  the sample sizes, so
+  [`bayes_one_sample_t()`](https://yelleknek.github.io/DMAR/reference/bayes_one_sample_t.md),
+  [`bayes_paired_t()`](https://yelleknek.github.io/DMAR/reference/bayes_paired_t.md),
+  and
+  [`bayes_independent_t()`](https://yelleknek.github.io/DMAR/reference/bayes_independent_t.md)
+  now take the summary statistics a paper reports (`mean`, `sd`, and
+  `n`; `mean_diff`, `sd_diff`, and `n`; or `mean_1`, `sd_1`, `n_1`,
+  `mean_2`, `sd_2`, `n_2`) as readily as raw data, following the same
+  exactly-one-path rule as the rest of the package. The summary form is
+  exact, not an approximation, and the help pages show how a
+  standardized effect size enters (a *d* of 0.5 is
+  `mean_1 = 0.5, mean_2 = 0` with unit standard deviations). Tests pin
+  the raw and summary forms to each other at machine precision.
+
+- **The directional test family speaks snake_case.** The canonical
+  `alternative` values of
+  [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+  [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
+  [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
+  [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
+  [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
+  and
+  [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
+  are now `"two_sided"`, `"less"`, and `"greater"`, with the base-R
+  spelling `"two.sided"` accepted as an alias so existing calls keep
+  working; anything stored on a returned object carries the underscore
+  form. The `cv_*` critical value family keeps its deliberately wider
+  synonym vocabulary with `"not_equal"` canonical, unchanged.
+
+- **[`var_omega_squared()`](https://yelleknek.github.io/DMAR/reference/var_omega_squared.md)
+  returned a variance that did not shrink with the sample size.** The
+  worker multiplied the wrong combination of terms, and the consequence
+  was not a small bias: the returned variance converged to a positive
+  constant instead of to zero, so its error grew with N. Against a
+  200,000-replication Monte Carlo of the sampling distribution it was
+  too large by a factor of 1.4 at the smallest cell tested and by 115 at
+  the largest, and N times the variance climbed from 0.8 at N = 30 to 51
+  at N = 5100 where the true value settles near 0.31. Any standard error
+  or Wald interval built on it was badly inflated, and worse in larger
+  samples. The variance is now the delta-method transfer of Fleishman’s
+  (1980, Eq. 22) exact variance of the unbiased estimator of the
+  signal-to-noise ratio, carried to the omega squared scale by his Eq. 8
+  with Jacobian (1 - omega²⁾2, which tracks the Monte Carlo to within a
+  few percent across every cell tested and to 1.00 by N = 300. Two
+  regression tests now guard it: agreement with a fixed-seed Monte
+  Carlo, and the consistency check that N times the variance stays
+  bounded, which the old formula would have failed. The help page also
+  no longer attributes an omega squared variance to Fleishman, who gives
+  one only for the signal-to-noise ratio and says explicitly that the
+  correlation ratio has an interval and a median but not a variance.
+
+- **Generalized eta squared now classifies interactions the way its
+  sources do.** Olejnik and Algina (2003, Eq. 5) and Bakeman (2005)
+  define an effect as a measured source of variance when *any* factor in
+  its term is measured, so a measured-by-manipulated interaction belongs
+  in the denominator automatically.
+  [`eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/eta_squared_generalized.md)
+  and
+  [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
+  had instead included only the effects explicitly listed in `observed`,
+  a rule the help page misattributed to Bakeman (2005), who recommends
+  the opposite. Listing a factor in `observed` now also places every
+  interaction containing it in the denominator, so `observed = "c"`
+  reproduces the papers’ worked examples as written; an explicit
+  interaction label is still honored as given. Values change only for
+  model-interface calls on designs with measured-by-manipulated
+  interactions, where the corrected values are smaller. Tests now anchor
+  the Keppel and Kirk worked values printed in Olejnik and Algina
+  (2003).
+
+- [`signal_to_noise_R2()`](https://yelleknek.github.io/DMAR/reference/signal_to_noise_R2.md)’s
+  nonlinear estimator now follows Muirhead’s
+
+  1985. Equation 10 exactly: the c/Y correction is added to the
+        untruncated linear estimate before truncation at zero, rather
+        than after the linear estimate was itself truncated. The two
+        orders agree whenever the sample R-squared is not tiny; for
+        sample R-squared below p/(N-1) the reported nonlinear value is
+        now smaller, as the paper defines it.
+
+- In
+  [`ss_aipe_pcm()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm.md)’s
+  assurance search, the critical *t* now tracks each candidate sample
+  size’s degrees of freedom instead of reusing the value frozen from the
+  expected-width search. The frozen *t* was very slightly conservative;
+  the correction moves nothing by as much as one subject, and every
+  documented example returns the same sample size as before.
+
+- The
+  [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md)
+  example carried the wrong sum of squares for its covariate. The
+  Maxwell, Delaney, and Kelley Chapter 9 depression example needs the
+  within-groups sum of squares of the pretest, which the chapter data
+  give as 752.5 (and which the sibling
+  [`ci_sc_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_sc_ancova.md)
+  example already used); the example instead passed 313.37, the
+  within-groups sum of squares the covariate explains in the posttest, a
+  different row of the same ANCOVA decomposition. The interval moves
+  only in the third decimal, but the two pages now agree with each other
+  and with the chapter data, and a test recomputes 752.5 from the data
+  (via the AMCP package) so the constant cannot drift again.
+
+- [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md) now
+  works when the noncentrality parameter is supplied directly. The `ncp`
+  branch set the noncentrality but never the standardized contrast, so
+  the documented call errored on the closing table construction (three
+  terms against two values). The branch now inverts the same
+  relationship the `means` and `psi` branches use (the noncentrality is
+  the standardized contrast divided by `sqrt(sum(c_weights^2 / n))`), so
+  the three parameterizations of one effect return identical tables;
+  that equivalence and the ncp path’s coverage are now tested.
+
+- [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md) and
+  [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md) now
+  recycle a scalar `n` by the number of contrast weights. The scalar was
+  recycled by `length(means)`, which is zero on the `psi`-only path
+  (and, for
+  [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md), the
+  `ncp`-only path), so those documented calls stopped on the `n` /
+  `c_weights` length check. No result changes on the `means` path, where
+  the two lengths agree; a `means` vector whose length differs from
+  `c_weights` is now rejected with a clear error instead of being
+  silently recycled.
+
+- [`ss_aipe_cv()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv.md)
+  now accepts the documented `mu` / `sigma` parameterization, deriving
+  `C_of_V = sigma / mu`; previously neither formal was read and the call
+  stopped on “argument is of length zero”. Supplying `C_of_V` together
+  with `mu` or `sigma` is rejected as conflicting. The `mu` / `sigma`
+  path returns exactly the sample size of the equivalent `C_of_V` call
+  (for `mu = 10`, `sigma = 1`, `width = .1`, `conf_level = .99`, both
+  give `N = 20`). The example prose on the help page said the population
+  coefficient of variation was .25 while the calls passed .1 (which
+  plans `N = 20`, where .25 plans `N = 100`); the prose now matches the
+  calls, and a `mu` / `sigma` example was added.
 
 - [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md) with
   `missing = "ml"` now estimates the mean structure with free item
@@ -1306,16 +2375,14 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   = 156) and Grant-White (n = 145) elementary schools in Chicago.
   Variable names follow the MBESS convention (e.g.,
   `t1_visual_perception` through `t26_flags`) so scripts written against
-  [`MBESS::HS`](https://rdrr.io/pkg/MBESS/man/HS.html) port over with a
-  single rename of the object. The values are the corrected version of
-  the data, identical to
-  [`MBESS::HS`](https://rdrr.io/pkg/MBESS/man/HS.html) as of MBESS 4.9.3
-  and to `psychTools::holzinger.raw`. The documentation discusses the
-  bi- factor study design, the five ability blocks (spatial, verbal,
-  mental speed, memory, reasoning), the Joreskog (1969) 9 test subset,
-  and the silent post-4.6.0 MBESS correction that is the source of
-  values still found in
-  [`sem::HS.data`](https://rdrr.io/pkg/sem/man/HS.data.html) and
+  `MBESS::HS` port over with a single rename of the object. The values
+  are the corrected version of the data, identical to `MBESS::HS` as of
+  MBESS 4.9.3 and to `psychTools::holzinger.raw`. The documentation
+  discusses the bi- factor study design, the five ability blocks
+  (spatial, verbal, mental speed, memory, reasoning), the
+  Joreskog (1969) 9 test subset, and the silent post-4.6.0 MBESS
+  correction that is the source of values still found in `sem::HS.data`
+  and
   [`OpenMx::HS.ability.data`](https://rdrr.io/pkg/OpenMx/man/HS.ability.data.html).
 
 - New data set `pygmalion`: the teacher-expectancy data from Rosenthal
@@ -1330,11 +2397,11 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   pooled residual variance (175.3251), and the covariate variance
   (348.91) reproduce the worked example for the variance of the
   estimated treatment effect at selected covariate values
-  (cf. [`MBESS::var.ete`](https://rdrr.io/pkg/MBESS/man/var.ete.html)).
-  The same numbers ship with the book’s data companion **AMCP** as
-  `chapter_9_exercise_15`; here the experimental condition is a labeled
-  factor (`Control`, `Bloomer`) and the columns use DMAR’s descriptive
-  names, with no measured value altered. Pairs with
+  (cf. `MBESS::var.ete`). The same numbers ship with the book’s data
+  companion **AMCP** as `chapter_9_exercise_15`; here the experimental
+  condition is a labeled factor (`Control`, `Bloomer`) and the columns
+  use DMAR’s descriptive names, with no measured value altered. Pairs
+  with
   [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md) and
   is documented in
   [`vignette("pygmalion", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/pygmalion.md).
@@ -1441,7 +2508,7 @@ under-developed in MBESS. New families include:
   [`meta_smd()`](https://yelleknek.github.io/DMAR/reference/meta_smd.md)
   (exact Hedges correction by default) and
   [`meta_r()`](https://yelleknek.github.io/DMAR/reference/meta_r.md)
-  (Fisher z pooling, with optional per-study attenuation corrections)
+  (Fisher’s Z pooling, with optional per-study attenuation corrections)
   are the metric front ends.
   [`combine_p()`](https://yelleknek.github.io/DMAR/reference/combine_p.md)
   provides the four classical combined significance tests and
@@ -1602,9 +2669,6 @@ under-developed in MBESS. New families include:
   [`print_anova()`](https://yelleknek.github.io/DMAR/reference/print_anova.md),
   and
   [`print_summary()`](https://yelleknek.github.io/DMAR/reference/print_summary.md).
-  [`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md) is also
-  available under the spelled-out alias
-  [`design_effect()`](https://yelleknek.github.io/DMAR/reference/deft.md).
 
 - DMAR no longer requires the GSL system library: the Gauss
   hypergeometric function behind the exact squared multiple correlation
@@ -1637,8 +2701,7 @@ under-developed in MBESS. New families include:
   [`proportion_of_superiority()`](https://yelleknek.github.io/DMAR/reference/proportion_of_superiority.md)
   (sometimes called Cohen’s U3).
 
-- Agreement and reliability extensions:
-  [`bland_altman_loa()`](https://yelleknek.github.io/DMAR/reference/loa.md),
+- Agreement and reliability extensions: `bland_altman_loa()`,
   [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
   [`cohen_kappa()`](https://yelleknek.github.io/DMAR/reference/cohen_kappa.md),
   [`fleiss_kappa()`](https://yelleknek.github.io/DMAR/reference/fleiss_kappa.md),
@@ -1669,22 +2732,21 @@ under-developed in MBESS. New families include:
 
 - Parameterization conversions in the `convert_*` family
   (`convert_R2_f`, `convert_f_R2`, `convert_lambda_R2`,
-  `convert_R2_lambda`, `convert_r_z`, `convert_z_r`,
+  `convert_R2_lambda`, `convert_r_Z`, `convert_Z_r`,
   `convert_delta_lambda`, `convert_lambda_delta`, `convert_cor_cov`).
   Every conversion is exact-invertible and the inverse direction is
   shipped as a sibling function where it makes sense.
 
-- A worked simulation study of the AIPE family is included as a vignette
-  ([`vignette("aipe_simulation_study", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/aipe_simulation_study.md)),
-  reporting expected and realized CI widths, realized coverage, and
-  assurance-achievement rates across 10,000 Monte Carlo replications per
-  cell.
+- A worked simulation study of the AIPE family reports expected and
+  realized CI widths, realized coverage, and assurance-achievement rates
+  across 10,000 Monte Carlo replications per cell. It establishes how
+  the methods perform rather than how they are used, so it is maintained
+  alongside the package rather than shipped in it.
 
 ### Internal changes
 
 - [`ss_aipe_reliability()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability.md)
-  no longer embeds a vendored copy of MBESS 3.2.0’s
-  [`ci.reliability()`](https://rdrr.io/pkg/MBESS/man/ci.reliability.html)
+  no longer embeds a vendored copy of MBESS 3.2.0’s `ci.reliability()`
   for the Monte Carlo assurance search. The interval at each candidate
   sample size now comes from DMAR’s own reliability internals (the
   single-factor delta method interval for the factor analytic type; the

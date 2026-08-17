@@ -109,16 +109,25 @@ ss_aipe_R2_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis across `G` replications. Each row corresponds
-to one summary statistic; the `term` entries include the mean / median /
-SD of the lower and upper confidence limits on \\R^2\\, the mean /
-median / SD of the observed \\R^2\\, the mean / median / SD of the full
-and one-sided interval widths, the percentage of intervals with width at
-or below the planning target (`pct_less_w`), the tail-specific empirical
-non-coverage of `true_R2` (`pct_ci_miss_low`, `pct_ci_miss_high`) and
-the overall empirical type I error rate (`total_type_I_error`), and the
-number of replications on which a confidence interval could not be
-obtained (`num_probs_with_cis`).
+Carlo sensitivity analysis across `G` replications. The `term` entries
+are: `mean_lower_limit`, `median_lower_limit`, `sd_lower_limit`,
+`mean_upper_limit`, `median_upper_limit`, `sd_upper_limit` (summaries of
+the realized confidence limits); `mean_R2`, `median_R2`, `sd_R2`
+(summaries of the observed \\R^2\\); `mean_ci_width_lower`,
+`median_ci_width_lower`, `sd_ci_width_lower`, `mean_ci_width_upper`,
+`median_ci_width_upper`, `sd_ci_width_upper` (summaries of the one-sided
+widths, measured from the observed \\R^2\\ to each limit);
+`mean_ci_width`, `median_ci_width`, `sd_ci_width` (summaries of the full
+interval widths); `pct_ci_less_w` (proportion of intervals with width at
+or below the planning target `w`); `pct_ci_miss_low` and
+`pct_ci_miss_high` (tail-specific empirical non-coverage of `true_R2`);
+`total_type_I_error` (overall empirical non-coverage, the sum of the two
+tails); `num_probs_with_cis` (number of replications on which a
+confidence interval could not be obtained); and the input echoes
+`total_N` (the sample size evaluated), `p`, `true_R2`, `estimated_R2`
+(NA when `specified_N` was supplied instead), `width`, `conf_level`, and
+`assurance` (present only when an assurance was supplied). The
+proportion rows are on the 0 to 1 scale, not percentages.
 
 ## Details
 
@@ -204,56 +213,39 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # Change 'G' to some large number (e.g., G=10,000)
-ss_aipe_R2_sensitivity(true_R2 = .5, estimated_R2 = .4, w = .10, p = 5, conf_level = 0.95, G = 25)
-#> 1 
-#> 2 
-#> 3 
-#> 4 
-#> 5 
-#> 6 
-#> 7 
-#> 8 
-#> 9 
-#> 10 
-#> 11 
-#> 12 
-#> 13 
-#> 14 
-#> 15 
-#> 16 
-#> 17 
-#> 18 
-#> 19 
-#> 20 
-#> 21 
-#> 22 
-#> 23 
-#> 24 
-#> 25 
-#>  term                     value   
-#>  mean_low_lim_r2          0.453   
-#>  median_low_lim_r2        0.453   
-#>  sd_low_lim_r2            0.0216  
-#>  mean_up_lim_r2           0.546   
-#>  median_up_lim_r2         0.546   
-#>  sd_up_lim_r2             0.0197  
-#>  mean_r2                  0.503   
-#>  median_r2                0.503   
-#>  sd_r2                    0.0207  
-#>  mean_lower_ci_width_r2   0.0501  
-#>  median_lower_ci_width_r2 0.0502  
-#>  sd_lower_ci_width_r2     0.000958
-#>  mean_upper_ci_width_r2   0.0429  
-#>  median_upper_ci_width_r2 0.0429  
-#>  sd_upper_ci_width_r2     0.000952
-#>  mean_ci_width_r2         0.093   
-#>  median_ci_width_r2       0.0931  
-#>  sd_ci_width_r2           0.00191 
-#>  pct_less_w               1       
-#>  pct_ci_miss_low          0       
-#>  pct_ci_miss_high         0.04    
-#>  total_type_I_error       0.04    
-#>  num_probs_with_cis       0       
+set.seed(113)
+ss_aipe_R2_sensitivity(true_R2 = .5, estimated_R2 = .4, w = .10, p = 5,
+                       conf_level = 0.95, G = 25, print_iter = FALSE)
+#>  term                  value   
+#>  mean_lower_limit      0.455   
+#>  median_lower_limit    0.452   
+#>  sd_lower_limit        0.0204  
+#>  mean_upper_limit      0.548   
+#>  median_upper_limit    0.545   
+#>  sd_upper_limit        0.0186  
+#>  mean_R2               0.505   
+#>  median_R2             0.502   
+#>  sd_R2                 0.0195  
+#>  mean_ci_width_lower   0.0501  
+#>  median_ci_width_lower 0.0502  
+#>  sd_ci_width_lower     0.000925
+#>  mean_ci_width_upper   0.0428  
+#>  median_ci_width_upper 0.043   
+#>  sd_ci_width_upper     0.000914
+#>  mean_ci_width         0.0929  
+#>  median_ci_width       0.0932  
+#>  sd_ci_width           0.00184 
+#>  pct_ci_less_w         1       
+#>  pct_ci_miss_low       0       
+#>  pct_ci_miss_high      0       
+#>  total_type_I_error    0       
+#>  num_probs_with_cis    0       
+#>  total_N               889     
+#>  p                     5       
+#>  true_R2               0.5     
+#>  estimated_R2          0.4     
+#>  width                 0.1     
+#>  conf_level            0.95    
 #> 
 #> Confidence level: 95%
 ```

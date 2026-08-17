@@ -80,8 +80,10 @@ A `data.frame` with rows `n_star` (the oracle total sample size an
 investigator with known \\\sigma\\ would use), `mean_N`, `median_N`,
 `sd_N` (the stopping total across replications), `ratio_mean_N_n_star`,
 `coverage` (the proportion of replications whose \\\hat\psi_N \pm h\\
-interval covered the true contrast), and `se_coverage` (its simulation
-standard error).
+interval covered the true contrast), `se_coverage` (its simulation
+standard error), and the input echoes `half_width`, `true_psi` (the
+population contrast implied by `c_weights` and `true_means`),
+`true_sigma`, `alpha_level`, and `m0`.
 
 ## Details
 
@@ -103,7 +105,7 @@ The sequential procedure spends about \\n^\*\\ without knowing
 
 ## References
 
-Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, P. J.
+Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, J. J.
 (2025). A sequential approach for noninferiority or equivalence of a
 linear contrast under cost constraints. *Psychological Methods, 30*(2),
 425–439. [doi:10.1037/met0000570](https://doi.org/10.1037/met0000570)
@@ -138,7 +140,6 @@ Ken Kelley <kkelley@nd.edu>
 # the t-quantile rule stops near the oracle with near-nominal
 # coverage. (G kept small here for speed; use G = 2000 or more in
 # earnest.)
-# \donttest{
 ss_seq_c_sensitivity(c_weights = c(1, -1), half_width = 2.5,
                      true_sigma = 15.67, G = 200, seed = 113)
 #>  term                value 
@@ -149,7 +150,11 @@ ss_seq_c_sensitivity(c_weights = c(1, -1), half_width = 2.5,
 #>  ratio_mean_N_n_star 1.01  
 #>  coverage            0.885 
 #>  se_coverage         0.0226
+#>  half_width          2.5   
+#>  true_psi            0     
+#>  true_sigma          15.7  
+#>  alpha_level         0.05  
+#>  m0                  10    
 #> 
 #> Confidence level: 90%
-# }
 ```

@@ -125,8 +125,10 @@ Other plotting:
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -146,37 +148,26 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # nlme: linear growth in tooth distance over age (Orthodont, 27 children).
+# Four of the children are paneled here so the figure is quick to draw;
+# drop n_random to get a panel for every child.
 fm_nlme <- nlme::lme(distance ~ age, random = ~ age | Subject,
                      data = nlme::Orthodont)
-plot_trajectories_fitted(fm_nlme, n_random = 12)
+p <- plot_trajectories_fitted(fm_nlme, n_random = 4, seed = 113)
+p
 
-
-# lme4: reaction time over sleep deprivation days (sleepstudy, 18 ppl).
-fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
-                      data = lme4::sleepstudy)
-p <- plot_trajectories_fitted(fm_lme4)
-#> Warning: the ‘findbars’ function has moved to the reformulas package. Please update your imports, or ask an upstream package maintainer to do so.
 attr(p, "quality_of_fit")  # per-subject R^2 and RMSE
-#>    Subject r_squared      rmse
-#> 1      308 0.6815132 43.158406
-#> 2      309 0.4011314  9.007368
-#> 3      310 0.7175444 12.147523
-#> 4      330 0.1580405 21.508880
-#> 5      331 0.3425145 21.972777
-#> 6      332 0.2028791 54.505975
-#> 7      333 0.8473896 11.725514
-#> 8      334 0.7855956 18.517020
-#> 9      335 0.3975776 12.627108
-#> 10     337 0.9333963 15.011870
-#> 11     349 0.9053282 13.890654
-#> 12     350 0.8686035 22.928632
-#> 13     351 0.4517983 20.572395
-#> 14     352 0.7445483 22.958867
-#> 15     369 0.8412265 14.164425
-#> 16     370 0.8525069 23.170270
-#> 17     371 0.5807206 22.441078
-#> 18     372 0.9118031 10.257194
-# }
+#>   Subject r_squared      rmse
+#> 1     M03 0.7377049 1.0072738
+#> 2     F02 0.9481481 0.5232407
+#> 3     F05 0.6914286 0.6397144
+#> 4     F10 0.7363636 0.7785559
+
+# An lme4 fit is handled the same way. Not run here because the call
+# loads the lme4 namespace and then draws a panel for each of the
+# eighteen subjects, which is where the time goes; fitting the model
+# is quick by comparison. The calls are:
+# fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
+#                       data = lme4::sleepstudy)
+# plot_trajectories_fitted(fm_lme4)
 ```

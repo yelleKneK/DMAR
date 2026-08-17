@@ -42,6 +42,12 @@ A `data.frame` with rows for each of the three effects (`A`, `B`, `A:B`)
 crossed with each sphericity adjustment (`none`, `Greenhouse-Geisser`,
 `Huynh-Feldt`, `lower_bound`). Columns: `effect`, `adjustment`,
 `F_value`, `df_1`, `df_2`, `p_value`, `epsilon`, `partial_eta_squared`.
+When an effect has too few subjects for its epsilon to be estimable
+(\\n - 1\\ smaller than the effect's numerator degrees of freedom; see
+Details), the Greenhouse-Geisser and Huynh-Feldt rows for that effect
+carry `NA` in `epsilon`, `df_1`, `df_2`, and `p_value`, and a single
+warning names the condition; the unadjusted and lower-bound rows are
+unaffected.
 
 ## Details
 
@@ -59,8 +65,34 @@ against its own subject-by-effect residual stratum:
 **Sphericity.** Each effect's univariate *F*-ratio assumes sphericity of
 its corresponding subject-by-effect residual covariance matrix. Three
 adjustments are reported per effect: Greenhouse-Geisser (Greenhouse &
-Geisser, 1959), Huynh-Feldt (Huynh & Feldt, 1976), and the lower-bound
-\\\epsilon = 1 / (df - 1)\\.
+Geisser, 1959), Huynh-Feldt (Huynh & Feldt, 1976), and the lower bound
+\\\epsilon = 1 / df\\, where \\df\\ is the effect's numerator degrees of
+freedom; this is the smallest value \\\epsilon\\ can attain, reached
+under maximal departure from sphericity.
+
+**Subjects needed to estimate epsilon.** The Greenhouse-Geisser epsilon
+for an effect with \\q\\ numerator degrees of freedom is estimated from
+the sample covariance matrix of \\q\\ orthonormal contrasts among the
+effect's cell means, a different matrix for each effect (Maxwell,
+Delaney, & Kelley, 2027, Chapters 11 and 12). That matrix has rank at
+most \\n - 1\\, so when \\n - 1 \< q\\ it is necessarily singular; the
+same rank deficiency makes the multivariate approach to a
+within-subjects design mathematically impossible when \\n \< a\\
+(Maxwell, Delaney, & Kelley, 2027, Chapter 13). The Greenhouse-Geisser
+formula still returns a number in that case, but the number is an
+artifact of the rank deficiency rather than an estimate: it cannot
+exceed \\(n - 1)/q\\ no matter what the population epsilon is, even
+under exact sphericity, where the population value is 1. Rather than
+report a value the design cannot support, the function reports `NA` for
+the Greenhouse-Geisser and Huynh-Feldt rows of any effect with \\n - 1
+\< q\\ and issues a single warning naming the condition
+([`car::Anova`](https://rdrr.io/pkg/car/man/Anova.html) likewise
+declines to report the corrections for an effect whose error matrix is
+singular). The unadjusted row and the lower-bound row remain: the lower
+bound \\1/q\\ is Geisser and Greenhouse's a priori bound on epsilon,
+valid no matter how badly sphericity is violated, and it requires no
+estimate of the covariance matrix (Maxwell, Delaney, & Kelley, 2027,
+Chapter 11).
 
 **Per-effect partial \\\eta^2\\.** Computed as \\SS\_\mathrm{effect} /
 (SS\_\mathrm{effect} + SS\_\mathrm{effect,\\ error})\\ using the
@@ -90,7 +122,7 @@ designs. *Journal of Educational Statistics, 1*(1), 69–82.
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
-ed.). Routledge. (See Chapter 12.)
+ed.). Routledge. (See Chapters 11–13.)
 
 ## See also
 

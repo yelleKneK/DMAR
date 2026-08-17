@@ -95,7 +95,7 @@ smallest magnitude those decimals can represent prints as “\< 0.0001”
 instead of rounding to `0.0000`. A column is treated as holding
 *p*-values when it is named `p_value`, `p.value`, `p_adjusted` (the
 multiplicity-adjusted case, as in
-[`dunnett_ci`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md)),
+[`ci_dunnett`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md)),
 or `p_chi_square` (the exact-fit test of a fitted model, as in
 [`measurement_invariance`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md));
 in a long-format table whose quantities share a single `value` column,
@@ -132,11 +132,11 @@ right there for any further calculation. Three common needs:
   table, or `options(dmar.digits = 6)` for the rest of the session.
 
 - *Hand the result to other tools.* `tidy(x)` returns a one-row-per-term
-  table with broom-style column names (`term`, `estimate`, `conf.low`,
-  `conf.high`, and so on), which is the convenient “wide” view for
-  plotting or joining; `glance(x)` returns a one-row model-level
-  summary. Both come from the generics package and need no extra setup.
-  For a single-estimand result such as
+  table in DMAR's own column vocabulary (`term`, `estimate`, `se`,
+  `statistic`, `p_value`, `ci_lower`, `ci_upper`, and so on), which is
+  the convenient “wide” view for plotting or joining; `glance(x)`
+  returns a one-row model-level summary. Both come from the generics
+  package and need no extra setup. For a single-estimand result such as
   [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md) the
   table is already one row, so `glance()` coincides with `tidy()` (there
   are no extra model-level statistics to report); for a multi-row result
@@ -194,13 +194,7 @@ generics::glance(x)
 
 # The same display rules apply to wide tables (several typed columns),
 # for example an effect size with its confidence interval per effect.
-ci_eta_squared(aov(len ~ supp * factor(dose), data = ToothGrowth))
-#>  effect            eta_squared lower_limit upper_limit F_value df_effect
-#>  supp              0.224       0.0531      0.377       15.6    1        
-#>  factor(dose)      0.773       0.638       0.823       92      2        
-#>  supp:factor(dose) 0.132       0.00132     0.274       4.11    2        
-#>  df_error N 
-#>  54       60
-#>  54       60
-#>  54       60
+ci_eta_squared(aov(iq_8 ~ treatment, data = pygmalion))
+#>  effect    eta_squared lower_limit upper_limit F_value df_effect df_error N  
+#>  treatment 0.0202      0.000881    0.0609      6.34    1         308      310
 ```

@@ -102,22 +102,24 @@ Biopharmaceutics, 15*(6), 657–680.
 [`power_density_equivalence_md`](https://yelleknek.github.io/DMAR/reference/power_density_equivalence_md.md)
 
 Other equivalence testing:
+[`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
 [`power_density_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_density_equivalence_md.md),
 [`power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_c.md),
 [`power_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md),
-[`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
-[`tost_c()`](https://yelleknek.github.io/DMAR/reference/tost_c.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md)
+[`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md)
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -130,27 +132,49 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
-# Phillips (1990) Figure 3 reproduction.
-n  <- c(9, 12, 18, 24, 30, 40, 60)
-nu <- c(7, 10, 16, 22, 28, 38, 58)
-power_equivalence_md_plot(
+# One curve per sample size, showing power against the true mean
+# difference. Two of the seven sample sizes behind Phillips (1990)
+# Figure 3 are drawn here so the example stays quick; the full
+# reproduction is given below.
+fig <- power_equivalence_md_plot(
   alpha_level = .05, logscale = FALSE,
   theta1 = -.2, theta2 = .2, sigma = .20,
-  n = n, nu = nu,
-  subtitle = "Phillips Figure 3"
+  n = c(24, 60), nu = c(22, 58)
 )
+fig
 
 
-# Diletti (1991) Figure 1c on the log scale.
-n_d  <- c(8, 12, 18, 24, 30, 40, 60)
-nu_d <- c(6, 10, 16, 22, 28, 38, 58)
-power_equivalence_md_plot(
-  alpha_level = .05, logscale = TRUE,
-  theta1 = .8, theta2 = 1.25, sigma = .20,
-  n = n_d, nu = nu_d,
-  subtitle = "Diletti, Figure 1c"
-)
+# The numbers behind the curves travel with the figure, so a particular
+# power value can be read off rather than eyeballed. The first column is
+# the true difference and the remaining columns give power, one column
+# per sample size. Power is highest where the true difference is zero.
+power_grid <- attr(fig, "power_grid")
+power_grid[which.min(abs(power_grid[, 1])), ]
+#>      diff      n=24      n=60 
+#> 0.0000000 0.9127046 0.9998349 
 
-# }
+# The two published figures are not run here because every curve
+# evaluates the power integral at 201 true differences, so a
+# seven-curve figure costs a few tenths of a second. Phillips (1990)
+# Figure 3 is:
+# n  <- c(9, 12, 18, 24, 30, 40, 60)
+# nu <- c(7, 10, 16, 22, 28, 38, 58)
+# power_equivalence_md_plot(
+#   alpha_level = .05, logscale = FALSE,
+#   theta1 = -.2, theta2 = .2, sigma = .20,
+#   n = n, nu = nu,
+#   subtitle = "Phillips Figure 3"
+# )
+
+# Diletti (1991) Figure 1c is the same idea on the log scale, where the
+# equivalence limits are the 0.80 to 1.25 ratio bounds used in
+# bioequivalence work:
+# n_d  <- c(8, 12, 18, 24, 30, 40, 60)
+# nu_d <- c(6, 10, 16, 22, 28, 38, 58)
+# power_equivalence_md_plot(
+#   alpha_level = .05, logscale = TRUE,
+#   theta1 = .8, theta2 = 1.25, sigma = .20,
+#   n = n_d, nu = nu_d,
+#   subtitle = "Diletti, Figure 1c"
+# )
 ```

@@ -184,20 +184,23 @@ ss_aipe_crd_both_fixed_width(
 
 - diff_size:
 
-  Difference cluster size specification. The difference in cluster sizes
-  can be specified in two ways. First, users may specify cluster size as
-  integers, which can be negative or positive. The resulting cluster
-  sizes will be based on the estimated cluster size adding by the
-  specified vectors. For example, if the cluster size is 25, the number
-  of clusters is 10, and the specified different cluster size is
-  `c(-1, 0, 1)`, the cluster sizes will be 24, 25, 26, 24, 25, 26, 24,
-  25, 26, and 24. Second, users may specify cluster size as positive
-  decimals. The resulting cluster size will be based on the estimated
-  cluster size multiplied by the specified vectors. For example, if the
-  cluster size is 25, the number of clusters is 10, and the specified
-  different cluster size is `c(-1, 0, 1)`, the cluster sizes will be 24,
-  25, 26, 24, 25, 26, 24, 25, 26, and 24. If `NULL`, the cluster size is
-  equal across clusters
+  Difference cluster size specification. The differences in cluster
+  sizes can be specified in two ways, and the specified vector is
+  recycled across the clusters. First, users may specify differences as
+  integers, which can be negative or positive; the resulting cluster
+  sizes add the specified values to the estimated cluster size. For
+  example, if the cluster size is 25, the number of clusters is 10, and
+  `diff_size = c(-1, 0, 1)`, the cluster sizes will be 24, 25, 26, 24,
+  25, 26, 24, 25, 26, and 24. Second, users may specify multipliers of
+  the cluster size as positive decimals; at least one value must be
+  non-integer, which is what selects the multiplicative form. The
+  resulting cluster sizes multiply the estimated cluster size by the
+  specified values and round to the nearest integer. For example, if the
+  cluster size is 25, the number of clusters is 10, and
+  `diff_size = c(0.8, 1, 1.2)`, the cluster sizes will be 20, 25, 30,
+  20, 25, 30, 20, 25, 30, and 20. In either form a resulting cluster
+  size below 1 is set to 1. If `NULL`, the cluster size is equal across
+  clusters
 
 - n_clusters:
 

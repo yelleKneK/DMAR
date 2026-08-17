@@ -1,4 +1,4 @@
-# Convert a Correlation Coefficient (R) Into the Scale of Fisher's *Z*
+# Convert a Correlation Coefficient (*r*) Into the Scale of Fisher's *Z*
 
 This function converts a correlation coefficient into the scale of
 Fisher's *Z*, the variance-stabilizing transformation of a correlation.
@@ -15,8 +15,6 @@ which makes *Z* convenient for forming confidence intervals.
 
 ``` r
 convert_r_Z(r)
-
-convert_r_z(r)
 ```
 
 ## Arguments
@@ -52,7 +50,7 @@ Brace College Publishers.
 ## See also
 
 [`convert_Z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md),
-[`ci_cc`](https://yelleknek.github.io/DMAR/reference/ci_cc.md)
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
 
 Other parameterization conversions:
 [`convert_F_chisq()`](https://yelleknek.github.io/DMAR/reference/convert_F_chisq.md),
@@ -76,8 +74,4 @@ convert_r_Z(.35)
 #>  term     value
 #>  Z_from_r 0.365
 
-# convert_r_z() is an exported alias of convert_r_Z()
-convert_r_z(.35)
-#>  term     value
-#>  Z_from_r 0.365
 ```

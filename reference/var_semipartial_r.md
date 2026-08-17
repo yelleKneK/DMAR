@@ -3,12 +3,12 @@
 Computes the large-sample variance of the sample semipartial (also known
 as the part) correlation coefficient \\r\_{Y(X \cdot Z_1 \cdots Z_J)}\\
 under multivariate normality. The function provides two variances: the
-asymptotic variance under the alternative (analogous to the Olkin-Finn,
-1995, partial-correlation form) and, when the full-model coefficient of
-multiple determination \\R^2\_{Y \cdot X Z_1 \cdots Z_J}\\ is supplied,
-the exact null-hypothesis variance derived from the multiple-regression
-*F*-test for the unique contribution of \\X\\ (Cohen, Cohen, West, &
-Aiken, 2003).
+asymptotic variance under the alternative (the partial-correlation form
+applied by analogy) and, when the full-model coefficient of multiple
+determination \\R^2\_{Y \cdot X Z_1 \cdots Z_J}\\ is supplied, the exact
+null-hypothesis variance derived from the multiple-regression *F*-test
+for the unique contribution of \\X\\ (Cohen, Cohen, West, & Aiken,
+2003).
 
 ## Usage
 
@@ -59,16 +59,17 @@ regression coefficients in multiple-regression reports (Cohen et al.,
 2003).
 
 **Asymptotic variance (default).** Under multivariate normality the
-semipartial admits the same large-sample form as the partial (Olkin &
-Finn, 1995, by analogy): \$\$\mathrm{Var}(\hat r\_{Y(X \cdot Z)})
+semipartial admits the same large-sample form as the partial (Fisher,
+1924, applied by analogy): \$\$\mathrm{Var}(\hat r\_{Y(X \cdot Z)})
 \\\approx\\ \frac{(1 - \rho^2\_{Y(X \cdot Z)})^2}{n - J - 1}.\$\$ The
 function evaluates this with \\\hat r\_{sp}\\ substituted for
 \\\rho\_{sp}\\. This is the appropriate quantity for Wald-style
 inference and for AIPE-style precision planning analogous to that of the
-partial correlation. Exact higher-order variance formulas that depend on
-the full population correlation structure are available in Yuan and Chan
-(2011) and Aloe and Becker (2012), and the present approximation matches
-them in the leading \\1/n\\ term.
+partial correlation. Aloe and Becker (2012) develop the asymptotic
+variance of the semipartial as a function of the full population
+correlation structure, and Yuan and Chan (2011) give exact higher-order
+results for the closely related standardized regression coefficients;
+the present approximation matches the leading \\1/n\\ behavior.
 
 **Null-hypothesis variance (when `R2_full` is supplied).** In multiple
 regression the unique contribution of \\X\\ is tested with \$\$F \\=\\
@@ -106,10 +107,6 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
 ed.). Routledge. (See Chapter 4 on contrasts, Chapter 5 on multiple
 comparisons, and Chapter 9 on ANCOVA.)
-
-Olkin, I., & Finn, J. D. (1995). Correlations redux. *Psychological
-Bulletin, 118*(1), 155–164.
-[doi:10.1037/0033-2909.118.1.155](https://doi.org/10.1037/0033-2909.118.1.155)
 
 Yuan, K.-H., & Chan, W. (2011). Biases and standard errors of
 standardized regression coefficients. *Psychometrika, 76*(4), 670–690.

@@ -92,7 +92,7 @@ modeling. *Journal of Statistical Software, 48*(2), 1–36.
 [`ss_aipe_sem_path`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path.md),
 [`ss_aipe_sem_path_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path_sensitivity.md),
 [`ss_aipe_rmsea_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rmsea_sensitivity.md),
-[`covmat_from_cfm`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md).
+[`covmat_from_cfa`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md).
 
 ## Author
 

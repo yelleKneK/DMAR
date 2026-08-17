@@ -114,8 +114,10 @@ Other plotting:
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
 [`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md),
@@ -128,7 +130,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # The Pygmalion teacher-expectancy data: post-test IQ (averaged over
 # the two follow-ups) on pretest IQ, by condition. The expectancy
 # effect is significant only in a band of pretest IQ values.
@@ -146,5 +147,4 @@ x <- rnorm(n, 50, 10)
 y <- 2 + 0.5 * x + (g == "high") * (0.4 * x - 15) + rnorm(n, 0, 5)
 plot_regions_of_significance(y ~ x * g, data = data.frame(y, x, g))
 
-# }
 ```

@@ -65,7 +65,7 @@ into an R Markdown chunk renders as a formatted
 whole-number sample sizes, *p*-values to fixed decimals) rather than as
 a raw dump of doubles. `as_kable` is the explicit form of the same
 rendering: it returns the `knitr_kable` object so the caller can pipe it
-into kableExtra styling or embed it in a larger document. Both reuse
+into further styling or embed it in a larger document. Both reuse
 [`format.dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md),
 so what a reader sees in a report matches what they saw at the console,
 and neither rounds the stored numbers.
@@ -95,29 +95,15 @@ x <- ci_smd(smd = 0.5, n_1 = 50, n_2 = 50)
 
 # A knitr_kable that keeps every column, ready for a report.
 as_kable(x)
-#> <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-#> <caption>Confidence level: 95%</caption>
-#>  <thead>
-#>   <tr>
-#>    <th style="text-align:left;"> term </th>
-#>    <th style="text-align:left;"> value </th>
-#>   </tr>
-#>  </thead>
-#> <tbody>
-#>   <tr>
-#>    <td style="text-align:left;"> lower_limit </td>
-#>    <td style="text-align:left;"> 0.101 </td>
-#>   </tr>
-#>   <tr>
-#>    <td style="text-align:left;"> smd </td>
-#>    <td style="text-align:left;"> 0.5 </td>
-#>   </tr>
-#>   <tr>
-#>    <td style="text-align:left;"> upper_limit </td>
-#>    <td style="text-align:left;"> 0.897 </td>
-#>   </tr>
-#> </tbody>
-#> </table>
+#> 
+#> 
+#> Table: Confidence level: 95%
+#> 
+#> |term        |value |
+#> |:-----------|:-----|
+#> |lower_limit |0.101 |
+#> |smd         |0.5   |
+#> |upper_limit |0.897 |
 
 # The sentence an author writes in a results section.
 results_sentence(x, label = "Cohen's d")

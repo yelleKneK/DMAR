@@ -51,13 +51,19 @@ reliability_kr20(
 ## Value
 
 A `data.frame` with columns `term` and `value` and rows `"estimate"`
-(sample KR-20), `"se"` (standard error, `NA` for methods that do not
-produce one), `"lower_limit"` and `"upper_limit"` (clamped to \[0, 1\]),
-`"conf_level"`, `"N"` (effective sample size after listwise deletion),
-`"N_complete"` (the complete cases; equal to `"N"` here, and carried so
-the whole reliability family returns one shape), and `"J"` (number of
-items). Attributes `coefficient` (`"kr20"`) and `ci_method` record the
-computation; bootstrap calls also record `B`.
+(sample KR-20), `"se"` (standard error on the coefficient scale, `NA`
+for methods that do not produce one; for the transformation-based
+intervals `"fisher"`, `"bonett"`, and `"hakstian_whalen"` it is the
+delta method back-transform of the transformation-scale standard error),
+`"se_transformed"` (only for those transformation-based intervals: the
+standard error on the transformation scale, with the scale named in the
+attribute `se_transform_scale`: `"fisher_z"`, `"log(1-alpha)"`, or
+`"cube_root"`), `"lower_limit"` and `"upper_limit"` (clamped to \[0,
+1\]), `"conf_level"`, `"N"` (effective sample size after listwise
+deletion), `"N_complete"` (the complete cases; equal to `"N"` here, and
+carried so the whole reliability family returns one shape), and `"J"`
+(number of items). Attributes `coefficient` (`"kr20"`) and `ci_method`
+record the computation; bootstrap calls also record `B`.
 
 ## Details
 
@@ -89,18 +95,32 @@ see that function's *Details* for full descriptions. The default for
 KR-20 is `"feldt"`, the *F*-distribution interval originally developed
 for KR-20.
 
+The menu also includes the nonparametric bootstrap intervals
+`"percentile"`, `"bca"`, `"bootstrap_se"`, and
+`"bootstrap_se_logistic"`, which resample the rows of `data` with
+replacement `B` times and recompute KR-20 on each replication (Efron &
+Tibshirani, 1993). They are worth the cost when the closed forms are
+least trustworthy, which for dichotomous items means highly unbalanced
+item difficulties or a sample size too small for the normal-theory
+derivations behind `"feldt"` and `"bonett"`. No bootstrap runs unless
+`ci_method` asks for one; when it does, the default is `B = 10000`
+replications, and supplying `seed` makes the interval reproducible.
+
 **Comparison with other packages.** The psych package computes the same
-quantity via [`alpha`](https://rdrr.io/pkg/psych/man/alpha.html) (since
-\\\alpha\\ on 0/1 data *is* KR-20). `reliability_kr20` restricts input
-to raw 0/1 data so the dichotomous-items assumption cannot be quietly
-violated, presents the historical formula in the documentation, and
-accompanies the point estimate with a confidence interval drawn from the
-methods compared in Kelley and Pornprasertmanit (2016).
+quantity via `alpha` (since \\\alpha\\ on 0/1 data *is* KR-20).
+`reliability_kr20` restricts input to raw 0/1 data so the
+dichotomous-items assumption cannot be quietly violated, presents the
+historical formula in the documentation, and accompanies the point
+estimate with a confidence interval drawn from the methods compared in
+Kelley and Pornprasertmanit (2016).
 
 ## References
 
 Cronbach, L. J. (1951). Coefficient alpha and the internal structure of
 tests. *Psychometrika, 16*(3), 297–334.
+
+Efron, B., & Tibshirani, R. J. (1993). *An introduction to the
+bootstrap*. New York, NY: Chapman & Hall/CRC.
 
 Feldt, L. S. (1965). The approximate sampling distribution of
 Kuder-Richardson reliability coefficient twenty. *Psychometrika, 30*,
@@ -139,7 +159,7 @@ Psychology, 65*, 371–401.
 (general wrapper),
 [`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
 [`reliability_omega_categorical`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md),
-[`alpha`](https://rdrr.io/pkg/psych/man/alpha.html).
+`alpha`.
 
 Other reliability:
 [`cohen_kappa()`](https://yelleknek.github.io/DMAR/reference/cohen_kappa.md),
@@ -181,23 +201,20 @@ reliability_kr20(data = items)
 #>  N_complete  300  
 #>  J           10   
 reliability_kr20(data = items, ci_method = "bonett")
-#>  term        value 
-#>  estimate    0.774 
-#>  se          0.0864
-#>  lower_limit 0.732 
-#>  upper_limit 0.809 
-#>  conf_level  0.95  
-#>  N           300   
-#>  N_complete  300   
-#>  J           10    
-reliability_kr20(data = items, ci_method = "percentile", B = 200)
-#>  term        value 
-#>  estimate    0.774 
-#>  se          0.0193
-#>  lower_limit 0.728 
-#>  upper_limit 0.805 
-#>  conf_level  0.95  
-#>  N           300   
-#>  N_complete  300   
-#>  J           10    
+#>  term           value 
+#>  estimate       0.774 
+#>  se             0.0195
+#>  se_transformed 0.0864
+#>  lower_limit    0.732 
+#>  upper_limit    0.809 
+#>  conf_level     0.95  
+#>  N              300   
+#>  N_complete     300   
+#>  J              10    
+
+# A bootstrap interval recomputes KR-20 on each of B resamples of the
+# rows, so it is shown rather than run; the call is
+#   reliability_kr20(data = items, ci_method = "percentile",
+#                    B = 10000, seed = 113)
+# and the default B = 10000 is what a reported interval deserves.
 ```

@@ -100,7 +100,11 @@ Other data simulators:
 [`simulate_ancova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_data.md),
 [`simulate_ancova_factorial_data()`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_factorial_data.md),
 [`simulate_anova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_anova_data.md),
-[`simulate_longitudinal_polynomial()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_polynomial.md)
+[`simulate_longitudinal_gompertz()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_gompertz.md),
+[`simulate_longitudinal_logistic()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_logistic.md),
+[`simulate_longitudinal_negative_exponential()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_negative_exponential.md),
+[`simulate_longitudinal_polynomial()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_polynomial.md),
+[`simulate_longitudinal_richards()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_richards.md)
 
 ## Author
 
@@ -129,7 +133,7 @@ simulate_regression_data(
   seed   = 113
 )[1:3, ]
 #>            y         x1         x2         x3         x4         x5
-#> 1 -0.3960700 -0.6224146  0.2159206 -0.3064253  0.3549176  0.1135693
-#> 2 -0.1355309 -0.9516532 -2.1782904 -0.3684705 -1.4350247 -0.7092047
-#> 3 -0.6852586 -0.9420999 -0.6252969  0.1668666 -0.2680763 -0.9912944
+#> 1 -0.3960700 -0.3724134 -0.5445050  0.4563194  0.1107002  0.1054664
+#> 2 -0.1355309 -1.4695662 -0.4833627 -2.2009360 -0.7832249 -0.7055538
+#> 3 -0.6852586 -0.9169909 -0.3397163 -0.5326804  0.1738402 -1.0443534
 ```

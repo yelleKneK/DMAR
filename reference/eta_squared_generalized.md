@@ -36,11 +36,12 @@ eta_squared_generalized(
 
 - observed:
 
-  Character vector of effect names that are *measured* rather than
-  *manipulated*. Their sums of squares are kept in the denominator of
-  \\\eta^2_G\\. Manipulated factors (effects not in `observed`) are
-  excluded from the denominator when they are not the focal effect. For
-  `aovlist` fits the names must match the effect labels visible in
+  Character vector naming the *measured* (rather than *manipulated*)
+  factors. Their sums of squares, and the SS of every interaction
+  containing a listed factor, are kept in the denominator of
+  \\\eta^2_G\\ per Olejnik and Algina (2003, Eq. 5). Manipulated effects
+  are excluded from the denominator when they are not the focal effect.
+  For `aovlist` fits the names must match the effect labels visible in
   `summary(object)`.
 
 - SS_effect:
@@ -139,11 +140,23 @@ leading term of the denominator). Practically this means listing every
 effect as `observed` reduces to total \\\eta^2\\ for between-subjects
 designs.
 
-**Higher-order interactions.** The function applies the simpler rule
-recommended by Bakeman (2005): only effects *explicitly listed* in
-`observed` contribute to the denominator (apart from the focal effect
-and the error strata). Mixed measured-x-manipulated interactions are
-treated like manipulated effects unless the user lists them as observed.
+**Higher-order interactions.** An effect is a measured source of
+variance when *any* factor in its term is measured (Olejnik & Algina,
+2003, Eq. 5; Bakeman, 2005), so listing a factor in `observed` also
+places every interaction containing that factor in the denominator
+automatically. In a design with manipulated `A` and measured `c`,
+`observed = "c"` therefore puts `c` and `A:c` in the denominator, which
+is what the cited papers' worked examples do. An explicit interaction
+label in `observed` is honored as given, declaring that one term
+measured without marking its constituent factors.
+
+**Covariates.** Under Olejnik and Algina's Eq. 5, a covariate is a
+measured source whose SS always belongs in the denominator, so in an
+ANCOVA list the covariate in `observed`. Because
+[`anova()`](https://rdrr.io/r/stats/anova.html) on an `lm`/`aov` fit
+uses sequential sums of squares, enter the covariate before the
+treatment factors in the model formula so its SS is adjusted the way the
+ANCOVA decomposition intends.
 
 **Confidence intervals.** See
 [`ci_eta_squared_generalized`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
@@ -207,14 +220,17 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Fitted model with `observed`. ToothGrowth: dose (manipulated) and
-#        supp (manipulated). For illustration treat supp as measured.
-fit <- aov(len ~ supp * dose, data = ToothGrowth)
-eta_squared_generalized(fit, observed = "supp")
-#>      effect eta_squared_generalized
-#> 1      supp              0.18029211
-#> 2      dose              0.66134791
-#> 3 supp:dose              0.07241611
+# 1. Fitted model with `observed`. In the pygmalion expectancy
+#        experiment, treatment is manipulated while grade is a measured
+#        classification, so grade's variance stays in the denominator.
+pyg <- pygmalion
+pyg$grade <- factor(pyg$grade)
+fit <- aov(iq_8 ~ treatment * grade, data = pyg)
+eta_squared_generalized(fit, observed = "grade")
+#>            effect eta_squared_generalized
+#> 1       treatment              0.02015391
+#> 2           grade              0.04396181
+#> 3 treatment:grade              0.01872564
 
 # 2. Raw sums of squares.
 eta_squared_generalized(SS_effect = 100, SS_observed = c(40, 30),
@@ -263,7 +279,7 @@ mixed_data <- data.frame(
 fit_mixed <- aov(y ~ group * time + Error(subject/time), data = mixed_data)
 eta_squared_generalized(fit_mixed, observed = "group")
 #>       effect eta_squared_generalized      stratum
-#> 1      group              0.01121085      subject
-#> 2       time              0.09195236 subject:time
+#> 1      group              0.01108528      subject
+#> 2       time              0.09101617 subject:time
 #> 3 group:time              0.01120063 subject:time
 ```

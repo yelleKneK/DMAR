@@ -146,8 +146,10 @@ Other plotting:
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md),
@@ -160,7 +162,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Built-in Orthodont data: 27 children, 4 measurements each.
 d <- nlme::Orthodont
 
@@ -169,10 +170,11 @@ plot_trajectories(d, id = "Subject", time = "age",
                   outcome = "distance", group = "Sex")
 
 
-# One panel per child (12 random children).
-plot_trajectories(d, id = "Subject", time = "age",
-                  outcome = "distance",
-                  n_random = 12, facet = TRUE, ncol = 4)
-
-# }
+# One panel per child, for twelve children drawn at random. Not run
+# here because faceting draws twelve small plots instead of one, which
+# costs about twice what the overlay above does. The call is:
+# plot_trajectories(d, id = "Subject", time = "age",
+#                   outcome = "distance",
+#                   n_random = 12, facet = TRUE, ncol = 4,
+#                   seed = 113)
 ```

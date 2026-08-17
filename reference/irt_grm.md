@@ -332,54 +332,17 @@ grm
 a_pop
 #> [1] 1.2 0.9 1.5 1.0 1.3 1.1
 
-# The same fit reported with logistic slopes (about 1.702 times larger).
-irt_grm(responses, metric = "logistic")
-#>  item  factor category lambda tau    a    b     
-#>  item1 theta  1        0.779  -1.3   2.12 -1.66 
-#>  item1 theta  2        0.779  -0.496 2.12 -0.636
-#>  item1 theta  3        0.779  0.215  2.12 0.275 
-#>  item1 theta  4        0.779  0.869  2.12 1.11  
-#>  item2 theta  1        0.64   -0.979 1.42 -1.53 
-#>  item2 theta  2        0.64   -0.283 1.42 -0.442
-#>  item2 theta  3        0.64   0.279  1.42 0.437 
-#>  item2 theta  4        0.64   0.954  1.42 1.49  
-#>  item3 theta  1        0.856  -1.49  2.81 -1.74 
-#>  item3 theta  2        0.856  -0.617 2.81 -0.721
-#>  item3 theta  3        0.856  0.186  2.81 0.217 
-#>  item3 theta  4        0.856  0.873  2.81 1.02  
-#>  item4 theta  1        0.694  -0.954 1.64 -1.38 
-#>  item4 theta  2        0.694  -0.208 1.64 -0.3  
-#>  item4 theta  3        0.694  0.423  1.64 0.609 
-#>  item4 theta  4        0.694  1.2    1.64 1.73  
-#>  item5 theta  1        0.795  -1.21  2.23 -1.52 
-#>  item5 theta  2        0.795  -0.392 2.23 -0.493
-#>  item5 theta  3        0.795  0.322  2.23 0.405 
-#>  item5 theta  4        0.795  1.04   2.23 1.31  
-#>  item6 theta  1        0.742  -0.989 1.88 -1.33 
-#>  item6 theta  2        0.742  -0.237 1.88 -0.32 
-#>  item6 theta  3        0.742  0.419  1.88 0.565 
-#>  item6 theta  4        0.742  0.989  1.88 1.33  
-
 # Model fit travels with the item parameters.
 attr(grm, "fit_measures")[c("cfi", "tli", "rmsea", "srmr")]
 #>        cfi        tli      rmsea       srmr 
 #> 1.00000000 1.00131440 0.00000000 0.01127189 
 
-# A subset of the items, selected by name.
-irt_grm(responses, items = c("item1", "item3", "item5"))
-#>  item  factor category lambda tau    a    b     
-#>  item1 theta  1        0.772  -1.3   1.21 -1.68 
-#>  item1 theta  2        0.772  -0.496 1.21 -0.643
-#>  item1 theta  3        0.772  0.215  1.21 0.278 
-#>  item1 theta  4        0.772  0.869  1.21 1.13  
-#>  item3 theta  1        0.836  -1.49  1.52 -1.78 
-#>  item3 theta  2        0.836  -0.617 1.52 -0.738
-#>  item3 theta  3        0.836  0.186  1.52 0.222 
-#>  item3 theta  4        0.836  0.873  1.52 1.04  
-#>  item5 theta  1        0.814  -1.21  1.4  -1.48 
-#>  item5 theta  2        0.814  -0.392 1.4  -0.482
-#>  item5 theta  3        0.814  0.322  1.4  0.395 
-#>  item5 theta  4        0.814  1.04   1.4  1.28  
+# Two further calls, each of which refits the model and so is not run
+# here. The first reports the same fit with logistic slopes (about
+# 1.702 times larger than the normal ogive slopes above), the second
+# fits a subset of the items selected by name:
+# irt_grm(responses, metric = "logistic")
+# irt_grm(responses, items = c("item1", "item3", "item5"))
 
 # The boundary response function of the first item at theta = 0.
 first <- grm[grm$item == "item1", ]

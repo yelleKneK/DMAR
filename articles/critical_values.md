@@ -148,7 +148,7 @@ natively;
 and the underlying
 [`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
 supply it. (For its use in a full ANCOVA analysis see the
-`cv_bryant_paulson` and `bryant_paulson_simulation` vignettes.)
+`bryant_paulson_ancova` vignette.)
 
 It reproduces the published anchor exactly:
 

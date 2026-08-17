@@ -102,7 +102,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 fit <- lme4::lmer(Reaction ~ Days + (Days | Subject),
                   data = lme4::sleepstudy)
 R2_mixed_effects_decomposition(fit)
@@ -112,5 +111,4 @@ R2_mixed_effects_decomposition(fit)
 #>  total_m   0.432 
 #>  total_fv  0.368 
 #>  total_fvm 0.799 
-# }
 ```

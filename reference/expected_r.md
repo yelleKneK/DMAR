@@ -29,10 +29,9 @@ expected_r(rho, n)
 
   Sample size on which the Pearson \\r\\ would be computed. A scalar or
   vector of integers with \\n \ge 4\\. (At \\n = 3\\ the bias is defined
-  but the formula involves \\\Gamma(1/2)\\ in the denominator and is
-  numerically delicate; we require \\n \ge 4\\ for well-conditioned
-  computation.) When `rho` and `n` are both vectors they must have the
-  same length or recycle cleanly.
+  but the exact formula is numerically delicate; we require \\n \ge 4\\
+  for well-conditioned computation.) When `rho` and `n` are both vectors
+  they must have the same length or recycle cleanly.
 
 ## Value
 
@@ -67,16 +66,17 @@ for a design-stage walk-through.
 **The exact formula.** Under bivariate normality, if \\r\\ is the sample
 Pearson correlation in a sample of size \\n\\, \$\$\mathrm{E}\[r \mid
 \rho, n\] \\=\\ \rho \\\cdot\\ {}\_2F_1\\\left(\tfrac{1}{2},\\
-\tfrac{1}{2};\\ \tfrac{n-1}{2};\\ \rho^2 \right) \\\cdot\\
-\frac{\Gamma\\\left(\tfrac{n-1}{2}\right)^2}
-{\Gamma\\\left(\tfrac{n-2}{2}\right)\\\Gamma\\\left(\tfrac{n}{2}\right)}.\$\$
+\tfrac{1}{2};\\ \tfrac{n+1}{2};\\ \rho^2 \right) \\\cdot\\
+\frac{\Gamma\\\left(\tfrac{n}{2}\right)^2}
+{\Gamma\\\left(\tfrac{n-1}{2}\right)\\\Gamma\\\left(\tfrac{n+1}{2}\right)}.\$\$
 Here \\{}\_2F_1(a, b; c; z) = \sum\_{k=0}^{\infty} \frac{(a)\_k
 (b)\_k}{(c)\_k\\ k!}\\ z^k\\ is the Gauss hypergeometric function with
 Pochhammer symbols \\(x)\_k = x(x+1)\cdots(x+k-1)\\ (Hotelling, 1953,
-Section 4; Olkin & Pratt, 1958, equation 3.2). For \\\rho^2 \< 1\\ the
-series converges absolutely; this implementation sums by a numerically
-stable forward recurrence and stops when the relative contribution of
-the next term falls below a tolerance.
+Section 7 for the moments of \\r\\, Section 3, equation 25, for the
+exact density; Olkin & Pratt, 1958, equation 3.2, for this closed form).
+For \\\rho^2 \< 1\\ the series converges absolutely; this implementation
+sums by a numerically stable forward recurrence and stops when the
+relative contribution of the next term falls below a tolerance.
 
 **Tuning the series convergence (rarely needed).** Two internal tuning
 constants control the \\{}\_2F_1\\ series summation:
@@ -107,8 +107,8 @@ is largest when \\n\\ is small or \\\|\rho\|\\ is moderate; as \\n \to
 sign as \\\rho\\ and is approximately \\\rho(1 - \rho^2)/\[2(n - 1)\]\\
 to leading order (Fisher, 1915; Hotelling, 1953; Ghosh, 1966); the exact
 formula above incorporates all higher-order corrections. For \\\rho =
-0.5\\, \\n = 10\\, the bias is about \\-0.024\\; for \\\rho = 0.5\\, \\n
-= 30\\, about \\-0.006\\.
+0.5\\, \\n = 10\\, the bias is about \\+0.021\\; for \\\rho = 0.5\\, \\n
+= 30\\, about \\+0.0065\\.
 
 **Olkin-Pratt (1958) unbiased estimator of \\\rho\\.** The companion to
 this expected-value calculation is the Olkin-Pratt unbiased estimator of
@@ -123,23 +123,25 @@ r^2)/(2(n - 3))\]\\ (Olkin, 1967) is the truncation of the OP series at
 
 Although the unbiased estimator is straightforward to apply, it is
 rarely used because in most downstream uses (significance testing,
-Fisher's-\\z\\ confidence intervals, structural-equation models) the
+Fisher's \\Z\\ confidence intervals, structural-equation models) the
 bias is small relative to other sources of uncertainty. Where it does
 matter, meta-analyses with many small samples, reliability / validity
 coefficients estimated from short calibration samples, design-stage
 estimates feeding into AIPE sample size machinery the correction is well
 worth applying.
 
-**Connection to Fisher's z transform.** Fisher's (1915) variance-
-stabilizing transform \\z = \tanh^{-1}(r)\\ has approximate variance
+**Connection to Fisher's Z transform.** The variance-stabilizing
+transform \\z = \tanh^{-1}(r)\\, proposed in passing in Fisher (1915, p.
+521) and developed in Fisher (1921), has approximate variance
 \\1/(n-3)\\ regardless of \\\rho\\, but \\\mathrm{E}\[z\]\\ also carries
-a small-sample bias of order \\1/n\\. The unbiased \\z\\ estimator
-parallels the OP correction at the \\r\\ level (Hotelling, 1953).
+a small-sample bias of order \\1/n\\ (Hotelling, 1953, Section 8).
+Hotelling (1953, Sections 9–10) gives bias-adjusted and
+variance-stabilized refinements of \\Z\\, e.g. \\z - (3z + r)/(4n)\\.
 
 ## References
 
 Anderson, T. W. (2003). *An introduction to multivariate statistical
-analysis* (4th ed.), Section 4.2. Wiley.
+analysis* (3rd ed.), Section 4.2. Wiley.
 
 Fisher, R. A. (1915). Frequency distribution of the values of the
 correlation coefficient in samples from an indefinitely large
@@ -177,7 +179,7 @@ Edward Arnold.
 
 ## See also
 
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`cor`](https://rdrr.io/r/stats/cor.html),
 [`cor.test`](https://rdrr.io/r/stats/cor.test.html)
 
@@ -206,7 +208,7 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # 1. A single value: rho = 0.5, n = 10. The sample r is downwardly
-#        biased by about 0.024 (~5% of rho).
+#        biased by about 0.021, roughly 4% of rho.
 expected_r(rho = 0.5, n = 10)
 #>  rho n  expected_r bias   relative_bias
 #>  0.5 10 0.479      0.0213 0.0427       
@@ -285,7 +287,6 @@ expected_r(rho = rho_planned, n = n_planned)
 #        through options() for the rare cases that need them (e.g.,
 #        very near-boundary |rho| where the 2F1 series converges
 #        slowly). The defaults rarely need to be changed.
-# \donttest{
 options(DMAR.expected_r.tol = 1e-12,
         DMAR.expected_r.max_iter = 20000L)
 expected_r(rho = 0.999, n = 5)
@@ -293,5 +294,4 @@ expected_r(rho = 0.999, n = 5)
 #>  0.999 5 0.999      0.000493 0.000494     
 options(DMAR.expected_r.tol = NULL,
         DMAR.expected_r.max_iter = NULL)   # restore defaults
-# }
 ```

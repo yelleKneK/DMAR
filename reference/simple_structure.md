@@ -46,20 +46,34 @@ hyperplane cutoffs as the `"salient"` and `"hyperplane"` attributes.
 
 ## Details
 
-Item complexity is the index of Hoffman (1978), \\c_i = (\sum_j
+Item complexity is Hofmann's complexity index, proposed in Hofmann
+(1977) and given as Equation 1 of Hofmann (1978), \\c_i = (\sum_j
 \lambda\_{ij}^2)^2 / \sum_j \lambda\_{ij}^4\\, which equals one when an
 item loads on a single factor and rises toward the number of factors as
-the loadings spread out; it is the same complexity that
-[`psych::fa`](https://rdrr.io/pkg/psych/man/fa.html) reports. An item is
-*pure* when exactly one of its loadings is salient and *complex* when
-more than one is. The hyperplane proportion is the fraction of all
-loadings whose absolute value is below `hyperplane`; a clean simple
-structure is mostly such near-zero loadings.
+the loadings spread out; it is the same complexity that `psych::fa`
+reports. The `"complexity"` attribute holds these per-item values, and
+the `mean_complexity` row is their arithmetic average, what Hofmann
+(1978) calls the total matrix complexity. These are complexities, not
+Kaiser's (1974) simplicity index; Hofmann (1978) shows that either can
+be derived from the other at the item level, with the simplicity of item
+\\i\\ in an \\m\\-factor solution given by his Equation 3, \\s_i =
+\[1/(m - 1)\]\[(m / c_i) - 1\]\\. An item is *pure* when exactly one of
+its loadings is salient and *complex* when more than one is. The
+hyperplane proportion is the fraction of all loadings whose absolute
+value is below `hyperplane`; a clean simple structure is mostly such
+near-zero loadings.
 
 ## References
 
-Hoffman, P. J. (1978). Hierarchical factoring schema by item complexity.
-*Multivariate Behavioral Research, 13*(1), 91–104.
+Hofmann, R. J. (1977). Indices descriptive of factor complexity. *The
+Journal of General Psychology, 96*, 58–66.
+
+Hofmann, R. J. (1978). Complexity and simplicity as objective indices
+descriptive of factor solutions. *Multivariate Behavioral Research,
+13*(2), 247–250.
+
+Kaiser, H. F. (1974). An index of factorial simplicity. *Psychometrika,
+39*(1), 31–36.
 
 Thurstone, L. L. (1947). *Multiple-factor analysis*. University of
 Chicago Press.

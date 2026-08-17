@@ -112,8 +112,12 @@ reliability(
 
 The `data.frame` returned by the dispatched `reliability_*` function
 (rows: `estimate`, `se`, `lower_limit`, `upper_limit`, `conf_level`,
-`N`, `N_complete`, `J`). The `coefficient` attribute identifies which
-coefficient was computed.
+`N`, `N_complete`, `J`). The `se` row is on the coefficient scale; the
+transformation-based intervals (`"fisher"`, `"bonett"`,
+`"hakstian_whalen"`) add an `se_transformed` row carrying the
+transformation-scale standard error, with the scale named in the
+`se_transform_scale` attribute. The `coefficient` attribute identifies
+which coefficient was computed.
 
 ## Details
 
@@ -222,7 +226,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(113)
 J <- 6
 loadings <- seq(0.4, 0.8, length.out = J)
@@ -247,28 +250,19 @@ reliability(data = items)
 
 # Explicit type.
 reliability(data = items, type = "alpha")
-#>  term        value
-#>  estimate    0.767
-#>  se          0.11 
-#>  lower_limit 0.71 
-#>  upper_limit 0.812
-#>  conf_level  0.95 
-#>  N           200  
-#>  N_complete  200  
-#>  J           6    
+#>  term           value 
+#>  estimate       0.767 
+#>  se             0.0257
+#>  se_transformed 0.11  
+#>  lower_limit    0.71  
+#>  upper_limit    0.812 
+#>  conf_level     0.95  
+#>  N              200   
+#>  N_complete     200   
+#>  J              6     
 
-# From a covariance matrix (also picks coefficient omega).
-reliability(S = cov(items), N = 200)
-#> Auto-detected type = "omega" (McDonald's coefficient omega from a single-factor CFA).
-#> Robust omega is reported without a confidence interval: its interval is bootstrap based, which requires raw data rather than a covariance matrix.
-#>  term        value
-#>  estimate    0.781
-#>  se          <NA> 
-#>  lower_limit <NA> 
-#>  upper_limit <NA> 
-#>  conf_level  0.95 
-#>  N           200  
-#>  N_complete  200  
-#>  J           6    
-# }
+# A covariance matrix and its sample size stand in for raw data, and
+# auto-detection again picks coefficient omega. The call fits the
+# single factor model a second time, so it is shown rather than run:
+#   reliability(S = cov(items), N = 200)
 ```

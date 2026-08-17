@@ -26,7 +26,7 @@ plot_ci(
 
 - ci:
 
-  A `data.frame` from an DMAR `ci_*` function. When supplied, the
+  A `data.frame` from a DMAR `ci_*` function. When supplied, the
   function auto-detects the format and extracts the point estimate(s),
   lower limit(s), and upper limit(s). Explicit `estimate`, `lower`, and
   `upper` arguments override values parsed from `ci`.
@@ -58,8 +58,8 @@ plot_ci(
 
 - show_n:
 
-  Logical. If `TRUE` (the default), sample sizes are annotated beside
-  each estimate.
+  Logical. If `TRUE` (the default), the sample size is annotated above
+  each estimate, with the estimate and its interval printed below.
 
 - reference_line:
 
@@ -108,10 +108,10 @@ The function recognizes three DMAR output formats:
 - **Long term/value without estimate**:
 
   Output from
-  [`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md) or
-  [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md), which
-  contains only `"lower_limit"` and `"upper_limit"`. Supply the point
-  estimate via the `estimate` argument.
+  [`ci_R`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  or [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
+  which contains only `"lower_limit"` and `"upper_limit"`. Supply the
+  point estimate via the `estimate` argument.
 
 - **Wide per-effect format**:
 
@@ -127,7 +127,7 @@ Requires ggplot2 (listed in `Suggests`).
 ## See also
 
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
+[`ci_R`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`plot_smd`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
@@ -137,8 +137,10 @@ Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -152,7 +154,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # From explicit values.
 plot_ci(estimate = 0.45, lower = 0.15, upper = 0.75,
         names = "Cohen's d", n = 60, reference_line = 0)
@@ -163,12 +164,13 @@ ci_result <- ci_smd(smd = 0.5, n_1 = 50, n_2 = 50)
 plot_ci(ci_result, n = 100, reference_line = 0)
 
 
-# Multiple effects from ci_omega_squared().
-fit <- aov(breaks ~ wool * tension, data = warpbreaks)
+# Multiple effects from ci_omega_squared(): the expectancy treatment
+# and the grade classification in the pygmalion data.
+pyg <- pygmalion
+pyg$grade <- factor(pyg$grade)
+fit <- aov(iq_8 ~ treatment + grade, data = pyg)
 omega_result <- ci_omega_squared(fit)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
 plot_ci(omega_result, reference_line = 0,
         xlab = expression(omega^2))
 
-# }
 ```

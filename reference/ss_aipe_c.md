@@ -62,7 +62,9 @@ ss_aipe_c(
 
 ## Value
 
-- sample_size:
+A 1-row `data.frame` with columns `term` and `value`:
+
+- necessary_n_per_group:
 
   the necessary sample size *per group*
 

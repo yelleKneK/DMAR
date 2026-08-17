@@ -26,7 +26,9 @@ var_indirect_effect(a, b, var_a, var_b, cov_ab = 0)
   Variances (squared standard errors) of \\\hat a\\ and \\\hat b\\. For
   standardized regression with no covariates, \\\mathrm{Var}(\hat a)
   \approx (1 - a^2)/(n - 2)\\ and \\\mathrm{Var}(\hat b) \approx (1 -
-  b^2)/(n - 3)\\.
+  b^2)/\\(n - 3)(1 - a^2)\\\\, the standardized-model variance
+  accounting for the correlation the \\a\\ path induces between the
+  predictors of \\Y\\.
 
 - cov_ab:
 
@@ -74,10 +76,11 @@ matters in models with covariates that simultaneously load on \\M\\ and
 
 **Connection to
 [`ss_aipe_indirect_effect`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md).**
-The Sobel variance is what
+The Sobel (delta method) variance is what
 [`ss_aipe_indirect_effect`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md)
-uses under `method = "sobel"` for AIPE planning; this function makes the
-alternative formulas available for explicit comparison.
+builds on under `method = "closed_form"` for AIPE planning; this
+function makes the alternative formulas available for explicit
+comparison.
 
 ## References
 

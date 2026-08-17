@@ -51,28 +51,30 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-fit <- mlmr(mpg ~ wt + hp, data = mtcars, ci_method = "wald")
+fit <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
+              t9_word_meaning,
+            data = holzinger_swineford, ci_method = "wald")
 generics::tidy(fit)
-#>          term    estimate          se statistic       p_value
-#> 1 (Intercept) 37.22727012 1.522000394 24.459435 3.993921e-132
-#> 2          wt -3.87783074 0.602344341 -6.437897  1.211403e-10
-#> 3          hp -0.03177295 0.008596028 -3.696236  2.188195e-04
+#>                     term   estimate         se statistic      p_value
+#> 1            (Intercept) 2.38038350 0.47731165  4.987064 6.130392e-07
+#> 2 t5_general_information 0.08482737 0.01642376  5.164917 2.405460e-07
+#> 3        t9_word_meaning 0.21956217 0.02651353  8.281136 1.220057e-16
 generics::tidy(fit, conf.int = TRUE)
-#>          term    estimate          se statistic       p_value    ci_lower
-#> 1 (Intercept) 37.22727012 1.522000394 24.459435 3.993921e-132 34.24420416
-#> 2          wt -3.87783074 0.602344341 -6.437897  1.211403e-10 -5.05840396
-#> 3          hp -0.03177295 0.008596028 -3.696236  2.188195e-04 -0.04862085
-#>      ci_upper
-#> 1 40.21033607
-#> 2 -2.69725753
-#> 3 -0.01492504
+#>                     term   estimate         se statistic      p_value
+#> 1            (Intercept) 2.38038350 0.47731165  4.987064 6.130392e-07
+#> 2 t5_general_information 0.08482737 0.01642376  5.164917 2.405460e-07
+#> 3        t9_word_meaning 0.21956217 0.02651353  8.281136 1.220057e-16
+#>     ci_lower  ci_upper
+#> 1 1.44486986 3.3158971
+#> 2 0.05263738 0.1170174
+#> 3 0.16759660 0.2715277
 generics::tidy(fit, conf.int = TRUE, standardized = TRUE)
-#>          term    estimate          se statistic       p_value    ci_lower
-#> 1 (Intercept) 37.22727012 1.522000394 24.459435 3.993921e-132 34.24420416
-#> 2          wt -3.87783074 0.602344341 -6.437897  1.211403e-10 -5.05840396
-#> 3          hp -0.03177295 0.008596028 -3.696236  2.188195e-04 -0.04862085
-#>      ci_upper std_estimate
-#> 1 40.21033607           NA
-#> 2 -2.69725753   -0.6295545
-#> 3 -0.01492504   -0.3614507
+#>                     term   estimate         se statistic      p_value
+#> 1            (Intercept) 2.38038350 0.47731165  4.987064 6.130392e-07
+#> 2 t5_general_information 0.08482737 0.01642376  5.164917 2.405460e-07
+#> 3        t9_word_meaning 0.21956217 0.02651353  8.281136 1.220057e-16
+#>     ci_lower  ci_upper std_estimate
+#> 1 1.44486986 3.3158971           NA
+#> 2 0.05263738 0.1170174    0.3007216
+#> 3 0.16759660 0.2715277    0.4821600
 ```

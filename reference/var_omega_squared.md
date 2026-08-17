@@ -1,11 +1,16 @@
 # Asymptotic Variance of Omega Squared (ANOVA Effect Size)
 
 Computes the large-sample (delta method) variance of the sample
-\\\hat\omega^2\\ (Hays' 1994 bias-corrected estimator) using Fleishman's
-(1980) formula for the variance of the unbiased estimator of
-\\\omega^2\\ in a fixed-effects ANOVA. The variance is computed on the
-noncentral *F* sampling distribution of the observed *F* statistic and
-is the natural companion to
+\\\hat\omega^2\\ (Hays' 1994 bias-corrected estimator) in a
+fixed-effects ANOVA. Fleishman (1980, Eq. 22, p. 669) gives the exact
+variance of the unbiased estimator of the signal-to-noise ratio \\f^2 =
+\sigma^2_a / \sigma^2_e\\ under the noncentral *F* sampling distribution
+of the observed *F* statistic; because \\\omega^2 = f^2 / (1 + f^2)\\
+(his Eq. 8), the delta method carries that variance to the \\\omega^2\\
+scale with the Jacobian \\\mathrm{d}\omega^2/\mathrm{d}f^2 = (1 -
+\omega^2)^2\\. Fleishman gives no variance on the \\\omega^2\\ scale
+himself, so the transfer is this package's step rather than his. The
+result is the natural companion to
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
 (CI) and
 [`omega_squared`](https://yelleknek.github.io/DMAR/reference/omega_squared.md)
@@ -143,14 +148,19 @@ var_omega_squared(population_omega_squared = 0.10,
                    df_effect = 2,
                    df_error = 57,
                    N = 60)
-#>  term              value 
-#>  var_omega_squared 0.0175
+#>  term              value  
+#>  var_omega_squared 0.00632
 
-# 2. Per-effect variance from a fitted lm() / aov():
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
+# 2. Per-effect variance from a fitted lm() / aov() (pygmalion data:
+#        expectancy treatment x grade, N = 310):
+fit_factorial <- aov(iq_8 ~ treatment * factor(grade), data = pygmalion)
 var_omega_squared(object = fit_factorial)
-#>  effect       omega_squared_partial var_omega_squared df_effect df_error N 
-#>  wool         0.0487                0.0092            1         48       54
-#>  tension      0.217                 0.0634            2         48       54
-#>  wool:tension 0.106                 0.0201            2         48       54
+#>  effect                  omega_squared_partial var_omega_squared df_effect
+#>  treatment               0.0176                0.000239          1        
+#>  factor(grade)           0.0281                0.000441          5        
+#>  treatment:factor(grade) 0.00307               0.000145          5        
+#>  df_error N  
+#>  298      310
+#>  298      310
+#>  298      310
 ```

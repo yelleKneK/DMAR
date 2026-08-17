@@ -422,16 +422,17 @@ d$y2[runif(N) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
 reliability_alpha(data = d[, paste0("y", 1:6)])
 ```
 
-| term        | value |
-|:------------|:------|
-| estimate    | 0.762 |
-| se          | 0.106 |
-| lower_limit | 0.707 |
-| upper_limit | 0.807 |
-| conf_level  | 0.95  |
-| N           | 215   |
-| N_complete  | 215   |
-| J           | 6     |
+| term           | value  |
+|:---------------|:-------|
+| estimate       | 0.762  |
+| se             | 0.0252 |
+| se_transformed | 0.106  |
+| lower_limit    | 0.707  |
+| upper_limit    | 0.807  |
+| conf_level     | 0.95   |
+| N              | 215    |
+| N_complete     | 215    |
+| J              | 6      |
 
 ``` r
 
@@ -462,9 +463,8 @@ complete-data closed forms, ADF, the profile likelihood) are refused
 with an explanation rather than silently reverting to listwise deletion;
 the delta method (`"ml"`, `"mlr"`) and bootstrap intervals remain
 available. Users of MBESS may recognize the `aux` idea from
-[`ci.reliability()`](https://rdrr.io/pkg/MBESS/man/ci.reliability.html),
-whose implementation no longer runs on current semTools; DMAR implements
-the saturated correlates model directly.
+`ci.reliability()`, whose implementation no longer runs on current
+semTools; DMAR implements the saturated correlates model directly.
 
 ## One Entry Point and the Broom Verbs
 

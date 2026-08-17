@@ -63,6 +63,12 @@ ran and how long it took. The print method's natural-language form is
 designed to be copy-pasted into a methods section or an analysis note
 without further formatting.
 
+The name coincides with
+[`lubridate::now()`](https://lubridate.tidyverse.org/reference/now.html),
+and the masking is deliberate: both functions return the current time as
+a `POSIXct` object, so a script written for either remains correct with
+the other attached; only the printed form differs.
+
 ## See also
 
 [`Sys.time`](https://rdrr.io/r/base/Sys.time.html) for the underlying
@@ -78,29 +84,41 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Print the current date and time.
 now()
-#> August 1, 2026 (5:13 PM)
+#> August 17, 2026 (12:51 PM)
 
 # Time how long a piece of work takes. The pattern is the same
 # whether the work is a bootstrap, a simulation, or a numeric
-# search. The "-" operator returns an elapsed time as a
-# difftime, with units chosen automatically.
+# search: capture a stamp before, capture one after, subtract.
+# The "-" operator returns the elapsed time as a difftime, with
+# units chosen automatically. Here the work is a descriptive
+# summary of three Holzinger and Swineford cognitive tests, small
+# enough that the elapsed time is a fraction of a second.
 start <- now()
-Sys.sleep(0.5)
+d <- descriptives(holzinger_swineford[, c("t1_visual_perception",
+                                          "t2_cubes", "t4_lozenges")])
 end <- now()
 end - start
-#> Time difference of 0.5014763 secs
+#> Time difference of 0.003771305 secs
+
+# A deliberate wait shows the same pattern on a longer interval.
+# Not run here because the only way to demonstrate a wait is to
+# make the example wait; the calls are:
+# start <- now()
+# Sys.sleep(0.5)
+# end <- now()
+# end - start          # elapsed time, here about 0.5 seconds
 
 # Date only.
 now(time = FALSE)
-#> August 1, 2026
+#> August 17, 2026
 
 # Tidy data.frame form, when the components are needed
 # individually for programmatic processing (e.g., embedding in a
 # report's metadata block).
 now(tidy = TRUE)
 #>     term value
-#> 1    day     1
+#> 1    day    17
 #> 2   year  2026
-#> 3   hour     5
-#> 4 minute    13
+#> 3   hour    12
+#> 4 minute    51
 ```

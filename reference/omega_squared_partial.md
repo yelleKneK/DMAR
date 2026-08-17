@@ -71,7 +71,7 @@ and
 
 This function is the explicitly-named counterpart of
 [`omega_squared`](https://yelleknek.github.io/DMAR/reference/omega_squared.md).
-The two share the same point-estimate formula , in a one-way ANOVA they
+The two share the same point-estimate formula: in a one-way ANOVA they
 coincide with the total \\\omega^2\\; in a factorial ANOVA both return
 the per-effect *partial* value computed against the model's residual
 mean square. `omega_squared_partial` is provided so that user code that
@@ -96,7 +96,7 @@ invariant to whether additional orthogonal factors are present (Olejnik
 effect size index when off-factors are "extrinsic" (i.e., would not vary
 in a hypothetical full replication of the population setup).
 
-**Bias correction vs.\\ partial eta squared.** \\\hat{\eta}^2_p\\ , the
+**Bias correction vs.\\ partial eta squared.** \\\hat{\eta}^2_p\\, the
 sample partial eta squared, is the proportion of *sample* variance
 accounted for and is upward-biased as an estimator of the population
 \\\eta^2_p\\. \\\hat{\omega}^2_p\\ subtracts \\df\_{\text{effect}} \cdot
@@ -212,31 +212,34 @@ omega_squared_partial(F_value = 11.221, df_effect = 4, df_error = 50, N = 55)
 #>    effect omega_squared_partial F_value df_effect df_error  N
 #> 1 overall             0.4263902  11.221         4       50 55
 
-# 2. Factorial ANOVA: partial omega squared per effect on the
-#        balanced warpbreaks data (2 wool x 3 tension, 9/cell, N = 54).
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
-omega_squared_partial(fit_factorial)
-#>         effect omega_squared_partial  F_value df_effect df_error  N
-#> 1         wool            0.04871442 3.765288         1       48 54
-#> 2      tension            0.21734699 8.498047         2       48 54
-#> 3 wool:tension            0.10563655 4.189069         2       48 54
+# 2. Two-factor ANOVA: partial omega squared per effect on the
+#        pygmalion data (expectancy treatment x grade, unequal cell
+#        sizes, N = 310). The treatment is manipulated while grade is
+#        a measured classification, and the partial value for each
+#        effect removes the variance the other accounts for. The
+#        treatment by grade interaction is weak here (F = 1.19), so
+#        the additive model is used.
+fit_additive <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
+omega_squared_partial(fit_additive)
+#>          effect omega_squared_partial  F_value df_effect df_error   N
+#> 1     treatment            0.01749124 6.518816         1      303 310
+#> 2 factor(grade)            0.02800886 2.786589         5      303 310
 
 # 3. omega_squared_partial() and ci_omega_squared() agree on the
 #        point estimate row-by-row.
-pt  <- omega_squared_partial(fit_factorial)
-ci  <- ci_omega_squared(fit_factorial)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
+pt  <- omega_squared_partial(fit_additive)
+ci  <- ci_omega_squared(fit_additive)
 pt$omega_squared_partial
-#> [1] 0.04871442 0.21734699 0.10563655
+#> [1] 0.01749124 0.02800886
 ci$omega_squared
-#> [1] 0.04871442 0.21734699 0.10563655
+#> [1] 0.01749124 0.02800886
 
 # 4. The named pair: omega_squared() and omega_squared_partial()
 #        report identical numbers in this design; the only difference
 #        is the name of the value column, which makes the user's
 #        intent (partial) explicit.
-omega_squared(fit_factorial)$omega_squared
-#> [1] 0.04871442 0.21734699 0.10563655
-omega_squared_partial(fit_factorial)$omega_squared_partial
-#> [1] 0.04871442 0.21734699 0.10563655
+omega_squared(fit_additive)$omega_squared
+#> [1] 0.01749124 0.02800886
+omega_squared_partial(fit_additive)$omega_squared_partial
+#> [1] 0.01749124 0.02800886
 ```

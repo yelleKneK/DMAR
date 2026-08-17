@@ -77,14 +77,20 @@ ss_aipe_sm_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis. Summary rows include the mean / median / SD
-of the realized full confidence interval width (`mean_full_width`,
-`median_full_width`, `sd_full_width`), the proportion of intervals
-narrower than the planning target (`pct_width_obs_narrower`), the mean
-lower- and upper-tail widths (`mean_width_lower`, `mean_width_upper`),
-and the empirical Type I error rates on each tail (`type_I_error_upper`,
-`type_I_error_lower`). Inputs echoed back include the planning
-`sample_size` and `desired_width`.
+Carlo sensitivity analysis across the `G` replications. The `term`
+entries are: `mean_sm`, `median_sm`, `sd_sm` (summaries of the realized
+standardized mean); `mean_ci_width`, `median_ci_width`, `sd_ci_width`
+(summaries of the full interval widths); `mean_ci_width_lower` and
+`mean_ci_width_upper` (mean one-sided widths, measured from the observed
+standardized mean to each limit); `pct_ci_less_w` (proportion of
+intervals at or below the target width); `pct_ci_miss_low` and
+`pct_ci_miss_high` (tail-specific empirical non-coverage of `true_sm`);
+`total_type_I_error` (overall empirical non-coverage, the sum of the two
+tails); and the input echoes `total_N`, `true_sm`, `estimated_sm` (NA
+when `specified_N` was supplied instead), `width`, `conf_level`, and
+`assurance` (present only when an assurance was supplied). The
+proportion and Type I error rows are proportions on the 0 to 1 scale,
+not percentages.
 
 ## References
 
@@ -146,8 +152,9 @@ Ken Kelley <kkelley@nd.edu>
 # Objects contained in the 'Summary'.
 # Res.1$term
 
-# How many obtained full widths are narrower than the desired one?
-# Res.1[which(Res.1$term == 'pct_width_obs_narrower'),2]
+# What proportion of the obtained full widths are narrower than the
+# desired one?
+# Res.1[which(Res.1$term == 'pct_ci_less_w'),2]
 
 # True standardized mean difference is 10, but specified at 12.
 # Change 'G' to some large number (e.g., G=20)
@@ -155,5 +162,5 @@ Ken Kelley <kkelley@nd.edu>
 #desired_width=.5, assurance=NULL, conf_level=.95, G=20)
 
 # The effect of the misspecification on mean confidence intervals is:
-# Res.2[which(Res.2$term == 'mean_full_width'),2]
+# Res.2[which(Res.2$term == 'mean_ci_width'),2]
 ```

@@ -11,6 +11,8 @@
 
 ### Core workflows
 
+- [Nonlinear Growth Curves and the Meaning of Their
+  Parameters](https://yelleknek.github.io/DMAR/articles/nonlinear_growth.md):
 - [Power and Precision for the One-Way ANOVA: A Model Comparison
   Perspective](https://yelleknek.github.io/DMAR/articles/one_way_anova_power.md):
 - [Power for Factorial ANCOVA: A 2 x 4 x 3 Design Worked in
@@ -42,12 +44,5 @@
   (1984)](https://yelleknek.github.io/DMAR/articles/teacher_expectancy.md):
 - [Simultaneous Comparison of Adjusted Means in ANCOVA With
   DMAR](https://yelleknek.github.io/DMAR/articles/bryant_paulson_ancova.md):
-- [Bryant-Paulson Simultaneous Intervals: A Simulation
-  Study](https://yelleknek.github.io/DMAR/articles/bryant_paulson_simulation.md):
-- [Critical Values for ANCOVA Multiple Comparisons:
-  cv_bryant_paulson()](https://yelleknek.github.io/DMAR/articles/cv_bryant_paulson.md):
-- [Performance of Accuracy in Parameter Estimation Sample Size Planning:
-  A 10,000-Replication Monte Carlo
-  Study](https://yelleknek.github.io/DMAR/articles/aipe_simulation_study.md):
 - [Weighted Kappa: Cohen's 1968 Illustration, Worked in
   Full](https://yelleknek.github.io/DMAR/articles/weighted_kappa.md):

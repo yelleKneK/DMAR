@@ -1,10 +1,11 @@
 # Power of Fisher's Exact Test (Noncentral Hypergeometric)
 
-Computes the power of Fisher's exact test for the 2 \\\times\\ 2 table
-under the noncentral hypergeometric distribution (Fisher, 1934), where
-the alternative is parameterized by the true odds ratio \\\psi\\. The
-power is the probability that the (conditional) exact test rejects
-\\H_0: \psi = 1\\ when in fact \\\psi = \psi_1 \ne 1\\.
+Computes the power of Fisher's exact test (Fisher, 1934) for the 2
+\\\times\\ 2 table under Fisher's noncentral hypergeometric
+distribution, where the alternative is parameterized by the true odds
+ratio \\\psi\\. The power is the probability that the (conditional)
+exact test rejects \\H_0: \psi = 1\\ when in fact \\\psi = \psi_1 \ne
+1\\.
 
 ## Usage
 
@@ -15,7 +16,7 @@ power_fisher_exact(
   p_1,
   p_2,
   alpha_level = 0.05,
-  alternative = c("two.sided", "less", "greater")
+  alternative = c("two_sided", "less", "greater")
 )
 ```
 
@@ -38,7 +39,8 @@ power_fisher_exact(
 
 - alternative:
 
-  One of `"two.sided"` (default), `"less"`, or `"greater"`.
+  One of `"two_sided"` (default; the base-R spelling `"two.sided"` is
+  accepted as an alias), `"less"`, or `"greater"`.
 
 ## Value
 
@@ -61,8 +63,12 @@ column totals.
 
 Under \\H_0: \psi = 1\\, \\X_1\\ given the marginals follows the
 *central* hypergeometric. Under the alternative \\\psi_1\\, \\X_1\\
-follows the *noncentral* hypergeometric with parameter \\\psi_1\\
-(Wallenius, 1963; Fog, 2008).
+follows *Fisher's noncentral* hypergeometric with odds ratio parameter
+\\\psi_1\\ (Fisher, 1935; Fog, 2008), the conditional distribution of
+one binomial count given the total of two independent binomials.
+(Wallenius' noncentral hypergeometric, which arises from sequential
+biased urn sampling, is a different distribution and is not the relevant
+one here.)
 
 **Power calculation.** For each possible value of the column-1 total \\S
 = 0, 1, \ldots, n_1 + n_2\\:
@@ -78,19 +84,18 @@ follows the *noncentral* hypergeometric with parameter \\\psi_1\\
 
 The power is the resulting weighted sum.
 
-**Dependency.** Requires the BiasedUrn package on CRAN for the
-noncentral hypergeometric probabilities. If the package is not installed
-an informative error is raised.
-
 ## References
 
 Fisher, R. A. (1934). *Statistical methods for research workers* (5th
 ed.). Oliver & Boyd.
 
-Fog, A. (2008). Calculation methods for Wallenius' noncentral
-hypergeometric distribution. *Communications in Statistics – Simulation
-and Computation, 37*(2), 258–273.
-[doi:10.1080/03610910701790269](https://doi.org/10.1080/03610910701790269)
+Fisher, R. A. (1935). The logic of inductive inference. *Journal of the
+Royal Statistical Society, 98*(1), 39–82.
+
+Fog, A. (2008). Sampling methods for Wallenius' and Fisher's noncentral
+hypergeometric distributions. *Communications in Statistics – Simulation
+and Computation, 37*(2), 241–257.
+[doi:10.1080/03610910701790236](https://doi.org/10.1080/03610910701790236)
 
 Good, P. I. (2000). *Permutation tests: A practical guide to resampling
 methods for testing hypotheses* (2nd ed.). Springer.
@@ -99,16 +104,12 @@ O'Brien, R. G. (1998). A tour of UnifyPow: A SAS module/macro for sample
 size analysis. *Proceedings of the 23rd SAS Users Group International
 Conference*, 1346–1355.
 
-Wallenius, K. T. (1963). *Biased sampling: The noncentral hypergeometric
-probability distribution* (Doctoral dissertation). Stanford University.
-
 ## See also
 
 [`fisher.test`](https://rdrr.io/r/stats/fisher.test.html)
 
 Other sample size for power:
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
@@ -145,8 +146,10 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
-# 1. Power for n_1 = n_2 = 30, p_1 = 0.6, p_2 = 0.3:
+# 1. Power for n_1 = n_2 = 30 when the two population proportions are
+#    0.6 and 0.3. The value comes from enumerating the conditional
+#    reference set the test itself uses, not from a normal
+#    approximation, so it is the power of the test as conducted.
 power_fisher_exact(n_1 = 30, n_2 = 30, p_1 = 0.6, p_2 = 0.3)
 #>  term           value
 #>  power          0.561
@@ -158,7 +161,9 @@ power_fisher_exact(n_1 = 30, n_2 = 30, p_1 = 0.6, p_2 = 0.3)
 #>  n_2            30   
 #>  alpha_level    0.05 
 
-# 2. Power for smaller effect, larger samples:
+# 2. A difference of 0.10 between proportions is much harder to detect:
+#    100 per group is not close to enough. Sample size requirements grow
+#    quickly as the difference between the two proportions shrinks.
 power_fisher_exact(n_1 = 100, n_2 = 100, p_1 = 0.45, p_2 = 0.35)
 #>  term           value
 #>  power          0.258
@@ -169,5 +174,4 @@ power_fisher_exact(n_1 = 100, n_2 = 100, p_1 = 0.45, p_2 = 0.35)
 #>  n_1            100  
 #>  n_2            100  
 #>  alpha_level    0.05 
-# }
 ```

@@ -64,8 +64,8 @@ ed.). Routledge. (See Chapters 4, 7.)
 [`is_orthogonal_set`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md)
 
 Other design utilities:
-[`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md),
 [`design_consequences()`](https://yelleknek.github.io/DMAR/reference/design_consequences.md),
+[`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md),
 [`helmert_coding()`](https://yelleknek.github.io/DMAR/reference/helmert_coding.md),
 [`is_orthogonal_set()`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md),
 [`orthogonal_polynomial()`](https://yelleknek.github.io/DMAR/reference/orthogonal_polynomial.md)

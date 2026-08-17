@@ -176,8 +176,8 @@ Other agreement and measurement:
 [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
 [`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md),
 [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
+[`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
 [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-[`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md),
 [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
 
 ## Author

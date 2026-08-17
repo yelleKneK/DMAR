@@ -63,14 +63,18 @@ of size \\n\\, the method-of-moments estimators are \$\$\hat\sigma^2_b
 \hat\sigma^2_w \\=\\ \mathit{MS}\_w.\$\$
 
 **Modified-large-sample CIs (Burdick-Graybill 1992).** The MLS interval
-for \\\sigma^2_b\\ is \$\$\hat\sigma^2_b \pm \frac{1}{n} \sqrt{V_L},
-\qquad V_L \\=\\ G_1 \mathit{MS}\_b^2 + H_2 \mathit{MS}\_w^2 -
-\mathit{MS}\_b \mathit{MS}\_w / n,\$\$ where the constants \\G_1, H_2\\
-depend on the degrees of freedom and the \\\chi^2\\ quantiles at the
-chosen confidence level (see Burdick & Graybill 1992, equations
-2.4.1–2.4.5 for the explicit formulas). For the within-group component,
-the standard \\\chi^2\\-based CI on \\\mathit{MS}\_w\\ (Searle, Casella,
-& McCulloch, 1992) is used.
+for \\\sigma^2_b\\ is \$\$\left\[\frac{\mathit{MS}\_b - \mathit{MS}\_w -
+\sqrt{V_L}}{n},\\\\ \frac{\mathit{MS}\_b - \mathit{MS}\_w +
+\sqrt{V_U}}{n}\right\],\$\$ with \$\$V_L \\=\\ G_1^2 \mathit{MS}\_b^2 +
+H_2^2 \mathit{MS}\_w^2 + G\_{12} \mathit{MS}\_b \mathit{MS}\_w, \qquad
+V_U \\=\\ H_1^2 \mathit{MS}\_b^2 + G_2^2 \mathit{MS}\_w^2 + H\_{12}
+\mathit{MS}\_b \mathit{MS}\_w,\$\$ where the constants \\G_1\\, \\G_2\\,
+\\H_1\\, \\H_2\\ and the cross-term constants \\G\_{12}\\, \\H\_{12}\\
+depend on the degrees of freedom and on \\\chi^2\\ and *F* quantiles at
+the chosen confidence level (Burdick & Graybill, 1992, equations
+2.4.1–2.4.5 give the explicit formulas). The lower limit is truncated at
+zero. For the within-group component, the standard \\\chi^2\\-based CI
+on \\\mathit{MS}\_w\\ (Searle, Casella, & McCulloch, 1992) is used.
 
 **Caveats.** MLS intervals assume balanced data and homogeneous
 variances within groups. For unbalanced data the appropriate analog is
@@ -99,8 +103,8 @@ Other agreement and measurement:
 [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
 [`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md),
 [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
-[`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-[`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md)
+[`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
+[`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md)
 
 ## Author
 

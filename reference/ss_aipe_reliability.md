@@ -234,10 +234,9 @@ ss_aipe_reliability(model = "Parallel", type = "Normal Theory", width = .1,
 #> 
 #> Confidence level: 95%
 
-# \donttest{
 # The assurance cases run a Monte Carlo search; the iteration counts below are
 # reduced so the example runs quickly. Raise initial_iter and final_iter for a
-# production plan, and set.seed() for a reproducible search.
+# production plan.
 set.seed(113)
 
 # Same population, now targeting an assurance.
@@ -253,35 +252,38 @@ ss_aipe_reliability(model = "Parallel", type = "Normal Theory", width = .1,
 #> 
 #> Confidence level: 95%
 
-# True score (tau equivalent) model. Here psi_square is a vector of length i
-# (number of items), while cor_est stays a single value.
-ss_aipe_reliability(model = "True Score", type = "Normal Theory", width = .1,
-  i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3), conf_level = .95,
-  assurance = .85, initial_iter = 50, final_iter = 200)
-#>  term                value
-#>  necessary_N         113  
-#>  width               0.1  
-#>  specified_assurance 0.85 
-#>  empirical_assurance 0.85 
-#>  final_iter          200  
+# The true score (tau equivalent) model takes psi_square as a vector of
+# length i (number of items) while cor_est stays a single value. Its
+# assurance search is the slowest of the normal theory calls on this page,
+# and the S matrix example at the end already plans for the true score
+# model, so this one is shown rather than run:
+#   ss_aipe_reliability(model = "True Score", type = "Normal Theory",
+#     width = .1, i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3),
+#     conf_level = .95, assurance = .85, initial_iter = 50,
+#     final_iter = 200)
+
+# Congeneric model, planned from the item loadings and error variances rather
+# than from a single correlation. With assurance = NULL the necessary N comes
+# from the closed form expected width evaluated at the implied population
+# correlation matrix, so type does not enter the answer; type selects the
+# interval that the Monte Carlo assurance search evaluates.
+ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic", width = .15,
+  i = 4, lambda = c(.8, .7, .7, .8), psi_square = c(.4, .5, .5, .4),
+  conf_level = .95, assurance = NULL)
+#>  term        value
+#>  necessary_N 53   
 #> 
 #> Confidence level: 95%
 
-# Congeneric model with the factor analytic approach (coefficient omega).
-# Each Monte Carlo iteration fits a one factor model, so this is the slow case.
-ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic", width = .15,
-  i = 4, lambda = c(.8, .7, .7, .8), psi_square = c(.4, .5, .5, .4),
-  conf_level = .95, assurance = .80, initial_iter = 10, final_iter = 20)
-#> Warning: lavaan->lav_object_post_check():  
-#>    some estimated ov variances are negative
-#>  term                value
-#>  necessary_N         64   
-#>  width               0.15 
-#>  specified_assurance 0.8  
-#>  empirical_assurance 0.8  
-#>  final_iter          20   
-#> 
-#> Confidence level: 95%
+# Adding an assurance to that congeneric plan is the expensive case: with the
+# factor analytic interval a one factor model is fit at every Monte Carlo
+# iteration and at every candidate sample size the search visits, so it runs
+# for tens of seconds at the reduced counts used above and for many minutes at
+# the defaults. That is why it is not run here; the call is
+#   ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic",
+#     width = .15, i = 4, lambda = c(.8, .7, .7, .8),
+#     psi_square = c(.4, .5, .5, .4), conf_level = .95, assurance = .80,
+#     initial_iter = 50, final_iter = 200)
 
 # Planning from a presumed population correlation matrix among the items.
 pop_mat <- rbind(
@@ -294,12 +296,11 @@ ss_aipe_reliability(model = "True Score", type = "Normal Theory", width = .15,
   S = pop_mat, conf_level = .95, assurance = .85, initial_iter = 50,
   final_iter = 200)
 #>  term                value
-#>  necessary_N         119  
+#>  necessary_N         120  
 #>  width               0.15 
 #>  specified_assurance 0.85 
-#>  empirical_assurance 0.855
+#>  empirical_assurance 0.88 
 #>  final_iter          200  
 #> 
 #> Confidence level: 95%
-# }
 ```

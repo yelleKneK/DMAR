@@ -112,17 +112,24 @@ ss_power_reg_coef_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis. Rows include the planning sample size used
-(`total_N`), the empirical power (`empirical_power`), the analytic power
-computed from
-[`ss_power_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef.md)
-(`analytic_power`), and the mean / median / SD of the realized \\\hat
-b_j\\, the standard error of \\\hat b_j\\, the test statistic, and
-\\R^2\\. The result carries the `dmar_ss_power_sensitivity` class, so
+Carlo sensitivity analysis. The `term` entries are: `total_N` (the
+sample size evaluated), `empirical_power`, `analytic_power` (computed
+from
+[`ss_power_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef.md)),
+the mean / median / SD of the realized \\\hat b_j\\ (`mean_b_j`,
+`median_b_j`, `sd_b_j`), of its standard error (`mean_se_b_j`,
+`median_se_b_j`, `sd_se_b_j`), of the test statistic (`mean_t`,
+`median_t`, `sd_t`), and of the squared multiple correlation coefficient
+(`mean_R2`, `median_R2`, `sd_R2`), `t_crit` (the critical value), and
+the input echoes `p`, `which_predictor`, `true_b_j` and `estimated_b_j`
+(the population and planning values of the targeted coefficient implied
+by the supplied covariance structures), `desired_power` (NA when
+`specified_N` was supplied instead), and `alpha_level`. The result
+carries the `dmar_ss_power_sensitivity` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) reports the
 planned sample size beside the empirical and analytic power, and
 [`glance`](https://generics.r-lib.org/reference/glance.html) adds the
-simulated estimator distribution.
+simulated estimator distribution beside the echoed inputs.
 
 ## Details
 
@@ -172,7 +179,6 @@ confidence interval width.
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
@@ -208,7 +214,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Targeted coefficient power sensitivity with two predictors. The
 # default G = 1000 replications is used in practice; G is reduced here
 # so the example runs quickly.
@@ -233,10 +238,14 @@ ss_power_reg_coef_sensitivity(
 #>  mean_t          2.94  
 #>  median_t        3     
 #>  sd_t            1.02  
-#>  mean_r2         0.222 
-#>  median_r2       0.21  
-#>  sd_r2           0.0849
+#>  mean_R2         0.222 
+#>  median_R2       0.21  
+#>  sd_R2           0.0849
 #>  t_crit          2     
+#>  p               2     
+#>  which_predictor 1     
 #>  true_b_j        0.341 
-# }
+#>  estimated_b_j   0.341 
+#>  desired_power   0.8   
+#>  alpha_level     0.05  
 ```

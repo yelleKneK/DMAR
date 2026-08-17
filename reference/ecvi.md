@@ -104,8 +104,10 @@ ecvi(chisq = 24.361, df = 8, npar = 13, n = 301)
 #> 
 #> Confidence level: 95%
 
-fit <- lavaan::cfa("v =~ x1 + x2 + x3\nt =~ x4 + x5 + x6",
-                   data = lavaan::HolzingerSwineford1939, std.lv = TRUE)
+fit <- lavaan::cfa(
+  "visual =~ t1_visual_perception + t2_cubes + t4_lozenges
+   verbal =~ t6_paragraph_comprehension + t7_sentence + t9_word_meaning",
+  data = holzinger_swineford, std.lv = TRUE)
 ecvi(fit)
 #>  term        value
 #>  ecvi        0.167

@@ -607,306 +607,6 @@ cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE)
 #> 
 #> Confidence level: 95%
 
-# Descriptors can differ by factor.
-cfa_k(holzinger_swineford, hs_factors,
-      equal_loading = c(verbal = TRUE, deduction = FALSE))
-#> Measurement structure, per factor:
-#>   verbal: essentially tau-equivalent (equal loadings)
-#>   deduction: congeneric (no equality constraints)
-#> 
-#>  syntax                                                   term                 
-#>  verbal =~ t6_paragraph_comprehension                     lambda_verbal        
-#>  verbal =~ t7_sentence                                    lambda_verbal        
-#>  verbal =~ t9_word_meaning                                lambda_verbal        
-#>  verbal ~~ verbal                                         phi_verbal           
-#>  t6_paragraph_comprehension ~~ t6_paragraph_comprehension psi_verbal_1         
-#>  t7_sentence ~~ t7_sentence                               psi_verbal_2         
-#>  t9_word_meaning ~~ t9_word_meaning                       psi_verbal_3         
-#>  deduction =~ t20_deduction                               lambda_deduction_1   
-#>  deduction =~ t22_problem_reasoning                       lambda_deduction_2   
-#>  deduction =~ t23_series_completion                       lambda_deduction_3   
-#>  deduction ~~ deduction                                   phi_deduction        
-#>  t20_deduction ~~ t20_deduction                           psi_deduction_1      
-#>  t22_problem_reasoning ~~ t22_problem_reasoning           psi_deduction_2      
-#>  t23_series_completion ~~ t23_series_completion           psi_deduction_3      
-#>  verbal ~~ deduction                                      phi_verbal_deduction 
-#>                                                           loading_sum_verbal   
-#>                                                           error_sum_verbal     
-#>                                                           omega_verbal         
-#>                                                           ave_verbal           
-#>                                                           H_verbal             
-#>                                                           loading_sum_deduction
-#>                                                           error_sum_deduction  
-#>                                                           omega_deduction      
-#>                                                           ave_deduction        
-#>                                                           H_deduction          
-#>                                                           chi_square           
-#>                                                           df                   
-#>                                                           p_chi_square         
-#>                                                           cfi                  
-#>                                                           tli                  
-#>                                                           nnfi                 
-#>                                                           rmsea                
-#>                                                           rmsea_ci_lower       
-#>                                                           rmsea_ci_upper       
-#>                                                           rmsea_ci_level       
-#>                                                           srmr                 
-#>                                                           AIC                  
-#>                                                           BIC                  
-#>                                                           H0                   
-#>                                                           H1                   
-#>  estimate  se     z_value p_value  ci_lower ci_upper
-#>  3.46      0.163  21.2    < 0.0001 3.14     3.78    
-#>  3.46      0.163  21.2    < 0.0001 3.14     3.78    
-#>  3.46      0.163  21.2    < 0.0001 3.14     3.78    
-#>  1         0      <NA>    <NA>     1        1       
-#>  1.22      0.508  2.4     0.0163   0.225    2.21    
-#>  10.8      1.03   10.5    < 0.0001 8.82     12.8    
-#>  31.3      2.65   11.8    < 0.0001 26.1     36.5    
-#>  11.2      1.16   9.67    < 0.0001 8.91     13.4    
-#>  6.57      0.533  12.3    < 0.0001 5.53     7.61    
-#>  6.86      0.527  13      < 0.0001 5.82     7.89    
-#>  1         0      <NA>    <NA>     1        1       
-#>  248       23.7   10.5    < 0.0001 201      294     
-#>  41.1      4.93   8.34    < 0.0001 31.5     50.8    
-#>  36.2      4.86   7.46    < 0.0001 26.7     45.8    
-#>  0.667     0.047  14.2    < 0.0001 0.575    0.759   
-#>  10.4      0.489  21.2    < 0.0001 9.42     11.3    
-#>  43.4      2.8    15.5    < 0.0001 37.9     48.8    
-#>  0.713     0.0233 30.7    < 0.0001 0.667    0.758   
-#>  0.57      0.0231 24.7    < 0.0001 0.524    0.615   
-#>  0.919     0.0299 30.8    < 0.0001 0.86     0.977   
-#>  24.6      1.55   15.9    < 0.0001 21.6     27.6    
-#>  325       23.8   13.6    < 0.0001 278      372     
-#>  0.651     0.0355 18.3    < 0.0001 0.581    0.72    
-#>  0.471     0.0332 14.2    < 0.0001 0.406    0.536   
-#>  0.74      0.0274 27      < 0.0001 0.687    0.794   
-#>  134       <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  10        <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  < 0.0001  <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.846     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.769     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.769     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.203     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.173     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.234     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.9       <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.164     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  11871.888 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  11912.666 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -5924.944 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -5857.863 <NA>   <NA>    <NA>     <NA>     <NA>    
-#> 
-#> Confidence level: 95%
-
-# Equal loadings and intercepts (tau-equivalent), then also equal
-# error variances (parallel). The mean structure is added because
-# equal_intercept asks about it.
-cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
-      equal_intercept = TRUE)
-#> Measurement structure, per factor:
-#>   verbal: tau-equivalent (equal loadings and intercepts)
-#>   deduction: tau-equivalent (equal loadings and intercepts)
-#> 
-#>  syntax                                                   term                 
-#>  verbal =~ t6_paragraph_comprehension                     lambda_verbal        
-#>  verbal =~ t7_sentence                                    lambda_verbal        
-#>  verbal =~ t9_word_meaning                                lambda_verbal        
-#>  verbal ~~ verbal                                         phi_verbal           
-#>  t6_paragraph_comprehension ~~ t6_paragraph_comprehension psi_verbal_1         
-#>  t7_sentence ~~ t7_sentence                               psi_verbal_2         
-#>  t9_word_meaning ~~ t9_word_meaning                       psi_verbal_3         
-#>  t6_paragraph_comprehension ~1                            nu_verbal            
-#>  t7_sentence ~1                                           nu_verbal            
-#>  t9_word_meaning ~1                                       nu_verbal            
-#>  deduction =~ t20_deduction                               lambda_deduction     
-#>  deduction =~ t22_problem_reasoning                       lambda_deduction     
-#>  deduction =~ t23_series_completion                       lambda_deduction     
-#>  deduction ~~ deduction                                   phi_deduction        
-#>  t20_deduction ~~ t20_deduction                           psi_deduction_1      
-#>  t22_problem_reasoning ~~ t22_problem_reasoning           psi_deduction_2      
-#>  t23_series_completion ~~ t23_series_completion           psi_deduction_3      
-#>  t20_deduction ~1                                         nu_deduction         
-#>  t22_problem_reasoning ~1                                 nu_deduction         
-#>  t23_series_completion ~1                                 nu_deduction         
-#>  verbal ~~ deduction                                      phi_verbal_deduction 
-#>                                                           loading_sum_verbal   
-#>                                                           error_sum_verbal     
-#>                                                           omega_verbal         
-#>                                                           ave_verbal           
-#>                                                           H_verbal             
-#>                                                           loading_sum_deduction
-#>                                                           error_sum_deduction  
-#>                                                           omega_deduction      
-#>                                                           ave_deduction        
-#>                                                           H_deduction          
-#>                                                           chi_square           
-#>                                                           df                   
-#>                                                           p_chi_square         
-#>                                                           cfi                  
-#>                                                           tli                  
-#>                                                           nnfi                 
-#>                                                           rmsea                
-#>                                                           rmsea_ci_lower       
-#>                                                           rmsea_ci_upper       
-#>                                                           rmsea_ci_level       
-#>                                                           srmr                 
-#>                                                           AIC                  
-#>                                                           BIC                  
-#>                                                           H0                   
-#>                                                           H1                   
-#>  estimate  se     z_value p_value  ci_lower ci_upper
-#>  4.37      0.258  17      < 0.0001 3.86     4.87    
-#>  4.37      0.258  17      < 0.0001 3.86     4.87    
-#>  4.37      0.258  17      < 0.0001 3.86     4.87    
-#>  1         0      <NA>    <NA>     1        1       
-#>  49.6      4.44   11.2    < 0.0001 40.9     58.3    
-#>  13.9      1.75   7.94    < 0.0001 10.5     17.4    
-#>  25.5      2.54   10.1    < 0.0001 20.6     30.5    
-#>  15.5      0.298  52      < 0.0001 14.9     16.1    
-#>  15.5      0.298  52      < 0.0001 14.9     16.1    
-#>  15.5      0.298  52      < 0.0001 14.9     16.1    
-#>  6.39      0.473  13.5    < 0.0001 5.47     7.32    
-#>  6.39      0.473  13.5    < 0.0001 5.47     7.32    
-#>  6.39      0.473  13.5    < 0.0001 5.47     7.32    
-#>  1         0      <NA>    <NA>     1        1       
-#>  304       25.7   11.8    < 0.0001 253      354     
-#>  52.4      5.96   8.79    < 0.0001 40.7     64.1    
-#>  79.2      7.76   10.2    < 0.0001 64       94.4    
-#>  23.4      0.48   48.7    < 0.0001 22.4     24.3    
-#>  23.4      0.48   48.7    < 0.0001 22.4     24.3    
-#>  23.4      0.48   48.7    < 0.0001 22.4     24.3    
-#>  0.901     0.0577 15.6    < 0.0001 0.788    1.01    
-#>  13.1      0.773  17      < 0.0001 11.6     14.6    
-#>  89        5.33   16.7    < 0.0001 78.6     99.5    
-#>  0.659     0.0315 20.9    < 0.0001 0.597    0.72    
-#>  0.428     0.0333 12.8    < 0.0001 0.363    0.493   
-#>  0.715     0.0316 22.6    < 0.0001 0.653    0.777   
-#>  19.2      1.42   13.5    < 0.0001 16.4     22      
-#>  435       27.8   15.6    < 0.0001 381      490     
-#>  0.458     0.0423 10.8    < 0.0001 0.375    0.541   
-#>  0.299     0.0349 8.58    < 0.0001 0.231    0.368   
-#>  0.589     0.0454 13      < 0.0001 0.5      0.678   
-#>  1100      <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  16        <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  < 0.0001  <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0         <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -0.259    <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -0.259    <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.474     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.451     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.498     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.9       <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.989     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  12837.111 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  12877.889 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -6407.556 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -5857.863 <NA>   <NA>    <NA>     <NA>     <NA>    
-#> 
-#> Confidence level: 95%
-cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
-      equal_intercept = TRUE, equal_error = TRUE)
-#> Measurement structure, per factor:
-#>   verbal: parallel (equal loadings, intercepts, and error variances)
-#>   deduction: parallel (equal loadings, intercepts, and error variances)
-#> 
-#>  syntax                                                   term                 
-#>  verbal =~ t6_paragraph_comprehension                     lambda_verbal        
-#>  verbal =~ t7_sentence                                    lambda_verbal        
-#>  verbal =~ t9_word_meaning                                lambda_verbal        
-#>  verbal ~~ verbal                                         phi_verbal           
-#>  t6_paragraph_comprehension ~~ t6_paragraph_comprehension psi_verbal           
-#>  t7_sentence ~~ t7_sentence                               psi_verbal           
-#>  t9_word_meaning ~~ t9_word_meaning                       psi_verbal           
-#>  t6_paragraph_comprehension ~1                            nu_verbal            
-#>  t7_sentence ~1                                           nu_verbal            
-#>  t9_word_meaning ~1                                       nu_verbal            
-#>  deduction =~ t20_deduction                               lambda_deduction     
-#>  deduction =~ t22_problem_reasoning                       lambda_deduction     
-#>  deduction =~ t23_series_completion                       lambda_deduction     
-#>  deduction ~~ deduction                                   phi_deduction        
-#>  t20_deduction ~~ t20_deduction                           psi_deduction        
-#>  t22_problem_reasoning ~~ t22_problem_reasoning           psi_deduction        
-#>  t23_series_completion ~~ t23_series_completion           psi_deduction        
-#>  t20_deduction ~1                                         nu_deduction         
-#>  t22_problem_reasoning ~1                                 nu_deduction         
-#>  t23_series_completion ~1                                 nu_deduction         
-#>  verbal ~~ deduction                                      phi_verbal_deduction 
-#>                                                           loading_sum_verbal   
-#>                                                           error_sum_verbal     
-#>                                                           omega_verbal         
-#>                                                           ave_verbal           
-#>                                                           H_verbal             
-#>                                                           loading_sum_deduction
-#>                                                           error_sum_deduction  
-#>                                                           omega_deduction      
-#>                                                           ave_deduction        
-#>                                                           H_deduction          
-#>                                                           chi_square           
-#>                                                           df                   
-#>                                                           p_chi_square         
-#>                                                           cfi                  
-#>                                                           tli                  
-#>                                                           nnfi                 
-#>                                                           rmsea                
-#>                                                           rmsea_ci_lower       
-#>                                                           rmsea_ci_upper       
-#>                                                           rmsea_ci_level       
-#>                                                           srmr                 
-#>                                                           AIC                  
-#>                                                           BIC                  
-#>                                                           H0                   
-#>                                                           H1                   
-#>  estimate  se     z_value p_value  ci_lower ci_upper
-#>  3.75      0.274  13.7    < 0.0001 3.22     4.29    
-#>  3.75      0.274  13.7    < 0.0001 3.22     4.29    
-#>  3.75      0.274  13.7    < 0.0001 3.22     4.29    
-#>  1         0      <NA>    <NA>     1        1       
-#>  30.4      1.75   17.3    < 0.0001 27       33.8    
-#>  30.4      1.75   17.3    < 0.0001 27       33.8    
-#>  30.4      1.75   17.3    < 0.0001 27       33.8    
-#>  13.9      0.284  49.2    < 0.0001 13.4     14.5    
-#>  13.9      0.284  49.2    < 0.0001 13.4     14.5    
-#>  13.9      0.284  49.2    < 0.0001 13.4     14.5    
-#>  7.56      0.585  12.9    < 0.0001 6.41     8.7     
-#>  7.56      0.585  12.9    < 0.0001 6.41     8.7     
-#>  7.56      0.585  12.9    < 0.0001 6.41     8.7     
-#>  1         0      <NA>    <NA>     1        1       
-#>  139       8      17.3    < 0.0001 123      154     
-#>  139       8      17.3    < 0.0001 123      154     
-#>  139       8      17.3    < 0.0001 123      154     
-#>  23.8      0.586  40.5    < 0.0001 22.6     24.9    
-#>  23.8      0.586  40.5    < 0.0001 22.6     24.9    
-#>  23.8      0.586  40.5    < 0.0001 22.6     24.9    
-#>  0.979     0.0704 13.9    < 0.0001 0.841    1.12    
-#>  11.3      0.823  13.7    < 0.0001 9.65     12.9    
-#>  91.2      5.26   17.3    < 0.0001 80.9     102     
-#>  0.582     0.0418 13.9    < 0.0001 0.5      0.664   
-#>  0.317     0.0371 8.53    < 0.0001 0.244    0.39    
-#>  0.582     0.0418 13.9    < 0.0001 0.5      0.664   
-#>  22.7      1.75   12.9    < 0.0001 19.2     26.1    
-#>  416       24     17.3    < 0.0001 369      463     
-#>  0.553     0.0447 12.4    < 0.0001 0.465    0.64    
-#>  0.292     0.0373 7.81    < 0.0001 0.219    0.365   
-#>  0.553     0.0447 12.4    < 0.0001 0.465    0.64    
-#>  1340      <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  20        <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  < 0.0001  <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0         <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -0.228    <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -0.228    <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.468     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.447     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.49      <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.9       <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  0.743     <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  13070.624 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  13096.574 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -6528.312 <NA>   <NA>    <NA>     <NA>     <NA>    
-#>  -5857.863 <NA>   <NA>    <NA>     <NA>     <NA>    
-#> 
-#> Confidence level: 95%
-
 # Measurement properties: omega, ave, and H per factor (each with a
 # delta method standard error and confidence interval), the latent
 # correlations, and the htmt ratios.
@@ -936,65 +636,41 @@ cfa_k(holzinger_swineford, hs_factors, output = "measurement")
 #> 
 #> Confidence level: 95%
 
-# \donttest{
+# The rest of the descriptor menu is shown but not run here, since
+# each call refits the model. Descriptors can differ by factor:
+# cfa_k(holzinger_swineford, hs_factors,
+#       equal_loading = c(verbal = TRUE, deduction = FALSE))
+#
+# Equal loadings and intercepts (tau-equivalent), then also equal
+# error variances (parallel). The mean structure is added because
+# equal_intercept asks about it:
+# cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
+#       equal_intercept = TRUE)
+# cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
+#       equal_intercept = TRUE, equal_error = TRUE)
+#
 # Ordered-categorical items: the model is fit by WLSMV to polychoric
 # correlations, and each ordered factor's omega is reported on the
-# categorical sum score metric (Green & Yang, 2009).
-set.seed(113)
-eta <- rnorm(200)
-lat <- sweep(matrix(rep(eta, 6), 200, 6), 2,
-             seq(0.5, 0.8, length.out = 6), `*`) +
-  matrix(rnorm(200 * 6), 200, 6) %*%
-  diag(sqrt(1 - seq(0.5, 0.8, length.out = 6)^2))
-likert <- as.data.frame(apply(lat, 2, function(x)
-  as.integer(cut(x, breaks = c(-Inf, -1, 0, 1, Inf)))))
-names(likert) <- paste0("item_", 1:6)
-cfa_k(likert,
-      list(scale_a = paste0("item_", 1:3),
-           scale_b = paste0("item_", 4:6)),
-      ordered = TRUE, output = "measurement")
-#> Ordered items declared: switching to estimator = "WLSMV" with robust standard errors.
-#> Warning: lavaan->lav_object_post_check():  
-#>    covariance matrix of latent variables is not positive definite ; use 
-#>    lavInspect(fit, "cov.lv") to investigate.
-#> omega_scale_a, omega_scale_b reported on the categorical sum score metric (Green & Yang, 2009).
-#> Measurement structure, per factor:
-#>   scale_a: congeneric (no equality constraints)
-#>   scale_b: congeneric (no equality constraints)
-#> 
-#>  syntax             term                 estimate se     z_value p_value 
-#>  scale_a ~~ scale_b phi_scale_a_scale_b  1.07     0.0882 12.1    < 0.0001
-#>                     omega_scale_a        0.437    <NA>   <NA>    <NA>    
-#>                     ave_scale_a          0.235    0.0537 4.38    < 0.0001
-#>                     H_scale_a            0.482    0.0753 6.4     < 0.0001
-#>                     omega_scale_b        0.774    <NA>   <NA>    <NA>    
-#>                     ave_scale_b          0.601    0.0389 15.5    < 0.0001
-#>                     H_scale_b            0.827    0.0252 32.8    < 0.0001
-#>  scale_a ~~ scale_b htmt_scale_a_scale_b 1.06     <NA>   <NA>    <NA>    
-#>  ci_lower ci_upper
-#>  0.893    1.24    
-#>  <NA>     <NA>    
-#>  0.13     0.34    
-#>  0.335    0.63    
-#>  <NA>     <NA>    
-#>  0.525    0.677   
-#>  0.778    0.877   
-#>  <NA>     <NA>    
-#> 
-#> Confidence level: 95%
-
-# Does the equal-loadings description hold? Compare nested fits.
-fit_free  <- cfa_k(holzinger_swineford, hs_factors, output = "fit")
-fit_equal <- cfa_k(holzinger_swineford, hs_factors,
-                   equal_loading = TRUE, output = "fit")
-lavaan::lavTestLRT(fit_free, fit_equal)
-#> 
-#> Chi-Squared Difference Test
-#> 
-#>           Df   AIC   BIC   Chisq Chisq diff   RMSEA Df diff Pr(>Chisq)    
-#> fit_free   8 11756 11804  13.769                                          
-#> fit_equal 12 11883 11916 149.150     135.38 0.33033       4  < 2.2e-16 ***
-#> ---
-#> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# }
+# categorical sum score metric (Green & Yang, 2009):
+# set.seed(113)
+# eta <- rnorm(200)
+# lat <- sweep(matrix(rep(eta, 6), 200, 6), 2,
+#              seq(0.5, 0.8, length.out = 6), `*`) +
+#   matrix(rnorm(200 * 6), 200, 6) %*%
+#   diag(sqrt(1 - seq(0.5, 0.8, length.out = 6)^2))
+# likert <- as.data.frame(apply(lat, 2, function(x)
+#   as.integer(cut(x, breaks = c(-Inf, -1, 0, 1, Inf)))))
+# names(likert) <- paste0("item_", 1:6)
+# cfa_k(likert,
+#       list(scale_a = paste0("item_", 1:3),
+#            scale_b = paste0("item_", 4:6)),
+#       ordered = TRUE, output = "measurement")
+#
+# Does the equal-loadings description hold? Two fits that differ only
+# in a descriptor are nested, so output = "fit" hands them straight to
+# lavaan's likelihood ratio test:
+# fit_free  <- cfa_k(holzinger_swineford, hs_factors, output = "fit")
+# fit_equal <- cfa_k(holzinger_swineford, hs_factors,
+#                    equal_loading = TRUE, output = "fit")
+# lavaan::lavTestLRT(fit_free, fit_equal)
 ```

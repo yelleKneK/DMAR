@@ -34,7 +34,7 @@ fleiss_kappa(
 - ci_method:
 
   Interval method: `"wald"` (the default, the asymptotic interval from
-  the Gwet linearization variance), `"percentile"` (bootstrap
+  the Gwet (2008) linearization variance), `"percentile"` (bootstrap
   percentile), or `"bca"` (bootstrap bias-corrected and accelerated).
   The multirater kappa variance literature is unsettled, and Zapf,
   Castell, Morawietz, and Karch (2016) recommend bootstrap intervals in
@@ -78,18 +78,38 @@ kappa is \$\$\hat\kappa_F = \frac{\bar P - P_e}{1 - P_e}, \qquad \bar P
 **Standard error.** Two variances are involved, because the variance of
 \\\hat\kappa_F\\ under \\H_0\\: \kappa = 0\\ is not its variance at a
 nonzero value. The test of no agreement uses the null variance of
-Fleiss, Nee, and Landis (1979), \$\$\mathrm{Var}\_0(\hat\kappa_F) =
-\frac{2}{N\\m\\(m-1)\\(1-P_e)^2}\Bigl(P_e - (2m-3)\\P_e^2 + 2(m-2)\sum_j
-p_j^3\Bigr),\$\$ and the reported \\z\\ statistic and *p*-value come
-from it. The confidence interval instead uses the linearization variance
-of Gwet (2014, Ch. 6), which is consistent at the estimated
+Fleiss, Nee, and Landis (1979, Equation 12), who corrected the standard
+errors given in Fleiss (1971), \$\$\mathrm{Var}\_0(\hat\kappa_F) =
+\frac{2\\\bigl(P_e + P_e^2 - 2\sum_j
+p_j^3\bigr)}{N\\m\\(m-1)\\(1-P_e)^2},\$\$ and the reported \\z\\
+statistic and *p*-value come from it. On the Fleiss (1971) Table 1
+example below this gives \\z = 17.65\\, matching `irr::kappam.fleiss`.
+The confidence interval instead uses the linearization variance of Gwet
+(2008, Section 6), which is consistent at the estimated
 \\\hat\kappa_F\\: each subject \\i\\ contributes an influence value
-\\\kappa_i^\ast\\, and \\\mathrm{Var}(\hat\kappa_F) = \sum_i
-(\kappa_i^\ast - \hat\kappa_F)^2 / \\N(N-1)\\\\. The Wald confidence
-interval is \\\hat\kappa_F \pm z\_{1-\alpha/2}\\\widehat{\mathrm{SE}}\\,
-with the upper limit truncated at 1. Using the null variance for the
-interval would understate the standard error and give a spuriously
-narrow interval.
+\\\kappa_i^\ast\\ (Gwet's Equations 34 and 35), and
+\\\mathrm{Var}(\hat\kappa_F) = \sum_i (\kappa_i^\ast - \hat\kappa_F)^2 /
+\\N(N-1)\\\\, Gwet's Equation 33 with the sampling fraction set to zero.
+(Gwet derives the variance for the multiple-rater pi statistic, which is
+the same estimator as Fleiss's kappa.) The Wald confidence interval is
+\\\hat\kappa_F \pm z\_{1-\alpha/2}\\\widehat{\mathrm{SE}}\\, with the
+upper limit truncated at 1. Using the null variance for the interval
+would understate the standard error and give a spuriously narrow
+interval.
+
+**Bootstrap interval.** The variance of multirater kappa is unsettled in
+the literature, and Zapf, Castell, Morawietz, and Karch (2016) recommend
+a bootstrap interval in this setting. With `ci_method = "percentile"` or
+`"bca"` the subjects (the rows of `ratings`) are resampled with
+replacement `B` times, kappa is recomputed on each resample, and the
+interval is read off the bootstrap distribution: the percentile interval
+takes the empirical quantiles, and the BCa interval adjusts the quantile
+positions for median bias and for acceleration (Efron & Tibshirani,
+1993). Ask for it when \\N\\ is small or \\\hat\kappa_F\\ is near a
+boundary, where the Wald interval's coverage is least dependable. The
+`se`, `z_value`, and `p_value` columns keep their asymptotic definitions
+under every `ci_method`; only the interval changes. Bootstrap results
+vary from run to run; supply `seed` for reproducibility.
 
 Fleiss's kappa is purely nominal (no weighting). For ordinal categories
 with two raters, use
@@ -111,8 +131,10 @@ variance of kappa in the case of different sets of raters.
 Efron, B., & Tibshirani, R. J. (1993). *An introduction to the
 bootstrap*. New York, NY: Chapman & Hall/CRC.
 
-Gwet, K. L. (2014). *Handbook of inter-rater reliability* (4th ed.).
-Advanced Analytics, LLC.
+Gwet, K. L. (2008). Computing inter-rater reliability and its variance
+in the presence of high agreement. *British Journal of Mathematical and
+Statistical Psychology, 61*(1), 29–48.
+[doi:10.1348/000711006X126600](https://doi.org/10.1348/000711006X126600)
 
 Zapf, A., Castell, S., Morawietz, L., & Karch, A. (2016). Measuring
 inter-rater reliability for nominal data: Which coefficients and
@@ -182,20 +204,16 @@ fleiss_1971 <- matrix(c(
 ), nrow = 30, byrow = TRUE)
 fleiss_kappa(fleiss_1971)
 #>  kappa se     lower_limit upper_limit z_value p_value  n_subjects n_raters
-#>  0.43  0.0542 0.324       0.536       15.6    < 0.0001 30         6       
+#>  0.43  0.0542 0.324       0.536       17.7    < 0.0001 30         6       
 #>  n_categories
 #>  5           
 #> 
 #> Confidence level: 95%
 
-# A bootstrap interval: subjects (rows) are resampled with
-# replacement and kappa recomputed on each resample.
-fleiss_kappa(fleiss_1971, ci_method = "percentile", B = 2000,
-             seed = 113)
-#>  kappa se     lower_limit upper_limit z_value p_value  n_subjects n_raters
-#>  0.43  0.0542 0.316       0.532       15.6    < 0.0001 30         6       
-#>  n_categories
-#>  5           
-#> 
-#> Confidence level: 95%
+# A bootstrap interval, which resamples the subjects (rows) with
+# replacement and recomputes kappa on each resample. Not run here,
+# because 2000 refits of kappa is more than a help page should do;
+# the call is:
+# fleiss_kappa(fleiss_1971, ci_method = "percentile", B = 2000,
+#              seed = 113)
 ```

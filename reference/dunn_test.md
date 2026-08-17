@@ -75,9 +75,9 @@ result.
 
 **When to use it.** Use Dunn's test when the outcome is ordinal, or when
 it is continuous but the normality or homogeneity assumptions behind
-[`tukey_kramer_ci`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md)
+[`ci_tukey_kramer`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
 and
-[`games_howell_ci`](https://yelleknek.github.io/DMAR/reference/games_howell_ci.md)
+[`ci_games_howell`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md)
 are untenable and a rank-based analysis is preferred to a
 transformation; the design is between subjects; and a significant
 Kruskal–Wallis test leaves the question of which groups differ. It is
@@ -91,9 +91,9 @@ statement about medians unless the group distributions have the same
 shape. It also returns no confidence interval on any quantity in the
 original units, which is a real cost: where a parametric procedure is
 defensible,
-[`games_howell_ci`](https://yelleknek.github.io/DMAR/reference/games_howell_ci.md)
+[`ci_games_howell`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md)
 or
-[`tukey_kramer_ci`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md)
+[`ci_tukey_kramer`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
 reports intervals on the mean difference, and Maxwell, Delaney, and
 Kelley (2027) emphasize interval estimation over test decisions
 throughout. For a distribution free effect size with a confidence
@@ -124,9 +124,9 @@ ed.). Routledge.
 
 [`kruskal.test`](https://rdrr.io/r/stats/kruskal.test.html) for the
 omnibus test this follows,
-[`games_howell_ci`](https://yelleknek.github.io/DMAR/reference/games_howell_ci.md)
+[`ci_games_howell`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md)
 and
-[`tukey_kramer_ci`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md)
+[`ci_tukey_kramer`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
 for the parametric all-pairs procedures,
 [`cliff_delta`](https://yelleknek.github.io/DMAR/reference/cliff_delta.md)
 for a distribution free effect size with a confidence interval, and
@@ -140,26 +140,39 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# The omnibus question first: do the groups differ at all?
-kruskal.test(weight ~ group, data = PlantGrowth)
+# The omnibus question first: do the three treatment arms of the
+# drinks_trial data differ at all? The raw drinks_per_week outcome is
+# markedly right-skewed, which is no obstacle here: ranks are invariant
+# to a monotone transformation, so the raw and log scales give
+# identical results.
+kruskal.test(drinks_per_week ~ treatment, data = drinks_trial)
 #> 
 #>  Kruskal-Wallis rank sum test
 #> 
-#> data:  weight by group
-#> Kruskal-Wallis chi-squared = 7.9882, df = 2, p-value = 0.01842
+#> data:  drinks_per_week by treatment
+#> Kruskal-Wallis chi-squared = 7.2491, df = 2, p-value = 0.02666
 #> 
 
 # Then which pairs, on the same pooled ranking the omnibus test used.
-dunn_test(PlantGrowth$weight, PlantGrowth$group)
-#>  contrast    mean_rank_difference se   z_statistic p_value p_adjusted
-#>  trt1 - ctrl -4.4                 3.94 -1.12       0.2637  0.2637    
-#>  trt2 - ctrl 6.65                 3.94 1.69        0.0912  0.1823    
-#>  trt2 - trt1 11                   3.94 2.81        0.0050  0.0150    
+dunn_test(drinks_trial$drinks_per_week, drinks_trial$treatment)
+#>  contrast                    mean_rank_difference se   z_statistic p_value
+#>  CRA - Standard              -13                  5.99 -2.18       0.0294 
+#>  CRA + Disulfiram - Standard -16.2                7    -2.32       0.0205 
+#>  CRA + Disulfiram - CRA      -3.18                7.18 -0.442      0.6583 
+#>  p_adjusted
+#>  0.0615    
+#>  0.0615    
+#>  0.6583    
 
 # Without a multiplicity adjustment (rarely what you want).
-dunn_test(PlantGrowth$weight, PlantGrowth$group, method = "none")
-#>  contrast    mean_rank_difference se   z_statistic p_value p_adjusted
-#>  trt1 - ctrl -4.4                 3.94 -1.12       0.2637  0.2637    
-#>  trt2 - ctrl 6.65                 3.94 1.69        0.0912  0.0912    
-#>  trt2 - trt1 11                   3.94 2.81        0.0050  0.0050    
+dunn_test(drinks_trial$drinks_per_week, drinks_trial$treatment,
+          method = "none")
+#>  contrast                    mean_rank_difference se   z_statistic p_value
+#>  CRA - Standard              -13                  5.99 -2.18       0.0294 
+#>  CRA + Disulfiram - Standard -16.2                7    -2.32       0.0205 
+#>  CRA + Disulfiram - CRA      -3.18                7.18 -0.442      0.6583 
+#>  p_adjusted
+#>  0.0294    
+#>  0.0205    
+#>  0.6583    
 ```

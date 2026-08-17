@@ -118,12 +118,17 @@ components*. Wiley.
 [`lmer`](https://rdrr.io/pkg/lme4/man/lmer.html)
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -132,12 +137,8 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 Other mixed models:

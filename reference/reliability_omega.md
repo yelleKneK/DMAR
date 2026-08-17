@@ -103,8 +103,14 @@ reliability_omega(
 ## Value
 
 A `data.frame` with columns `term` and `value` and rows `"estimate"`
-(sample coefficient \\\omega\\), `"se"` (standard error from the chosen
-method, `NA` for closed-form transformation CIs), `"lower_limit"` and
+(sample coefficient \\\omega\\), `"se"` (standard error on the
+coefficient scale, `NA` for methods that do not produce one; for the
+transformation-based intervals `"fisher"`, `"bonett"`, and
+`"hakstian_whalen"` it is the delta method back-transform of the
+transformation-scale standard error), `"se_transformed"` (only for those
+transformation-based intervals: the standard error on the transformation
+scale, with the scale named in the attribute `se_transform_scale`:
+`"fisher_z"`, `"log(1-alpha)"`, or `"cube_root"`), `"lower_limit"` and
 `"upper_limit"` (clamped to \[0, 1\]), `"conf_level"`, `"N"` (the cases
 the analysis used: the complete cases under listwise deletion, every
 case with at least one observed item under `missing = "fiml"`),
@@ -327,16 +333,15 @@ errors rather than silent fallbacks to listwise deletion. Multiple
 imputation is a different feature with a different interface and is out
 of scope here.
 
-**Comparison with other packages.** The psych package provides
-[`omega`](https://rdrr.io/pkg/psych/man/omega.html), which fits a
-Schmid-Leiman hierarchical factor model and reports several variants of
-\\\omega\\ (\\\omega_t\\, \\\omega_h\\) alongside extensive psychometric
-diagnostics. `reliability_omega` in DMAR differs in emphasis: it
-implements McDonald's \\\omega\\ from a single-factor (congeneric) model
-and accompanies the point estimate with a confidence interval drawn from
-the methods compared in Kelley and Pornprasertmanit (2016). The same
-denominator distinction appears in semTools' `compRelSEM()` as its
-`obs.var` argument.
+**Comparison with other packages.** The psych package provides `omega`,
+which fits a Schmid-Leiman hierarchical factor model and reports several
+variants of \\\omega\\ (\\\omega_t\\, \\\omega_h\\) alongside extensive
+psychometric diagnostics. `reliability_omega` in DMAR differs in
+emphasis: it implements McDonald's \\\omega\\ from a single-factor
+(congeneric) model and accompanies the point estimate with a confidence
+interval drawn from the methods compared in Kelley and Pornprasertmanit
+(2016). The same denominator distinction appears in semTools'
+`compRelSEM()` as its `obs.var` argument.
 
 ## References
 
@@ -457,8 +462,7 @@ reliability. *Psychometrika, 70*, 123–133.
 (categorical omega for ordered items),
 [`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
 [`cfa_1`](https://yelleknek.github.io/DMAR/reference/cfa_1.md)
-(single-factor CFA used internally),
-[`omega`](https://rdrr.io/pkg/psych/man/omega.html).
+(single-factor CFA used internally), `omega`.
 
 Other reliability:
 [`cohen_kappa()`](https://yelleknek.github.io/DMAR/reference/cohen_kappa.md),
@@ -478,7 +482,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(113)
 J <- 6
 loadings <- seq(0.5, 0.8, length.out = J)
@@ -502,18 +505,16 @@ reliability_omega(data = items)
 #>  N_complete  200  
 #>  J           6    
 
-# Robust omega with the recommended bootstrap interval
-# (few replications for a quick example).
-reliability_omega(data = items, ci_method = "percentile", B = 200)
-#>  term        value 
-#>  estimate    0.821 
-#>  se          0.0204
-#>  lower_limit 0.773 
-#>  upper_limit 0.853 
-#>  conf_level  0.95  
-#>  N           200   
-#>  N_complete  200   
-#>  J           6     
+# The closed-form standard errors are derived under the model implied
+# ratio, so with the observed denominator the interval comes from a
+# bootstrap, which refits the single factor model once per
+# replication. That refitting is why it is not run here; the call is
+#   reliability_omega(data = items, ci_method = "percentile", B = 10000,
+#                     seed = 113)
+# with ci_method = "bca" as the alternative. The percentile interval is
+# what Kelley and Pornprasertmanit (2016) recommend for hierarchical
+# omega, and the default B = 10000 is an accuracy choice rather than a
+# formality: a reported interval deserves the full count (see Details).
 
 # Model implied denominator with its closed-form robust ML interval.
 reliability_omega(data = items, denominator = "model_implied")
@@ -527,34 +528,18 @@ reliability_omega(data = items, denominator = "model_implied")
 #>  N_complete  200   
 #>  J           6     
 
-# ML CI from a covariance matrix (model implied denominator).
-reliability_omega(S = cov(items), N = 200,
-                  denominator = "model_implied", ci_method = "ml")
-#>  term        value 
-#>  estimate    0.82  
-#>  se          0.0197
-#>  lower_limit 0.781 
-#>  upper_limit 0.858 
-#>  conf_level  0.95  
-#>  N           200   
-#>  N_complete  200   
-#>  J           6     
-
-# Full information maximum likelihood with an auxiliary variable:
-# missingness on y2 depends on an auxiliary z (missing at random
-# given z). Supplying aux implies missing = "fiml".
-z <- eta + rnorm(200, sd = 0.5)
-d <- data.frame(items, z = z)
-d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
-reliability_omega(data = d, aux = "z", denominator = "model_implied")
-#>  term        value 
-#>  estimate    0.819 
-#>  se          0.0202
-#>  lower_limit 0.779 
-#>  upper_limit 0.859 
-#>  conf_level  0.95  
-#>  N           200   
-#>  N_complete  124   
-#>  J           6     
-# }
+# Two further routes into the same coefficient are shown rather than
+# run, since each one fits the single factor model again. The first
+# works from the summary statistics a paper reports, a covariance
+# matrix and its sample size:
+#   reliability_omega(S = cov(items), N = 200,
+#                     denominator = "model_implied", ci_method = "ml")
+# The second is full information maximum likelihood with an auxiliary
+# variable, where missingness on y2 depends on an auxiliary z (missing
+# at random given z). Supplying aux implies missing = "fiml":
+#   z <- eta + rnorm(200, sd = 0.5)
+#   d <- data.frame(items, z = z)
+#   d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
+#   reliability_omega(data = d, aux = "z",
+#                     denominator = "model_implied")
 ```

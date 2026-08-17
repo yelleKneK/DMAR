@@ -8,13 +8,14 @@ exposed for any effect metric whose estimates are approximately normal
 with known variances. The random effects model is the default and the
 fit reports the full uncertainty picture in one table: the pooled
 estimate with its confidence interval, the between-study standard
-deviation tau and variance tau-squared *with Q-profile confidence
-intervals*, I-squared and H-squared *with intervals*, Cochran's Q test,
-and, always, a prediction interval for the effect in a new study.
-Reporting the prediction interval by default is deliberate: when
-heterogeneity is real, the confidence interval for the average effect
-understates what the next study will show, and the package treats “where
-will the next study land” as part of the answer, not an option.
+deviation tau, the between-study variance tau-squared with its Q-profile
+confidence interval, I-squared with an interval mapped from the
+tau-squared limits, H-squared, Cochran's Q test, and, always, a
+prediction interval for the effect in a new study. Reporting the
+prediction interval by default is deliberate: when heterogeneity is
+real, the confidence interval for the average effect understates what
+the next study will show, and the package treats “where will the next
+study land” as part of the answer, not an option.
 
 ## Usage
 
@@ -74,11 +75,11 @@ in the `"method"` and `"hartung_knapp"` attributes.
 The model is \\y_i = \mu + u_i + e_i\\ with \\u_i \sim N(0, \tau^2)\\
 and \\e_i \sim N(0, v_i)\\, \\v_i\\ treated as known. The \\\tau^2\\
 confidence interval inverts the generalized Q statistic (Viechtbauer,
-2007); the I-squared and H-squared intervals map the \\\tau^2\\ interval
-through the typical within-study variance of Higgins and Thompson
-(2002). The prediction interval follows Higgins, Thompson, and
-Spiegelhalter (2009), using *t* with \\k - 2\\ degrees of freedom, and
-requires at least three studies.
+2007); the I-squared interval maps the \\\tau^2\\ interval through the
+typical within-study variance of Higgins and Thompson (2002). The
+prediction interval follows Higgins, Thompson, and Spiegelhalter (2009),
+using *t* with \\k - 2\\ degrees of freedom, and requires at least three
+studies.
 
 I-squared is reported because readers expect it, but note its well-known
 limitation: it is a *proportion* of variability, not an amount, so the

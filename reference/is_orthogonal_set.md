@@ -63,11 +63,11 @@ ed.). Routledge. (See Sec. 4.10.)
 
 [`effects_coding`](https://yelleknek.github.io/DMAR/reference/effects_coding.md),
 [`helmert_coding`](https://yelleknek.github.io/DMAR/reference/helmert_coding.md),
-[`scheffe_ci`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md)
+[`ci_scheffe`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md)
 
 Other design utilities:
-[`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md),
 [`design_consequences()`](https://yelleknek.github.io/DMAR/reference/design_consequences.md),
+[`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md),
 [`effects_coding()`](https://yelleknek.github.io/DMAR/reference/effects_coding.md),
 [`helmert_coding()`](https://yelleknek.github.io/DMAR/reference/helmert_coding.md),
 [`orthogonal_polynomial()`](https://yelleknek.github.io/DMAR/reference/orthogonal_polynomial.md)

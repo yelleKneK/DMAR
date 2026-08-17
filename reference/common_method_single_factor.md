@@ -1,15 +1,15 @@
 # Single-Common-Factor Screen for Common Method Variance
 
 This function implements Harman's single-factor test, the most widely
-used (and weakest) screen for common method variance. Extract a single
-unrotated factor from all of the items and inspect how much of their
-variance it accounts for. The rationale is that if a single method
-factor dominated the responses, one unrotated factor would capture a
-large share of the common variance. A first factor accounting for more
-than half of the variance is the customary red flag (Podsakoff,
-MacKenzie, Lee, & Podsakoff, 2003). The screen is coarse and cannot by
-itself rule method variance in or out; the marker-variable and
-latent-method-factor approaches are stronger (see
+used (and weakest) screen for common method variance: fit a one-factor
+model to all of the items by maximum likelihood and inspect how much of
+their variance the common factor accounts for. The rationale is that if
+a single method factor dominated the responses, one common factor would
+capture a large share of the variance. A factor accounting for more than
+half of the variance is the customary red flag (Podsakoff, MacKenzie,
+Lee, & Podsakoff, 2003). The screen is coarse and cannot by itself rule
+method variance in or out; the marker-variable and latent method factor
+approaches are stronger (see
 [`common_method_marker`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md)).
 
 ## Usage
@@ -39,7 +39,8 @@ common_method_single_factor(data = NULL, S = NULL, R = NULL)
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with rows `variance_explained` (the
-first-factor proportion) and `n_items` in the `value` column.
+proportion of total variance the single common factor accounts for) and
+`n_items` in the `value` column.
 
 ## Details
 
@@ -55,14 +56,25 @@ marker, it asks only whether a single dimension dominates the item set,
 so it can flag a strong common factor but cannot identify whether that
 factor is method or substance.
 
-The statistic is the proportion of total variance explained by the first
-unrotated principal component, the largest eigenvalue of the item
-correlation matrix divided by the number of items. Correlations from raw
-data use pairwise-complete observations. A supplied covariance matrix is
-first standardized to a correlation matrix with
-[`cov2cor`](https://rdrr.io/r/stats/cor.html).
+The one-factor model is fit to the item correlation matrix by maximum
+likelihood with [`factanal`](https://rdrr.io/r/stats/factanal.html), and
+the statistic is the proportion of total variance the common factor
+accounts for: the sum of the squared standardized loadings divided by
+the number of items (equivalently, the mean communality). Much of the
+applied literature computes the screen from the largest eigenvalue of
+the correlation matrix, which describes the first principal component,
+not a factor; the test is implemented factor analytically here, in the
+psychometric tradition, because a principal component absorbs unique as
+well as common variance and so overstates the share a common factor
+accounts for. Correlations from raw data use pairwise-complete
+observations. A supplied covariance matrix is first standardized to a
+correlation matrix with [`cov2cor`](https://rdrr.io/r/stats/cor.html).
+The one-factor model requires at least three items.
 
 ## References
+
+Harman, H. H. (1976). *Modern factor analysis* (3rd ed.). University of
+Chicago Press.
 
 Lindell, M. K., & Whitney, D. J. (2001). Accounting for common method
 variance in cross-sectional research designs. *Journal of Applied
@@ -112,12 +124,12 @@ d <- data.frame(
   x4 = rnorm(200),     x5 = rnorm(200),     x6 = rnorm(200))
 common_method_single_factor(d)
 #>  term               value
-#>  variance_explained 0.327
+#>  variance_explained 0.239
 #>  n_items            6    
 
 # The same screen from the summary statistics a paper reports.
 common_method_single_factor(S = cov(d))
 #>  term               value
-#>  variance_explained 0.327
+#>  variance_explained 0.239
 #>  n_items            6    
 ```

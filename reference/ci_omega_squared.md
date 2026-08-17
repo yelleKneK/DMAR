@@ -84,10 +84,10 @@ factorial designs the same formula applied per effect yields *partial*
 omega squared (Olejnik & Algina, 2003); values below zero are truncated
 to zero.
 
-**Confidence interval.** The CI is constructed by Steiger's (2004, Eq.
-17) confidence interval transformation principle: a CI for the
-noncentrality parameter \\\lambda\\ of the *F* distribution is obtained
-(via
+**Confidence interval.** The CI is constructed by Steiger's (2004,
+Proposition 1) confidence interval transformation principle: a CI for
+the noncentrality parameter \\\lambda\\ of the *F* distribution is
+obtained (via
 [`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md))
 and then mapped through \$\$\omega^2\_{\text{bound}} =
 \frac{\lambda\_{\text{bound}}}{\lambda\_{\text{bound}} + N}.\$\$ When
@@ -99,7 +99,8 @@ one-way design, the interval produced here is identical to the CI for
 \\\eta^2\\ from
 [`ci_pvaf`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md); the
 two estimands coincide in the population and differ only in their
-*sample* estimators (Steiger, 2004).
+*sample* estimators (an implication of the confidence interval
+transformation principle of Steiger, 2004).
 
 **Sums of squares in factorial designs.** When a fitted model is
 supplied, the function reads the *F*-values from
@@ -156,14 +157,13 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
 [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -200,23 +200,26 @@ ci_omega_squared(
 #>  effect  omega_squared lower_limit upper_limit F_value df_effect df_error N 
 #>  overall 0.426         0.261       0.565       11.2    4         50       55
 
-# 2. One way ANOVA from a fitted model (PlantGrowth, 3 groups, N = 30).
-fit_one <- aov(weight ~ group, data = PlantGrowth)
+# 2. One way ANOVA from a fitted model: mean IQ gain differs across
+#        the six grades of the pygmalion data (N = 310).
+fit_one <- aov(iq_gain ~ factor(grade), data = pygmalion)
 ci_omega_squared(fit_one)
-#>  effect omega_squared lower_limit upper_limit F_value df_effect df_error N 
-#>  group  0.204         0.0099      0.464       4.85    2         27       30
+#>  effect        omega_squared lower_limit upper_limit F_value df_effect df_error
+#>  factor(grade) 0.104         0.0481      0.176       8.16    5         304     
+#>  N  
+#>  310
 
-# 3. Factorial ANOVA: partial omega squared per effect (balanced
-#        warpbreaks data: 2 wool types x 3 tensions, 9 per cell, N = 54).
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
-ci_omega_squared(fit_factorial)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
-#>  effect       omega_squared lower_limit upper_limit F_value df_effect df_error
-#>  wool         0.0487        0           0.222       3.77    1         48      
-#>  tension      0.217         0.0558      0.411       8.5     2         48      
-#>  wool:tension 0.106         0.00191     0.298       4.19    2         48      
-#>  N 
-#>  54
-#>  54
-#>  54
+# 3. Two-factor ANOVA: partial omega squared per effect for the
+#        manipulated expectancy treatment and the measured grade
+#        classification (pygmalion data, N = 310). The treatment by
+#        grade interaction is weak here (F = 1.19), so the additive
+#        model is used.
+fit_additive <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
+ci_omega_squared(fit_additive)
+#>  effect        omega_squared lower_limit upper_limit F_value df_effect df_error
+#>  treatment     0.0175        0.00102     0.0619      6.52    1         303     
+#>  factor(grade) 0.028         0.00113     0.082       2.79    5         303     
+#>  N  
+#>  310
+#>  310
 ```

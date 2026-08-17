@@ -131,7 +131,7 @@ after each batch.
 
 ## References
 
-Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, P. J.
+Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, J. J.
 (2025). A sequential approach for noninferiority or equivalence of a
 linear contrast under cost constraints. *Psychological Methods, 30*(2),
 425–439. [doi:10.1037/met0000570](https://doi.org/10.1037/met0000570)
@@ -155,7 +155,7 @@ and interval estimation. *The Annals of Statistics, 5*(5), 984–995.
 [`ss_seq_c_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_seq_c_sensitivity.md),
 [`ss_aipe_c`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c.md),
 [`ss_power_equivalence_c`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
-[`tost_c`](https://yelleknek.github.io/DMAR/reference/tost_c.md),
+[`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
 [`mr_smd`](https://yelleknek.github.io/DMAR/reference/mr_smd.md)
 
 Other sequential estimation:

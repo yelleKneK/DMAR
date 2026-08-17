@@ -131,18 +131,27 @@ d <- data.frame(
   a3 = .6 * f1 + rnorm(n, 0, .8),
   b1 = .8 * f2 + rnorm(n, 0, .6), b2 = .7 * f2 + rnorm(n, 0, .7),
   b3 = .6 * f2 + rnorm(n, 0, .8))
-htmt(d, blocks = list(A = c("a1", "a2", "a3"),
-                      B = c("b1", "b2", "b3")))
+h <- htmt(d, blocks = list(A = c("a1", "a2", "a3"),
+                           B = c("b1", "b2", "b3")))
+h
 #>  construct_1 construct_2 htmt 
 #>  A           B           0.269
 
 # The broom verbs: one row per construct pair.
-h <- htmt(d, blocks = list(A = c("a1", "a2", "a3"),
-                           B = c("b1", "b2", "b3")))
 generics::tidy(h)
 #>   term  estimate
 #> 1  A:B 0.2691979
 generics::glance(h)
 #>   n_terms conf_level B_used
 #> 1       1         NA     NA
+
+# The upper confidence bound, which is the quantity the validity
+# literature compares against 0.85 or 0.90, comes from a bootstrap
+# that recomputes every pairwise ratio on each of B resamples. It is
+# shown rather than run; the call is
+#   htmt(d, blocks = list(A = c("a1", "a2", "a3"),
+#                         B = c("b1", "b2", "b3")),
+#        B = 10000, seed = 113)
+# and a claim about discriminant validity deserves that bound rather
+# than the point estimate alone.
 ```

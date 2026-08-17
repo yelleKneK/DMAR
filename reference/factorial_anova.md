@@ -148,12 +148,17 @@ for the multivariate mixed design, and
 for the effect size intervals.
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
 [`mixed_anova()`](https://yelleknek.github.io/DMAR/reference/mixed_anova.md),
@@ -162,12 +167,8 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -177,24 +178,27 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# An unbalanced two-factor design: mpg by cylinders and transmission.
-# The cell sizes are unequal, so the Types differ.
-factorial_anova(mpg ~ factor(cyl) * factor(am), data = mtcars)
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
-#>  effect                 SS   df F_value p_value  eta_squared_partial
-#>  factor(cyl)            410  2  22.3    < 0.0001 0.632              
-#>  factor(am)             29.9 1  3.25    0.0831   0.111              
-#>  factor(cyl):factor(am) 25.4 2  1.38    0.2686   0.0962             
-#>  Residuals              239  26 <NA>    <NA>     <NA>               
+# An unbalanced two-factor design: IQ gain in the pygmalion expectancy
+# experiment, by treatment and by lower (grades 1 and 2) versus upper
+# (grades 3 through 6) grades, where the expectancy effect concentrated
+# in the lower grades. The cell sizes are unequal, so the Types differ.
+pyg <- pygmalion
+pyg$grade_band <- factor(ifelse(pyg$grade <= 2, "lower", "upper"))
+factorial_anova(iq_gain ~ treatment * grade_band, data = pyg)
+#>  effect               SS    df  F_value p_value eta_squared_partial
+#>  treatment            1510  1   8.24    0.0044  0.0262             
+#>  grade_band           1830  1   10      0.0017  0.0317             
+#>  treatment:grade_band 1120  1   6.11    0.0140  0.0196             
+#>  Residuals            55900 306 <NA>    <NA>    <NA>               
 #>  eta_squared_partial_lower eta_squared_partial_upper omega_squared_partial
-#>  0.319                     0.728                     0.571                
-#>  0                         0.312                     0.0656               
-#>  0                         0.271                     0.0234               
+#>  0.00257                   0.0703                    0.0228               
+#>  0.00453                   0.0785                    0.0283               
+#>  0.00071                   0.0598                    0.0162               
 #>  <NA>                      <NA>                      <NA>                 
 #>  omega_squared_partial_lower omega_squared_partial_upper
-#>  0.319                       0.728                      
-#>  0                           0.312                      
-#>  0                           0.271                      
+#>  0.00257                     0.0703                     
+#>  0.00453                     0.0785                     
+#>  0.00071                     0.0598                     
 #>  <NA>                        <NA>                       
 #> 
 #> Sum of squares: Type III
@@ -202,23 +206,25 @@ factorial_anova(mpg ~ factor(cyl) * factor(am), data = mtcars)
 #> Confidence level: 95%
 
 # The same design under Type II (adjusts each main effect for the other
-# main effect, but not for the interaction):
-factorial_anova(mpg ~ factor(cyl) * factor(am), data = mtcars, ss_type = 2)
+# main effect, but not for the interaction). Here the main effect F
+# statistics drop, and a warning reports that the affected noncentral F
+# lower limits are clamped to 0.
+factorial_anova(iq_gain ~ treatment * grade_band, data = pyg, ss_type = 2)
 #> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
-#>  effect                 SS   df F_value p_value  eta_squared_partial
-#>  factor(cyl)            456  2  24.8    < 0.0001 0.656              
-#>  factor(am)             36.8 1  4       0.0561   0.133              
-#>  factor(cyl):factor(am) 25.4 2  1.38    0.2686   0.0962             
-#>  Residuals              239  26 <NA>    <NA>     <NA>               
+#>  effect               SS    df  F_value p_value eta_squared_partial
+#>  treatment            798   1   4.37    0.0374  0.0141             
+#>  grade_band           790   1   4.33    0.0384  0.0139             
+#>  treatment:grade_band 1120  1   6.11    0.0140  0.0196             
+#>  Residuals            55900 306 <NA>    <NA>    <NA>               
 #>  eta_squared_partial_lower eta_squared_partial_upper omega_squared_partial
-#>  0.352                     0.746                     0.598                
-#>  0                         0.335                     0.0857               
-#>  0                         0.271                     0.0234               
+#>  0                         0.0504                    0.0108               
+#>  0                         0.0501                    0.0106               
+#>  0.00071                   0.0598                    0.0162               
 #>  <NA>                      <NA>                      <NA>                 
 #>  omega_squared_partial_lower omega_squared_partial_upper
-#>  0.352                       0.746                      
-#>  0                           0.335                      
-#>  0                           0.271                      
+#>  0                           0.0504                     
+#>  0                           0.0501                     
+#>  0.00071                     0.0598                     
 #>  <NA>                        <NA>                       
 #> 
 #> Sum of squares: Type II

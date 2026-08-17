@@ -91,10 +91,10 @@ An object of class `"correlations_test"` containing the matrices `r`,
 `p`, `ci_lower`, `ci_upper`, and `n` (all \\p \times p\\ with variable
 names as row/column names), plus the arguments used. When
 `format = "html"` or `format = "latex"` and `file` is `NULL`, a
-[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)/[`kableExtra`](https://rdrr.io/pkg/kableExtra/man/kableExtra-package.html)
-object is returned instead so that the table renders inside R Markdown /
-Quarto documents. When `format = "text"`, the table is printed to the
-console and the raw object is returned invisibly.
+[`kable`](https://rdrr.io/pkg/knitr/man/kable.html) object is returned
+instead so that the table renders inside R Markdown / Quarto documents.
+When `format = "text"`, the table is printed to the console and the raw
+object is returned invisibly.
 
 ## Details
 
@@ -116,7 +116,7 @@ Fisher-*z* scale is selected to match the sampling distribution of the
 chosen correlation coefficient:
 
 - Pearson (`method = "pearson"`): \\\mathrm{SE}(z) = 1/\sqrt{n - 3}\\.
-  This is the classical Fisher (1915, 1921) interval. Under bivariate
+  This is the classical Fisher (1921) interval. Under bivariate
   normality the coverage of this interval matches
   [`cor.test`](https://rdrr.io/r/stats/cor.test.html)'s `conf.int`
   exactly; for departures from bivariate normality both intervals lose
@@ -133,10 +133,13 @@ chosen correlation coefficient:
   correlations.
 
 - Kendall (`method = "kendall"`): \\\mathrm{SE}(z) = \sqrt{0.437 / (n -
-  4)}\\. This is Bonett and Wright's (2000) Fisher-*z* interval for
-  Kendall's \\\tau\\. The constant 0.437 is derived under bivariate
-  normality (Bonett & Wright, 2000, equation 4). Requires \\n \ge 5\\;
-  for smaller pairwise samples the interval is returned as `NA`.
+  4)}\\. This is Bonett and Wright's (2000, equation 2) Fisher-*z*
+  interval for Kendall's \\\tau\\. The constant 0.437 is the asymptotic
+  variance factor of Fieller, Hartley, and Pearson (1957), derived under
+  bivariate normality and stated by Bonett and Wright as accurate for
+  \\\|\tau\| \< .8\\ (the Spearman variance above is likewise stated as
+  accurate for \\\|\rho_s\| \< .95\\). Requires \\n \ge 5\\; for smaller
+  pairwise samples the interval is returned as `NA`.
 
 The Fisher-*z* machinery requires \\\|r\| \< 1\\ for the transformation
 to be finite. When \\r = \pm 1\\ (perfect correlation in the sample),
@@ -156,7 +159,8 @@ concordance-based meaning. See Maxwell, Delaney, & Kelley (2027, Chapter
 9) for an extended discussion of effect size choice and interval
 estimation.
 
-**HTML/LaTeX output.** Uses the kableExtra package (a `Suggests`
+**HTML/LaTeX output.** Built with
+[`knitr::kable`](https://rdrr.io/pkg/knitr/man/kable.html) (a `Suggests`
 dependency). Cell content and variable names are escaped for the target
 format so that “*p* \< .001” renders correctly and that variable names
 containing characters such as `_`, `&`, or `%` do not break LaTeX
@@ -175,6 +179,10 @@ Bonett, D. G., & Wright, T. A. (2000). Sample size requirements for
 estimating Pearson, Kendall and Spearman correlations. *Psychometrika,
 65*(1), 23–28.
 [doi:10.1007/BF02294183](https://doi.org/10.1007/BF02294183)
+
+Fieller, E. C., Hartley, H. O., & Pearson, E. S. (1957). Tests for rank
+correlation coefficients. I. *Biometrika, 44*(3/4), 470–481.
+[doi:10.1093/biomet/44.3-4.470](https://doi.org/10.1093/biomet/44.3-4.470)
 
 Fisher, R. A. (1915). Frequency distribution of the values of the
 correlation coefficient in samples from an indefinitely large
@@ -198,14 +206,19 @@ ed.). Routledge.
 [`descriptives`](https://yelleknek.github.io/DMAR/reference/descriptives.md),
 [`cor.test`](https://rdrr.io/r/stats/cor.test.html),
 [`cor`](https://rdrr.io/r/stats/cor.html),
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md)
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -215,12 +228,8 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -230,193 +239,137 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Worked example using the built-in 'attitude' data set (employee survey of
-# 30 departments on 7 ordinal rating items). The goal of correlations_test()
-# is to produce a formatted correlation matrix that reports, for every
-# variable pair, the correlation, its two-sided p-value, a confidence
-# interval on the population correlation, and the pairwise sample size. See
-# Kelley (2007) and Maxwell, Delaney, & Kelley (2027, Chapter 9) for
-# discussion of why effect sizes should be accompanied by confidence
-# intervals.
+# Worked example using four cognitive tests from the Holzinger and
+# Swineford (1939) study (301 children in two schools). The goal of
+# correlations_test() is to produce a formatted correlation matrix that
+# reports, for every variable pair, the correlation, its two-sided
+# p-value, a confidence interval on the population correlation, and the
+# pairwise sample size. See Kelley (2007) and Maxwell, Delaney, & Kelley
+# (2027, Chapter 9) for discussion of why effect sizes should be
+# accompanied by confidence intervals.
+hs_tests <- holzinger_swineford[, c("t1_visual_perception", "t2_cubes",
+                                    "t4_lozenges",
+                                    "t6_paragraph_comprehension")]
 
 # Pearson correlations (the default). Each lower-triangle cell stacks r,
-# the two-sided p-value, the 95\% confidence interval (Fisher's z
+# the two-sided p-value, the 95\% confidence interval (Fisher's Z
 # transformation; Fisher, 1915, 1921), and the pairwise N.
-correlations_test(attitude)
+correlations_test(hs_tests)
 #> Correlations (Pearson, 95% CI)
 #> 
-#>               rating        complaints    privileges    learning      raises        critical      advance       
-#> ----------------------------------------------------------------------------------------------------------------
-#> rating        -                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
+#>                             t1_visual_perception          t2_cubes                      t4_lozenges                   t6_paragraph_comprehension    
+#> ----------------------------------------------------------------------------------------------------------------------------------------------------
+#> t1_visual_perception        -                                                                                                                       
+#>                                                                                                                                                     
+#>                                                                                                                                                     
+#>                                                                                                                                                     
 #> 
-#> complaints    .83           -                                                                                   
-#>               p < .0001                                                                                         
-#>               [.66, .91]                                                                                        
-#>               N = 30                                                                                            
+#> t2_cubes                    .30                           -                                                                                         
+#>                             p < .0001                                                                                                               
+#>                             [.19, .40]                                                                                                              
+#>                             N = 301                                                                                                                 
 #> 
-#> privileges    .43           .56           -                                                                     
-#>               p = .0189     p = .0013                                                                           
-#>               [.08, .68]    [.25, .76]                                                                          
-#>               N = 30        N = 30                                                                              
+#> t4_lozenges                 .44                           .34                           -                                                           
+#>                             p < .0001                     p < .0001                                                                                 
+#>                             [.34, .53]                    [.24, .44]                                                                                
+#>                             N = 301                       N = 301                                                                                   
 #> 
-#> learning      .62           .60           .49           -                                                       
-#>               p = .0002     p = .0005     p = .0056                                                             
-#>               [.34, .80]    [.30, .79]    [.16, .72]                                                            
-#>               N = 30        N = 30        N = 30                                                                
-#> 
-#> raises        .59           .67           .45           .64           -                                         
-#>               p = .0006     p < .0001     p = .0136     p = .0001                                               
-#>               [.29, .78]    [.41, .83]    [.10, .69]    [.36, .81]                                              
-#>               N = 30        N = 30        N = 30        N = 30                                                  
-#> 
-#> critical      .16           .19           .15           .12           .38           -                           
-#>               p = .4091     p = .3205     p = .4375     p = .5417     p = .0401                                 
-#>               [-.22, .49]   [-.19, .51]   [-.22, .48]   [-.25, .46]   [.02, .65]                                
-#>               N = 30        N = 30        N = 30        N = 30        N = 30                                    
-#> 
-#> advance       .16           .22           .34           .53           .57           .28           -             
-#>               p = .4132     p = .2328     p = .0633     p = .0025     p = .0009     p = .1292                   
-#>               [-.22, .49]   [-.15, .54]   [-.02, .63]   [.21, .75]    [.27, .77]    [-.09, .58]                 
-#>               N = 30        N = 30        N = 30        N = 30        N = 30        N = 30                      
+#> t6_paragraph_comprehension  .37                           .15                           .16                           -                             
+#>                             p < .0001                     p = .0079                     p = .0058                                                   
+#>                             [.27, .47]                    [.04, .26]                    [.05, .27]                                                  
+#>                             N = 301                       N = 301                       N = 301                                                     
 #> 
 
 # Add significance stars and an explanatory footnote.
-correlations_test(attitude, stars = TRUE)
+correlations_test(hs_tests, stars = TRUE)
 #> Correlations (Pearson, 95% CI)
 #> 
-#>               rating        complaints    privileges    learning      raises        critical      advance       
-#> ----------------------------------------------------------------------------------------------------------------
-#> rating        -                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
+#>                             t1_visual_perception          t2_cubes                      t4_lozenges                   t6_paragraph_comprehension    
+#> ----------------------------------------------------------------------------------------------------------------------------------------------------
+#> t1_visual_perception        -                                                                                                                       
+#>                                                                                                                                                     
+#>                                                                                                                                                     
+#>                                                                                                                                                     
 #> 
-#> complaints    .83***        -                                                                                   
-#>               p < .0001                                                                                         
-#>               [.66, .91]                                                                                        
-#>               N = 30                                                                                            
+#> t2_cubes                    .30***                        -                                                                                         
+#>                             p < .0001                                                                                                               
+#>                             [.19, .40]                                                                                                              
+#>                             N = 301                                                                                                                 
 #> 
-#> privileges    .43*          .56**         -                                                                     
-#>               p = .0189     p = .0013                                                                           
-#>               [.08, .68]    [.25, .76]                                                                          
-#>               N = 30        N = 30                                                                              
+#> t4_lozenges                 .44***                        .34***                        -                                                           
+#>                             p < .0001                     p < .0001                                                                                 
+#>                             [.34, .53]                    [.24, .44]                                                                                
+#>                             N = 301                       N = 301                                                                                   
 #> 
-#> learning      .62***        .60***        .49**         -                                                       
-#>               p = .0002     p = .0005     p = .0056                                                             
-#>               [.34, .80]    [.30, .79]    [.16, .72]                                                            
-#>               N = 30        N = 30        N = 30                                                                
-#> 
-#> raises        .59***        .67***        .45*          .64***        -                                         
-#>               p = .0006     p < .0001     p = .0136     p = .0001                                               
-#>               [.29, .78]    [.41, .83]    [.10, .69]    [.36, .81]                                              
-#>               N = 30        N = 30        N = 30        N = 30                                                  
-#> 
-#> critical      .16           .19           .15           .12           .38*          -                           
-#>               p = .4091     p = .3205     p = .4375     p = .5417     p = .0401                                 
-#>               [-.22, .49]   [-.19, .51]   [-.22, .48]   [-.25, .46]   [.02, .65]                                
-#>               N = 30        N = 30        N = 30        N = 30        N = 30                                    
-#> 
-#> advance       .16           .22           .34           .53**         .57***        .28           -             
-#>               p = .4132     p = .2328     p = .0633     p = .0025     p = .0009     p = .1292                   
-#>               [-.22, .49]   [-.15, .54]   [-.02, .63]   [.21, .75]    [.27, .77]    [-.09, .58]                 
-#>               N = 30        N = 30        N = 30        N = 30        N = 30        N = 30                      
+#> t6_paragraph_comprehension  .37***                        .15**                         .16**                         -                             
+#>                             p < .0001                     p = .0079                     p = .0058                                                   
+#>                             [.27, .47]                    [.04, .26]                    [.05, .27]                                                  
+#>                             N = 301                       N = 301                       N = 301                                                     
 #> 
 #> Note. * p < .05, ** p < .01, *** p < .001.
 
 # Spearman correlations at a 99\% confidence level. The interval uses
-# Bonett and Wright's (2000) Fisher-z standard error
+# Bonett and Wright's (2000) Fisher's Z standard error
 # sqrt((1 + r^2/2) / (n - 3)), which corrects the plain Fisher interval
 # for the heavier tails of Spearman's sampling distribution.
-correlations_test(attitude, method = "spearman", conf_level = 0.99)
+correlations_test(hs_tests, method = "spearman", conf_level = 0.99)
 #> Correlations (Spearman, 99% CI)
 #> 
-#>               rating        complaints    privileges    learning      raises        critical      advance       
-#> ----------------------------------------------------------------------------------------------------------------
-#> rating        -                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
+#>                             t1_visual_perception          t2_cubes                      t4_lozenges                   t6_paragraph_comprehension    
+#> ----------------------------------------------------------------------------------------------------------------------------------------------------
+#> t1_visual_perception        -                                                                                                                       
+#>                                                                                                                                                     
+#>                                                                                                                                                     
+#>                                                                                                                                                     
 #> 
-#> complaints    .83           -                                                                                   
-#>               p < .0001                                                                                         
-#>               [.55, .94]                                                                                        
-#>               N = 30                                                                                            
+#> t2_cubes                    .28                           -                                                                                         
+#>                             p < .0001                                                                                                               
+#>                             [.14, .42]                                                                                                              
+#>                             N = 301                                                                                                                 
 #> 
-#> privileges    .48           .53           -                                                                     
-#>               p = .0067     p = .0029                                                                           
-#>               [.00, .78]    [.05, .80]                                                                          
-#>               N = 30        N = 30                                                                              
+#> t4_lozenges                 .44                           .32                           -                                                           
+#>                             p < .0001                     p < .0001                                                                                 
+#>                             [.31, .56]                    [.18, .45]                                                                                
+#>                             N = 301                       N = 301                                                                                   
 #> 
-#> learning      .62           .58           .51           -                                                       
-#>               p = .0003     p = .0008     p = .0041                                                             
-#>               [.18, .85]    [.13, .83]    [.03, .80]                                                            
-#>               N = 30        N = 30        N = 30                                                                
-#> 
-#> raises        .60           .65           .46           .62           -                                         
-#>               p = .0005     p = .0001     p = .0115     p = .0002                                               
-#>               [.15, .84]    [.22, .87]    [-.03, .77]   [.18, .85]                                              
-#>               N = 30        N = 30        N = 30        N = 30                                                  
-#> 
-#> critical      .05           .11           .11           .13           .29           -                           
-#>               p = .8003     p = .5541     p = .5473     p = .4970     p = .1245                                 
-#>               [-.42, .50]   [-.37, .54]   [-.36, .55]   [-.35, .56]   [-.21, .66]                               
-#>               N = 30        N = 30        N = 30        N = 30        N = 30                                    
-#> 
-#> advance       .20           .22           .34           .54           .49           .26           -             
-#>               p = .2821     p = .2338     p = .0680     p = .0021     p = .0061     p = .1736                   
-#>               [-.29, .61]   [-.27, .62]   [-.16, .70]   [.07, .81]    [.01, .79]    [-.24, .64]                 
-#>               N = 30        N = 30        N = 30        N = 30        N = 30        N = 30                      
+#> t6_paragraph_comprehension  .38                           .19                           .15                           -                             
+#>                             p < .0001                     p = .0007                     p = .0105                                                   
+#>                             [.24, .50]                    [.05, .33]                    [-.00, .29]                                                 
+#>                             N = 301                       N = 301                       N = 301                                                     
 #> 
 
-# Kendall's tau, also using Bonett and Wright's (2000) Fisher-z standard
+# Kendall's tau, also using Bonett and Wright's (2000) Fisher's Z standard
 # error sqrt(0.437 / (n - 4)). Kendall is often preferred over Spearman
-# for small samples and for samples with many tied ranks.
-correlations_test(attitude, method = "kendall")
+# for small samples and for samples with many tied ranks, and these
+# integer test scores carry many ties.
+correlations_test(hs_tests, method = "kendall")
 #> Correlations (Kendall, 95% CI)
 #> 
-#>               rating        complaints    privileges    learning      raises        critical      advance       
-#> ----------------------------------------------------------------------------------------------------------------
-#> rating        -                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
+#>                             t1_visual_perception          t2_cubes                      t4_lozenges                   t6_paragraph_comprehension    
+#> ----------------------------------------------------------------------------------------------------------------------------------------------------
+#> t1_visual_perception        -                                                                                                                       
+#>                                                                                                                                                     
+#>                                                                                                                                                     
+#>                                                                                                                                                     
 #> 
-#> complaints    .65           -                                                                                   
-#>               p < .0001                                                                                         
-#>               [.49, .78]                                                                                        
-#>               N = 30                                                                                            
+#> t2_cubes                    .21                           -                                                                                         
+#>                             p < .0001                                                                                                               
+#>                             [.13, .28]                                                                                                              
+#>                             N = 301                                                                                                                 
 #> 
-#> privileges    .36           .39           -                                                                     
-#>               p = .0066     p = .0032                                                                           
-#>               [.12, .56]    [.15, .58]                                                                          
-#>               N = 30        N = 30                                                                              
+#> t4_lozenges                 .32                           .23                           -                                                           
+#>                             p < .0001                     p < .0001                                                                                 
+#>                             [.25, .38]                    [.15, .30]                                                                                
+#>                             N = 301                       N = 301                                                                                   
 #> 
-#> learning      .45           .45           .36           -                                                       
-#>               p = .0006     p = .0006     p = .0066                                                             
-#>               [.23, .63]    [.23, .63]    [.12, .55]                                                            
-#>               N = 30        N = 30        N = 30                                                                
-#> 
-#> raises        .44           .49           .34           .51           -                                         
-#>               p = .0007     p = .0002     p = .0105     p < .0001                                               
-#>               [.22, .62]    [.27, .66]    [.09, .54]    [.30, .67]                                              
-#>               N = 30        N = 30        N = 30        N = 30                                                  
-#> 
-#> critical      .03           .08           .09           .08           .20           -                           
-#>               p = .8158     p = .5545     p = .5075     p = .5190     p = .1277                                 
-#>               [-.22, .28]   [-.17, .32]   [-.17, .33]   [-.17, .33]   [-.05, .43]                               
-#>               N = 30        N = 30        N = 30        N = 30        N = 30                                    
-#> 
-#> advance       .13           .17           .27           .39           .39           .18           -             
-#>               p = .3158     p = .1911     p = .0377     p = .0029     p = .0028     p = .1727                   
-#>               [-.12, .37]   [-.08, .40]   [.03, .49]    [.16, .58]    [.16, .59]    [-.07, .41]                 
-#>               N = 30        N = 30        N = 30        N = 30        N = 30        N = 30                      
+#> t6_paragraph_comprehension  .28                           .14                           .10                           -                             
+#>                             p < .0001                     p = .0007                     p = .0104                                                   
+#>                             [.21, .34]                    [.07, .21]                    [.03, .18]                                                  
+#>                             N = 301                       N = 301                       N = 301                                                     
 #> 
 
 # Save a formatted HTML table that opens directly in a browser
 # (then copy into Word). No pandoc required.
 tmp_html <- tempfile(fileext = ".html")
-correlations_test(attitude, stars = TRUE, format = "html", file = tmp_html)
+correlations_test(hs_tests, stars = TRUE, format = "html", file = tmp_html)
 ```

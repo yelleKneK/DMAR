@@ -187,11 +187,15 @@ m <- 0.5 * x + rnorm(n, 0, sqrt(1 - 0.25))
 y <- 0.2 * x + 0.4 * m + rnorm(n, 0, 0.8)
 d <- data.frame(x = x, m = m, y = y)
 
-mediate(d, x = "x", m = "m", y = "y", B = 500, seed = 113)
+# The Sobel interval is closed form, so it is the call that runs here.
+# It assumes the product ab is normally distributed, which is why it is
+# reported for comparison rather than used for inference. The B row of
+# the result is NA because no replications are drawn.
+mediate(d, x = "x", m = "m", y = "y", ci_method = "sobel")
 #>  term                value 
 #>  indirect_effect     0.182 
-#>  indirect_lower      0.117 
-#>  indirect_upper      0.25  
+#>  indirect_lower      0.105 
+#>  indirect_upper      0.259 
 #>  direct_effect       0.194 
 #>  direct_lower        0.0634
 #>  direct_upper        0.324 
@@ -205,31 +209,17 @@ mediate(d, x = "x", m = "m", y = "y", B = 500, seed = 113)
 #>  se_indirect         0.0393
 #>  proportion_mediated 0.484 
 #>  N                   200   
-#>  B                   500   
+#>  B                   <NA>  
 #> 
 #> Confidence level: 95%
 
-# The Monte Carlo interval needs no refitting and is fast for large B.
-mediate(d, x = "x", m = "m", y = "y", ci_method = "monte_carlo",
-        B = 10000, seed = 113)
-#>  term                value 
-#>  indirect_effect     0.182 
-#>  indirect_lower      0.109 
-#>  indirect_upper      0.266 
-#>  direct_effect       0.194 
-#>  direct_lower        0.0634
-#>  direct_upper        0.324 
-#>  total_effect        0.375 
-#>  total_lower         0.25  
-#>  total_upper         0.501 
-#>  a                   0.449 
-#>  b                   0.404 
-#>  se_a                0.0615
-#>  se_b                0.0678
-#>  se_indirect         0.0393
-#>  proportion_mediated 0.484 
-#>  N                   200   
-#>  B                   10000 
-#> 
-#> Confidence level: 95%
+# The percentile bootstrap is the default and is what a reported
+# analysis would use. It is not run here because it refits both
+# regressions in each of the B resamples; the call is:
+# mediate(d, x = "x", m = "m", y = "y", seed = 113)
+
+# The Monte Carlo interval needs no refitting, so it stays quick even
+# for a large B, but it still draws B replications. Also not run here:
+# mediate(d, x = "x", m = "m", y = "y", ci_method = "monte_carlo",
+#         B = 10000, seed = 113)
 ```

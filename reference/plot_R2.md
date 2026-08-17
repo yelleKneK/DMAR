@@ -97,7 +97,7 @@ size.)
 ## See also
 
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
+[`ci_R`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`plot_ci`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_smd`](https://yelleknek.github.io/DMAR/reference/plot_smd.md)
 
@@ -105,8 +105,10 @@ Other plotting:
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -120,18 +122,16 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Basic call.
 plot_R2(R2 = 0.25, N = 100, p = 5)
 
 
-# With fixed predictors and a 90% CI.
-plot_R2(R2 = 0.35, N = 200, p = 3, conf_level = 0.90,
-        random_predictors = FALSE)
+# The variations below are not run, since the call above already shows
+# the default display and each additional figure has to be drawn. With
+# fixed predictors and a 90% confidence interval:
+# plot_R2(R2 = 0.35, N = 200, p = 3, conf_level = 0.90,
+#         random_predictors = FALSE)
 
-
-# Without annotations.
-plot_R2(R2 = 0.10, show_ci = FALSE, show_n = FALSE)
-
-# }
+# Without the annotations:
+# plot_R2(R2 = 0.10, show_ci = FALSE, show_n = FALSE)
 ```

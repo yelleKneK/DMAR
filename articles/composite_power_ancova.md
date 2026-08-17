@@ -1,5 +1,26 @@
 # Composite Power for Factorial ANCOVA: Planning Simple Effects, an Interaction, and a Moderator
 
+> **The simulations below run 25 replications, and their answers are
+> wrong.** Twenty five replications keep the document knitting in under
+> a second, but a proportion estimated from that many carries a
+> simulation standard error of about 0.10, so the printed values scatter
+> by a tenth or more around the quantity they estimate. They are shown
+> to demonstrate the method, not to be read.
+>
+> So that a reader can see both the method and the answer, every
+> simulated quantity is reported beside the same quantity computed from
+> **10,000 replications**, which is the column to read. Those reference
+> values were produced by `tools/composite_power_reference.R`, which
+> runs the identical code at `reps = 10000`; the script is in the
+> maintained repository and is not shipped with the package. **Raise
+> `reps` to 10,000 or more before using any of this to plan a study.**
+>
+> The closed form results elsewhere in the vignette, which come from
+> [`ss_power_contrast()`](https://yelleknek.github.io/DMAR/reference/ss_power_contrast.md)
+> and its siblings, are exact and carry no simulation error. The
+> comparison between the two is part of the point: where a closed form
+> exists, use it.
+
 This vignette is a worked tutorial on planning statistical power for a
 factorial design in which more than one effect matters. It is organized
 around a single running example, a 2 × 2 experiment, and it does three
@@ -415,7 +436,7 @@ ggplot(den, aes(t)) +
        x = "t statistic", y = "Density")
 ```
 
-![](composite_power_ancova_files/figure-html/noncentral%20figure-1.png)
+![](composite_power_ancova_files/figure-html/noncentral-figure-1.png)
 
 ### The Shared Design
 
@@ -508,9 +529,34 @@ by **Monte Carlo** simulation: generate many datasets from the assumed
 population, apply all three tests to each, and record the proportion of
 datasets in which all three reject.
 
+The `reps` argument is the number of replications. It is set to 25 here
+so the document knits quickly, and the answers at that setting are
+correspondingly poor; the reference column added below each result is
+the same computation at `reps = 10000`.
+
 ``` r
 
-composite_power <- function(n, mu, sigma2, reps = 4000, alpha = 0.05, seed = 113) {
+# Computed by tools/composite_power_reference.R, which runs the code in this
+# vignette at reps = 10000. Kept as literals because a 10,000-replication
+# sweep is far too slow to run while the document is being knitted.
+ref <- list(
+  marginal   = c(1.0000, 0.8056, 0.9070),
+  composite  = 0.7126,
+  product    = 0.7307,
+  n_seq      = seq(20, 40, by = 2),
+  comp_seq   = c(0.4837, 0.5695, 0.6251, 0.6909, 0.7310, 0.7734,
+                 0.8142, 0.8454, 0.8730, 0.8920, 0.9098),
+  n_comp80   = 32,
+  threeway   = c(three_way = 0.7909, two_way = 1.0000),
+  N_try      = c(395, 420, 440, 460),
+  tw_by_N    = c(0.7909, 0.8161, 0.8298, 0.8479),
+  N_mc80     = 420
+)
+```
+
+``` r
+
+composite_power <- function(n, mu, sigma2, reps = 25, alpha = 0.05, seed = 113) {
   set.seed(seed)
   a <- length(mu); N <- a * n; df <- N - a
   tcrit <- qt(1 - alpha / 2, df)
@@ -531,18 +577,29 @@ composite_power <- function(n, mu, sigma2, reps = 4000, alpha = 0.05, seed = 113
 }
 
 mc <- composite_power(n_design, mu, sigma2)
-round(c(smallest_marginal = min(mc$marginal),
-        product_if_independent = mc$product,
-        composite = mc$composite), 3)
-#>      smallest_marginal product_if_independent              composite 
-#>                  0.801                  0.730                  0.712
+
+data.frame(
+  row.names = c("smallest_marginal", "product_if_independent", "composite"),
+  `reps = 25`    = round(c(min(mc$marginal), mc$product, mc$composite), 3),
+  `reps = 10000` = round(c(min(ref$marginal), ref$product, ref$composite), 3),
+  check.names = FALSE)
+#>                        reps = 25 reps = 10000
+#> smallest_marginal          0.840        0.806
+#> product_if_independent     0.806        0.731
+#> composite                  0.800        0.713
 ```
 
-At the sample size chosen for $`.80`$ marginal power, composite power is
-approximately 0.71. The simulated marginal powers reproduce the analytic
-values, which confirms the simulation is behaving correctly. The product
-of the marginals, 0.73, is close to the composite but not equal to it,
-since independence does not hold.
+Read the right-hand column. At the sample size chosen for $`.80`$
+marginal power, composite power is 0.71: the design that gives each
+effect an $`80\%`$ chance of being detected gives the whole predicted
+pattern only about a 71% chance. The product of the marginals, 0.73, is
+close to the composite but not equal to it, since independence does not
+hold.
+
+The left-hand column is the same quantity from 25 replications. It is
+off by 0.09 on the composite, which is about what a simulation standard
+error of 0.09 predicts, and it is the reason the reference column
+exists.
 
 ``` r
 
@@ -578,48 +635,58 @@ increase until the simulation reaches that value.
 
 ``` r
 
-n_seq    <- seq(20, 40, by = 2)
-comp_seq <- sapply(n_seq, function(nn) composite_power(nn, mu, sigma2, reps = 3000)$composite)
+n_seq    <- ref$n_seq
+comp_seq <- sapply(n_seq, function(nn) composite_power(nn, mu, sigma2)$composite)
 weakest  <- sapply(n_seq, function(nn)
   ss_power_contrast(targets[["Treatment cost | Machine"]], mu = mu,
                     sigma_squared = sigma2, n_per_group = nn)$value[3])
-n_comp80 <- n_seq[which(comp_seq >= 0.80)[1]]
+n_comp80 <- ref$n_comp80
 
 comp_plot <- rbind(
-  data.frame(n = n_seq, power = weakest,  curve = "Smallest marginal power"),
-  data.frame(n = n_seq, power = comp_seq, curve = "Composite power (all three)"))
+  data.frame(n = n_seq, power = weakest,       curve = "Smallest marginal power"),
+  data.frame(n = n_seq, power = ref$comp_seq,  curve = "Composite power, 10000 replications"),
+  data.frame(n = n_seq, power = comp_seq,      curve = "Composite power, 25 replications"))
 
 ggplot(comp_plot, aes(n, power, color = curve)) +
   geom_hline(yintercept = 0.80, linetype = "dashed", color = "grey40") +
   geom_line(linewidth = 1) + geom_point(size = 1.6) +
   geom_vline(xintercept = n_design, linetype = "dotted", color = "grey55") +
   geom_vline(xintercept = n_comp80, linetype = "dotted", color = accent) +
-  scale_color_manual(values = c("Smallest marginal power" = agent_cols[["Machine"]],
-                                "Composite power (all three)" = accent), name = NULL) +
+  scale_color_manual(
+    values = c("Smallest marginal power" = agent_cols[["Machine"]],
+               "Composite power, 10000 replications" = accent,
+               "Composite power, 25 replications" = "grey65"), name = NULL) +
   labs(title = "The additional cost of requiring all three effects jointly",
        subtitle = sprintf("Marginal design: n = %d per cell. Composite design: n = %d per cell.",
                           n_design, n_comp80),
        x = "n per cell", y = "Power") +
-  ylim(0, 1)
+  ylim(0, 1) +
+  theme(legend.text = element_text(size = 9))
 ```
 
 ![](composite_power_ancova_files/figure-html/composite-curve-1.png)
 
-| n per cell | total N | composite power |
-|-----------:|--------:|----------------:|
-|         20 |      80 |           0.481 |
-|         22 |      88 |           0.578 |
-|         24 |      96 |           0.624 |
-|         26 |     104 |           0.683 |
-|         28 |     112 |           0.742 |
-|         30 |     120 |           0.772 |
-|         32 |     128 |           0.811 |
-|         34 |     136 |           0.842 |
-|         36 |     144 |           0.874 |
-|         38 |     152 |           0.887 |
-|         40 |     160 |           0.911 |
+The gray curve is what 25 replications produce: it wanders around the
+converged curve and is not monotone, even though composite power must
+increase with sample size. Reading a required sample size off a curve
+like that is how a plan acquires an error nobody can see afterward.
 
-Monte Carlo composite power by sample size. {.table}
+| n per cell | total N | reps = 25 | reps = 10000 |
+|-----------:|--------:|----------:|-------------:|
+|         20 |      80 |      0.32 |        0.484 |
+|         22 |      88 |      0.52 |        0.570 |
+|         24 |      96 |      0.56 |        0.625 |
+|         26 |     104 |      0.76 |        0.691 |
+|         28 |     112 |      0.80 |        0.731 |
+|         30 |     120 |      0.68 |        0.773 |
+|         32 |     128 |      0.80 |        0.814 |
+|         34 |     136 |      0.80 |        0.845 |
+|         36 |     144 |      0.96 |        0.873 |
+|         38 |     152 |      0.88 |        0.892 |
+|         40 |     160 |      0.88 |        0.910 |
+
+Monte Carlo composite power by sample size, at 25 replications and at
+10,000. {.table}
 
 Composite power reaches $`.80`$ at approximately 32 per cell, a total of
 $`N =`$ 128, compared with the 108 required for each effect
@@ -922,7 +989,7 @@ and the model `lm(y ~ A*B*M)` is fitted to each generated sample:
 
 ``` r
 
-simulate_threeway_power <- function(N, gamma, rho = .2, reps = 1500, seed = 113) {
+simulate_threeway_power <- function(N, gamma, rho = .2, reps = 25, seed = 113) {
   sigma_e <- sqrt(2)
   varY_less_M <- bA^2*.25 + bB^2*.25 + bAB^2*.0625 + gamma^2*.0625 + sigma_e^2
   betaM <- sqrt(rho^2 * varY_less_M / (1 - rho^2))
@@ -939,14 +1006,19 @@ simulate_threeway_power <- function(N, gamma, rho = .2, reps = 1500, seed = 113)
 }
 
 mc_small <- simulate_threeway_power(N_3way, gamma = gamma_small)
-round(mc_small, 3)
-#> three_way   two_way 
-#>     0.794     1.000
+
+data.frame(row.names = names(ref$threeway),
+           `reps = 25`    = round(mc_small, 3),
+           `reps = 10000` = round(ref$threeway, 3),
+           check.names = FALSE)
+#>           reps = 25 reps = 10000
+#> three_way      0.88        0.791
+#> two_way        1.00        1.000
 ```
 
 At the analytic sample size the simulated power for the three-way
-interaction is approximately 0.79, slightly below $`.80`$. This reflects
-the difference between fixed and random predictors noted in the
+interaction is 0.79, slightly below $`.80`$. This reflects the
+difference between fixed and random predictors noted in the
 `ss_power_reg_coef` documentation, under which random predictors require
 a somewhat larger sample for the same power. Sweeping across sample
 sizes locates the value that achieves $`.80`$ in the random-predictor
@@ -954,20 +1026,28 @@ case:
 
 ``` r
 
-N_try   <- c(N_3way, 420, 440, 460)
+N_try   <- ref$N_try
 mc_by_N <- sapply(N_try, function(NN)
   simulate_threeway_power(NN, gamma = gamma_small)["three_way"])
-N_mc80  <- N_try[which(mc_by_N >= 0.80)[1]]
+N_mc80  <- ref$N_mc80
 
-ggplot(data.frame(N = N_try, power = mc_by_N), aes(N, power)) +
+tw_plot <- rbind(
+  data.frame(N = N_try, power = ref$tw_by_N, reps = "10000 replications"),
+  data.frame(N = N_try, power = mc_by_N,     reps = "25 replications"))
+
+ggplot(tw_plot, aes(N, power, color = reps)) +
   geom_hline(yintercept = 0.80, linetype = "dashed", color = "grey40") +
   geom_vline(xintercept = N_3way, linetype = "dotted", color = "grey55") +
-  geom_line(linewidth = 1, color = accent) +
-  geom_point(size = 2.6, color = accent) +
-  geom_text(aes(label = sprintf("%.2f", power)), vjust = -0.9, size = 3.3) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.6) +
+  scale_color_manual(values = c("10000 replications" = accent,
+                                "25 replications" = "grey65"), name = NULL) +
+  geom_text(data = subset(tw_plot, reps == "10000 replications"),
+            aes(label = sprintf("%.2f", power)), vjust = -0.9, size = 3.3,
+            show.legend = FALSE) +
   annotate("text", x = N_3way, y = 0.755, angle = 90, vjust = -0.4, size = 3,
            color = "grey40", label = sprintf("analytic N = %d", N_3way)) +
-  labs(title = "Random predictors require a larger sample than the fixed-predictor formula",
+  labs(title = "Random predictors require a larger sample",
        subtitle = "Monte Carlo power for the small three-way interaction (gamma = 0.8)",
        x = "Total N", y = "Three-way power (Monte Carlo)") +
   ylim(0.72, 0.90)

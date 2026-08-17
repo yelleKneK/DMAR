@@ -158,7 +158,11 @@ order, the row indexing automatically matches.
 Other data simulators:
 [`simulate_ancova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_data.md),
 [`simulate_anova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_anova_data.md),
+[`simulate_longitudinal_gompertz()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_gompertz.md),
+[`simulate_longitudinal_logistic()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_logistic.md),
+[`simulate_longitudinal_negative_exponential()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_negative_exponential.md),
 [`simulate_longitudinal_polynomial()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_polynomial.md),
+[`simulate_longitudinal_richards()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_richards.md),
 [`simulate_regression_data()`](https://yelleknek.github.io/DMAR/reference/simulate_regression_data.md)
 
 ## Author

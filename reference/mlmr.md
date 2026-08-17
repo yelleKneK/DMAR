@@ -235,8 +235,11 @@ structure of an `lm` fit:
 
 - `adj_R2`:
 
-  Adjusted \\R^2\\ using the lavaan reported sample size and the number
-  of slopes.
+  Adjusted \\R^2\\ using the number of complete cases (`N_complete`, the
+  rows complete on the outcome and every predictor, which are the rows
+  that identify the regression) and the number of slopes; the lavaan
+  reported `N` can be larger under FIML because it counts rows that
+  inform only the predictor distribution.
 
 - `logLik`:
 
@@ -421,95 +424,121 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Complete data: estimates agree with lm() to working precision.
-fit_mlmr <- mlmr(mpg ~ wt + hp, data = mtcars, ci_method = "wald")
-fit_lm   <- lm(mpg ~ wt + hp, data = mtcars)
+# Complete data: the maximum likelihood estimates agree with lm() to
+# working precision. This block asks for the Wald interval, the one
+# member of the CI menu cheap enough to run at example time. It is
+# the only block here that runs; the rest is left as commented code
+# so a reader can see the syntax without paying the run time.
+fit_mlmr <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
+                   t9_word_meaning,
+                 data = holzinger_swineford, ci_method = "wald")
+fit_lm   <- lm(t6_paragraph_comprehension ~ t5_general_information +
+                 t9_word_meaning,
+               data = holzinger_swineford)
 cbind(mlmr = coef(fit_mlmr), lm = coef(fit_lm))
-#>                    mlmr          lm
-#> (Intercept) 37.22727012 37.22727012
-#> wt          -3.87783074 -3.87783074
-#> hp          -0.03177295 -0.03177295
+#>                              mlmr         lm
+#> (Intercept)            2.38038350 2.38038350
+#> t5_general_information 0.08482737 0.08482737
+#> t9_word_meaning        0.21956217 0.21956217
 
-# Default print and summary.
 fit_mlmr
 #> 
 #> Call:
-#> mlmr(formula = mpg ~ wt + hp, data = mtcars, ci_method = "wald")
+#> mlmr(formula = t6_paragraph_comprehension ~ t5_general_information + 
+#>     t9_word_meaning, data = holzinger_swineford, ci_method = "wald")
 #> 
 #> Coefficients:
-#> (Intercept)           wt           hp  
-#>    37.22727     -3.87783     -0.03177  
+#>            (Intercept)  t5_general_information         t9_word_meaning  
+#>                2.38038                 0.08483                 0.21956  
 #> 
+confint(fit_mlmr)
+#>                             2.5 %    97.5 %
+#> (Intercept)            1.44486986 3.3158971
+#> t5_general_information 0.05263738 0.1170174
+#> t9_word_meaning        0.16759660 0.2715277
+
+# summary() adds the intervals, the per-predictor semi-partial R^2
+# and Cohen's f^2, and the omnibus likelihood ratio test of all
+# slopes equal to zero.
 summary(fit_mlmr)
 #> 
 #> Call:
-#> mlmr(formula = mpg ~ wt + hp, data = mtcars, ci_method = "wald")
+#> mlmr(formula = t6_paragraph_comprehension ~ t5_general_information + 
+#>     t9_word_meaning, data = holzinger_swineford, ci_method = "wald")
 #> 
 #> Missing data: fiml | Estimator: ML | SE: standard
-#> Sample size (used by lavaan): 32   Complete cases: 32
+#> Sample size (used by lavaan): 301   Complete cases: 301
 #> 
 #> Coefficients:
-#>              Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept) 37.227270   1.522000  24.459  < 2e-16 ***
-#> wt          -3.877831   0.602344  -6.438 1.21e-10 ***
-#> hp          -0.031773   0.008596  -3.696 0.000219 ***
+#>                        Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)             2.38038    0.47731   4.987 6.13e-07 ***
+#> t5_general_information  0.08483    0.01642   5.165 2.41e-07 ***
+#> t9_word_meaning         0.21956    0.02651   8.281  < 2e-16 ***
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #> 
 #> Confidence intervals (method: wald, level = 0.95):
-#>                2.5 %   97.5 %
-#> (Intercept) 34.24420 40.21034
-#> wt          -5.05840 -2.69726
-#> hp          -0.04862 -0.01493
+#>                          2.5 % 97.5 %
+#> (Intercept)            1.44487 3.3159
+#> t5_general_information 0.05264 0.1170
+#> t9_word_meaning        0.16760 0.2715
 #> 
 #> Per-predictor effect sizes (semi-partial R^2 and f^2):
-#>       sr^2 Cohen's f^2
-#> wt 0.22435      1.2952
-#> hp 0.07395      0.4269
+#>                           sr^2 Cohen's f^2
+#> t5_general_information 0.04101     0.08863
+#> t9_word_meaning        0.10542     0.22783
 #> 
-#> Residual std. error (ML): 2.469 on 29 residual degrees of freedom
-#> Model implied R-squared: 0.8268,   Adjusted R-squared: 0.8148,   Cohen's f^2: 4.773
-#> Omnibus likelihood ratio test (all slopes = 0): chi square = 56.1 on 2 df, p = 6.567e-13
-#> Log likelihood: -289.6   AIC: 597.2   BIC: 610.4
+#> Residual std. error (ML): 2.372 on 298 residual degrees of freedom
+#> Model implied R-squared: 0.5373,   Adjusted R-squared: 0.5342,   Cohen's f^2: 1.161
+#> Omnibus likelihood ratio test (all slopes = 0): chi square = 232 on 2 df, p = < 2.2e-16
+#> Log likelihood: -2792   AIC: 5602   BIC: 5635
 
-# Likelihood ratio CIs (default).
-confint(fit_mlmr)
-#>                   2.5 %      97.5 %
-#> (Intercept) 34.24420416 40.21033607
-#> wt          -5.05840396 -2.69725753
-#> hp          -0.04862085 -0.01492504
+# The interval menu is profile, Wald, and bootstrap. The default,
+# ci_method = "profile", inverts the likelihood ratio test one
+# parameter at a time through a sequence of constrained refits, and
+# it is what a reported interval deserves. The bootstrap resamples
+# rows and takes percentile limits; it is what to ask for when the
+# normality the likelihood assumes is doubtful. Both refit the model
+# many times, so neither is run here; the calls are
+#   mlmr(t6_paragraph_comprehension ~ t5_general_information +
+#          t9_word_meaning, data = holzinger_swineford)
+#   mlmr(t6_paragraph_comprehension ~ t5_general_information +
+#          t9_word_meaning, data = holzinger_swineford,
+#        ci_method = "boot", B = 1000, boot_seed = 113)
+# with boot_seed supplied because bootstrap limits otherwise move
+# from run to run.
 
-# Auxiliary variable (saturated correlates). qsec is not in the
-# model; it is brought in to inform the likelihood. On complete data
-# the coefficients are unchanged to working precision, and when the
-# outcome is missing as a function of qsec it helps recover them.
-# \donttest{
-fit_aux <- mlmr(mpg ~ wt + hp, data = mtcars, auxiliary = "qsec")
-cbind(no_aux = coef(fit_mlmr), aux = coef(fit_aux))
-#>                  no_aux         aux
-#> (Intercept) 37.22727012 37.22727014
-#> wt          -3.87783074 -3.87783075
-#> hp          -0.03177295 -0.03177295
+# Missing values on a predictor are where maximum likelihood and
+# least squares part company. The full information likelihood keeps
+# every row that carries information; listwise deletion keeps only
+# the rows that are complete. The Holzinger and Swineford battery
+# carries real missingness for this: the revised second-form test
+# t26_flags was administered to only 145 of the 301 students, so a
+# model using it loses more than half the sample under listwise
+# deletion while the full information fit keeps all 301 rows. Not
+# run here because the comparison costs two more fits; the code is:
+#   fit_fiml <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
+#                      t26_flags, data = holzinger_swineford,
+#                    ci_method = "wald", effect_sizes = FALSE)
+#   fit_lwd  <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
+#                      t26_flags, data = holzinger_swineford,
+#                    missing = "listwise",
+#                    ci_method = "wald", effect_sizes = FALSE)
+#   rbind(FIML = coef(fit_fiml), listwise = coef(fit_lwd))
+#   c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
+# Passing effect_sizes = FALSE there skips the constrained refits the
+# effect size block needs, which are not what is being compared.
 
-# Demonstrate FIML with missing values on a predictor.
-set.seed(113)
-d <- mtcars
-d$hp[sample.int(nrow(d), 8)] <- NA
-fit_fiml <- mlmr(mpg ~ wt + hp, data = d)            # FIML
-fit_lwd  <- mlmr(mpg ~ wt + hp, data = d,
-                 missing = "listwise")               # listwise
-rbind(FIML = coef(fit_fiml), listwise = coef(fit_lwd))
-#>          (Intercept)        wt          hp
-#> FIML        37.48716 -4.027626 -0.02983439
-#> listwise    37.01425 -3.989346 -0.02756755
-
-# Bootstrap confidence intervals; supply boot_seed for reproducibility.
-fit_boot <- mlmr(mpg ~ wt + hp, data = mtcars,
-                 ci_method = "boot", B = 100, boot_seed = 113)
-confint(fit_boot)
-#>                   2.5 %      97.5 %
-#> (Intercept) 33.50458027 41.27427324
-#> wt          -5.31416113 -2.74304660
-#> hp          -0.05028086 -0.01939352
-# }
+# An auxiliary variable is not a predictor. The complete speed test
+# t13_straight_and_curved_capitals enters as a saturated correlate,
+# correlated with the outcome residual and with the predictors, so
+# the likelihood can draw on it for the rows where t26_flags is
+# missing while the coefficients keep their meaning. Continuing from
+# the model above, and again not run here:
+#   fit_aux <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
+#                     t26_flags, data = holzinger_swineford,
+#                   ci_method = "wald",
+#                   auxiliary = "t13_straight_and_curved_capitals",
+#                   effect_sizes = FALSE)
+#   cbind(no_aux = coef(fit_fiml), aux = coef(fit_aux))
 ```

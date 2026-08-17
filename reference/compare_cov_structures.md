@@ -128,11 +128,16 @@ S-PLUS*. Springer.
 [`anova`](https://rdrr.io/r/stats/anova.html)
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -142,12 +147,8 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -157,7 +158,7 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
+# Four repeated measures on each of 30 subjects.
 set.seed(113)
 n <- 30; k <- 4
 subj <- factor(rep(1:n, each = k))
@@ -165,6 +166,10 @@ tm   <- factor(rep(1:k, times = n))
 y    <- as.vector(t(matrix(rnorm(n * k), n, k) +
                      rep(rnorm(n, 0, 1), each = k)))
 d <- data.frame(y, subj, tm)
+
+# All eight structures at once. Read the table by comparing AIC and BIC
+# across rows, and use the likelihood-ratio test only for the nested
+# comparison it reports, each structure against UN.
 compare_cov_structures(d, outcome = "y", subject = "subj",
                        time = "tm")
 #>   structure   log_lik      AIC      BIC n_par LRT_vs_UN_chisq LRT_vs_UN_df
@@ -201,5 +206,4 @@ compare_cov_structures(d, outcome = "y", subject = "subj",
 #> 2          NA
 #> 3          NA
 #> 4          NA
-# }
 ```

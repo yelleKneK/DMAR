@@ -24,7 +24,7 @@ meta_contrast(yi, vi, weights, center = TRUE)
 
   Numeric vector of study effect sizes (any metric whose sampling
   distribution is approximately normal; standardized mean differences
-  and Fisher-z correlations qualify).
+  and Fisher's Z correlations qualify).
 
 - vi:
 

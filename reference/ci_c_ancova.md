@@ -167,7 +167,7 @@ Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -175,7 +175,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -203,27 +202,29 @@ Ken Kelley <kkelley@nd.edu>
 # scores as the covariate. The means of pretest scores of group 1 to 3 are
 # 17, 17.7, and 17.4, respectively, and the adjusted means of groups 1 to 3
 # are 7.5, 12, and 14, respectively. The error variance in ANCOVA is 29,
-# and the sum of squares within groups from ANOVA on the covariate is 313.37.
+# and the sum of squares within groups from ANOVA on the covariate is 752.5.
 
 # To obtain the confidence interval for adjusted mean of group 1 versus group 2:
-ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), c_weights = c(1, -1, 0),
-n = 10, cov_means = c(17, 17.7, 17.4), SSwithin_x = 313.37)
+ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29),
+            c_weights = c(1, -1, 0), n = 10,
+            cov_means = c(17, 17.7, 17.4), SSwithin_x = 752.5)
 #>  term        value
-#>  lower_limit -9.47
+#>  lower_limit -9.46
 #>  psi         -4.5 
-#>  upper_limit 0.47 
+#>  upper_limit 0.458
 #> 
 #> Confidence level: 95%
 
-# For Bryant-Paulson simultaneous intervals over the family of all pairwise
-# comparisons of the adjusted means, select procedure = "bryant_paulson".
-# The call is forwarded to ci_c_ancova_bp().
-ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n = 10,
-procedure = "bryant_paulson")
-#>  contrast          estimate lower_limit upper_limit
-#>  group_1 - group_2 -4.5     -10.6       1.61       
-#>  group_1 - group_3 -6.5     -12.6       -0.393     
-#>  group_2 - group_3 -2       -8.11       4.11       
-#> 
-#> Confidence level: 95%
+# That interval is the right one for a single contrast planned in advance.
+# For the family of all three pairwise comparisons of the adjusted means,
+# with coverage that holds simultaneously across the family, select
+# procedure = "bryant_paulson"; the call is forwarded to ci_c_ancova_bp().
+# That route inverts the Bryant-Paulson distribution numerically to get its
+# multiplier, which takes about half a second, so it is shown here rather
+# than run.
+# ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n = 10,
+#             procedure = "bryant_paulson")
+# The simultaneous limits are wider, which is the price of the family
+# statement: group 1 against group 2 runs from -10.61 to 1.61, where the
+# single planned contrast above ran from -9.47 to 0.47.
 ```

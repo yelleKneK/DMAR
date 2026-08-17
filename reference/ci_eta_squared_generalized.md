@@ -213,14 +213,13 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -242,41 +241,43 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-fit <- aov(len ~ supp * dose, data = ToothGrowth)
+# The pygmalion expectancy experiment: treatment is manipulated, while
+# grade is a measured classification, so grade belongs in the denominator.
+pyg <- pygmalion
+pyg$grade <- factor(pyg$grade)
+fit <- aov(iq_8 ~ treatment * grade, data = pyg)
 
-# Default: point estimate only, no CI.
-ci_eta_squared_generalized(fit, observed = "supp")
+# The default returns the point estimate and leaves the limits NA, because
+# both interval methods are approximations.
+ci_eta_squared_generalized(fit, observed = "grade")
 #> No CI computed (method = 'none'). Set method = 'parametric' for an approximate noncentral F transformation, or method = 'bootstrap' for a residual bootstrap (requires a fitted model). Both methods are approximate; see ?ci_eta_squared_generalized.
-#>  effect    eta_squared_generalized lower_limit upper_limit method
-#>  supp      0.18                    <NA>        <NA>        none  
-#>  dose      0.661                   <NA>        <NA>        none  
-#>  supp:dose 0.0724                  <NA>        <NA>        none  
+#>  effect          eta_squared_generalized lower_limit upper_limit method
+#>  treatment       0.0202                  <NA>        <NA>        none  
+#>  grade           0.044                   <NA>        <NA>        none  
+#>  treatment:grade 0.0187                  <NA>        <NA>        none  
 
-# Parametric approximation (warning issued).
-# \donttest{
-ci_eta_squared_generalized(fit, observed = "supp", method = "parametric")
+# The parametric approximation maps a noncentral F interval for the focal
+# effect through the observed sums of squares. Warnings mark the method as
+# preliminary and report that the interaction's lower limit is clamped at
+# 0; treat the limits accordingly.
+ci_eta_squared_generalized(fit, observed = "grade", method = "parametric")
 #> Warning: Parametric CI uses an approximate transformation that maps the partial-eta squared CI through the observed sums of squares for measured factors. Coverage properties have not been broadly validated; results should be treated as preliminary and independently evaluated.
-#>  effect    eta_squared_generalized lower_limit upper_limit method    
-#>  supp      0.18                    0.033       0.34        parametric
-#>  dose      0.661                   0.504       0.74        parametric
-#>  supp:dose 0.0724                  7.33e-05    0.202       parametric
+#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution, so the lower confidence limit on generalized eta squared is 0.
+#>  effect          eta_squared_generalized lower_limit upper_limit method    
+#>  treatment       0.0202                  0.000974    0.0583      parametric
+#>  grade           0.044                   0.00116     0.0807      parametric
+#>  treatment:grade 0.0187                  0           0.0413      parametric
 #> 
 #> Confidence level: 95%
 
-# Residual bootstrap (warning issued; slower). B = 1000 is the enforced
-# minimum; 10000 or more is recommended for publication-quality intervals.
-ci_eta_squared_generalized(fit, observed = "supp",
-                           method = "bootstrap", B = 1000, seed = 113)
-#> Warning: Bootstrap CI uses parametric resampling of residuals from the fitted model (B = 1000). Coverage has not been broadly validated for generalized eta squared; results should be treated as preliminary.
-#>  effect    eta_squared_generalized lower_limit upper_limit method   
-#>  supp      0.18                    0.0495      0.377       bootstrap
-#>  dose      0.661                   0.568       0.77        bootstrap
-#>  supp:dose 0.0724                  0.00285     0.227       bootstrap
-#> 
-#> Confidence level: 95%
-# }
+# The third option is a residual bootstrap, which refits the model once per
+# replication. It is not run here: B is required to be at least 1000, and
+# even that is slower than an example should be, while a reported interval
+# deserves B = 10000 or more. The call is
+#   ci_eta_squared_generalized(fit, observed = "grade",
+#                              method = "bootstrap", B = 10000, seed = 113)
 
-# Within-subjects ANOVA. Parametric CI uses each effect's stratum.
+# Within-subjects ANOVA. The parametric CI uses each effect's own stratum.
 set.seed(113)
 n <- 20
 rm_data <- data.frame(
@@ -287,12 +288,10 @@ rm_data <- data.frame(
             0.7 * rep(1:3, n) + rnorm(n * 3, sd = 1.2)
 )
 fit_rm <- aov(y ~ time + Error(subject/time), data = rm_data)
-# \donttest{
 ci_eta_squared_generalized(fit_rm, method = "parametric")
 #> Warning: Parametric CI uses an approximate transformation that maps the partial-eta squared CI through the observed sums of squares for measured factors. Coverage properties have not been broadly validated; results should be treated as preliminary and independently evaluated.
 #>  effect eta_squared_generalized stratum      lower_limit upper_limit method    
 #>  time   0.0965                  subject:time 0.00548     0.145       parametric
 #> 
 #> Confidence level: 95%
-# }
 ```

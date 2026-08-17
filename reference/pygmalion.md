@@ -106,15 +106,13 @@ than only at the grand mean.
 **Reproducible quantities.** Fitting the separate-slopes model
 `lm(iq_8 ~ iq_pre * treatment)` gives a within-group slope of
 \\0.77799\\ for the controls and \\0.96894\\ for the bloomers (reported
-as \\0.96895\\ in
-[`MBESS::var.ete`](https://rdrr.io/pkg/MBESS/man/var.ete.html), a
-fifth-decimal rounding difference). The pooled within-group residual
-variance is \\\hat\sigma^2 = 175.3251\\ on 306 degrees of freedom, and
-the sample variance of the covariate is \\348.91\\. These are exactly
-the inputs used in the worked example for the variance of the estimated
-treatment effect at selected covariate values under heterogeneity of
-regression (Li, McLouth, and Delaney; see
-[`MBESS::var.ete`](https://rdrr.io/pkg/MBESS/man/var.ete.html)).
+as \\0.96895\\ in `MBESS::var.ete`, a fifth-decimal rounding
+difference). The pooled within-group residual variance is \\\hat\sigma^2
+= 175.3251\\ on 306 degrees of freedom, and the sample variance of the
+covariate is \\348.91\\. These are exactly the inputs used in the worked
+example for the variance of the estimated treatment effect at selected
+covariate values under heterogeneity of regression (Li, McLouth, and
+Delaney; see `MBESS::var.ete`).
 
 **Relationship to the AMCP package.** The same numeric data ship with
 the book's data companion, the AMCP package, as `chapter_9_exercise_15`

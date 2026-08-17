@@ -12,9 +12,9 @@ family of comparisons and, through the Bryant–Paulson critical value,
 correctly account for the extra sampling uncertainty that comes from
 estimating the covariate adjustment from random covariates. Naively
 applying Tukey's method to adjusted means ignores that uncertainty and
-produces intervals that are too narrow (below-nominal coverage); see the
-package vignette “Bryant–Paulson simultaneous intervals: a simulation
-study.”
+produces intervals that are too narrow (below-nominal coverage); a
+simulation study of that undercoverage is maintained alongside the
+package.
 
 ## Usage
 
@@ -78,12 +78,12 @@ ci_c_ancova_bp(
 - contrast_type:
 
   One of `"pairwise"` (default) or `"allowance"`. `"pairwise"` uses the
-  quadratic standard error \\\sqrt{\sum c_i^2 / n_i}\\ (Tukey–Kramer),
-  exact for pairwise comparisons. `"allowance"` uses Tukey's allowance
-  \\\tfrac12 \sum \|c_i\|\\, which yields intervals that hold
+  Tukey–Kramer quadratic standard error, exact for pairwise comparisons.
+  `"allowance"` uses Tukey's allowance, which yields intervals that hold
   simultaneously over *all* contrasts, including complex ones (this is
-  the form in Eq. (2.4) of Bryant and Bruvold, 1980). The two coincide
-  for pairwise comparisons.
+  the form in Eq. (2.4) of Bryant and Bruvold, 1980). The width factor
+  each choice applies is given in Details. The two coincide for pairwise
+  comparisons.
 
 - ...:
 
@@ -149,14 +149,14 @@ ed.). Routledge. (See Chapter 9.)
 for the underlying distribution;
 [`ci_c_ancova`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md)
 for the per-comparison interval;
-[`ancova`](https://yelleknek.github.io/DMAR/reference/ancova.md) for a
+[`ancova`](https://yelleknek.github.io/DMAR/reference/ancova.md) for an
 ANCOVA fit.
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -164,7 +164,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -186,42 +185,34 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Bryant & Bruvold (1980) worked example: 6 panels, 1 covariate, nu = 14,
+# The multiplier for these intervals is a Bryant-Paulson quantile, which has
+# no closed form: it is obtained by inverting a numerical integral with a
+# root search. With the single random covariate of the worked example below
+# that takes about half a second per call, so nothing on this page is run;
+# the calls, with the values they produce, are given here.
+
+# Bryant and Bruvold (1980) worked example: 6 panels, 1 covariate, nu = 14,
 # ANCOVA error MS = 0.01326. Here the design is a randomized block with
 # s = 4 blocks, so the per-group "n" for the adjusted-mean SE is 4 and the
 # error df (14) must be supplied directly.
-adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
-ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-               n = 4, num_covariates = 1, df = 14)
-#>  contrast          estimate lower_limit upper_limit
-#>  group_1 - group_2 -0.024   -0.302      0.254      
-#>  group_1 - group_3 -0.507   -0.785      -0.229     
-#>  group_1 - group_4 -0.92    -1.2        -0.642     
-#>  group_1 - group_5 -1.02    -1.3        -0.745     
-#>  group_1 - group_6 -1.28    -1.56       -1         
-#>  group_2 - group_3 -0.483   -0.761      -0.205     
-#>  group_2 - group_4 -0.896   -1.17       -0.618     
-#>  group_2 - group_5 -0.999   -1.28       -0.721     
-#>  group_2 - group_6 -1.26    -1.54       -0.979     
-#>  group_3 - group_4 -0.413   -0.691      -0.135     
-#>  group_3 - group_5 -0.516   -0.794      -0.238     
-#>  group_3 - group_6 -0.774   -1.05       -0.496     
-#>  group_4 - group_5 -0.103   -0.381      0.175      
-#>  group_4 - group_6 -0.361   -0.639      -0.0829    
-#>  group_5 - group_6 -0.258   -0.536      0.0201     
-#> 
-#> Confidence level: 95%
-# Each pairwise critical difference is 0.278, matching the paper.
+# adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
+# bp <- ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+#                      n = 4, num_covariates = 1, df = 14)
+# bp
+# The multiplier is 4.83 and every pairwise critical difference is 0.278,
+# matching the paper; the 15 intervals hold jointly at the 95 percent level.
+# The multiplier is kept on the result, so the critical difference can be
+# rebuilt by hand as q * s_ancova * sqrt(1/n):
+# attr(bp, "critical_value")
+# attr(bp, "critical_value") * sqrt(0.01326) * sqrt(1 / 4)
 
-# \donttest{
-# A single complex contrast (panels 1-2 vs. 3-6), simultaneous over all
-# contrasts via the allowance form:
-ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326), n = 4, df = 14,
-               c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
-               contrast_type = "allowance")
-#>  contrast   estimate lower_limit upper_limit
-#>  contrast_1 -0.921   -1.2        -0.643     
-#> 
-#> Confidence level: 95%
-# }
+# A complex contrast (say panels 1 and 2 against panels 3 through 6) is
+# requested by passing its weights to c_weights, together with
+# contrast_type = "allowance", the all-contrasts form of Eq. (2.4) of
+# Bryant and Bruvold. That contrast of adjusted means is -0.921, with
+# simultaneous limits of -1.199 and -0.643.
+# ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+#                c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
+#                n = 4, num_covariates = 1, df = 14,
+#                contrast_type = "allowance")
 ```

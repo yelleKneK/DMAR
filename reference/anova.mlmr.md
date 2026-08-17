@@ -59,17 +59,22 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-fit1 <- mlmr(mpg ~ wt,       data = mtcars, ci_method = "wald",
+# Both fits ask for the Wald interval and skip the effect size block,
+# since the likelihood ratio test needs neither and each costs refits.
+fit1 <- mlmr(t6_paragraph_comprehension ~ t5_general_information,
+             data = holzinger_swineford, ci_method = "wald",
              effect_sizes = FALSE)
-fit2 <- mlmr(mpg ~ wt + hp,  data = mtcars, ci_method = "wald",
+fit2 <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
+               t9_word_meaning,
+             data = holzinger_swineford, ci_method = "wald",
              effect_sizes = FALSE)
 anova(fit1, fit2)
 #> Likelihood ratio test for nested mlmr fits
-#> Model 2: mpg ~ wt + hp
-#> Model 1: mpg ~ wt
-#>         Df    AIC    BIC  Chisq Chisq diff Df diff Pr(>Chisq)    
-#> Model 2  0 597.22 610.41  0.000                                  
-#> Model 1  1 606.59 618.32 11.377     11.377       1  0.0007436 ***
+#> Model 2: t6_paragraph_comprehension ~ t5_general_information + t9_word_meaning
+#> Model 1: t6_paragraph_comprehension ~ t5_general_information
+#>         Df    AIC    BIC Chisq Chisq diff Df diff Pr(>Chisq)    
+#> Model 2  0 5601.5 5634.9  0.00                                  
+#> Model 1  1 5661.3 5691.0 61.78      61.78       1   3.84e-15 ***
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```

@@ -80,19 +80,19 @@ for the asymptotic variance, and
 for the partial-correlation analog of this function.
 
 **Note on conservatism of the assurance plan.** The empirical simulation
-reported in
-[`vignette("aipe_simulation_study", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/aipe_simulation_study.md)
-finds that `ss_aipe_semipartial_r()` is on the boundary of its valid
-range at 80% assurance and modestly conservative at 99% assurance. At
-\\\gamma = 0.80\\, the realized assurance at the recommended sample size
-is within Monte-Carlo error of the target, that is, the bound is
-operating at the edge of its validity. At \\\gamma = 0.99\\, the ideal
-sample size is about 15 to 20 subjects smaller than the recommended
-sample size, reflecting the looser upper-tail bound at the 99% level.
-The recommended sample size is therefore a sufficient sample size rather
-than the smallest possible sample size. A small safety margin (5 to 10
-subjects) is advisable when planning at \\\gamma = 0.80\\. See the
-simulation vignette for the per-condition overshoot.
+study of the AIPE planner family finds that `ss_aipe_semipartial_r()` is
+on the boundary of its valid range at 80% assurance and modestly
+conservative at 99% assurance. At \\\gamma = 0.80\\, the realized
+assurance at the recommended sample size is within Monte Carlo error of
+the target, that is, the bound is operating at the edge of its validity.
+At \\\gamma = 0.99\\, the ideal sample size is about 15 to 20 subjects
+smaller than the recommended sample size, reflecting the looser
+upper-tail bound at the 99% level. The recommended sample size is
+therefore a sufficient sample size rather than the smallest possible
+sample size. A small safety margin (5 to 10 subjects) is advisable when
+planning at \\\gamma = 0.80\\.
+[`ss_aipe_semipartial_r_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
+quantifies the overshoot for any one condition.
 
 ## References
 
@@ -135,6 +135,10 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
@@ -145,9 +149,10 @@ Other AIPE sample size planning:
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 

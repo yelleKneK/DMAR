@@ -38,7 +38,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 fit <- lme4::lmer(Reaction ~ Days + (Days | Subject),
                   data = lme4::sleepstudy)
 res <- R2_mixed_effects(fit)
@@ -50,5 +49,4 @@ generics::glance(res)
 #>             term  estimate
 #> 1    R2_marginal 0.2786511
 #> 2 R2_conditional 0.7992199
-# }
 ```

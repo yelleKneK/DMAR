@@ -1,6 +1,6 @@
 # Random Effects Meta-Analysis of Correlations
 
-Pools correlations across independent studies on the Fisher *z* scale
+Pools correlations across independent studies on the Fisher's *Z* scale
 and reports the results back in the correlation metric. Optionally, each
 study's correlation is first corrected for attenuation due to
 measurement error in either or both variables (the Spearman correction
@@ -57,7 +57,7 @@ A `data.frame` (class `dmar_tbl`) with the same rows as
 [`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md): the
 `estimate`, `lower_limit` / `upper_limit`, and prediction interval rows
 in the correlation metric; the `se`, test statistic, and heterogeneity
-rows on the Fisher *z* scale where the model lives.
+rows on the Fisher's *Z* scale where the model lives.
 
 ## Details
 
@@ -65,8 +65,9 @@ Pooling uses \\z_i = \mathrm{atanh}(r_i)\\ with sampling variance \\1 /
 (n_i - 3)\\; the pooled estimate, its confidence limits, and the
 prediction interval are transformed back through \\\tanh\\. The
 heterogeneity quantities (tau, tau-squared, I-squared, H-squared, Q)
-remain on the Fisher *z* scale, where the model lives; tau is therefore
-the between-study standard deviation of the *z*-scale correlations.
+remain on the Fisher's *Z* scale, where the model lives; tau is
+therefore the between-study standard deviation of the *z*-scale
+correlations.
 
 When corrections are applied, the corrected correlation's variance is
 computed from its own \\n_i\\ on the *z* scale, the conventional simple
@@ -92,9 +93,9 @@ for the single-study correction and its connection to latent variable
 modeling;
 [`reliability`](https://yelleknek.github.io/DMAR/reference/reliability.md)
 for estimating the reliabilities;
-[`convert_r_z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
+[`convert_r_Z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
 /
-[`convert_z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
+[`convert_Z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
 for the transformation used.
 
 Other meta-analysis:

@@ -338,6 +338,7 @@ ci_pvaf(F_value  = 11.221, df_1 = 4, df_2 = 50, N = 55)
 | term            | value | prob_less | prob_greater |
 |:----------------|:------|:----------|:-------------|
 | lower_limit     | 0.226 | 0.025     | 0.975        |
+| pvaf            | 0.473 | NA        | NA           |
 | upper_limit     | 0.587 | 0.975     | 0.025        |
 | actual_coverage | 0.95  | NA        | NA           |
 
@@ -377,9 +378,8 @@ planned design would produce. For the four-group running example:
 
 ci_srsnr(means = mu_j, sigma_squared = sigma_squared, n_per_group = n_j)
 #> Warning: The observed F_value is below the alpha_lower critical value of the
-#> central F-distribution; the lower noncentrality limit has been clamped to 0 and
-#> the reported 'prob_greater' on the lower_limit row reflects the actual
-#> upper-tail probability at lambda = 0.
+#> central F-distribution, so the lower confidence limit on the square root of the
+#> signal-to-noise ratio is 0.
 ```
 
 | term        | value |
@@ -607,9 +607,9 @@ contrast_test(fit_aov,
               contrasts = list("avg of 1, 2, 3 vs 4" = c(1/3, 1/3, 1/3, -1)))
 ```
 
-| contrast | estimate | se | t | df | p | p_adj | conf_lower | conf_upper |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| avg of 1, 2, 3 vs 4 | 12.2 | 3.35 | 3.64 | 76 | 0.000495 | 0.000495 | 5.52 | 18.9 |
+| contrast            | estimate | se   | t    | df  | p_value | p_adjusted | ci_lower | ci_upper |
+|:--------------------|:---------|:-----|:-----|:----|:--------|:-----------|:---------|:---------|
+| avg of 1, 2, 3 vs 4 | 12.2     | 3.35 | 3.64 | 76  | 0.0005  | 0.0005     | 5.52     | 18.9     |
 
 Confidence level: 95%
 
@@ -630,21 +630,21 @@ se_psi <- sqrt(sigma_squared * sum(c_weights^2 / n_j))
 design_consequences(true_effect = psi, se = se_psi, df = N - a, alpha_level = .05)
 ```
 
-| term                | value    |
-|:--------------------|:---------|
-| power               | 0.818    |
-| type_s_error        | 3.28e-06 |
-| exaggeration_ratio  | 1.11     |
-| expected_half_width | 6.15     |
-| mean_ci_width       | 12.3     |
-| median_ci_width     | 12.3     |
-| sd_ci_width         | 0.999    |
-| pct_ci_less_w       | NA       |
-| target_width        | NA       |
-| true_effect         | 9        |
-| se                  | 3.1      |
-| df                  | 76       |
-| alpha_level         | 0.05     |
+| term                | value   |
+|:--------------------|:--------|
+| power               | 0.818   |
+| type_s_error        | 8.4e-07 |
+| exaggeration_ratio  | 1.11    |
+| expected_half_width | 6.15    |
+| mean_ci_width       | 12.3    |
+| median_ci_width     | 12.3    |
+| sd_ci_width         | 0.999   |
+| pct_ci_less_w       | NA      |
+| target_width        | NA      |
+| true_effect         | 9       |
+| se                  | 3.1     |
+| df                  | 76      |
+| alpha_level         | 0.05    |
 
 Confidence level: 95%
 
@@ -674,7 +674,7 @@ ss_aipe_c(error_variance = sigma_squared, c_weights = c_weights,
 
 Confidence level: 95%
 
-## Why Not base R’s power.anova.test()
+## Why Not base R’s `power.anova.test()`
 
 The base function
 [`power.anova.test()`](https://rdrr.io/r/stats/power.anova.test.html)

@@ -51,8 +51,8 @@ multiple regression/correlation analysis for the behavioral sciences*
 [`is_orthogonal_set`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md)
 
 Other design utilities:
-[`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md),
 [`design_consequences()`](https://yelleknek.github.io/DMAR/reference/design_consequences.md),
+[`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md),
 [`effects_coding()`](https://yelleknek.github.io/DMAR/reference/effects_coding.md),
 [`is_orthogonal_set()`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md),
 [`orthogonal_polynomial()`](https://yelleknek.github.io/DMAR/reference/orthogonal_polynomial.md)

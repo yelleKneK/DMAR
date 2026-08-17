@@ -106,7 +106,7 @@ and
 
 ## References
 
-Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, P. J.
+Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, J. J.
 (2025). A sequential approach for noninferiority or equivalence of a
 linear contrast under cost constraints. *Psychological Methods, 30*(2),
 425–439. [doi:10.1037/met0000570](https://doi.org/10.1037/met0000570)
@@ -125,18 +125,18 @@ Biopharmaceutics, 15*(6), 657–680.
 
 [`power_equivalence_md`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md),
 [`ss_power_equivalence_c`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
-[`tost_c`](https://yelleknek.github.io/DMAR/reference/tost_c.md),
+[`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
 [`ss_aipe_c`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c.md)
 
 Other equivalence testing:
+[`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
 [`power_density_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_density_equivalence_md.md),
 [`power_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md),
 [`power_equivalence_md_plot()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md_plot.md),
-[`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
-[`tost_c()`](https://yelleknek.github.io/DMAR/reference/tost_c.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md)
+[`ss_power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md)
 
 ## Author
 

@@ -1,6 +1,6 @@
-# Print an Anova / Anova Table With DMAR *p*-value Formatting
+# Print a Model Comparison or ANOVA Table With DMAR *p*-value Formatting
 
-Pretty-print an anova-like object (the output of
+Pretty-print an ANOVA-like object (the output of
 [`stats::anova`](https://rdrr.io/r/stats/anova.html),
 [`car::Anova`](https://rdrr.io/pkg/car/man/Anova.html),
 `lmerTest::anova`, etc.) with *p*-values formatted at a fixed number of
@@ -22,7 +22,7 @@ print_anova(x, digits_p = 4L)
 
 - x:
 
-  An anova-like data frame with one or more `Pr(...)` columns. Accepts
+  An ANOVA-like data frame with one or more `Pr(...)` columns. Accepts
   `anova` objects from
   [`stats::anova`](https://rdrr.io/r/stats/anova.html),
   [`car::Anova`](https://rdrr.io/pkg/car/man/Anova.html),

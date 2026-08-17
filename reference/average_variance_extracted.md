@@ -129,37 +129,48 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Directly from standardized loadings:
+# Directly from the standardized loadings a paper reports:
 average_variance_extracted(loadings = c(.8, .7, .6))
 #>  factor ave   ci_lower ci_upper
 #>  f      0.497 <NA>     <NA>    
 
-# From a fitted one-factor model (requires lavaan):
-set.seed(113)
-f <- rnorm(250)
-d <- data.frame(y1 = .8 * f + rnorm(250, 0, .6),
-                y2 = .7 * f + rnorm(250, 0, .7),
-                y3 = .6 * f + rnorm(250, 0, .8))
-fit <- lavaan::cfa("f =~ y1 + y2 + y3", data = d, std.lv = TRUE)
-average_variance_extracted(fit)
-#>  factor ave  ci_lower ci_upper
-#>  f      0.52 <NA>     <NA>    
+# From a fitted model, one AVE per factor (requires lavaan).
+data(holzinger_swineford)
+fit <- lavaan::cfa(
+  "verbal    =~ t6_paragraph_comprehension + t7_sentence +
+                t9_word_meaning
+   deduction =~ t20_deduction + t22_problem_reasoning +
+                t23_series_completion",
+  data = holzinger_swineford)
+ave_tbl <- average_variance_extracted(fit)
+ave_tbl
+#>  factor    ave   ci_lower ci_upper
+#>  deduction 0.469 <NA>     <NA>    
+#>  verbal    0.719 <NA>     <NA>    
 
-# \donttest{
-# A percentile bootstrap interval refits the model per replication.
-average_variance_extracted(fit, ci_method = "percentile", B = 200,
-                           seed = 113)
-#>  factor ave  ci_lower ci_upper
-#>  f      0.52 0.463    0.587   
-#> 
-#> Confidence level: 95%
-# }
+# The Fornell and Larcker (1981) discriminant criterion compares each
+# factor's AVE with the squared correlation between the factors: a
+# factor should account for more of its own indicators' variance than
+# it shares with the other factor. Here the comparison favors verbal
+# and goes against deduction, whose AVE falls below the shared
+# variance. Fitting with cfa_k(..., output = "measurement") puts the
+# AVE values and the latent correlations in one table.
+lavaan::lavInspect(fit, "cor.lv")["verbal", "deduction"]^2
+#> [1] 0.5327517
+
+# An interval comes from ci_method = "percentile", which resamples the
+# cases and refits the model once per replication. That refitting is
+# why it is not run here; the call is
+#   average_variance_extracted(fit, ci_method = "percentile",
+#                              B = 1000, seed = 113)
+# and a reported interval deserves the default B = 1000 or more.
 
 # The broom verbs: one row per factor.
-generics::tidy(average_variance_extracted(fit))
-#>   term  estimate ci_lower ci_upper
-#> 1    f 0.5196232       NA       NA
-generics::glance(average_variance_extracted(fit))
+generics::tidy(ave_tbl)
+#>        term  estimate ci_lower ci_upper
+#> 1 deduction 0.4694312       NA       NA
+#> 2    verbal 0.7193173       NA       NA
+generics::glance(ave_tbl)
 #>   n_terms conf_level B_used
-#> 1       1         NA     NA
+#> 1       2         NA     NA
 ```

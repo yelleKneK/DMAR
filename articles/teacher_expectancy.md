@@ -97,11 +97,20 @@ combine_p(p18, weights = df18)
 | stouffer_weighted_p | 0.1922 |
 | k                   | 18     |
 
-Three of the four reject the joint null (the paper’s values: Fisher chi
-square(36) = 62.17, Edgington sum 6.84, adding-Zs z = 2.12). The
-df-weighted test does not (z = 0.87). That disagreement is the first
-finding: the larger studies found smaller effects, so something about
-the studies, not just sampling error, drives the variation.
+Raudenbush’s Table 2 reports three of the four rejecting the null:
+Fisher’s chi square(36) = 62.17, Edgington’s sum of 6.84 (*p* = .04),
+and the adding-Zs test (his z = 2.12, *p* = .017), with only the
+df-weighted variant not rejecting. Recomputed here from the tabled
+one-tailed *p*-values, Fisher (chi square(36) = 62.17, *p* = .0043) and
+adding-Zs (z = 2.20, *p* = .0139) reject as he found, but Edgington’s
+sum comes to 6.996 rather than 6.84 and its *p*-value lands at .0509, a
+hair past the line his rounding placed it inside. A method whose
+decision flips with the third decimal of the inputs is telling you the
+evidence is borderline, not settled; the two sturdy rejections and the
+df-weighted non-rejection (z = 0.87, *p* = .19) carry the real message.
+That disagreement is the first finding: the larger studies found smaller
+effects, so something about the studies, not just sampling error, drives
+the variation.
 
 ## Why Do the Studies Disagree? The Prior-Contact Contrast
 
@@ -315,7 +324,6 @@ table above):
 
 plot_forest(d, vi, labels = teacher_expectancy$author,
             xlab = "Standardized mean difference (d)")
-#> `height` was translated to `width`.
 ```
 
 ![](teacher_expectancy_files/figure-html/forest-1.png)

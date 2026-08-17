@@ -82,8 +82,10 @@ Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
@@ -97,7 +99,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 data(holzinger_swineford)
 hs_factors <- list(
   verbal = c("t6_paragraph_comprehension",
@@ -110,16 +111,16 @@ res <- cfa_k(holzinger_swineford, hs_factors)
 plot_cfa_k(res)
 
 
-# The same question for the error variances (the additional
-# constraint that separates essentially parallel from essentially
-# tau-equivalent).
-plot_cfa_k(res, what = "errors")
-
-
-# After imposing the constraint, the display shows the equated value.
-res_equal <- cfa_k(holzinger_swineford, hs_factors,
-                   equal_loading = TRUE)
-plot_cfa_k(res_equal)
-
-# }
+# Two further displays are shown but not run here, since each draws
+# another figure and the second refits the model as well. The same
+# question for the error variances, the additional constraint that
+# separates essentially parallel from essentially tau-equivalent:
+# plot_cfa_k(res, what = "errors")
+#
+# After imposing the constraint, every item in a factor sits at the
+# common estimate and the dashed line is that estimate rather than
+# the mean of the free ones:
+# res_equal <- cfa_k(holzinger_swineford, hs_factors,
+#                    equal_loading = TRUE)
+# plot_cfa_k(res_equal)
 ```

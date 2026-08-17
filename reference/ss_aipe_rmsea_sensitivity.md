@@ -77,14 +77,19 @@ ss_aipe_rmsea_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the a priori
-Monte Carlo study. The `term` entries are `"suc_rep"` (number of
-converged replications), `"total_N"` (\\N\\ used to plan the study),
-`"df"` (model degrees of freedom), `"rmsea_pop"` (population RMSEA
-driving the plan), `"desired_width"` (target CI width), `"mean_width"`
-and `"median_width"` (realized CI width distribution), `"assurance"`
-(proportion of intervals narrower than `desired_width`), `"alpha_upper"`
-and `"alpha_lower"` (tail-specific empirical Type I error rates),
-`"alpha"` (overall empirical Type I error rate), and `"conf_level"`.
+Monte Carlo study. The `term` entries are: `"mean_rmsea"`,
+`"median_rmsea"`, `"sd_rmsea"` (summaries of the realized RMSEA
+estimates across the converged replications); `"mean_ci_width"`,
+`"median_ci_width"`, `"sd_ci_width"` (summaries of the realized interval
+widths); `"pct_ci_less_w"` (proportion of intervals narrower than the
+target width); `"pct_ci_miss_low"` and `"pct_ci_miss_high"`
+(tail-specific empirical non-coverage of the population RMSEA);
+`"total_type_I_error"` (overall empirical non-coverage, the sum of the
+two tails); and the echoes `"suc_rep"` (number of converged
+replications), `"total_N"` (the *N* evaluated), `"df"` (model degrees of
+freedom), `"true_rmsea"` (the population RMSEA recovered from fitting
+`model` to `Sigma`), `"width"`, and `"conf_level"`. The proportion rows
+are on the 0 to 1 scale, not percentages.
 
 ## Details
 
@@ -145,7 +150,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(113)
 
 # True data generating model: two correlated factors (r = 0.5), three
@@ -161,22 +165,11 @@ dimnames(Sigma) <- list(paste0("x", 1:6), paste0("x", 1:6))
 # Proposed (misspecified) model: a single common factor.
 proposed <- "g =~ x1 + x2 + x3 + x4 + x5 + x6"
 
-ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
-                          G = 25)
-#>  term          value
-#>  suc_rep       25   
-#>  total_N       695  
-#>  df            9    
-#>  rmsea_pop     0.204
-#>  desired_width 0.05 
-#>  mean_width    0.05 
-#>  median_width  0.05 
-#>  assurance     0.52 
-#>  alpha_upper   0.08 
-#>  alpha_lower   0    
-#>  alpha         0.08 
-#>  conf_level    0.95 
-#> 
-#> Confidence level: 95%
-# }
+# The simulation itself is not run at example time: it fits the proposed
+# model once at a very large N to recover the population RMSEA, then
+# generates and fits a fresh sample on every replication. The G below is
+# already far smaller than a study one would report; the default of 200,
+# or more, is the realistic setting. The call is:
+# ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
+#                           G = 25)
 ```

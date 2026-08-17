@@ -35,10 +35,12 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-fit <- mlmr(mpg ~ wt + hp, data = mtcars, ci_method = "wald")
+fit <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
+              t9_word_meaning,
+            data = holzinger_swineford, ci_method = "wald")
 generics::glance(fit)
-#>          R2    adj_R2    sigma       f2 statistic     p_value df    logLik
-#> 1 0.8267855 0.8148396 2.468854 4.773187  56.10318 6.56674e-13  9 -289.6083
-#>        AIC      BIC deviance df_residual nobs
-#> 1 597.2166 610.4082 579.2166          29   32
+#>          R2    adj_R2    sigma       f2 statistic      p_value df   logLik
+#> 1 0.5372996 0.5341942 2.371619 1.161226  231.9733 4.242586e-51  9 -2791.77
+#>       AIC      BIC deviance df_residual nobs
+#> 1 5601.54 5634.904  5583.54         298  301
 ```

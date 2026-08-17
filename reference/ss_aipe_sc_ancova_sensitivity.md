@@ -103,15 +103,21 @@ ss_aipe_sc_ancova_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis across `G` replications. Summary rows include
-the mean / median / SD of the realized full confidence interval width
-(`mean_full_width`, `median_full_width`, `sd_full_width`), the
-proportion of intervals narrower than the planning target
-(`pct_width_obs_narrower`), the mean lower- and upper-tail widths
-(`mean_width_lower`, `mean_width_upper`), and the empirical Type I error
-rates on each tail and overall (`type_I_error_upper`,
-`type_I_error_lower`, `type_I_error`). Inputs echoed back include the
-planning `sample_size`, `rho`, `desired_width`, and `assurance`.
+Carlo sensitivity analysis across `G` replications. The `term` entries
+are: `mean_psi`, `median_psi`, `sd_psi` (summaries of the realized
+standardized ANCOVA contrast); `mean_ci_width`, `median_ci_width`,
+`sd_ci_width` (summaries of the full interval widths);
+`mean_ci_width_lower` and `mean_ci_width_upper` (mean one-sided widths,
+measured from the observed contrast to each limit); `pct_ci_less_w`
+(proportion of intervals at or below the target width);
+`pct_ci_miss_low` and `pct_ci_miss_high` (tail-specific empirical
+non-coverage of `true_psi`); `total_type_I_error` (overall empirical
+non-coverage, the sum of the two tails); and the input echoes
+`n_per_group`, `total_N`, `true_psi`, `estimated_psi` (NA when
+`n_per_group` was supplied instead), `rho`, `width`, `conf_level`, and
+`assurance` (present only when an assurance was supplied). The
+proportion and Type I error rows are proportions on the 0 to 1 scale,
+not percentages.
 
 ## Details
 
@@ -173,7 +179,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Sensitivity analysis for a standardized ANCOVA contrast across
 # three groups, contrast (-1, 0, 1), a covariate-outcome correlation
 # of 0.4, and a planning target width of 0.5. Sizes are kept small
@@ -186,17 +191,26 @@ ss_aipe_sc_ancova_sensitivity(
   desired_width = 0.5, rho = 0.4,
   conf_level = 0.95, G = 50, print_iter = FALSE
 )
-#>  term                   value  
-#>  mean_full_width        0.5    
-#>  median_full_width      0.499  
-#>  sd_full_width          0.00249
-#>  pct_width_obs_narrower 0.58   
-#>  mean_width_lower       0.25   
-#>  mean_width_upper       0.249  
-#>  type_I_error_upper     2      
-#>  type_I_error_lower     0      
-#>  type_I_error           2      
+#>  term                value  
+#>  mean_psi            0.481  
+#>  median_psi          0.467  
+#>  sd_psi              0.119  
+#>  mean_ci_width       0.5    
+#>  median_ci_width     0.499  
+#>  sd_ci_width         0.00249
+#>  mean_ci_width_lower 0.25   
+#>  mean_ci_width_upper 0.249  
+#>  pct_ci_less_w       0.58   
+#>  pct_ci_miss_low     0      
+#>  pct_ci_miss_high    0.02   
+#>  total_type_I_error  0.02   
+#>  n_per_group         126    
+#>  total_N             378    
+#>  true_psi            0.5    
+#>  estimated_psi       0.5    
+#>  rho                 0.4    
+#>  width               0.5    
+#>  conf_level          0.95   
 #> 
 #> Confidence level: 95%
-# }
 ```

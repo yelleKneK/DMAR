@@ -207,7 +207,7 @@ factorial_anova(y ~ A * B, data = d, ss_type = 3)$SS[1:3]   # matches
 #> [1]  7.641891 14.692503  1.474433
 ```
 
-## How factorial_anova() Computes the Types
+## How `factorial_anova()` Computes the Types
 
 Each sum of squares is a model comparison, and every model in the
 comparison is an ordinary least squares fit to a subset of the columns

@@ -100,15 +100,25 @@ intervals are too wide to be informative.
 
 **Significance lens.** Writing \\\lambda = \theta / \mathrm{se}\\ and
 \\c\\ for the two-sided critical value, the power and the Type S error
-follow from the two tails of the (noncentral *t* or normal) distribution
-of the estimate, and the exaggeration ratio is the expected absolute
-estimate conditional on significance over the absolute true effect.
-Gelman and Carlin's `retrodesign()` computes the exaggeration ratio by
-simulation; here it is computed exactly, from truncated normal moments
-when `df = Inf` and by numerical integration against the *t* density
-otherwise, so no simulation error enters. When `true_effect = 0` the
-power equals `alpha_level`, the Type S error is 0.5, and the
-exaggeration ratio is undefined (`NA`).
+follow from the two tails of the distribution of the test statistic: the
+noncentral *t* with noncentrality \\\lambda\\ when `df` is finite (the
+exact distribution of the *t* statistic when the standard error is
+estimated from the data, the same sampling model the precision lens
+uses), and the normal when `df = Inf`. The exaggeration ratio is the
+expected absolute estimate conditional on significance over the absolute
+true effect, computed exactly: from truncated normal moments when
+`df = Inf`, and otherwise by integrating those moments over the chi
+distribution of the estimated standard error, so no simulation error
+enters. Gelman and Carlin's `retrodesign()` instead evaluates a central
+*t* shifted by \\\lambda\\ (and simulates the exaggeration ratio under
+that model), an approximation that treats the standard error as known;
+the two agree as `df` grows and coincide at `df = Inf`, but at small
+`df` they differ: in the underpowered regime the design analysis is
+aimed at (power below about 0.7), the known-se approximation understates
+power and overstates the Type S and Type M errors, so their published
+finite-`df` values differ from the exact ones reported here. When
+`true_effect = 0` the power equals `alpha_level`, the Type S error is
+0.5, and the exaggeration ratio is undefined (`NA`).
 
 **Precision lens.** The realized interval half-width is
 \\t\_{1-\alpha^\*/2,\\\mathit{df}} \cdot \widehat{\mathrm{se}}\\ with
@@ -137,9 +147,11 @@ Gelman, A., & Carlin, J. (2014). Beyond power calculations: Assessing
 Type S (sign) and Type M (magnitude) errors. *Perspectives on
 Psychological Science, 9*(6), 641–651.
 [doi:10.1177/1745691614551642](https://doi.org/10.1177/1745691614551642)
-(Their accompanying `retrodesign()` function obtains the exaggeration
-ratio by simulation; the closed-form and *t*-integration computation
-here is exact.)
+(Their accompanying `retrodesign()` function evaluates a
+location-shifted central *t*, the known-se approximation, and obtains
+the exaggeration ratio by simulation; the finite-df case here uses the
+exact noncentral *t* and exact moments instead, so the two differ at
+small df. See Details.)
 
 Kelley, K., & Maxwell, S. E. (2003). Sample size for multiple
 regression: Obtaining regression coefficients that are accurate, not
@@ -173,7 +185,7 @@ difference, a different bias than the significance-filter exaggeration
 here.
 
 Other design utilities:
-[`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md),
+[`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md),
 [`effects_coding()`](https://yelleknek.github.io/DMAR/reference/effects_coding.md),
 [`helmert_coding()`](https://yelleknek.github.io/DMAR/reference/helmert_coding.md),
 [`is_orthogonal_set()`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md),
@@ -188,10 +200,10 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # ---- Both lenses on one underpowered design --------------------------
 # True effect 0.1 measured with standard error 0.3 (say, d = .1 with
-# about 45 per group): power is 6 percent, a significant result has a
-# 17 percent chance of the wrong sign and overstates the truth
-# seven-fold, and the 95 percent CI is about 1.2 wide, twelve times the
-# effect. Bad for detection, bad for precision.
+# about 22 per group, 45 in total): power is 6 percent, a significant
+# result has a 17 percent chance of the wrong sign and overstates the
+# truth seven-fold, and the 95 percent CI is about 1.2 wide, twelve
+# times the effect. Bad for detection, bad for precision.
 design_consequences(true_effect = 0.1, se = 0.3)
 #>  term                value 
 #>  power               0.0628
@@ -234,9 +246,9 @@ design_consequences(true_effect = 0.1, se = 0.03)
 # both lenses.
 design_consequences(true_effect = 0.4, sd = 1, n_1 = 60, n_2 = 60)
 #>  term                value   
-#>  power               0.583   
-#>  type_s_error        4.99e-05
-#>  exaggeration_ratio  1.31    
+#>  power               0.584   
+#>  type_s_error        3.06e-05
+#>  exaggeration_ratio  1.3     
 #>  expected_half_width 0.361   
 #>  mean_ci_width       0.722   
 #>  median_ci_width     0.721   
@@ -257,9 +269,9 @@ design_consequences(true_effect = 0.4, sd = 1, n_1 = 60, n_2 = 60)
 design_consequences(true_effect = 0.4, sd = 1, n_1 = 60, n_2 = 60,
                     w = 0.7)
 #>  term                value   
-#>  power               0.583   
-#>  type_s_error        4.99e-05
-#>  exaggeration_ratio  1.31    
+#>  power               0.584   
+#>  type_s_error        3.06e-05
+#>  exaggeration_ratio  1.3     
 #>  expected_half_width 0.361   
 #>  mean_ci_width       0.722   
 #>  median_ci_width     0.721   
@@ -299,20 +311,20 @@ design_consequences(true_effect = NULL, sd = 1, n_1 = 60, n_2 = 60,
 n_plan <- ss_aipe_smd(delta = 0.4, width = 0.5)$value[1]
 design_consequences(true_effect = 0.4, sd = 1,
                     n_1 = n_plan, n_2 = n_plan, w = 0.5)
-#>  term                value   
-#>  power               0.885   
-#>  type_s_error        3.06e-07
-#>  exaggeration_ratio  1.07    
-#>  expected_half_width 0.248   
-#>  mean_ci_width       0.496   
-#>  median_ci_width     0.496   
-#>  sd_ci_width         0.0222  
-#>  pct_ci_less_w       0.578   
-#>  target_width        0.5     
-#>  true_effect         0.4     
-#>  se                  0.126   
-#>  df                  250     
-#>  alpha_level         0.05    
+#>  term                value  
+#>  power               0.885  
+#>  type_s_error        1.7e-07
+#>  exaggeration_ratio  1.07   
+#>  expected_half_width 0.248  
+#>  mean_ci_width       0.496  
+#>  median_ci_width     0.496  
+#>  sd_ci_width         0.0222 
+#>  pct_ci_less_w       0.578  
+#>  target_width        0.5    
+#>  true_effect         0.4    
+#>  se                  0.126  
+#>  df                  250    
+#>  alpha_level         0.05   
 #> 
 #> Confidence level: 95%
 ```

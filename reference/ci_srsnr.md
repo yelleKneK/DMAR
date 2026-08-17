@@ -123,7 +123,7 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -131,7 +131,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -154,7 +153,7 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 ## To illustrate the calculation of the confidence interval for noncentral
 ## F parameter,Bargman (1970) gave an example in which a 5-group ANOVA with
-## 11 subjects in each group is conducted and the observed F value is 11.2213.
+## 11 subjects in each group is conducted and the observed F value is 11.221.
 ## This example continued to be used in Venables (1975),  Fleishman (1980),
 ## and Steiger (2004). If one wants to calculate the exact confidence interval
 ## for square root of the signal-to-noise ratio of that example, this
@@ -186,7 +185,7 @@ ci_srsnr(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55, alpha_lower = .02, alpha
 # implied F-value internally and returns the resulting CI on the square
 # root of the signal-to-noise ratio.
 ci_srsnr(means = c(94, 91, 92, 83), sigma_squared = 67.375, n_per_group = 6)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
+#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution, so the lower confidence limit on the square root of the signal-to-noise ratio is 0.
 #>  term        value
 #>  lower_limit 0    
 #>  upper_limit 0.874

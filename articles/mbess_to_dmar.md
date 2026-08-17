@@ -50,7 +50,7 @@ most-used MBESS calls to their DMAR equivalents.
 | `MBESS::ci.sc(...)`, `MBESS::ci.sc.ancova(...)` | `DMAR::ci_sc(...)`, `DMAR::ci_sc_ancova(...)` | Standardized contrast CIs. |
 | `MBESS::ci.c(...)`, `MBESS::ci.c.ancova(...)` | `DMAR::ci_c(...)`, `DMAR::ci_c_ancova(...)` | Unstandardized contrast CIs. |
 | `MBESS::ci.rmsea(...)` | `DMAR::ci_rmsea(...)` | Noncentral-$`\chi^2`$ inversion for RMSEA. |
-| `MBESS::ci.cc(...)` | `DMAR::ci_cc(...)` | Correlation CI; `r` and `n` arguments. |
+| `MBESS::ci.cc(...)` | `DMAR::ci_r(...)` | Correlation CI; `r` and `n` arguments. |
 | `MBESS::conf.limits.nct(...)` | `DMAR::conf_limits_nct(...)` | Noncentral *t*; `t.value -> t_value`. |
 | `MBESS::conf.limits.ncf(...)` | `DMAR::conf_limits_ncf(...)` | Noncentral $`F`$. |
 | `MBESS::conf.limits.nc.chisq(...)` | `DMAR::conf_limits_nc_chisq(...)` | Noncentral $`\chi^2`$. |
@@ -64,7 +64,7 @@ most-used MBESS calls to their DMAR equivalents.
 | `MBESS::sd.unbiased(...)` | `DMAR::sd_unbiased(...)` | Holtzman-corrected SD. |
 | `MBESS::signal.to.noise.R2(R.Square, ...)` | `DMAR::signal_to_noise_R2(R2, ...)` | `R.Square -> R2` per the meaningful-capital rule. |
 | `MBESS::smd(...)`, `MBESS::smd.c(...)` | `DMAR::smd(...)`, `DMAR::smd_c(...)` | Standardized mean difference point estimates. |
-| [`MBESS::HS`](https://rdrr.io/pkg/MBESS/man/HS.html), `MBESS::Prime.Time` | [`DMAR::holzinger_swineford`](https://yelleknek.github.io/DMAR/reference/holzinger_swineford.md) (`HS_Data` alias), [`DMAR::prime_time_achievement`](https://yelleknek.github.io/DMAR/reference/prime_time_achievement.md) (`Prime_Time` alias) | Same data; documented canonical names; short aliases. |
+| `MBESS::HS`, `MBESS::Prime.Time` | [`DMAR::holzinger_swineford`](https://yelleknek.github.io/DMAR/reference/holzinger_swineford.md), [`DMAR::prime_time_achievement`](https://yelleknek.github.io/DMAR/reference/prime_time_achievement.md) | Same data under the documented snake_case names. |
 
 The convention for the rename is: 1. Replace `.` with `_` in function
 and argument names (`ci.smd -> ci_smd`, `n.1 -> n_1`,
@@ -85,7 +85,7 @@ The migration story is only half the story. The reason to move forward
 is what DMAR does that MBESS does not. The additions cluster in five
 areas.
 
-### 1. Maximum Likelihood Multiple Regression with FIML (`mlmr()` / `mlmr_mv()`)
+### 1. Maximum Likelihood Multiple Regression With FIML (`mlmr()` / `mlmr_mv()`)
 
 [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) is an
 [`lm()`](https://rdrr.io/r/stats/lm.html)-like front end to full
@@ -120,9 +120,9 @@ Every closed-form AIPE planner has a Monte Carlo sensitivity companion
 to quantify the realized CI width and empirical coverage when the
 planning value is wrong. The companion is the recommended workflow when
 the planning value comes from a small pilot or from a literature with
-publication bias. The
-[`vignette("aipe_simulation_study", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/aipe_simulation_study.md)
-reports a 10,000-replication sweep across the planner family.
+publication bias. A 10,000-replication sweep across the planner family,
+reporting realized interval width and empirical coverage for each, is
+maintained separately from the package.
 
 ### 4. ANOVA and ANCOVA Wrappers
 
@@ -140,13 +140,13 @@ effect;
 for the mixed-design multivariate ANOVA. The functions return tidy
 `data.frame`s suitable for direct piping into reporting tables.
 
-### 5. Reliability with Proper CIs
+### 5. Reliability With Proper CIs
 
 The reliability family (`reliability_alpha`, `reliability_omega` (with a
 model implied or observed total-variance denominator; the latter is
-[`MBESS::ci.reliability`](https://rdrr.io/pkg/MBESS/man/ci.reliability.html)’s
-“hierarchical” type), `reliability_omega_categorical`,
-`reliability_kr20`, `reliability_H`, and the dispatch wrapper
+`MBESS::ci.reliability`’s “hierarchical” type),
+`reliability_omega_categorical`, `reliability_kr20`, `reliability_H`,
+and the dispatch wrapper
 [`reliability()`](https://yelleknek.github.io/DMAR/reference/reliability.md))
 returns the point estimate alongside the Feldt/Bonett/Fisher CI, the
 delta method SE when applicable, the sample size, and the number of
@@ -166,9 +166,9 @@ depend.
 - [`is_orthogonal_set()`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md):
   check orthogonality of an entire contrast matrix.
 - [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md),
-  [`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
-  [`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
-  [`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md):
+  [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+  [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
+  [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md):
   critical values and CIs for the classical multiple-comparison
   procedures, returning tidy `data.frame`s.
 - [`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md):

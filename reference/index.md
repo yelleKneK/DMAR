@@ -118,10 +118,14 @@ Confidence intervals for effect sizes and related quantities.
 - [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md)
   : Bryant–Paulson Simultaneous Confidence Intervals for Contrasts of
   Adjusted Means in ANCOVA
-- [`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md) :
-  Confidence Interval for the Population Correlation Coefficient
+- [`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  [`ci_R()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+  : Confidence Intervals for the Population Correlation and Multiple
+  Correlation
 - [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md) :
   Confidence Interval for the Coefficient of Variation
+- [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md)
+  : Dunnett's Simultaneous Confidence Intervals Against a Control
 - [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md)
   : Confidence Interval on the Largest Eigenvalue of a Sample Covariance
   Matrix
@@ -131,6 +135,9 @@ Confidence intervals for effect sizes and related quantities.
   : Confidence Interval for Generalized Eta Squared (Approximate)
 - [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md)
   : Confidence Interval for Partial Eta Squared (Effect Size for ANOVA)
+- [`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md)
+  : Provides Games–Howell Simultaneous Confidence Intervals for All
+  Pairwise Comparisons Without Assuming Homogeneity of Variance
 - [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md)
   : Confidence Interval for the Squared Mahalanobis Distance
 - [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
@@ -140,10 +147,6 @@ Confidence intervals for effect sizes and related quantities.
 - [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md) :
   Confidence Interval for the Proportion of Variance Accounted for (in
   the Dependent Variable by Knowing the Levels of the Factor)
-- [`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md)
-  [`ci_R()`](https://yelleknek.github.io/DMAR/reference/ci_r.md) :
-  Confidence Interval for the Population Multiple Correlation
-  Coefficient
 - [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md) :
   Confidence Interval for an Unstandardized Regression Coefficient
 - [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md)
@@ -158,6 +161,8 @@ Confidence intervals for effect sizes and related quantities.
 - [`ci_sc_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_sc_ancova.md)
   : Confidence Interval for a Standardized Contrast in ANCOVA With One
   Covariate
+- [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md)
+  : Scheffe-Adjusted Simultaneous Confidence Intervals for Contrasts
 - [`ci_sm()`](https://yelleknek.github.io/DMAR/reference/ci_sm.md) :
   Confidence Interval for the Standardized Mean
 - [`ci_smd()`](https://yelleknek.github.io/DMAR/reference/ci_smd.md) :
@@ -172,16 +177,9 @@ Confidence intervals for effect sizes and related quantities.
   Confidence Interval for a Standardized Regression Coefficient
 - [`ci_srsnr()`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md)
   : Confidence Interval for the Square Root of the Signal-to-Noise Ratio
-- [`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md)
-  : Dunnett's Simultaneous Confidence Intervals Against a Control
-- [`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md)
+- [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
   : Tukey-Kramer Simultaneous Confidence Intervals for Pairwise
   Contrasts
-- [`games_howell_ci()`](https://yelleknek.github.io/DMAR/reference/games_howell_ci.md)
-  : Provides Games–Howell Simultaneous Confidence Intervals for All
-  Pairwise Comparisons Without Assuming Homogeneity of Variance
-- [`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md)
-  : Scheffe-Adjusted Simultaneous Confidence Intervals for Contrasts
 
 ## Sample size planning, accuracy in parameter estimation (AIPE)
 
@@ -234,6 +232,18 @@ Confidence intervals for effect sizes and related quantities.
 - [`ss_aipe_cv_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv_sensitivity.md)
   : Sensitivity Analysis for Sample Size Planning From the Accuracy in
   Parameter Estimation Perspective for the Coefficient of Variation
+- [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md)
+  : AIPE Sample Size Planning for an Equivalence Test on the Pearson
+  Correlation
+- [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md)
+  : Sensitivity Analysis for Sample Size Planning From the AIPE
+  Perspective for an Equivalence-Test Correlation
+- [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md)
+  : AIPE Sample Size Planning for an Equivalence Test on the
+  Standardized Mean Difference
+- [`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md)
+  : Sensitivity Analysis for Sample Size Planning From the AIPE
+  Perspective for an Equivalence-Test SMD
 - [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
   : Sample Size for AIPE on an Intraclass Correlation Coefficient
 - [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md)
@@ -267,11 +277,16 @@ Confidence intervals for effect sizes and related quantities.
 - [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md)
   : Sensitivity Analysis for Sample Size Planning From the AIPE
   Perspective for a Polynomial Change Parameter
+- [`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md)
+  : Sample Size for AIPE on a Pearson Correlation
+- [`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md)
+  : Sensitivity Analysis for Sample Size Planning From the AIPE
+  Perspective for a Pearson Correlation
 - [`ss_aipe_rc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc.md)
   : Sample Size Necessary for the Accuracy in Parameter Estimation
   Approach for an Unstandardized Regression Coefficient of Interest
 - [`ss_aipe_rc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc_sensitivity.md)
-  : Sensitivity Analysis for Sample Size Planing From the Accuracy in
+  : Sensitivity Analysis for Sample Size Planning From the Accuracy in
   Parameter Estimation Perspective for the Unstandardized Regression
   Coefficient
 - [`ss_aipe_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef.md)
@@ -329,15 +344,9 @@ Confidence intervals for effect sizes and related quantities.
   : Sample Size Necessary for the Accuracy in Parameter Estimation
   Approach for a Standardized Regression Coefficient of Interest
 - [`ss_aipe_src_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src_sensitivity.md)
-  : Sensitivity Analysis for Sample Size Planing From the Accuracy in
+  : Sensitivity Analysis for Sample Size Planning From the Accuracy in
   Parameter Estimation Perspective for the Standardized Regression
   Coefficient
-- [`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md)
-  : AIPE Sample Size Planning for TOST on the Standardized Mean
-  Difference
-- [`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
-  : Sensitivity Analysis for Sample Size Planning From the AIPE
-  Perspective for an Equivalence-Test SMD
 
 ## Sample size planning, power
 
@@ -468,8 +477,7 @@ Confidence intervals for effect sizes and related quantities.
 - [`design_consequences()`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
   : Consequences of a Design: Power, Sign and Magnitude Errors, and
   Expected Precision
-- [`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md)
-  [`design_effect()`](https://yelleknek.github.io/DMAR/reference/deft.md)
+- [`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md)
   : Kish's Design Effect (DEFF), DEFT, and the Effective Sample Size
 - [`effects_coding()`](https://yelleknek.github.io/DMAR/reference/effects_coding.md)
   : Effects-Coding Contrast Matrix for a Factor
@@ -495,12 +503,15 @@ Confidence intervals for effect sizes and related quantities.
 
 ## Equivalence testing
 
-- [`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md)
-  : TOST (Two One-Sided Tests) on the Standardized Mean Difference
-- [`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md) :
-  TOST (Two One-Sided Tests) on the Pearson Correlation
-- [`tost_c()`](https://yelleknek.github.io/DMAR/reference/tost_c.md) :
-  TOST (Two One-Sided Tests) and Noninferiority for a Linear Contrast
+- [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md)
+  : Equivalence Test for the Standardized Mean Difference via Two
+  One-Sided Tests (TOST)
+- [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md)
+  : Equivalence Test for the Pearson Correlation via Two One-Sided Tests
+  (TOST)
+- [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
+  : Equivalence and Noninferiority Tests for a Linear Contrast via Two
+  One-Sided Tests (TOST)
 
 ## Reliability and agreement
 
@@ -523,7 +534,6 @@ Confidence intervals for effect sizes and related quantities.
   : Coefficient Omega (McDonald) With a Confidence Interval
 
 - [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
-  [`reliability_omega_c()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
   : Categorical Omega for Ordered-Categorical Items, With a Confidence
   Interval
 
@@ -559,8 +569,8 @@ Confidence intervals for effect sizes and related quantities.
 - [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md) :
   Lin's Concordance Correlation Coefficient
 
-- [`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md)
-  [`bland_altman_loa()`](https://yelleknek.github.io/DMAR/reference/loa.md)
+- [`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md)
+  [`loa()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md)
   : Limits of Agreement (Bland-Altman) With Confidence Intervals on the
   Limits
 
@@ -600,6 +610,9 @@ Confidence intervals for effect sizes and related quantities.
 - [`contrast_adjusted()`](https://yelleknek.github.io/DMAR/reference/contrast_adjusted.md)
   : Confidence Interval for a Contrast of Covariate-Adjusted Cell Means
   in a Factorial ANCOVA
+
+- [`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md)
+  : Adjusted Cell and Marginal Means From a Fitted Linear Model
 
 - [`dunn_test()`](https://yelleknek.github.io/DMAR/reference/dunn_test.md)
   : Provides Dunn's Rank-Sum Test of All Pairwise Differences Following
@@ -671,6 +684,11 @@ Confidence intervals for effect sizes and related quantities.
 - [`mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)
   : Mediation Analysis via Model-Based Constrained Optimization
 
+## Longitudinal change
+
+- [`analysis_of_change()`](https://yelleknek.github.io/DMAR/reference/analysis_of_change.md)
+  : Analysis of Change: Fit Change Models to One or Many Trajectories
+
 ## Maximum likelihood regression (FIML)
 
 - [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) :
@@ -697,7 +715,6 @@ Confidence intervals for effect sizes and related quantities.
 - [`cov_sem()`](https://yelleknek.github.io/DMAR/reference/cov_sem.md) :
   Model Implied Covariance Matrix From a Lavaan-Specified SEM
 - [`covmat_from_cfa()`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md)
-  [`covmat_from_cfm()`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md)
   : Generate a Population Covariance Matrix From a One-Factor
   Confirmatory Factor Model
 - [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md)
@@ -798,10 +815,9 @@ Confidence intervals for effect sizes and related quantities.
   Convert Between *F*, \\R^2\\, and Their Noncentral Parameters
 
 - [`convert_Z_r()`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
-  [`convert_z_r()`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
   :
 
-  Convert Fisher's *Z* Into the Scale of a Correlation Coefficient (R)
+  Convert Fisher's *Z* Into the Scale of a Correlation Coefficient (*r*)
 
 - [`convert_cor_cov()`](https://yelleknek.github.io/DMAR/reference/convert_cor_cov.md)
   : Correlation Matrix to Covariance Matrix Conversion
@@ -815,10 +831,9 @@ Confidence intervals for effect sizes and related quantities.
   : Convert Between the Standardized Mean Difference and the Correlation
 
 - [`convert_r_Z()`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
-  [`convert_r_z()`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
   :
 
-  Convert a Correlation Coefficient (R) Into the Scale of Fisher's *Z*
+  Convert a Correlation Coefficient (*r*) Into the Scale of Fisher's *Z*
 
 - [`convert_delta_lambda()`](https://yelleknek.github.io/DMAR/reference/convert_t_smd.md)
   [`convert_lambda_delta()`](https://yelleknek.github.io/DMAR/reference/convert_t_smd.md)
@@ -913,8 +928,17 @@ Confidence intervals for effect sizes and related quantities.
   Any Number of Covariates)
 - [`simulate_anova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_anova_data.md)
   : Simulate Data From a One-Way Fixed-Effects ANOVA Model
+- [`simulate_longitudinal_gompertz()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_gompertz.md)
+  : Simulate Data From a Gompertz Change (Growth) Model
+- [`simulate_longitudinal_logistic()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_logistic.md)
+  : Simulate Data From a Logistic Change (Growth) Model
+- [`simulate_longitudinal_negative_exponential()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_negative_exponential.md)
+  : Simulate Data From a Negative Exponential (Asymptotic Regression)
+  Change Model
 - [`simulate_longitudinal_polynomial()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_polynomial.md)
   : Simulate Data From a Polynomial Change (Growth) Model
+- [`simulate_longitudinal_richards()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_richards.md)
+  : Simulate Data From a Richards Change (Growth) Model
 - [`simulate_regression_data()`](https://yelleknek.github.io/DMAR/reference/simulate_regression_data.md)
   : Simulate Data From a Multivariate Normal Multiple-Regression Model
 
@@ -950,6 +974,10 @@ Confidence intervals for effect sizes and related quantities.
 
 ## Display helpers
 
+- [`format(`*`<dmar_tbl>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
+  [`print(`*`<dmar_tbl>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
+  : Printing for DMAR Result Tables
+
 - [`format_p()`](https://yelleknek.github.io/DMAR/reference/format_p.md)
   :
 
@@ -963,7 +991,7 @@ Confidence intervals for effect sizes and related quantities.
 - [`print_anova()`](https://yelleknek.github.io/DMAR/reference/print_anova.md)
   :
 
-  Print an Anova / Anova Table With DMAR *p*-value Formatting
+  Print a Model Comparison or ANOVA Table With DMAR *p*-value Formatting
 
 - [`print_summary()`](https://yelleknek.github.io/DMAR/reference/print_summary.md)
   :
@@ -1065,6 +1093,8 @@ tidy() and glance() views of DMAR results, and methods for mlmr fits.
 - [`bessel_errors`](https://yelleknek.github.io/DMAR/reference/bessel_errors.md)
   : Bessel's (1818) Grouped Frequency Distribution of Bradley's
   Astronomical Observation Errors
+- [`depression_bdi`](https://yelleknek.github.io/DMAR/reference/depression_bdi.md)
+  : Depression Treatment Study With a Pretest Covariate
 - [`diagnosis_agreement`](https://yelleknek.github.io/DMAR/reference/diagnosis_agreement.md)
   : Cohen's (1968) Psychiatric Diagnosis Agreement Table
 - [`drinks_trial`](https://yelleknek.github.io/DMAR/reference/drinks_trial.md)

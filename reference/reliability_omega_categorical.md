@@ -14,14 +14,6 @@ reliability_omega_categorical(
   B = 10000,
   seed = NULL
 )
-
-reliability_omega_c(
-  data,
-  ci_method = c("bca", "percentile", "bootstrap_se", "bootstrap_se_logistic", "none"),
-  conf_level = 0.95,
-  B = 10000,
-  seed = NULL
-)
 ```
 
 ## Arguments
@@ -57,13 +49,13 @@ reliability_omega_c(
 ## Value
 
 A `data.frame` with columns `term` and `value` and rows `"estimate"`
-(sample \\\omega_C\\), `"se"` (bootstrap standard deviation across
-replications, `NA` for `ci_method = "none"`), `"lower_limit"` and
-`"upper_limit"` (clamped to \[0, 1\]), `"conf_level"`, `"N"`,
-`"N_complete"` (the complete cases; equal to `"N"` here, and carried so
-the whole reliability family returns one shape), and `"J"`. Attributes
-`coefficient` (`"omega_categorical"`), `ci_method`, and `B` record the
-computation.
+(sample \\\omega_C\\), `"se"` (the bootstrap standard deviation across
+replications, already on the coefficient scale; `NA` for
+`ci_method = "none"`), `"lower_limit"` and `"upper_limit"` (clamped to
+\[0, 1\]), `"conf_level"`, `"N"`, `"N_complete"` (the complete cases;
+equal to `"N"` here, and carried so the whole reliability family returns
+one shape), and `"J"`. Attributes `coefficient` (`"omega_categorical"`),
+`ci_method`, and `B` record the computation.
 
 ## Details
 
@@ -82,21 +74,23 @@ ordered categorical items. With the delta parameterization
 X\_{j'}^{\*}}\right)},\$\$ where \\\sigma\_{jj'}(r)\\ is the model
 implied covariance of \\(X\_{j}, X\_{j'})\\ computed from a bivariate
 normal CDF over pairs of category thresholds and a correlation \\r\\
-(Green & Yang, 2009, Eq. 13–14; Kelley & Pornprasertmanit, 2016, Eq.
-17–18). The numerator uses model implied polychoric correlations
-(\\\lambda_j \lambda\_{j'}\\), while the denominator uses observed
-polychoric correlations estimated from the data via a saturated
-bivariate model.
+(Green & Yang, 2009, Eq. 13–14, with the full coefficient their Eq. 21;
+Kelley & Pornprasertmanit, 2016, Eq. 17–18). The numerator uses model
+implied polychoric correlations (\\\lambda_j \lambda\_{j'}\\), while the
+denominator uses observed polychoric correlations estimated from the
+data via a saturated bivariate model.
 
 Kelley and Pornprasertmanit (2016) found in extensive Monte Carlo
 simulation that the bias-corrected and accelerated (BCa) bootstrap
 confidence interval for categorical omega achieved acceptable coverage
 across a wide variety of threshold patterns, sample sizes, item counts,
-and population reliability values. They specifically recommend BCa for
-categorical omega. Because no bootstrap runs in DMAR unless the user
-requests one, the default output is the point estimate with a message
-naming the call that produces the recommended interval; request
-`ci_method = "bca"` to obtain it.
+and population reliability values, with one documented exception:
+coverage dipped somewhat below the acceptable range when the number of
+items and the population reliability were both high. They specifically
+recommend BCa for categorical omega. Because no bootstrap runs in DMAR
+unless the user requests one, the default output is the point estimate
+with a message naming the call that produces the recommended interval;
+request `ci_method = "bca"` to obtain it.
 
 **When to use.** Use `reliability_omega_categorical` when items are
 ordered-categorical, especially when (a) the number of categories is
@@ -149,14 +143,12 @@ for reproducibility.
 
   Return only the point estimate.
 
-**Comparison with other packages.** The psych package's
-[`omega`](https://rdrr.io/pkg/psych/man/omega.html) fits a Schmid-Leiman
-hierarchical factor model on continuous (or treated-as-continuous) items
-and does not implement categorical omega in the sense of Green and Yang
-(2009). For ordered-categorical items `reliability_omega_categorical` is
-the appropriate choice;
-[`polychoric`](https://rdrr.io/pkg/psych/man/tetrachor.html) provides
-polychoric correlation estimation as a separate tool.
+**Comparison with other packages.** The psych package's `omega` fits a
+Schmid-Leiman hierarchical factor model on continuous (or
+treated-as-continuous) items and does not implement categorical omega in
+the sense of Green and Yang (2009). For ordered-categorical items
+`reliability_omega_categorical` is the appropriate choice; `polychoric`
+provides polychoric correlation estimation as a separate tool.
 
 ## References
 
@@ -208,9 +200,7 @@ Psychology, 65*, 371–401.
 [`reliability_omega`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md)
 (use for continuous items),
 [`reliability_kr20`](https://yelleknek.github.io/DMAR/reference/reliability_kr20.md)
-(for dichotomous items),
-[`omega`](https://rdrr.io/pkg/psych/man/omega.html),
-[`polychoric`](https://rdrr.io/pkg/psych/man/tetrachor.html).
+(for dichotomous items), `omega`, `polychoric`.
 
 Other reliability:
 [`cohen_kappa()`](https://yelleknek.github.io/DMAR/reference/cohen_kappa.md),
@@ -230,7 +220,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 set.seed(113)
 # Six 5-category items with a single latent factor.
 N <- 200
@@ -258,21 +247,19 @@ reliability_omega_categorical(data = items)
 #>  N_complete  200  
 #>  J           6    
 
-# The recommended BCa bootstrap, requested explicitly (reduced B for
-# a fast example).
-# The BCa interval is the recommended method for a real analysis
-# (with the default B = 10000); the percentile interval at a small B
-# keeps this demonstration quick.
-reliability_omega_categorical(data = items, ci_method = "percentile",
-                              B = 100)
-#>  term        value 
-#>  estimate    0.832 
-#>  se          0.0177
-#>  lower_limit 0.793 
-#>  upper_limit 0.868 
-#>  conf_level  0.95  
-#>  N           200   
-#>  N_complete  200   
-#>  J           6     
-# }
+# The same items treated as continuous, for contrast. That call fits a
+# second factor analysis model, so it is shown rather than run:
+#   reliability_omega(data = items)
+# With five categories and thresholds spread across the latent scale
+# the two coefficients nearly agree on these data; the gap widens as
+# the categories get coarser and as the thresholds move into the
+# tails, which is where the categorical coefficient is worth its cost.
+
+# Every interval for categorical omega is bootstrap based, and each
+# replication refits the ordered-categorical factor analysis model.
+# That refitting is why it is not run here; the call is
+#   reliability_omega_categorical(data = items, ci_method = "bca",
+#                                 B = 10000, seed = 113)
+# and a reported interval deserves the BCa method at the default
+# B = 10000.
 ```

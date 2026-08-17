@@ -91,13 +91,15 @@ to invert the noncentral *t* distribution at the specified two-tailed
 (or asymmetric, via `alpha_lower` / `alpha_upper`) confidence level.
 
 **Independent vs.\\ paired comparison.** `ci_smd` assumes two
-*independent* groups with a common variance. For a paired or
-within-subject design (a paired *t* setup), use
-[`ci_smd_c`](https://yelleknek.github.io/DMAR/reference/ci_smd_c.md),
-whose noncentral *t* machinery accounts for the within-subject
-covariance via the \\2 - 2\rho\\ reduction in the denominator.
-Mismatching the two leads to substantially wrong coverage; the choice
-should follow the design.
+*independent* groups with a common variance. DMAR does not currently
+provide a confidence interval for the standardized mean difference in a
+paired or within-subject design, whose sampling distribution depends on
+the correlation between the paired measurements; applying the
+independent groups interval to paired data gives the wrong coverage.
+([`ci_smd_c`](https://yelleknek.github.io/DMAR/reference/ci_smd_c.md) is
+not a paired interval either; it is the interval for Glass's estimator,
+which standardizes the difference between two independent groups by the
+control group standard deviation.)
 
 **Bias correction (Hedges' g).** `ci_smd` reports the CI on *d*; if the
 bias-corrected *g* is desired, multiply the bounds by the Hedges and
@@ -186,7 +188,7 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -194,7 +196,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),

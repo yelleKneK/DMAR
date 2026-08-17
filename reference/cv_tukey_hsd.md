@@ -112,15 +112,15 @@ cv_tukey_hsd(alpha_level = .05, df = 27, groups = 3)
 #>  term     value area_less area_greater
 #>  upper_cv 2.48  0.95      0.05        
 
-# Using the built-in PlantGrowth dataset (3 groups, N = 30).
-fit <- aov(weight ~ group, data = PlantGrowth)
+# Using DMAR's test_market data (6 marketing panels, N = 24).
+fit <- aov(brand_movement ~ panel, data = test_market)
 cv_tukey_hsd(
   alpha_level  = .05,
   df     = df.residual(fit),
-  groups = nlevels(PlantGrowth$group)
+  groups = nlevels(test_market$panel)
 )
 #>  term     value area_less area_greater
-#>  upper_cv 2.48  0.95      0.05        
+#>  upper_cv 3.18  0.95      0.05        
 
 # A more stringent alpha with a simple (non-verbose) result.
 cv_tukey_hsd(alpha_level = .01, df = 27, groups = 3, verbose = FALSE)

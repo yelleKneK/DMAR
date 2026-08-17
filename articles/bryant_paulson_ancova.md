@@ -7,12 +7,11 @@ model, read off the adjusted means and the error term, and then place
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
 which uses the Bryant–Paulson generalized studentized range
 ([`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)).
-The companion vignette, *Bryant-Paulson Simultaneous Intervals: A
-Simulation Study*, shows **why** the ordinary Tukey distribution is the
-wrong reference when the covariate is random. Here we focus on **how**
-to do the analysis.
+The simulation study maintained alongside the package shows **why** the
+ordinary Tukey distribution is the wrong reference when the covariate is
+random. Here we focus on **how** to do the analysis.
 
-## 1. The Worked Example from Bryant & Bruvold (1980)
+## 1. The Worked Example From Bryant & Bruvold (1980)
 
 The `test_market` data ship with DMAR. A company compared six marketing
 strategies (“panels”) for a brand across four blocks of retail outlets,

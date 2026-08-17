@@ -38,10 +38,12 @@ ss_aipe_sm(sm, width, conf_level = 0.95, assurance = NULL, ...)
 
 ## Value
 
-- sample_size:
+A 1-row `data.frame` with columns `term` and `value`:
 
-  The necessary sample size in order to achieve the desired degree of
-  accuracy (i.e., the sufficiently narrow confidence interval)
+- necessary_N:
+
+  The necessary total sample size in order to achieve the desired degree
+  of accuracy (i.e., the sufficiently narrow confidence interval)
 
 ## References
 

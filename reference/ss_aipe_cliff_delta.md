@@ -2,9 +2,8 @@
 
 Determines the sample size needed for the confidence interval on Cliff's
 (1993) \\\delta\\ (and equivalently Vargha-Delaney's \\A = (\delta + 1)
-/ 2\\) to have a desired width, using the large-sample U-statistic
-variance of DeLong, DeLong, & Clarke-Pearson (1988) under
-exchangeability.
+/ 2\\) to have a desired width, using the maximum-variance bound on
+\\\hat\delta\\ (Feng & Cliff, 2004, Equation 6, p. 324).
 
 ## Usage
 
@@ -54,15 +53,16 @@ n_2\\, the expected CI width, and the inputs echoed back.
 
 ## Details
 
-**DeLong-DeLong-Clarke-Pearson variance.** Under exchangeability of
-paired observations within and across groups, the asymptotic variance of
-\\\hat\delta\\ for groups of sizes \\n_1, n_2\\ is approximated by the
-upper bound (DeLong et al., 1988): \$\$\mathrm{Var}(\hat\delta) \\\le\\
-\frac{(1 - \delta^2)}{\min(n_1, n_2)}.\$\$ Setting the half-width of a
-Wald-style CI \\z\_{1-\alpha/2} \sqrt{\mathrm{Var}(\hat\delta)}\\ equal
-to the target half-width and solving gives the recommended per-group
-sample size. The bound is conservative; the realized CI is generally
-narrower than the target.
+**Maximum-variance bound.** The variance of \\\hat\delta\\ at a given
+\\\delta\\ is largest in the bimodal configuration, where it equals
+\\(1 - \delta^2)/n_b\\ with \\n_b\\ the bimodal group's size; for
+unequal groups the smaller sample size is used conservatively (Feng &
+Cliff, 2004, Equation 6 and following text, p. 324):
+\$\$\mathrm{Var}(\hat\delta) \\\le\\ \frac{(1 - \delta^2)}{\min(n_1,
+n_2)}.\$\$ Setting the half-width of a Wald-style CI \\z\_{1-\alpha/2}
+\sqrt{\mathrm{Var}(\hat\delta)}\\ equal to the target half-width and
+solving gives the recommended per-group sample size. The bound is
+conservative; the realized CI is generally narrower than the target.
 
 **Allocation.** The bound is dominated by \\\min(n_1, n_2)\\, so
 balanced allocation (`ratio = 1`) is approximately optimal under
@@ -75,9 +75,10 @@ Cliff, N. (1993). Dominance statistics: Ordinal analyses to answer
 ordinal questions. *Psychological Bulletin, 114*(3), 494–509.
 [doi:10.1037/0033-2909.114.3.494](https://doi.org/10.1037/0033-2909.114.3.494)
 
-DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L. (1988). Comparing
-the areas under two or more correlated receiver operating characteristic
-curves: A nonparametric approach. *Biometrics, 44*(3), 837–845.
+Feng, D., & Cliff, N. (2004). Monte Carlo evaluation of ordinal d with
+improved confidence interval. *Journal of Modern Applied Statistical
+Methods, 3*(2), 322–332.
+[doi:10.22237/jmasm/1099267560](https://doi.org/10.22237/jmasm/1099267560)
 
 Vargha, A., & Delaney, H. D. (2000). A critique and improvement of the
 CL common language effect size statistics of McGraw and Wong. *Journal
@@ -99,6 +100,10 @@ Other AIPE sample size planning:
 [`ss_aipe_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_sensitivity.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
@@ -109,10 +114,11 @@ Other AIPE sample size planning:
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 

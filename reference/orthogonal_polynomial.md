@@ -130,7 +130,8 @@ of the tabulated integer coefficients.)
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
-ed.). Routledge. (See Chapter 6 on trend analysis.)
+ed.). Routledge. (See Chapter 6 on trend analysis; Appendix Table A.10
+reports these coefficients.)
 
 ## See also
 
@@ -142,8 +143,8 @@ ed.). Routledge. (See Chapter 6 on trend analysis.)
 [`ci_c`](https://yelleknek.github.io/DMAR/reference/ci_c.md)
 
 Other design utilities:
-[`deft()`](https://yelleknek.github.io/DMAR/reference/deft.md),
 [`design_consequences()`](https://yelleknek.github.io/DMAR/reference/design_consequences.md),
+[`design_effect()`](https://yelleknek.github.io/DMAR/reference/design_effect.md),
 [`effects_coding()`](https://yelleknek.github.io/DMAR/reference/effects_coding.md),
 [`helmert_coding()`](https://yelleknek.github.io/DMAR/reference/helmert_coding.md),
 [`is_orthogonal_set()`](https://yelleknek.github.io/DMAR/reference/is_orthogonal_set.md)
@@ -212,10 +213,10 @@ contrast_test(aov(y ~ intensity),
               contrasts = list(linear    = op[, "linear"],
                                quadratic = op[, "quadratic"],
                                cubic     = op[, "cubic"]))
-#>  contrast  estimate se   t     df p        p_adj    conf_lower conf_upper
-#>  linear    -9.63    1.39 -6.91 35 4.95e-08 4.95e-08 -12.5      -6.8      
-#>  quadratic 1.02     1.65 0.62  35 0.539    0.539    -2.32      4.37      
-#>  cubic     2.54     1.39 1.82  35 0.0771   0.0771   -0.291     5.36      
+#>  contrast  estimate se   t     df p_value  p_adjusted ci_lower ci_upper
+#>  linear    -9.63    1.39 -6.91 35 < 0.0001 < 0.0001   -12.5    -6.8    
+#>  quadratic 1.02     1.65 0.62  35 0.5390   0.5390     -2.32    4.37    
+#>  cubic     2.54     1.39 1.82  35 0.0771   0.0771     -0.291   5.36    
 #> 
 #> Confidence level: 95%
 

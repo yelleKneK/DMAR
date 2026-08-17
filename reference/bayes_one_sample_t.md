@@ -12,19 +12,45 @@ Morey, & Iverson, 2009) is also reported.
 ## Usage
 
 ``` r
-bayes_one_sample_t(x, mu_0 = 0, prior_scale = sqrt(2)/2, conf_level = 0.95)
+bayes_one_sample_t(
+  x = NULL,
+  mu_0 = 0,
+  mean = NULL,
+  sd = NULL,
+  n = NULL,
+  prior_location = 0,
+  prior_scale = sqrt(2)/2,
+  prior_mean = NULL,
+  prior_sd = NULL,
+  conf_level = 0.95
+)
 ```
 
 ## Arguments
 
 - x:
 
-  Numeric vector of observations.
+  Numeric vector of observations. Omit to supply summary statistics
+  instead.
 
 - mu_0:
 
   The comparison value for the mean under the point null (and the
   centering value for \\\delta\\). Defaults to 0.
+
+- mean, sd, n:
+
+  Summary statistics: the sample mean, standard deviation, and sample
+  size. The Bayes factor depends on the data only through the *t*
+  statistic and \\n\\, so the summary form is exact, not an
+  approximation. Supply either `x` or all three summary values, never
+  both.
+
+- prior_location:
+
+  Location of the Cauchy prior on \\\delta\\. Defaults to 0, the JZS
+  prior; a nonzero value centers the prior on an expected effect
+  (Gronau, Ly, & Wagenmakers, 2020).
 
 - prior_scale:
 
@@ -36,6 +62,13 @@ bayes_one_sample_t(x, mu_0 = 0, prior_scale = sqrt(2)/2, conf_level = 0.95)
   \approx 0.707\\ is the JZS “medium” prior. Fully custom or subjective
   priors beyond the Cauchy family are not supported by the BayesFactor
   engine.
+
+- prior_mean, prior_sd:
+
+  Mean and standard deviation of a normal prior on \\\delta\\, for prior
+  beliefs stated as moments. Supplying them selects the normal prior;
+  they cannot be combined with the Cauchy arguments. See the prior
+  section of Details.
 
 - conf_level:
 
@@ -49,6 +82,32 @@ A `data.frame` (class `dmar_tbl`) with the posterior summaries of
 mapped to the raw mean difference scale (`raw_*`), the Bayes factors
 (`bf_10`, `bf_01`), the observed `t` and `df`, the `prior_scale`, and
 `n`.
+
+**Specifying the prior.** The default prior on the standardized effect
+\\\delta\\ is the JZS Cauchy centered at zero. Its `prior_scale` \\r\\
+is not a standard deviation: a Cauchy has no mean and no variance (those
+integrals diverge), so beliefs stated as prior moments cannot be
+expressed through it. What the scale does fix is the quartiles: half the
+prior mass lies within \\\pm r\\ of the location, so the default \\r =
+\sqrt{2}/2\\ says a 50 percent prior bet that \\\|\delta\| \< 0.71\\. A
+directional prior keeps the Cauchy and moves `prior_location` (Gronau,
+Ly, & Wagenmakers, 2020). A researcher who thinks in prior moments
+instead sets `prior_mean` and `prior_sd`, which use a normal prior with
+exactly those moments; the two families are exclusive.
+
+The families are also linked by an exact identity: a Cauchy with
+location \\\mu\\ and scale \\r\\ is a normal prior \\N(\mu, r^2/z^2)\\
+whose \\z\\ is standard normal, that is, a normal prior whose variance
+you are not sure of. Choosing the Cauchy is therefore choosing a normal
+prior with built-in doubt about its own width, which is why its tails
+are heavier and its Bayes factors more conservative. A normal matched to
+the Cauchy's interquartile range has `prior_sd = 1.4826 * prior_scale`.
+The full posterior of \\\delta\\ is returned in the `"posterior"`
+attribute as a data frame of `delta` and `density`, so any posterior
+probability, not only the reported ones, can be computed from it.
+
+A standardized effect size enters through the summary form directly: an
+observed *d* relative to `mu_0 = 0` is `mean = d, sd = 1`.
 
 ## Details
 
@@ -74,6 +133,10 @@ summaries through the sample standard deviation (a plug-in, as is
 conventional for reporting).
 
 ## References
+
+Gronau, Q. F., Ly, A., & Wagenmakers, E.-J. (2020). Informed Bayesian
+t-tests. *The American Statistician, 74*(2), 137–143.
+[doi:10.1080/00031305.2018.1562983](https://doi.org/10.1080/00031305.2018.1562983)
 
 Rouder, J. N., Speckman, P. L., Sun, D., Morey, R. D., & Iverson, G.
 (2009). Bayesian t tests for accepting and rejecting the null
@@ -112,18 +175,19 @@ set.seed(113)
 x <- rnorm(40, mean = 0.4, sd = 1)
 bayes_one_sample_t(x)
 #>  term                   value
-#>  delta_posterior_median 0.502
+#>  delta_posterior_median 0.503
 #>  delta_posterior_mean   0.503
-#>  delta_lower            0.178
+#>  delta_lower            0.179
 #>  delta_upper            0.832
 #>  p_delta_positive       0.999
-#>  raw_posterior_median   0.518
-#>  raw_lower              0.184
-#>  raw_upper              0.858
+#>  raw_posterior_median   0.519
+#>  raw_lower              0.185
+#>  raw_upper              0.859
 #>  bf_10                  20   
 #>  bf_01                  0.05 
 #>  t                      3.39 
 #>  df                     39   
+#>  prior_location         0    
 #>  prior_scale            0.707
 #>  n                      40   
 #> 
@@ -132,18 +196,19 @@ bayes_one_sample_t(x)
 # Against a nonzero comparison value, with a wider prior.
 bayes_one_sample_t(x, mu_0 = 0.1, prior_scale = 1)
 #>  term                   value
-#>  delta_posterior_median 0.421
+#>  delta_posterior_median 0.422
 #>  delta_posterior_mean   0.423
-#>  delta_lower            0.103
-#>  delta_upper            0.743
+#>  delta_lower            0.105
+#>  delta_upper            0.744
 #>  p_delta_positive       0.995
-#>  raw_posterior_median   0.435
-#>  raw_lower              0.106
-#>  raw_upper              0.767
+#>  raw_posterior_median   0.436
+#>  raw_lower              0.108
+#>  raw_upper              0.768
 #>  bf_10                  3.87 
 #>  bf_01                  0.259
 #>  t                      2.78 
 #>  df                     39   
+#>  prior_location         0    
 #>  prior_scale            1    
 #>  n                      40   
 #> 

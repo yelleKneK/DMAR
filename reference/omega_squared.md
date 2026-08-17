@@ -169,34 +169,34 @@ omega_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55)
 #>    effect omega_squared F_value df_effect df_error  N
 #> 1 overall     0.4263902  11.221         4       50 55
 
-# 2. One way ANOVA from a fitted model (PlantGrowth, 3 groups, N = 30).
-fit_one <- aov(weight ~ group, data = PlantGrowth)
+# 2. One way ANOVA from a fitted model (depression_bdi: three
+#        treatment arms, 10 per arm, N = 30).
+fit_one <- aov(bdi_post ~ condition, data = depression_bdi)
 omega_squared(fit_one)
-#>   effect omega_squared  F_value df_effect df_error  N
-#> 1  group     0.2040788 4.846088         2       27 30
+#>      effect omega_squared  F_value df_effect df_error  N
+#> 1 condition     0.1194484 3.034776         2       27 30
 
-# 3. Factorial ANOVA: partial omega squared per effect (balanced
-#        warpbreaks data: 2 wool types x 3 tensions, 9 per cell, N = 54).
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
-omega_squared(fit_factorial)
-#>         effect omega_squared  F_value df_effect df_error  N
-#> 1         wool    0.04871442 3.765288         1       48 54
-#> 2      tension    0.21734699 8.498047         2       48 54
-#> 3 wool:tension    0.10563655 4.189069         2       48 54
+# 3. Two-factor ANOVA: partial omega squared per effect for the
+#        manipulated expectancy treatment and the measured grade
+#        classification (pygmalion data, unequal cell sizes,
+#        N = 310). The treatment by grade interaction is weak here
+#        (F = 1.19), so the additive model is used.
+fit_additive <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
+omega_squared(fit_additive)
+#>          effect omega_squared  F_value df_effect df_error   N
+#> 1     treatment    0.01749124 6.518816         1      303 310
+#> 2 factor(grade)    0.02800886 2.786589         5      303 310
 
 # 4. omega_squared() and ci_omega_squared() compose: the point
 #        estimates agree row-by-row.
-pt  <- omega_squared(fit_factorial)
-ci  <- ci_omega_squared(fit_factorial)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
+pt  <- omega_squared(fit_additive)
+ci  <- ci_omega_squared(fit_additive)
 merge(pt, ci, by = c("effect", "omega_squared",
                      "F_value", "df_effect", "df_error", "N"))
-#>         effect omega_squared  F_value df_effect df_error  N lower_limit
-#> 1      tension    0.21734699 8.498047         2       48 54 0.055751214
-#> 2         wool    0.04871442 3.765288         1       48 54 0.000000000
-#> 3 wool:tension    0.10563655 4.189069         2       48 54 0.001906446
+#>          effect omega_squared  F_value df_effect df_error   N lower_limit
+#> 1 factor(grade)    0.02800886 2.786589         5      303 310 0.001130205
+#> 2     treatment    0.01749124 6.518816         1      303 310 0.001023671
 #>   upper_limit
-#> 1   0.4106053
-#> 2   0.2222776
-#> 3   0.2983809
+#> 1  0.08196003
+#> 2  0.06187026
 ```

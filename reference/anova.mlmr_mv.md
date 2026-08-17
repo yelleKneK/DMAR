@@ -54,17 +54,23 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-fit1 <- mlmr_mv(cbind(mpg, disp) ~ wt,      data = mtcars,
-                ci_method = "wald")
-fit2 <- mlmr_mv(cbind(mpg, disp) ~ wt + hp, data = mtcars,
-                ci_method = "wald")
+# Both fits ask for the Wald interval and skip the effect size block,
+# since the likelihood ratio test needs neither and each costs refits.
+fit1 <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
+                  t5_general_information,
+                data = holzinger_swineford,
+                ci_method = "wald", effect_sizes = FALSE)
+fit2 <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
+                  t5_general_information + t7_sentence,
+                data = holzinger_swineford,
+                ci_method = "wald", effect_sizes = FALSE)
 anova(fit1, fit2)
 #> Likelihood ratio test for nested mlmr_mv fits
-#> Model 2: cbind(mpg, disp) ~ wt + hp
-#> Model 1: cbind(mpg, disp) ~ wt
-#>         Df    AIC    BIC Chisq Chisq diff Df diff Pr(>Chisq)    
-#> Model 2  0 941.75 962.27  0.00                                  
-#> Model 1  2 959.28 976.87 21.53      21.53       2  2.113e-05 ***
+#> Model 2: cbind(t6_paragraph_comprehension, t9_word_meaning) ~ t5_general_information +      t7_sentence
+#> Model 1: cbind(t6_paragraph_comprehension, t9_word_meaning) ~ t5_general_information
+#>         Df    AIC    BIC  Chisq Chisq diff Df diff Pr(>Chisq)    
+#> Model 2  0 7131.8 7183.7   0.00                                  
+#> Model 1  2 7232.4 7276.9 104.65     104.65       2  < 2.2e-16 ***
 #> ---
 #> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```

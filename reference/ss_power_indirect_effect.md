@@ -117,7 +117,6 @@ Other mediation:
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
@@ -153,8 +152,11 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Fritz and MacKinnon's (2007) running scenario (a = b = .39).
-# Joint significance needs 65 cases for power .80.
+# Fritz and MacKinnon's (2007) running scenario (a = b = .39). The
+# joint significance approximation returns necessary_N = 65; raw-data
+# simulation puts the power at N = 65 nearer .77 and reaches .80 near
+# N = 70, which is why Fritz and MacKinnon's simulation-based table
+# reports a somewhat larger requirement.
 ss_power_indirect_effect(a = .39, b = .39, desired_power = .80)
 #>  term            value
 #>  necessary_N     65   

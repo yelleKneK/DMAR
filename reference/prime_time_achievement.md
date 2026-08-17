@@ -28,7 +28,7 @@ level demographics and ability and achievement scores, classroom level
 variables, school level variables, and school corporation (district)
 level variables. Original Indiana DOE variable spellings are preserved,
 including the typos `calender` (calendar), `hispanc1` and `hispanc2`
-(hispanic), and `rmediate` (remediate), for code compatibility with
+(Hispanic), and `rmediate` (remediate), for code compatibility with
 Finch, Bolin, and Kelley (2019). The SPSS variable label from the source
 file is available as `attr(prime_time_achievement$VAR, "label")` for
 every variable carried over from the SPSS file; the one derived recode
@@ -534,18 +534,6 @@ LA, April 1-5, 2002. ERIC document ED466679.
 
 ## Details
 
-The data frame is exposed under two names for user convenience:
-`prime_time_achievement` (canonical) and the short alias `Prime_Time`.
-The canonical name is the one shipped in `data/`, so
-`data(prime_time_achievement)` loads it; the alias `Prime_Time` is an
-active binding created at load time (rather than a duplicate `.rda`), so
-the bare name `Prime_Time` resolves to the identical object after
-[`library(DMAR)`](https://kenkelley.org) but `data(Prime_Time)` does not
-find a data set. A parallel lowercase `prime_time` alias is
-intentionally *not* provided because shipping both `prime_time.rda` and
-`Prime_Time.rda` would collide on case-insensitive filesystems (APFS,
-HFS+, NTFS).
-
 **Study background.** Indiana's Prime Time program, phased in beginning
 1984 to 1985 (Indiana statute; House Bill 1166 of 2001 codified the
 modern funding formula), was one of the earliest state level initiatives
@@ -610,12 +598,12 @@ pre-computed and safe to use as grouping variables; the bare `corp` and
 `class` columns are *not* unique by themselves. Class sizes range from 3
 to 28 students (median 19); schools have 1 to 8 third grade classrooms
 (median 3) and 11 to 166 students (median 65); corporations have 15 to
-808 students (median 124). Variance decomposition for the published
+756 students (median 117). Variance decomposition for the published
 outcome `nctotal` based on the three level random intercept null model
 `lmer(nctotal ~ 1 + (1 | corp_id/school_id))` gives: between-corporation
-variance 16.50, between-school within corporation variance 22.70, and
+variance 16.29, between-school within corporation variance 22.72, and
 within school residual variance 240.43, so that
-*ICC*\\\_{\mathrm{corp}}\\ \\\approx\\ 0.059,
+*ICC*\\\_{\mathrm{corp}}\\ \\\approx\\ 0.058,
 *ICC*\\\_{\mathrm{school\|corp}}\\ \\\approx\\ 0.081, and the combined
 cluster *ICC*\\\_{\mathrm{cluster}}\\ \\\approx\\ 0.140. These
 nontrivial intraclass correlations are the methodological reason
@@ -639,8 +627,9 @@ upward, the reduced form is \$\$Y\_{ijk} = \gamma\_{000} + \gamma\_{100}
 X^{(1)}\_{ijk} + \gamma\_{010} X^{(2)}\_{jk} + \gamma\_{001}
 X^{(3)}\_k + u\_{00k} + r\_{0jk} + r\_{1jk} X^{(1)}\_{ijk} +
 e\_{ijk},\$\$ which in lme4 translates to
-`lmer(Y ~ X1 + X2 + X3 + (1 + X1 | corp_id/school_id))`. See the
-examples for concrete fits.
+`lmer(Y ~ X1 + X2 + X3 + (1 + X1 | corp_id/school_id))`. The examples
+give concrete fits as commented code, which the help page therefore does
+not run; uncomment them to fit them.
 
 **Suggested benchmark uses.** The data set is intentionally rich enough
 to support a wide range of demonstrations and benchmarks, including:
@@ -706,13 +695,13 @@ Teacher perspectives on training, implementation, and pedagogy. ERIC
 document ED455220. <https://files.eric.ed.gov/fulltext/ED455220.pdf>.
 
 *Indiana statutory context.* Indiana General Assembly, House Bill 1166
-(2001). <https://archive.iga.in.gov/2001/bills/IN/IN1166.1.html>.
+(2001). `https://archive.iga.in.gov/2001/bills/IN/IN1166.1.html`.
 
 *Project STAR background and Education Week coverage.* Pate-Bain, H.,
 and Achilles, C. M. (1986). Interesting developments on class size. *Phi
 Delta Kappan, 67*, 662–665. See also Education Week, *Research: Sizing
 up small classes* (February 7, 2001),
-<https://www.edweek.org/leadership/research-sizing-up-small-classes/2001/02>.
+`https://www.edweek.org/leadership/research-sizing-up-small-classes/2001/02`.
 
 *Project STAR teacher aide null result that motivated the Prime Time
 evaluation.* Finn, J. D., Gerber, S. B., Farber, S. L., and Achilles, C.
@@ -786,160 +775,35 @@ pt_complete <- prime_time_achievement[
   analysis_vars
 ]
 
-# \donttest{
+# ----- Multilevel fits -----
+
+# The three fits below are shown but not run, because each one
+# estimates a multilevel model on the full student level file and
+# together they cost more time than a help page should take.
+# Uncomment to fit them.
+
 # Three-level null random intercept model. The variance
 # decomposition gives the corp, school | corp, and within
 # ICCs reported in the Details section.
-m_null <- lme4::lmer(nctotal ~ 1 + (1 | corp_id/school_id),
-                     data = prime_time_achievement)
-summary(m_null)
-#> Linear mixed model fit by REML ['lmerMod']
-#> Formula: nctotal ~ 1 + (1 | corp_id/school_id)
-#>    Data: prime_time_achievement
-#> 
-#> REML criterion at convergence: 90763.2
-#> 
-#> Scaled residuals: 
-#>     Min      1Q  Median      3Q     Max 
-#> -3.6512 -0.7367 -0.0133  0.7201  2.8518 
-#> 
-#> Random effects:
-#>  Groups            Name        Variance Std.Dev.
-#>  school_id:corp_id (Intercept)  22.72    4.766  
-#>  corp_id           (Intercept)  16.29    4.037  
-#>  Residual                      240.43   15.506  
-#> Number of obs: 10865, groups:  school_id:corp_id, 163; corp_id, 61
-#> 
-#> Fixed effects:
-#>             Estimate Std. Error t value
-#> (Intercept)  60.5874     0.7061    85.8
+# m_null <- lme4::lmer(nctotal ~ 1 + (1 | corp_id/school_id),
+#                      data = prime_time_achievement)
+# summary(m_null)
 
 # Level-1 (race), level-2 (ptia and classize), and level-3
 # (ses) main-effect model. Compare to Lapsley et al. (2002),
 # which fit closely related HLM specifications.
-m_main <- lme4::lmer(
-  nctotal ~ factor(race) + factor(ptia) + classize + ses +
-    (1 | corp_id/school_id),
-  data = prime_time_achievement)
-summary(m_main)
-#> Linear mixed model fit by REML ['lmerMod']
-#> Formula: nctotal ~ factor(race) + factor(ptia) + classize + ses + (1 |  
-#>     corp_id/school_id)
-#>    Data: prime_time_achievement
-#> 
-#> REML criterion at convergence: 89620.2
-#> 
-#> Scaled residuals: 
-#>     Min      1Q  Median      3Q     Max 
-#> -3.4991 -0.7372 -0.0115  0.7199  2.9917 
-#> 
-#> Random effects:
-#>  Groups            Name        Variance Std.Dev.
-#>  school_id:corp_id (Intercept)  16.24    4.029  
-#>  corp_id           (Intercept)  13.61    3.689  
-#>  Residual                      236.75   15.387  
-#> Number of obs: 10755, groups:  school_id:corp_id, 163; corp_id, 61
-#> 
-#> Fixed effects:
-#>               Estimate Std. Error t value
-#> (Intercept)   49.24631    4.49485  10.956
-#> factor(race)2 -8.26722    4.02948  -2.052
-#> factor(race)3  7.36730    4.45236   1.655
-#> factor(race)4 -3.67271    4.12163  -0.891
-#> factor(race)5 -0.30283    3.98688  -0.076
-#> factor(race)6 -1.99673    4.14749  -0.481
-#> factor(ptia)2  0.64273    0.66173   0.971
-#> factor(ptia)3 -0.56790    2.64478  -0.215
-#> classize       1.46167    0.35583   4.108
-#> ses            0.11198    0.02294   4.881
-#> 
-#> Correlation of Fixed Effects:
-#>             (Intr) fctr(r)2 fctr(r)3 fct()4 fct()5 fct()6 fctr(p)2 fctr(p)3
-#> factor(rc)2 -0.885                                                         
-#> factor(rc)3 -0.791  0.883                                                  
-#> factor(rc)4 -0.863  0.963    0.864                                         
-#> factor(rc)5 -0.885  0.986    0.893    0.965                                
-#> factor(rc)6 -0.855  0.953    0.860    0.934  0.959                         
-#> factor(pt)2 -0.183  0.000   -0.006   -0.005 -0.002 -0.004                  
-#> factor(pt)3 -0.050  0.001   -0.001    0.001 -0.002  0.000  0.126           
-#> classize    -0.183  0.009    0.011    0.000  0.006  0.001  0.265    0.011  
-#> ses         -0.377  0.023   -0.004    0.018 -0.004  0.010  0.112    0.071  
-#>             classz
-#> factor(rc)2       
-#> factor(rc)3       
-#> factor(rc)4       
-#> factor(rc)5       
-#> factor(rc)6       
-#> factor(pt)2       
-#> factor(pt)3       
-#> classize          
-#> ses         -0.090
+# m_main <- lme4::lmer(
+#   nctotal ~ factor(race) + factor(ptia) + classize + ses +
+#     (1 | corp_id/school_id),
+#   data = prime_time_achievement)
+# summary(m_main)
 
 # Cross-level interaction: ptia x ses (the published finding
 # was that aide benefit was concentrated in higher-SES
 # schools).
-m_inter <- lme4::lmer(
-  nctotal ~ factor(race) + factor(ptia) * ses + classize +
-    (1 | corp_id/school_id),
-  data = prime_time_achievement)
-summary(m_inter)
-#> Linear mixed model fit by REML ['lmerMod']
-#> Formula: nctotal ~ factor(race) + factor(ptia) * ses + classize + (1 |  
-#>     corp_id/school_id)
-#>    Data: prime_time_achievement
-#> 
-#> REML criterion at convergence: 89623.4
-#> 
-#> Scaled residuals: 
-#>     Min      1Q  Median      3Q     Max 
-#> -3.4958 -0.7366 -0.0118  0.7197  2.9910 
-#> 
-#> Random effects:
-#>  Groups            Name        Variance Std.Dev.
-#>  school_id:corp_id (Intercept)  16.39    4.049  
-#>  corp_id           (Intercept)  13.58    3.685  
-#>  Residual                      236.76   15.387  
-#> Number of obs: 10755, groups:  school_id:corp_id, 163; corp_id, 61
-#> 
-#> Fixed effects:
-#>                    Estimate Std. Error t value
-#> (Intercept)       48.659313   5.368981   9.063
-#> factor(race)2     -8.266518   4.029644  -2.051
-#> factor(race)3      7.359468   4.452546   1.653
-#> factor(race)4     -3.673089   4.121863  -0.891
-#> factor(race)5     -0.307672   3.987043  -0.077
-#> factor(race)6     -2.000371   4.147672  -0.482
-#> factor(ptia)2      1.259289   3.624373   0.347
-#> factor(ptia)3     27.518709  37.753208   0.729
-#> ses                0.118886   0.042988   2.766
-#> classize           1.461474   0.356267   4.102
-#> factor(ptia)2:ses -0.007379   0.044300  -0.167
-#> factor(ptia)3:ses -0.423564   0.568556  -0.745
-#> 
-#> Correlation of Fixed Effects:
-#>             (Intr) fctr(r)2 fctr(r)3 fct()4 fct()5 fct()6 fctr(p)2 fctr(p)3
-#> factor(rc)2 -0.741                                                         
-#> factor(rc)3 -0.662  0.883                                                  
-#> factor(rc)4 -0.720  0.963    0.864                                         
-#> factor(rc)5 -0.740  0.986    0.893    0.965                                
-#> factor(rc)6 -0.714  0.953    0.860    0.934  0.959                         
-#> factor(pt)2 -0.565  0.000   -0.003   -0.005 -0.002 -0.004                  
-#> factor(pt)3 -0.085  0.001   -0.001    0.001 -0.001  0.000  0.110           
-#> ses         -0.631  0.012   -0.004    0.006 -0.003  0.003  0.841    0.121  
-#> classize    -0.138  0.009    0.011    0.000  0.006  0.001  0.023   -0.010  
-#> fctr(pt)2:s  0.546  0.000    0.002    0.005  0.002  0.003 -0.983   -0.103  
-#> fctr(pt)3:s  0.077 -0.001    0.001   -0.001  0.001  0.000 -0.099   -0.997  
-#>             ses    classz fc()2:
-#> factor(rc)2                     
-#> factor(rc)3                     
-#> factor(rc)4                     
-#> factor(rc)5                     
-#> factor(rc)6                     
-#> factor(pt)2                     
-#> factor(pt)3                     
-#> ses                             
-#> classize    -0.070              
-#> fctr(pt)2:s -0.844  0.026       
-#> fctr(pt)3:s -0.110  0.010  0.093
-# }
+# m_inter <- lme4::lmer(
+#   nctotal ~ factor(race) + factor(ptia) * ses + classize +
+#     (1 | corp_id/school_id),
+#   data = prime_time_achievement)
+# summary(m_inter)
 ```

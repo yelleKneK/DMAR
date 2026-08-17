@@ -50,10 +50,10 @@ arc.
 - `expected`:
 
   Expected frequency under a normal distribution with mean 0 and
-  standard deviation approximately 0.2 seconds of arc. These are
-  Bessel's own normal-model expectations as reproduced in Maxwell,
-  Delaney, and Kelley (2027). Both the observed and expected columns sum
-  to 300.
+  standard deviation approximately 0.22 seconds of arc (a least squares
+  fit to the expected counts gives 0.216). These are Bessel's own
+  normal-model expectations as reproduced in Maxwell, Delaney, and
+  Kelley (2027). Both the observed and expected columns sum to 300.
 
 ## Source
 

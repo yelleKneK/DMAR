@@ -84,7 +84,7 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
 ed.). Routledge. (See Chapter 5 on the multiple-comparisons problem,
 where simultaneous confidence intervals for several means or contrasts
-are developed; Appendix Table A.2 reports SMM critical values.)
+are developed; Appendix Table A.5 reports SMM critical values.)
 
 ## See also
 

@@ -23,7 +23,7 @@ ss_aipe_icc_sensitivity(
   assurance = NULL,
   specified_N = NULL,
   conf_level = 0.95,
-  type = "ICC(1,1)",
+  type = c("ICC(1,1)", "ICC(2,1)", "ICC(3,1)", "ICC(1,k)", "ICC(2,k)", "ICC(3,k)"),
   G = 1000,
   print_iter = FALSE,
   save = FALSE,
@@ -111,14 +111,14 @@ Carlo results across the `G` replications. The `term` entries are:
 `"mean_icc"`, `"median_icc"`, `"sd_icc"` (mean / median / SD of the *G*
 observed ICC estimates); `"mean_ci_width"`, `"median_ci_width"`,
 `"sd_ci_width"` (corresponding summaries of the realized interval
-widths); `"pct_ci_less_w"` (percentage of intervals at or below the
+widths); `"pct_ci_less_w"` (proportion of intervals at or below the
 planning width `width`); `"pct_ci_miss_low"` and `"pct_ci_miss_high"`
 (tail-specific non-coverage of `true_rho`); `"total_type_I_error"`
 (overall empirical non-coverage of `true_rho`); plus the input echoes
-`"total_N"`, `"k"`, `"true_rho"`, `"estimated_rho"`, `"width"`, and
-`"conf_level"`. The ICC type is not a row; it is stored as the
-`"icc_type"` attribute on the returned object so the `value` column
-stays numeric.
+`"total_N"`, `"k"`, `"true_rho"`, `"estimated_rho"`, `"width"`,
+`"conf_level"`, and `"assurance"` (present only when an assurance was
+supplied). The ICC type is not a row; it is stored as the `"icc_type"`
+attribute on the returned object so the `value` column stays numeric.
 
 ## Details
 
@@ -148,8 +148,16 @@ so the population `ICC(2,1)` equals \\\sigma^2\_{\mathrm{subj}} /
 rater effect is fixed (centered constants), so the population `ICC(3,1)`
 equals \\\sigma^2\_{\mathrm{subj}} / (\sigma^2\_{\mathrm{subj}} +
 \sigma^2\_{\mathrm{err}})\\ but the two-way decomposition is used in the
-estimator. Within each cell, the total variance is unity by construction
-so `true_rho` maps directly to the subject-variance share.
+estimator. Within each cell, the total variance is unity by
+construction. For the single-rater forms `true_rho` therefore maps
+directly to the subject-variance share; for the average-of-\\k\\ forms
+`true_rho` is first mapped to the single-rater scale through the inverse
+Spearman-Brown relation \\\rho = \rho_k / \[k - (k - 1)\rho_k\]\\, so
+that the population ICC at the average-of-\\k\\ level equals `true_rho`.
+Coverage is checked against `true_rho` on its own scale, matching the
+scale on which
+[`icc`](https://yelleknek.github.io/DMAR/reference/icc.md) reports each
+form.
 
 ## References
 
@@ -191,6 +199,10 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
 [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md),
@@ -200,10 +212,11 @@ Other AIPE sample size planning:
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 
@@ -212,7 +225,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Reduced G and a wide target width keep this Monte Carlo example fast;
 # raise G (e.g., 1000 or more) for stable empirical-coverage estimates.
 
@@ -308,5 +320,4 @@ ss_aipe_icc_sensitivity(
 #>  conf_level         0.95  
 #> 
 #> Confidence level: 95%
-# }
 ```

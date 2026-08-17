@@ -51,9 +51,9 @@ total variance summed across all variance components.
 
 **Bonett (2002) CI.** The CI is built on the Fisher-style
 \\L\\-transformation \$\$L \\=\\ \tfrac{1}{2} \log\left(\frac{1 +
-(k - 1) \rho}{1 - \rho}\right),\$\$ with variance \\1 / (2 (n - 2))\\,
-where \\k\\ is the average cluster size and \\n\\ is the number of
-clusters. Back- transformation keeps the bounds in \\\[0, 1\]\\.
+(k - 1) \rho}{1 - \rho}\right),\$\$ with variance \\k / (2 (k - 1) (n -
+2))\\, where \\k\\ is the average cluster size and \\n\\ is the number
+of clusters. Back- transformation keeps the bounds in \\\[0, 1\]\\.
 
 **Limitations.** The Bonett CI is built on a balanced / approximately
 balanced approximation; for severely unbalanced designs the profile
@@ -85,8 +85,8 @@ Other agreement and measurement:
 [`content_validity_index()`](https://yelleknek.github.io/DMAR/reference/content_validity_index.md),
 [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
 [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
+[`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
 [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-[`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md),
 [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
 
 Other mixed models:
@@ -106,7 +106,11 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
+# Twenty groups of six, with a group-level standard deviation of 0.7 on
+# top of within-group noise with a standard deviation of 1, so the data
+# generating ICC is 0.7^2 / (0.7^2 + 1) = 0.329. The estimate below comes
+# with a wide interval: 20 clusters is not many, and the interval is what
+# keeps that fact visible.
 set.seed(113)
 n_grp <- 20; n_per <- 6
 grp <- factor(rep(1:n_grp, each = n_per))
@@ -125,5 +129,4 @@ icc_lmer(fit)
 #>  average_cluster_size 6     
 #> 
 #> Confidence level: 95%
-# }
 ```

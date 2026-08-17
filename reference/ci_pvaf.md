@@ -58,14 +58,17 @@ ci_pvaf(
 
 ## Value
 
-A 3-row `data.frame` with columns `term`, `value`, `prob_less`, and
+A 4-row `data.frame` with columns `term`, `value`, `prob_less`, and
 `prob_greater`. The `term` values are `"lower_limit"` (the lower
 confidence limit on the proportion of variance accounted for, on the
-\[0, 1\] scale), `"upper_limit"` (the upper confidence limit), and
+\[0, 1\] scale), `"pvaf"` (the sample proportion of variance accounted
+for, `df_1 * F_value / (df_1 * F_value + df_2)`, the same value that eta
+squared reports, so the point estimate sits between its confidence
+limits), `"upper_limit"` (the upper confidence limit), and
 `"actual_coverage"` (the achieved coverage probability, which equals
 `conf_level` when both tail targets are met). The `prob_less` and
 `prob_greater` columns report the achieved tail-error probabilities at
-the two limits; `NA` on the `actual_coverage` row.
+the two limits; `NA` on the `"pvaf"` and `"actual_coverage"` rows.
 
 ## Details
 
@@ -120,14 +123,13 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
 [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -150,13 +152,14 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 ## Bargman (1970) gave an example in which a 5-group ANOVA with 11 subjects in each
-## group is conducted and the observed F value is 11.2213. This example was used
+## group is conducted and the observed F value is 11.221. This example was used
 ## in Venables (1975),  Fleishman (1980), and Steiger (2004). If one wants to calculate the
 ## exact confidence interval for the proportion of variance accounted for in that example,
 ## this function can be used.
 ci_pvaf(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55)
 #>  term            value prob_less prob_greater
 #>  lower_limit     0.226 0.025     0.975       
+#>  pvaf            0.473 <NA>      <NA>        
 #>  upper_limit     0.587 0.975     0.025       
 #>  actual_coverage 0.95  <NA>      <NA>        
 #> 
@@ -165,6 +168,7 @@ ci_pvaf(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55)
 ci_pvaf(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55, conf_level = .90)
 #>  term            value prob_less prob_greater
 #>  lower_limit     0.261 0.05      0.95        
+#>  pvaf            0.473 <NA>      <NA>        
 #>  upper_limit     0.565 0.95      0.05        
 #>  actual_coverage 0.9   <NA>      <NA>        
 #> 
@@ -173,6 +177,7 @@ ci_pvaf(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55, conf_level = .90)
 ci_pvaf(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55, alpha_lower = 0, alpha_upper = .05)
 #>  term            value prob_less prob_greater
 #>  lower_limit     0     0         1           
+#>  pvaf            0.473 <NA>      <NA>        
 #>  upper_limit     0.565 0.95      0.05        
 #>  actual_coverage 0.95  <NA>      <NA>        
 #> 

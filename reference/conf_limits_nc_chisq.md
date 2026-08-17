@@ -84,7 +84,7 @@ A `data.frame` with one row per confidence limit and the columns:
 
 - prob_less:
 
-  (`verbose = TRUE`) The probability \\P(X \le \mathtt{Chi\\Square})\\
+  (`verbose = TRUE`) The probability \\P(X \le \mathtt{chi\\square})\\
   that an observation from the noncentral chi square distribution
   centered at the row's limit falls at or below the observed
   `chi_square`.
@@ -92,7 +92,7 @@ A `data.frame` with one row per confidence limit and the columns:
 - prob_greater:
 
   (`verbose = TRUE`) The complementary probability \\P(X \ge
-  \mathtt{Chi\\Square})\\. By construction this equals `alpha_lower` on
+  \mathtt{chi\\square})\\. By construction this equals `alpha_lower` on
   the `lower_limit` row and \\1 - \mathtt{alpha\\upper}\\ on the
   `upper_limit` row.
 
@@ -103,17 +103,24 @@ of a noncentral chi square distribution with `df` degrees of freedom
 whose appropriate tail at the observed `chi_square` contains the
 requested probability:
 
-- the lower limit satisfies \\P(X \ge \mathtt{Chi\\Square}) =
+- the lower limit satisfies \\P(X \ge \mathtt{chi\\square}) =
   \mathtt{alpha\\lower}\\;
 
-- the upper limit satisfies \\P(X \le \mathtt{Chi\\Square}) =
+- the upper limit satisfies \\P(X \le \mathtt{chi\\square}) =
   \mathtt{alpha\\upper}\\.
 
-Each tail probability is continuous and strictly monotone decreasing in
-the noncentrality parameter, so each limit is the unique non-negative
-root of a one-dimensional equation, located here with
-[`uniroot`](https://rdrr.io/r/stats/uniroot.html); `extendInt` is used
-to widen the search bracket if needed.
+The two conditions run in opposite directions in \\\lambda\\: the
+lower-tail probability \\P(X \le \mathtt{chi\\square})\\ is continuous
+and strictly decreasing in the noncentrality parameter, so the
+upper-tail probability \\P(X \ge \mathtt{chi\\square})\\ is continuous
+and strictly increasing in it. The lower limit is the \\\lambda\\ at
+which the upper tail has grown to `alpha_lower`, and the upper limit is
+the \\\lambda\\ at which the lower tail has shrunk to `alpha_upper`.
+Each is therefore the unique non-negative root of a one-dimensional
+equation, and both are located with
+[`uniroot`](https://rdrr.io/r/stats/uniroot.html) on the decreasing
+lower-tail scale; `extendInt` is used to widen the search bracket if
+needed.
 
 Because the noncentrality parameter is bounded below by zero, the lower
 limit is set to zero whenever the observed `chi_square` is smaller than

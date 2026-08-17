@@ -237,20 +237,23 @@ ss_aipe_crd_es_both_fixed_width(
 
 - diff_size:
 
-  Difference cluster size specification. The difference in cluster sizes
-  can be specified in two ways. First, users may specify cluster size as
-  integers, which can be negative or positive. The resulting cluster
-  sizes will be based on the estimated cluster size adding by the
-  specified vectors. For example, if the cluster size is 25, the number
-  of clusters is 10, and the specified different cluster size is
-  `c(-1, 0, 1)`, the cluster sizes will be 24, 25, 26, 24, 25, 26, 24,
-  25, 26, and 24. Second, users may specify cluster size as positive
-  decimals. The resulting cluster size will be based on the estimated
-  cluster size multiplied by the specified vectors. For example, if the
-  cluster size is 25, the number of clusters is 10, and the specified
-  different cluster size is `c(-1, 0, 1)`, the cluster sizes will be 24,
-  25, 26, 24, 25, 26, 24, 25, 26, and 24. If `NULL`, the cluster size is
-  equal across clusters
+  Difference cluster size specification. The differences in cluster
+  sizes can be specified in two ways, and the specified vector is
+  recycled across the clusters. First, users may specify differences as
+  integers, which can be negative or positive; the resulting cluster
+  sizes add the specified values to the estimated cluster size. For
+  example, if the cluster size is 25, the number of clusters is 10, and
+  `diff_size = c(-1, 0, 1)`, the cluster sizes will be 24, 25, 26, 24,
+  25, 26, 24, 25, 26, and 24. Second, users may specify multipliers of
+  the cluster size as positive decimals; at least one value must be
+  non-integer, which is what selects the multiplicative form. The
+  resulting cluster sizes multiply the estimated cluster size by the
+  specified values and round to the nearest integer. For example, if the
+  cluster size is 25, the number of clusters is 10, and
+  `diff_size = c(0.8, 1, 1.2)`, the cluster sizes will be 20, 25, 30,
+  20, 25, 30, 20, 25, 30, and 20. In either form a resulting cluster
+  size below 1 is set to 1. If `NULL`, the cluster size is equal across
+  clusters
 
 - n_clusters:
 
@@ -340,72 +343,82 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Every planner here runs an OpenMx likelihood-based Monte Carlo at each
-# step of a sample size search. How long that takes depends on what is
-# being searched over. Searching over cluster size, or over a budget, is
-# cheap and those calls run under automated checking. Searching over the
-# NUMBER OF CLUSTERS to hit a target confidence interval width evaluates
-# many candidate designs and takes minutes to tens of minutes even at a
-# small nrep, so those two calls are shown but not run; the package's tests
-# exercise them.
-# \donttest{
-# Cluster size needed for a target width, given the number of clusters.
-ss_aipe_crd_es_n_individuals_fixed_width(width = 0.3, 250, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
-#>  term                                      value
-#>  cluster_size                              2    
-#>  exp_width_of_individual-level_effect_size 0.216
-#> 
-#> Confidence level: 95%
-
-# The same design questions under a budget rather than a target width.
+# Two of these planners answer a question the budget alone settles. Given
+# what it costs to open a cluster and what it costs to collect one more
+# individual, the first reports how many clusters a budget buys at a fixed
+# cluster size and the second reports how large each cluster can be at a
+# fixed number of clusters. Clusters cost nothing to open here and each
+# individual costs 1, so the budget buys 1000 individuals and the only
+# question is how to arrange them.
 ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
-  clus_cost = 0, indiv_cost = 1, nrep = 5, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
-#>  term                                      value
-#>  necessary_n_clusters                      50   
-#>  exp_width_of_individual-level_effect_size 0.357
-#>  budget                                    1000 
+  clus_cost = 0, indiv_cost = 1)
+#>  term                 value
+#>  necessary_n_clusters 50   
+#>  budget               1000 
 #> 
 #> Confidence level: 95%
 
 ss_aipe_crd_es_n_individuals_fixed_budget(budget = 1000, n_clusters = 200,
-  clus_cost = 0, indiv_cost = 1, nrep = 5, pr_treat = 0.5, icc_Y = 0.25, es = 0.5)
-#>  term                                      value
-#>  cluster_size                              5    
-#>  exp_width_of_individual-level_effect_size 0.218
-#>  budget                                    1000 
+  clus_cost = 0, indiv_cost = 1)
+#>  term         value
+#>  cluster_size 5    
+#>  budget       1000 
 #> 
 #> Confidence level: 95%
 
-# Both the number of clusters and the cluster size, under a budget.
-ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5, indiv_cost = 1, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
-#>  term                                      value
-#>  necessary_n_clusters                      112  
-#>  cluster_size                              3    
-#>  exp_width_of_individual-level_effect_size 0.297
-#>  budget                                    896  
-#> 
-#> Confidence level: 95%
-# }
-
-if (FALSE) { # \dontrun{
-# Number of clusters needed for a target width, given the cluster size.
-ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
-
-# Both quantities under a target width.
-ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5, indiv_cost = 1, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5)
-
+# The interval width these planners can report, and every answer that
+# targets a width, rests on an a priori Monte Carlo simulation: a candidate
+# is evaluated by generating nrep data sets and reading the
+# likelihood-based confidence interval on the standardized effect size from
+# OpenMx, and the planners that search over the number of clusters evaluate
+# many candidates in turn. Those calls run for seconds to minutes apiece,
+# so they are shown below but not run; the package's tests exercise them.
+# Each one describes a population standardized effect size of 0.5, with
+# es_type = 1 putting that effect size in individual-level standard
+# deviation units and a quarter of the outcome variance lying between
+# clusters.
+#
+# Supplying nrep and the population values to a budget planner adds the
+# expected width of the interval the affordable design buys:
+#   ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
+#     clus_cost = 0, indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25,
+#     pr_treat = 0.5, nrep = 1000, seed = 113)
+#
+# Cluster size needed for a target width, given the number of clusters.
+# With 250 clusters the planner settles on the smallest cluster size it
+# will consider, two individuals per cluster, and the expected width still
+# comes in well under the target: for a contrast between conditions that
+# are assigned at the cluster level, precision is bought with clusters
+# rather than with what happens inside them.
+#   ss_aipe_crd_es_n_individuals_fixed_width(width = 0.5, n_clusters = 250,
+#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
+#     seed = 113)
+#
+# Once recruiting a cluster costs 5, the number of clusters and the cluster
+# size trade off against each other, and this planner searches the
+# combinations the budget allows for the narrowest expected interval:
+#   ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5,
+#     indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,
+#     nrep = 1000, seed = 113)
+#
+# Number of clusters needed for a target width, given the cluster size:
+#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,
+#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
+#     seed = 113)
+#
+# Both quantities under a target width, taking the least costly combination
+# that reaches it:
+#   ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5,
+#     indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,
+#     nrep = 1000, seed = 113)
+#
 # Unequal cluster sizes: diff_size gives each cluster's deviation from
 # n_individuals (additive) or its multiplicative factor.
-ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5,
-  diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))
-
-ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
-  es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 5,
-  diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))
-} # }
+#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,
+#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
+#     seed = 113, diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))
+#
+#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,
+#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
+#     seed = 113, diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))
 ```

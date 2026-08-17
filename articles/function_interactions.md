@@ -66,7 +66,7 @@ model comparison treatment. Concretely:
 # Partial r:           var_partial_r  → ss_aipe_partial_r
 # Semipartial r:       var_semipartial_r → ss_aipe_semipartial_r
 # Squared multi R:     var_R2         → ss_aipe_R2
-# Cliff's delta:       (DeLong bound) → ss_aipe_cliff_delta
+# Cliff's delta:       (max-variance bound) → ss_aipe_cliff_delta
 # omega²:              var_omega_squared → ss_aipe_omega_squared (noncentral F)
 # Cronbach alpha:      var_alpha      → ss_aipe_reliability
 # ICC:                 var_icc        → ss_aipe_icc
@@ -168,7 +168,7 @@ returns the bias-corrected estimate $`g = J(\mathit{df})\,d`$, so the
 same constant runs throughout the $`d`$-family of functions for
 consistency.
 
-## 3. Effect Size Transforms: smd ↔︎ cles ↔︎ proportion_of_superiority ↔︎ nnt
+## 3. Effect Size Transforms: `smd` ↔︎ `cles` ↔︎ `proportion_of_superiority` ↔︎ `nnt`
 
 A single standardized mean difference (Cohen’s $`d`$) can be reported on
 five common scales without losing information:
@@ -208,7 +208,7 @@ for (d in c(0.2, 0.5, 0.8)) {
 For an applied report, the same effect can be communicated on whichever
 scale is most natural for the audience without recomputing anything.
 
-## 4. Ordinal Alternatives: cliff_delta, vargha_delaney_A, probability_of_superiority_paired
+## 4. Ordinal Alternatives: `cliff_delta`, `vargha_delaney_A`, `probability_of_superiority_paired`
 
 When the dependent variable is ordinal, skewed, or you want a
 nonparametric effect size, the same role is played by U-statistic
@@ -277,11 +277,13 @@ planner is solving against.
 The package’s measurement family is small but covers the common needs:
 
 - [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md):
-  Lin’s (1989) concordance correlation, with the King-Chinchilli (2001)
-  skewness-corrected CI as the default.
-- [`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md):
-  Bland-Altman 95% limits of agreement with the Carkeet (2015) exact
-  noncentral *t* CIs on the limits.
+  Lin’s (1989) concordance correlation, with the CI built on Lin’s
+  *z*-transformed standard error.
+- [`loa()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md):
+  Bland-Altman 95% limits of agreement with the Carkeet
+  2015. exact tolerance-factor CIs, by default for the limits considered
+        as a pair (his recommended construction), with the per-limit
+        noncentral *t* form as `method = "individual"`.
 - [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md):
   Burdick-Graybill (1992) modified-large- sample CIs on variance
   components, the standard tool in generalizability theory (Brennan,
@@ -386,7 +388,7 @@ var_smd(delta = 0.5, n_1 = 50, n_2 = 50)
 # 1. AIPE planner (raw-scale Olkin-Finn variance):
 ss_aipe_partial_r(rho = 0.30, J = 3, width = 0.20)
 
-# 2. Same plan on the Fisher-z scale (Bonett 2008):
+# 2. Same plan on the Fisher's Z scale (Bonett 2008):
 ss_aipe_partial_r(rho = 0.30, J = 3, width = 0.20, fisher_z = TRUE)
 
 # 3. Variance utility: what SE would result at the recommended n?

@@ -226,8 +226,7 @@ speed, memory, and reasoning ability blocks and multiple group analyses
 across the Pasteur and Grant-White schools.
 
 The values in `holzinger_swineford` are the corrected version of the
-data, identical on all 26 test cells to
-[`MBESS::HS`](https://rdrr.io/pkg/MBESS/man/HS.html) from MBESS version
+data, identical on all 26 test cells to `MBESS::HS` from MBESS version
 4.9.3 onward and to `psychTools::holzinger.raw`. An older version of the
 data, with approximately 53 cell values that were later corrected,
 continues to circulate as `HS.data` in the sem package and as
@@ -236,12 +235,6 @@ snapshots taken from MBESS version 4.6.0 prior to the correction. The
 corrections are concentrated on the memory and reasoning tests, with the
 largest cluster on `t20_deduction` (15 cells, including a number of sign
 flips that reflect a corrected guessing-penalty adjustment).
-
-The shorter name `HS_Data` is provided as an alias for users who prefer
-the MBESS-era abbreviation. The alias is an active binding to the same
-data frame, so the bare name `HS_Data` works after
-[`library(DMAR)`](https://kenkelley.org); `data(HS_Data)` does not apply
-to an alias binding (use `data(holzinger_swineford)`).
 
 ## References
 
@@ -321,8 +314,4 @@ joreskog_subset <- subset(
 )
 dim(joreskog_subset)
 #> [1] 145   9
-
-# HS_Data is an alias for the same object.
-identical(holzinger_swineford, HS_Data)
-#> [1] TRUE
 ```

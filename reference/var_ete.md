@@ -91,6 +91,28 @@ is strong. The square root of the returned value is the standard error
 used for a confidence interval or test of the treatment effect at the
 chosen covariate value.
 
+At the sample grand mean of the covariate, writing \\N = n_1 + n_2\\,
+the population variance (their Equation 10) is \$\$\mathrm{Var} =
+\sigma^2 C_0 + \frac{(\beta_1 - \beta_2)^2 \sigma^2_Z}{N}, \qquad C_0 =
+\frac{1}{n_1} + \frac{1}{n_2} + \frac{n_2}{N n_1 (n_1 - 3)} +
+\frac{n_1}{N n_2 (n_2 - 3)},\$\$ and with `type = "sample"` the returned
+value is their unbiased estimator (Equation C.7), which subtracts
+\\\sigma^2 \\(N-3)/(n_1-3) + (N-3)/(n_2-3)\\ / \\N (N-1)\\\\ so that
+plugging in sample estimates does not overstate the variance. The
+`covariate_value = "sd"` expressions are their Equations 12 and C.9,
+which add the variance contribution of estimating the covariate's
+standard deviation, and the `"fixed"` expressions are their Equations 14
+and C.10.
+
+The two `"fixed"` estimands differ in where the deviation of
+`fixed_value` is measured from. With `type = "sample"` the deviation is
+taken from the sample grand mean (Equation C.10), so `mu_Z` should be
+the sample mean of the covariate. With `type = "population"` the
+deviation is taken from a known population mean (Equation 14);
+evaluating the treatment effect at that known mean itself, as in the
+paper's worked example, sets `fixed_value = mu_Z`, which zeroes the
+deviation term.
+
 ## References
 
 Kelley, K. (2007a). Confidence intervals for standardized effect sizes:

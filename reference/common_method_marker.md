@@ -2,13 +2,17 @@
 
 The marker-variable technique of Lindell and Whitney (2001) estimates
 common method variance from the correlation of a *marker* variable that
-is theoretically unrelated to the substantive constructs: any non-zero
-correlation it shows is attributed to shared method, and that amount is
-partialled out of the substantive correlations. When no a priori marker
-is available, the smallest positive correlation among the substantive
-items is used as a proxy, the common marker-free variant of the method.
-Correlations that survive the adjustment are evidence that a
-relationship is not an artifact of method variance.
+is theoretically unrelated to at least one of the substantive variables:
+any non-zero correlation it shows with that variable is attributed to
+shared method, and that amount is partialled out of the substantive
+correlations. When no a priori marker is available, the smallest
+positive correlation among the substantive items is used as a proxy, the
+common marker-free variant of the method. A correlation that remains
+statistically significant after the adjustment, by the paper's *t* test
+of the adjusted correlation with \\N - 3\\ degrees of freedom (their
+Equation 5), is evidence that the relationship is not an artifact of
+method variance; the test is applied by the user, since this function
+works from the correlation matrix alone and does not take \\N\\.
 
 ## Usage
 
@@ -39,10 +43,15 @@ attribute.
 
 Writing \\r_M\\ for the marker (or proxy) correlation, each substantive
 correlation is adjusted as \\r^{A}\_{ij} = (r\_{ij} - r_M) / (1 - r_M)\\
-(Lindell & Whitney, 2001, Equation 3). The CMV-adjusted correlation
+(Lindell & Whitney, 2001, Equation 4). The CMV-adjusted correlation
 matrix is returned as the `"adjusted"` attribute; the reported table
 summarizes the marker correlation and the average absolute correlation
 before and after adjustment.
+
+The method presumes the variables are reflected so that their
+intercorrelations are positive; a negative substantive correlation is
+pushed further from zero by the adjustment rather than attenuated, so
+reverse-code as needed before adjusting.
 
 ## References
 

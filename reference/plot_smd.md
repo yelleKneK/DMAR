@@ -130,8 +130,10 @@ Other plotting:
 [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
 [`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
 [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
 [`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md),
@@ -142,7 +144,7 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -150,7 +152,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -171,26 +172,24 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # From a known effect size and sample sizes.
 plot_smd(smd = 0.50, n_1 = 50, n_2 = 50)
 
 
-# From raw data.
-set.seed(113)
-g1 <- rnorm(40, mean = 0.6, sd = 1)
-g2 <- rnorm(40, mean = 0.0, sd = 1)
-plot_smd(group_1 = g1, group_2 = g2)
+# The variations below are not run, since the call above already shows
+# the default display and each additional figure has to be drawn. From
+# raw data, where the standardized mean difference and both sample
+# sizes are taken from the data:
+# set.seed(113)
+# g1 <- rnorm(40, mean = 0.6, sd = 1)
+# g2 <- rnorm(40, mean = 0.0, sd = 1)
+# plot_smd(group_1 = g1, group_2 = g2)
 
+# Without the confidence interval or the sample size annotations:
+# plot_smd(smd = 0.80, show_ci = FALSE, show_n = FALSE)
 
-# Without the CI or sample size annotations.
-plot_smd(smd = 0.80, show_ci = FALSE, show_n = FALSE)
-
-
-# Custom group labels and title.
-plot_smd(smd = 0.45, n_1 = 75, n_2 = 75,
-         group_labels = c("Treatment", "Control"),
-         title = "Treatment Effect on Reading Scores")
-
-# }
+# Custom group labels and title:
+# plot_smd(smd = 0.45, n_1 = 75, n_2 = 75,
+#          group_labels = c("Treatment", "Control"),
+#          title = "Treatment Effect on Reading Scores")
 ```

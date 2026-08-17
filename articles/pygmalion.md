@@ -120,7 +120,7 @@ print_anova(anova(fit_add, fit_het))
 #> 2    306 53649.49  1  680.1436 3.879327 0.0498
 ```
 
-## A Tidy ANCOVA with `ancova()`
+## A Tidy ANCOVA With `ancova()`
 
 [`DMAR::ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md)
 returns the adjusted (covariate-corrected) cell means, the omnibus *F*
@@ -156,8 +156,7 @@ as_kable(res)
 | df_homogeneity_of_regression | 1        |
 | p_homogeneity_of_regression  | 0.0498   |
 
-Confidence level: 95% {.table .table
-style="width: auto !important; margin-left: auto; margin-right: auto;"}
+Confidence level: 95% {.table}
 
 Note that the `F_homogeneity_of_regression` row reproduces the 1-df
 interaction test above, and that the adjusted means come from the

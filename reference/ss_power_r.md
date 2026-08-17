@@ -3,7 +3,7 @@
 Determine the necessary sample size to achieve a desired level of
 statistical power for the test of a Pearson correlation against a null
 value (typically zero), or, given a sample size, return the realized
-statistical power. The computation uses the Fisher *z* transformation,
+statistical power. The computation uses the Fisher's *Z* transformation,
 which has a near-normal sampling distribution.
 
 ## Usage
@@ -90,9 +90,9 @@ contrasts.)
 
 ## See also
 
-[`ci_cc`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
-[`convert_r_z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md),
-[`convert_z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
+[`convert_r_Z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md),
+[`convert_Z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
 for what a chosen design delivers: power, the Type S (sign) and Type M
@@ -102,7 +102,6 @@ confidence interval width.
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),

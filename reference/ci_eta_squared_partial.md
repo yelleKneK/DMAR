@@ -116,14 +116,13 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -153,18 +152,18 @@ ci_eta_squared_partial(F_value = 11.221, df_effect = 4,
 #>  N 
 #>  55
 
-# Factorial ANOVA: per-effect partial eta squared with CI.
-fit <- aov(breaks ~ wool * tension, data = warpbreaks)
+# Two-factor ANOVA: per-effect partial eta squared with CI for the
+# manipulated expectancy treatment and the measured grade
+# classification (pygmalion data, N = 310). The treatment by grade
+# interaction is weak here (F = 1.19), so the additive model is used.
+fit <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
 ci_eta_squared_partial(fit)
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution; the lower noncentrality limit has been clamped to 0 and the reported 'prob_greater' on the lower_limit row reflects the actual upper-tail probability at lambda = 0.
-#>  effect       eta_squared_partial lower_limit upper_limit F_value df_effect
-#>  wool         0.0727              0           0.222       3.77    1        
-#>  tension      0.261               0.0558      0.411       8.5     2        
-#>  wool:tension 0.149               0.00191     0.298       4.19    2        
-#>  df_error N 
-#>  48       54
-#>  48       54
-#>  48       54
+#>  effect        eta_squared_partial lower_limit upper_limit F_value df_effect
+#>  treatment     0.0211              0.00102     0.0619      6.52    1        
+#>  factor(grade) 0.044               0.00113     0.082       2.79    5        
+#>  df_error N  
+#>  303      310
+#>  303      310
 
 # Within-subjects ANOVA.
 set.seed(113)

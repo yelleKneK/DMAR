@@ -104,7 +104,7 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -112,7 +112,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md),
@@ -145,8 +144,9 @@ ci_rmsea(rmsea = .055, df = 40, N = 425, conf_level = .95)
 # 2. The 90 percent CI is the conventional choice when interpretation
 #    will follow the Browne and Cudeck (1993) close fit decision rule
 #    (the test of H_0: RMSEA <= 0.05 vs. the upper CI limit). Here the
-#    upper limit lands below 0.05, which is the close fit threshold
-#    Browne and Cudeck recommend.
+#    upper limit is 0.052, just above the close fit threshold of 0.05
+#    that Browne and Cudeck recommend, so close fit is not established
+#    even though the point estimate sits comfortably below it.
 ci_rmsea(rmsea = .035, df = 40, N = 425, conf_level = .90)
 #>  term        value 
 #>  lower_limit 0.0147

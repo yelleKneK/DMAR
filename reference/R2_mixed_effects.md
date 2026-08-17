@@ -107,10 +107,13 @@ intercept variance component, so the two paths agree.
 Generalized linear mixed models introduce a distribution-specific
 variance term and are not handled by this function.
 
-**The bootstrap interval.** With `ci_method = "boot"` the interval comes
-from a parametric bootstrap
+**The bootstrap interval.** The default `ci_method = "none"` reports the
+two point estimates alone, so the bootstrap is what to ask for when the
+marginal and conditional \\R^2\\ are to be reported with an interval and
+the refits it costs are affordable. With `ci_method = "boot"` the
+interval comes from a parametric bootstrap
 ([`bootMer`](https://rdrr.io/pkg/lme4/man/bootMer.html)): each of the
-`R` replicates (1000 by default) simulates a new response vector from
+`B` replicates (1000 by default) simulates a new response vector from
 the fitted model, refits the model, and recomputes the two \\R^2\\
 values. The unit of resampling is therefore a whole simulated data set
 drawn from the estimated model, not a resampled set of cases. Only the
@@ -150,8 +153,8 @@ Other agreement and measurement:
 [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
 [`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md),
 [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
+[`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
 [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-[`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md),
 [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
 
 Other mixed models:
@@ -171,14 +174,23 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 fit <- lme4::lmer(Reaction ~ Days + (Days | Subject),
                   data = lme4::sleepstudy)
+
+# Marginal R2 is the proportion of variance the fixed effects account for;
+# conditional R2 adds what the random effects account for, so the gap
+# between the two is what the subject-level terms buy.
 R2_mixed_effects(fit)
 #>  term           value
 #>  R2_marginal    0.279
 #>  R2_conditional 0.799
 #> 
 #> Confidence level: 95%
-# }
+
+# A bootstrap interval is available through ci_method = "boot". It refits
+# the model once per replication, so it is not run here; the call is
+#   R2_mixed_effects(fit, ci_method = "boot", B = 1000, seed = 113)
+# where B = 1000 is the default and seed is supplied because the limits
+# otherwise move from run to run. Raise B when the Monte Carlo error of
+# the reported limits needs to be smaller.
 ```

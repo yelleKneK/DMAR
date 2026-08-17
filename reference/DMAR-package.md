@@ -1,23 +1,23 @@
 # Design, Measurement, and Analysis in R
 
-A modern R package for design, measurement, and analysis in
-human-centered research, with special strength in effect sizes,
-confidence intervals, sample size planning, reliability and agreement,
-mediation analysis, equivalence testing, meta-analysis, experimental and
-quasi-experimental designs, repeated measures, and model
-comparison-based inference. DMAR (pronounced “Dee-Mar”) is heavily
-methodological in nature, drawing on the psychometric and statistical
-traditions, and is aligned with the methodological and applied research
-program of the author. Much of the package traces to the author's
-methodological work and collaborations, including sample size planning
-via accuracy in parameter estimation (AIPE; Kelley & Maxwell, 2003;
-Kelley & Rausch, 2006; Maxwell, Kelley, & Rausch, 2008), the definition
-and communication of effect sizes (Kelley & Preacher, 2012; Preacher &
-Kelley, 2011), and the model comparison perspective of Maxwell, Delaney,
-and Kelley (2027). It aims to be methodologically sound and particularly
-well-suited to research in which the independent or dependent variables
-involve the person, across psychology, sociology, education, management,
-marketing, and information systems.
+A modern R package for design, measurement, and analysis, with special
+strength in effect sizes, confidence intervals, size planning,
+reliability and agreement, mediation analysis, equivalence testing,
+meta-analysis, experimental and quasi-experimental designs, repeated
+measures, and model comparison-based inference. DMAR (pronounced
+“Dee-Mar”) is heavily methodological in nature, drawing on the
+psychometric and statistical traditions, and is aligned with the
+methodological and applied research program and interests of the author.
+Many aspects of the package traces to the author's methodological work
+and collaborations, including sample size planning via accuracy in
+parameter estimation (AIPE; Kelley & Maxwell, 2003; Kelley & Rausch,
+2006; Maxwell, Kelley, & Rausch, 2008), the definition and communication
+of effect sizes (Kelley & Preacher, 2012; Preacher & Kelley, 2011), and
+the model comparison perspective of Maxwell, Delaney, and Kelley (2027).
+It aims to be methodologically sound and particularly well-suited to
+research in which the independent or dependent variables involve the
+person, across psychology, sociology, education, behavioral economics,
+management, marketing, and information systems.
 
 ## Details
 
@@ -39,13 +39,10 @@ tables, and a small number of scalar utilities such as `skewness` and
 and opinionated, and is designed for clarity and reproducibility.
 
 DMAR builds heavily on the MBESS package (Kelley, 2007a, 2007b), which
-has been on CRAN for about two decades. MBESS was originally framed for
-the behavioral, educational, and social sciences, but its use has grown
-well beyond that scope; DMAR is a more modern, more general, and greatly
-expanded reimagining that reflects how the methods are now applied. The
-notational and programming changes were too extensive to ship under the
-MBESS name without breaking compatibility, so the work ships under a new
-name; MBESS itself remains stable.
+has been on CRAN for more than two decades. MBESS was originally framed
+for the behavioral, educational, and social sciences, but its use has
+grown well beyond that scope; DMAR is quite general, though especially
+well-aligned with human-centered research.
 
 **Function families.** A user-facing tour:
 
@@ -59,10 +56,10 @@ name; MBESS itself remains stable.
 
 - Confidence intervals on effect sizes:
 
-  `ci_smd`, `ci_smd_c`, `ci_R2`, `ci_r`, `ci_rc`, `ci_src`,
+  `ci_smd`, `ci_smd_c`, `ci_R2`, `ci_R`, `ci_rc`, `ci_src`,
   `ci_eta_squared` (and partial / generalized variants),
   `ci_omega_squared`, `ci_pvaf`, `ci_snr`, `ci_srsnr`, `ci_mahalanobis`,
-  `ci_eigenvalue`, `ci_cv`, `ci_sm`, `ci_reg_coef`, `ci_cc`, `ci_rmsea`.
+  `ci_eigenvalue`, `ci_cv`, `ci_sm`, `ci_reg_coef`, `ci_r`, `ci_rmsea`.
 
 - Maximum likelihood regression:
 
@@ -81,7 +78,7 @@ name; MBESS itself remains stable.
   implied or observed total-variance denominator, and a
   `reliability_omega_categorical` for ordered items),
   `reliability_kr20`, `reliability_H`, `cohen_kappa`, `fleiss_kappa`,
-  `krippendorff_alpha`, `gwet_ac`, `loa`.
+  `krippendorff_alpha`, `gwet_ac`, `limits_of_agreement`.
 
 - Mediation:
 
@@ -94,7 +91,7 @@ name; MBESS itself remains stable.
 
 - Confirmatory factor and SEM tools:
 
-  `cfa_1`, `cov_sem`, `covmat_from_cfm`, `compare_cov_structures`.
+  `cfa_1`, `cov_sem`, `covmat_from_cfa`, `compare_cov_structures`.
 
 - Sample size planning (AIPE):
 
@@ -115,16 +112,16 @@ name; MBESS itself remains stable.
 - Critical values and tests:
 
   `cv_t`, `cv_z`, `cv_smm`, `cv_scheffe`, `cv_tukey_hsd`, `cv_dunnett`,
-  `dunnett_ci`, `tukey_kramer_ci`, `scheffe_ci`, `welch_t`,
+  `ci_dunnett`, `ci_tukey_kramer`, `ci_scheffe`, `welch_t`,
   `summary_t_test`, `correlations_test`, `power_fisher_exact`,
-  `randomization_test_paired`, `tost_smd`, `tost_r`,
+  `randomization_test_paired`, `equivalence_smd`, `equivalence_r`,
   `power_equivalence_md`.
 
 - Parameterization conversions:
 
   `convert_R2_f` / `convert_f_R2`, `convert_R2_lambda` /
   `convert_lambda_R2`, `convert_delta_lambda` / `convert_lambda_delta`,
-  `convert_r_z` / `convert_z_r`, `convert_cor_cov`.
+  `convert_r_Z` / `convert_Z_r`, `convert_cor_cov`.
 
 - Visualization:
 
@@ -133,8 +130,8 @@ name; MBESS itself remains stable.
 
 - Multilevel and clustering:
 
-  `icc`, `icc_lmer`, `variance_components_mls`, `deft` (Kish design
-  effect), `ss_aipe_crd_*`.
+  `icc`, `icc_lmer`, `variance_components_mls`, `design_effect` (Kish
+  design effect), `ss_aipe_crd_*`.
 
 - Data sets:
 
@@ -142,14 +139,13 @@ name; MBESS itself remains stable.
   astronomical observation errors), `diagnosis_agreement` (Cohen's 1968
   weighted kappa illustration), `drinks_trial` (Smith, Meyers, and
   Delaney's 1998 Community Reinforcement Approach drinking trial),
-  `holzinger_swineford` (the 1939 factor analysis study, with `HS_Data`
-  alias), `prime_time_achievement` (the Indiana Prime Time third grade
-  achievement evaluation, with `Prime_Time` alias), `pygmalion`
-  (Rosenthal and Jacobson's 1968 teacher-expectancy data),
-  `teacher_expectancy` (Raudenbush's 1984 meta-analysis of 18
-  teacher-expectancy experiments), and `test_market` (Bryant and
-  Bruvold's 1980 controlled test-market experiment for ANCOVA with a
-  random covariate).
+  `holzinger_swineford` (the 1939 factor analysis study),
+  `prime_time_achievement` (the Indiana Prime Time third grade
+  achievement evaluation), `pygmalion` (Rosenthal and Jacobson's 1968
+  teacher-expectancy data), `teacher_expectancy` (Raudenbush's 1984
+  meta-analysis of 18 teacher-expectancy experiments), and `test_market`
+  (Bryant and Bruvold's 1980 controlled test-market experiment for
+  ANCOVA with a random covariate).
 
 **Feedback.** Bug reports, feature requests, and suggestions for new
 methods are welcomed by email to Ken Kelley <kkelley@nd.edu> (please put

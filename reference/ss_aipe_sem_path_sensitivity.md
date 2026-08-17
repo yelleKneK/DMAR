@@ -94,14 +94,19 @@ ss_aipe_sem_path_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the a priori
-Monte Carlo study. The `term` entries are `"total_N"` (the planned *N*),
-`"desired_width"` (target CI width), `"mean_width"` and `"median_width"`
-(realized CI width distribution across the `G` replications),
-`"width_less_than_desired"` (proportion of realized widths at or below
-`desired_width`), `"type_I_err_upper"` and `"type_I_err_lower"`
-(tail-specific empirical Type I error rates), `"type_I_err"` (overall
-empirical Type I error rate), `"conf_level"`, and `"suc_rep"` (number of
-converged replications).
+Monte Carlo study. The `term` entries are: `"mean_path"`,
+`"median_path"`, `"sd_path"` (summaries of the realized estimates of the
+targeted path across the converged replications); `"mean_ci_width"`,
+`"median_ci_width"`, `"sd_ci_width"` (summaries of the realized interval
+widths); `"pct_ci_less_w"` (proportion of realized widths at or below
+`desired_width`); `"pct_ci_miss_low"` and `"pct_ci_miss_high"`
+(tail-specific empirical non-coverage of the population path);
+`"total_type_I_error"` (overall empirical non-coverage, the sum of the
+two tails); and the echoes `"suc_rep"` (number of converged
+replications), `"total_N"` (the *N* evaluated), `"true_path"` (the
+population value of the targeted path under `true_Sigma`), `"width"`,
+`"conf_level"`, and `"assurance"` (present only when an assurance was
+supplied). The proportion rows are on the 0 to 1 scale, not percentages.
 
 ## Details
 
@@ -162,38 +167,52 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
-set.seed(113)
-pop_model <- "
-  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-  f2 ~ 0.5*f1
-  f1 ~~ 1*f1
-  f2 ~~ 0.75*f2
-  y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
-  y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
-"
-Sigma <- cov_sem(pop_model)$sigma_theta
-analysis_model <- "
-  f1 =~ y1 + y2 + y3
-  f2 =~ y4 + y5 + y6
-  f2 ~ b*f1
-"
-ss_aipe_sem_path_sensitivity(model = analysis_model, est_Sigma = Sigma,
-                             true_Sigma = Sigma, which_path = "b",
-                             desired_width = 0.30, N = 150, G = 25)
-#>  term                    value
-#>  total_N                 150  
-#>  desired_width           0.3  
-#>  mean_width              0.409
-#>  median_width            0.401
-#>  width_less_than_desired 0    
-#>  type_I_err_upper        0.04 
-#>  type_I_err_lower        0.04 
-#>  type_I_err              0.08 
-#>  conf_level              0.95 
-#>  suc_rep                 25   
-#> 
-#> Confidence level: 95%
-# }
+# This function is itself a Monte Carlo study: it plans a sample size and
+# then fits the analysis model to G freshly simulated data sets, so even a
+# modest G takes long enough that the worked example below is shown here
+# rather than run.
+#
+# The planning values a researcher would bring to ss_aipe_sem_path():
+# each factor is measured by three indicators, each with a residual
+# variance of 0.5.
+#   planning_model <- "
+#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+#     f2 ~ 0.5*f1
+#     f1 ~~ 1*f1
+#     f2 ~~ 0.75*f2
+#     y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+#     y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+#   "
+#
+# The population the study will actually sample from: the same structural
+# path of 0.5, but noisier indicators than the planning values assumed,
+# with residual variances of 0.8.
+#   true_model <- "
+#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+#     f2 ~ 0.5*f1
+#     f1 ~~ 1*f1
+#     f2 ~~ 0.75*f2
+#     y1 ~~ 0.8*y1; y2 ~~ 0.8*y2; y3 ~~ 0.8*y3
+#     y4 ~~ 0.8*y4; y5 ~~ 0.8*y5; y6 ~~ 0.8*y6
+#   "
+#
+#   analysis_model <- "
+#     f1 =~ y1 + y2 + y3
+#     f2 =~ y4 + y5 + y6
+#     f2 ~ b*f1
+#   "
+#
+#   est_Sigma <- cov_sem(planning_model)$sigma_theta
+#   true_Sigma <- cov_sem(true_model)$sigma_theta
+#
+# The sample size planned from the optimistic measurement quality is
+# evaluated against the population that actually holds: the realized
+# intervals are wider than desired, and few of them meet the target.
+#   set.seed(113)
+#   ss_aipe_sem_path_sensitivity(model = analysis_model,
+#                                est_Sigma = est_Sigma,
+#                                true_Sigma = true_Sigma, which_path = "b",
+#                                desired_width = 0.30, G = 1000)
 ```

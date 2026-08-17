@@ -2,13 +2,13 @@
 
 Computes \\\mathrm{E}\[r\_{XY \cdot Z_1 \cdots Z_J} \mid \rho, n, J\]\\,
 the exact expected value of the sample partial Pearson correlation
-coefficient under multivariate normality, generalizing the Olkin-Pratt
+coefficient under multivariate normality, applying the Olkin-Pratt
 (1958) / Hotelling (1953) result for the simple Pearson correlation to
-the partial-correlation setting (Olkin & Finn, 1995). Like the simple
-*r*, the partial *r* is downward-biased as an estimator of the
-population partial correlation \\\rho\_{XY \cdot Z}\\, with the
-magnitude of the bias growing in the number of controls \\J\\ and
-shrinking in the sample size \\n\\.
+the partial-correlation setting, an extension Olkin and Pratt (1958,
+Section 2.3) give themselves. Like the simple *r*, the partial *r* is
+downward-biased as an estimator of the population partial correlation
+\\\rho\_{XY \cdot Z}\\, with the magnitude of the bias growing in the
+number of controls \\J\\ and shrinking in the sample size \\n\\.
 
 ## Usage
 
@@ -43,10 +43,10 @@ A `data.frame` with one row per (`rho`, `n`, `J`) input and the columns
 The formula is the same as for the simple *r* but with the degrees of
 freedom reduced from \\n\\ to \\n - J\\: \$\$\mathrm{E}\[r\_{XY \cdot Z}
 \mid \rho\_{XY \cdot Z}, n, J\] \\=\\ \rho\_{XY \cdot Z} \\\cdot\\
-{}\_2F_1\\\left(\tfrac{1}{2},\\ \tfrac{1}{2};\\ \tfrac{n - J - 1}{2};\\
+{}\_2F_1\\\left(\tfrac{1}{2},\\ \tfrac{1}{2};\\ \tfrac{n - J + 1}{2};\\
 \rho\_{XY \cdot Z}^{\\2}\right) \\\cdot\\ \frac{\Gamma\\\left(\tfrac{n -
-J - 1}{2}\right)^2} {\Gamma\\\left(\tfrac{n - J - 2}{2}\right)\\
-\Gamma\\\left(\tfrac{n - J}{2}\right)}.\$\$
+J}{2}\right)^2} {\Gamma\\\left(\tfrac{n - J - 1}{2}\right)\\
+\Gamma\\\left(\tfrac{n - J + 1}{2}\right)}.\$\$
 
 `expected_partial_r()` is especially useful at the *design stage*:
 sample size plans that assume \\\rho\_{XY \cdot Z}\\ as the value to be
@@ -56,20 +56,26 @@ the partial correlation by an amount that grows in \\J\\.
 **Generalization of Olkin-Pratt.** Under multivariate normality, the
 partial correlation \\r\_{XY \cdot Z}\\ computed from a sample of size
 \\n\\ has the same sampling distribution as a simple Pearson correlation
-from a sample of size \\n - J\\ (Anderson, 2003, Section 4.3). The bias
+from a sample of size \\n - J\\ (Anderson, 2003, Theorem 4.3.5, Section
+4.3.2, p. 143, who credits the derivation to Fisher, 1924). The bias
 formula for the simple *r* (Hotelling, 1953; Olkin & Pratt, 1958)
 therefore applies directly to the partial *r* with the substitution \\n
 \to n - J\\. The Olkin-Pratt (1958) unbiased estimator extends in the
 same way: given an observed \\r\_{XY \cdot Z}\\, the unbiased estimator
 of \\\rho\_{XY \cdot Z}\\ is \\r \cdot {}\_2F_1(1/2, 1/2; (n - J - 2)/2;
-1 - r^2)\\ (Olkin & Finn, 1995).
+1 - r^2)\\ (Olkin & Pratt, 1958, Section 2.3, where the partial
+correlation is shown to have the simple correlation's density at the
+reduced sample size, so their estimator applies with that substitution).
 
-**Magnitude of the bias.** To leading order (Olkin & Finn, 1995,
-equation 11): \$\$\mathrm{E}\[r\_{XY \cdot Z}\] - \rho\_{XY \cdot Z}
-\\\approx\\ -\rho\_{XY \cdot Z} (1 - \rho\_{XY \cdot Z}^2) / \[2 (n -
-J - 1)\].\$\$ For \\\rho\_{XY \cdot Z} = 0.4\\, \\n = 30\\, \\J = 2\\,
-the bias is about \\-0.006\\; for \\n = 30\\, \\J = 10\\, about
-\\-0.009\\.
+**Magnitude of the bias.** To leading order, from Hotelling's (1953)
+expansion of the simple-correlation expectation applied at the reduced
+sample size: \$\$\rho\_{XY \cdot Z} - \mathrm{E}\[r\_{XY \cdot Z}\]
+\\\approx\\ \rho\_{XY \cdot Z} (1 - \rho\_{XY \cdot Z}^2) / \[2 (n - J -
+1)\],\$\$ matching the sign convention of the returned `bias` column,
+\\\rho\_{XY \cdot Z} - \mathrm{E}\[r\_{XY \cdot Z}\]\\, which is
+positive for positive \\\rho\_{XY \cdot Z}\\. For \\\rho\_{XY \cdot Z} =
+0.4\\, \\n = 30\\, \\J = 2\\, the exact bias is about \\+0.00624\\; for
+\\n = 30\\, \\J = 10\\, about \\+0.00888\\.
 
 **Tuning the series convergence.** The underlying \\{}\_2F_1\\ series is
 summed by forward recurrence and stops when the relative contribution
@@ -82,15 +88,15 @@ users almost never need to change them.
 ## References
 
 Anderson, T. W. (2003). *An introduction to multivariate statistical
-analysis* (4th ed.), Sections 4.2 and 4.3. Wiley.
+analysis* (3rd ed.), Sections 4.2 and 4.3. Wiley. (Theorem 4.3.5,
+Section 4.3.2, p. 143: the sample partial correlation based on \\N\\
+observations, with \\J\\ variables partialled out, has cdf \\F\[r \mid
+N - J, \rho\]\\; Anderson writes the count of partialled variables as
+\\p - q\\.)
 
 Hotelling, H. (1953). New light on the correlation coefficient and its
 transforms. *Journal of the Royal Statistical Society, Series B, 15*(2),
 193–232.
-
-Olkin, I., & Finn, J. D. (1995). Correlations redux. *Psychological
-Bulletin, 118*(1), 155–164.
-[doi:10.1037/0033-2909.118.1.155](https://doi.org/10.1037/0033-2909.118.1.155)
 
 Olkin, I., & Pratt, J. W. (1958). Unbiased estimation of certain
 correlation coefficients. *The Annals of Mathematical Statistics,
@@ -140,9 +146,8 @@ expected_partial_r(rho = 0.4, n = 30, J = c(1, 2, 5, 10, 20))
 #>  0.4 30 10 0.391              0.00888 0.0222       
 #>  0.4 30 20 0.381              0.0187  0.0469       
 
-# 3. Reduces to expected_r() when J = 1 ... 0:
-#        ("partialing zero variables" is the simple correlation case
-#        with one fewer df by convention; see Anderson (2003).)
+# 3. Partialing J = 1 variable at n = 11 is distributed exactly as a
+#    simple correlation at n = 10 (Anderson, 2003, Theorem 4.3.5):
 expected_partial_r(rho = 0.5, n = 11, J = 1)$expected_partial_r
 #> [1] 0.4786588
 expected_r(rho = 0.5, n = 10)$expected_r

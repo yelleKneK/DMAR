@@ -58,8 +58,8 @@ Borenstein, M., Hedges, L. V., Higgins, J. P. T., & Rothstein, H. R.
 [`convert_or_d`](https://yelleknek.github.io/DMAR/reference/convert_d_or.md)
 for the odds ratio leg of the same triangle;
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md) and
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md) for
-estimating the quantities being converted.
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+for estimating the quantities being converted.
 
 Other parameterization conversions:
 [`convert_F_chisq()`](https://yelleknek.github.io/DMAR/reference/convert_F_chisq.md),

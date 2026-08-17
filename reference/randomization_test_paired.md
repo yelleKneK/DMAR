@@ -1,6 +1,6 @@
 # Paired-Samples Randomization (Sign-Flip) Test
 
-Computes an exact (or Monte-Carlo) sign-flip randomization test for
+Computes an exact (or Monte Carlo) sign-flip randomization test for
 paired observations \\(x_i, y_i)\\, treating the within-pair sign of
 \\d_i = y_i - x_i\\ as the randomization mechanism (Fisher, 1971;
 Edgington & Onghena, 2007). Under the null hypothesis of exchangeability
@@ -14,7 +14,7 @@ randomization_test_paired(
   x,
   y,
   statistic = c("mean", "t"),
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two_sided", "less", "greater"),
   exact = NULL,
   n_resamples = 10000L,
   seed = NULL
@@ -36,18 +36,19 @@ randomization_test_paired(
 
 - alternative:
 
-  One of `"two.sided"` (default), `"less"`, or `"greater"`.
+  One of `"two_sided"` (default; the base-R spelling `"two.sided"` is
+  accepted as an alias), `"less"`, or `"greater"`.
 
 - exact:
 
   Logical. If `NULL` (default), uses exact enumeration when \\n \le 20\\
-  and Monte-Carlo otherwise. If `TRUE`, forces exact enumeration (caps
+  and Monte Carlo otherwise. If `TRUE`, forces exact enumeration (caps
   at \\n \le 25\\; above that the \\2^n\\ space is too large). If
-  `FALSE`, forces Monte-Carlo.
+  `FALSE`, forces Monte Carlo.
 
 - n_resamples:
 
-  Number of Monte-Carlo resamples when exact enumeration is not used.
+  Number of Monte Carlo resamples when exact enumeration is not used.
   Default `10000L`.
 
 - seed:
@@ -60,12 +61,12 @@ randomization_test_paired(
 
 A `data.frame` with rows for the observed test statistic, the *p*-value,
 the number of pairs, the number of randomizations evaluated, and a flag
-indicating whether the test was exact or Monte-Carlo.
+indicating whether the test was exact or Monte Carlo.
 
 ## Details
 
 For small \\n\\ (default \\n \le 20\\) the test enumerates all \\2^n\\
-sign patterns exactly; for larger \\n\\ a Monte-Carlo approximation is
+sign patterns exactly; for larger \\n\\ a Monte Carlo approximation is
 used (default `n_resamples = 10000L`).
 
 **Why randomization.** The randomization test makes no distributional
@@ -80,8 +81,8 @@ reference distribution. The exact two-sided *p*-value is the proportion
 of patterns yielding a test statistic at least as extreme (in absolute
 value) as the observed.
 
-**Monte-Carlo branch.** For larger \\n\\, `n_resamples` random sign
-patterns are drawn uniformly from \\\\-1, +1\\^n\\; the Monte-Carlo
+**Monte Carlo branch.** For larger \\n\\, `n_resamples` random sign
+patterns are drawn uniformly from \\\\-1, +1\\^n\\; the Monte Carlo
 *p*-value uses the standard (\\1 + \mathrm{count}\\) / (\\1 + B\\)
 plug-in to avoid *p* = 0.
 
@@ -104,12 +105,17 @@ test),
 [`probability_of_superiority_paired`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md)
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -118,12 +124,8 @@ Other hypothesis tests:
 [`pairwise_within()`](https://yelleknek.github.io/DMAR/reference/pairwise_within.md),
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -144,7 +146,7 @@ randomization_test_paired(control, treat)
 #>  n_evaluated 32    
 #>  exact       1     
 
-# 2. Larger n: Monte-Carlo branch.
+# 2. Larger n: Monte Carlo branch.
 set.seed(113)
 x <- rnorm(50, 100, 15)
 y <- x + rnorm(50,   5, 12)

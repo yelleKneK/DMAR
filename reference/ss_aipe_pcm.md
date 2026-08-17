@@ -119,6 +119,12 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
 ed.). Routledge. (See Chapters 11, 15.)
 
+Raudenbush, S. W., & Liu, X.-F. (2001). Effects of study duration,
+frequency of observation, and sample size on power in studies of group
+differences in polynomial change. *Psychological Methods, 6*(4),
+387–401.
+[doi:10.1037/1082-989X.6.4.387](https://doi.org/10.1037/1082-989X.6.4.387)
+
 ## See also
 
 [`ss_power_pcm`](https://yelleknek.github.io/DMAR/reference/ss_power_pcm.md)

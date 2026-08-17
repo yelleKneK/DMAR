@@ -162,8 +162,8 @@ approximation computed from the asymptotic variances, spent before any
 simulation) reaches `desired_power`, brackets the crossing
 geometrically, and bisects to adjacent integers, each candidate
 evaluated with its own `G` replications. A planning call therefore fits
-the analysis model several thousand times; the examples use a small `G`
-to run quickly, and a real plan is worth a larger one.
+the analysis model several thousand times, which is why the examples on
+this page are shown but not run.
 
 ## Note
 
@@ -249,7 +249,6 @@ the composite is evaluated by quadrature rather than simulation.
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
@@ -293,69 +292,53 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
-# A three-factor model whose conclusion needs both structural paths: f1
-# predicting f2, and f2 predicting f3 over and above f1. The population
-# model fixes every parameter to its purported population value.
-pop_model <- "
-  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-  f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
-  f2 ~ 0.4*f1
-  f3 ~ 0.3*f2 + 0.25*f1
-  f1 ~~ 1*f1
-  f2 ~~ 0.84*f2
-  f3 ~~ 0.8*f3
-  y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
-  y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
-  y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
-"
-
+# A three-factor model whose conclusion rests on three structural paths
+# at once: f1 predicting f2, f2 predicting f3, and f1 predicting f3
+# directly. Composite power here is a simulated quantity, so every call
+# refits the analysis model G times and a planning search refits it several
+# thousand times. The worked example that follows is therefore shown rather
+# than run.
+#
+# The population model fixes every parameter to its purported population
+# value.
+#   pop_model <- "
+#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+#     f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
+#     f2 ~ 0.4*f1
+#     f3 ~ 0.3*f2 + 0.25*f1
+#     f1 ~~ 1*f1
+#     f2 ~~ 0.84*f2
+#     f3 ~~ 0.8*f3
+#     y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+#     y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+#     y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
+#   "
+#
 # The analysis model is free; the labels name the parameters of interest.
-analysis_model <- "
-  f1 =~ y1 + y2 + y3
-  f2 =~ y4 + y5 + y6
-  f3 =~ y7 + y8 + y9
-  f2 ~ a*f1
-  f3 ~ b*f2 + c*f1
-"
-
-# Realized composite power at N = 200. G is small so the example runs
-# quickly; a real plan is worth G = 1000 or more (G = 50 here).
-set.seed(113)
-ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
-                       N = 200, G = 50)
-#>  term                   value 
-#>  specified_N            200   
-#>  composite_power        0.64  
-#>  composite_power_mc_se  0.0679
-#>  power_a                1     
-#>  power_b                0.88  
-#>  power_c                0.76  
-#>  population_a           0.4   
-#>  population_b           0.3   
-#>  population_c           0.25  
-#>  alpha_level            0.05  
-#>  replications           50    
-#>  converged_replications 50    
-
-# The necessary N for composite power of 0.80 over the two structural
-# paths a and b (c is left out of the composite).
-set.seed(113)
-ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
-                       parameters = c("a", "b"),
-                       desired_power = 0.80, G = 50)
-#>  term                   value 
-#>  necessary_N            161   
-#>  composite_power        0.86  
-#>  composite_power_mc_se  0.0491
-#>  power_a                1     
-#>  power_b                0.86  
-#>  population_a           0.4   
-#>  population_b           0.3   
-#>  alpha_level            0.05  
-#>  replications           50    
-#>  converged_replications 50    
-#>  desired_power          0.8   
-# }
+#   analysis_model <- "
+#     f1 =~ y1 + y2 + y3
+#     f2 =~ y4 + y5 + y6
+#     f3 =~ y7 + y8 + y9
+#     f2 ~ a*f1
+#     f3 ~ b*f2 + c*f1
+#   "
+#
+# Realized composite power at N = 200. The probability that all three
+# paths come out significant in the same study is lower than the marginal
+# power of any one of them: the composite event sits inside each marginal
+# event, so the weakest parameter governs the design.
+#   set.seed(113)
+#   ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
+#                          N = 200, G = 1000)
+#
+# Leaving N out plans the necessary sample size for a desired composite
+# power instead, here over the two structural paths a and b with c left
+# out of the composite. That search evaluates a sequence of candidate
+# sample sizes, each with its own G replications, so it costs several
+# thousand model fits:
+#   set.seed(113)
+#   ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
+#                          parameters = c("a", "b"),
+#                          desired_power = 0.80, G = 1000)
 ```

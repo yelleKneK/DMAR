@@ -57,9 +57,10 @@ machinery, are:
   unbiased for \\\phi^2\\.
 
 - `phi2_umvue`: Muirhead's (1985) unique minimum variance unbiased
-  estimator (his \\\theta_U\\); equivalent to Stuart, Ord, and
-  Arnold's (1999) equation 28.97. Requires \\N \ge p + 6\\ (the gate on
-  all three Muirhead estimators); for smaller \\N\\ the value is `NA`.
+  estimator (his \\\theta_U\\, their Eq. 4); equivalent to Stuart, Ord,
+  and Arnold's (1999) equation 28.97. Requires \\N \ge p + 6\\ (the gate
+  on all three Muirhead estimators); for smaller \\N\\ the value is
+  `NA`.
 
 - `phi2_umvue_l`: Muirhead's (1985) linearly-improved unique minimum
   variance unbiased estimator (his \\\theta_L\\); equivalent to Stuart
@@ -70,10 +71,13 @@ machinery, are:
   \\\theta\_{NL}\\). Dominates the linear improvement in MSE but
   requires \\p \ge 5\\; for smaller \\p\\ the value is `NA`.
 
-Muirhead's nonlinear estimator is the recommended choice when \\p \ge
-5\\; otherwise the linear estimator should be preferred over the plug-in
-and adjusted-\\R^2\\ forms. All three Muirhead estimators are truncated
-at zero, so the returned value is on the same scale as \\\phi^2\\.
+The nonlinear estimator dominates the linear one in risk when \\p \ge
+5\\, though Muirhead notes the two perform very similarly in practice;
+for smaller \\p\\ the linear estimator is preferred over the plug-in and
+adjusted-\\R^2\\ forms. All three Muirhead estimators are reported
+truncated at zero, so the returned value is on the same scale as
+\\\phi^2\\ (the truncation introduces a negligible bias only when the
+population \\\phi^2\\ is near zero).
 
 As \\N\\ grows with \\p\\ fixed, the five estimators converge to a
 common value (the population \\\phi^2\\); the difference between them is

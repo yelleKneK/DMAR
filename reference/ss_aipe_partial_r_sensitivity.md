@@ -7,7 +7,7 @@ whose implied partial correlation between \\Y\\ and \\X_1\\ (controlling
 for \\X_2, \ldots, X_J\\) equals `true_rho`, then on each replication
 draws an *n*-row sample from the corresponding multivariate normal
 distribution and computes the sample partial correlation and its
-Fisher-\\z\\ CI.
+Fisher's \\Z\\ CI.
 
 ## Usage
 
@@ -84,7 +84,8 @@ ss_aipe_partial_r_sensitivity(
 A `data.frame` with rows for the realized partial correlation, the
 interval width, the proportion of intervals at or below `width`,
 tail-specific and overall non-coverage of `true_rho`, and the input
-echoes.
+echoes, including `assurance` (present only when an assurance was
+supplied).
 
 ## References
 
@@ -112,6 +113,10 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
@@ -121,10 +126,11 @@ Other AIPE sample size planning:
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 
@@ -133,7 +139,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Reduced replications and a wide target interval keep this fast.
 set.seed(113)
 ss_aipe_partial_r_sensitivity(
@@ -144,10 +149,10 @@ ss_aipe_partial_r_sensitivity(
 #>  mean_partial_r     0.413 
 #>  median_partial_r   0.429 
 #>  sd_partial_r       0.108 
-#>  mean_ci_width      0.388 
-#>  median_ci_width    0.387 
-#>  sd_ci_width        0.0386
-#>  pct_ci_less_w      0.6   
+#>  mean_ci_width      0.391 
+#>  median_ci_width    0.39  
+#>  sd_ci_width        0.0389
+#>  pct_ci_less_w      0.58  
 #>  pct_ci_miss_low    0.04  
 #>  pct_ci_miss_high   0.02  
 #>  total_type_I_error 0.06  
@@ -159,5 +164,4 @@ ss_aipe_partial_r_sensitivity(
 #>  conf_level         0.95  
 #> 
 #> Confidence level: 95%
-# }
 ```

@@ -64,6 +64,20 @@ ed.). Routledge. (See Chapter 1 on the logic of the randomization test.)
 [`randomization_test`](https://yelleknek.github.io/DMAR/reference/randomization_test.md)
 for the test itself.
 
+Other plotting:
+[`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
+[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
+[`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
+[`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
+[`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
+[`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
+[`plot_regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/plot_regions_of_significance.md),
+[`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
+[`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
+[`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md),
+[`power_equivalence_md_plot()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md_plot.md)
+
 ## Author
 
 Ken Kelley

@@ -140,7 +140,6 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Population covariance from a fully fixed model (see cov_sem()).
 pop_model <- "
   f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
@@ -167,5 +166,18 @@ ss_aipe_sem_path(model = analysis_model, Sigma = Sigma,
 #>  var_theta_j 0.00584
 #> 
 #> Confidence level: 95%
-# }
+
+# That sample size holds the interval to the desired width on average, so
+# about half of the studies it plans return a wider one. Adding assurance
+# plans for the width to be met in 90 percent of studies instead, at the
+# cost of a larger sample size.
+ss_aipe_sem_path(model = analysis_model, Sigma = Sigma,
+                 desired_width = 0.30, which_path = "b",
+                 assurance = 0.90)
+#>  term        value  
+#>  necessary_N 293    
+#>  path_index  5      
+#>  var_theta_j 0.00526
+#> 
+#> Confidence level: 95%
 ```

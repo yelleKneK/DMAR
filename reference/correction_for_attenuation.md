@@ -9,9 +9,9 @@ test theory (Lord & Novick, 1968), the disattenuated correlation
 estimates the correlation between the true scores, that is, how strongly
 the two constructs would correlate if each were measured without error.
 When `N` is supplied, a confidence interval for the corrected
-correlation is formed by disattenuating the endpoints of the Fisher *z*
-interval for the observed correlation, the standard practice when the
-reliabilities are treated as known.
+correlation is formed by disattenuating the endpoints of the Fisher's
+*Z* interval for the observed correlation, the standard practice when
+the reliabilities are treated as known.
 
 ## Usage
 
@@ -49,7 +49,7 @@ correction_for_attenuation(
 
   Optional sample size on which `r` is based. When supplied, a
   `conf_level` confidence interval for the corrected correlation is
-  reported by correcting the endpoints of the Fisher *z* interval for
+  reported by correcting the endpoints of the Fisher's *Z* interval for
   `r`.
 
 - conf_level:
@@ -106,11 +106,11 @@ and its family for estimating the reliabilities supplied here;
 [`cfa_1`](https://yelleknek.github.io/DMAR/reference/cfa_1.md) and
 lavaan for the latent variable route the Details recommend when items
 are available;
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md) for
-inference on the observed correlation itself;
-[`convert_r_z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+for inference on the observed correlation itself;
+[`convert_r_Z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md)
 and
-[`convert_z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
+[`convert_Z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md)
 for the Fisher transformation the interval uses.
 
 Other effect size estimates:

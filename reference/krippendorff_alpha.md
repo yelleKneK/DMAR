@@ -87,14 +87,18 @@ interval is offered: the limits are the empirical quantiles of the
 bootstrap estimates (Efron & Tibshirani, 1993); there is no
 bias-corrected and accelerated (BCa) variant. Resamples on which the
 coefficient cannot be computed (for example, a resample without enough
-pairable values) are dropped, and the No closed-form sampling variance
-is in general use for Krippendorff's alpha across its measurement levels
-and missing-data patterns; the bootstrap is the interval Krippendorff
-recommends (Krippendorff, 2011; Hayes & Krippendorff, 2007). The
-interval is computed from the resamples that return a finite value; how
-many did is reported as the `B_used` row of the result. `B = 1000L`
-typically gives a stable CI to two decimal places. Bootstrap results
-vary from run to run; supply `seed` for reproducibility.
+pairable values) are dropped; the interval is computed from the ones
+that return a finite value, and how many did is reported as the `B_used`
+row of the result. No closed-form sampling variance is in general use
+for Krippendorff's alpha across its measurement levels and missing data
+patterns, so the bootstrap is the interval Krippendorff recommends
+(Krippendorff, 2011; Hayes & Krippendorff, 2007). `B = 1000L` typically
+gives a stable CI to two decimal places. The bootstrap is opt-in
+(`boot = FALSE` by default, which returns the point estimate alone and
+is much faster); ask for it whenever the coefficient is being reported
+rather than explored, since a point estimate on its own says nothing
+about how precisely \\\alpha\\ is determined. Bootstrap results vary
+from run to run; supply `seed` for reproducibility.
 
 **Interpretation.** \\\alpha\\ ranges from \\-D_e / D_o\\ (perfect
 disagreement) through \\0\\ (chance level) to \\1\\ (perfect agreement).
@@ -133,8 +137,8 @@ Other agreement and measurement:
 [`content_validity_index()`](https://yelleknek.github.io/DMAR/reference/content_validity_index.md),
 [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
 [`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md),
+[`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
 [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-[`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md),
 [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
 
 ## Author
@@ -164,16 +168,19 @@ krippendorff_alpha(ratings, level = "nominal")
 set.seed(113)
 r1 <- rnorm(30, 0, 1)
 r2 <- r1 + rnorm(30, 0, 0.3)
-krippendorff_alpha(cbind(r1, r2), level = "interval",
-                   boot = TRUE, B = 500L)
+krippendorff_alpha(cbind(r1, r2), level = "interval")
 #>  term               value 
 #>  krippendorff_alpha 0.956 
 #>  D_observed         0.0955
 #>  D_expected         2.16  
 #>  n_pairable         60    
-#>  lower_limit        0.916 
-#>  upper_limit        0.976 
-#>  B_used             500   
 #> 
 #> Confidence level: 95%
+
+# The percentile bootstrap interval for the same ratings, which
+# recomputes alpha on each of B resamples of the units. Not run
+# here, because 500 refits of alpha is more than a help page should
+# do; the call is:
+# krippendorff_alpha(cbind(r1, r2), level = "interval",
+#                    boot = TRUE, B = 500L, seed = 113)
 ```

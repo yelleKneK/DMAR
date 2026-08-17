@@ -111,7 +111,8 @@ A `data.frame` with rows for mean / median / SD of the realized
 estimated slope difference and CI width, the proportion of intervals at
 or below `width`, tail-specific and overall non-coverage of the
 population slope difference (0 by construction in this simulator), and
-the input echoes.
+the input echoes, including `assurance` (present only when an assurance
+was supplied).
 
 ## References
 
@@ -139,6 +140,10 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
@@ -148,10 +153,11 @@ Other AIPE sample size planning:
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 
@@ -160,41 +166,19 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
-# Reduced Monte Carlo replications for a fast illustration; raise G
-# for a production sensitivity sweep.
-set.seed(113)
-ss_aipe_pcm_sensitivity(
-  true_variance_trend       = 0.003,
-  true_error_variance       = 0.0262,
-  estimated_variance_trend  = 0.003,
-  estimated_error_variance  = 0.0262,
-  duration  = 4, frequency = 1,
-  width     = 0.05,
-  G = 20, print_iter = FALSE
-)
-#>  term                     value  
-#>  mean_slope_diff          0.00529
-#>  median_slope_diff        0.00307
-#>  sd_slope_diff            0.0104 
-#>  mean_ci_width            0.0511 
-#>  median_ci_width          0.051  
-#>  sd_ci_width              0.00298
-#>  pct_ci_less_w            0.45   
-#>  pct_ci_miss_low          0.05   
-#>  pct_ci_miss_high         0      
-#>  total_type_I_error       0.05   
-#>  n_per_group              71     
-#>  n_timepoints             5      
-#>  true_variance_trend      0.003  
-#>  true_error_variance      0.0262 
-#>  estimated_variance_trend 0.003  
-#>  estimated_error_variance 0.0262 
-#>  duration                 4      
-#>  frequency                1      
-#>  width                    0.05   
-#>  conf_level               0.95   
-#> 
-#> Confidence level: 95%
-# }
+# Every replication simulates two full groups of subjects, fits a
+# slope for each subject, and forms a confidence interval on the
+# difference in mean slopes, so the sweep is not run at example time.
+# The G below is far smaller than a reported sensitivity study would
+# use; the default of 1000 is the realistic setting. The call is:
+# set.seed(113)
+# ss_aipe_pcm_sensitivity(
+#   true_variance_trend       = 0.003,
+#   true_error_variance       = 0.0262,
+#   estimated_variance_trend  = 0.003,
+#   estimated_error_variance  = 0.0262,
+#   duration  = 4, frequency = 1,
+#   width     = 0.05,
+#   G = 20, print_iter = FALSE
+# )
 ```

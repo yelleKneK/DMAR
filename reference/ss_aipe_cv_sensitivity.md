@@ -98,10 +98,16 @@ Carlo results across the `G` replications. The `term` entries are:
 `"mean_cv"`, `"median_cv"`, `"sd_cv"` (mean / median / SD of the *G*
 observed sample coefficients of variation); `"mean_ci_width"`,
 `"median_ci_width"`, `"sd_ci_width"` (corresponding summaries of the
-realized interval widths); `"pct_ci_less_w"` (percentage of intervals at
+realized interval widths); `"pct_ci_less_w"` (proportion of intervals at
 or below the planning width `width`); `"pct_ci_miss_low"` and
-`"pct_ci_miss_high"` (tail-specific non-coverage); and
-`"total_type_I_error"` (overall empirical non-coverage of `true_cv`).
+`"pct_ci_miss_high"` (tail-specific non-coverage);
+`"total_type_I_error"` (overall empirical non-coverage of `true_cv`);
+plus the input echoes `"total_N"` (the sample size evaluated),
+`"true_cv"`, `"estimated_cv"` (NA when `specified_N` was supplied
+instead), `"width"`, `"conf_level"`, and `"assurance"` (present only
+when an assurance was supplied). The proportion rows are on the 0 to 1
+scale, not percentages, so `total_type_I_error` is the sum of
+`pct_ci_miss_low` and `pct_ci_miss_high`.
 
 ## Details
 
@@ -188,10 +194,15 @@ ss_aipe_cv_sensitivity(
 #>  mean_ci_width      0.0976
 #>  median_ci_width    0.0979
 #>  sd_ci_width        0.0108
-#>  pct_ci_less_w      59    
-#>  pct_ci_miss_low    1.5   
-#>  pct_ci_miss_high   3     
+#>  pct_ci_less_w      0.59  
+#>  pct_ci_miss_low    0.015 
+#>  pct_ci_miss_high   0.03  
 #>  total_type_I_error 0.045 
+#>  total_N            60    
+#>  true_cv            0.25  
+#>  estimated_cv       0.25  
+#>  width              0.1   
+#>  conf_level         0.95  
 #> 
 #> Confidence level: 95%
 
@@ -216,10 +227,15 @@ ss_aipe_cv_sensitivity(
 #>  mean_ci_width      0.144 
 #>  median_ci_width    0.145 
 #>  sd_ci_width        0.0176
-#>  pct_ci_less_w      0.5   
-#>  pct_ci_miss_low    1.5   
-#>  pct_ci_miss_high   3     
+#>  pct_ci_less_w      0.005 
+#>  pct_ci_miss_low    0.015 
+#>  pct_ci_miss_high   0.03  
 #>  total_type_I_error 0.045 
+#>  total_N            60    
+#>  true_cv            0.35  
+#>  estimated_cv       0.25  
+#>  width              0.1   
+#>  conf_level         0.95  
 #> 
 #> Confidence level: 95%
 ```

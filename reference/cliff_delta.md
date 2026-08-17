@@ -42,14 +42,20 @@ Vargha-Delaney (2000) statistic. The sample estimator is \\\hat\delta =
 \\\[-1, 1\]\\, with 0 indicating no stochastic dominance.
 
 **Analytic CI.** The asymptotic variance of \\\hat\delta\\ is (Cliff,
-1996, equation 5.18) \$\$\mathrm{Var}(\hat\delta) \\=\\ \frac{(n_2 - 1)
-\sigma^2\_{d_1} + (n_1 - 1) \sigma^2\_{d_2} + \sigma^2_d}{n_1 n_2},\$\$
-where \\\sigma^2\_{d_i}\\ is the variance of the per-observation
-dominance scores within each group. The CI is constructed on the
-Fisher-style \\\mathrm{arctanh}\\-transformed scale and
-back-transformed, as recommended by Cliff (1996, Section 5.4) to handle
-the bounded range of \\\delta\\ (analogous to the Fisher *z* CI for
-Pearson \\r\\).
+1993; restated as Feng & Cliff, 2004, Equation 2, p. 323)
+\$\$\mathrm{Var}(\hat\delta) \\=\\ \frac{(n_2 - 1) \sigma^2\_{d_1} +
+(n_1 - 1) \sigma^2\_{d_2} + \sigma^2_d}{n_1 n_2},\$\$ where
+\\\sigma^2\_{d_i}\\ is the variance of the per-observation dominance
+scores within each group. (Feng & Cliff's printed equation transposes
+the \\(n_1 - 1)\\ and \\(n_2 - 1)\\ coefficients, which matters only for
+unequal group sizes; the pairing above is the correct one, checked by
+simulation against the empirical variance of \\\hat\delta\\.) The CI is
+constructed on the Fisher-style \\\mathrm{arctanh}\\-transformed scale
+and back-transformed to respect the bounded range of \\\delta\\
+(analogous to Fisher's *Z* CI for Pearson \\r\\). Feng & Cliff (2004,
+Equation 5, p. 324) recommend an alternative asymmetric interval that
+models the dependence of the variance on \\\delta\\; the two
+constructions agree to first order.
 
 **Connection to other measures.** Cliff's \\\delta\\ is a linear
 transformation of the Vargha-Delaney (2000) \\A\\ statistic (\\\delta =
@@ -66,7 +72,12 @@ ordinal questions. *Psychological Bulletin, 114*(3), 494–509.
 [doi:10.1037/0033-2909.114.3.494](https://doi.org/10.1037/0033-2909.114.3.494)
 
 Cliff, N. (1996). *Ordinal methods for behavioral data analysis*.
-Lawrence Erlbaum. (See Chapter 5 for the analytic CI.)
+Lawrence Erlbaum.
+
+Feng, D., & Cliff, N. (2004). Monte Carlo evaluation of ordinal d with
+improved confidence interval. *Journal of Modern Applied Statistical
+Methods, 3*(2), 322–332.
+[doi:10.22237/jmasm/1099267560](https://doi.org/10.22237/jmasm/1099267560)
 
 Long, J. D., Feng, D., & Cliff, N. (2003). Ordinal analysis of
 behavioral data. In I. B. Weiner (Ed.), *Handbook of psychology, Vol. 2:

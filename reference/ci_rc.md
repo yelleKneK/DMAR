@@ -41,11 +41,11 @@ ci_rc(
 
 - s_Y:
 
-  standard Deviation of *Y*, the dependent variable
+  Standard deviation of *Y*, the dependent variable
 
 - s_X:
 
-  standard Deviation of *X*, the predictor variable of interest
+  Standard deviation of *X*, the predictor variable of interest
 
 - N:
 
@@ -100,9 +100,17 @@ ci_rc(
 
 ## Value
 
-A `data.frame` with rows for the lower and upper confidence limits of
-the regression coefficient, returned as a single `value` column keyed by
-`term`.
+A 2-row `data.frame` with columns `term`, `value`, `prob_less`, and
+`prob_greater`. The `term` values are `"lower_limit"` and
+`"upper_limit"`, and `value` holds the confidence limits on the
+regression coefficient in its raw metric. The `prob_less` and
+`prob_greater` columns report the tail probabilities below and above
+each limit; when the noncentral *t* approach is used they are the
+achieved tail probabilities. Unlike
+[`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md) and
+[`ci_reg_coef`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
+which place the point estimate between its limits as a third row,
+`ci_rc` returns the two limits only.
 
 ## Details
 
@@ -139,7 +147,7 @@ experiments and analyzing data: A model comparison perspective* (4th
 ed.). Routledge. (See Chapter 4 on individual comparisons of means and
 Chapter 6 on trend analysis.)
 
-Smithson, M. (2003). *Confidence intervals*. New York, NY: Sage
+Smithson, M. (2003). *Confidence intervals*. Thousand Oaks, CA: Sage
 Publications.
 
 Steiger, J. H. (2004). Beyond the *F* Test: Effect size confidence
@@ -159,7 +167,7 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -167,7 +175,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
 [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md),

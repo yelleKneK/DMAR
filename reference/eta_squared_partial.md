@@ -132,13 +132,16 @@ eta_squared_partial(F_value = 11.221, df_effect = 4, df_error = 50)
 #>  effect  eta_squared_partial F_value df_effect df_error
 #>  overall 0.473               11.2    4         50      
 
-# Factorial ANOVA: partial eta squared per effect.
-fit <- aov(breaks ~ wool * tension, data = warpbreaks)
+# Factorial ANOVA: partial eta squared per effect (pygmalion data:
+# expectancy treatment x grade, 2 x 6 with unequal cell sizes,
+# N = 310). The treatment is manipulated; grade is a measured
+# classification of the pupils.
+fit <- aov(iq_8 ~ treatment * factor(grade), data = pygmalion)
 eta_squared_partial(fit)
-#>  effect       eta_squared_partial F_value df_effect df_error
-#>  wool         0.0727              3.77    1         48      
-#>  tension      0.261               8.5     2         48      
-#>  wool:tension 0.149               4.19    2         48      
+#>  effect                  eta_squared_partial F_value df_effect df_error
+#>  treatment               0.0215              6.54    1         298     
+#>  factor(grade)           0.0448              2.8     5         298     
+#>  treatment:factor(grade) 0.0196              1.19    5         298     
 
 # Within-subjects ANOVA: per-effect partial eta squared with stratum.
 set.seed(113)

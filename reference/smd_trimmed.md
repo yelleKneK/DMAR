@@ -50,16 +50,25 @@ nonnormal distributions. Replacing means by 20%- trimmed means and SD by
 is roughly 96% (Wilcox, 2017, ch. 5) and whose efficiency under
 heavy-tailed contamination is substantially higher than Cohen's *d*.
 
-**The 0.642 constant.** \\0.642 = \mathrm{Var}(X) / \mathrm{Var}(X_W)\\
-when \\X \sim N(0, 1)\\ and \\X_W\\ is the 20%-Winsorized version.
-Choosing this constant makes \\d_R = \delta\\ when the data are normal,
-so the new estimator is on the same scale as Cohen's *d*.
+**The 0.642 constant.** \\0.642 = \mathrm{SD}(X_W) / \mathrm{SD}(X) =
+\sqrt{\mathrm{Var}(X_W) / \mathrm{Var}(X)}\\ when \\X \sim N(0, 1)\\ and
+\\X_W\\ is the 20%-Winsorized version. Choosing this constant makes
+\\d_R = \delta\\ when the data are normal, so the new estimator is on
+the same scale as Cohen's *d*.
 
-**CI.** The CI uses Yuen's (1974) test framework: the *t*-statistic on
-the trimmed-mean difference is referred to a *t* distribution with
-Yuen-Welch degrees of freedom, and the noncentrality parameter for the
-CI is built from the observed \\d_R \cdot \sqrt{\tilde n / 2}\\
-(Keselman et al., 2008).
+**CI.** The CI follows the construction of Keselman, Algina, Lix,
+Wilcox, and Deering (2008): Yuen's (1974) *t*-statistic on the
+trimmed-mean difference (their Equation 8) is referred to a noncentral
+*t* distribution with the Yuen-Welch approximate degrees of freedom
+(their Equation 9), the noncentrality parameters whose tail
+probabilities bracket the observed statistic are located with
+[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+and those limits are rescaled to the \\d_R\\ metric. The degrees of
+freedom are reported in the `df_yuen` row of the returned table. At
+`trim = 0` the construction reduces to the Welch approximate degrees of
+freedom interval; for the exact equal-variance interval on the untrimmed
+standardized mean difference use
+[`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md).
 
 ## References
 
@@ -101,7 +110,8 @@ variances. *Biometrika, 61*(1), 165–170.
 
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md),
 [`var_smd_trimmed`](https://yelleknek.github.io/DMAR/reference/var_smd_trimmed.md),
-[`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md)
+[`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
+[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
 
 Other effect size estimates:
 [`cles()`](https://yelleknek.github.io/DMAR/reference/cles.md),
@@ -133,8 +143,8 @@ x <- rnorm(40, 0,   1); y <- rnorm(40, 0.5, 1)
 smd_trimmed(x, y)
 #>  term                 value 
 #>  smd_trimmed          -0.405
-#>  lower_limit          -0.974
-#>  upper_limit          0.169 
+#>  lower_limit          -0.883
+#>  upper_limit          0.0775
 #>  trimmed_mean_x       0.187 
 #>  trimmed_mean_y       0.589 
 #>  winsorized_sd_x      0.636 
@@ -155,8 +165,8 @@ y <- c(rnorm(38, 0.5, 1), 30, -25)
 smd_trimmed(x, y)
 #>  term                 value 
 #>  smd_trimmed          -0.349
-#>  lower_limit          -0.918
-#>  upper_limit          0.223 
+#>  lower_limit          -0.826
+#>  upper_limit          0.131 
 #>  trimmed_mean_x       0.187 
 #>  trimmed_mean_y       0.539 
 #>  winsorized_sd_x      0.636 

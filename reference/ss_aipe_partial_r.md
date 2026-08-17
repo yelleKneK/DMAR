@@ -5,9 +5,9 @@ population partial correlation \\\rho\_{XY \cdot Z_1 \cdots Z_J}\\ to
 have a desired width (Accuracy in Parameter Estimation; Kelley, 2008).
 The function inverts the asymptotic variance of the partial Pearson
 correlation, either on the raw scale (Olkin & Finn, 1995) or on the
-Fisher *z*-transformed scale (Hotelling, 1953; Bonett, 2008), and solves
-for the smallest \\n\\ that achieves the target half-width (or full
-width).
+Fisher's *Z*-transformed scale (Fisher, 1921, 1924; Bonett, 2008), and
+solves for the smallest \\n\\ that achieves the target half-width (or
+full width).
 
 ## Usage
 
@@ -41,8 +41,14 @@ ss_aipe_partial_r(
 
 - which_width:
 
-  Whether `width` refers to the `"Full"` width (default) or the
-  `"Lower"` or `"Upper"` half-width.
+  Whether `width` is the `"Full"` width of the interval (default) or a
+  half-width: `"Lower"` and `"Upper"` both interpret `width` as half the
+  full width, so they plan for a full width of twice `width` and return
+  the same sample size. Because the interval is not generally symmetric
+  about the estimate (with `fisher_z = TRUE` in particular), its
+  realized lower and upper half-widths can differ from each other and
+  from half the full width; the planner does not target them separately.
+  A genuinely one-sided width target is not currently offered.
 
 - conf_level:
 
@@ -77,39 +83,37 @@ approximately \$\$w\_{1/2} \\\approx\\ z\_{1 - \alpha/2} \cdot
 Solving for \\n\\: \$\$n \\=\\ J + 1 + \Big\lceil (z\_{1 - \alpha/2})^2
 \cdot (1 - \rho\_{XY \cdot Z}^{\\2})^2 / w\_{1/2}^{2} \Big\rceil.\$\$
 This is the planning analog of the half-width of
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md) applied to
-a partial correlation.
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
+applied to a partial correlation.
 
 **Fisher-*z* scale (recommended for small \\\rho\\, near boundary, or
 small \\n - J\\).** Bonett (2008) advocates planning on the
 variance-stabilized Fisher-*z* scale and back-transforming the bounds.
-On the \\z\\ scale, the asymptotic half-width is \$\$w^{(z)}\_{1/2}
-\\\approx\\ z\_{1 - \alpha/2} / \sqrt{n - J - 3}.\$\$ Solving for the
-\\n\\ that achieves a given back-transformed \\w\_{1/2}\\ is done by a
-1-D search; this is generally the more accurate route when \\n\\ is
-small or \\\|\rho\|\\ is large.
+On the Fisher's \\Z\\ scale, the asymptotic half-width is
+\$\$w^{(z)}\_{1/2} \\\approx\\ z\_{1 - \alpha/2} / \sqrt{n - J - 3}.\$\$
+Solving for the \\n\\ that achieves a given back-transformed
+\\w\_{1/2}\\ is done by a 1-D search; this is generally the more
+accurate route when \\n\\ is small or \\\|\rho\|\\ is large.
 
 **When to use partial vs. simple correlation planning.** Use this
 function when the inferential target is the population correlation
 between \\X\\ and \\Y\\ *after* statistically controlling for \\Z_1,
 \ldots, Z_J\\. For the simple Pearson correlation, see
-[`ss_aipe_rc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc.md)
-or equivalent.
+[`ss_aipe_r`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md).
 
 **Note on conservatism of the assurance plan.** The empirical simulation
-reported in
-[`vignette("aipe_simulation_study", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/aipe_simulation_study.md)
-finds that `ss_aipe_partial_r()` is tight (zero overshoot) at 80%
-assurance but modestly conservative at 99% assurance, with an empirical
-ideal sample size of about 5 to 10 subjects smaller than the recommended
-sample size. The mechanism is the usual one for AIPE assurance plans:
-the Olkin-Finn (1995) Wald- style upper bound on \\\Pr(\widehat W \>
-\omega)\\ that the planner inverts is not tight at the recommended
-sample size, especially at the 99% level where the inversion has to push
-further into the upper tail of \\\widehat W\\. The recommended sample
-size is a sufficient sample size rather than the smallest possible
-sample size. See the simulation vignette for the per-condition
-overshoot.
+study of the AIPE planner family finds that `ss_aipe_partial_r()` is
+tight (zero overshoot) at 80% assurance but modestly conservative at 99%
+assurance, with an empirical ideal sample size of about 5 to 10 subjects
+smaller than the recommended sample size. The mechanism is the usual one
+for AIPE assurance plans: the Olkin-Finn (1995) Wald- style upper bound
+on \\\Pr(\widehat W \> \omega)\\ that the planner inverts is not tight
+at the recommended sample size, especially at the 99% level where the
+inversion has to push further into the upper tail of \\\widehat W\\. The
+recommended sample size is a sufficient sample size rather than the
+smallest possible sample size.
+[`ss_aipe_partial_r_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md)
+quantifies the overshoot for any one condition.
 
 ## References
 
@@ -122,9 +126,11 @@ Bonett, D. G. (2008). Confidence intervals for standardized linear
 contrasts of means. *Psychological Methods, 13*(2), 99–109.
 [doi:10.1037/1082-989X.13.2.99](https://doi.org/10.1037/1082-989X.13.2.99)
 
-Hotelling, H. (1953). New light on the correlation coefficient and its
-transforms. *Journal of the Royal Statistical Society, Series B, 15*(2),
-193–232.
+Fisher, R. A. (1921). On the "probable error" of a coefficient of
+correlation deduced from a small sample. *Metron, 1*, 3–32.
+
+Fisher, R. A. (1924). The distribution of the partial correlation
+coefficient. *Metron, 3*, 329–332.
 
 Kelley, K. (2008). Sample size planning for the squared multiple
 correlation coefficient: Accuracy in parameter estimation via narrow
@@ -151,7 +157,7 @@ Bulletin, 118*(1), 155–164.
 [`var_partial_r`](https://yelleknek.github.io/DMAR/reference/var_partial_r.md),
 [`expected_partial_r`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`ss_aipe_semipartial_r`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_rc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc.md)
+[`ss_aipe_r`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
 for what a chosen design delivers: power, the Type S (sign) and Type M
@@ -163,6 +169,10 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
@@ -172,10 +182,11 @@ Other AIPE sample size planning:
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 
@@ -197,7 +208,7 @@ ss_aipe_partial_r(rho = 0.30, J = 2, width = 0.20)
 #> 
 #> Confidence level: 95%
 
-# 2. Same problem on the Fisher-z scale (Bonett 2008):
+# 2. Same problem on the Fisher's Z scale (Bonett 2008):
 ss_aipe_partial_r(rho = 0.30, J = 2, width = 0.20, fisher_z = TRUE)
 #>  term           value
 #>  necessary_N    322  

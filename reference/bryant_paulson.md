@@ -172,26 +172,33 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Critical value from the worked example of Bryant & Bruvold (1980):
-# k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05.
-qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14) # 4.83
-#> [1] 4.829856
+# Critical value from the worked example of Bryant and Bruvold (1980):
+# k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. Getting a
+# quantile means inverting the distribution function with uniroot, and every
+# step of that root search evaluates the integral over the covariate-shrinkage
+# factor, so the call takes about half a second and is shown here rather than
+# run.
+# qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
+# It returns 4.83, the entry in Table 1 of Bryant and Paulson (1976). The
+# distribution function itself is a single integral and is quick, so the
+# pbryant_paulson calls below do run.
 
 # The ordinary Tukey value (ignoring that the covariate is random and
 # estimated) is smaller, so it yields intervals that are too narrow:
 qtukey(0.95, nmeans = 6, df = 14)                                   # 4.64
 #> [1] 4.638538
 
-# \donttest{
-# With no covariates the Bryant-Paulson distribution is exactly the
-# studentized range:
-pbryant_paulson(4.64, num_covariates = 0, num_groups = 6, df = 14)
-#> [1] 0.9500928
-ptukey(4.64, nmeans = 6, df = 14)
-#> [1] 0.9500928
+# How much too narrow: the Bryant-Paulson area beyond the Tukey value is the
+# familywise error rate Tukey's method actually delivers in this design.
+# With no covariate the two distributions coincide, so the area is .0499,
+# the nominal .05 up to the rounding of 4.64 itself. Each additional random
+# covariate carries more estimation uncertainty, stretches the distribution
+# to the right, and pushes the rate up, to .063, .076, and .091.
+pbryant_paulson(4.64, num_covariates = 0:3, num_groups = 6, df = 14,
+                lower_tail = FALSE)
+#> [1] 0.04990724 0.06273456 0.07633320 0.09054790
 
-# More covariates -> more estimation uncertainty -> larger critical value.
-qbryant_paulson(0.95, num_covariates = 1:3, num_groups = 4, df = 20)
-#> [1] 4.066658 4.172209 4.275151
-# }
+# The p = 0 entry above is exactly the ordinary studentized range:
+ptukey(4.64, nmeans = 6, df = 14, lower.tail = FALSE)
+#> [1] 0.04990724
 ```

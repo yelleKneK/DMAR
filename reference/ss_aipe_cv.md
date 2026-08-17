@@ -3,7 +3,9 @@
 Determines the necessary sample size so that the expected confidence
 interval width for the coefficient of variation will be sufficiently
 narrow, optionally with a desired degree of certainty that the interval
-will not be wider than desired. The value of `C_of_V` should be
+will not be wider than desired. The population coefficient of variation
+may be given directly as `C_of_V` or through `mu` and `sigma`, in which
+case `C_of_V` is taken as `sigma / mu`. The value of `C_of_V` should be
 positive.
 
 ## Usage
@@ -50,7 +52,7 @@ ss_aipe_cv(
 
 - sigma:
 
-  Population standard deviation (specified with `mu` when `C_of_V`) is
+  Population standard deviation (specified with `mu` when `C_of_V` is
   not specified)
 
 - alpha_lower:
@@ -104,8 +106,17 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # Suppose one wishes to have a confidence interval with an expected width of .10
-# for a 99% confidence interval when the population coefficient of variation is .25.
+# for a 99% confidence interval when the population coefficient of variation is .10.
 ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99)
+#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.
+#>  term        value
+#>  necessary_N 20   
+#> 
+#> Confidence level: 99%
+
+# The same planning problem parameterized by the population mean and standard
+# deviation: mu = 10 and sigma = 1 imply the same coefficient of variation, .10.
+ss_aipe_cv(mu = 10, sigma = 1, width = .1, conf_level = .99)
 #> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.
 #>  term        value
 #>  necessary_N 20   

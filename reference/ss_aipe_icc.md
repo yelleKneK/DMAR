@@ -18,7 +18,7 @@ ss_aipe_icc(
   width,
   which_width = c("Full", "Lower", "Upper"),
   conf_level = 0.95,
-  type = "ICC(1,1)",
+  type = c("ICC(1,1)", "ICC(2,1)", "ICC(3,1)", "ICC(1,k)", "ICC(2,k)", "ICC(3,k)"),
   assurance = NULL
 )
 ```
@@ -46,7 +46,14 @@ ss_aipe_icc(
 
 - which_width:
 
-  `"Full"` (default) or `"Lower"` / `"Upper"` half-width.
+  Whether `width` is the `"Full"` width of the interval (default) or a
+  half-width: `"Lower"` and `"Upper"` both interpret `width` as half the
+  full width, so they plan for a full width of twice `width` and return
+  the same sample size. Because the interval is not generally symmetric
+  about the estimate, its realized lower and upper half-widths can
+  differ from each other and from half the full width; the planner does
+  not target them separately. A genuinely one-sided width target is not
+  currently offered.
 
 - conf_level:
 
@@ -54,11 +61,16 @@ ss_aipe_icc(
 
 - type:
 
-  Which Shrout-Fleiss (1979) ICC form is being planned. One of
-  `"ICC(1,1)"`, `"ICC(2,1)"`, `"ICC(3,1)"`, or the average-of-\\k\\
-  versions; default `"ICC(1,1)"`. Currently the single-rater single-form
-  variance (Smith, 1956 / Donner, 1986) is used; for average-of-\\k\\
-  types the Spearman-Brown delta method variance is applied.
+  Which Shrout-Fleiss (1979) ICC form is being planned. One of the
+  single-rater forms `"ICC(1,1)"`, `"ICC(2,1)"`, `"ICC(3,1)"` (which
+  share the planning variance) or the average-of-\\k\\ forms
+  `"ICC(1,k)"`, `"ICC(2,k)"`, `"ICC(3,k)"`; default `"ICC(1,1)"`. Both
+  `rho` and `width` are interpreted on the scale of the requested form:
+  for an average-of-\\k\\ form the planning value is mapped to the
+  single-rater scale through the inverse Spearman-Brown relation and
+  each candidate confidence limit is mapped back, so the returned sample
+  size targets the width of the interval on the average-of-\\k\\ ICC
+  itself (see Details).
 
 - assurance:
 
@@ -70,7 +82,8 @@ ss_aipe_icc(
 
 A `data.frame` with rows for the recommended sample size (*number of
 subjects*), the expected back-transformed CI width, and the inputs
-echoed back.
+echoed back. The Shrout-Fleiss form the plan targets is stored as the
+`"icc_type"` attribute so the `value` column stays numeric.
 
 ## Details
 
@@ -86,30 +99,39 @@ the smallest \\n\\ whose back-transformed CI width is below the target.
 
 **Single-rater vs.\\ average-of-\\k\\ ICC.** The Bonett (2002) variance
 applies directly to the single-rater forms (`ICC(1,1)`, `ICC(2,1)`,
-`ICC(3,1)`). For average-of-\\k\\ forms, the planning is done on the
-single-rater scale and back-transformed using the Spearman-Brown
-formula, following the convention used by
+`ICC(3,1)`). For the average-of-\\k\\ forms the planning value
+\\\rho_k\\ is first mapped to the single-rater scale through the inverse
+Spearman-Brown relation \\\rho = \rho_k / \[k - (k - 1)\rho_k\]\\, the
+interval is formed on the \\L\\ scale as above, and each candidate limit
+is mapped back to the average-of-\\k\\ scale (composing the inverse
+\\L\\ transform with the Spearman-Brown formula reduces to \\\rho_k =
+1 - e^{-2L}\\). The width criterion therefore applies to the confidence
+interval on the average-of-\\k\\ ICC itself, following the convention
+used by
 [`var_icc`](https://yelleknek.github.io/DMAR/reference/var_icc.md).
+Because the two scales differ, an average-of-\\k\\ plan generally
+recommends a different sample size than a single-rater plan at the same
+numeric `rho` and `width`; at `rho = 0.7`, `k = 3`, and `width = 0.20`,
+planning for `ICC(1,1)` recommends \\n = 69\\ subjects while planning
+for `ICC(1,k)` recommends \\n = 110\\.
 
-**Note on conservatism of the assurance plan.** The empirical simulation
-reported in
-[`vignette("aipe_simulation_study", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/aipe_simulation_study.md)
-finds that `ss_aipe_icc()` tends to over-recommend sample size when an
-`assurance` argument is supplied. In the cells tested, the realized
-assurance at the recommended sample size is well above the requested
-`assurance`, and the ideal sample size (the smallest sample size at
-which the empirical assurance still meets the target) is roughly 25 to
-40 subjects smaller than the recommended sample size. The mechanism is
-that ICC planning typically calls for a relatively small number of
-subjects (often \\n \< 150\\), and at those sample sizes the Bonett
-(2002) Fisher-style variance approximation has heavier upper tails than
-the planner's normal-theory inversion accounts for. The inversion adds a
-buffer to keep the upper-tail probability below \\1 -
-\mathrm{assurance}\\, and that buffer is empirically larger than
-necessary. The recommended sample size is therefore a sufficient sample
-size rather than the smallest possible sample size. See the simulation
-vignette for the per-condition overshoot and the empirical-assurance
-trajectory.
+**The assurance correction can fall slightly short.** Monte Carlo
+evaluation with
+[`ss_aipe_icc_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md)
+shows that the chi squared inflation tends to deliver a little less
+assurance than requested. At the condition of the second example below
+(`rho = 0.7`, `k = 3`, `width = 0.20`, `assurance = 0.80`), the
+recommended \\n = 79\\ yields an empirical assurance of about .77
+against the requested .80 (10,000 replications of the *F*-based interval
+computed by [`icc`](https://yelleknek.github.io/DMAR/reference/icc.md)),
+and the smallest sample size whose empirical assurance reaches .80 is
+\\n = 81\\. The mechanism is that the realized interval widths on the
+raw-ICC scale have a heavier upper tail than the chi squared inflation
+on the transformed scale accounts for, so the buffer the correction adds
+is slightly too small. When meeting the assurance target matters, check
+the recommended sample size with
+[`ss_aipe_icc_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md)
+and increase \\n\\ until the empirical assurance reaches the target.
 
 ## References
 
@@ -147,6 +169,10 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
 [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md),
@@ -156,10 +182,11 @@ Other AIPE sample size planning:
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 

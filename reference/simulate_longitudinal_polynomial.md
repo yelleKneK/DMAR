@@ -5,7 +5,7 @@ model: each subject follows a degree-\\P\\ polynomial in time whose
 coefficients vary randomly across subjects, and each measurement adds
 independent level-one error. The polynomial order is general (order 0 is
 a flat line, 1 a straight line, 2 a quadratic, and so on), one or
-several groups may differ in their mean trajectories, the level-one
+several populations may differ in their mean trajectories, the level-one
 error can be set directly or pinned to a target measurement reliability,
 and the actual time of each assessment may jitter away from its nominal
 target. This is the Monte Carlo companion to
@@ -20,8 +20,11 @@ assessment times) and study what happens.
 ``` r
 simulate_longitudinal_polynomial(
   n,
-  target_times,
+  target_times = NULL,
   fixed_coefficients,
+  time_range = NULL,
+  occasions = NULL,
+  time_distribution = "uniform",
   random_variances = 0,
   random_correlation = NULL,
   error_variance = NULL,
@@ -36,16 +39,17 @@ simulate_longitudinal_polynomial(
 
 - n:
 
-  A single positive integer (equal sample size in every group) or a
-  numeric vector of length `G` giving the number of subjects in each of
-  the `G` groups, where `G` is the number of mean trajectories supplied
-  through `fixed_coefficients`.
+  A single positive integer (equal number of units in every population)
+  or a numeric vector of length `G` giving the number of subjects in
+  each of the `G` populations, where `G` is the number of mean
+  trajectories supplied through `fixed_coefficients`.
 
 - target_times:
 
   A numeric vector of the nominal (planned) measurement times, length
-  \\M\\. They need not be equally spaced. A degree-\\P\\ model requires
-  \\M \ge P + 1\\ occasions.
+  \\M\\, one shared schedule for every unit. They need not be equally
+  spaced. A degree-\\P\\ model requires \\M \ge P + 1\\ occasions. Give
+  either this or `time_range`.
 
 - fixed_coefficients:
 
@@ -53,9 +57,31 @@ simulate_longitudinal_polynomial(
   time, ordered from the intercept upward: `c(b0, b1, ..., bP)` encodes
   \\b_0 + b_1 t + b_2 t^2 + \dots + b_P t^P\\. The length sets the
   polynomial order \\P\\ (length 1 is order 0, a flat line at `b0`). For
-  several groups, pass a *list* of equal-length coefficient vectors, one
-  per group; the groups then differ in their mean trajectories but share
-  the variance components below (the Raudenbush-Liu two-group setup).
+  several populations, pass a *list* of equal-length coefficient
+  vectors, one per population; the populations then differ in their mean
+  trajectories but share the variance components below (the
+  Raudenbush-Liu two-group setup).
+
+- time_range:
+
+  Alternative to `target_times`: `c(lower, upper)` bounds from which
+  each unit draws its own measurement times, so no two units share a
+  schedule (e.g., age in weeks at testing rather than a fixed grade).
+  Requires `occasions`; with `time_range`, the level-one error must be a
+  single `error_variance` with the default independent structure, and
+  `timing_sd` does not apply.
+
+- occasions:
+
+  With `time_range`: a single positive integer (every unit measured the
+  same number of times) or `c(min, max)`, from which each unit's number
+  of measurement times is drawn uniformly. Every value must be at least
+  \\P + 1\\ so each unit's trajectory identifies the polynomial.
+
+- time_distribution:
+
+  Distribution of the unit-specific times over `time_range`; currently
+  `"uniform"`.
 
 - random_variances:
 
@@ -138,10 +164,11 @@ columns
 
   Factor uniquely identifying each subject.
 
-- `group`:
+- `population`:
 
-  Factor with `G` levels (`"1"`, ...) giving each subject's group. With
-  a single trajectory there is one level.
+  Factor with `G` levels (`"1"`, ...) giving each unit's population (its
+  data generating parameter vector). With one parameter vector there is
+  one level.
 
 - `occasion`:
 
@@ -171,8 +198,10 @@ independent, otherwise the vector of per-occasion error variances),
 `"error_covariance"` (the full \\M \times M\\ level-one error covariance
 actually used), `"reliability_by_occasion"` (the per-occasion
 reliabilities at the nominal times), `"random_covariance"` (the
-level-two covariance \\T\\), and `"polynomial_order"` (\\P\\). The
-format is directly usable with
+level-two covariance \\T\\), `"polynomial_order"` (\\P\\), and
+`"schedule"` (`"shared"` or `"unit_specific"`). With `time_range` there
+is no shared occasion grid, so `"error_covariance"` is `NA` and
+`"reliability_by_occasion"` is `NA`. The format is directly usable with
 [`plot_trajectories`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md)
 and with mixed-model fitters such as
 [`nlme::lme()`](https://rdrr.io/pkg/nlme/man/lme.html) or
@@ -180,9 +209,9 @@ and with mixed-model fitters such as
 
 ## Details
 
-**The model.** Subject \\i\\ in group \\g\\ has a random coefficient
-vector \\\pi_i = (\pi\_{i0}, \dots, \pi\_{iP})\\ drawn from a
-multivariate normal with mean the group's `fixed_coefficients`
+**The model.** Subject \\i\\ in population \\g\\ has a random
+coefficient vector \\\pi_i = (\pi\_{i0}, \dots, \pi\_{iP})\\ drawn from
+a multivariate normal with mean the population's `fixed_coefficients`
 \\\beta_g\\ and covariance \\T\\. The latent trajectory is the
 polynomial \\\mu_i(t) = \sum\_{k=0}^{P} \pi\_{ik}\\ t^k\\, and the
 observed score at a measurement time \\t\\ is \\y = \mu_i(t) + e\\, with
@@ -296,6 +325,10 @@ Other data simulators:
 [`simulate_ancova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_data.md),
 [`simulate_ancova_factorial_data()`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_factorial_data.md),
 [`simulate_anova_data()`](https://yelleknek.github.io/DMAR/reference/simulate_anova_data.md),
+[`simulate_longitudinal_gompertz()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_gompertz.md),
+[`simulate_longitudinal_logistic()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_logistic.md),
+[`simulate_longitudinal_negative_exponential()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_negative_exponential.md),
+[`simulate_longitudinal_richards()`](https://yelleknek.github.io/DMAR/reference/simulate_longitudinal_richards.md),
 [`simulate_regression_data()`](https://yelleknek.github.io/DMAR/reference/simulate_regression_data.md)
 
 ## Author
@@ -305,7 +338,7 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. One group of linear growers with a random intercept and a random slope,
+# 1. One population of linear growers with a random intercept and a random slope,
 #    measured yearly for four years (five occasions), with the level-one
 #    error set directly.
 set.seed(113)
@@ -317,16 +350,16 @@ d <- simulate_longitudinal_polynomial(
   error_variance     = 1
 )
 head(d)
-#>   id group occasion target_time time true_score         y
-#> 1  1     1        1           0    0   9.733291  9.084685
-#> 2  1     1        2           1    1  11.773957 11.949644
-#> 3  1     1        3           2    2  13.814622 13.610660
-#> 4  1     1        4           3    3  15.855288 15.918206
-#> 5  1     1        5           4    4  17.895953 17.911464
-#> 6  2     1        1           0    0   7.249557  8.428662
+#>   id population occasion target_time time true_score         y
+#> 1  1          1        1           0    0   9.733291  9.084685
+#> 2  1          1        2           1    1  11.773957 11.949644
+#> 3  1          1        3           2    2  13.814622 13.610660
+#> 4  1          1        4           3    3  15.855288 15.918206
+#> 5  1          1        5           4    4  17.895953 17.911464
+#> 6  2          1        1           0    0   7.249557  8.428662
 
-# 2. Two groups that differ only in their slope (a treatment that changes the
-#    rate of growth). Pass a list of coefficient vectors, one per group.
+# 2. Two populations that differ only in their slope (a treatment that changes
+#    the rate of growth). Pass a list of coefficient vectors, one per population.
 set.seed(113)
 two <- simulate_longitudinal_polynomial(
   n                  = c(40, 40),
@@ -335,18 +368,18 @@ two <- simulate_longitudinal_polynomial(
   random_variances   = c(4, 0.25),
   error_variance     = 1
 )
-aggregate(y ~ group + occasion, data = two, FUN = mean)
-#>    group occasion        y
-#> 1      1        1  9.77354
-#> 2      2        1 10.34420
-#> 3      1        2 10.66252
-#> 4      2        2 12.11865
-#> 5      1        3 11.38262
-#> 6      2        3 14.02571
-#> 7      1        4 12.39497
-#> 8      2        4 15.66385
-#> 9      1        5 13.34494
-#> 10     2        5 17.31383
+aggregate(y ~ population + occasion, data = two, FUN = mean)
+#>    population occasion        y
+#> 1           1        1  9.77354
+#> 2           2        1 10.34420
+#> 3           1        2 10.66252
+#> 4           2        2 12.11865
+#> 5           1        3 11.38262
+#> 6           2        3 14.02571
+#> 7           1        4 12.39497
+#> 8           2        4 15.66385
+#> 9           1        5 13.34494
+#> 10          2        5 17.31383
 
 # 3. Pin the level-one error to a target reliability instead of setting it
 #    directly. The single number is the average reliability across occasions;
@@ -388,6 +421,26 @@ head(jit[, c("id", "occasion", "target_time", "time")])
 #> 5  1        5           4  4.00090495
 #> 6  2        1           0 -0.02811366
 
+# 4b. Unit-specific measurement times: each of 12 children is tested
+#     between 40 and 90 weeks of age, five to nine times, no two on the
+#     same schedule. The level-one error is a single variance; the
+#     "schedule" attribute records the design.
+set.seed(113)
+ages <- simulate_longitudinal_polynomial(
+  n                  = 12,
+  time_range         = c(40, 90),
+  occasions          = c(5, 9),
+  fixed_coefficients = c(10, 0.5),
+  random_variances   = c(4, 0.01),
+  error_variance     = 2
+)
+attr(ages, "schedule")
+#> [1] "unit_specific"
+table(table(ages$id))   # units per occasion count
+#> 
+#> 5 6 7 8 9 
+#> 4 1 2 4 1 
+
 # 5. A flat line (order 0): no growth, only a random subject level and
 #    measurement error. The coefficient vector has length one.
 set.seed(113)
@@ -399,13 +452,13 @@ flat <- simulate_longitudinal_polynomial(
   error_variance     = 1
 )
 head(flat)
-#>   id group occasion target_time time true_score        y
-#> 1  1     1        1           0    0   5.188592 5.471883
-#> 2  1     1        2           1    1   5.188592 6.936332
-#> 3  1     1        3           2    2   5.188592 6.385949
-#> 4  1     1        4           3    3   5.188592 4.852617
-#> 5  1     1        5           4    4   5.188592 6.085924
-#> 6  2     1        1           0    0   6.944857 8.731318
+#>   id population occasion target_time time true_score        y
+#> 1  1          1        1           0    0   5.188592 5.471883
+#> 2  1          1        2           1    1   5.188592 6.936332
+#> 3  1          1        3           2    2   5.188592 6.385949
+#> 4  1          1        4           3    3   5.188592 4.852617
+#> 5  1          1        5           4    4   5.188592 6.085924
+#> 6  2          1        1           0    0   6.944857 8.731318
 
 # 6. Autocorrelated measurement error: the same error variance at each wave,
 #    but the level-one errors decay as an AR(1) process (errors at adjacent

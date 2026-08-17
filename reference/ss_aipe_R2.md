@@ -164,7 +164,7 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Closed-form planner under random predictors (the typical case).
+# 1. Closed form planner under random predictors (the typical case).
 #    Sample size sufficient for the expected CI width on rho^2 to be .10.
 ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
            which_width = "Full", p = 5, random_predictors = TRUE)
@@ -174,48 +174,30 @@ ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
 #> 
 #> Confidence level: 95%
 
-# 2. Same target under fixed predictors (planned dosing levels,
-#    factorial covariates, etc.). Required N is typically smaller.
-ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-           which_width = "Full", p = 5, random_predictors = FALSE)
-#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
-#>  term        value
-#>  necessary_N 584  
-#> 
-#> Confidence level: 95%
+# 2. The same target under fixed predictors (planned dosing levels,
+#    factorial covariates, and the like) needs a smaller N, and adding an
+#    assurance of .85, so that the realized width is no larger than the
+#    target in 85 percent of replications rather than only on average,
+#    needs a larger one. Each is another pass of the same iterative search
+#    over N, so the two calls are shown here rather than run:
+#
+#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+#               which_width = "Full", p = 5, random_predictors = FALSE)
+#
+#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+#               which_width = "Full", p = 5, assurance = .85,
+#               random_predictors = TRUE)
 
-# 3. Adding assurance (.85): the realized CI width will be no larger
-#    than the target width in 85 percent of replications, not just on
-#    average. Required N grows accordingly.
-ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-           which_width = "Full", p = 5, assurance = .85,
-           random_predictors = TRUE)
-#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
-#>  term        value
-#>  necessary_N 815  
-#> 
-#> Confidence level: 95%
-
-# 4. verify_ss = TRUE runs a Monte Carlo verification of the
-#    closed-form approximation. Slow (minutes), so wrapped in
-#    \donttest{}; uncomment to run.
-# \donttest{
-# verify_ss = TRUE re-runs a verification simulation and is worth it
-# for a real plan; it is omitted here so the example runs quickly.
-ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-           which_width = "Full", p = 5, random_predictors = TRUE)
-#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
-#>  term        value
-#>  necessary_N 773  
-#> 
-#> Confidence level: 95%
-ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-           which_width = "Full", p = 5, assurance = .85,
-           random_predictors = FALSE)
-#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
-#>  term        value
-#>  necessary_N 629  
-#> 
-#> Confidence level: 95%
-# }
+# 3. verify_ss = TRUE follows the closed form approximation with an a
+#    priori Monte Carlo simulation of the realized width, starting from
+#    the closed form answer and returning the sample size the simulation
+#    settles on, which is what a plan meant to be defended deserves. G is
+#    the number of replications in that simulation; 10000 is the default
+#    and the recommendation. The call runs for several minutes, so it too
+#    is shown rather than run:
+#
+#    set.seed(113)
+#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+#               which_width = "Full", p = 5, random_predictors = TRUE,
+#               verify_ss = TRUE, G = 10000)
 ```

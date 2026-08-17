@@ -2,7 +2,7 @@
 
 Computes the minimum number of clusters (level-2 units) needed so that
 the confidence interval on a level-1 fixed-effect slope has expected
-half-width no larger than \\\omega\\ (Kelley, 2007; Raudenbush & Liu,
+full width no larger than \\\omega\\ (Kelley, 2007; Raudenbush & Liu,
 2001; Snijders & Bosker, 2012). The function inverts the closed-form
 approximation for the variance of a fixed-effect slope in a balanced
 two-level random-intercept model.
@@ -14,7 +14,6 @@ ss_aipe_mixed_effects(
   sigma2_y,
   sigma2_x,
   icc,
-  beta = 0,
   width,
   cluster_size = 20L,
   conf_level = 0.95
@@ -35,13 +34,6 @@ ss_aipe_mixed_effects(
 
   Intraclass correlation of the outcome.
 
-- beta:
-
-  Anticipated fixed-effect slope value. Default `0` (most conservative;
-  the planning is robust to misspecification of `beta` because the
-  variance of a fixed effect does not depend on the slope value to first
-  order).
-
 - width:
 
   Target full CI width on the slope.
@@ -58,26 +50,32 @@ ss_aipe_mixed_effects(
 ## Value
 
 A `data.frame` with rows for the recommended number of clusters
-`necessary_n_clusters`, the implied total `N`
-(`n_clusters * cluster_size`), the target `width`, the intraclass
-correlation, the cluster size, and the resulting
-`ci_half_width_expected`.
+`necessary_n_clusters`, the implied total sample size `total_N`
+(`necessary_n_clusters * cluster_size`), the target `width`, the
+intraclass correlation `icc`, the `cluster_size`, and the resulting
+`ci_width_expected` (the expected full CI width at the recommended
+size).
 
 ## Details
 
-**Design effect.** The effective sample size for a level-1 fixed effect
-in a two-level model is \\N / \mathrm{DE}\\, where \$\$\mathrm{DE} = 1 +
-(m - 1) \rho_I,\$\$ \\m\\ is the cluster size, and \\\rho_I\\ the
-intraclass correlation. The asymptotic variance of \\\hat\beta\\ is
-approximately \$\$\mathrm{Var}(\hat\beta) \\\approx\\ \frac{\sigma^2_y
-(1 - \rho_I)}{N \sigma^2_x} \cdot \frac{m}{1 + (m - 1) \rho_I}^{-1},\$\$
-for a level-1 predictor centered within cluster. The function inverts
-this expression for \\N = n\_{\mathrm{clusters}} \cdot m\\.
+**Variance of the slope.** For a level-1 predictor centered within
+cluster, the asymptotic variance of \\\hat\beta\\ is approximately
+\$\$\mathrm{Var}(\hat\beta) \\\approx\\ \frac{\sigma^2_y (1 - \rho_I)}{N
+\sigma^2_x},\$\$ where \\N = n\_{\mathrm{clusters}} \cdot m\\ is the
+total number of level-1 units, \\m\\ is the cluster size, and \\\rho_I\\
+the intraclass correlation. Because within-cluster centering removes the
+cluster-level variation from the predictor, the design effect \\1 +
+(m - 1) \rho_I\\ that inflates the variance of a cluster-level estimand
+does not appear here; clustering enters only through the residual
+variance \\\sigma^2_y (1 - \rho_I)\\. The function inverts this
+expression for \\N\\. No anticipated slope value is needed: \\\beta\\
+does not appear in the variance, so the recommended number of clusters
+is the same whatever the slope.
 
 **Scope.** Planning is for the most common single-level covariate case
 (random intercept, fixed slope, level-1 predictor centered within
 cluster). For cross-level interactions or random slopes, the variance
-formula changes and a Monte-Carlo planner should be used instead
+formula changes and a Monte Carlo planner should be used instead
 (Schoemann, Boulton, & Short, 2017).
 
 ## References
@@ -114,7 +112,6 @@ confidence interval width.
 
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
@@ -165,26 +162,26 @@ Ken Kelley <kkelley@nd.edu>
 #        sigma_y = 1, sigma_x = 1, target CI width = 0.20:
 ss_aipe_mixed_effects(sigma2_y = 1, sigma2_x = 1, icc = 0.10,
                            width = 0.20, cluster_size = 20)
-#>  term                   value
-#>  necessary_n_clusters   18   
-#>  total_N                360  
-#>  width                  0.2  
-#>  icc                    0.1  
-#>  cluster_size           20   
-#>  ci_half_width_expected 0.098
+#>  term                 value
+#>  necessary_n_clusters 18   
+#>  total_N              360  
+#>  width                0.2  
+#>  icc                  0.1  
+#>  cluster_size         20   
+#>  ci_width_expected    0.196
 #> 
 #> Confidence level: 95%
 
 # 2. The same study with stronger clustering (ICC = 0.20):
 ss_aipe_mixed_effects(sigma2_y = 1, sigma2_x = 1, icc = 0.20,
                            width = 0.20, cluster_size = 20)
-#>  term                   value
-#>  necessary_n_clusters   16   
-#>  total_N                320  
-#>  width                  0.2  
-#>  icc                    0.2  
-#>  cluster_size           20   
-#>  ci_half_width_expected 0.098
+#>  term                 value
+#>  necessary_n_clusters 16   
+#>  total_N              320  
+#>  width                0.2  
+#>  icc                  0.2  
+#>  cluster_size         20   
+#>  ci_width_expected    0.196
 #> 
 #> Confidence level: 95%
 ```

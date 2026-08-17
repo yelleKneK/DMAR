@@ -96,17 +96,24 @@ reliability_alpha(
 ## Value
 
 A `data.frame` with columns `term` and `value` and rows `"estimate"`
-(sample coefficient \\\alpha\\), `"se"` (standard error, `NA` for
-methods that do not produce one), `"lower_limit"` and `"upper_limit"`
-(clamped to \[0, 1\]), `"conf_level"`, `"N"` (the cases the analysis
-used: the complete cases under listwise deletion, every case with at
-least one observed item under `missing = "fiml"`), `"N_complete"` (the
-complete cases, so the cost of listwise deletion is visible at a glance;
-equal to `"N"` under listwise deletion and for covariance input), and
-`"J"` (number of items). The selected coefficient, CI method, and
-missing-data treatment travel as the attributes `coefficient`,
-`ci_method`, `missing`, and (when supplied) `aux`; bootstrap calls also
-record `B`.
+(sample coefficient \\\alpha\\), `"se"` (standard error on the
+coefficient scale, `NA` for methods that do not produce one; for the
+transformation-based intervals `"fisher"`, `"bonett"`, and
+`"hakstian_whalen"` it is the delta method back-transform of the
+transformation-scale standard error, evaluated at the estimate),
+`"se_transformed"` (only for those transformation-based intervals: the
+standard error on the transformation scale, the quantity the interval is
+built from, with the scale named in the attribute `se_transform_scale`:
+`"fisher_z"`, `"log(1-alpha)"`, or `"cube_root"`), `"lower_limit"` and
+`"upper_limit"` (clamped to \[0, 1\]), `"conf_level"`, `"N"` (the cases
+the analysis used: the complete cases under listwise deletion, every
+case with at least one observed item under `missing = "fiml"`),
+`"N_complete"` (the complete cases, so the cost of listwise deletion is
+visible at a glance; equal to `"N"` under listwise deletion and for
+covariance input), and `"J"` (number of items). The selected
+coefficient, CI method, and missing-data treatment travel as the
+attributes `coefficient`, `ci_method`, `missing`, and (when supplied)
+`aux`; bootstrap calls also record `B`.
 
 ## Details
 
@@ -300,10 +307,9 @@ names the estimator to use instead:
 
   Return only the point estimate.
 
-**Comparison with other packages.** The psych package provides
-[`alpha`](https://rdrr.io/pkg/psych/man/alpha.html), which reports
-coefficient \\\alpha\\ along with item-level diagnostics (item-total
-correlations, alpha-if-item-deleted, and several alternative
+**Comparison with other packages.** The psych package provides `alpha`,
+which reports coefficient \\\alpha\\ along with item-level diagnostics
+(item-total correlations, alpha-if-item-deleted, and several alternative
 coefficients). The emphasis in psych is broad exploratory psychometric
 reporting. `reliability_alpha` in DMAR differs in emphasis: it returns a
 single point estimate alongside a principled confidence interval drawn
@@ -431,7 +437,7 @@ of the maximum likelihood estimator of Cronbach's alpha. *Psychometrika,
 [`cfa_1`](https://yelleknek.github.io/DMAR/reference/cfa_1.md)
 (single-factor CFA used internally),
 [`ss_aipe_reliability`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability.md),
-[`alpha`](https://rdrr.io/pkg/psych/man/alpha.html).
+`alpha`.
 
 Other reliability:
 [`cohen_kappa()`](https://yelleknek.github.io/DMAR/reference/cohen_kappa.md),
@@ -462,15 +468,16 @@ colnames(items) <- paste0("y", seq_len(J))
 
 # Default (Bonett's transformation) CI from raw data.
 reliability_alpha(data = items)
-#>  term        value
-#>  estimate    0.777
-#>  se          0.11 
-#>  lower_limit 0.723
-#>  upper_limit 0.82 
-#>  conf_level  0.95 
-#>  N           200  
-#>  N_complete  200  
-#>  J           6    
+#>  term           value 
+#>  estimate       0.777 
+#>  se             0.0246
+#>  se_transformed 0.11  
+#>  lower_limit    0.723 
+#>  upper_limit    0.82  
+#>  conf_level     0.95  
+#>  N              200   
+#>  N_complete     200   
+#>  J              6     
 
 # Same point estimate from a covariance matrix; CI requires N.
 S <- cov(items)
@@ -485,33 +492,28 @@ reliability_alpha(S = S, N = 200, ci_method = "feldt")
 #>  N_complete  200  
 #>  J           6    
 
-# Percentile bootstrap with 200 reps for a quick example.
-reliability_alpha(data = items, ci_method = "percentile", B = 200)
-#>  term        value 
-#>  estimate    0.777 
-#>  se          0.0248
-#>  lower_limit 0.72  
-#>  upper_limit 0.817 
-#>  conf_level  0.95  
-#>  N           200   
-#>  N_complete  200   
-#>  J           6     
+# The bootstrap intervals resample the rows and recompute the
+# coefficient B times, so they are shown rather than run. The
+# percentile interval reads its limits off the empirical quantiles of
+# the bootstrap estimates:
+#   reliability_alpha(data = items, ci_method = "percentile",
+#                     B = 10000, seed = 113)
+# The bias-corrected and accelerated interval adjusts those two
+# quantile positions for median bias and for acceleration, and is the
+# better choice for a reported interval:
+#   reliability_alpha(data = items, ci_method = "bca", B = 10000,
+#                     seed = 113)
+# The default B = 10000 is an accuracy choice, not a formality, since
+# BCa works farther into the tails of the bootstrap distribution than
+# the percentile interval does (see Details).
 
-# Full information maximum likelihood with an auxiliary variable:
-# missingness on y2 depends on an auxiliary z (missing at random
-# given z), so listwise deletion is biased and FIML with z is not.
-# Supplying aux implies missing = "fiml".
-z <- eta + rnorm(200, sd = 0.5)
-d <- data.frame(items, z = z)
-d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
-reliability_alpha(data = d, aux = "z")
-#>  term        value 
-#>  estimate    0.778 
-#>  se          0.0256
-#>  lower_limit 0.728 
-#>  upper_limit 0.829 
-#>  conf_level  0.95  
-#>  N           200   
-#>  N_complete  124   
-#>  J           6     
+# Full information maximum likelihood with an auxiliary variable,
+# shown rather than run because it fits a model over the items and
+# the auxiliary. Missingness on y2 depends on an auxiliary z (missing
+# at random given z), so listwise deletion is biased and FIML with z
+# is not. Supplying aux implies missing = "fiml":
+#   z <- eta + rnorm(200, sd = 0.5)
+#   d <- data.frame(items, z = z)
+#   d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
+#   reliability_alpha(data = d, aux = "z")
 ```

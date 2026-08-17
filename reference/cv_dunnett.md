@@ -85,8 +85,7 @@ ordinary one- or two-sided *t* critical value.
 ## Note
 
 The constant-correlation assumption holds for balanced designs (equal n
-per group); for severely unbalanced designs use
-[`glht`](https://rdrr.io/pkg/multcomp/man/glht.html) instead.
+per group); for severely unbalanced designs use `glht` instead.
 
 ## References
 
@@ -98,7 +97,7 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
 ed.). Routledge. (See Chapter 5 on the multiple-comparisons problem;
 Dunnett's many-to-one comparisons procedure is developed there, and
-Appendix Tables A.3 and A.4 report its critical values for two- and
+Appendix Tables A.6 and A.7 report its critical values for two- and
 one-tailed tests.)
 
 ## See also

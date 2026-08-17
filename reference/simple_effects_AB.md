@@ -30,12 +30,12 @@ simple_effects_AB(
 
   A fitted [`aov`](https://rdrr.io/r/stats/aov.html) or
   [`lm`](https://rdrr.io/r/stats/lm.html) object whose right-hand side
-  has *exactly two* crossed factors (e.g.\\ `breaks ~ wool * tension`).
-  The interaction term is strongly recommended so that the pooled error
-  is the pure within-cell \\\mathit{MS}\_W\\; the function still runs
-  without it but issues a warning (the additive-model residual includes
-  interaction variance and inflates the error term used for the pooled
-  simple effect *F*).
+  has *exactly two* crossed factors (e.g.\\
+  `iq_gain ~ treatment * grade`). The interaction term is strongly
+  recommended so that the pooled error is the pure within-cell
+  \\\mathit{MS}\_W\\; the function still runs without it but issues a
+  warning (the additive-model residual includes interaction variance and
+  inflates the error term used for the pooled simple effect *F*).
 
 - which:
 
@@ -210,12 +210,17 @@ for the noncentrality machinery,
 for power calculations on the omnibus factorial effects.
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -225,11 +230,7 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -239,94 +240,102 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 2 x 3 factorial: wool (A) x tension (B) on warpbreaks.
-fit <- aov(breaks ~ wool * tension, data = warpbreaks)
+# 2 x 3 factorial: expectancy treatment (A) x grade (B) on the
+# pygmalion data. Grades 4 through 6 are omitted so the family of
+# simple effects stays short enough to read at a glance.
+pyg <- pygmalion[pygmalion$grade <= 3, ]
+pyg$grade <- factor(pyg$grade)
+fit <- aov(iq_gain ~ treatment * grade, data = pyg)
 
-# Default: pooled MS_W, both families, no adjustment.
+# Default: pooled MS_W, both families, no adjustment. The expectancy
+# effect on IQ gain is concentrated in grades 1 and 2; at grade 3 the
+# F is 0.004, so the lower limit on partial eta squared is clamped to
+# 0 and the function notes the clamp in a warning.
 simple_effects_AB(fit)
-#> Warning: The conf_limits_ncf() lower-limit clamp fired in 3 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
-#>  effect             focal_factor conditioning_factor conditioning_level F_value
-#>  wool | tension = L wool         tension             L                  10     
-#>  wool | tension = M wool         tension             M                  0.858  
-#>  wool | tension = H wool         tension             H                  1.26   
-#>  tension | wool = A tension      wool                A                  10.3   
-#>  tension | wool = B tension      wool                B                  2.37   
-#>  df_effect df_error p_value p_adjusted partial_eta_squared lower_limit
-#>  1         48       0.0027  0.0027     0.173               0.0216     
-#>  1         48       0.3589  0.3589     0.0176              0          
-#>  1         48       0.2682  0.2682     0.0255              0          
-#>  2         48       0.0002  0.0002     0.301               0.082      
-#>  2         48       0.1039  0.1039     0.09                0          
-#>  upper_limit n_at_level
-#>  0.335       18        
-#>  0.134       18        
-#>  0.15        18        
-#>  0.446       27        
-#>  0.229       27        
-#> 
-#> Confidence level: 95%
-
-# Only the simple effects of tension within each wool level, with a
-# Holm adjustment across that family of two tests.
-simple_effects_AB(fit, which = "B_at_A", adjust = "holm")
 #> Warning: The conf_limits_ncf() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
-#>  effect             focal_factor conditioning_factor conditioning_level F_value
-#>  tension | wool = A tension      wool                A                  10.3   
-#>  tension | wool = B tension      wool                B                  2.37   
-#>  df_effect df_error p_value p_adjusted partial_eta_squared lower_limit
-#>  2         48       0.0002  0.0004     0.301               0.082      
-#>  2         48       0.1039  0.1039     0.09                0          
-#>  upper_limit n_at_level
-#>  0.446       27        
-#>  0.229       27        
+#>  effect                      focal_factor conditioning_factor
+#>  treatment | grade = 1       treatment    grade              
+#>  treatment | grade = 2       treatment    grade              
+#>  treatment | grade = 3       treatment    grade              
+#>  grade | treatment = Control grade        treatment          
+#>  grade | treatment = Bloomer grade        treatment          
+#>  conditioning_level F_value df_effect df_error p_value p_adjusted
+#>  1                  7.39    1         157      0.0073  0.0073    
+#>  2                  5.26    1         157      0.0231  0.0231    
+#>  3                  0.00438 1         157      0.9473  0.9473    
+#>  Control            3.96    2         157      0.0211  0.0211    
+#>  Bloomer            6.46    2         157      0.0020  0.0020    
+#>  partial_eta_squared lower_limit upper_limit n_at_level
+#>  0.0449              0.00322     0.119       52        
+#>  0.0324              0.000173    0.1         58        
+#>  2.79e-05            0           0.00907     53        
+#>  0.048               0.000596    0.117       131       
+#>  0.076               0.0112      0.155       32        
 #> 
 #> Confidence level: 95%
 
-# Welch error term: refits a Welch one-way at each conditioning level.
+# Only the simple effects of grade within each treatment level, with
+# a Holm adjustment across that family of two tests.
+simple_effects_AB(fit, which = "B_at_A", adjust = "holm")
+#>  effect                      focal_factor conditioning_factor
+#>  grade | treatment = Control grade        treatment          
+#>  grade | treatment = Bloomer grade        treatment          
+#>  conditioning_level F_value df_effect df_error p_value p_adjusted
+#>  Control            3.96    2         157      0.0211  0.0211    
+#>  Bloomer            6.46    2         157      0.0020  0.0040    
+#>  partial_eta_squared lower_limit upper_limit n_at_level
+#>  0.048               0.000596    0.117       131       
+#>  0.076               0.0112      0.155       32        
+#> 
+#> Confidence level: 95%
+
+# Welch error term: refits a Welch one-way at each conditioning
+# level. The Welch denominator df fall well below the pooled 157, so
+# more of the lower limits are clamped to 0.
 simple_effects_AB(fit, error_term = "welch")
-#> Warning: The conf_limits_ncf() lower-limit clamp fired in 3 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
-#>  effect             focal_factor conditioning_factor conditioning_level F_value
-#>  wool | tension = L wool         tension             L                  5.65   
-#>  wool | tension = M wool         tension             M                  1.25   
-#>  wool | tension = H wool         tension             H                  2.32   
-#>  tension | wool = A tension      wool                A                  4.8    
-#>  tension | wool = B tension      wool                B                  5.8    
-#>  df_effect df_error p_value p_adjusted partial_eta_squared lower_limit
-#>  1         12.4     0.0344  0.0344     0.314               0          
-#>  1         15.9     0.2796  0.2796     0.0731              0          
-#>  1         11.5     0.1548  0.1548     0.168               0          
-#>  2         15.1     0.0243  0.0243     0.389               0.000678   
-#>  2         14.3     0.0144  0.0144     0.448               0.0155     
-#>  upper_limit n_at_level
-#>  0.53        18        
-#>  0.348       18        
-#>  0.412       18        
-#>  0.499       27        
-#>  0.535       27        
+#> Warning: The conf_limits_ncf() lower-limit clamp fired in 4 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#>  effect                      focal_factor conditioning_factor
+#>  treatment | grade = 1       treatment    grade              
+#>  treatment | grade = 2       treatment    grade              
+#>  treatment | grade = 3       treatment    grade              
+#>  grade | treatment = Control grade        treatment          
+#>  grade | treatment = Bloomer grade        treatment          
+#>  conditioning_level F_value df_effect df_error p_value p_adjusted
+#>  1                  6.87    1         9.03     0.0277  0.0277    
+#>  2                  2.97    1         12.5     0.1096  0.1096    
+#>  3                  0.00712 1         24.5     0.9335  0.9335    
+#>  Control            3.21    2         80.7     0.0455  0.0455    
+#>  Bloomer            7.48    2         14.5     0.0058  0.0058    
+#>  partial_eta_squared lower_limit upper_limit n_at_level
+#>  0.432               0           0.313       52        
+#>  0.192               0           0.196       58        
+#>  0.00029             0           0.0357      53        
+#>  0.0737              0           0.128       131       
+#>  0.508               0.0393      0.541       32        
 #> 
 #> Confidence level: 95%
 
 # Bonferroni across the full a + b = 5-test family.
 simple_effects_AB(fit, adjust = "bonferroni")
-#> Warning: The conf_limits_ncf() lower-limit clamp fired in 3 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
-#>  effect             focal_factor conditioning_factor conditioning_level F_value
-#>  wool | tension = L wool         tension             L                  10     
-#>  wool | tension = M wool         tension             M                  0.858  
-#>  wool | tension = H wool         tension             H                  1.26   
-#>  tension | wool = A tension      wool                A                  10.3   
-#>  tension | wool = B tension      wool                B                  2.37   
-#>  df_effect df_error p_value p_adjusted partial_eta_squared lower_limit
-#>  1         48       0.0027  0.0134     0.173               0.0216     
-#>  1         48       0.3589  1.0000     0.0176              0          
-#>  1         48       0.2682  1.0000     0.0255              0          
-#>  2         48       0.0002  0.0009     0.301               0.082      
-#>  2         48       0.1039  0.5193     0.09                0          
-#>  upper_limit n_at_level
-#>  0.335       18        
-#>  0.134       18        
-#>  0.15        18        
-#>  0.446       27        
-#>  0.229       27        
+#> Warning: The conf_limits_ncf() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#>  effect                      focal_factor conditioning_factor
+#>  treatment | grade = 1       treatment    grade              
+#>  treatment | grade = 2       treatment    grade              
+#>  treatment | grade = 3       treatment    grade              
+#>  grade | treatment = Control grade        treatment          
+#>  grade | treatment = Bloomer grade        treatment          
+#>  conditioning_level F_value df_effect df_error p_value p_adjusted
+#>  1                  7.39    1         157      0.0073  0.0365    
+#>  2                  5.26    1         157      0.0231  0.1154    
+#>  3                  0.00438 1         157      0.9473  1.0000    
+#>  Control            3.96    2         157      0.0211  0.1053    
+#>  Bloomer            6.46    2         157      0.0020  0.0101    
+#>  partial_eta_squared lower_limit upper_limit n_at_level
+#>  0.0449              0.00322     0.119       52        
+#>  0.0324              0.000173    0.1         58        
+#>  2.79e-05            0           0.00907     53        
+#>  0.048               0.000596    0.117       131       
+#>  0.076               0.0112      0.155       32        
 #> 
 #> Confidence level: 95%
 

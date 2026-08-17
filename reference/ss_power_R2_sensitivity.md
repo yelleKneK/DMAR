@@ -107,18 +107,21 @@ ss_power_R2_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis across `G` replications. Rows include the
-planning sample size used (`total_N`), the empirical power
-(`empirical_power`, the proportion of replications on which \\F\\
-exceeded the critical value), the analytic power computed from
+Carlo sensitivity analysis across `G` replications. The `term` entries
+are: `total_N` (the sample size evaluated), `empirical_power` (the
+proportion of replications on which \\F\\ exceeded the critical value),
+`analytic_power` (computed from
 [`ss_power_R2`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md)
-under the same model as planning (`analytic_power`), the mean / median /
-SD of the realized \\R^2\\ and \\F\\, and the critical value (`f_crit`).
-The result carries the `dmar_ss_power_sensitivity` class, so
+under the same model as planning), `mean_R2` / `median_R2` / `sd_R2` and
+`mean_F` / `median_F` / `sd_F` (summaries of the realized \\R^2\\ and
+\\F\\), `F_crit` (the critical value), and the input echoes `p`,
+`true_R2`, `estimated_R2` and `desired_power` (both NA when
+`specified_N` was supplied instead), and `alpha_level`. The result
+carries the `dmar_ss_power_sensitivity` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) reports the
 planned sample size beside the empirical and analytic power, and
 [`glance`](https://generics.r-lib.org/reference/glance.html) adds the
-simulated \\R^2\\ and \\F\\ distribution.
+simulated \\R^2\\ and \\F\\ distribution beside the echoed inputs.
 
 ## Details
 
@@ -168,7 +171,6 @@ confidence interval width.
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
-[`ss_aipe_tost_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -215,13 +217,18 @@ ss_power_R2_sensitivity(true_R2 = 0.30, estimated_R2 = 0.30,
                         G = 200, print_iter = FALSE)
 #>  term            value
 #>  total_N         36   
-#>  empirical_power 0.795
+#>  empirical_power 0.77 
 #>  analytic_power  0.802
-#>  mean_r2         0.4  
-#>  median_r2       0.397
-#>  sd_r2           0.118
-#>  mean_f          4.43 
-#>  median_f        3.95 
-#>  sd_f            2.25 
-#>  f_crit          2.53 
+#>  mean_R2         0.396
+#>  median_R2       0.386
+#>  sd_R2           0.122
+#>  mean_F          4.41 
+#>  median_F        3.78 
+#>  sd_F            2.51 
+#>  F_crit          2.53 
+#>  p               5    
+#>  true_R2         0.3  
+#>  estimated_R2    0.3  
+#>  desired_power   0.8  
+#>  alpha_level     0.05 
 ```

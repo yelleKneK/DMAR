@@ -163,7 +163,7 @@ shapes.
   Long-format interval tables, with rows for `lower_limit` and
   `upper_limit` and, when the function reports one, an estimate row
   whose `term` is the name of the parameter. Carried by
-  [`ci_cc`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+  [`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
   [`ci_smd_c`](https://yelleknek.github.io/DMAR/reference/ci_smd_c.md),
   [`ci_pvaf`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
   and
@@ -185,11 +185,11 @@ Both produce a one-row `data.frame` with `term`, `estimate`, `ci_lower`,
 either class calls `tidy()`, since the row is already the whole result.
 
 **The post hoc family.**
-[`tukey_kramer_ci`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
-[`games_howell_ci`](https://yelleknek.github.io/DMAR/reference/games_howell_ci.md),
-[`scheffe_ci`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
+[`ci_tukey_kramer`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
+[`ci_games_howell`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
+[`ci_scheffe`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 and
-[`dunnett_ci`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md)
+[`ci_dunnett`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md)
 all carry `dmar_post_hoc_ci`. Their source table is wide, with one row
 per comparison: a `contrast` label, a point estimate (`mean_difference`
 for the pairwise and many-to-one procedures, `contrast_value` for
@@ -207,7 +207,7 @@ carries `dmar_contrast_test`. Its source table is wide, with one row per
 contrast: a `contrast` label, the estimate \\\hat{\psi} = \sum_i c_i
 \bar{Y}\_i\\, its standard error, the *t*-statistic and the degrees of
 freedom it is referred to, the unadjusted *p*-value, the
-multiplicity-adjusted `p_adj`, and the `conf_lower` and `conf_upper`
+multiplicity-adjusted `p_adjusted`, and the `ci_lower` and `ci_upper`
 limits. `tidy()` renames those to `term`, `estimate`, `ci_lower`,
 `ci_upper`, `statistic`, `df`, `p_value`, `p_adjusted`, and
 `conf_level`, one row per contrast. Both *p*-values are kept, because
@@ -295,20 +295,20 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # A single interval: tidy() and glance() coincide, because there is
 # nothing at the model level the one row does not already carry.
-res <- ci_cc(r = 0.5, n = 50)
+res <- ci_r(r = 0.5, n = 50)
 generics::tidy(res)
-#>      term estimate  ci_lower  ci_upper conf_level
-#> 1 est_cor      0.5 0.2574879 0.6832563       0.95
+#>   term estimate  ci_lower  ci_upper conf_level
+#> 1    r      0.5 0.2574879 0.6832563       0.95
 generics::glance(res)
-#>      term estimate  ci_lower  ci_upper conf_level
-#> 1 est_cor      0.5 0.2574879 0.6832563       0.95
+#>   term estimate  ci_lower  ci_upper conf_level
+#> 1    r      0.5 0.2574879 0.6832563       0.95
 
 # A family of simultaneous intervals: one tidy() row per comparison,
 # one glance() row describing the family.
 set.seed(113)
 y <- c(rnorm(10, 0), rnorm(10, 1), rnorm(10, 2))
 g <- factor(rep(c("a", "b", "c"), each = 10))
-gh <- games_howell_ci(y, group = g)
+gh <- ci_games_howell(y, group = g)
 generics::tidy(gh)
 #>    term estimate    ci_lower ci_upper   p_adjusted conf_level
 #> 1 b - a 1.665520  0.62193264 2.709108 1.976750e-03       0.95
@@ -321,20 +321,20 @@ generics::glance(gh)
 # A set of contrasts: tidy() keeps both the unadjusted and the
 # adjusted p-value, and glance() names the adjustment that produced
 # the second of them.
-fit <- aov(weight ~ group, data = PlantGrowth)
+fit <- aov(bdi_post ~ condition, data = depression_bdi)
 ct <- contrast_test(fit, contrasts = "pairwise", adjust = "tukey")
 generics::tidy(ct)
-#>          term estimate   ci_lower  ci_upper statistic df     p_value p_adjusted
-#> 1 trt1 - ctrl   -0.371 -1.0622161 0.3202161 -1.330791 27 0.194387880 0.39087114
-#> 2 trt2 - ctrl    0.494 -0.1972161 1.1852161  1.771996 27 0.087681675 0.19799599
-#> 3 trt2 - trt1    0.865  0.1737839 1.5562161  3.102787 27 0.004459236 0.01200642
-#>   conf_level
-#> 1       0.95
-#> 2       0.95
-#> 3       0.95
+#>                  term estimate   ci_lower  ci_upper statistic df    p_value
+#> 1      placebo - ssri      4.9 -2.0793312 11.879331 1.7407322 27 0.09311706
+#> 2    wait_list - ssri      6.7 -0.2793312 13.679331 2.3801849 27 0.02462568
+#> 3 wait_list - placebo      1.8 -5.1793312  8.779331 0.6394526 27 0.52791718
+#>   p_adjusted conf_level
+#> 1  0.2088175       0.95
+#> 2  0.0617362       0.95
+#> 3  0.7998146       0.95
 generics::glance(ct)
 #>   n_contrasts adjust var_equal p_adjusted_min conf_level
-#> 1           3  tukey      TRUE     0.01200642       0.95
+#> 1           3  tukey      TRUE      0.0617362       0.95
 
 # A sample size planner: tidy() gives the size and the power it buys,
 # glance() adds the planning inputs that produced them.

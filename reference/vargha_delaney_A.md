@@ -156,10 +156,12 @@ vargha_delaney_A(x, y)
 #>   ci_method
 #> 1     logit
 
-# Formula interface on built-in ToothGrowth data: VC vs OJ.
-vargha_delaney_A(len ~ supp, data = ToothGrowth)
-#>           A         se lower_limit upper_limit  z_value    p_value n_1 n_2
-#> 1 0.6394444 0.07352625   0.4869786   0.7681696 1.896526 0.05789052  30  30
+# Formula interface on the pygmalion field experiment. The first factor
+# level (Control) forms group 1, so A below 0.5 says a randomly drawn
+# control child tends to score below a child from the bloomer group.
+vargha_delaney_A(iq_8 ~ treatment, data = pygmalion)
+#>           A         se lower_limit upper_limit   z_value    p_value n_1 n_2
+#> 1 0.4292429 0.04119075   0.3510403   0.5111451 -1.717791 0.08583467 246  64
 #>   ci_method
 #> 1     logit
 

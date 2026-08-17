@@ -177,20 +177,23 @@ eta_squared(F_value = 11.221, df_effect = 4, df_error = 50)
 #>  effect  eta_squared F_value df_effect df_error
 #>  overall 0.473       11.2    4         50      
 
-# 2. One way ANOVA from a fitted model (PlantGrowth, 3 groups, N = 30).
-fit_one <- aov(weight ~ group, data = PlantGrowth)
+# 2. One way ANOVA from a fitted model (depression_bdi: three
+#        treatment arms, 10 per arm, N = 30).
+fit_one <- aov(bdi_post ~ condition, data = depression_bdi)
 eta_squared(fit_one)
-#>  effect eta_squared F_value df_effect df_error
-#>  group  0.264       4.85    2         27      
+#>  effect    eta_squared F_value df_effect df_error
+#>  condition 0.184       3.03    2         27      
 
-# 3. Factorial ANOVA: partial eta squared per effect (balanced
-#        warpbreaks data: 2 wool types x 3 tensions, 9 per cell, N = 54).
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
+# 3. Factorial ANOVA: partial eta squared per effect (pygmalion
+#        data: expectancy treatment x grade, 2 x 6 with unequal cell
+#        sizes, N = 310). The treatment is manipulated; grade is a
+#        measured classification of the pupils.
+fit_factorial <- aov(iq_8 ~ treatment * factor(grade), data = pygmalion)
 eta_squared(fit_factorial)
-#>  effect       eta_squared F_value df_effect df_error
-#>  wool         0.0727      3.77    1         48      
-#>  tension      0.261       8.5     2         48      
-#>  wool:tension 0.149       4.19    2         48      
+#>  effect                  eta_squared F_value df_effect df_error
+#>  treatment               0.0215      6.54    1         298     
+#>  factor(grade)           0.0448      2.8     5         298     
+#>  treatment:factor(grade) 0.0196      1.19    5         298     
 
 # 4. Within-subjects (repeated measures) ANOVA. Simulated 20-subject
 #        x 3-time design; each subject is measured at Pre, Mid, Post.

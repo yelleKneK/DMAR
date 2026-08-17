@@ -38,14 +38,15 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-S <- cov(mtcars[, 1:5])
-res <- reliability_alpha(S = S, N = 32, ci_method = "feldt")
+# Coefficient alpha for the three verbal tests of the Holzinger and
+# Swineford battery, from their covariance matrix.
+S <- cov(holzinger_swineford[, c("t6_paragraph_comprehension",
+                                 "t7_sentence", "t9_word_meaning")])
+res <- reliability_alpha(S = S, N = 301, ci_method = "feldt")
 generics::tidy(res)
-#>    term  estimate se  ci_lower  ci_upper
-#> 1 alpha 0.4671591 NA 0.1066876 0.7112825
+#>    term  estimate se  ci_lower ci_upper
+#> 1 alpha 0.8305929 NA 0.7945197 0.861239
 generics::glance(res)
-#>   coefficient  estimate se  ci_lower  ci_upper conf_level nobs n_items
-#> 1       alpha 0.4671591 NA 0.1066876 0.7112825       0.95   32       5
-#>   ci_method
-#> 1     feldt
+#>   coefficient  estimate se  ci_lower ci_upper conf_level nobs n_items ci_method
+#> 1       alpha 0.8305929 NA 0.7945197 0.861239       0.95  301       3     feldt
 ```

@@ -77,7 +77,7 @@ intraclass correlation coefficients. *Psychological Methods, 1*(1),
 
 ## See also
 
-[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
+[`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`descriptives`](https://yelleknek.github.io/DMAR/reference/descriptives.md)
 
 Other reliability:

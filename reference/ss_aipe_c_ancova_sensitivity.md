@@ -107,13 +107,22 @@ ss_aipe_c_ancova_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis. Summary rows include the mean and median
-realized full-CI width (`mean_width_obs`, `median_width_obs`), the
-proportion of intervals narrower than the planning target
-(`width_narrower`), the mean ratio of the ANCOVA standard error to the
-ANOVA-only (`mean_ratio`), and tail-specific and overall empirical Type
-I error rates (`type_I_error_upper`, `type_I_error_lower`,
-`type_I_error`). The per-replication vectors (`psi_obs`, `se_psi`,
+Carlo sensitivity analysis across `G` replications. The `term` entries
+are: `mean_psi`, `median_psi`, `sd_psi` (summaries of the realized
+unstandardized contrast); `mean_ci_width`, `median_ci_width`,
+`sd_ci_width` (summaries of the realized interval widths);
+`pct_ci_less_w` (proportion of intervals narrower than the planning
+target `width`); `pct_ci_miss_low` and `pct_ci_miss_high` (tail-specific
+empirical non-coverage of the population contrast); `total_type_I_error`
+(overall empirical non-coverage, the sum of the two tails);
+`mean_se_ratio` (mean ratio of the contrast standard error that ignores
+the covariate-imbalance term to the full ANCOVA standard error); and the
+input echoes `n_per_group`, `total_N`, `true_psi` (the population
+contrast implied by `mu_y` and `c_weights`), `est_error_var_ancova` (as
+supplied or as resolved from `est_error_var_anova` and `est_rho`),
+`rho`, `width`, `conf_level`, and `assurance` (present only when an
+assurance was supplied). The proportion rows are on the 0 to 1 scale,
+not percentages. The per-replication vectors (`psi_obs`, `se_psi`,
 `se_psi_restricted`, `width_obs`) are not returned; they are written to
 the CSV named by `filename` when `save = TRUE`.
 
@@ -155,21 +164,31 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # Monte Carlo sensitivity sweep; G is small here so the example runs quickly.
 # Raise G (e.g., G = 1000 or more) for a stable sensitivity analysis.
 set.seed(113)
 ss_aipe_c_ancova_sensitivity(true_error_var_ancova=30,
                              est_error_var_ancova=30, rho=.2, mu_y=c(10,12,15,13), mu_x=2,
                              G=50, sigma_x=1.3, sigma_y=2, c_weights=c(1,0,-1,0), width=3)
-#>  term               value
-#>  type_I_error       6    
-#>  type_I_error_upper 2    
-#>  type_I_error_lower 4    
-#>  width_narrower     100  
-#>  mean_width_obs     1.07 
-#>  median_width_obs   1.07 
-#>  mean_ratio         0.999
+#>  term                 value 
+#>  mean_psi             -4.98 
+#>  median_psi           -4.96 
+#>  sd_psi               0.26  
+#>  mean_ci_width        1.07  
+#>  median_ci_width      1.07  
+#>  sd_ci_width          0.0366
+#>  pct_ci_less_w        1     
+#>  pct_ci_miss_low      0.04  
+#>  pct_ci_miss_high     0.02  
+#>  total_type_I_error   0.06  
+#>  mean_se_ratio        0.999 
+#>  n_per_group          104   
+#>  total_N              416   
+#>  true_psi             -5    
+#>  est_error_var_ancova 30    
+#>  rho                  0.2   
+#>  width                3     
+#>  conf_level           0.95  
 #> 
 #> Confidence level: 95%
 
@@ -177,15 +196,25 @@ ss_aipe_c_ancova_sensitivity(true_error_var_anova=36,
                              est_error_var_anova=36, rho=.2, est_rho=.2, G=50,
                              mu_y=c(10,12,15,13), mu_x=2, sigma_x=1.3, sigma_y=6,
                              c_weights=c(1,0,-1,0), width=3, assurance=NULL)
-#>  term               value
-#>  type_I_error       2    
-#>  type_I_error_upper 2    
-#>  type_I_error_lower 0    
-#>  width_narrower     50   
-#>  mean_width_obs     3.02 
-#>  median_width_obs   3    
-#>  mean_ratio         0.999
+#>  term                 value 
+#>  mean_psi             -5    
+#>  median_psi           -4.94 
+#>  sd_psi               0.721 
+#>  mean_ci_width        3.02  
+#>  median_ci_width      3     
+#>  sd_ci_width          0.0912
+#>  pct_ci_less_w        0.5   
+#>  pct_ci_miss_low      0     
+#>  pct_ci_miss_high     0.02  
+#>  total_type_I_error   0.02  
+#>  mean_se_ratio        0.999 
+#>  n_per_group          119   
+#>  total_N              476   
+#>  true_psi             -5    
+#>  est_error_var_ancova 34.6  
+#>  rho                  0.2   
+#>  width                3     
+#>  conf_level           0.95  
 #> 
 #> Confidence level: 95%
-# }
 ```

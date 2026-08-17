@@ -78,13 +78,21 @@ ss_aipe_smd_sensitivity(
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis. Summary rows include the mean / median / SD
-of the realized full confidence interval width (`mean_full_width`,
-`median_full_width`, `sd_full_width`), the proportion of intervals
-narrower than the planning target (`pct_less_desired`), the mean lower-
-and upper-tail widths (`mean_width_lower`, `mean_width_upper`), and the
-empirical Type I error rates on each tail (`type_I_error_upper`,
-`type_I_error_lower`).
+Carlo sensitivity analysis across the `G` replications. The `term`
+entries are: `mean_smd`, `median_smd`, `sd_smd` (summaries of the
+realized standardized mean difference); `mean_ci_width`,
+`median_ci_width`, `sd_ci_width` (summaries of the full interval
+widths); `mean_ci_width_lower` and `mean_ci_width_upper` (mean one-sided
+widths, measured from the observed standardized mean difference to each
+limit); `pct_ci_less_w` (proportion of intervals at or below the target
+width); `pct_ci_miss_low` and `pct_ci_miss_high` (tail-specific
+empirical non-coverage of `true_delta`); `total_type_I_error` (overall
+empirical non-coverage, the sum of the two tails); and the input echoes
+`n_per_group`, `total_N`, `true_delta`, `estimated_delta` (NA when
+`n_per_group` was supplied instead), `width`, `conf_level`, and
+`assurance` (present only when an assurance was supplied). The
+proportion and Type I error rows are proportions on the 0 to 1 scale,
+not percentages.
 
 ## Details
 
@@ -152,14 +160,18 @@ Ken Kelley <kkelley@nd.edu>
 # Since 'true_delta' equals 'estimated_delta', this usage
 # returns the results of a correctly specified situation.
 # Note that 'G' should be large (50 is used to make the example run easily)
+set.seed(113)
 Res.1 <- ss_aipe_smd_sensitivity(true_delta=.5, estimated_delta=.5, desired_width=.30,
                                  assurance=NULL, conf_level=.95, G=50, print_iter=FALSE)
 
 # Objects contained in the 'summary'.
 Res.1$term
-#> [1] "mean_full_width"    "median_full_width"  "sd_full_width"     
-#> [4] "pct_less_desired"   "mean_width_lower"   "mean_width_upper"  
-#> [7] "type_I_error_upper" "type_I_error_lower"
+#>  [1] "mean_smd"            "median_smd"          "sd_smd"             
+#>  [4] "mean_ci_width"       "median_ci_width"     "sd_ci_width"        
+#>  [7] "mean_ci_width_lower" "mean_ci_width_upper" "pct_ci_less_w"      
+#> [10] "pct_ci_miss_low"     "pct_ci_miss_high"    "total_type_I_error" 
+#> [13] "n_per_group"         "total_N"             "true_delta"         
+#> [16] "estimated_delta"     "width"               "conf_level"         
 
 # True standardized mean difference is .4, but specified at .5.
 # Change 'G' to some large number (e.g., G=5,000)
@@ -168,8 +180,8 @@ Res.2 <- ss_aipe_smd_sensitivity(true_delta=.4, estimated_delta=.5, desired_widt
 
 # The effect of the misspecification on mean confidence intervals is:
 Res.2[1,]
-#>  term            value
-#>  mean_full_width 0.298
+#>  term     value
+#>  mean_smd 0.372
 #> 
 #> Confidence level: 95%
 
@@ -179,8 +191,8 @@ Res.3 <- ss_aipe_smd_sensitivity(true_delta=.5, estimated_delta=.4, desired_widt
 
 # The effect of the misspecification on mean confidence intervals is:
 Res.3[1,]
-#>  term            value
-#>  mean_full_width 0.302
+#>  term     value
+#>  mean_smd 0.484
 #> 
 #> Confidence level: 95%
 ```

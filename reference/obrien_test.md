@@ -68,12 +68,17 @@ experimental designs. *Psychological Bulletin, 89*(3), 570–574.
 [`var.test`](https://rdrr.io/r/stats/var.test.html)
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -82,12 +87,8 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -101,9 +102,10 @@ Ken Kelley <kkelley@nd.edu>
 # by Abdi (2007). Sixty-four participants were assigned to a control group
 # (no mnemonic instruction) or an experimental group (peg-word mnemonic).
 # The score is the number of word pairs (out of 10) recalled. Abdi (2007,
-# Table 6) reports F = 1.29 (df = 1, 62), p = .2595 for the O'Brien test of
-# equal variances; the experimental group's apparent ceiling effect does
-# not produce statistically detectable variance heterogeneity.
+# Table 6) reports F = 1.29 (df = 1, 62) for the O'Brien test of equal
+# variances, p = .260 as computed here; the experimental group's apparent
+# ceiling effect does not produce statistically detectable variance
+# heterogeneity.
 hunter_1964 <- data.frame(
   group = factor(
     c(rep("Control", 32), rep("Experimental", 32)),
@@ -140,10 +142,12 @@ bartlett.test(recall ~ group, data = hunter_1964)
 #> Bartlett's K-squared = 1.6756, df = 1, p-value = 0.1955
 #> 
 
-# Vector / grouping-variable interface (built-in PlantGrowth).
-obrien_test(PlantGrowth$weight, PlantGrowth$group)
+# Vector / grouping-variable interface, on DMAR's depression_bdi data.
+# The wait list variance is about twice the SSRI variance, but with ten
+# observations per group the test does not reject equal variances.
+obrien_test(depression_bdi$bdi_post, depression_bdi$condition)
 #>  statistic df_1 df_2 p_value n_groups n_total
-#>  1.59      2    27   0.2218  3        30     
+#>  1.29      2    27   0.2918  3        30     
 #>  method                                    
 #>  O'Brien's test for homogeneity of variance
 ```

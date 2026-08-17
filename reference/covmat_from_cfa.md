@@ -20,8 +20,6 @@ formals are named in the lowercase vector form (`lambda` and
 
 ``` r
 covmat_from_cfa(lambda, psi_squared, ...)
-
-covmat_from_cfm(lambda, psi_squared, ...)
 ```
 
 ## Arguments
@@ -71,9 +69,7 @@ a residual covariance between two indicators. A confirmatory factor
 model with correlated errors (correlated uniquenesses) requires a more
 general formulation than this function provides.
 
-`covmat_from_cfm()` is a backward-compatible alias for
-`covmat_from_cfa()`; the two are identical, and the `cfa` spelling
-matches the
+The `cfa` spelling matches the
 [`cfa_1`](https://yelleknek.github.io/DMAR/reference/cfa_1.md) naming.
 
 ## See also

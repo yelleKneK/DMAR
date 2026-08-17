@@ -65,15 +65,18 @@ ci_mahalanobis(
 
 - conf_level:
 
-  Confidence coverage for a symmetric interval (default `0.95`). Used
-  only when both `alpha_lower` and `alpha_upper` are `NULL`.
+  Confidence coverage for a symmetric interval (default `0.95`). Set it
+  to `NULL` to specify the tails directly through `alpha_lower` and
+  `alpha_upper`.
 
 - alpha_lower, alpha_upper:
 
-  Optional Type I error rates for the lower and upper tail. If both are
-  `NULL`, a symmetric interval at `conf_level` is used. If both are
-  supplied, `conf_level` is recomputed as
-  `1 - alpha_lower - alpha_upper`.
+  Optional Type I error rates for the lower and upper tail. To use them,
+  set `conf_level = NULL` and supply both (an asymmetric or one-sided
+  interval with coverage `1 - alpha_lower - alpha_upper`); supplying
+  either alongside a non-`NULL` `conf_level` is an error, as in
+  [`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
+  to which they are passed.
 
 - ...:
 
@@ -168,14 +171,13 @@ Other confidence intervals for effect sizes:
 [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
 [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -197,28 +199,33 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Two-sample distance between the two iris species 'setosa' and
-#     'versicolor' on the four sepal/petal measurements.
-g1 <- as.matrix(iris[iris$Species == "setosa",     1:4])
-g2 <- as.matrix(iris[iris$Species == "versicolor", 1:4])
+# Two-sample distance between the two schools of the Holzinger and
+#     Swineford (1939) study on a four-test cognitive battery.
+battery <- c("t1_visual_perception", "t2_cubes", "t4_lozenges",
+             "t6_paragraph_comprehension")
+g1 <- as.matrix(holzinger_swineford[
+  holzinger_swineford$school == "Grant-White", battery])
+g2 <- as.matrix(holzinger_swineford[
+  holzinger_swineford$school == "Pasteur", battery])
 ci_mahalanobis(group_1 = g1, group_2 = g2)
-#>  sample_type D2  lower_limit upper_limit F_value df_1 df_2 n_1 n_2 p
-#>  two-sample  103 72.6        132         625     4    95   50  50  4
+#>  sample_type D2    lower_limit upper_limit F_value df_1 df_2 n_1 n_2 p
+#>  two-sample  0.608 0.259       0.975       11.3    4    296  145 156 4
 #> 
 #> Confidence level: 95%
 
-# One-sample distance: how far is the centroid of versicolor from a
-#     reference vector of (5.5, 3.0, 4.0, 1.5)?
-ci_mahalanobis(group_1 = g2, mu_0 = c(5.5, 3.0, 4.0, 1.5))
-#>  sample_type D2   lower_limit upper_limit F_value df_1 df_2 n_1 n_2  p
-#>  one-sample  5.26 2.79        7.49        61.7    4    46   50  <NA> 4
+# One-sample distance: how far is the Grant-White centroid from a
+#     reference vector of (29, 24, 18, 9)?
+ci_mahalanobis(group_1 = g1, mu_0 = c(29, 24, 18, 9))
+#>  sample_type D2    lower_limit upper_limit F_value df_1 df_2 n_1 n_2  p
+#>  one-sample  0.289 0.11        0.474       10.2    4    141  145 <NA> 4
 #> 
 #> Confidence level: 95%
 
-# Pre-computed D^2 (no raw data needed).
-ci_mahalanobis(D2 = 103.2, n_1 = 50, n_2 = 50, p = 4)
-#>  sample_type D2  lower_limit upper_limit F_value df_1 df_2 n_1 n_2 p
-#>  two-sample  103 72.6        131         625     4    95   50  50  4
+# Pre-computed D^2 (no raw data needed): the two-school distance,
+#     reproduced from reported summaries.
+ci_mahalanobis(D2 = 0.608, n_1 = 145, n_2 = 156, p = 4)
+#>  sample_type D2    lower_limit upper_limit F_value df_1 df_2 n_1 n_2 p
+#>  two-sample  0.608 0.259       0.974       11.3    4    296  145 156 4
 #> 
 #> Confidence level: 95%
 ```

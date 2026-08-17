@@ -156,7 +156,7 @@ the proportion of variance accounted for by a single predictor;
 [`ci_snr()`](https://yelleknek.github.io/DMAR/reference/ci_snr.md) and
 [`ci_srsnr()`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md)
 for signal-to-noise ratios;
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
+[`ci_R()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md), and
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md) for
 correlations and standardized regression coefficients;
@@ -233,11 +233,11 @@ fit <- aov(weight ~ group, data = PlantGrowth)
 contrast_test(fit, contrasts = "pairwise", adjust = "tukey")
 ```
 
-| contrast    | estimate | se    | t     | df  | p       | p_adj | conf_lower | conf_upper |
-|:------------|:---------|:------|:------|:----|:--------|:------|:-----------|:-----------|
-| trt1 - ctrl | -0.371   | 0.279 | -1.33 | 27  | 0.194   | 0.391 | -1.06      | 0.32       |
-| trt2 - ctrl | 0.494    | 0.279 | 1.77  | 27  | 0.0877  | 0.198 | -0.197     | 1.19       |
-| trt2 - trt1 | 0.865    | 0.279 | 3.1   | 27  | 0.00446 | 0.012 | 0.174      | 1.56       |
+| contrast    | estimate | se    | t     | df  | p_value | p_adjusted | ci_lower | ci_upper |
+|:------------|:---------|:------|:------|:----|:--------|:-----------|:---------|:---------|
+| trt1 - ctrl | -0.371   | 0.279 | -1.33 | 27  | 0.1944  | 0.3909     | -1.06    | 0.32     |
+| trt2 - ctrl | 0.494    | 0.279 | 1.77  | 27  | 0.0877  | 0.1980     | -0.197   | 1.19     |
+| trt2 - trt1 | 0.865    | 0.279 | 3.1   | 27  | 0.0045  | 0.0120     | 0.174    | 1.56     |
 
 Confidence level: 95%
 
@@ -386,7 +386,7 @@ specialized packages.
 
 - For full-featured factor analysis and SEM, use `lavaan`.
 - For coefficient $`\alpha`$ / $`\omega`$ with extensive options, use
-  [`psych::omega()`](https://rdrr.io/pkg/psych/man/omega.html).
+  `psych::omega()`.
 - For mixed-effects models, use `lme4` or `nlme`.
 - For robust ANOVA, use `WRS2`.
 

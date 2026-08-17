@@ -46,10 +46,10 @@ The covariance matrix returned is always a symmetric matrix.
 The correlation matrix input should be a square matrix, and the length
 of `sd` should be equal to the number of variables in the correlation
 matrix (i.e., the number of rows/columns). Sometimes the correlation
-matrix input may not have exactly 1's on the main diagonal, due to, eg,
-rounding; `discrepancy` specifies the allowable discrepancy so that the
-function still considers the input as a correlation matrix and can
-proceed (but the function does not change the numbers on the main
+matrix input may not have exactly 1's on the main diagonal, due to,
+e.g., rounding; `discrepancy` specifies the allowable discrepancy so
+that the function still considers the input as a correlation matrix and
+can proceed (but the function does not change the numbers on the main
 diagonal).
 
 ## See also

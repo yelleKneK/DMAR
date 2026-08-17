@@ -118,11 +118,17 @@ requested probability:
 - the upper limit satisfies \\P(F \le \mathtt{F\\value}) =
   \mathtt{alpha\\upper}\\.
 
-Each tail probability is continuous and strictly monotone decreasing in
-the noncentrality parameter, so each limit is the unique non-negative
-root of a one-dimensional equation, located here with
-[`uniroot`](https://rdrr.io/r/stats/uniroot.html); `extendInt` is used
-to widen the search bracket if needed.
+The two conditions run in opposite directions in \\\lambda\\: the
+lower-tail probability \\P(F \le \mathtt{F\\value})\\ is continuous and
+strictly decreasing in the noncentrality parameter, so the upper-tail
+probability \\P(F \ge \mathtt{F\\value})\\ is continuous and strictly
+increasing in it. The lower limit is the \\\lambda\\ at which the upper
+tail has grown to `alpha_lower`, and the upper limit is the \\\lambda\\
+at which the lower tail has shrunk to `alpha_upper`. Each is therefore
+the unique non-negative root of a one-dimensional equation, and both are
+located with [`uniroot`](https://rdrr.io/r/stats/uniroot.html) on the
+decreasing lower-tail scale; `extendInt` is used to widen the search
+bracket if needed.
 
 Because the noncentrality parameter is bounded below by zero, the lower
 limit is set to zero whenever the observed `F_value` is smaller than the
@@ -130,7 +136,9 @@ limit is set to zero whenever the observed `F_value` is smaller than the
 data is consistent with \\\lambda = 0\\ at the requested confidence
 level). A warning is issued in that case, and the achieved probabilities
 reported in the output reflect the actual values at \\\lambda = 0\\
-rather than the requested `alpha_lower`.
+rather than the requested `alpha_lower`. The warning carries the
+condition class `dmar_ncf_clamp`, so a caller that inverts the
+noncentral *F* repeatedly can muffle or deduplicate it by class.
 
 ## References
 

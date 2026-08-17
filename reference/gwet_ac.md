@@ -1,10 +1,10 @@
 # Gwet's AC1 and AC2 Chance-Corrected Agreement Coefficients
 
-Computes Gwet's (2008, 2014) AC1 (nominal data) and AC2 (ordinal data
-with user-supplied weights) chance-corrected agreement coefficients for
-two or more raters. AC1/AC2 are more robust than Cohen's \\\kappa\\ to
-extreme marginal-prevalence imbalance and the trait-distribution
-paradox.
+Computes Gwet's AC1 (nominal data; Gwet, 2008) and AC2 (ordinal data
+with user-supplied weights; Gwet, 2014) chance-corrected agreement
+coefficients for two or more raters. AC1/AC2 are more robust than
+Cohen's \\\kappa\\ to extreme marginal-prevalence imbalance and the
+trait-distribution paradox.
 
 ## Usage
 
@@ -93,8 +93,8 @@ Other agreement and measurement:
 [`content_validity_index()`](https://yelleknek.github.io/DMAR/reference/content_validity_index.md),
 [`icc_lmer()`](https://yelleknek.github.io/DMAR/reference/icc_lmer.md),
 [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
+[`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md),
 [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
-[`loa()`](https://yelleknek.github.io/DMAR/reference/loa.md),
 [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
 
 ## Author

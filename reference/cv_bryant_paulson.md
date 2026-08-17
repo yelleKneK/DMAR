@@ -144,7 +144,9 @@ Duncan, D. B. (1955). Multiple range and multiple F tests. *Biometrics,
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
-ed.). Routledge. (See Chapter 9.)
+ed.). Routledge. (See Chapter 9, where multiple comparisons of adjusted
+means in the analysis of covariance are developed; Appendix Table A.8
+reports these critical values.)
 
 ## See also
 
@@ -173,24 +175,37 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Multiple comparisons of adjusted means in ANCOVA (the setting of Maxwell,
 # Delaney, and Kelley, 2027, Chapter 9), using the worked example of Bryant
-# & Bruvold (1980): 6 panels, 1 random covariate, 14 error df, alpha_level = .05.
-# The single-step value is the multiplier for simultaneous confidence
-# intervals on the pairwise differences of adjusted means; here it is 4.83.
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1)
-#>  term     value area_less area_greater
-#>  upper_cv 4.83  0.95      0.05        
+# and Bruvold (1980): 6 panels, 1 random covariate, 14 error df,
+# alpha_level = .05. The single-step value is the multiplier for simultaneous
+# confidence intervals on the pairwise differences of adjusted means. With a
+# covariate present there is no closed form for it: the Bryant-Paulson
+# distribution function is integrated numerically and then inverted, which
+# takes about half a second, so the call is shown here rather than run.
+# cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1)
+# It returns 4.83, the entry in Table 1 of Bryant and Paulson (1976) and the
+# multiplier behind the simultaneous intervals of the 1980 worked example.
 
-# With no covariates it is sqrt(2) times the Tukey HSD critical value.
+# With no covariates the reference distribution is the ordinary studentized
+# range, which base R supplies directly, so these calls are quick and do run
+# here. The critical value is sqrt(2) times the Tukey HSD critical value.
 cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 0)$value
 #> [1] 4.638538
 sqrt(2) * cv_tukey_hsd(alpha_level = .05, df = 14, groups = 6)$value
 #> [1] 4.638538
 
-# \donttest{
-# Duncan multiple-range significant range (Table 2 of the paper).
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
+# The stepwise Duncan multiple-range significant range comes from
+# procedure = "duncan". With covariates = 0 it reduces to Duncan's (1955)
+# own significant studentized range, 3.37 for a stretch of 6 groups on 14
+# error degrees of freedom.
+cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 0,
                   procedure = "duncan")
 #>  term     value area_less area_greater
-#>  upper_cv 3.5   <NA>      <NA>        
-# }
+#>  upper_cv 3.37  <NA>      <NA>        
+# One random covariate raises that range to 3.50, the entry in Table 2 of
+# Bryant and Bruvold (1980). Being stepwise, it inverts a separate
+# Bryant-Paulson quantile for every stretch from 2 to 6 groups, so it costs
+# several seconds and is not run here either. The package tests and the
+# tests check it against the paper's Section 4 example.
+# cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
+#                   procedure = "duncan")
 ```

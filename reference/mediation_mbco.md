@@ -252,11 +252,16 @@ solution actually satisfies the constraint, and keeps the feasible
 solution with the smallest deviance. In the memory example below this
 matters: for the single mediator model the best-fitting null model sets
 the imagery-to-recall path to zero (\\\mathrm{LRT}\_{\mathrm{MBCO}} =
-72.54\\), while the branch that sets the instruction-to-imagery path to
-zero fits worse (\\\mathrm{LRT}\_{\mathrm{MBCO}} = 175.77\\, the value
-reported for this example in Tofighi & Kelley, 2020, whose optimizer
-stopped on that branch); either way the null model is overwhelmingly
-incompatible with the data, so the substantive conclusion is the same.
+71.31\\, the statistic the example reports), while the branch that sets
+the instruction-to-imagery path to zero fits worse
+(\\\mathrm{LRT}\_{\mathrm{MBCO}} = 179.02\\). Tofighi and Kelley (2020)
+report 175.77 for this example, a value from that worse-fitting branch,
+on which their optimizer stopped; their statistic also differs from the
+179.02 here because the example runs from the published (rounded)
+summary statistics of their Table 1 rather than the full-precision
+moments (which give 72.54 and 175.77 for the two branches). Either way
+the null model is overwhelmingly incompatible with the data, so the
+substantive conclusion is the same.
 
 **Effects estimated and tested.** With `x` and `y` resolved, the
 function enumerates every directed pathway from `x` to `y` along
@@ -276,6 +281,24 @@ Every reported row carries its estimate, a delta method standard error
 (via [`mxSE`](https://rdrr.io/pkg/OpenMx/man/mxSE.html)), the
 `ci_method` confidence interval, and the MBCO likelihood ratio test with
 its degrees of freedom and *p*-value.
+
+**Choosing the confidence interval.** The default profile likelihood
+interval inverts the likelihood ratio test for the effect itself (Neale
+& Miller, 1997), so its limits are free to sit asymmetrically about the
+estimate, as the skewed sampling distribution of a product of
+coefficients calls for, and the interval and the MBCO test tell the same
+story. Each bound is a constrained search of its own, which is what
+makes it the expensive choice. The Monte Carlo interval is the
+inexpensive alternative that also accommodates the skewness: `B`
+coefficient vectors are drawn from the joint normal approximation of the
+estimates, the effect is evaluated in each draw, and the limits are the
+empirical \\(\alpha/2, 1 - \alpha/2)\\ quantiles of those `B` values
+(MacKinnon, Lockwood, & Williams, 2004). Ask for it when the profile
+searches are slow, when a profile bound fails to converge, or when
+comparing with a published analysis that reports one, as Tofighi and
+Kelley (2020) do for the memory data in the examples. The Wald interval
+is the symmetric delta method interval and is reported only for
+comparison.
 
 **Multiple groups (moderated mediation across groups).** With `group`
 (or list-form `S`, `M`, `N`), the model is fit as a multiple-group SEM:
@@ -486,40 +509,11 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# A quick simulated single-mediator example. Requires the OpenMx and
-# lavaan packages to be installed.
-set.seed(113)
-n <- 200
-x <- rnorm(n)
-m <- 0.5 * x + rnorm(n, 0, sqrt(1 - 0.25))
-y <- 0.2 * x + 0.4 * m + rnorm(n, 0, 0.8)
-d <- data.frame(x = x, m = m, y = y)
-mediation_mbco("m ~ x \n y ~ m + x", data = d, x = "x", y = "y",
-               ci_method = "wald")
-#> Mediation tests via model-based constrained optimization (MBCO)
-#>   Effects of x on y; N = 200; optimizer: SLSQP
-#>   Full model: deviance = 1551.498904, AIC = 1569.498904, BIC = 1599.183761
-#>   R2 (full model): m = 0.212, y = 0.280
-#>   Each p_value is from the MBCO likelihood ratio test of the
-#>   null model constraining that effect to zero. Causal readings
-#>   rest on the no omitted confounder assumption.
-#> 
-#>  pathway               term           estimate se     ci_lower ci_upper lrt  df
-#>  x -> y (all pathways) total_effect   0.375    0.0633 0.251    0.499    32.4 1 
-#>  x -> y                direct_effect  0.194    0.0656 0.0652   0.322    8.54 1 
-#>  x -> m -> y           indirect_via_m 0.182    0.0391 0.105    0.258    33.2 1 
-#>  p_value  delta_aic delta_bic
-#>  < 0.0001 30.4      27.1     
-#>  0.0035   6.54      3.24     
-#>  < 0.0001 31.2      27.9     
-#> 
-#> Confidence level: 95%
-
-# \donttest{
 # Replicate the memory experiment analyses of Tofighi and Kelley
 # (2020) from the summary statistics in their Table 1 (data from
 # MacKinnon, Valente, & Wurpts, 2018; N = 369). Instruction is 1 for
 # imagery rehearsal instructions and 0 for repetition instructions.
+# Requires the OpenMx and lavaan packages to be installed.
 vars <- c("instruction", "imagery", "repetition", "recall")
 sds  <- c(0.50, 2.96, 2.84, 3.40)
 R_tk <- matrix(c(1.00,  .62, -.67,  .32,
@@ -531,181 +525,51 @@ S_tk <- outer(sds, sds) * R_tk
 M_tk <- c(instruction = 0.51, imagery = 5.66, repetition = 6.08,
           recall = 12.07)
 
-# Single-mediator model: instruction -> imagery -> recall.
-single <- "
-  imagery ~ b1*instruction
-  recall  ~ b2*imagery + b3*instruction
-"
-mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
-               x = "instruction", y = "recall",
-               ci_method = "monte_carlo", seed = 113)
-#> Mediation tests via model-based constrained optimization (MBCO)
-#>   Effects of instruction on recall; N = 369; optimizer: SLSQP
-#>   Full model: deviance = 4040.806567, AIC = 4058.806567, BIC = 4094.003737
-#>   R2 (full model): imagery = 0.384, recall = 0.260
-#>   Each p_value is from the MBCO likelihood ratio test of the
-#>   null model constraining that effect to zero. Causal readings
-#>   rest on the no omitted confounder assumption.
-#> 
-#>  pathway                              term                 estimate se   
-#>  instruction -> recall (all pathways) total_effect         2.18     0.335
-#>  instruction -> recall                direct_effect        0.042    0.388
-#>  instruction -> imagery -> recall     indirect_via_imagery 2.13     0.279
-#>  ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
-#>  1.51     2.84     39.9   1  < 0.0001 37.9      34       
-#>  -0.724   0.804    0.0117 1  0.9139   -1.99     -5.9     
-#>  1.61     2.7      71.3   1  < 0.0001 69.3      65.4     
-#> 
-#> Confidence level: 95%
+# Single-mediator model: instruction -> imagery -> recall. The fit is
+# not run here because every reported effect costs its own constrained
+# null model fit in OpenMx, on top of the B Monte Carlo replications
+# the interval draws. The call is:
+# single <- "
+#   imagery ~ b1*instruction
+#   recall  ~ b2*imagery + b3*instruction
+# "
+# mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
+#                x = "instruction", y = "recall",
+#                ci_method = "monte_carlo", seed = 113)
 # The indirect effect is about 2.1 words (the paper reports 2.121,
 # SE = 0.276, 95% Monte Carlo CI [1.600, 2.682]).
 
 # Parallel two-mediator model, with the contrast of the two specific
-# indirect effects (the paper's Research Questions 2 and 3).
-parallel <- "
-  imagery    ~ b1*instruction
-  repetition ~ b3*instruction
-  recall     ~ b2*imagery + b4*repetition + b5*instruction
-  imagery ~~ repetition
-"
-mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
-               x = "instruction", y = "recall",
-               hypotheses = c(imagery_minus_repetition =
-                 "indirect_via_imagery - indirect_via_repetition"),
-               ci_method = "monte_carlo", seed = 113)
-#> Mediation tests via model-based constrained optimization (MBCO)
-#>   Effects of instruction on recall; N = 369; optimizer: SLSQP
-#>   Full model: deviance = 5613.915747, AIC = 5641.915747, BIC = 5696.6669
-#>   R2 (full model): imagery = 0.384, repetition = 0.449, recall = 0.260
-#>   Each p_value is from the MBCO likelihood ratio test of the
-#>   null model constraining that effect to zero. Causal readings
-#>   rest on the no omitted confounder assumption.
-#> 
-#>  pathway                                        term                    
-#>  instruction -> recall (all pathways)           total_effect            
-#>  instruction -> recall                          direct_effect           
-#>  instruction -> recall (all indirect pathways)  total_indirect          
-#>  instruction -> imagery -> recall               indirect_via_imagery    
-#>  instruction -> repetition -> recall            indirect_via_repetition 
-#>  indirect_via_imagery - indirect_via_repetition imagery_minus_repetition
-#>  estimate se    ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
-#>  2.18     0.335 1.51     2.84     39.9   1  < 0.0001 37.9      34       
-#>  0.0943   0.447 -0.799   0.978    0.0445 1  0.8329   -1.96     -5.87    
-#>  2.08     0.356 1.4      2.8      35.4   1  < 0.0001 33.4      29.5     
-#>  2.15     0.286 1.6      2.74     68.1   1  < 0.0001 66.1      62.2     
-#>  -0.0669  0.284 -0.61    0.488    0.0556 1  0.8136   -1.94     -5.86    
-#>  2.22     0.444 1.34     3.09     25.7   1  < 0.0001 23.7      19.8     
-#> 
-#> Confidence level: 95%
+# indirect effects (the paper's Research Questions 2 and 3). Not run
+# here for the same reason; the call is:
+# parallel <- "
+#   imagery    ~ b1*instruction
+#   repetition ~ b3*instruction
+#   recall     ~ b2*imagery + b4*repetition + b5*instruction
+#   imagery ~~ repetition
+# "
+# mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
+#                x = "instruction", y = "recall",
+#                hypotheses = c(imagery_minus_repetition =
+#                  "indirect_via_imagery - indirect_via_repetition"),
+#                ci_method = "monte_carlo", seed = 113)
 # The indirect effect through repetition is near zero (the paper
 # reports LRT = 0.083, p = .773), while the contrast shows the
 # imagery pathway is larger (the paper reports LRT = 25.828,
 # difference = 2.222, SE = 0.445).
 
-# Moderated mediation across groups: the same model in two groups,
-# with the between-group difference of every effect tested. Leaving
-# the paths unlabeled lets them differ by group.
-set.seed(113)
-n <- 150
-two_groups <- rbind(
-  within(data.frame(x = rnorm(n), condition = "treatment"), {
-    m <- 0.6 * x + rnorm(n)
-    y <- 0.5 * m + 0.2 * x + rnorm(n)
-  }),
-  within(data.frame(x = rnorm(n), condition = "control"), {
-    m <- 0.2 * x + rnorm(n)
-    y <- 0.1 * m + 0.2 * x + rnorm(n)
-  }))
-mediation_mbco("m ~ x \n y ~ m + x", data = two_groups,
-               group = "condition", x = "x", y = "y",
-               ci_method = "wald")
-#> Mediation tests via model-based constrained optimization (MBCO)
-#>   Effects of x on y; N = 300; optimizer: SLSQP
-#>   Groups (reference first): treatment, control
-#>   Full model: deviance = 2514.474242, AIC = 2550.474242, BIC = 2617.142327
-#>   R2 (full model): m (treatment) = 0.231, y (treatment) = 0.356, m (control) = 0.000, y (control) = 0.105
-#>   Each p_value is from the MBCO likelihood ratio test of the
-#>   null model constraining that effect to zero. Causal readings
-#>   rest on the no omitted confounder assumption.
-#> 
-#>  pathway                                    
-#>  x -> y (all pathways) [treatment]          
-#>  x -> y (all pathways) [control]            
-#>  x -> y (all pathways) [control - treatment]
-#>  x -> y [treatment]                         
-#>  x -> y [control]                           
-#>  x -> y [control - treatment]               
-#>  x -> m -> y [treatment]                    
-#>  x -> m -> y [control]                      
-#>  x -> m -> y [control - treatment]          
-#>  term                                   estimate se     ci_lower ci_upper
-#>  total_effect_treatment                 0.518    0.0859 0.349    0.686   
-#>  total_effect_control                   0.232    0.0701 0.0945   0.369   
-#>  total_effect_control_minus_treatment   -0.286   0.111  -0.503   -0.0682 
-#>  direct_effect_treatment                0.26     0.0876 0.0879   0.431   
-#>  direct_effect_control                  0.235    0.0687 0.1      0.369   
-#>  direct_effect_control_minus_treatment  -0.0249  0.111  -0.243   0.193   
-#>  indirect_via_m_treatment               0.258    0.057  0.146    0.37    
-#>  indirect_via_m_control                 -0.00274 0.014  -0.0302  0.0247  
-#>  indirect_via_m_control_minus_treatment -0.261   0.0587 -0.376   -0.146  
-#>  lrt    df p_value  delta_aic delta_bic
-#>  32.5   1  < 0.0001 30.5      26.8     
-#>  10.6   1  0.0012   8.56      4.86     
-#>  6.56   1  0.0104   4.56      0.853    
-#>  8.53   1  0.0035   6.53      2.83     
-#>  11.2   1  0.0008   9.23      5.53     
-#>  0.05   1  0.8231   -1.95     -5.65    
-#>  33.4   1  < 0.0001 31.4      27.7     
-#>  0.0363 1  0.8490   -1.96     -5.67    
-#>  29.8   1  < 0.0001 27.8      24.1     
-#> 
-#> Confidence level: 95%
-
-# Probing moderated mediation with a continuous moderator: the
-# effect of x on m depends on w (the x:w term). The output has the
-# conditional indirect effect at the moderator's mean and one
-# standard deviation either side, the index of moderated mediation
-# (the change in the indirect effect per unit w), and its MBCO
-# likelihood ratio test.
-set.seed(113)
-n <- 300
-x <- rnorm(n)
-w <- rnorm(n)
-m <- 0.5 * x + 0.3 * w + 0.4 * x * w + rnorm(n)
-y <- 0.5 * m + 0.2 * x + 0.1 * w + rnorm(n)
-d_mod <- data.frame(x = x, w = w, m = m, y = y)
-mediation_mbco("m ~ x + w + x:w \n y ~ m + x + w", data = d_mod,
-               x = "x", y = "y", moderator = "w",
-               ci_method = "wald")
-#> Mediation tests via model-based constrained optimization (MBCO)
-#>   Effects of x on y; N = 300; optimizer: SLSQP
-#>   Full model: deviance = 4194.186376, AIC = 4232.186376, BIC = 4302.558243
-#>   R2 (full model): m = 0.403, y = 0.421
-#>   Each p_value is from the MBCO likelihood ratio test of the
-#>   null model constraining that effect to zero. Causal readings
-#>   rest on the no omitted confounder assumption.
-#> 
-#>  pathway                                  term                      estimate
-#>  x -> y (all pathways) at w = -0.8997     total_effect_at_low       0.31    
-#>  x -> y (all pathways) at w = 0.1036      total_effect_at_mean      0.537   
-#>  x -> y (all pathways) at w = 1.107       total_effect_at_high      0.764   
-#>  x -> y (all pathways), change per unit w total_effect_moderation   0.226   
-#>  x -> y                                   direct_effect             0.219   
-#>  x -> m -> y at w = -0.8997               indirect_via_m_at_low     0.0905  
-#>  x -> m -> y at w = 0.1036                indirect_via_m_at_mean    0.318   
-#>  x -> m -> y at w = 1.107                 indirect_via_m_at_high    0.545   
-#>  x -> m -> y, change per unit w           indirect_via_m_moderation 0.226   
-#>  se     ci_lower ci_upper lrt  df p_value  delta_aic delta_bic
-#>  0.0732 0.166    0.453    16   1  < 0.0001 14        10.3     
-#>  0.0619 0.416    0.658    67.1 1  < 0.0001 65.1      61.4     
-#>  0.071  0.625    0.903    113  1  < 0.0001 111       107      
-#>  0.0369 0.154    0.299    52.2 1  < 0.0001 50.2      46.5     
-#>  0.0625 0.0967   0.342    12   1  0.0005   10        6.35     
-#>  0.0446 0.00307  0.178    4.24 1  0.0394   2.24      -1.46    
-#>  0.0427 0.234    0.401    94.5 1  < 0.0001 92.5      88.8     
-#>  0.0662 0.415    0.674    137  1  < 0.0001 135       131      
-#>  0.0369 0.154    0.299    52.2 1  < 0.0001 50.2      46.5     
-#> 
-#> Confidence level: 95%
-# }
+# Raw data go in through 'data' rather than 'S', 'M', and 'N'. Adding
+# 'group' fits the model in every group and tests the between-group
+# difference of each effect, which is moderated mediation with a
+# categorical moderator. Leaving the paths unlabeled lets them differ
+# by group. It is not run here because each reported difference costs
+# its own constrained null model fit:
+#   mediation_mbco("m ~ x \n y ~ m + x", data = two_groups,
+#                  group = "condition", x = "x", y = "y",
+#                  ci_method = "wald")
+#
+# A continuous moderator goes in through 'moderator'. That analysis,
+# fit from a data frame with the conditional effects it estimates
+# drawn as curves over the moderator's range, is shown at
+# ?plot_mediation_mbco.
 ```

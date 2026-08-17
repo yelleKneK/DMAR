@@ -184,8 +184,8 @@ closed-form sample sizes (the no-assurance approximation
 uses, computed from the asymptotic variances before any simulation),
 brackets the crossing geometrically, and bisects to adjacent integers,
 each candidate evaluated with its own `G` replications. A planning call
-therefore fits the analysis model several thousand times; the examples
-use a small `G` to run quickly, and a real plan is worth a larger one.
+therefore fits the analysis model several thousand times, which is why
+the examples on this page are shown but not run.
 
 Each reported proportion carries a simulation standard error of about
 \\\sqrt{p(1 - p)/G}\\, and the necessary sample size inherits that
@@ -248,6 +248,10 @@ Other AIPE sample size planning:
 [`ss_aipe_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_sensitivity.md),
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
+[`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
+[`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
+[`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
+[`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
@@ -258,10 +262,11 @@ Other AIPE sample size planning:
 [`ss_aipe_partial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r.md),
 [`ss_aipe_partial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_partial_r_sensitivity.md),
 [`ss_aipe_pcm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_pcm_sensitivity.md),
+[`ss_aipe_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r.md),
+[`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
-[`ss_aipe_tost_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_tost_smd_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
 
 ## Author
 
@@ -270,90 +275,60 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# \donttest{
 # A mediation model whose research questions concern the magnitudes of
-# both individual paths and the indirect effect. The population model
-# fixes every parameter to its purported population value.
-pop_model <- "
-  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-  f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
-  f2 ~ 0.4*f1
-  f3 ~ 0.5*f2 + 0.2*f1
-  f1 ~~ 1*f1
-  f2 ~~ 0.84*f2
-  f3 ~~ 0.7*f3
-  y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
-  y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
-  y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
-"
-
+# both individual paths and the indirect effect. Every quantity this
+# function reports comes out of a Monte Carlo study: each evaluated sample
+# size refits the analysis model G times, and a planning search refits it
+# several thousand times. Even a single evaluation at a small G takes long
+# enough that the worked example below is shown here rather than run.
+#
+# The population model fixes every parameter to its purported population
+# value.
+#   pop_model <- "
+#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+#     f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
+#     f2 ~ 0.4*f1
+#     f3 ~ 0.5*f2 + 0.2*f1
+#     f1 ~~ 1*f1
+#     f2 ~~ 0.84*f2
+#     f3 ~~ 0.7*f3
+#     y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+#     y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+#     y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
+#   "
+#
 # The analysis model labels the two paths and defines the indirect
 # effect; all three make up the set of interest.
-analysis_model <- "
-  f1 =~ y1 + y2 + y3
-  f2 =~ y4 + y5 + y6
-  f3 =~ y7 + y8 + y9
-  f2 ~ a*f1
-  f3 ~ b*f2 + cp*f1
-  ab := a*b
-"
-
-# Realized interval widths at N = 200. G is small so the example runs
-# quickly; a real plan is worth G = 1000 or more (G = 50 here).
-set.seed(113)
-ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
-                      parameters = c("a", "b", "ab"),
-                      desired_width = 0.30, N = 200, G = 50)
-#>  term                    value
-#>  specified_N             200  
-#>  composite_assurance     0    
-#>  mean_width_a            0.34 
-#>  mean_width_b            0.373
-#>  mean_width_ab           0.215
-#>  width_within_desired_a  0.16 
-#>  width_within_desired_b  0.04 
-#>  width_within_desired_ab 0.98 
-#>  desired_width_a         0.3  
-#>  desired_width_b         0.3  
-#>  desired_width_ab        0.3  
-#>  population_a            0.4  
-#>  population_b            0.5  
-#>  population_ab           0.2  
-#>  conf_level              0.95 
-#>  replications            50   
-#>  converged_replications  50   
-#> 
-#> Confidence level: 95%
-
-# The necessary N for all three intervals to be simultaneously within
-# their desired widths in 80 percent of studies, with the indirect
-# effect held to a narrower interval than the paths.
-set.seed(113)
-ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
-                      parameters = c("a", "b", "ab"),
-                      desired_width = c(a = 0.35, b = 0.35, ab = 0.25),
-                      assurance = 0.80, G = 50)
-#>  term                    value
-#>  necessary_N             279  
-#>  composite_assurance     0.8  
-#>  mean_width_a            0.292
-#>  mean_width_b            0.319
-#>  mean_width_ab           0.184
-#>  width_within_desired_a  0.94 
-#>  width_within_desired_b  0.86 
-#>  width_within_desired_ab 0.98 
-#>  desired_width_a         0.35 
-#>  desired_width_b         0.35 
-#>  desired_width_ab        0.25 
-#>  population_a            0.4  
-#>  population_b            0.5  
-#>  population_ab           0.2  
-#>  conf_level              0.95 
-#>  replications            50   
-#>  converged_replications  50   
-#>  assurance               0.8  
-#> 
-#> Confidence level: 95%
-# }
+#   analysis_model <- "
+#     f1 =~ y1 + y2 + y3
+#     f2 =~ y4 + y5 + y6
+#     f3 =~ y7 + y8 + y9
+#     f2 ~ a*f1
+#     f3 ~ b*f2 + cp*f1
+#     ab := a*b
+#   "
+#
+# Realized interval widths at N = 200, with the indirect effect held to a
+# narrower interval than the paths through a named vector of widths. Each
+# interval lands within its desired width in most of the replications, yet
+# all three do so together in far fewer of them: that joint proportion,
+# reported as composite_assurance, is what a design of this kind has to be
+# planned against.
+#   set.seed(113)
+#   ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
+#                         parameters = c("a", "b", "ab"),
+#                         desired_width = c(a = 0.35, b = 0.40, ab = 0.25),
+#                         N = 200, G = 1000)
+#
+# Leaving N out plans the necessary sample size instead, here for all
+# three intervals to be simultaneously within their desired widths in 80
+# percent of studies. That search evaluates a sequence of candidate sample
+# sizes, each with its own G replications, so it costs several thousand
+# model fits:
+#   set.seed(113)
+#   ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
+#                         parameters = c("a", "b", "ab"),
+#                         desired_width = c(a = 0.35, b = 0.40, ab = 0.25),
+#                         assurance = 0.80, G = 1000)
 ```

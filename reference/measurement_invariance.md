@@ -340,132 +340,93 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Are the three visual-perception tests measuring the same construct in
-# the same way at the two schools? (Holzinger & Swineford, bundled.)
+# Do the two schools measure the verbal and the reasoning construct
+# in the same way? (Holzinger & Swineford, bundled.) The measurement
+# model is a named list of factors; for a single factor, name its
+# indicators with items = instead.
 data(holzinger_swineford)
-measurement_invariance(
-  holzinger_swineford,
-  items = c("t1_visual_perception", "t2_cubes", "t3_paper_form_board"),
-  group = "school"
-)
-#>  level      chi_square df p_chi_square cfi rmsea delta_chi_square delta_df
-#>  configural 7.92e-13   0  <NA>         1   0     <NA>             <NA>    
-#>  metric     1.19       2  0.5521       1   0     1.19             2       
-#>  scalar     3.86       4  0.4251       1   0     2.67             2       
-#>  strict     5.55       7  0.5926       1   0     1.69             3       
-#>  p_value delta_cfi delta_rmsea
-#>  <NA>    <NA>      <NA>       
-#>  0.5521  1.09e-14  0          
-#>  0.2628  0         0          
-#>  0.6384  0         0          
-
-# The real measurement model: three factors, given as a named list.
 hs_factors <- list(
-  visual = c("t1_visual_perception", "t2_cubes", "t3_paper_form_board"),
-  verbal = c("t6_paragraph_comprehension", "t7_sentence",
-             "t9_word_meaning"),
-  speed  = c("t20_deduction", "t22_problem_reasoning",
-             "t23_series_completion"))
+  verbal    = c("t6_paragraph_comprehension", "t7_sentence",
+                "t9_word_meaning"),
+  deduction = c("t20_deduction", "t22_problem_reasoning",
+                "t23_series_completion"))
+
+# The bottom two rungs. Configural invariance asks whether the same
+# pattern of loadings holds at both schools; metric adds the
+# constraint that the loadings are equal across schools, and it is
+# the rung that has to hold before a relation involving one of these
+# factors is compared across them. Naming those two in levels = stops
+# the ladder there, which is what keeps this example quick.
 mi <- measurement_invariance(holzinger_swineford, hs_factors,
-                             group = "school")
+                             group = "school",
+                             levels = c("configural", "metric"))
 mi
 #>  level      chi_square df p_chi_square cfi   rmsea  delta_chi_square delta_df
-#>  configural 63.2       48 0.0698       0.984 0.0458 <NA>             <NA>    
-#>  metric     73.4       54 0.0405       0.98  0.0489 10.2             6       
-#>  scalar     84.8       60 0.0192       0.974 0.0524 11.4             6       
-#>  strict     95.8       69 0.0182       0.972 0.0508 11               9       
+#>  configural 22.5       16 0.1276       0.992 0.052  <NA>             <NA>    
+#>  metric     36.3       20 0.0140       0.979 0.0737 13.8             4       
 #>  p_value delta_cfi delta_rmsea
 #>  <NA>    <NA>      <NA>       
-#>  0.1148  -0.0044   0.00305    
-#>  0.0768  -0.00559  0.00354    
-#>  0.2778  -0.00204  -0.00164   
+#>  0.0078  -0.0127   0.0217     
 
 # The fitted models travel with the table, so localizing a failed rung
 # costs no refitting.
 names(attr(mi, "fits"))
-#> [1] "configural" "metric"     "scalar"     "strict"    
+#> [1] "configural" "metric"    
 
 # The broom verbs: one row per rung of the ladder, and the model-level
 # summary (estimator, test flavor, fit index flavor).
 generics::tidy(mi)
 #>         term chi_square df p_chi_square       cfi      rmsea delta_chi_square
-#> 1 configural   63.18063 48   0.06979934 0.9842742 0.04584121               NA
-#> 2     metric   73.42351 54   0.04047763 0.9798789 0.04888760         10.24287
-#> 3     scalar   84.82304 60   0.01915958 0.9742854 0.05243045         11.39953
-#> 4     strict   95.79195 69   0.01815131 0.9722458 0.05079364         10.96891
-#>   delta_df    p_value    delta_cfi  delta_rmsea
-#> 1       NA         NA           NA           NA
-#> 2        6 0.11478967 -0.004395257  0.003046387
-#> 3        6 0.07678597 -0.005593453  0.003542851
-#> 4        9 0.27784620 -0.002039621 -0.001636811
+#> 1 configural   22.50471 16   0.12762979 0.9915883 0.05197395               NA
+#> 2     metric   36.34593 20   0.01400184 0.9788619 0.07369221         13.84122
+#>   delta_df    p_value  delta_cfi delta_rmsea
+#> 1       NA         NA         NA          NA
+#> 2        4 0.00781944 -0.0127264  0.02171826
 generics::glance(mi)
 #>   n_levels estimator ordered                                test fit_indices
-#> 1        4        ML   FALSE standard chi square difference test    standard
+#> 1        2        ML   FALSE standard chi square difference test    standard
 
-# \donttest{
-# Partial invariance: free one loading across groups at every rung
-# (Byrne, Shavelson, & Muthén, 1989). Each constrained rung loses one
-# degree of freedom relative to full invariance.
-measurement_invariance(holzinger_swineford, hs_factors, group = "school",
-                       group_partial = "visual =~ t2_cubes")
-#>  level      chi_square df p_chi_square cfi   rmsea  delta_chi_square delta_df
-#>  configural 63.2       48 0.0698       0.984 0.0458 <NA>             <NA>    
-#>  metric     73.4       53 0.0331       0.979 0.0506 10.2             5       
-#>  scalar     84.8       59 0.0155       0.973 0.0539 11.4             6       
-#>  strict     95.8       68 0.0149       0.971 0.0521 11               9       
-#>  p_value delta_cfi delta_rmsea
-#>  <NA>    <NA>      <NA>       
-#>  0.0687  -0.00543  0.00476    
-#>  0.0770  -0.00559  0.00332    
-#>  0.2789  -0.00202  -0.00183   
-
-# Ordered indicators: the thresholds rung comes first, and the tests are
-# the scaled difference tests.
-hs_ordered <- holzinger_swineford
-for (item in unlist(hs_factors, use.names = FALSE)) {
-  hs_ordered[[item]] <- as.integer(cut(
-    holzinger_swineford[[item]],
-    breaks = quantile(holzinger_swineford[[item]], c(0, .25, .5, .75, 1)),
-    include.lowest = TRUE))
-}
-mi_ordered <- measurement_invariance(hs_ordered, hs_factors,
-                                     group = "school", ordered = TRUE)
-#> Ordered items declared: switching to estimator = "WLSMV".
-#> A strict rung with ordered items requires the theta parameterization (residual variances are not free parameters under delta): switching to parameterization = "theta".
-mi_ordered
-#>  level      chi_square df p_chi_square cfi   rmsea  delta_chi_square delta_df
-#>  configural 58.3       48 0.1460       0.974 0.0607 <NA>             <NA>    
-#>  thresholds 70.5       57 0.1077       1     0.0673 13.7             9       
-#>  metric     66.8       63 0.3493       1     0.0625 1.61             6       
-#>  scalar     86.7       69 0.0738       1     0.0636 14.9             6       
-#>  strict     95.7       78 0.0842       1     0.0544 10.3             9       
-#>  p_value delta_cfi delta_rmsea
-#>  <NA>    <NA>      <NA>       
-#>  0.1337  0.0264    0.00664    
-#>  0.9522  0         -0.00488   
-#>  0.0211  0         0.00111    
-#>  0.3249  0         -0.00914   
-attr(mi_ordered, "test")
-#> [1] "scaled chi square difference test (method = \"satorra.2000\")"
-
-# Model syntax works too, and full information maximum likelihood is
-# available for continuous items with incomplete cases.
-hs_missing <- holzinger_swineford
-set.seed(113)
-hs_missing$t2_cubes[sample(nrow(hs_missing), 20)] <- NA
-measurement_invariance(
-  hs_missing,
-  model = "visual =~ t1_visual_perception + t2_cubes + t3_paper_form_board",
-  group = "school", missing = "fiml")
-#>  level      chi_square df p_chi_square cfi rmsea delta_chi_square delta_df
-#>  configural 2.77e-13   0  <NA>         1   0     <NA>             <NA>    
-#>  metric     1.59       2  0.4524       1   0     1.59             2       
-#>  scalar     3.78       4  0.4359       1   0     2.2              2       
-#>  strict     4.91       7  0.6704       1   0     1.13             3       
-#>  p_value delta_cfi delta_rmsea
-#>  <NA>    <NA>      <NA>       
-#>  0.4524  3.77e-15  0          
-#>  0.3332  0         0          
-#>  0.7700  0         0          
+# Each of the calls below refits the ladder from the bottom, so they
+# are shown here rather than run. Leaving levels = at its default
+# fits the whole ladder, configural through metric, scalar, and
+# strict:
+# measurement_invariance(holzinger_swineford, hs_factors,
+#                        group = "school")
+#
+# Partial invariance frees one loading across the schools at every
+# rung (Byrne, Shavelson, & Muthén, 1989), so each constrained rung
+# loses one degree of freedom relative to full invariance:
+# measurement_invariance(holzinger_swineford, hs_factors,
+#                        group = "school",
+#                        group_partial = "verbal =~ t7_sentence")
+#
+# With the indicators coded as ordered categories, ordered = TRUE puts
+# the thresholds rung first, because thresholds rather than intercepts
+# carry the location information there, and makes the rung-to-rung
+# tests the scaled difference tests:
+# hs_ordered <- holzinger_swineford
+# for (item in unlist(hs_factors, use.names = FALSE)) {
+#   hs_ordered[[item]] <- as.integer(cut(
+#     holzinger_swineford[[item]],
+#     breaks = quantile(holzinger_swineford[[item]],
+#                       c(0, .25, .5, .75, 1)),
+#     include.lowest = TRUE))
 # }
+# mi_ordered <- measurement_invariance(hs_ordered, hs_factors,
+#                                      group = "school",
+#                                      ordered = TRUE)
+# mi_ordered
+# attr(mi_ordered, "test")
+#
+# The measurement model can also be given as lavaan syntax, and
+# missing = "fiml" fits the ladder by full information maximum
+# likelihood when continuous items have incomplete cases:
+# hs_missing <- holzinger_swineford
+# set.seed(113)
+# hs_missing$t7_sentence[sample(nrow(hs_missing), 20)] <- NA
+# measurement_invariance(
+#   hs_missing,
+#   model = "verbal =~ t6_paragraph_comprehension + t7_sentence +
+#            t9_word_meaning",
+#   group = "school", missing = "fiml")
 ```

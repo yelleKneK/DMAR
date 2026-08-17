@@ -74,8 +74,8 @@ contrast_test(
 ## Value
 
 A `data.frame` with one row per contrast and columns `contrast`,
-`estimate`, `se`, `t`, `df`, `p`, `p_adj`, `conf_lower`, and
-`conf_upper`. The adjustment, confidence level, and variance assumption
+`estimate`, `se`, `t`, `df`, `p_value`, `p_adjusted`, `ci_lower`, and
+`ci_upper`. The adjustment, confidence level, and variance assumption
 are stored as `attr(*, "adjust")`, `attr(*, "conf_level")`, and
 `attr(*, "var_equal")`. The table prints through the
 [`dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
@@ -97,8 +97,8 @@ n_i\right)^2}{\sum_i (c_i^2 s_i^2 / n_i)^2 / (n_i - 1)}.\$\$ The
 unadjusted *p*-value is two-sided based on the *t* reference
 distribution.
 
-**Adjustments.** The `p_adj` and confidence interval critical value are
-computed as follows.
+**Adjustments.** The `p_adjusted` and confidence interval critical value
+are computed as follows.
 
 - `"none"`: no adjustment; the CI uses \\t\_{1-\alpha/2,df}\\.
 
@@ -156,11 +156,16 @@ and
 for the tidy methods
 
 Other hypothesis tests:
+[`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
+[`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
-[`dunnett_ci()`](https://yelleknek.github.io/DMAR/reference/dunnett_ci.md),
+[`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -170,12 +175,8 @@ Other hypothesis tests:
 [`randomization_test()`](https://yelleknek.github.io/DMAR/reference/randomization_test.md),
 [`randomization_test_paired()`](https://yelleknek.github.io/DMAR/reference/randomization_test_paired.md),
 [`regions_of_significance()`](https://yelleknek.github.io/DMAR/reference/regions_of_significance.md),
-[`scheffe_ci()`](https://yelleknek.github.io/DMAR/reference/scheffe_ci.md),
 [`simple_effects_AB()`](https://yelleknek.github.io/DMAR/reference/simple_effects_AB.md),
 [`summary_t_test()`](https://yelleknek.github.io/DMAR/reference/summary_t_test.md),
-[`tost_r()`](https://yelleknek.github.io/DMAR/reference/tost_r.md),
-[`tost_smd()`](https://yelleknek.github.io/DMAR/reference/tost_smd.md),
-[`tukey_kramer_ci()`](https://yelleknek.github.io/DMAR/reference/tukey_kramer_ci.md),
 [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
 ## Author
@@ -185,42 +186,60 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# All pairwise comparisons among the three PlantGrowth groups.
-fit <- aov(weight ~ group, data = PlantGrowth)
+# All pairwise comparisons among the three arms of the depression_bdi
+# treatment study.
+fit <- aov(bdi_post ~ condition, data = depression_bdi)
 contrast_test(fit, contrasts = "pairwise")
-#>  contrast    estimate se    t     df p       p_adj   conf_lower conf_upper
-#>  trt1 - ctrl -0.371   0.279 -1.33 27 0.194   0.194   -0.943     0.201     
-#>  trt2 - ctrl 0.494    0.279 1.77  27 0.0877  0.0877  -0.078     1.07      
-#>  trt2 - trt1 0.865    0.279 3.1   27 0.00446 0.00446 0.293      1.44      
+#>  contrast            estimate se   t     df p_value p_adjusted ci_lower
+#>  placebo - ssri      4.9      2.81 1.74  27 0.0931  0.0931     -0.876  
+#>  wait_list - ssri    6.7      2.81 2.38  27 0.0246  0.0246     0.924   
+#>  wait_list - placebo 1.8      2.81 0.639 27 0.5279  0.5279     -3.98   
+#>  ci_upper
+#>  10.7    
+#>  12.5    
+#>  7.58    
 #> 
 #> Confidence level: 95%
 
 # Custom contrasts with a Tukey-protected family-wise error rate.
 contrast_test(fit, contrasts = "pairwise", adjust = "tukey")
-#>  contrast    estimate se    t     df p       p_adj conf_lower conf_upper
-#>  trt1 - ctrl -0.371   0.279 -1.33 27 0.194   0.391 -1.06      0.32      
-#>  trt2 - ctrl 0.494    0.279 1.77  27 0.0877  0.198 -0.197     1.19      
-#>  trt2 - trt1 0.865    0.279 3.1   27 0.00446 0.012 0.174      1.56      
+#>  contrast            estimate se   t     df p_value p_adjusted ci_lower
+#>  placebo - ssri      4.9      2.81 1.74  27 0.0931  0.2088     -2.08   
+#>  wait_list - ssri    6.7      2.81 2.38  27 0.0246  0.0617     -0.279  
+#>  wait_list - placebo 1.8      2.81 0.639 27 0.5279  0.7998     -5.18   
+#>  ci_upper
+#>  11.9    
+#>  13.7    
+#>  8.78    
 #> 
 #> Confidence level: 95%
 
-# A user-defined contrast: ctrl vs. average of the two treatments.
+# A user-defined contrast: the SSRI arm vs. the average of the placebo
+# and wait list arms. With levels ordered ssri, placebo, wait_list, the
+# weights c(1, -0.5, -0.5) estimate that difference.
 contrast_test(
   fit,
-  contrasts = list("ctrl vs trts" = c(1, -0.5, -0.5)),
+  contrasts = list("ssri vs non-drug arms" = c(1, -0.5, -0.5)),
   adjust = "scheffe"
 )
-#>  contrast     estimate se    t      df p     p_adj conf_lower conf_upper
-#>  ctrl vs trts -0.0615  0.241 -0.255 27 0.801 0.968 -0.687     0.564     
+#>  contrast              estimate se   t     df p_value p_adjusted ci_lower
+#>  ssri vs non-drug arms -5.8     2.44 -2.38 27 0.0247  0.0766     -12.1   
+#>  ci_upper
+#>  0.514   
 #> 
 #> Confidence level: 95%
 
-# Welch-style inference (unequal group variances).
+# Welch-style inference: the wait list variance is about twice the
+# SSRI variance, so the pooled error term is worth questioning.
 contrast_test(fit, contrasts = "pairwise", var_equal = FALSE)
-#>  contrast    estimate se    t     df   p      p_adj  conf_lower conf_upper
-#>  trt1 - ctrl -0.371   0.311 -1.19 16.5 0.25   0.25   -1.03      0.288     
-#>  trt2 - ctrl 0.494    0.231 2.13  16.8 0.0479 0.0479 0.00513    0.983     
-#>  trt2 - trt1 0.865    0.287 3.01  14.1 0.0093 0.0093 0.249      1.48      
+#>  contrast            estimate se   t     df   p_value p_adjusted ci_lower
+#>  placebo - ssri      4.9      2.48 1.98  17.9 0.0638  0.0638     -0.313  
+#>  wait_list - ssri    6.7      2.93 2.28  16.2 0.0361  0.0361     0.489   
+#>  wait_list - placebo 1.8      3    0.599 16.8 0.5569  0.5569     -4.54   
+#>  ci_upper
+#>  10.1    
+#>  12.9    
+#>  8.14    
 #> 
 #> Confidence level: 95%
 
@@ -229,14 +248,14 @@ contrast_test(fit, contrasts = "pairwise", var_equal = FALSE)
 # one pairwise contrast of the three treatment means.
 fit_drinks <- aov(log_drinks ~ treatment, data = drinks_trial)
 contrast_test(fit_drinks, contrasts = "pairwise")
-#>  contrast                    estimate se    t      df p      p_adj  conf_lower
-#>  CRA - Standard              -0.454   0.198 -2.29  85 0.0242 0.0242 -0.848    
-#>  CRA + Disulfiram - Standard -0.594   0.232 -2.57  85 0.012  0.012  -1.05     
-#>  CRA + Disulfiram - CRA      -0.14    0.238 -0.589 85 0.557  0.557  -0.612    
-#>  conf_upper
-#>  -0.0606   
-#>  -0.134    
-#>  0.332     
+#>  contrast                    estimate se    t      df p_value p_adjusted
+#>  CRA - Standard              -0.454   0.198 -2.29  85 0.0242  0.0242    
+#>  CRA + Disulfiram - Standard -0.594   0.232 -2.57  85 0.0120  0.0120    
+#>  CRA + Disulfiram - CRA      -0.14    0.238 -0.589 85 0.5575  0.5575    
+#>  ci_lower ci_upper
+#>  -0.848   -0.0606 
+#>  -1.05    -0.134  
+#>  -0.612   0.332   
 #> 
 #> Confidence level: 95%
 
@@ -247,10 +266,10 @@ contrast_test(
   fit_drinks,
   contrasts = list("CRA arms vs Standard" = c(-1, 0.5, 0.5))
 )
-#>  contrast             estimate se   t     df p       p_adj   conf_lower
-#>  CRA arms vs Standard -0.524   0.18 -2.92 85 0.00451 0.00451 -0.882    
-#>  conf_upper
-#>  -0.167    
+#>  contrast             estimate se   t     df p_value p_adjusted ci_lower
+#>  CRA arms vs Standard -0.524   0.18 -2.92 85 0.0045  0.0045     -0.882  
+#>  ci_upper
+#>  -0.167  
 #> 
 #> Confidence level: 95%
 ```

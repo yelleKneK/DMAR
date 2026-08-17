@@ -131,7 +131,7 @@ Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
 [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-[`ci_cc()`](https://yelleknek.github.io/DMAR/reference/ci_cc.md),
+[`ci_correlation`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md),
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
@@ -139,7 +139,6 @@ Other confidence intervals for effect sizes:
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`ci_r()`](https://yelleknek.github.io/DMAR/reference/ci_r.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -186,7 +185,7 @@ n = c(10, 10), N = 20, conf_level = .95)
 #> Confidence level: 95%
 
 # An example given by Maxwell, Delaney, & Kelley (2027) :
-# 24 subjects of mild hypertensives are assigned to one of four treatments: drug
+# 20 subjects of mild hypertensives are assigned to one of four treatments: drug
 # therapy, biofeedback, dietary modification, and a treatment combining all the
 # three previous treatments. Subjects' blood pressure is measured two weeks
 # after the termination of treatment. Now we want to form a 95% level
