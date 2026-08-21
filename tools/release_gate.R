@@ -186,8 +186,11 @@ banned <- paste(c(intToUtf8(c(99,108,97,117,100,101)), intToUtf8(c(97,110,116,10
 names_hit <- system(sprintf("tar -tzf %s | grep -icE '%s'", shQuote(tarball), banned), intern = TRUE)
 content_hit <- system(sprintf("tar -xzOf %s 2>/dev/null | grep -icE '%s'", shQuote(tarball), banned), intern = TRUE)
 log_hit <- system(sprintf("git log --format=%%B | grep -icE '%s'", banned), intern = TRUE)
+# grep -c exits 1 on a zero count, and system(intern = TRUE) then tags the
+# "0" with a status attribute; compare the numbers, not the objects.
+counts <- suppressWarnings(as.integer(c(names_hit, content_hit, log_hit)))
 gate("tarball and git history carry no authorship residue",
-     identical(names_hit, "0") && identical(content_hit, "0") && identical(log_hit, "0"),
+     length(counts) == 3L && !anyNA(counts) && sum(counts) == 0L,
      sprintf("file names %s, file content %s, commit messages %s", names_hit, content_hit, log_hit))
 surfaces <- unique(sub("/.*", "", sub("^[^/]+/", "", system(sprintf("tar -tzf %s", shQuote(tarball)), intern = TRUE))))
 gate("tarball holds only the standard surfaces", all(surfaces %in% c("DESCRIPTION", "NAMESPACE", "NEWS.md", "README.md", "R", "build", "data", "inst", "man", "tests", "vignettes", "LICENSE", "LICENSE.md")),
