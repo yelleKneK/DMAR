@@ -1,5 +1,22 @@
 # DMAR 1.0.0 submission (resubmission)
 
+## Response to the incoming pretest of 2026-08-19
+
+The 2026-08-19 pretest (Debian and Windows) returned the package for
+a LaTeX error in the PDF manual, traced to a single help page:
+`ss_aipe_equivalence_smd_sensitivity.Rd` carried `\code{}` markup
+inside an `\eqn{}`, which renders as `\texttt` inside LaTeX math and
+fails the manual build ("Missing $ inserted"); the HTML manual
+reported the same line as a math rendering problem, and the leftover
+`DMAR-manual.tex` NOTE followed from the failed build. The equation
+is now written in symbols, with the argument names in the
+surrounding prose, and no `\eqn{}` or `\deqn{}` in the package
+contains Rd markup. The same pretest asked for a trailing slash on
+the package website URL in README.md; added. This round's local
+check ran `R CMD check --as-cran` with the PDF and HTML manuals
+built (the earlier rounds had used `--no-manual` locally, which is
+how the line slipped through): both manuals now build clean.
+
 ## Response to the incoming pretest of 2026-07-31
 
 Third pretest (overall checktime 18 minutes on Windows). The previous

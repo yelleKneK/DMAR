@@ -23,7 +23,8 @@
 #' @param delta_lower,delta_upper Equivalence bounds on the SMD, as
 #'   positive magnitudes with the same meaning as in
 #'   \code{\link{equivalence_smd}}: the region is
-#'   \eqn{(-\code{delta_lower}, \code{delta_upper})}.
+#'   \eqn{(-\delta_L, +\delta_U)}, with \code{delta_lower} as
+#'   \eqn{\delta_L} and \code{delta_upper} as \eqn{\delta_U}.
 #'   \code{delta_upper} is required; \code{delta_lower} defaults to
 #'   \code{delta_upper} (a symmetric region). The simulator records
 #'   whether the realized CI falls entirely inside the region.

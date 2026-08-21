@@ -325,7 +325,7 @@ all-missing units in `gwet_ac()`, and incomplete category sets in
 
 ## Learn more
 
-- **Package website:** <https://yelleknek.github.io/DMAR>
+- **Package website:** <https://yelleknek.github.io/DMAR/>
 - **Start here:** `vignette("DMAR")` (overview),
   `vignette("dmar_output")` (the tidy `dmar_tbl` output and
   `tidy()`/`glance()`/`as_kable()` methods), `vignette("mbess_to_dmar")`
