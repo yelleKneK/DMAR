@@ -81,10 +81,10 @@ hits <- names(Filter(function(rd) any(grepl(math_markup, math_nodes(rd))), rd_db
 gate("no Rd markup inside \\eqn{} or \\deqn{} (parsed, all pages)", length(hits) == 0L, hits)
 
 ## ---- 3. Documentation current ------------------------------------------
-doc_files <- c(list.files("man", full.names = TRUE), "NAMESPACE")
+doc_files <- c(list.files("man", pattern = "[.]Rd$", full.names = TRUE), "NAMESPACE")
 before <- tools::md5sum(doc_files)
 suppressMessages(roxygen2::roxygenise(roclets = c("rd", "namespace")))
-doc_files <- c(list.files("man", full.names = TRUE), "NAMESPACE")
+doc_files <- c(list.files("man", pattern = "[.]Rd$", full.names = TRUE), "NAMESPACE")
 after <- tools::md5sum(doc_files)
 stale <- c(setdiff(names(after), names(before)), setdiff(names(before), names(after)),
            names(before)[names(before) %in% names(after) & before != after[names(before)]])
