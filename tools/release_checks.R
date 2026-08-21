@@ -190,8 +190,12 @@ setwd(old_wd)
 if (ok_build) {
   tb <- list.files(bld, pattern = "[.]tar[.]gz$", full.names = TRUE)[1]
   contents <- untar(tb, list = TRUE)
-  bad <- grep("_problems|[.]orig$|[.]Rmd[.]orig|tools/|dev/|[.]Rcheck|[A-Z]{4,}[.]md|cran-comments",
-              contents, value = TRUE)
+  # Root-level .md files other than NEWS, README, and LICENSE are working
+  # files (the instruction file, decision notes) and must not ship.
+  bad <- c(grep("_problems|[.]orig$|[.]Rmd[.]orig|tools/|dev/|[.]Rcheck|cran-comments",
+                contents, value = TRUE),
+           grep("^[^/]+/(?!NEWS[.]md$|README[.]md$|LICENSE[.]md$)[^/]+[.]md$",
+                contents, value = TRUE, perl = TRUE))
   check("tarball contains no working files", length(bad) == 0, bad)
   # Note: built with --no-build-vignettes, so this size understates the real
   # tarball, which adds the rendered vignette HTML. The figure is a floor.

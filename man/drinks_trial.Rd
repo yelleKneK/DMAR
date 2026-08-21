@@ -23,7 +23,8 @@ A data frame with 88 observations on 5 variables.
     at zero and markedly right-skewed (range 0 to 624.6, mean
     36.9, median 3.8).}
   \item{\code{log_drinks}}{Common-log transformation
-    \eqn{\log_{10}(\code{drinks\_per\_week} + 1)}, the scale on
+    \eqn{\log_{10}(x + 1)} of \eqn{x = } \code{drinks_per_week},
+    the scale on
     which Smith, Meyers, and Delaney (1998) ran their primary
     between-groups analyses to obtain approximate normality.
     The plus-one inside the logarithm keeps the zero values
