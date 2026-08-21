@@ -146,13 +146,34 @@ allowed_note <- function(h) grepl("CRAN incoming feasibility", h) ||
 bad_notes <- note_heads[!vapply(note_heads, allowed_note, logical(1))]
 feas <- log[seq(from = max(1, grep("CRAN incoming feasibility", log)[1]),
                 length.out = 25)]
-feas_extra <- grep("invalid URLs|invalid file URIs|Non-FOSS|Insufficient package version|Size of tarball|Days since last update",
+feas_extra <- grep("invalid file URIs|Non-FOSS|Insufficient package version|Size of tarball|Days since last update",
                    feas, value = TRUE)
+# URL problems: take the whole block, then re-probe any 5xx (a gateway
+# timeout at the checker's moment is environmental); only a reproducible
+# problem fails the gate, and every flagged URL is recorded either way.
+url_start <- grep("invalid URLs", log)
+url_block <- character(); url_bad <- character()
+if (length(url_start)) {
+  k <- url_start[1] + 1L
+  while (k <= length(log) && grepl("^\\s", log[k])) { url_block <- c(url_block, trimws(log[k])); k <- k + 1L }
+  urls <- sub("^URL: ", "", grep("^URL: ", url_block, value = TRUE))
+  statuses <- sub("^Status: ", "", grep("^Status: ", url_block, value = TRUE))
+  for (i in seq_along(urls)) {
+    st <- if (i <= length(statuses)) statuses[i] else "?"
+    u <- sub(" \\(moved to .*\\)$", "", urls[i])
+    if (grepl("^5", st)) {
+      code <- tryCatch(system2("curl", c("-s", "-o", "/dev/null", "-w", "%{http_code}", "-L", "--max-time", "20", shQuote(u)), stdout = TRUE), error = function(e) "000")
+      if (identical(code, "200")) { cat("        transient ", st, " at check time; re-probe returned 200: ", u, "\n", sep = ""); next }
+    }
+    url_bad <- c(url_bad, sprintf("%s [%s]", urls[i], st))
+  }
+}
 gate("R CMD check --as-cran (manuals built): no ERROR, no WARNING",
      chk$status == 0L && !any(grepl("ERROR|WARNING", status_line)),
      c(status_line, grep("WARNING$|ERROR$", log, value = TRUE)))
-gate("R CMD check: no NOTE beyond new-submission and spelling", length(bad_notes) == 0L && length(feas_extra) == 0L,
-     c(bad_notes, feas_extra))
+gate("R CMD check: no NOTE beyond new-submission and spelling",
+     length(bad_notes) == 0L && length(feas_extra) == 0L && length(url_bad) == 0L,
+     c(bad_notes, feas_extra, if (length(url_bad)) c("reproducible URL problems:", url_bad)))
 gate("PDF manual built by check", any(grepl("checking PDF version of manual \\.\\.\\..*OK", log)),
      grep("PDF version of manual", log, value = TRUE))
 gate("HTML manual: no math rendering problems", !any(grepl("math rendering problems", log)),
@@ -172,9 +193,19 @@ gate(sprintf("full local test suite: %s passed, %s failed, %s errors, %s warning
              if (is.null(tst)) "?" else sum(tst$error), if (is.null(tst)) "?" else sum(tst$warning),
              if (is.null(tst)) "?" else sum(tst$skipped)), tst_ok)
 
-## ---- 9. Oracle harness ----------------------------------------------------
+## ---- 9. Oracle harness, against the tarball just checked ----------------
+# The snippets call DMAR:: explicitly, so they must see this tarball, not
+# whatever version happens to be installed in the user library.
+gate_lib <- file.path(work, "lib"); unlink(gate_lib, recursive = TRUE); dir.create(gate_lib)
+inst <- run("R", c("CMD", "INSTALL", "--no-docs", "--no-multiarch", paste0("--library=", gate_lib), tarball),
+            file.path(work, "install.log"))
+gate("tarball installs into a scratch library for the oracle run", inst$status == 0L,
+     if (inst$status != 0L) tail(inst$lines, 8))
 orc_log <- file.path(work, "oracle.log")
+old_libs <- Sys.getenv("R_LIBS")
+Sys.setenv(R_LIBS = paste(c(gate_lib, .libPaths()), collapse = .Platform$path.sep))
 orc <- run("Rscript", "tools/oracle_checks.R", orc_log)
+Sys.setenv(R_LIBS = old_libs)
 gate("oracle harness (live cross-package anchors)", orc$status == 0L,
      grep("oracle checks:|^Error", orc$lines, value = TRUE))
 
