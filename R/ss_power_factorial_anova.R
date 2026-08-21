@@ -39,7 +39,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ss_power_one_way_anova}}, \code{\link{ss_power_c}}, \code{\link{conf_limits_ncf}}
+#' @seealso \code{\link{ss_power_one_way_anova}}, \code{\link{ss_power_c}}, \code{\link{ci_ncf}}
 #'
 #' @examples
 #' # 2 x 3 design, main effect of factor B (the 3-level factor), f = 0.25, power = .80

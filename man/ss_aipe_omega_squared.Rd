@@ -73,7 +73,7 @@ the \emph{F} value used at each iteration of the search.
 
 \strong{Tolerance behavior at small \emph{N}.} For small candidate
 \emph{N} the noncentral \emph{F} lower limit is often clamped to zero
-(see \code{?conf_limits_ncf}). The search ignores these clamps in the
+(see \code{?ci_ncf}). The search ignores these clamps in the
 iteration and reports the final clamp count, if any, as an informational
 message; this matches the convention in \code{\link{ss_aipe_R2}}.
 }

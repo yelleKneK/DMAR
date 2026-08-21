@@ -176,7 +176,7 @@ Maxwell, S. E., Kelley, K., & Rausch, J. R. (2008). Sample size planning
   \doi{10.1146/annurev.psych.59.103006.093735}
 }
 \seealso{
-\code{\link{ss_aipe_reg_coef}}, \code{\link{ss_power_R2}}, \code{\link{conf_limits_ncf}}
+\code{\link{ss_aipe_reg_coef}}, \code{\link{ss_power_R2}}, \code{\link{ci_ncf}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

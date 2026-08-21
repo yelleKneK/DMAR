@@ -21,7 +21,7 @@
 #'
 #' This function uses the confidence interval transformation principle (Steiger, 2004) to transform the confidence limits for
 #' the noncentrality parameter to the confidence limits for the population proportion of variance accounted for by knowing the group status.
-#' The confidence interval for the noncentral \emph{F} parameter can be obtained from the function \code{\link{conf_limits_ncf}}, which is used within this function.
+#' The confidence interval for the noncentral \emph{F} parameter can be obtained from the function \code{\link{ci_ncf}}, which is used within this function.
 #'
 #' @return
 #' A 4-row \code{data.frame} with columns \code{term}, \code{value},
@@ -61,7 +61,7 @@
 #'
 #' @note This function can be used for single or factorial ANOVA designs.
 #'
-#' @seealso \code{\link{conf_limits_ncf}}
+#' @seealso \code{\link{ci_ncf}}
 #'
 #' @examples
 #' ## Bargman (1970) gave an example in which a 5-group ANOVA with 11 subjects in each
@@ -117,7 +117,7 @@ ci_pvaf <- function(F_value = NULL, df_1 = NULL, df_2 = NULL, N = NULL,
     stop("N must be larger than df_1+df_2")
   }
 
-  Lims <- .conf_limits_ncf_for(
+  Lims <- .ci_ncf_for(
     caller = "ci_pvaf",
     quantity = "the proportion of variance accounted for",
     F_value = F_value, conf_level = NULL,

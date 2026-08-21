@@ -111,7 +111,7 @@ Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
   significance tests?} (pp. 221--257). Mahwah, NJ: Lawrence Erlbaum.
 }
 \seealso{
-\code{\link{ss_aipe_sc}}, \code{\link{ss_aipe_c}}, \code{\link{conf_limits_nct}}
+\code{\link{ss_aipe_sc}}, \code{\link{ss_aipe_c}}, \code{\link{ci_nct}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

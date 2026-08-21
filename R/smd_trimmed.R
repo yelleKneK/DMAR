@@ -52,7 +52,7 @@
 #' noncentral \emph{t} distribution with the Yuen-Welch approximate
 #' degrees of freedom (their Equation 9), the noncentrality
 #' parameters whose tail probabilities bracket the observed statistic
-#' are located with \code{\link{conf_limits_nct}}, and those limits
+#' are located with \code{\link{ci_nct}}, and those limits
 #' are rescaled to the \eqn{d_R} metric. The degrees of freedom are
 #' reported in the \code{df_yuen} row of the returned table. At
 #' \code{trim = 0} the construction reduces to the Welch approximate
@@ -96,7 +96,7 @@
 #'   population variances. \emph{Biometrika, 61}(1), 165--170.
 #'
 #' @seealso \code{\link{smd}}, \code{\link{var_smd_trimmed}},
-#'   \code{\link{ci_smd}}, \code{\link{conf_limits_nct}}
+#'   \code{\link{ci_smd}}, \code{\link{ci_nct}}
 #'
 #' @examples
 #' # 1. Two normal groups: robust d agrees closely with Cohen's d.
@@ -157,7 +157,7 @@ smd_trimmed <- function(x, y, trim = 0.20, conf_level = 0.95) {
   t_yuen <- (m_t1 - m_t2) / sqrt(v_1 + v_2)
   df_y   <- (v_1 + v_2)^2 / (v_1^2 / (h_1 - 1) + v_2^2 / (h_2 - 1))
   scale_to_d <- c_const * sqrt(v_1 + v_2) / s_W_pool
-  lims <- conf_limits_nct(ncp = t_yuen, df = df_y,
+  lims <- ci_nct(ncp = t_yuen, df = df_y,
                           conf_level = conf_level, verbose = FALSE)
   lo <- scale_to_d * lims$value[lims$term == "lower_limit"]
   hi <- scale_to_d * lims$value[lims$term == "upper_limit"]

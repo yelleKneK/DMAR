@@ -174,7 +174,7 @@ ci_sc_ancova <- function(psi = NULL, adj_means = NULL, s_anova = NULL, s_ancova 
   if (standardizer == "s_ancova") {
     psi <- psi / s_ancova
     lambda_obs <- psi / sqrt(sample_size_weighted + (f_x_numerator / f_x_denominator))
-    lambda_limits <- conf_limits_nct(ncp = lambda_obs, df = nu, conf_level = 1 - alpha)
+    lambda_limits <- ci_nct(ncp = lambda_obs, df = nu, conf_level = 1 - alpha)
 
     psi_limit_upper <- lambda_limits[which(lambda_limits$term == "upper_limit"), 2] * sqrt(sample_size_weighted + (f_x_numerator / f_x_denominator))
     psi_limit_lower <- lambda_limits[which(lambda_limits$term == "lower_limit"), 2] * sqrt(sample_size_weighted + (f_x_numerator / f_x_denominator))
@@ -183,7 +183,7 @@ ci_sc_ancova <- function(psi = NULL, adj_means = NULL, s_anova = NULL, s_ancova 
   if (standardizer == "s_anova") {
     psi <- psi / s_anova
     lambda_obs <- psi / (ratio * sqrt(sample_size_weighted + (f_x_numerator / f_x_denominator)))
-    lambda_limits <- conf_limits_nct(ncp = lambda_obs, df = nu, conf_level = 1 - alpha)
+    lambda_limits <- ci_nct(ncp = lambda_obs, df = nu, conf_level = 1 - alpha)
 
     psi_limit_upper <- lambda_limits[which(lambda_limits$term == "upper_limit"), 2] * ratio * sqrt(sample_size_weighted + (f_x_numerator / f_x_denominator))
     psi_limit_lower <- lambda_limits[which(lambda_limits$term == "lower_limit"), 2] * ratio * sqrt(sample_size_weighted + (f_x_numerator / f_x_denominator))

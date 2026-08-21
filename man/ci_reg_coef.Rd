@@ -124,7 +124,7 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027).
 Smithson, M. (2003). \emph{Confidence intervals}. Thousand Oaks, CA: Sage Publications.
 }
 \seealso{
-\code{\link{ss_aipe_reg_coef}}, \code{\link{conf_limits_nct}}, \code{\link{ci_rc}}, \code{\link{ci_src}}
+\code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nct}}, \code{\link{ci_rc}}, \code{\link{ci_src}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

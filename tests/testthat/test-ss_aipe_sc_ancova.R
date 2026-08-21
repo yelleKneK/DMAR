@@ -43,7 +43,7 @@ test_that("ss_aipe_sc_ancova() rejects mixing conf_level and alphas", {
 
 test_that("ss_aipe_sc_ancova() s_anova assurance path runs end-to-end", {
   # The s_anova + assurance branch previously also forwarded conf_level alongside
-  # alphas to conf_limits_nct, which is the same bug pattern as s_ancova.
+  # alphas to ci_nct, which is the same bug pattern as s_ancova.
   res <- ss_aipe_sc_ancova(psi_standardized = .8, ratio = .6, width = .5,
                            c_weights = c(.5, .5, 0, -1), divisor = "s_anova",
                            assurance = .90)
@@ -51,10 +51,10 @@ test_that("ss_aipe_sc_ancova() s_anova assurance path runs end-to-end", {
   expect_equal(res$term, "necessary_n_per_group")
 })
 
-test_that("ss_aipe_sc_ancova() assurance path no longer errors on inner conf_limits_nct calls", {
-  # Regression test: same bug as ss_aipe_sc() -- the inner conf_limits_nct
+test_that("ss_aipe_sc_ancova() assurance path no longer errors on inner ci_nct calls", {
+  # Regression test: same bug as ss_aipe_sc() -- the inner ci_nct
   # calls forwarded the default conf_level = .95 alongside alpha_lower /
-  # alpha_upper, which conf_limits_nct refuses.
+  # alpha_upper, which ci_nct refuses.
   res <- ss_aipe_sc_ancova(psi_standardized = .8, width = .5,
                            c_weights = c(.5, .5, 0, -1), assurance = .90)
   expect_s3_class(res, "data.frame")

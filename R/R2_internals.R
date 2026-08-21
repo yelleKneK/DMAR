@@ -158,16 +158,16 @@
 # the data.frame construction and class tagging that ci_R2() does.
 # Used by ss_aipe_R2's fixed-predictors inner loop.
 #
-# The bulk of the cost in this path is the conf_limits_ncf root finding
+# The bulk of the cost in this path is the ci_ncf root finding
 # itself; this helper saves the per-iteration data.frame allocations
-# that wrap the inputs and outputs to conf_limits_ncf.
+# that wrap the inputs and outputs to ci_ncf.
 
 .ci_R2_fixed_limits_fast <- function(R2, N, p, alpha_lower, alpha_upper,
                                      tol = 1e-9) {
   df_1 <- p
   df_2 <- N - p - 1
   F_val <- .convert_R2_f_fast(R2, df_1, df_2)
-  Limits <- conf_limits_ncf(F_value = F_val, df_1 = df_1, df_2 = df_2,
+  Limits <- ci_ncf(F_value = F_val, df_1 = df_1, df_2 = df_2,
                             conf_level = NULL, tol = tol,
                             alpha_lower = alpha_lower,
                             alpha_upper = alpha_upper)

@@ -78,7 +78,7 @@ design the same expression gives the per-effect \emph{partial} \eqn{\eta^2}.
 \strong{Confidence interval.} The CI is constructed by Steiger's (2004)
 confidence interval transformation principle: a CI for the noncentrality
 parameter \eqn{\lambda} of the \emph{F} distribution is obtained (via
-\code{\link{conf_limits_ncf}}) and then mapped through
+\code{\link{ci_ncf}}) and then mapped through
 \deqn{\eta^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N}.}
 This is the same transformation used by \code{\link{ci_pvaf}} and
 \code{\link{ci_omega_squared}}; the three functions share CI machinery and
@@ -174,7 +174,7 @@ Steiger, J. H. (2004). Beyond the \emph{F} test: Effect size confidence
 \seealso{
 \code{\link{eta_squared}}, \code{\link{ci_eta_squared_partial}},
   \code{\link{ci_omega_squared}}, \code{\link{ci_pvaf}},
-  \code{\link{conf_limits_ncf}}
+  \code{\link{ci_ncf}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

@@ -46,7 +46,7 @@ With \eqn{q} free parameters and total sample size \eqn{N},
 \pkg{lavaan} reports. Writing \eqn{\hat\lambda = \chi^2 - df} for the
 estimated noncentrality, this is \eqn{(\hat\lambda + df + 2q)/N}; the
 confidence interval replaces \eqn{\hat\lambda} by the lower and upper
-noncentrality limits from \code{\link{conf_limits_nc_chisq}}, the same
+noncentrality limits from \code{\link{ci_nc_chisq}}, the same
 inversion used for the RMSEA interval (see \code{\link{ci_rmsea}}). ECVI
 differs from the AIC only by the constant factor \eqn{N}, so the two rank
 models identically; ECVI is reported because its metric (a discrepancy
@@ -70,7 +70,7 @@ Browne, M. W., & Cudeck, R. (1989). Single sample cross-validation
   Research, 24}(4), 445--455.
 }
 \seealso{
-\code{\link{ci_rmsea}}, \code{\link{conf_limits_nc_chisq}}.
+\code{\link{ci_rmsea}}, \code{\link{ci_nc_chisq}}.
 
 Other multivariate and latent variable methods:
 \code{\link[=average_variance_extracted]{average_variance_extracted()}},

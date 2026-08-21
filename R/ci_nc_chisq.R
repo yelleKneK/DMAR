@@ -1,13 +1,16 @@
-#' Confidence Limits for the Noncentrality Parameter of a Noncentral Chi Square Distribution
+#' Confidence Interval for the Noncentrality Parameter of a Noncentral Chi Square Distribution
 #'
 #' Finds the noncentrality parameters of a noncentral chi square distribution
 #' that bracket an observed chi square value with the requested tail
 #' probabilities, giving a confidence interval on the population noncentrality
-#' parameter. Together with \code{\link{conf_limits_nct}} and
-#' \code{\link{conf_limits_ncf}}, this is one of the low-level noncentral
+#' parameter. Together with \code{\link{ci_nct}} and
+#' \code{\link{ci_ncf}}, this is one of the low-level noncentral
 #' distribution workhorses on which the \code{ci_*} confidence interval
 #' functions are built; most analyses reach it through those functions rather
 #' than calling it directly.
+#' The function was \code{conf_limits_nc_chisq()} in earlier builds of DMAR and is
+#' \code{conf.limits.nc.chisq()} in MBESS; it is named into the \code{ci_*} family because a
+#' confidence interval is what it computes.
 #'
 #' @param chi_square The observed chi square value
 #' @param conf_level The desired degree of confidence for a symmetric interval
@@ -73,24 +76,24 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{conf_limits_nct}}, \code{\link{conf_limits_ncf}}, \code{\link[stats:Chisquare]{stats::pchisq()}}, \code{\link[stats:Chisquare]{stats::qchisq()}}, \code{\link[stats]{uniroot}}
+#' \code{\link{ci_nct}}, \code{\link{ci_ncf}}, \code{\link[stats:Chisquare]{stats::pchisq()}}, \code{\link[stats:Chisquare]{stats::qchisq()}}, \code{\link[stats]{uniroot}}
 #'
 #' @examples
 #' # A typical call to the function.
-#' conf_limits_nc_chisq(chi_square = 30, conf_level = .95, df = 15)
+#' ci_nc_chisq(chi_square = 30, conf_level = .95, df = 15)
 #'
 #' # A one-sided (upper) confidence interval.
-#' conf_limits_nc_chisq(chi_square = 30, alpha_lower = 0, alpha_upper = .05,
+#' ci_nc_chisq(chi_square = 30, alpha_lower = 0, alpha_upper = .05,
 #'                      conf_level = NULL, df = 15)
 #'
 #' @keywords design multivariate regression
 #'
-#' @family noncentral distribution confidence limits
+#' @family noncentral distribution confidence intervals
 #'
 #' @export
 #' @importFrom stats pchisq uniroot
 
-conf_limits_nc_chisq <- function(chi_square = NULL, conf_level = .95, df = NULL,
+ci_nc_chisq <- function(chi_square = NULL, conf_level = .95, df = NULL,
                                  alpha_lower = NULL, alpha_upper = NULL, tol = 1e-9,
                                  verbose = TRUE, ...) {
   if (is.null(chi_square)) stop("You must specify 'chi_square'.", call. = FALSE)

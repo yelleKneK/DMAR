@@ -187,7 +187,7 @@ Anderson, S. F., Kelley, K., & Maxwell, S. E. (2017). Sample-size
   \doi{10.1177/0956797617723724}
 }
 \seealso{
-\code{\link{ss_aipe_reg_coef}}, \code{\link{ss_power_R2}}, \code{\link{conf_limits_ncf}}
+\code{\link{ss_aipe_reg_coef}}, \code{\link{ss_power_R2}}, \code{\link{ci_ncf}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

@@ -67,6 +67,20 @@ of the MBESS package.
   (`cv_dunnett`, `cv_scheffe`, `cv_tukey_hsd`). The package is
   unreleased, so the old names are gone rather than aliased.
 
+* The noncentral-distribution intervals joined the family too
+  (2026-08-21): `ci_nct()`, `ci_ncf()`, and `ci_nc_chisq()` replace
+  `conf_limits_nct()`, `conf_limits_ncf()`, and `conf_limits_nc_chisq()`,
+  the snake-cased descendants of MBESS's `conf.limits.nct()` and kin.
+  Each computes a confidence interval (on the noncentrality parameter
+  that the effect size intervals are built from), and "confidence
+  limits" was vocabulary that existed only in MBESS; the new names
+  pair with `moments_nct()`, `moments_ncf()`, and `moments_nc_chisq()`
+  as one noncentral toolkit. The noncentral marker stays because the
+  noncentrality parameter is the estimand, and `nc_chisq` keeps the
+  underscore the package already uses in `moments_nc_chisq()` and
+  `convert_F_chisq()`. `plot_ci()` keeps its name: it is a plot first.
+  The old names are gone rather than aliased.
+
 * The correlation intervals now carry the names of their estimands,
   matching the rest of the correlation family (`ss_aipe_r`,
   `ss_power_r`, `var_r`, `expected_r`, `equivalence_r`): `ci_r()` is the
@@ -353,7 +367,7 @@ of the MBESS package.
 * When an observed *F* falls below the `alpha_lower` critical value of
   the central *F*-distribution, the lower noncentrality limit is 0 by
   construction; that is a normal consequence of a small observed
-  effect, not a failure. `conf_limits_ncf()` still warns once in that
+  effect, not a failure. `ci_ncf()` still warns once in that
   case, but the message now states the consequence for the interval
   (the lower confidence limit is 0) instead of describing achieved
   tail probabilities, and every function that builds its interval by
@@ -989,11 +1003,11 @@ load-bearing a test now recomputes it independently.
 * **`ci_mahalanobis()` documents the tail arguments its backend
   accepts.** The page promised that supplying `alpha_lower` and
   `alpha_upper` recomputes `conf_level`; that call errors, because the
-  tails pass straight through to `conf_limits_ncf()`, which refuses a
+  tails pass straight through to `ci_ncf()`, which refuses a
   non-NULL `conf_level` beside them. The page now directs users to set
   `conf_level = NULL` and supply both alphas, and a test pins the
   contract.
-* **`conf_limits_ncf()` and `conf_limits_nc_chisq()` state the
+* **`ci_ncf()` and `ci_nc_chisq()` state the
   monotonicity each search actually exploits.** The pages claimed each
   tail probability is strictly decreasing in the noncentrality
   parameter; the lower-limit condition works on the upper tail, which
@@ -1441,7 +1455,7 @@ for new users.
   pure/complex item counts.
 * **`ecvi()`** gives the Browne and Cudeck (1989) expected cross-validation
   index for a covariance-structure model, with a confidence interval derived
-  from the noncentral chi square (`conf_limits_nc_chisq()`); accepts a
+  from the noncentral chi square (`ci_nc_chisq()`); accepts a
   `lavaan` fit or a published fit table.
 * **`common_method_single_factor()`** and **`common_method_marker()`**
   implement the single-common-factor (Harman) screen and the Lindell and
@@ -2204,8 +2218,8 @@ under-developed in MBESS. New families include:
   result to infinity, whereas the upper-tail computation stays accurate
   past *F* = 1e20. Each help page states the exact computation. The map
   preserves the *p*-value but does not transport a noncentrality
-  parameter, so noncentral work belongs in `conf_limits_ncf()` and
-  `conf_limits_nc_chisq()`.
+  parameter, so noncentral work belongs in `ci_ncf()` and
+  `ci_nc_chisq()`.
 
 * Display helpers extending the package's *p*-value convention to
   objects DMAR does not produce: `format_p()`, `print_anova()`, and

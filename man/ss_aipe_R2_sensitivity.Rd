@@ -149,7 +149,7 @@ Steiger, J. H., & Fouladi, R. T. (1992). R2: A computer program for
   \doi{10.3758/BF03203611}
 }
 \seealso{
-\code{\link{ci_R2}}, \code{\link{conf_limits_nct}}, \code{\link{ss_aipe_R2}}
+\code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_R2}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

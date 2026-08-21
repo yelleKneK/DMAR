@@ -51,7 +51,7 @@ degrees of freedom and noncentrality parameter
 \eqn{\lambda = (N - 1) df \cdot \mathrm{RMSEA}^2}. The CI on
 \eqn{\mathrm{RMSEA}^2} is obtained by inverting the noncentral chi
 square distribution at the requested confidence level
-(\code{\link{conf_limits_nc_chisq}} does the inversion); the bounds are
+(\code{\link{ci_nc_chisq}} does the inversion); the bounds are
 then mapped back to the RMSEA scale via the square root. When the
 lower noncentrality limit hits zero (\emph{i.e.}, the data are
 compatible with a well-fitting model), the lower RMSEA limit is

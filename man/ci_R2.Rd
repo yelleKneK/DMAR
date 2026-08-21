@@ -42,7 +42,7 @@ ci_R2(
 \item{tol}{The convergence tolerance passed to \code{\link[stats]{uniroot}}
 when \code{random_predictors = FALSE} and the confidence limits are found
 by inverting the noncentral \emph{F} distribution (see
-\code{\link{conf_limits_ncf}}); ignored when
+\code{\link{ci_ncf}}); ignored when
 \code{random_predictors = TRUE}, where the Lee (1971) bisection uses its
 own fixed tolerance}
 }
@@ -90,7 +90,7 @@ study, and the omnibus \eqn{F}-statistic
 \emph{F} with \eqn{p} and \eqn{N - p - 1} degrees of freedom and
 noncentrality \eqn{\lambda = N \rho^2 / (1 - \rho^2)} (Cohen, 1988); the
 CI is obtained by inverting that distribution at the supplied
-confidence level (see \code{\link{conf_limits_ncf}}). Under random
+confidence level (see \code{\link{ci_ncf}}). Under random
 predictors the design matrix is itself a draw from a joint multivariate
 normal distribution and the unconditional sampling distribution of the
 sample \eqn{R^2} is given by Lee (1971); \code{ci_R2} uses the Lee
@@ -168,7 +168,7 @@ Steiger, J. H., & Fouladi, R. T. (1992). R2: A computer program for
   \doi{10.3758/BF03203611}
 }
 \seealso{
-\code{\link{ss_aipe_R2}}, \code{\link{conf_limits_ncf}}
+\code{\link{ss_aipe_R2}}, \code{\link{ci_ncf}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_c]{ci_c()}},

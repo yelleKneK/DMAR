@@ -72,7 +72,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_power_R2}}, \code{\link{conf_limits_ncf}}
+#' \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_power_R2}}, \code{\link{ci_ncf}}
 #'
 #' @examples
 #' Cor.Mat <- rbind(

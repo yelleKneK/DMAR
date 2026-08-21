@@ -105,7 +105,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ci_R2}}, \code{\link{conf_limits_nct}}, \code{\link{ss_aipe_R2}}
+#' \code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_R2}}
 #'
 #' @examples
 #' # Change 'G' to some large number (e.g., G=10,000)

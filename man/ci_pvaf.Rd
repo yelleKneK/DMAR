@@ -60,7 +60,7 @@ or lower and upper confidence limits (\code{alpha_lower} and \code{alpha_upper})
 
 This function uses the confidence interval transformation principle (Steiger, 2004) to transform the confidence limits for
 the noncentrality parameter to the confidence limits for the population proportion of variance accounted for by knowing the group status.
-The confidence interval for the noncentral \emph{F} parameter can be obtained from the function \code{\link{conf_limits_ncf}}, which is used within this function.
+The confidence interval for the noncentral \emph{F} parameter can be obtained from the function \code{\link{ci_ncf}}, which is used within this function.
 }
 \note{
 This function can be used for single or factorial ANOVA designs.
@@ -98,7 +98,7 @@ Steiger, J. H. (2004). Beyond the \emph{F} Test: Effect size confidence interval
   \doi{10.1037/1082-989X.9.2.164}
 }
 \seealso{
-\code{\link{conf_limits_ncf}}
+\code{\link{ci_ncf}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

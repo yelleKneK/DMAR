@@ -74,7 +74,7 @@ test_that("smd_trimmed()'s CI construction reproduces the Keselman et al. (2008)
   expect_equal(d_R1, 1.87, tolerance = 0.005)
   expect_equal(d_R2, 0.61, tolerance = 0.01)
 
-  lam <- conf_limits_nct(ncp = t_yuen, df = df_y, conf_level = 0.95,
+  lam <- ci_nct(ncp = t_yuen, df = df_y, conf_level = 0.95,
                          verbose = FALSE)$value
   expect_lt(max(abs(lam * d_R1 / t_yuen - c(0.31, 3.37))), 0.03)
   expect_lt(max(abs(lam * d_R2 / t_yuen - c(0.10, 1.11))), 0.015)
@@ -83,7 +83,7 @@ test_that("smd_trimmed()'s CI construction reproduces the Keselman et al. (2008)
   # have produced the printed limits: at df = h_1 + h_2 - 2 = 27 the
   # lower limit for delta_R1 is 0.40, three times farther from the
   # printed 0.31 than the Yuen-Welch reproduction above.
-  lam_pooled <- conf_limits_nct(ncp = t_yuen, df = h_1 + h_2 - 2,
+  lam_pooled <- ci_nct(ncp = t_yuen, df = h_1 + h_2 - 2,
                                 conf_level = 0.95,
                                 verbose = FALSE)$value
   expect_gt(abs(lam_pooled[1] * d_R1 / t_yuen - 0.31), 0.06)
@@ -120,7 +120,7 @@ test_that("smd_trimmed()'s CI inverts Yuen's t at the Yuen-Welch df", {
   # d_R = scale_to_d * t_yuen, so the noncentrality limits transfer
   # to the d_R metric by the same factor.
   d_R <- res$value[res$term == "smd_trimmed"]
-  lam <- conf_limits_nct(ncp = t_yuen, df = df_y, conf_level = 0.95,
+  lam <- ci_nct(ncp = t_yuen, df = df_y, conf_level = 0.95,
                          verbose = FALSE)$value
   expect_equal(res$value[res$term == "lower_limit"],
                lam[1] * d_R / t_yuen, tolerance = 1e-9)

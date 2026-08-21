@@ -119,7 +119,7 @@
 #'
 #' @seealso
 #' \code{\link{ss_aipe_R2}}, \code{\link{ss_power_R2_sensitivity}},
-#' \code{\link{ss_power_reg_coef}}, \code{\link{conf_limits_ncf}},
+#' \code{\link{ss_power_reg_coef}}, \code{\link{ci_ncf}},
 #' \code{\link{ci_R2}}
 #'
 #' @examples

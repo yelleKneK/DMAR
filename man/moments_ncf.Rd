@@ -66,7 +66,7 @@ Johnson, N. L., Kotz, S., & Balakrishnan, N. (1995). \emph{Continuous
 }
 \seealso{
 \code{\link{moments_nct}} for the noncentral \emph{t};
-  \code{\link{conf_limits_ncf}} for the noncentral \emph{F} confidence
+  \code{\link{ci_ncf}} for the noncentral \emph{F} confidence
   limits used in effect size intervals; \code{\link[stats]{df}} for the
   density.
 

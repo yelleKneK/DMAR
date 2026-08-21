@@ -196,7 +196,7 @@ factorial_anova <- function(formula, data, ss_type = 3L, conf_level = 0.95) {
   eta <- eta_lo <- eta_hi <- omega <- omega_lo <- omega_hi <- numeric(n_eff)
 
   # The per-effect ci_eta_squared_partial() / ci_omega_squared() calls each go
-  # through conf_limits_ncf(), whose noncentral F lower limit is often clamped
+  # through ci_ncf(), whose noncentral F lower limit is often clamped
   # to 0 for a small effect; surfacing that warning once per effect produces
   # many identical messages. Muffle the per-effect warnings, count them, and
   # emit a single summary warning at the end (via on.exit so it fires on any
@@ -205,7 +205,7 @@ factorial_anova <- function(formula, data, ss_type = 3L, conf_level = 0.95) {
   on.exit({
     if (.clamp_count > 0L) {
       warning(sprintf(
-        "The noncentral F lower-limit clamp in conf_limits_ncf() fired for %d of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.",
+        "The noncentral F lower-limit clamp in ci_ncf() fired for %d of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?ci_ncf for the meaning of the clamp.",
         .clamp_count
       ), call. = FALSE)
     }

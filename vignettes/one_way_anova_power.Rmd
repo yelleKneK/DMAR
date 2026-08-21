@@ -219,7 +219,7 @@ deliverable is the estimate together with a confidence interval, obtained by
 inverting the noncentral *F* distribution (Kelley, 2007; Steiger, 2004). Given an observed *F*, DMAR finds the
 noncentrality values whose noncentral *F* distributions place the observed *F*
 at the chosen lower and upper tail probabilities (this is what
-`conf_limits_ncf()` does), then transforms those noncentrality endpoints into
+`ci_ncf()` does), then transforms those noncentrality endpoints into
 the metric requested: a proportion of variance, a signal to noise ratio, or its
 square root.
 

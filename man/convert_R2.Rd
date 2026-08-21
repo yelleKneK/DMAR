@@ -42,7 +42,7 @@ Each of the four functions returns a 1-row \code{data.frame}
   degrees-of-freedom / sample size inputs supplied), which is what
   makes them useful inside the noncentrality-parameter confidence
   interval machinery of \code{\link{ci_R2}} and
-  \code{\link{conf_limits_ncf}}.
+  \code{\link{ci_ncf}}.
 }
 \description{
 Given values of test statistics (and the appropriate additional information) the value of the noncentral
@@ -62,7 +62,7 @@ Theory, application, and implementation. \emph{Journal of Statistical
 Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
 }
 \seealso{
-\code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{conf_limits_nct}}, \code{\link{conf_limits_ncf}}
+\code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ci_ncf}}
 
 Other parameterization conversions:
 \code{\link[=convert_F_chisq]{convert_F_chisq()}},

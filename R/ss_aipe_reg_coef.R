@@ -116,7 +116,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{conf_limits_nct}}
+#' \code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{ci_nct}}
 #'
 #' @examples
 #' # 1. Covariance structure path: supply the population correlation

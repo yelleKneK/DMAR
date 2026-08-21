@@ -55,7 +55,7 @@
 #' \strong{Confidence interval.} The CI is constructed by Steiger's (2004)
 #' confidence interval transformation principle: a CI for the noncentrality
 #' parameter \eqn{\lambda} of the \emph{F} distribution is obtained (via
-#' \code{\link{conf_limits_ncf}}) and then mapped through
+#' \code{\link{ci_ncf}}) and then mapped through
 #' \deqn{\eta^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N}.}
 #' This is the same transformation used by \code{\link{ci_pvaf}} and
 #' \code{\link{ci_omega_squared}}; the three functions share CI machinery and
@@ -112,7 +112,7 @@
 #'
 #' @seealso \code{\link{eta_squared}}, \code{\link{ci_eta_squared_partial}},
 #'   \code{\link{ci_omega_squared}}, \code{\link{ci_pvaf}},
-#'   \code{\link{conf_limits_ncf}}
+#'   \code{\link{ci_ncf}}
 #'
 #' @examples
 #' # 1. Raw-argument interface. Bargman's (1970) example.
@@ -226,7 +226,7 @@ ci_eta_squared <- function(
   eta_sq <- num / (num + df_error)
 
   partial <- value_name == "eta_squared_partial"
-  ncp_lims <- .conf_limits_ncf_for(
+  ncp_lims <- .ci_ncf_for(
     caller      = if (partial) "ci_eta_squared_partial" else "ci_eta_squared",
     quantity    = if (partial) "partial eta squared" else "eta squared",
     F_value     = F_value,

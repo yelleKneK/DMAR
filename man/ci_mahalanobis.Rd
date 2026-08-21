@@ -50,9 +50,9 @@ upper tail. To use them, set \code{conf_level = NULL} and supply both
 (an asymmetric or one-sided interval with coverage
 \code{1 - alpha_lower - alpha_upper}); supplying either alongside a
 non-\code{NULL} \code{conf_level} is an error, as in
-\code{\link{conf_limits_ncf}}, to which they are passed.}
+\code{\link{ci_ncf}}, to which they are passed.}
 
-\item{\dots}{Additional arguments passed to \code{\link{conf_limits_ncf}}
+\item{\dots}{Additional arguments passed to \code{\link{ci_ncf}}
 (for example \code{tol}).}
 }
 \value{
@@ -103,13 +103,13 @@ one-sample case (see Anderson, 2003, Section 5.2).
 \strong{Confidence interval.} The CI on \eqn{\Delta^2} is obtained by
 inverting these distributional results (Reiser, 2001): a CI on the
 noncentrality parameter \eqn{\lambda} is constructed via
-\code{\link{conf_limits_ncf}} and then mapped back to \eqn{\Delta^2} by
+\code{\link{ci_ncf}} and then mapped back to \eqn{\Delta^2} by
 \eqn{\Delta^2 = \lambda\,(n_1 + n_2)/(n_1 n_2)} (two sample) or
 \eqn{\Delta^2 = \lambda / n} (one sample). When the observed \eqn{F} is
 below the lower-tail critical value of the central \emph{F}-distribution at
 the requested confidence level, the lower CI on \eqn{\lambda} (and hence
 on \eqn{\Delta^2}) is clamped to zero, in keeping with the
-\code{\link{conf_limits_ncf}} convention.
+\code{\link{ci_ncf}} convention.
 
 \strong{Bias.} The plug-in estimator \eqn{D^2} is upward biased for
 \eqn{\Delta^2}; the CI from this function is exact for \eqn{\Delta^2}
@@ -162,7 +162,7 @@ Kelley, K. (2007). Confidence intervals for standardized
   \doi{10.18637/jss.v020.i08}
 }
 \seealso{
-\code{\link{conf_limits_ncf}}, \code{\link{ci_smd}},
+\code{\link{ci_ncf}}, \code{\link{ci_smd}},
   \code{\link{ci_R2}}
 
 Other confidence intervals for effect sizes:

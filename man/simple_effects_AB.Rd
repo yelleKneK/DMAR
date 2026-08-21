@@ -125,7 +125,7 @@ computed from the \emph{F} and the \emph{df} actually used in the test
 (so it reflects whichever error term was chosen). The confidence
 interval is built by Steiger's (2004) transformation principle: a CI
 for the noncentrality parameter \eqn{\lambda} of the \emph{F}
-distribution is obtained via \code{\link{conf_limits_ncf}} and then
+distribution is obtained via \code{\link{ci_ncf}} and then
 mapped through \eqn{\eta^2_p = \lambda / (\lambda + N_{\text{ref}})},
 with \eqn{N_{\text{ref}}} taken to be the total study \emph{N} for the
 pooled error term (treating the simple effect as a contrast within the
@@ -219,7 +219,7 @@ alternative approach. \emph{Biometrika, 38}, 330--336.
 \code{\link{contrast_test}} for within-level pairwise or custom
   contrasts, \code{\link{eta_squared_partial}} and
   \code{\link{ci_eta_squared_partial}} for the omnibus effect size
-  counterparts, \code{\link{conf_limits_ncf}} for the noncentrality
+  counterparts, \code{\link{ci_ncf}} for the noncentrality
   machinery, \code{\link{ss_power_factorial_anova}} for power
   calculations on the omnibus factorial effects.
 

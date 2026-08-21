@@ -56,7 +56,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ci_sc}}, \code{\link{conf_limits_nct}}, \code{\link{ss_aipe_c}}
+#' \code{\link{ci_sc}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_c}}
 #'
 #' @examples
 #' # Suppose the population standardized contrast is believed to be .6
@@ -93,7 +93,7 @@ ss_aipe_sc <- function(psi_standardized, c_weights, width,
 
     # Resolve interval bounds. Two equivalent specifications: a symmetric
     # conf_level (default .95) OR an explicit pair alpha_lower/alpha_upper
-    # (possibly asymmetric). The two cannot be mixed, matching conf_limits_nct.
+    # (possibly asymmetric). The two cannot be mixed, matching ci_nct.
     alphas_supplied <- !is.null(alpha_lower) || !is.null(alpha_upper)
     if (alphas_supplied) {
         if (!missing(conf_level) && !is.null(conf_level)) {
@@ -134,7 +134,7 @@ ss_aipe_sc <- function(psi_standardized, c_weights, width,
         lambda_0 <- psi_standardized / sqrt(sum(c_weights^2) / n)
 
         # Initial confidence limits.
-        lambda_limits_0 <- conf_limits_nct(ncp = lambda_0, df = n * J - J,
+        lambda_limits_0 <- ci_nct(ncp = lambda_0, df = n * J - J,
                                             conf_level = NULL,
                                             alpha_lower = alpha_lower,
                                             alpha_upper = alpha_upper)
@@ -147,7 +147,7 @@ ss_aipe_sc <- function(psi_standardized, c_weights, width,
         while (Diff_width_Full > 0) {
             n <- n + 1
             lambda <- psi_standardized / sqrt(sum(c_weights^2) / n)
-            lambda_limits <- conf_limits_nct(ncp = lambda, df = n * J - J,
+            lambda_limits <- ci_nct(ncp = lambda, df = n * J - J,
                                               conf_level = NULL,
                                               alpha_lower = alpha_lower,
                                               alpha_upper = alpha_upper)
@@ -174,14 +174,14 @@ ss_aipe_sc <- function(psi_standardized, c_weights, width,
                          width = width, c_weights = c_weights,
                          assurance = NULL, ...)[1,2]
 
-        Lim_2 <- conf_limits_nct(
+        Lim_2 <- ci_nct(
             ncp = psi_standardized / sqrt(sum(c_weights^2) / n0), df = n0 * J - J,
             conf_level = NULL,
             alpha_upper = (1 - assurance) / 2, alpha_lower = (1 - assurance) / 2
         )
         limit_2_sided <- sqrt(sum(c_weights^2) / n0) * Lim_2[which(Lim_2$term == 'upper_limit'),2]
 
-        Lim_1 <- conf_limits_nct(
+        Lim_1 <- ci_nct(
             ncp = psi_standardized / sqrt(sum(c_weights^2) / n0), df = n0 * J - J,
             conf_level = NULL,
             alpha_upper = 1 - assurance, alpha_lower = 0

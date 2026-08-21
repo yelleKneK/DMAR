@@ -54,7 +54,7 @@
 #' \strong{\code{method = "parametric"}.} The function first obtains a
 #' confidence interval for the population noncentrality parameter
 #' \eqn{\lambda} of the focal effect's \emph{F}-test via
-#' \code{\link{conf_limits_ncf}}. The NCP bounds are mapped through the
+#' \code{\link{ci_ncf}}. The NCP bounds are mapped through the
 #' partial-\eqn{\eta^2} transformation
 #' \eqn{\eta^2_{p,\text{bound}} = \lambda_{\text{bound}}/(\lambda_{\text{bound}} + N)}
 #' (matching the convention used by \code{\link{ci_pvaf}} and
@@ -288,7 +288,7 @@ ci_eta_squared_generalized <- function(
                                  alpha_lower, alpha_upper) {
 
   per_effect <- function(eff_name, F_v, df_e, df_err, ss_obs_ratio, N_use) {
-    ncp <- .conf_limits_ncf_for(
+    ncp <- .ci_ncf_for(
       caller      = "ci_eta_squared_generalized",
       quantity    = "generalized eta squared",
       F_value     = F_v,     df_1 = df_e, df_2 = df_err,
@@ -301,7 +301,7 @@ ci_eta_squared_generalized <- function(
     lo_etap <- lo_ncp / (lo_ncp + N_use)
     # A NA upper NCP means the observed F is so small that even at lambda = 0 the
     # lower-tail probability is already at or below alpha_upper, leaving the upper
-    # noncentrality limit undefined (conf_limits_ncf documents this). Propagate NA
+    # noncentrality limit undefined (ci_ncf documents this). Propagate NA
     # to the upper generalized eta squared limit, matching ci_eta_squared.
     up_etap <- if (is.na(up_ncp)) NA_real_
                else if (is.infinite(up_ncp)) 1

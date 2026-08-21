@@ -66,7 +66,7 @@
 #' @seealso
 #' \code{\link{smd_c}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}},
 #' \code{\link{ss_aipe_smd}}, \code{\link{ss_power_smd}},
-#' \code{\link{plot_smd}}, \code{\link{conf_limits_nct}}
+#' \code{\link{plot_smd}}, \code{\link{ci_nct}}
 #'
 #' @examples
 #' # Generate sample data.

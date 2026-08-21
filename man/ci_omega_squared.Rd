@@ -68,7 +68,7 @@ below zero are truncated to zero.
 \strong{Confidence interval.} The CI is constructed by Steiger's (2004,
 Proposition 1) confidence interval transformation principle: a CI for the
 noncentrality parameter \eqn{\lambda} of the \emph{F} distribution is
-obtained (via \code{\link{conf_limits_ncf}}) and then mapped through
+obtained (via \code{\link{ci_ncf}}) and then mapped through
 \deqn{\omega^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N}.}
 When the lower CI on \eqn{\lambda} is not identified (i.e., the observed
 \emph{F} is below the one-sided critical value), the lower limit on
@@ -147,7 +147,7 @@ Steiger, J. H. (2004). Beyond the \emph{F} test: Effect size confidence
   \doi{10.1037/1082-989X.9.2.164}
 }
 \seealso{
-\code{\link{ci_pvaf}}, \code{\link{conf_limits_ncf}}
+\code{\link{ci_pvaf}}, \code{\link{ci_ncf}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

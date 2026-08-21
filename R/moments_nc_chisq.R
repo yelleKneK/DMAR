@@ -41,7 +41,7 @@
 #'
 #' @seealso \code{\link{moments_ncf}} (whose numerator is a noncentral chi
 #'   square) and \code{\link{moments_nct}} for the other noncentral moments;
-#'   \code{\link{conf_limits_nc_chisq}} for the noncentral chi square
+#'   \code{\link{ci_nc_chisq}} for the noncentral chi square
 #'   confidence limits; \code{\link[stats]{dchisq}} for the density.
 #'
 #' @family noncentral distribution moments

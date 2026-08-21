@@ -24,7 +24,7 @@
 #' \eqn{\lambda = (N - 1) df \cdot \mathrm{RMSEA}^2}. The CI on
 #' \eqn{\mathrm{RMSEA}^2} is obtained by inverting the noncentral chi
 #' square distribution at the requested confidence level
-#' (\code{\link{conf_limits_nc_chisq}} does the inversion); the bounds are
+#' (\code{\link{ci_nc_chisq}} does the inversion); the bounds are
 #' then mapped back to the RMSEA scale via the square root. When the
 #' lower noncentrality limit hits zero (\emph{i.e.}, the data are
 #' compatible with a well-fitting model), the lower RMSEA limit is
@@ -112,22 +112,22 @@ ci_rmsea <- function(rmsea, df, N, conf_level = .95, alpha_lower = NULL, alpha_u
   # print("The Chi Square Statistic is:")
   # print(chi_sq_statistic)
 
-  # The clamp-to-zero warning from conf_limits_nc_chisq fires routinely for
+  # The clamp-to-zero warning from ci_nc_chisq fires routinely for
   # well-fitting models where the noncentrality lower limit hits the floor;
   # surfacing it on every RMSEA call would be noise. Suppress it here only.
-  chi_sq_conf_limits <- suppressWarnings(conf_limits_nc_chisq(
+  chi_sq_ncp_limits <- suppressWarnings(ci_nc_chisq(
     chi_square = chi_sq_statistic, conf_level = NULL, df = df,
     alpha_lower = alpha_lower, alpha_upper = alpha_upper
   ))
 
-  Low_Limit <- chi_sq_conf_limits$value[chi_sq_conf_limits$term == "lower_limit"]
-  Up_Limit  <- chi_sq_conf_limits$value[chi_sq_conf_limits$term == "upper_limit"]
+  Low_Limit <- chi_sq_ncp_limits$value[chi_sq_ncp_limits$term == "lower_limit"]
+  Up_Limit  <- chi_sq_ncp_limits$value[chi_sq_ncp_limits$term == "upper_limit"]
   if (is.na(Low_Limit)) Low_Limit <- 0
   Low_Limit <- max(0, Low_Limit)
 
   # Verify probabilities.
 
-  # Prob.Greater.Upper <- pchisq(q=chi_sq_statistic, df=df, ncp=chi_sq_conf_limits[2,2])
+  # Prob.Greater.Upper <- pchisq(q=chi_sq_statistic, df=df, ncp=chi_sq_ncp_limits[2,2])
 
   ###########################################################################################
 

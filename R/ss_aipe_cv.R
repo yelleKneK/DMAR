@@ -120,10 +120,10 @@ ss_aipe_cv <- function(C_of_V = NULL, width = NULL, conf_level = .95, assurance 
   # workspace variable named N.
   N <- minimal_N
 
-  # The iterative search calls ci_cv() (and through it conf_limits_nct())
+  # The iterative search calls ci_cv() (and through it ci_nct())
   # once per candidate N. Because the noncentrality parameter grows with
   # sqrt(N), it commonly exceeds 37.62, the value beyond which R's noncentral
-  # t is inaccurate, and conf_limits_nct() warns on each such call. Surfacing
+  # t is inaccurate, and ci_nct() warns on each such call. Surfacing
   # that warning once per iteration produces dozens of identical messages, so
   # we muffle the per-iteration warnings, count them, and emit a single
   # summary warning after the search completes.
@@ -152,7 +152,7 @@ ss_aipe_cv <- function(C_of_V = NULL, width = NULL, conf_level = .95, assurance 
   )
   if (.ncp_count > 0L) {
     warning(sprintf(
-      "During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in %d intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.",
+      "During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in %d intermediate evaluations. The returned sample size accounts for this; see ?ci_nct.",
       .ncp_count
     ), call. = FALSE)
   }

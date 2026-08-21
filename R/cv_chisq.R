@@ -36,7 +36,7 @@
 #'
 #'   A noncentral parameter can be supplied, which is what a power analysis
 #'   for a test of model fit needs, though it would not be used for a standard
-#'   null hypothesis significance test. See \code{\link{conf_limits_nc_chisq}}
+#'   null hypothesis significance test. See \code{\link{ci_nc_chisq}}
 #'   for confidence limits on the noncentral parameter itself.
 #'
 #' @references
@@ -58,7 +58,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso \code{\link{cv_t}}, \code{\link{cv_f}},
-#'   \code{\link{conf_limits_nc_chisq}}
+#'   \code{\link{ci_nc_chisq}}
 #'
 #' @keywords distribution htest
 #'

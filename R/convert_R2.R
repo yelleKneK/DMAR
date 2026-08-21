@@ -32,7 +32,7 @@
 #'   degrees-of-freedom / sample size inputs supplied), which is what
 #'   makes them useful inside the noncentrality-parameter confidence
 #'   interval machinery of \code{\link{ci_R2}} and
-#'   \code{\link{conf_limits_ncf}}.
+#'   \code{\link{ci_ncf}}.
 #'
 #' @references
 #' Kelley, K. (2007). Confidence intervals for standardized effect sizes:
@@ -41,7 +41,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{conf_limits_nct}}, \code{\link{conf_limits_ncf}}
+#' @seealso \code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ci_ncf}}
 #'
 #' @examples
 #' convert_R2_lambda(R2 = .5, N = 100)

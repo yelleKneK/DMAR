@@ -1,14 +1,17 @@
-#' Confidence Limits for the Noncentrality Parameter of a Noncentral \emph{F}-distribution
+#' Confidence Interval for the Noncentrality Parameter of a Noncentral \emph{F} Distribution
 #'
 #' Finds the noncentrality parameters of a noncentral \emph{F}-distribution
 #' that bracket an observed \emph{F}-value with the requested tail
 #' probabilities, giving a confidence interval on the population noncentrality
-#' parameter. Together with \code{\link{conf_limits_nct}} and
-#' \code{\link{conf_limits_nc_chisq}}, this is one of the low-level
+#' parameter. Together with \code{\link{ci_nct}} and
+#' \code{\link{ci_nc_chisq}}, this is one of the low-level
 #' noncentral distribution workhorses on which the \code{ci_*} confidence
 #' interval functions (e.g., \code{\link{ci_pvaf}}, \code{\link{ci_snr}},
 #' \code{\link{ci_R2}}) are built; most analyses reach it through those
 #' functions rather than calling it directly.
+#' The function was \code{conf_limits_ncf()} in earlier builds of DMAR and is
+#' \code{conf.limits.ncf()} in MBESS; it is named into the \code{ci_*} family because a
+#' confidence interval is what it computes.
 #'
 #' @param F_value The observed \emph{F}-value
 #' @param conf_level The desired degree of confidence for a symmetric interval
@@ -71,23 +74,23 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{conf_limits_nct}}, \code{\link{conf_limits_nc_chisq}}, \code{\link[stats:FDist]{stats::pf()}}, \code{\link[stats:FDist]{stats::qf()}}, \code{\link[stats]{uniroot}}
+#' \code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ci_nc_chisq}}, \code{\link[stats:FDist]{stats::pf()}}, \code{\link[stats:FDist]{stats::qf()}}, \code{\link[stats]{uniroot}}
 #'
 #' @examples
-#' conf_limits_ncf(F_value = 5, conf_level = .95, df_1 = 5, df_2 = 100)
+#' ci_ncf(F_value = 5, conf_level = .95, df_1 = 5, df_2 = 100)
 #'
 #' # A one-sided (upper) confidence interval.
-#' conf_limits_ncf(F_value = 5, conf_level = NULL, df_1 = 5, df_2 = 100,
+#' ci_ncf(F_value = 5, conf_level = NULL, df_1 = 5, df_2 = 100,
 #'                 alpha_lower = 0, alpha_upper = .05)
 #'
 #' @keywords design multivariate regression
 #'
-#' @family noncentral distribution confidence limits
+#' @family noncentral distribution confidence intervals
 #'
 #' @export
 #' @importFrom stats pf uniroot
 
-conf_limits_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
+ci_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
                             alpha_lower = NULL, alpha_upper = NULL, tol = 1e-9,
                             verbose = TRUE, ...) {
   if (is.null(F_value)) stop("You must specify 'F_value'.", call. = FALSE)
@@ -148,7 +151,7 @@ conf_limits_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 
       ))$root,
       error = function(e) {
         stop(sprintf(
-          "In conf_limits_ncf(), the root search for the lower noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_lower = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
+          "In ci_ncf(), the root search for the lower noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_lower = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
           format(F_value), format(df_1), format(df_2), format(alpha_lower), conditionMessage(e)
         ), call. = FALSE)
       }
@@ -177,7 +180,7 @@ conf_limits_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 
       ))$root,
       error = function(e) {
         stop(sprintf(
-          "In conf_limits_ncf(), the root search for the upper noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_upper = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
+          "In ci_ncf(), the root search for the upper noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_upper = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
           format(F_value), format(df_1), format(df_2), format(alpha_upper), conditionMessage(e)
         ), call. = FALSE)
       }

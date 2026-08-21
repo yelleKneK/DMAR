@@ -50,7 +50,7 @@ coverage (\code{conf_level}), or lower and upper confidence limits (\code{alpha_
 This function uses the confidence interval transformation principle (Steiger, 2004) to transform
 the confidence limits for the noncentrality parameter to the confidence limits for the population's
 signal-to-noise ratio. The confidence interval for noncentral \emph{F} parameter can be obtained
-from the \code{conf_limits_ncf} function in DMAR, which is used internally within this function.
+from the \code{ci_ncf} function in DMAR, which is used internally within this function.
 }
 \note{
 The signal to noise ratio is defined as the variance due to the particular factor over the error variance (i.e., the mean square error).
@@ -79,7 +79,7 @@ Steiger, J. H. (2004). Beyond the \emph{F} Test: Effect size confidence interval
   \doi{10.1037/1082-989X.9.2.164}
 }
 \seealso{
-\code{\link{ci_srsnr}}, \code{\link{conf_limits_ncf}}
+\code{\link{ci_srsnr}}, \code{\link{ci_ncf}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

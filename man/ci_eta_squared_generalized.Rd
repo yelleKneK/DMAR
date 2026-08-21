@@ -89,7 +89,7 @@ approximations and are exposed for exploration rather than as defaults.
 \strong{\code{method = "parametric"}.} The function first obtains a
 confidence interval for the population noncentrality parameter
 \eqn{\lambda} of the focal effect's \emph{F}-test via
-\code{\link{conf_limits_ncf}}. The NCP bounds are mapped through the
+\code{\link{ci_ncf}}. The NCP bounds are mapped through the
 partial-\eqn{\eta^2} transformation
 \eqn{\eta^2_{p,\text{bound}} = \lambda_{\text{bound}}/(\lambda_{\text{bound}} + N)}
 (matching the convention used by \code{\link{ci_pvaf}} and

@@ -24,7 +24,7 @@
 #' \pkg{lavaan} reports. Writing \eqn{\hat\lambda = \chi^2 - df} for the
 #' estimated noncentrality, this is \eqn{(\hat\lambda + df + 2q)/N}; the
 #' confidence interval replaces \eqn{\hat\lambda} by the lower and upper
-#' noncentrality limits from \code{\link{conf_limits_nc_chisq}}, the same
+#' noncentrality limits from \code{\link{ci_nc_chisq}}, the same
 #' inversion used for the RMSEA interval (see \code{\link{ci_rmsea}}). ECVI
 #' differs from the AIC only by the constant factor \eqn{N}, so the two rank
 #' models identically; ECVI is reported because its metric (a discrepancy
@@ -42,7 +42,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ci_rmsea}}, \code{\link{conf_limits_nc_chisq}}.
+#' @seealso \code{\link{ci_rmsea}}, \code{\link{ci_nc_chisq}}.
 #'
 #' @family multivariate and latent variable methods
 #'
@@ -93,7 +93,7 @@ ecvi <- function(fit = NULL, chisq = NULL, df = NULL, npar = NULL, n = NULL,
   const <- (df + 2 * npar) / n
   est <- (chisq + 2 * npar) / n               # = (chisq - df)/n + const
 
-  nc <- conf_limits_nc_chisq(chi_square = chisq, df = df,
+  nc <- ci_nc_chisq(chi_square = chisq, df = df,
                              conf_level = conf_level, verbose = FALSE)
   lambda_l <- nc$value[nc$term == "lower_limit"]
   lambda_u <- nc$value[nc$term == "upper_limit"]

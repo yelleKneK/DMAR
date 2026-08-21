@@ -64,7 +64,7 @@ difference (via \code{smd}). The two paths are mathematically
 equivalent under the equal variances assumption (since
 \eqn{t = \hat d \sqrt{n_1 n_2 / (n_1 + n_2)}}); pick whichever is
 easier to obtain. Supply exactly one. Both paths internally call
-\code{\link{conf_limits_nct}} to invert the noncentral \emph{t}
+\code{\link{ci_nct}} to invert the noncentral \emph{t}
 distribution at the specified two-tailed (or asymmetric, via
 \code{alpha_lower} / \code{alpha_upper}) confidence level.
 
@@ -87,9 +87,9 @@ Because \eqn{J(\nu)} is a constant, the rescaling preserves coverage.
 }
 \section{Warning}{
 
-This function uses \code{conf_limits_nct}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
+This function uses \code{ci_nct}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
 If the present function fails to converge (i.e., if it runs but does not report a solution), it is likely that the \code{tol} value is too restrictive and should be increased by a factor of 10, but probably by no more than 100.
-Running the function \code{conf_limits_nct} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
+Running the function \code{ci_nct} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
 }
 
 \examples{
@@ -151,7 +151,7 @@ Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
 \seealso{
 \code{\link{smd}}, \code{\link{smd_c}}, \code{\link{ci_smd_c}},
 \code{\link{ss_aipe_smd}}, \code{\link{ss_power_smd}},
-\code{\link{plot_smd}}, \code{\link{conf_limits_nct}}
+\code{\link{plot_smd}}, \code{\link{ci_nct}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

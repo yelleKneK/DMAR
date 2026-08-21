@@ -84,7 +84,7 @@ test_that("ci_mahalanobis() complains about malformed input", {
 
 test_that("alpha_lower/alpha_upper require conf_level = NULL, as documented", {
   # Anchors the ?ci_mahalanobis tail-argument contract: the tails pass
-  # straight through to conf_limits_ncf(), which refuses a non-NULL
+  # straight through to ci_ncf(), which refuses a non-NULL
   # conf_level beside them, so the page directs users to set
   # conf_level = NULL and supply both alphas (the page previously promised
   # a conf_level recomputation, and the documented call errored).

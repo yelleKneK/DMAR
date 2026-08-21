@@ -44,7 +44,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{conf_limits_nct}}, \code{\link{ci_sm}}
+#' @seealso \code{\link{ci_nct}}, \code{\link{ci_sm}}
 #'
 #' @examples
 #' # Suppose the population mean is believed to be 20, and the population
@@ -74,12 +74,12 @@ ss_aipe_sm <- function(sm, width, conf_level = .95, assurance = NULL, ...) {
   # Thanks to Guy Prochilo <University of Melbourne> for asking a question about negative standardized means that led to a fix in this function.
   # Namely, the addition of the abs() here, where the lack of this caused problems later for assurance parameters.
 
-  # The iterative search calls conf_limits_nct() repeatedly with intermediate
+  # The iterative search calls ci_nct() repeatedly with intermediate
   # trial values of N. When the population standardized mean is large, the
   # implied noncentrality parameter routinely exceeds the 37.62 magnitude at
-  # which pt()/qt() lose accuracy, and conf_limits_nct() signals this with a
+  # which pt()/qt() lose accuracy, and ci_nct() signals this with a
   # warning. Surfacing that warning once per iteration produces dozens of
-  # identical messages (see ?conf_limits_nct). We muffle the per-iteration
+  # identical messages (see ?ci_nct). We muffle the per-iteration
   # warnings with withCallingHandlers, count them, and emit a single summary
   # warning at the end (via on.exit so it fires on any return path). The
   # assurance branch calls ss_aipe_sm() recursively; a nested call detects the
@@ -95,7 +95,7 @@ ss_aipe_sm <- function(sm, width, conf_level = .95, assurance = NULL, ...) {
     on.exit({
       if (.ncp_env$count > 0L) {
         warning(sprintf(
-          "During the iterative sample size search, conf_limits_nct() reported a noncentrality parameter exceeding 37.62 in magnitude in %d intermediate evaluations, the limit at which R's pt()/qt() can return accurate noncentral t probabilities. The returned sample size may be affected; see ?conf_limits_nct.",
+          "During the iterative sample size search, ci_nct() reported a noncentrality parameter exceeding 37.62 in magnitude in %d intermediate evaluations, the limit at which R's pt()/qt() can return accurate noncentral t probabilities. The returned sample size may be affected; see ?ci_nct.",
           .ncp_env$count
         ), call. = FALSE)
       }
@@ -117,7 +117,7 @@ ss_aipe_sm <- function(sm, width, conf_level = .95, assurance = NULL, ...) {
     lambda_0 <- sm * sqrt(n)
 
     # Initial confidence limits.
-    lambda_limits_0 <- conf_limits_nct(ncp = lambda_0, df = n - 1, conf_level = 1 - alpha)
+    lambda_limits_0 <- ci_nct(ncp = lambda_0, df = n - 1, conf_level = 1 - alpha)
     sm_limit_upper_0 <- lambda_limits_0[which(lambda_limits_0$term == 'upper_limit'),2] / sqrt(n)
     sm_limit_lower_0 <- lambda_limits_0[which(lambda_limits_0$term == 'lower_limit'),2] / sqrt(n)
 
@@ -127,7 +127,7 @@ ss_aipe_sm <- function(sm, width, conf_level = .95, assurance = NULL, ...) {
     while (Diff_width_Full > 0) {
       n <- n + 1
       lambda <- sm * sqrt(n)
-      lambda_limits <- conf_limits_nct(ncp = lambda, df = n - 1, conf_level = 1 - alpha)
+      lambda_limits <- ci_nct(ncp = lambda, df = n - 1, conf_level = 1 - alpha)
       sm_limit_upper <- lambda_limits[which(lambda_limits$term == 'upper_limit'),2] / sqrt(n)
       sm_limit_lower <- lambda_limits[which(lambda_limits$term == 'lower_limit'),2] / sqrt(n)
       Current_width <- abs(sm_limit_upper - sm_limit_lower)
@@ -143,13 +143,13 @@ ss_aipe_sm <- function(sm, width, conf_level = .95, assurance = NULL, ...) {
 
     n0 <- ss_aipe_sm(sm = sm, conf_level = conf_level, width = width, assurance = NULL, ...)[1,2]
 
-    Lim_2 <- conf_limits_nct(
+    Lim_2 <- ci_nct(
       ncp = sm * sqrt(n0), df = n0 - 1, conf_level = NULL,
       alpha_upper = (1 - assurance) / 2, alpha_lower = (1 - assurance) / 2
     )
     limit_2_sided <- (1 / sqrt(n0)) * Lim_2[which(Lim_2$term == 'upper_limit'),2]
 
-    Lim_1 <- conf_limits_nct(
+    Lim_1 <- ci_nct(
       ncp = sm * sqrt(n0), df = n0 - 1, conf_level = NULL,
       alpha_upper = 1 - assurance, alpha_lower = 0
     )

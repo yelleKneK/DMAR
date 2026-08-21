@@ -54,7 +54,7 @@
 #' @section Warning: As discussed in Kelley and Maxwell (2008), the sample size planning approach from the AIPE perspective used in this function is only an approximation.
 #'
 #' @seealso
-#' \code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{conf_limits_nct}}, \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_aipe_rc}}
+#' \code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_aipe_rc}}
 #'
 #' @examples
 #' # Exchangable correlation structure

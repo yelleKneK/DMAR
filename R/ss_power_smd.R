@@ -72,7 +72,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ss_aipe_smd}}, \code{\link{ci_smd}}, \code{\link{smd}}, \code{\link{conf_limits_nct}}
+#' @seealso \code{\link{ss_aipe_smd}}, \code{\link{ci_smd}}, \code{\link{smd}}, \code{\link{ci_nct}}
 #'
 #' @examples
 #' # Per-group sample size for d = 0.5, alpha = .05, power = .80, two-sided

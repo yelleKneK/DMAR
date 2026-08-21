@@ -32,7 +32,7 @@
 #' equivalent under the equal variances assumption (since
 #' \eqn{t = \hat d \sqrt{n_1 n_2 / (n_1 + n_2)}}); pick whichever is
 #' easier to obtain. Supply exactly one. Both paths internally call
-#' \code{\link{conf_limits_nct}} to invert the noncentral \emph{t}
+#' \code{\link{ci_nct}} to invert the noncentral \emph{t}
 #' distribution at the specified two-tailed (or asymmetric, via
 #' \code{alpha_lower} / \code{alpha_upper}) confidence level.
 #'
@@ -112,14 +112,14 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @section Warning:
-#' This function uses \code{conf_limits_nct}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
+#' This function uses \code{ci_nct}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
 #' If the present function fails to converge (i.e., if it runs but does not report a solution), it is likely that the \code{tol} value is too restrictive and should be increased by a factor of 10, but probably by no more than 100.
-#' Running the function \code{conf_limits_nct} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
+#' Running the function \code{ci_nct} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
 #'
 #' @seealso
 #' \code{\link{smd}}, \code{\link{smd_c}}, \code{\link{ci_smd_c}},
 #' \code{\link{ss_aipe_smd}}, \code{\link{ss_power_smd}},
-#' \code{\link{plot_smd}}, \code{\link{conf_limits_nct}}
+#' \code{\link{plot_smd}}, \code{\link{ci_nct}}
 #'
 #' @examples
 #' # Steiger and Fouladi (1997) example values.
@@ -142,7 +142,7 @@ ci_smd <- function(ncp = NULL, smd = NULL, n_1 = NULL, n_2 = NULL, conf_level = 
   if (is.null(n_1) || is.null(n_2)) stop("You must specify sample size per group in order to determine confidence limits.", call. = FALSE)
   if (is.null(conf_level) && sum(alpha_lower, alpha_upper) >= 1) stop("There is a problem with your upper and or lower confidence limits.", call. = FALSE)
 
-  # Resolve conf_level vs explicit alpha bounds. Mirrors the conf_limits_nct
+  # Resolve conf_level vs explicit alpha bounds. Mirrors the ci_nct
   # contract: supply one or the other, never both.
   alphas_supplied <- !is.null(alpha_lower) || !is.null(alpha_upper)
   if (alphas_supplied) {
@@ -157,7 +157,7 @@ ci_smd <- function(ncp = NULL, smd = NULL, n_1 = NULL, n_2 = NULL, conf_level = 
   if (length(ncp) == 1) {
     # if(ncp==0) stop("You need not use a noncentral method since the noncentrality parameter is zero; use the critical value from the central t-distribution.", call.=FALSE)
     smd <- ncp * sqrt((n_1 + n_2) / (n_1 * n_2))
-    Limits <- conf_limits_nct(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
+    Limits <- ci_nct(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
 
     Limits_L <- Limits[which(Limits$term == "lower_limit"), 2]
     Limits_U <- Limits[which(Limits$term == "upper_limit"), 2]
@@ -175,7 +175,7 @@ ci_smd <- function(ncp = NULL, smd = NULL, n_1 = NULL, n_2 = NULL, conf_level = 
   if (length(smd) == 1) {
     # if(smd==0) stop("You need not use a noncentral method since the effect size is zero; use the critical value from the central t-distribution.", call.=FALSE)
     ncp <- smd * sqrt((n_1 * n_2) / (n_1 + n_2))
-    Limits <- conf_limits_nct(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
+    Limits <- ci_nct(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
     Limits_L <- Limits[which(Limits$term == "lower_limit"), 2]
     Limits_U <- Limits[which(Limits$term == "upper_limit"), 2]
     Lower_Conf_Limit <- Limits_L * sqrt((n_1 + n_2) / (n_1 * n_2))

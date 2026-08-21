@@ -45,7 +45,7 @@
 #' \strong{Confidence interval.} The CI is constructed by Steiger's (2004,
 #' Proposition 1) confidence interval transformation principle: a CI for the
 #' noncentrality parameter \eqn{\lambda} of the \emph{F} distribution is
-#' obtained (via \code{\link{conf_limits_ncf}}) and then mapped through
+#' obtained (via \code{\link{ci_ncf}}) and then mapped through
 #' \deqn{\omega^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N}.}
 #' When the lower CI on \eqn{\lambda} is not identified (i.e., the observed
 #' \emph{F} is below the one-sided critical value), the lower limit on
@@ -97,7 +97,7 @@
 #'   analysis. \emph{Psychological Methods, 9}(2), 164--182.
 #'   \doi{10.1037/1082-989X.9.2.164}
 #'
-#' @seealso \code{\link{ci_pvaf}}, \code{\link{conf_limits_ncf}}
+#' @seealso \code{\link{ci_pvaf}}, \code{\link{ci_ncf}}
 #'
 #' @examples
 #' # 1. Raw-argument interface. Bargman's (1970) example, also used in
@@ -195,7 +195,7 @@ ci_omega_squared <- function(
   omega_sq <- max(0, num / (num + N))
 
   # Noncentrality-parameter CI.
-  ncp_lims <- .conf_limits_ncf_for(
+  ncp_lims <- .ci_ncf_for(
     caller      = "ci_omega_squared",
     quantity    = "omega squared",
     F_value     = F_value,

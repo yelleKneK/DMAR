@@ -99,7 +99,7 @@
 #'
 #' @seealso
 #' \code{\link{smd}}, \code{\link{smd_c}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, 
-#' \code{\link{conf_limits_nct}}, \code{\link[stats:power.t.test]{stats::power.t.test()}}
+#' \code{\link{ci_nct}}, \code{\link[stats:power.t.test]{stats::power.t.test()}}
 #'
 #' @examples
 #' ss_aipe_smd(delta = .5, conf_level = .95, width = .30)
