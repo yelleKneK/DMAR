@@ -57,12 +57,12 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @section Warning:
-#' This function uses \code{ci_nct}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
+#' This function uses \code{ci_nc_t}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
 #' If the present function fails to converge (i.e., if it runs but does not report a solution), it is likely that the \code{tol} value is too restrictive and should be increased by a factor of 10, but probably by no more than 100.
-#' Running the function \code{ci_nct} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
+#' Running the function \code{ci_nc_t} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
 #'
 #' @seealso
-#' \code{\link{smd_c}}, \code{\link{smd}}, \code{\link{ci_smd}}, \code{\link{ci_nct}}
+#' \code{\link{smd_c}}, \code{\link{smd}}, \code{\link{ci_smd}}, \code{\link{ci_nc_t}}
 #'
 #' @examples
 #' ci_smd_c(smd_c = .5, n_C = 100, n_E = 100, conf_level = .95)
@@ -82,7 +82,7 @@ ci_smd_c <- function(ncp = NULL, smd_c = NULL, n_C = NULL, n_E = NULL, conf_leve
   if (!is.null(conf_level) && conf_level >= 1) stop("There is a problem with your confidence level.", call. = FALSE)
   if (is.null(conf_level) && sum(alpha_lower, alpha_upper) >= 1) stop("There is a problem with your upper and or lower confidence limits.", call. = FALSE)
 
-  # Resolve conf_level vs explicit alpha bounds. Mirrors the ci_nct
+  # Resolve conf_level vs explicit alpha bounds. Mirrors the ci_nc_t
   # contract: supply one or the other, never both.
   alphas_supplied <- !is.null(alpha_lower) || !is.null(alpha_upper)
   if (alphas_supplied) {
@@ -97,7 +97,7 @@ ci_smd_c <- function(ncp = NULL, smd_c = NULL, n_C = NULL, n_E = NULL, conf_leve
   df <- n_C - 1
 
   if (length(ncp) == 1) {
-    Limits <- ci_nct(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
+    Limits <- ci_nc_t(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
     Limits_L <- Limits[which(Limits$term == "lower_limit"), 2]
     Limits_U <- Limits[which(Limits$term == "upper_limit"), 2]
     Lower_Conf_Limit <- Limits_L * sqrt((n_C + n_E) / (n_C * n_E))
@@ -110,7 +110,7 @@ ci_smd_c <- function(ncp = NULL, smd_c = NULL, n_C = NULL, n_E = NULL, conf_leve
 
   if (length(smd_c) == 1) {
     ncp <- smd_c * sqrt((n_C * n_E) / (n_C + n_E))
-    Limits <- ci_nct(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
+    Limits <- ci_nc_t(ncp, df, conf_level = conf_level, alpha_lower = alpha_lower, alpha_upper = alpha_upper, tol = tol, ...)
     Limits_L <- Limits[which(Limits$term == "lower_limit"), 2]
     Limits_U <- Limits[which(Limits$term == "upper_limit"), 2]
     Lower_Conf_Limit <- Limits_L * sqrt((n_C + n_E) / (n_C * n_E))

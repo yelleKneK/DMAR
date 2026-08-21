@@ -68,7 +68,7 @@
 #' \eqn{N - p - 1} degrees of freedom and noncentrality
 #' \eqn{\lambda = N \rho^2 / (1 - \rho^2)} (Cohen, 1988); the CI on
 #' \eqn{\rho^2} is obtained by inverting that distribution and then taking
-#' the square root (see \code{\link{ci_ncf}}). Under random
+#' the square root (see \code{\link{ci_nc_F}}). Under random
 #' predictors the design matrix is itself a draw from a joint multivariate
 #' normal distribution and the unconditional sampling distribution of the
 #' sample \eqn{R^2} is given by Lee (1971); the same Lee bisection that
@@ -172,7 +172,7 @@
 #' @seealso \code{\link{ci_R2}}, \code{\link{ss_aipe_r}},
 #'   \code{\link{ss_power_r}}, \code{\link{var_r}}, \code{\link{ss_aipe_R2}},
 #'   \code{\link{convert_r_Z}}, \code{\link{convert_Z_r}},
-#'   \code{\link{ci_nct}}
+#'   \code{\link{ci_nc_t}}
 #'
 #' @keywords design regression
 #'

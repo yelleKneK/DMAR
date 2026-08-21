@@ -67,19 +67,23 @@ of the MBESS package.
   (`cv_dunnett`, `cv_scheffe`, `cv_tukey_hsd`). The package is
   unreleased, so the old names are gone rather than aliased.
 
-* The noncentral-distribution intervals joined the family too
-  (2026-08-21): `ci_nct()`, `ci_ncf()`, and `ci_nc_chisq()` replace
-  `conf_limits_nct()`, `conf_limits_ncf()`, and `conf_limits_nc_chisq()`,
-  the snake-cased descendants of MBESS's `conf.limits.nct()` and kin.
-  Each computes a confidence interval (on the noncentrality parameter
-  that the effect size intervals are built from), and "confidence
-  limits" was vocabulary that existed only in MBESS; the new names
-  pair with `moments_nct()`, `moments_ncf()`, and `moments_nc_chisq()`
-  as one noncentral toolkit. The noncentral marker stays because the
-  noncentrality parameter is the estimand, and `nc_chisq` keeps the
-  underscore the package already uses in `moments_nc_chisq()` and
-  `convert_F_chisq()`. `plot_ci()` keeps its name: it is a plot first.
-  The old names are gone rather than aliased.
+* The noncentral-distribution toolkit is named by one rule
+  (2026-08-21): `nc_` and then the distribution, so `ci_nc_t()`,
+  `ci_nc_F()`, and `ci_nc_chisq()` replace `conf_limits_nct()`,
+  `conf_limits_ncf()`, and `conf_limits_nc_chisq()` (the snake-cased
+  descendants of MBESS's `conf.limits.nct()` and kin), and
+  `moments_nc_t()` and `moments_nc_F()` replace `moments_nct()` and
+  `moments_ncf()` to match `moments_nc_chisq()`. The intervals join the
+  `ci_*` family because a confidence interval, on the noncentrality
+  parameter that the effect size intervals are built from, is what
+  they compute, and "confidence limits" was vocabulary that existed
+  only in MBESS. Splitting `nc` from the distribution token retires
+  the one inherited exception (`nct`, `ncf` against `nc_chisq`) and
+  restores the capital \emph{F} the package writes everywhere else
+  (`F_value`, `convert_F_chisq`). The noncentral marker stays because
+  the noncentrality parameter is the estimand. `plot_ci()` keeps its
+  name: it is a plot first. The old names are gone rather than
+  aliased; each page names its earlier self in the description.
 
 * The correlation intervals now carry the names of their estimands,
   matching the rest of the correlation family (`ss_aipe_r`,
@@ -367,7 +371,7 @@ of the MBESS package.
 * When an observed *F* falls below the `alpha_lower` critical value of
   the central *F*-distribution, the lower noncentrality limit is 0 by
   construction; that is a normal consequence of a small observed
-  effect, not a failure. `ci_ncf()` still warns once in that
+  effect, not a failure. `ci_nc_F()` still warns once in that
   case, but the message now states the consequence for the interval
   (the lower confidence limit is 0) instead of describing achieved
   tail probabilities, and every function that builds its interval by
@@ -380,7 +384,7 @@ of the MBESS package.
   at most once per call. Previously `ci_snr()` and `ci_srsnr()`
   surfaced the inner wording, which pointed users to a `prob_greater`
   column those functions do not return. The warning carries the
-  condition class `dmar_ncf_clamp`, which the iterative callers
+  condition class `dmar_nc_F_clamp`, which the iterative callers
   (`ss_aipe_R2()`, `ss_aipe_omega_squared()`, `factorial_anova()`,
   `simple_effects_AB()`) now match by class when deduplicating.
 * A genuine failure of the inner root finding is no longer a bare
@@ -1003,11 +1007,11 @@ load-bearing a test now recomputes it independently.
 * **`ci_mahalanobis()` documents the tail arguments its backend
   accepts.** The page promised that supplying `alpha_lower` and
   `alpha_upper` recomputes `conf_level`; that call errors, because the
-  tails pass straight through to `ci_ncf()`, which refuses a
+  tails pass straight through to `ci_nc_F()`, which refuses a
   non-NULL `conf_level` beside them. The page now directs users to set
   `conf_level = NULL` and supply both alphas, and a test pins the
   contract.
-* **`ci_ncf()` and `ci_nc_chisq()` state the
+* **`ci_nc_F()` and `ci_nc_chisq()` state the
   monotonicity each search actually exploits.** The pages claimed each
   tail probability is strictly decreasing in the noncentrality
   parameter; the lower-limit condition works on the upper tail, which
@@ -2144,8 +2148,8 @@ under-developed in MBESS. New families include:
   variable route it approximates: when item-level data exist, prefer
   the two-factor model's latent correlation to the plug-in formula.
 
-* Moments of the noncentral distributions: `moments_nct()`,
-  `moments_ncf()`, and `moments_nc_chisq()` return the mean, variance,
+* Moments of the noncentral distributions: `moments_nc_t()`,
+  `moments_nc_F()`, and `moments_nc_chisq()` return the mean, variance,
   standard deviation, skewness, and excess kurtosis of the noncentral
   *t*, *F*, and chi square distributions, with `NA` for moments whose
   degrees of freedom conditions fail. The noncentral *t* mean is the
@@ -2218,7 +2222,7 @@ under-developed in MBESS. New families include:
   result to infinity, whereas the upper-tail computation stays accurate
   past *F* = 1e20. Each help page states the exact computation. The map
   preserves the *p*-value but does not transport a noncentrality
-  parameter, so noncentral work belongs in `ci_ncf()` and
+  parameter, so noncentral work belongs in `ci_nc_F()` and
   `ci_nc_chisq()`.
 
 * Display helpers extending the package's *p*-value convention to

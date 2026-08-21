@@ -54,7 +54,7 @@
 #' Make sure the sum of the contrast weights are zero.
 #'
 #' @seealso
-#' \code{\link{ci_nct}}, \code{\link{ci_src}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, \code{\link{ci_sm}}, \code{\link{ci_c}} \code{\link{ci_c_ancova}}
+#' \code{\link{ci_nc_t}}, \code{\link{ci_src}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, \code{\link{ci_sm}}, \code{\link{ci_c}} \code{\link{ci_c_ancova}}
 #'
 #' @examples
 #' # Here is a four group example. Suppose that the means of groups 1--4 are 2, 4, 9,
@@ -160,7 +160,7 @@ ci_sc <- function(means = NULL, s_anova = NULL, c_weights = NULL, n = NULL, N = 
   if (is.null(df_error)) df_2 <- N - length(c_weights)
   if (!is.null(df_error)) df_2 <- df_error
 
-  Lims <- ci_nct(
+  Lims <- ci_nc_t(
     ncp = lambda, df = df_2, conf_level = NULL, alpha_lower = alpha_lower,
     alpha_upper = alpha_upper, ...
   )

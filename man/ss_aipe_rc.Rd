@@ -94,7 +94,7 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027).
   comparisons of means and Chapter 6 on trend analysis.)
 }
 \seealso{
-\code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_aipe_src}}
+\code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{ci_nc_t}}, \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_aipe_src}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

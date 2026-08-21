@@ -21,7 +21,7 @@
 #' This function uses the confidence interval transformation principle (Steiger, 2004) to transform
 #' the confidence limits for the noncentrality parameter to the confidence limits for the population's
 #' signal-to-noise ratio. The confidence interval for noncentral \emph{F} parameter can be obtained
-#' from the \code{ci_ncf} function in DMAR, which is used internally within this function.
+#' from the \code{ci_nc_F} function in DMAR, which is used internally within this function.
 #'
 #' @return
 #' A 2-row \code{data.frame} with columns \code{term} and \code{value}. The
@@ -42,7 +42,7 @@
 #' @note The signal to noise ratio is defined as the variance due to the particular factor over the error variance (i.e., the mean square error).
 #'
 #' @seealso
-#' \code{\link{ci_srsnr}}, \code{\link{ci_ncf}}
+#' \code{\link{ci_srsnr}}, \code{\link{ci_nc_F}}
 #'
 #' @examples
 #' ## Bargman (1970) gave an example in which a 5-group ANOVA with 11 subjects in each
@@ -88,7 +88,7 @@ ci_snr <- function(F_value = NULL, df_1 = NULL, df_2 = NULL, N = NULL, conf_leve
   if (N <= 0 || N <= df_1 + df_2) stop("N must be larger than df_1+df_2")
   ##########################################################################
 
-  Lims <- .ci_ncf_for(
+  Lims <- .ci_nc_F_for(
     caller = "ci_snr", quantity = "the signal-to-noise ratio",
     F_value = F_value, conf_level = NULL, df_1 = df_1,
     df_2 = df_2, alpha_lower = alpha_lower, alpha_upper = alpha_upper, ...

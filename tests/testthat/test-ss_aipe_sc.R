@@ -15,10 +15,10 @@ test_that("ss_aipe_sc() default conf_level = .95 produces a sensible per-group N
   expect_lt(res$value, 500)
 })
 
-test_that("ss_aipe_sc() assurance path no longer errors on inner ci_nct calls", {
+test_that("ss_aipe_sc() assurance path no longer errors on inner ci_nc_t calls", {
   # Regression test: the documented example used to fail with
   # "Specify either 'conf_level' or both of 'alpha_lower' and 'alpha_upper'"
-  # because the inner ci_nct() calls did not pass conf_level = NULL.
+  # because the inner ci_nc_t() calls did not pass conf_level = NULL.
   res <- ss_aipe_sc(psi_standardized = .6, c_weights = c(.5, .5, -.5, -.5, 0),
                     width = .4, assurance = .90)
   expect_s3_class(res, "data.frame")

@@ -8,6 +8,7 @@
 #' \emph{d} is a scaled noncentral \emph{t} variate. A central \emph{t}
 #' (\code{ncp = 0}) is the special case with mean 0 and the familiar
 #' \eqn{\mathit{df}/(\mathit{df}-2)} variance.
+#' The function was \code{moments_nct()} in earlier builds of DMAR.
 #'
 #' @param df Degrees of freedom, a single positive number (need not be a whole
 #'   number).
@@ -49,7 +50,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{moments_ncf}} for the noncentral \emph{F};
+#' @seealso \code{\link{moments_nc_F}} for the noncentral \emph{F};
 #'   \code{\link{expected_smd}} and \code{\link{var_smd}} for the same moments
 #'   specialized to Cohen's \emph{d}; \code{\link[stats]{dt}} for the density.
 #'
@@ -59,18 +60,18 @@
 #'
 #' @examples
 #' # A noncentral t with 20 df and noncentrality 2.5.
-#' moments_nct(df = 20, ncp = 2.5)
+#' moments_nc_t(df = 20, ncp = 2.5)
 #'
 #' # ncp = 0 is the central t: mean 0, variance df / (df - 2), no skew.
-#' moments_nct(df = 10)
+#' moments_nc_t(df = 10)
 #'
 #' # The mean is the noncentrality times the Hedges bias factor's reciprocal,
 #' # which is why Cohen's d (a scaled noncentral t) is upward biased.
-#' m <- moments_nct(df = 18, ncp = 1.2)
+#' m <- moments_nc_t(df = 18, ncp = 1.2)
 #' m$value[m$term == "mean"]
 #'
 #' @export
-moments_nct <- function(df, ncp = 0) {
+moments_nc_t <- function(df, ncp = 0) {
   if (!is.numeric(df) || length(df) != 1L || is.na(df) || df <= 0) {
     stop("'df' must be a single positive number.", call. = FALSE)
   }

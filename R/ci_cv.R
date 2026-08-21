@@ -107,7 +107,7 @@ ci_cv <- function(cv = NULL, mean = NULL, sd = NULL, n = NULL, data = NULL,
     }
     k <- sd / mean
     ncp_estimate <- sqrt(n) / k
-    CI_NCP <- ci_nct(
+    CI_NCP <- ci_nc_t(
       ncp = ncp_estimate, df = n -
         1, alpha_lower = alpha_upper, alpha_upper = alpha_lower,
       conf_level = NULL
@@ -171,7 +171,7 @@ ci_cv <- function(cv = NULL, mean = NULL, sd = NULL, n = NULL, data = NULL,
     mean_data <- mean(data)
     k <- sd_data / mean_data
     ncp_estimate <- sqrt(n) / k
-    CI_NCP <- ci_nct(
+    CI_NCP <- ci_nc_t(
       ncp = ncp_estimate, df = n -
         1, alpha_lower = alpha_upper, alpha_upper = alpha_lower,
       conf_level = NULL
@@ -234,7 +234,7 @@ ci_cv <- function(cv = NULL, mean = NULL, sd = NULL, n = NULL, data = NULL,
       stop("Since you specified the coefficient of variation ('cv') directly, do not specify the standard deviation ('sd').")
     }
     ncp_estimate <- sqrt(n) / k
-    CI_NCP <- ci_nct(
+    CI_NCP <- ci_nc_t(
       ncp = ncp_estimate, df = n -
         1, alpha_lower = alpha_upper, alpha_upper = alpha_lower,
       conf_level = NULL

@@ -124,8 +124,8 @@ nnt_from_smd <- function(smd,
   # via ci_smd() when sample sizes are available.
   if (is.null(smd_lower) && is.null(smd_upper) &&
       !is.null(n_1) && !is.null(n_2)) {
-    nct <- smd * sqrt(n_1 * n_2 / (n_1 + n_2))
-    ci  <- ci_smd(ncp = nct, n_1 = n_1, n_2 = n_2, conf_level = conf_level)
+    ncp_t <- smd * sqrt(n_1 * n_2 / (n_1 + n_2))
+    ci  <- ci_smd(ncp = ncp_t, n_1 = n_1, n_2 = n_2, conf_level = conf_level)
     smd_lower <- ci$value[ci$term == "lower_limit"]
     smd_upper <- ci$value[ci$term == "upper_limit"]
   }

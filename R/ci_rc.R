@@ -78,7 +78,7 @@
 #' in order to compute the confidence interval (options are thus given for the values that need to be specified).
 #'
 #' @seealso
-#' \code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nct}}, \code{\link{ci_reg_coef}}, \code{\link{ci_src}}
+#' \code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nc_t}}, \code{\link{ci_reg_coef}}, \code{\link{ci_src}}
 #'
 #' @keywords design
 #'

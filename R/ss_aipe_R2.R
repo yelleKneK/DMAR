@@ -14,7 +14,7 @@
 #' @param p The number of predictor variables
 #' @param assurance Value with which confidence can be placed that describes the likelihood of obtaining a confidence interval less than the value specified (e.g, .80, .90, .95)
 #' @param verify_ss Evaluates numerically via an internal Monte Carlo simulation the exact sample size given the specifications
-#' @param tol The tolerance of the iterative function \code{ci_nct} for convergence
+#' @param tol The tolerance of the iterative function \code{ci_nc_t} for convergence
 #' @param \dots For modifying the parameters of functions this function calls upon
 #'
 #' @details
@@ -84,7 +84,7 @@
 #' only and is essentially instantaneous.
 #'
 #' @seealso
-#' \code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_R2_sensitivity}}
+#' \code{\link{ci_R2}}, \code{\link{ci_nc_t}}, \code{\link{ss_aipe_R2_sensitivity}}
 #'
 #' @examples
 #' # 1. Closed form planner under random predictors (the typical case).
@@ -130,9 +130,9 @@
 ss_aipe_R2 <- function(population_R2 = NULL, conf_level = 0.95, width = NULL, random_predictors = TRUE,
                        which_width = "Full", p = NULL, assurance = NULL,
                        verify_ss = FALSE, tol = 1e-09, ...) {
-  # The iterative search calls ci_R2() (and through it ci_ncf())
+  # The iterative search calls ci_R2() (and through it ci_nc_F())
   # repeatedly with intermediate trial values of N. For early values of N the
-  # noncentral F lower limit is often clamped to 0, which ci_ncf
+  # noncentral F lower limit is often clamped to 0, which ci_nc_F
   # signals via a warning. Surfacing that warning once per iteration produces
   # dozens of identical messages. We muffle the per-iteration warnings with
   # withCallingHandlers, count them, and emit a single summary warning at the
@@ -141,7 +141,7 @@ ss_aipe_R2 <- function(population_R2 = NULL, conf_level = 0.95, width = NULL, ra
   on.exit({
     if (.clamp_count > 0L) {
       warning(sprintf(
-        "During the iterative sample size search, the noncentral F lower-limit clamp in ci_ncf() fired in %d intermediate evaluations. The returned sample size accounts for this; see ?ci_ncf for the meaning of the clamp.",
+        "During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in %d intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.",
         .clamp_count
       ), call. = FALSE)
     }
@@ -1093,7 +1093,7 @@ ss_aipe_R2 <- function(population_R2 = NULL, conf_level = 0.95, width = NULL, ra
     }
   }
   }, warning = function(w) {
-    if (inherits(w, "dmar_ncf_clamp")) {
+    if (inherits(w, "dmar_nc_F_clamp")) {
       .clamp_count <<- .clamp_count + 1L
       invokeRestart("muffleWarning")
     }

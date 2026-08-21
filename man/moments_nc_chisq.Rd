@@ -59,14 +59,14 @@ Johnson, N. L., Kotz, S., & Balakrishnan, N. (1995). \emph{Continuous
   univariate distributions} (Vol. 2, 2nd ed., Chapter 29). Wiley.
 }
 \seealso{
-\code{\link{moments_ncf}} (whose numerator is a noncentral chi
-  square) and \code{\link{moments_nct}} for the other noncentral moments;
+\code{\link{moments_nc_F}} (whose numerator is a noncentral chi
+  square) and \code{\link{moments_nc_t}} for the other noncentral moments;
   \code{\link{ci_nc_chisq}} for the noncentral chi square
   confidence limits; \code{\link[stats]{dchisq}} for the density.
 
 Other noncentral distribution moments:
-\code{\link[=moments_ncf]{moments_ncf()}},
-\code{\link[=moments_nct]{moments_nct()}}
+\code{\link[=moments_nc_F]{moments_nc_F()}},
+\code{\link[=moments_nc_t]{moments_nc_t()}}
 }
 \author{
 Ken Kelley \email{kkelley@nd.edu}

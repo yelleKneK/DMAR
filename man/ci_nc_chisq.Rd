@@ -43,8 +43,8 @@ A \code{data.frame} with one row per confidence limit and the columns:
 Finds the noncentrality parameters of a noncentral chi square distribution
 that bracket an observed chi square value with the requested tail
 probabilities, giving a confidence interval on the population noncentrality
-parameter. Together with \code{\link{ci_nct}} and
-\code{\link{ci_ncf}}, this is one of the low-level noncentral
+parameter. Together with \code{\link{ci_nc_t}} and
+\code{\link{ci_nc_F}}, this is one of the low-level noncentral
 distribution workhorses on which the \code{ci_*} confidence interval
 functions are built; most analyses reach it through those functions rather
 than calling it directly.
@@ -107,11 +107,11 @@ Theory, application, and implementation. \emph{Journal of Statistical
 Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
 }
 \seealso{
-\code{\link{ci_nct}}, \code{\link{ci_ncf}}, \code{\link[stats:Chisquare]{stats::pchisq()}}, \code{\link[stats:Chisquare]{stats::qchisq()}}, \code{\link[stats]{uniroot}}
+\code{\link{ci_nc_t}}, \code{\link{ci_nc_F}}, \code{\link[stats:Chisquare]{stats::pchisq()}}, \code{\link[stats:Chisquare]{stats::qchisq()}}, \code{\link[stats]{uniroot}}
 
 Other noncentral distribution confidence intervals:
-\code{\link[=ci_ncf]{ci_ncf()}},
-\code{\link[=ci_nct]{ci_nct()}}
+\code{\link[=ci_nc_F]{ci_nc_F()}},
+\code{\link[=ci_nc_t]{ci_nc_t()}}
 }
 \author{
 Ken Kelley \email{kkelley@nd.edu}

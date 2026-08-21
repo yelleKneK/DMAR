@@ -46,7 +46,7 @@
 #' See \code{ss_aipe_reg_coef} for more details.
 #'
 #' @seealso
-#' \code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{ci_nct}}, \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_aipe_src}}
+#' \code{\link{ss_aipe_reg_coef_sensitivity}}, \code{\link{ci_nc_t}}, \code{\link{ss_aipe_reg_coef}}, \code{\link{ss_aipe_src}}
 #'
 #' @examples
 #' # Exchangeable correlation structure

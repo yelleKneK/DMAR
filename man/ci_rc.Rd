@@ -114,7 +114,7 @@ Analysis of Variance and Contrast Analysis. \emph{Psychological Methods, 9}(2), 
   \doi{10.1037/1082-989X.9.2.164}
 }
 \seealso{
-\code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nct}}, \code{\link{ci_reg_coef}}, \code{\link{ci_src}}
+\code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nc_t}}, \code{\link{ci_reg_coef}}, \code{\link{ci_src}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

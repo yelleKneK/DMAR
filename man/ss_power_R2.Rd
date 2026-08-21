@@ -161,7 +161,7 @@ Anderson, S. F., Kelley, K., & Maxwell, S. E. (2017). Sample-size
 }
 \seealso{
 \code{\link{ss_aipe_R2}}, \code{\link{ss_power_R2_sensitivity}},
-\code{\link{ss_power_reg_coef}}, \code{\link{ci_ncf}},
+\code{\link{ss_power_reg_coef}}, \code{\link{ci_nc_F}},
 \code{\link{ci_R2}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:

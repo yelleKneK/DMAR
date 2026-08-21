@@ -105,10 +105,10 @@ ss_aipe_sm_sensitivity <- function(true_sm = NULL, estimated_sm = NULL, desired_
   if (is.null(estimated_sm) && is.null(specified_N)) stop("You must specify either 'estimated_sm' or 'specified_N' (i.e., the total sample size ).", call. = FALSE)
   if (!is.null(estimated_sm) && !is.null(specified_N)) stop("You must specify either 'estimated_sm' or 'specified_N' (i.e., the total sample size), but not both.", call. = FALSE)
 
-  # The planner search and the Monte Carlo loop both call ci_nct() many
+  # The planner search and the Monte Carlo loop both call ci_nc_t() many
   # times. When the observed standardized mean is large the noncentrality
   # parameter can exceed the magnitude at which R's pt()/qt() stay accurate,
-  # which ci_nct() signals via a warning; surfacing it on every
+  # which ci_nc_t() signals via a warning; surfacing it on every
   # evaluation produces dozens of identical messages. We muffle only that
   # specific warning with withCallingHandlers, count it, and emit a single
   # summary warning at the end (via on.exit so it fires on any return path).
@@ -117,7 +117,7 @@ ss_aipe_sm_sensitivity <- function(true_sm = NULL, estimated_sm = NULL, desired_
   on.exit({
     if (.nct_ncp_count > 0L) {
       warning(sprintf(
-        "During the sample size search and Monte Carlo sensitivity loop, the noncentrality parameter exceeded the accurate range of R's noncentral t functions in %d evaluations (see ?ci_nct). Those evaluations may be inaccurate.",
+        "During the sample size search and Monte Carlo sensitivity loop, the noncentrality parameter exceeded the accurate range of R's noncentral t functions in %d evaluations (see ?ci_nc_t). Those evaluations may be inaccurate.",
         .nct_ncp_count
       ), call. = FALSE)
     }
@@ -162,7 +162,7 @@ ss_aipe_sm_sensitivity <- function(true_sm = NULL, estimated_sm = NULL, desired_
         sm_obs[i] <- x_bar / sd(sample_data)
 
         lambda <- sm_obs[i] * sqrt(n)
-        lambda_limits <- ci_nct(ncp = lambda, df = n - 1, conf_level = conf_level)
+        lambda_limits <- ci_nc_t(ncp = lambda, df = n - 1, conf_level = conf_level)
         sm_limit_upper <- lambda_limits[2, 2] / sqrt(n)
         sm_limit_lower <- lambda_limits[1, 2] / sqrt(n)
 

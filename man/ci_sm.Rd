@@ -56,7 +56,7 @@ c) noncentral parameter (\code{ncp}).
 The confidence level must be specified in one of following two ways: using confidence interval coverage (\code{conf_level}),
 or lower and upper confidence limits (\code{alpha_lower} and \code{alpha_upper}). This function uses the exact confidence
 interval method based on noncentral \emph{t}-distributions. The confidence interval for noncentral \emph{t}-parameter can
-be obtained from the \code{ci_nct} function in DMAR.
+be obtained from the \code{ci_nc_t} function in DMAR.
 }
 \note{
 The standardized mean is the mean divided by the standard deviation.
@@ -80,7 +80,7 @@ Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
   significance tests?} (pp. 221--257). Mahwah, NJ: Lawrence Erlbaum.
 }
 \seealso{
-\code{\link{ci_nct}}
+\code{\link{ci_nc_t}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

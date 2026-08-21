@@ -116,7 +116,7 @@ Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
 \seealso{
 \code{\link{smd_c}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}},
 \code{\link{ss_aipe_smd}}, \code{\link{ss_power_smd}},
-\code{\link{plot_smd}}, \code{\link{ci_nct}}
+\code{\link{plot_smd}}, \code{\link{ci_nc_t}}
 }
 \author{
 Ken Kelley \email{kkelley@nd.edu}

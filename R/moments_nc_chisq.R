@@ -39,8 +39,8 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{moments_ncf}} (whose numerator is a noncentral chi
-#'   square) and \code{\link{moments_nct}} for the other noncentral moments;
+#' @seealso \code{\link{moments_nc_F}} (whose numerator is a noncentral chi
+#'   square) and \code{\link{moments_nc_t}} for the other noncentral moments;
 #'   \code{\link{ci_nc_chisq}} for the noncentral chi square
 #'   confidence limits; \code{\link[stats]{dchisq}} for the density.
 #'

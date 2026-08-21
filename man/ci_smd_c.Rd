@@ -51,9 +51,9 @@ matters when the treatment may alter variability as well as the mean.
 }
 \section{Warning}{
 
-This function uses \code{ci_nct}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
+This function uses \code{ci_nc_t}, which has as one of its arguments \code{tol} (and can be modified with \code{tol} of the present function).
 If the present function fails to converge (i.e., if it runs but does not report a solution), it is likely that the \code{tol} value is too restrictive and should be increased by a factor of 10, but probably by no more than 100.
-Running the function \code{ci_nct} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
+Running the function \code{ci_nc_t} directly will report the actual probability values of the limits found. This should be done if any modification to \code{tol} is necessary in order to ensure acceptable confidence limits for the noncentral \emph{t} parameter have been achieved.
 }
 
 \examples{
@@ -92,7 +92,7 @@ Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
   significance tests?} (pp. 221--257). Mahwah, NJ: Lawrence Erlbaum.
 }
 \seealso{
-\code{\link{smd_c}}, \code{\link{smd}}, \code{\link{ci_smd}}, \code{\link{ci_nct}}
+\code{\link{smd_c}}, \code{\link{smd}}, \code{\link{ci_smd}}, \code{\link{ci_nc_t}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

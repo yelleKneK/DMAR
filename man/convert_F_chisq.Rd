@@ -111,7 +111,7 @@ distributions and preserve the \emph{p}-value; neither transports a
 noncentrality parameter (a noncentral \emph{F} is not carried to a
 noncentral chi square with the same \eqn{\lambda}, except in the
 \eqn{\nu_2 \to \infty} limit). For noncentral work use
-\code{\link{ci_ncf}} and \code{\link{ci_nc_chisq}}.
+\code{\link{ci_nc_F}} and \code{\link{ci_nc_chisq}}.
 
 \strong{Special case.} With \eqn{\nu_1 = 1} this is the squared form of
 the relation between \emph{t} and \emph{z}, since
@@ -145,7 +145,7 @@ experiments and analyzing data: A model comparison perspective}
 }
 \seealso{
 \code{\link{cv_f}}, \code{\link{cv_chisq}},
-\code{\link{ci_ncf}}, \code{\link{ci_nc_chisq}}
+\code{\link{ci_nc_F}}, \code{\link{ci_nc_chisq}}
 
 Other parameterization conversions:
 \code{\link{convert_R2}},

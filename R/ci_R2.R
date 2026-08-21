@@ -30,7 +30,7 @@
 #' @param tol The convergence tolerance passed to \code{\link[stats]{uniroot}}
 #'   when \code{random_predictors = FALSE} and the confidence limits are found
 #'   by inverting the noncentral \emph{F} distribution (see
-#'   \code{\link{ci_ncf}}); ignored when
+#'   \code{\link{ci_nc_F}}); ignored when
 #'   \code{random_predictors = TRUE}, where the Lee (1971) bisection uses its
 #'   own fixed tolerance
 #'
@@ -44,7 +44,7 @@
 #' \emph{F} with \eqn{p} and \eqn{N - p - 1} degrees of freedom and
 #' noncentrality \eqn{\lambda = N \rho^2 / (1 - \rho^2)} (Cohen, 1988); the
 #' CI is obtained by inverting that distribution at the supplied
-#' confidence level (see \code{\link{ci_ncf}}). Under random
+#' confidence level (see \code{\link{ci_nc_F}}). Under random
 #' predictors the design matrix is itself a draw from a joint multivariate
 #' normal distribution and the unconditional sampling distribution of the
 #' sample \eqn{R^2} is given by Lee (1971); \code{ci_R2} uses the Lee
@@ -114,7 +114,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ss_aipe_R2}}, \code{\link{ci_ncf}}
+#' \code{\link{ss_aipe_R2}}, \code{\link{ci_nc_F}}
 #'
 #' @examples
 #' # For random predictor variables.
@@ -215,7 +215,7 @@ ci_R2 <- function(R2 = NULL, df_1 = NULL, df_2 = NULL, conf_level = .95, random_
   }
 
   if (random_predictors == FALSE) {
-    Limits <- .ci_ncf_for(
+    Limits <- .ci_nc_F_for(
       caller = "ci_R2",
       quantity = "the population squared multiple correlation coefficient",
       F_value = F_value, df_1 = df_1, df_2 = df_2, conf_level = NULL,

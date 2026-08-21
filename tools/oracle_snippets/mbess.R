@@ -44,7 +44,7 @@ local({
 
 ## from tests/testthat/test-numerical-correctness.R
 local({
-  dmar  <- DMAR::ci_ncf(F_value = 6.0, df_1 = 3, df_2 = 50,
+  dmar  <- DMAR::ci_nc_F(F_value = 6.0, df_1 = 3, df_2 = 50,
                                  conf_level = 0.95)
   mbess <- MBESS::conf.limits.ncf(F.value = 6.0, df.1 = 3, df.2 = 50,
                                   conf.level = 0.95)
@@ -58,7 +58,7 @@ local({
 
 ## from tests/testthat/test-numerical-correctness.R
 local({
-  dmar  <- DMAR::ci_nct(t_value = 2.83, df = 126, conf_level = 0.95)
+  dmar  <- DMAR::ci_nc_t(t_value = 2.83, df = 126, conf_level = 0.95)
   mbess <- MBESS::conf.limits.nct(t.value = 2.83, df = 126,
                                   conf.level = 0.95)
   stopifnot(

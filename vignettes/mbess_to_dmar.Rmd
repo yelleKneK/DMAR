@@ -72,8 +72,8 @@ equivalents.
 | `MBESS::ci.c(...)`, `MBESS::ci.c.ancova(...)`   | `DMAR::ci_c(...)`, `DMAR::ci_c_ancova(...)`   | Unstandardized contrast CIs.                                     |
 | `MBESS::ci.rmsea(...)`                     | `DMAR::ci_rmsea(...)`                      | Noncentral-$\chi^2$ inversion for RMSEA.                              |
 | `MBESS::ci.cc(...)`                        | `DMAR::ci_r(...)`                         | Correlation CI; `r` and `n` arguments.                                |
-| `MBESS::conf.limits.nct(...)`              | `DMAR::ci_nct(...)`               | Noncentral *t*; `t.value -> t_value`.                                 |
-| `MBESS::conf.limits.ncf(...)`              | `DMAR::ci_ncf(...)`               | Noncentral $F$.                                                       |
+| `MBESS::conf.limits.nct(...)`              | `DMAR::ci_nc_t(...)`               | Noncentral *t*; `t.value -> t_value`.                                 |
+| `MBESS::conf.limits.ncf(...)`              | `DMAR::ci_nc_F(...)`               | Noncentral $F$.                                                       |
 | `MBESS::conf.limits.nc.chisq(...)`         | `DMAR::ci_nc_chisq(...)`          | Noncentral $\chi^2$.                                                  |
 | `MBESS::ss.aipe.smd(delta, conf.level, width, ...)` | `DMAR::ss_aipe_smd(delta, conf_level, width, ...)` | Same AIPE planner; tidy return.                          |
 | `MBESS::ss.aipe.R2(...)`                   | `DMAR::ss_aipe_R2(...)`                    | AIPE planner for $R^2$; `K -> p`; `random.regressors` argument retired in favor of `random_predictors`. |

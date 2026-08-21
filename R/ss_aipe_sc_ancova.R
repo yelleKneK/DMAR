@@ -108,7 +108,7 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
     ratio <- sqrt(1 - rho^2)
   }
 
-  # Resolve interval bounds (mirrors ss_aipe_sc / ci_nct contract):
+  # Resolve interval bounds (mirrors ss_aipe_sc / ci_nc_t contract):
   # supply either a symmetric conf_level (default .95) or a possibly asymmetric
   # pair alpha_lower/alpha_upper, but not both.
   alphas_supplied <- !is.null(alpha_lower) || !is.null(alpha_upper)
@@ -164,7 +164,7 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
       # Initial estimate of noncentral value.
       lambda_0 <- psi_standardized / sqrt(sum(c_weights^2) / n)
 
-      lambda_limits_0 <- ci_nct(ncp = lambda_0, df = n * J - J - 1,
+      lambda_limits_0 <- ci_nc_t(ncp = lambda_0, df = n * J - J - 1,
                                           conf_level = NULL,
                                           alpha_lower = alpha_lower,
                                           alpha_upper = alpha_upper)
@@ -177,7 +177,7 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
       while (Diff_width_Full > 0) {
         n <- n + 1
         lambda <- psi_standardized / sqrt(sum(c_weights^2) / n)
-        lambda_limits <- ci_nct(ncp = lambda, df = n * J - J - 1,
+        lambda_limits <- ci_nc_t(ncp = lambda, df = n * J - J - 1,
                                           conf_level = NULL,
                                           alpha_lower = alpha_lower,
                                           alpha_upper = alpha_upper)
@@ -201,11 +201,11 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
                               width = width, c_weights = c_weights,
                               assurance = NULL, ...)[1,2]
 
-      lambda_2_sided <- ci_nct(ncp = psi_standardized / sqrt(sum(c_weights^2) / n0), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = (1 - assurance) / 2, alpha_lower = (1 - assurance) / 2)
+      lambda_2_sided <- ci_nc_t(ncp = psi_standardized / sqrt(sum(c_weights^2) / n0), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = (1 - assurance) / 2, alpha_lower = (1 - assurance) / 2)
 
       limit_2_sided <- sqrt(sum(c_weights^2) / n0) * lambda_2_sided[which(lambda_2_sided$term == 'upper_limit'),2]
 
-      lambda_1_sided <- ci_nct(ncp = psi_standardized / sqrt(sum(c_weights^2) / n0), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = 1 - assurance, alpha_lower = 0)
+      lambda_1_sided <- ci_nc_t(ncp = psi_standardized / sqrt(sum(c_weights^2) / n0), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = 1 - assurance, alpha_lower = 0)
 
       limit_1_sided <- sqrt(sum(c_weights^2) / n0) * lambda_1_sided[which(lambda_1_sided$term == 'upper_limit'),2]
 
@@ -278,7 +278,7 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
       # Initial estimate of noncentral value.
       lambda_0 <- psi_standardized / (ratio * sqrt(sum(c_weights^2) / n))
 
-      lambda_limits_0 <- ci_nct(ncp = lambda_0, df = n * J - J - 1,
+      lambda_limits_0 <- ci_nc_t(ncp = lambda_0, df = n * J - J - 1,
                                           conf_level = NULL,
                                           alpha_lower = alpha_lower,
                                           alpha_upper = alpha_upper)
@@ -290,7 +290,7 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
       while (Diff_width_Full > 0) {
         n <- n + 1
         lambda <- psi_standardized / (ratio * sqrt(sum(c_weights^2) / n))
-        lambda_limits <- ci_nct(ncp = lambda, df = n * J - J - 1,
+        lambda_limits <- ci_nc_t(ncp = lambda, df = n * J - J - 1,
                                           conf_level = NULL,
                                           alpha_lower = alpha_lower,
                                           alpha_upper = alpha_upper)
@@ -314,11 +314,11 @@ ss_aipe_sc_ancova <- function(psi = NULL, sigma_anova = NULL, sigma_ancova = NUL
                               width = width, c_weights = c_weights,
                               assurance = NULL, ...)[1,2]
 
-      lambda_2_sided <- ci_nct(ncp = psi_standardized / (ratio * sqrt(sum(c_weights^2) / n0)), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = (1 - assurance) / 2, alpha_lower = (1 - assurance) / 2)
+      lambda_2_sided <- ci_nc_t(ncp = psi_standardized / (ratio * sqrt(sum(c_weights^2) / n0)), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = (1 - assurance) / 2, alpha_lower = (1 - assurance) / 2)
 
       limit_2_sided <- sqrt(sum(c_weights^2) / n0) * ratio * lambda_2_sided[which(lambda_2_sided$term == 'upper_limit'),2]
 
-      lambda_1_sided <- ci_nct(ncp = psi_standardized / (ratio * sqrt(sum(c_weights^2) / n0)), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = 1 - assurance, alpha_lower = 0)
+      lambda_1_sided <- ci_nc_t(ncp = psi_standardized / (ratio * sqrt(sum(c_weights^2) / n0)), df = n0 * J - J - 1, conf_level = NULL, alpha_upper = 1 - assurance, alpha_lower = 0)
 
       limit_1_sided <- sqrt(sum(c_weights^2) / n0) * ratio * lambda_1_sided[which(lambda_1_sided$term == 'upper_limit'),2]
 

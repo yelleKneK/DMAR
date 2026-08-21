@@ -98,7 +98,7 @@ Analysis of Variance and Contrast Analysis. \emph{Psychological Methods, 9}(2), 
   \doi{10.1037/1082-989X.9.2.164}
 }
 \seealso{
-\code{\link{ci_nct}}, \code{\link{ci_src}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, \code{\link{ci_sm}}, \code{\link{ci_c}} \code{\link{ci_c_ancova}}
+\code{\link{ci_nc_t}}, \code{\link{ci_src}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, \code{\link{ci_sm}}, \code{\link{ci_c}} \code{\link{ci_c_ancova}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

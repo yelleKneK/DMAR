@@ -32,8 +32,8 @@
 #'   (an asymmetric or one-sided interval with coverage
 #'   \code{1 - alpha_lower - alpha_upper}); supplying either alongside a
 #'   non-\code{NULL} \code{conf_level} is an error, as in
-#'   \code{\link{ci_ncf}}, to which they are passed.
-#' @param \dots Additional arguments passed to \code{\link{ci_ncf}}
+#'   \code{\link{ci_nc_F}}, to which they are passed.
+#' @param \dots Additional arguments passed to \code{\link{ci_nc_F}}
 #'   (for example \code{tol}).
 #'
 #' @return A one-row \code{data.frame} with columns \code{sample_type}
@@ -73,13 +73,13 @@
 #' \strong{Confidence interval.} The CI on \eqn{\Delta^2} is obtained by
 #' inverting these distributional results (Reiser, 2001): a CI on the
 #' noncentrality parameter \eqn{\lambda} is constructed via
-#' \code{\link{ci_ncf}} and then mapped back to \eqn{\Delta^2} by
+#' \code{\link{ci_nc_F}} and then mapped back to \eqn{\Delta^2} by
 #' \eqn{\Delta^2 = \lambda\,(n_1 + n_2)/(n_1 n_2)} (two sample) or
 #' \eqn{\Delta^2 = \lambda / n} (one sample). When the observed \eqn{F} is
 #' below the lower-tail critical value of the central \emph{F}-distribution at
 #' the requested confidence level, the lower CI on \eqn{\lambda} (and hence
 #' on \eqn{\Delta^2}) is clamped to zero, in keeping with the
-#' \code{\link{ci_ncf}} convention.
+#' \code{\link{ci_nc_F}} convention.
 #'
 #' \strong{Bias.} The plug-in estimator \eqn{D^2} is upward biased for
 #' \eqn{\Delta^2}; the CI from this function is exact for \eqn{\Delta^2}
@@ -132,7 +132,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ci_ncf}}, \code{\link{ci_smd}},
+#' @seealso \code{\link{ci_nc_F}}, \code{\link{ci_smd}},
 #'   \code{\link{ci_R2}}
 #'
 #' @keywords multivariate htest
@@ -225,7 +225,7 @@ ci_mahalanobis <- function(D2          = NULL,
     lambda_to_D2 <- function(lam) lam / n_1
   }
 
-  ncp_ci <- .ci_ncf_for(
+  ncp_ci <- .ci_nc_F_for(
     caller      = "ci_mahalanobis",
     quantity    = "the squared Mahalanobis distance",
     F_value     = F_obs,

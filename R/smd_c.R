@@ -45,7 +45,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{smd}}, \code{\link{ci_nct}}
+#' \code{\link{smd}}, \code{\link{ci_nc_t}}
 #'
 #' @examples
 #' # Generate sample data.

@@ -85,7 +85,7 @@ Cohen, J. (1988). \emph{Statistical power analysis for the behavioral
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing experiments and analyzing data: A model comparison perspective} (4th ed.). Routledge.
 }
 \seealso{
-\code{\link{ss_power_one_way_anova}}, \code{\link{ss_power_c}}, \code{\link{ci_ncf}}
+\code{\link{ss_power_one_way_anova}}, \code{\link{ss_power_c}}, \code{\link{ci_nc_F}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

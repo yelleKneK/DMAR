@@ -66,7 +66,7 @@ Unlike the \emph{t} and \emph{z} distributions, the \emph{F}
 
   A noncentral parameter can be supplied, which is what a power analysis
   needs, though it would not be used for a standard null hypothesis
-  significance test. See \code{\link{ci_ncf}} for confidence
+  significance test. See \code{\link{ci_nc_F}} for confidence
   limits on the noncentral parameter itself.
 }
 \examples{
@@ -93,7 +93,7 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
 \seealso{
 \code{\link{cv_t}}, \code{\link{cv_chisq}},
   \code{\link{cv_bonferroni_f}}, \code{\link{cv_scheffe}},
-  \code{\link{ci_ncf}}
+  \code{\link{ci_nc_F}}
 
 Other critical values:
 \code{\link[=cv_bonferroni_f]{cv_bonferroni_f()}},

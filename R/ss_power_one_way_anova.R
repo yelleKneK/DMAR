@@ -40,7 +40,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ss_power_factorial_anova}}, \code{\link{ss_power_c}}, \code{\link{ss_power_sc}}, \code{\link{ci_ncf}}
+#' @seealso \code{\link{ss_power_factorial_anova}}, \code{\link{ss_power_c}}, \code{\link{ss_power_sc}}, \code{\link{ci_nc_F}}
 #'
 #' @examples
 #' # Three groups, f = 0.25, power = .80

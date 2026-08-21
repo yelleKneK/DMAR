@@ -112,7 +112,7 @@ Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
 }
 \seealso{
 \code{\link{smd}}, \code{\link{smd_c}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, 
-\code{\link{ci_nct}}, \code{\link[stats:power.t.test]{stats::power.t.test()}}
+\code{\link{ci_nc_t}}, \code{\link[stats:power.t.test]{stats::power.t.test()}}
 
 \code{\link{design_consequences}} for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the

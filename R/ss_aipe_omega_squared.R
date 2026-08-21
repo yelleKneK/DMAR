@@ -53,7 +53,7 @@
 #'
 #' \strong{Tolerance behavior at small \emph{N}.} For small candidate
 #' \emph{N} the noncentral \emph{F} lower limit is often clamped to zero
-#' (see \code{?ci_ncf}). The search ignores these clamps in the
+#' (see \code{?ci_nc_F}). The search ignores these clamps in the
 #' iteration and reports the final clamp count, if any, as an informational
 #' message; this matches the convention in \code{\link{ss_aipe_R2}}.
 #'
@@ -147,7 +147,7 @@ ss_aipe_omega_squared <- function(population_omega_squared,
   on.exit({
     if (.clamp_count > 0L) {
       message(sprintf(
-        "During the iterative sample size search, the noncentral F lower-limit clamp in ci_ncf() fired in %d intermediate evaluations.",
+        "During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in %d intermediate evaluations.",
         .clamp_count))
     }
   }, add = TRUE)
@@ -164,7 +164,7 @@ ss_aipe_omega_squared <- function(population_omega_squared,
                          N = N,
                          conf_level = conf_level),
         warning = function(w) {
-          if (inherits(w, "dmar_ncf_clamp")) {
+          if (inherits(w, "dmar_nc_F_clamp")) {
             .clamp_count <<- .clamp_count + 1L
             invokeRestart("muffleWarning")
           }

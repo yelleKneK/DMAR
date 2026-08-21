@@ -124,11 +124,11 @@ test_that("var_smd() is on the correct order of magnitude for the Hedges (1981) 
 
 
 # ===========================================================================
-# Noncentral F clamp: ci_ncf vs MBESS::conf.limits.ncf
+# Noncentral F clamp: ci_nc_F vs MBESS::conf.limits.ncf
 # ===========================================================================
 
-test_that("ci_ncf() matches MBESS::conf.limits.ncf() limits", {
-  dmar <- ci_ncf(F_value = 6.0, df_1 = 3, df_2 = 50,
+test_that("ci_nc_F() matches MBESS::conf.limits.ncf() limits", {
+  dmar <- ci_nc_F(F_value = 6.0, df_1 = 3, df_2 = 50,
                           conf_level = 0.95)
 
   lower_dmar <- dmar$value[dmar$term == "lower_limit"]
@@ -140,8 +140,8 @@ test_that("ci_ncf() matches MBESS::conf.limits.ncf() limits", {
 })
 
 
-test_that("ci_nct() matches MBESS::conf.limits.nct() limits", {
-  dmar <- ci_nct(t_value = 2.83, df = 126, conf_level = 0.95)
+test_that("ci_nc_t() matches MBESS::conf.limits.nct() limits", {
+  dmar <- ci_nc_t(t_value = 2.83, df = 126, conf_level = 0.95)
 
   lower_dmar <- dmar$value[dmar$term == "lower_limit"]
   upper_dmar <- dmar$value[dmar$term == "upper_limit"]

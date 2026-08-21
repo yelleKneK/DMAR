@@ -137,8 +137,8 @@ var_smd <- function(delta, n_1, n_2 = NULL, unbiased = FALSE) {
   c_df     <- 1 / J
 
   # Exact noncentral t variance:
-  var_nct  <- df_v * (1 + lambda^2) / (df_v - 2) - lambda^2 * c_df^2
-  var_d    <- var_nct / design
+  var_nc_t  <- df_v * (1 + lambda^2) / (df_v - 2) - lambda^2 * c_df^2
+  var_d    <- var_nc_t / design
 
   if (unbiased) var_d <- var_d * J^2
 

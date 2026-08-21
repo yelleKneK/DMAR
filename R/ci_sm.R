@@ -24,7 +24,7 @@
 #' The confidence level must be specified in one of following two ways: using confidence interval coverage (\code{conf_level}),
 #' or lower and upper confidence limits (\code{alpha_lower} and \code{alpha_upper}). This function uses the exact confidence
 #' interval method based on noncentral \emph{t}-distributions. The confidence interval for noncentral \emph{t}-parameter can
-#' be obtained from the \code{ci_nct} function in DMAR.
+#' be obtained from the \code{ci_nc_t} function in DMAR.
 #'
 #' @return
 #' A 3-row \code{data.frame} with columns \code{term} and \code{value}. The
@@ -46,7 +46,7 @@
 #'
 #' @note The standardized mean is the mean divided by the standard deviation.
 #'
-#' @seealso \code{\link{ci_nct}}
+#' @seealso \code{\link{ci_nc_t}}
 #'
 #' @examples
 #' ci_sm(sm = 2.037905, N = 13, conf_level = .95)
@@ -114,7 +114,7 @@ ci_sm <- function(sm = NULL, mean = NULL, sd = NULL, ncp = NULL, N = NULL, conf_
     ncp <- SM * sqrt(N)
   }
 
-  Conf_Limits <- ci_nct(ncp = ncp, df = (N - 1), conf_level = NULL, alpha_lower = alpha_lower, alpha_upper = alpha_upper, ...)
+  Conf_Limits <- ci_nc_t(ncp = ncp, df = (N - 1), conf_level = NULL, alpha_lower = alpha_lower, alpha_upper = alpha_upper, ...)
 
   ll <- Conf_Limits[which(Conf_Limits$term == "lower_limit"), 2] / sqrt(N)
   ul <- Conf_Limits[which(Conf_Limits$term == "upper_limit"), 2] / sqrt(N)

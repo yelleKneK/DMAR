@@ -107,7 +107,7 @@
 #' (so it reflects whichever error term was chosen). The confidence
 #' interval is built by Steiger's (2004) transformation principle: a CI
 #' for the noncentrality parameter \eqn{\lambda} of the \emph{F}
-#' distribution is obtained via \code{\link{ci_ncf}} and then
+#' distribution is obtained via \code{\link{ci_nc_F}} and then
 #' mapped through \eqn{\eta^2_p = \lambda / (\lambda + N_{\text{ref}})},
 #' with \eqn{N_{\text{ref}}} taken to be the total study \emph{N} for the
 #' pooled error term (treating the simple effect as a contrast within the
@@ -201,7 +201,7 @@
 #' @seealso \code{\link{contrast_test}} for within-level pairwise or custom
 #'   contrasts, \code{\link{eta_squared_partial}} and
 #'   \code{\link{ci_eta_squared_partial}} for the omnibus effect size
-#'   counterparts, \code{\link{ci_ncf}} for the noncentrality
+#'   counterparts, \code{\link{ci_nc_F}} for the noncentrality
 #'   machinery, \code{\link{ss_power_factorial_anova}} for power
 #'   calculations on the omnibus factorial effects.
 #'
@@ -226,7 +226,7 @@ simple_effects_AB <- function(
     c("none", "bonferroni", "holm", "hochberg", "BH", "BY")
   )
 
-  # Each row calls ci_ncf(), which emits a warning whenever F falls
+  # Each row calls ci_nc_F(), which emits a warning whenever F falls
   # below the alpha_lower critical value of the central F (lower NCP limit
   # clamped to 0). For a family of a + b simple effects this can produce
   # several identical warnings. Muffle them per call and report a single
@@ -235,7 +235,7 @@ simple_effects_AB <- function(
   on.exit({
     if (.clamp_count > 0L) {
       warning(sprintf(
-        "The ci_ncf() lower-limit clamp fired in %d of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_ncf for the meaning of the clamp.",
+        "The ci_nc_F() lower-limit clamp fired in %d of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.",
         .clamp_count
       ), call. = FALSE)
     }
@@ -367,7 +367,7 @@ simple_effects_AB <- function(
       lower_limit <- NA_real_; upper_limit <- NA_real_
     } else {
       ncp_lims <- tryCatch(
-        ci_ncf(
+        ci_nc_F(
           F_value     = F_val,
           df_1        = df1,
           df_2        = df2,
@@ -444,7 +444,7 @@ simple_effects_AB <- function(
   attr(out, "factor_B")   <- B_name
   .as_dmar_tbl(out, conf_level = conf_level)
   }, warning = function(w) {
-    if (inherits(w, "dmar_ncf_clamp")) {
+    if (inherits(w, "dmar_nc_F_clamp")) {
       .clamp_count <<- .clamp_count + 1L
       invokeRestart("muffleWarning")
     }

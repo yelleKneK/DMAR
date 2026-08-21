@@ -62,7 +62,7 @@ on the trimmed-mean difference (their Equation 8) is referred to a
 noncentral \emph{t} distribution with the Yuen-Welch approximate
 degrees of freedom (their Equation 9), the noncentrality
 parameters whose tail probabilities bracket the observed statistic
-are located with \code{\link{ci_nct}}, and those limits
+are located with \code{\link{ci_nc_t}}, and those limits
 are rescaled to the \eqn{d_R} metric. The degrees of freedom are
 reported in the \code{df_yuen} row of the returned table. At
 \code{trim = 0} the construction reduces to the Welch approximate
@@ -122,7 +122,7 @@ Yuen, K. K. (1974). The two-sample trimmed \emph{t} for unequal
 }
 \seealso{
 \code{\link{smd}}, \code{\link{var_smd_trimmed}},
-  \code{\link{ci_smd}}, \code{\link{ci_nct}}
+  \code{\link{ci_smd}}, \code{\link{ci_nc_t}}
 
 Other effect size estimates:
 \code{\link[=cles]{cles()}},

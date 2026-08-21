@@ -3,7 +3,7 @@
 #' Finds the noncentrality parameters of a noncentral \emph{t}-distribution
 #' that bracket an observed \emph{t}-value with the requested tail
 #' probabilities, giving a confidence interval on the population noncentrality
-#' parameter. Together with \code{\link{ci_ncf}} and
+#' parameter. Together with \code{\link{ci_nc_F}} and
 #' \code{\link{ci_nc_chisq}}, this is one of the low-level
 #' noncentral distribution workhorses on which the \code{ci_*} confidence
 #' interval functions (e.g., \code{\link{ci_smd}}, \code{\link{ci_smd_c}},
@@ -72,21 +72,21 @@
 #' As of R 4.0.0, the largest \code{ncp} that R can accurately handle is 37.62.
 #'
 #' @seealso
-#' \code{\link[stats:TDist]{stats::pt()}}, \code{\link[stats:TDist]{stats::qt()}}, \code{\link[stats]{uniroot}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, \code{\link{ci_ncf}}, \code{\link{ci_nc_chisq}}
+#' \code{\link[stats:TDist]{stats::pt()}}, \code{\link[stats:TDist]{stats::qt()}}, \code{\link[stats]{uniroot}}, \code{\link{ci_smd}}, \code{\link{ci_smd_c}}, \code{\link{ci_nc_F}}, \code{\link{ci_nc_chisq}}
 #'
 #' @examples
 #'# Suppose observed t-value based on 'df'=126 is 2.83. Finding the lower
 #'# and upper critical values for the population noncentrality parameter
 #'# with a symmetric confidence interval with 95\% confidence is given as:
-#'ci_nct(ncp = 2.83, df = 126, conf_level = .95)
+#'ci_nc_t(ncp = 2.83, df = 126, conf_level = .95)
 #'
 #'# Modifying the above example so that a nonsymmetric 95% confidence interval
 #'# can be formed:
-#'ci_nct(ncp = 2.83, df = 126, alpha_lower = .01, alpha_upper = .04, conf_level = NULL)
+#'ci_nc_t(ncp = 2.83, df = 126, alpha_lower = .01, alpha_upper = .04, conf_level = NULL)
 #'
 #'# Modifying the above example so that a single-sided 95% confidence interval
 #'# can be formed:
-#'ci_nct(ncp = 2.83, df = 126, alpha_lower = 0, alpha_upper = .05, conf_level = NULL)
+#'ci_nc_t(ncp = 2.83, df = 126, alpha_lower = 0, alpha_upper = .05, conf_level = NULL)
 #'
 #' @keywords models htest
 #'
@@ -95,7 +95,7 @@
 #' @export
 #' @importFrom stats pt uniroot
 
-ci_nct <- function(ncp, df, conf_level = .95, alpha_lower = NULL, alpha_upper = NULL,
+ci_nc_t <- function(ncp, df, conf_level = .95, alpha_lower = NULL, alpha_upper = NULL,
                             t_value, tol = 1e-9, verbose = TRUE, ...) {
   if (missing(ncp)) {
     if (missing(t_value)) {

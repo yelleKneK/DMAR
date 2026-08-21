@@ -68,7 +68,7 @@ The square root of the signal-to-noise ratio is defined as the standard deviatio
 standard deviation of the error (i.e., the square root of the mean square error). This function uses the confidence
 interval transformation principle (Steiger, 2004) to transform the confidence limits for the noncentrality parameter to
 the confidence limits for square root of signal-to-noise ratio. The confidence interval for noncentral \emph{F} parameter
-can be obtained from function \code{ci_ncf} in DMAR.
+can be obtained from function \code{ci_nc_F} in DMAR.
 }
 \examples{
 ## To illustrate the calculation of the confidence interval for noncentral
@@ -102,7 +102,7 @@ Steiger, J. H. (2004). Beyond the \emph{F} Test: Effect size confidence interval
   \doi{10.1037/1082-989X.9.2.164}
 }
 \seealso{
-\code{\link{ci_snr}}, \code{\link{ci_ncf}}
+\code{\link{ci_snr}}, \code{\link{ci_nc_F}}
 
 Other confidence intervals for effect sizes:
 \code{\link[=ci_R2]{ci_R2()}},

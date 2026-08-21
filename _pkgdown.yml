@@ -82,8 +82,8 @@ reference:
   desc: Confidence intervals for effect sizes and related quantities.
   contents:
   - starts_with("ci_")
-  - -ci_nct
-  - -ci_ncf
+  - -ci_nc_t
+  - -ci_nc_F
   - -ci_nc_chisq
 - title: Sample size planning, accuracy in parameter estimation (AIPE)
   contents:
@@ -205,8 +205,8 @@ reference:
 - title: Noncentral distributions
   contents:
   - starts_with("moments_")
-  - ci_nct
-  - ci_ncf
+  - ci_nc_t
+  - ci_nc_F
   - ci_nc_chisq
 - title: Data simulation
   contents:

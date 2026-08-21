@@ -88,7 +88,7 @@
 #' are preferred to it because of simpler arguments.
 #'
 #' @seealso
-#' \code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nct}}, \code{\link{ci_rc}}, \code{\link{ci_src}}
+#' \code{\link{ss_aipe_reg_coef}}, \code{\link{ci_nc_t}}, \code{\link{ci_rc}}, \code{\link{ci_src}}
 #'
 #' @keywords htest
 #'
@@ -177,10 +177,10 @@ ci_reg_coef <- function(b_j, SE_b_j = NULL, s_Y = NULL, s_X = NULL, N, p, R2_Y_X
   }
 
   if (noncentral == TRUE) {
-    NC_t_values <- ci_nct(ncp = obs_t, df = N - p - 1, conf_level = NULL, alpha_lower = alpha_lower, alpha_upper = alpha_upper)
+    NC_t_values <- ci_nc_t(ncp = obs_t, df = N - p - 1, conf_level = NULL, alpha_lower = alpha_lower, alpha_upper = alpha_upper)
     term <- c("lower_limit", "reg_coef", "upper_limit")
     value <- c(NC_t_values[which(NC_t_values$term == "lower_limit"), 2] * SE_b_j, b_j, NC_t_values[which(NC_t_values$term == "upper_limit"), 2] * SE_b_j)
-    # ci_nct reports prob_less / prob_greater as the mass of the
+    # ci_nc_t reports prob_less / prob_greater as the mass of the
     # distribution below / above each limit; convert to the achieved-tail-error
     # convention used by the central branch, ci_R2, and MBESS so that
     # prob_less on the lower row is the lower-tail error, not 1 - it.

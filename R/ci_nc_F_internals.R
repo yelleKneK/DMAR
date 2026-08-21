@@ -1,19 +1,19 @@
 # Internal helpers shared by the ci_* functions that build their confidence
 # intervals by inverting a noncentral F-distribution through
-# ci_ncf(): ci_snr(), ci_srsnr(), ci_pvaf(), ci_R2() with fixed
+# ci_nc_F(): ci_snr(), ci_srsnr(), ci_pvaf(), ci_R2() with fixed
 # predictors, ci_eta_squared(), ci_eta_squared_partial(),
 # ci_omega_squared(), ci_eta_squared_generalized() with the parametric
 # method, and ci_mahalanobis().
 #
 # Two jobs (QC decision 12, 2026-08-12):
 #
-# * When ci_ncf() sets the lower noncentrality limit to 0 because
+# * When ci_nc_F() sets the lower noncentrality limit to 0 because
 #   the observed F is below the alpha_lower critical value of the central
 #   F-distribution (a normal consequence of a small observed effect, not a
 #   failure), the warning the user sees must state the consequence for the
-#   interval the user asked for, not ci_ncf()'s internals.
-#   .ci_ncf_for() muffles the clamp warning (condition class
-#   "dmar_ncf_clamp") and re-signals it with the calling function's own
+#   interval the user asked for, not ci_nc_F()'s internals.
+#   .ci_nc_F_for() muffles the clamp warning (condition class
+#   "dmar_nc_F_clamp") and re-signals it with the calling function's own
 #   quantity in the message. The re-signaled warning carries the same
 #   condition class, so the iterative callers that deduplicate the clamp
 #   (ss_aipe_R2(), ss_aipe_omega_squared(), factorial_anova(),
@@ -23,13 +23,13 @@
 #   function the user called, the argument values that caused it, and what
 #   to try, rather than surfacing a bare uniroot() message.
 
-.ci_ncf_for <- function(caller, quantity, F_value, df_1, df_2,
+.ci_nc_F_for <- function(caller, quantity, F_value, df_1, df_2,
                                  conf_level = NULL, alpha_lower = NULL,
                                  alpha_upper = NULL, ...) {
   fmt <- function(x) if (is.null(x)) "NULL" else format(x)
   withCallingHandlers(
     tryCatch(
-      ci_ncf(F_value = F_value, conf_level = conf_level,
+      ci_nc_F(F_value = F_value, conf_level = conf_level,
                       df_1 = df_1, df_2 = df_2,
                       alpha_lower = alpha_lower, alpha_upper = alpha_upper,
                       ...),
@@ -45,12 +45,12 @@
         ), call. = FALSE)
       }
     ),
-    dmar_ncf_clamp = function(w) {
+    dmar_nc_F_clamp = function(w) {
       warning(warningCondition(sprintf(
         paste0("The observed F_value is below the alpha_lower critical ",
                "value of the central F-distribution, so the lower ",
                "confidence limit on %s is 0."),
-        quantity), class = "dmar_ncf_clamp"))
+        quantity), class = "dmar_nc_F_clamp"))
       invokeRestart("muffleWarning")
     }
   )
@@ -66,7 +66,7 @@
 # muffled.
 .warn_ncf_clamp_once <- function(expr) {
   clamp_seen <- FALSE
-  withCallingHandlers(expr, dmar_ncf_clamp = function(w) {
+  withCallingHandlers(expr, dmar_nc_F_clamp = function(w) {
     if (clamp_seen) invokeRestart("muffleWarning")
     clamp_seen <<- TRUE
   })

@@ -39,7 +39,7 @@
 #'
 #'   A noncentral parameter can be supplied, which is what a power analysis
 #'   needs, though it would not be used for a standard null hypothesis
-#'   significance test. See \code{\link{ci_ncf}} for confidence
+#'   significance test. See \code{\link{ci_nc_F}} for confidence
 #'   limits on the noncentral parameter itself.
 #'
 #' @references
@@ -66,7 +66,7 @@
 #'
 #' @seealso \code{\link{cv_t}}, \code{\link{cv_chisq}},
 #'   \code{\link{cv_bonferroni_f}}, \code{\link{cv_scheffe}},
-#'   \code{\link{ci_ncf}}
+#'   \code{\link{ci_nc_F}}
 #'
 #' @keywords distribution htest
 #'

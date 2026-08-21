@@ -3,8 +3,8 @@
 #' Finds the noncentrality parameters of a noncentral chi square distribution
 #' that bracket an observed chi square value with the requested tail
 #' probabilities, giving a confidence interval on the population noncentrality
-#' parameter. Together with \code{\link{ci_nct}} and
-#' \code{\link{ci_ncf}}, this is one of the low-level noncentral
+#' parameter. Together with \code{\link{ci_nc_t}} and
+#' \code{\link{ci_nc_F}}, this is one of the low-level noncentral
 #' distribution workhorses on which the \code{ci_*} confidence interval
 #' functions are built; most analyses reach it through those functions rather
 #' than calling it directly.
@@ -76,7 +76,7 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ci_nct}}, \code{\link{ci_ncf}}, \code{\link[stats:Chisquare]{stats::pchisq()}}, \code{\link[stats:Chisquare]{stats::qchisq()}}, \code{\link[stats]{uniroot}}
+#' \code{\link{ci_nc_t}}, \code{\link{ci_nc_F}}, \code{\link[stats:Chisquare]{stats::pchisq()}}, \code{\link[stats:Chisquare]{stats::qchisq()}}, \code{\link[stats]{uniroot}}
 #'
 #' @examples
 #' # A typical call to the function.

@@ -8,6 +8,7 @@
 #' sampling behavior of \eqn{R^2}, eta squared, and the omnibus \emph{F} test
 #' under the alternative. A central \emph{F} (\code{ncp = 0}) is the special
 #' case.
+#' The function was \code{moments_ncf()} in earlier builds of DMAR.
 #'
 #' @param df_1 Numerator degrees of freedom, a single positive number.
 #' @param df_2 Denominator degrees of freedom, a single positive number.
@@ -44,8 +45,8 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{moments_nct}} for the noncentral \emph{t};
-#'   \code{\link{ci_ncf}} for the noncentral \emph{F} confidence
+#' @seealso \code{\link{moments_nc_t}} for the noncentral \emph{t};
+#'   \code{\link{ci_nc_F}} for the noncentral \emph{F} confidence
 #'   limits used in effect size intervals; \code{\link[stats]{df}} for the
 #'   density.
 #'
@@ -55,16 +56,16 @@
 #'
 #' @examples
 #' # A noncentral F with 3 and 40 df and noncentrality 8.
-#' moments_ncf(df_1 = 3, df_2 = 40, ncp = 8)
+#' moments_nc_F(df_1 = 3, df_2 = 40, ncp = 8)
 #'
 #' # ncp = 0 is the central F: mean df_2 / (df_2 - 2).
-#' moments_ncf(df_1 = 3, df_2 = 40)
+#' moments_nc_F(df_1 = 3, df_2 = 40)
 #'
 #' # The variance is undefined for four or fewer denominator df.
-#' moments_ncf(df_1 = 2, df_2 = 4, ncp = 5)
+#' moments_nc_F(df_1 = 2, df_2 = 4, ncp = 5)
 #'
 #' @export
-moments_ncf <- function(df_1, df_2, ncp = 0) {
+moments_nc_F <- function(df_1, df_2, ncp = 0) {
   if (!is.numeric(df_1) || length(df_1) != 1L || is.na(df_1) || df_1 <= 0) {
     stop("'df_1' must be a single positive number.", call. = FALSE)
   }

@@ -79,7 +79,7 @@ Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
   Chapter 3 on one-way ANOVA.)
 }
 \seealso{
-\code{\link{smd}}, \code{\link{ci_nct}}
+\code{\link{smd}}, \code{\link{ci_nc_t}}
 }
 \author{
 Ken Kelley \email{kkelley@nd.edu}

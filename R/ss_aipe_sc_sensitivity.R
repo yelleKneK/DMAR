@@ -67,7 +67,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ss_aipe_sc}}, \code{\link{ss_aipe_c}}, \code{\link{ci_nct}}
+#' @seealso \code{\link{ss_aipe_sc}}, \code{\link{ss_aipe_c}}, \code{\link{ci_nc_t}}
 #'
 #' @examples
 #' # Sensitivity analysis for a standardized three-group ANOVA contrast
@@ -155,7 +155,7 @@ ss_aipe_sc_sensitivity <- function(true_psi = NULL, estimated_psi = NULL, c_weig
     s_pooled <- mean(sd_group)
     psi_obs[i] <- sum(c_weights * x_bar) / s_pooled
     lambda <- psi_obs[i] / sqrt(sum(c_weights^2) / n)
-    lambda_limits <- ci_nct(ncp = lambda, df = n * J - J, conf_level = conf_level)
+    lambda_limits <- ci_nc_t(ncp = lambda, df = n * J - J, conf_level = conf_level)
     psi_limit_upper <- lambda_limits[2, 2] * sqrt(sum(c_weights^2) / n)
     psi_limit_lower <- lambda_limits[1, 2] * sqrt(sum(c_weights^2) / n)
 

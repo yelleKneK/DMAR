@@ -32,7 +32,7 @@
 #' standard deviation of the error (i.e., the square root of the mean square error). This function uses the confidence
 #' interval transformation principle (Steiger, 2004) to transform the confidence limits for the noncentrality parameter to
 #' the confidence limits for square root of signal-to-noise ratio. The confidence interval for noncentral \emph{F} parameter
-#' can be obtained from function \code{ci_ncf} in DMAR.
+#' can be obtained from function \code{ci_nc_F} in DMAR.
 #'
 #' @return
 #' A 2-row \code{data.frame} with columns \code{term} and \code{value}. The
@@ -51,7 +51,7 @@
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
-#' @seealso \code{\link{ci_snr}}, \code{\link{ci_ncf}}
+#' @seealso \code{\link{ci_snr}}, \code{\link{ci_nc_F}}
 #'
 #' @examples
 #' ## To illustrate the calculation of the confidence interval for noncentral
@@ -128,7 +128,7 @@ ci_srsnr <- function(F_value = NULL, df_1 = NULL, df_2 = NULL, N = NULL,
   if (F_value <= 0) stop(" 'F_value' must be larger than 0. ")
   if (N <= 0 || N <= df_1 + df_2) stop("N must be larger than df_1+df_2")
 
-  Lims <- .ci_ncf_for(
+  Lims <- .ci_nc_F_for(
     caller = "ci_srsnr",
     quantity = "the square root of the signal-to-noise ratio",
     F_value = F_value, conf_level = NULL, df_1 = df_1,

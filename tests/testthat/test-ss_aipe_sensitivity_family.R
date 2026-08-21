@@ -284,7 +284,7 @@ test_that("ss_aipe_sm_sensitivity() reports the realized standardized mean besid
   skip_on_cran()
   set.seed(113)
   # At true_sm = 5 the noncentrality parameter is large enough that
-  # ci_nct() warns about the accurate range of R's noncentral t
+  # ci_nc_t() warns about the accurate range of R's noncentral t
   # functions; that warning is expected here and not under test.
   res <- suppressWarnings(suppressMessages(
     ss_aipe_sm_sensitivity(true_sm = 5, estimated_sm = 5,

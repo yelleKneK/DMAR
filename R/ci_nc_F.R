@@ -3,7 +3,7 @@
 #' Finds the noncentrality parameters of a noncentral \emph{F}-distribution
 #' that bracket an observed \emph{F}-value with the requested tail
 #' probabilities, giving a confidence interval on the population noncentrality
-#' parameter. Together with \code{\link{ci_nct}} and
+#' parameter. Together with \code{\link{ci_nc_t}} and
 #' \code{\link{ci_nc_chisq}}, this is one of the low-level
 #' noncentral distribution workhorses on which the \code{ci_*} confidence
 #' interval functions (e.g., \code{\link{ci_pvaf}}, \code{\link{ci_snr}},
@@ -51,7 +51,7 @@
 #' level). A warning is issued in that case, and the achieved probabilities
 #' reported in the output reflect the actual values at \eqn{\lambda = 0} rather
 #' than the requested \code{alpha_lower}. The warning carries the condition
-#' class \code{dmar_ncf_clamp}, so a caller that inverts the noncentral
+#' class \code{dmar_nc_F_clamp}, so a caller that inverts the noncentral
 #' \emph{F} repeatedly can muffle or deduplicate it by class.
 #'
 #' @return
@@ -74,13 +74,13 @@
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
 #' @seealso
-#' \code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{ci_nct}}, \code{\link{ci_nc_chisq}}, \code{\link[stats:FDist]{stats::pf()}}, \code{\link[stats:FDist]{stats::qf()}}, \code{\link[stats]{uniroot}}
+#' \code{\link{ss_aipe_R2}}, \code{\link{ci_R2}}, \code{\link{ci_nc_t}}, \code{\link{ci_nc_chisq}}, \code{\link[stats:FDist]{stats::pf()}}, \code{\link[stats:FDist]{stats::qf()}}, \code{\link[stats]{uniroot}}
 #'
 #' @examples
-#' ci_ncf(F_value = 5, conf_level = .95, df_1 = 5, df_2 = 100)
+#' ci_nc_F(F_value = 5, conf_level = .95, df_1 = 5, df_2 = 100)
 #'
 #' # A one-sided (upper) confidence interval.
-#' ci_ncf(F_value = 5, conf_level = NULL, df_1 = 5, df_2 = 100,
+#' ci_nc_F(F_value = 5, conf_level = NULL, df_1 = 5, df_2 = 100,
 #'                 alpha_lower = 0, alpha_upper = .05)
 #'
 #' @keywords design multivariate regression
@@ -90,7 +90,7 @@
 #' @export
 #' @importFrom stats pf uniroot
 
-ci_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
+ci_nc_F <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
                             alpha_lower = NULL, alpha_upper = NULL, tol = 1e-9,
                             verbose = TRUE, ...) {
   if (is.null(F_value)) stop("You must specify 'F_value'.", call. = FALSE)
@@ -131,12 +131,12 @@ ci_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
     # upper-tail mass at F_value increases with lambda from its already-too-
     # large value at lambda = 0. This is a normal consequence of a small
     # observed F, not a failure, so it is a warning, not an error. The
-    # condition class "dmar_ncf_clamp" lets the ci_* callers restate the
+    # condition class "dmar_nc_F_clamp" lets the ci_* callers restate the
     # consequence for their own effect size and lets the iterative planners
     # deduplicate the warning by class.
     warning(warningCondition(
       "The observed F_value is below the alpha_lower critical value of the central F-distribution, so the lower confidence limit on the noncentrality parameter is 0.",
-      class = "dmar_ncf_clamp"
+      class = "dmar_nc_F_clamp"
     ))
     lower_ncp <- 0
     achieved_alpha_lower <- 1 - central_lower_tail
@@ -151,7 +151,7 @@ ci_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
       ))$root,
       error = function(e) {
         stop(sprintf(
-          "In ci_ncf(), the root search for the lower noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_lower = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
+          "In ci_nc_F(), the root search for the lower noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_lower = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
           format(F_value), format(df_1), format(df_2), format(alpha_lower), conditionMessage(e)
         ), call. = FALSE)
       }
@@ -180,7 +180,7 @@ ci_ncf <- function(F_value = NULL, conf_level = .95, df_1 = NULL, df_2 = NULL,
       ))$root,
       error = function(e) {
         stop(sprintf(
-          "In ci_ncf(), the root search for the upper noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_upper = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
+          "In ci_nc_F(), the root search for the upper noncentrality limit failed for F_value = %s with df_1 = %s and df_2 = %s (alpha_upper = %s). The inner solver reported: %s. Verify that 'F_value' and the degrees of freedom describe the intended analysis; if they do, adjust 'tol' or request one-sided limits through 'alpha_lower' and 'alpha_upper'.",
           format(F_value), format(df_1), format(df_2), format(alpha_upper), conditionMessage(e)
         ), call. = FALSE)
       }
