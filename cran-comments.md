@@ -55,8 +55,8 @@ anchor running on the CRAN path; a handful of files whose blocks were
 already skipped before this round, chiefly in the Monte Carlo
 sensitivity family, contribute nothing on the CRAN path, which is the
 convention that family has always followed. No test was deleted or
-weakened: the full suite runs 8,246 expectations locally with no
-failures and none skipped; the CRAN path runs 6,873 of them, with the
+weakened: the full suite runs 8,251 expectations locally with no
+failures and none skipped; the CRAN path runs 6,881 of them, with the
 Monte Carlo blocks skipped and their published-value anchors
 retained.
 
