@@ -248,6 +248,10 @@ if (ok_all) {
   file.copy(tarball, file.path(dest, tarball_name), overwrite = TRUE)
   cat(sprintf("tarball: %s\nsha256:  %s\n", file.path(dest, tarball_name), sha256))
   cat(sprintf("\nALL GATES PASSED (%d gates, %.1f min)\n", length(results), elapsed))
+  cat("next: (1) R CMD INSTALL the certified tarball so the console matches the\n",
+      "submission; (2) a win-builder r-devel run closes the HTML Tidy gap this\n",
+      "machine cannot check; (3) upload exactly the file above and verify its\n",
+      "sha256 against this record first.\n", sep = "")
   quit(status = 0L)
 }
 cat(sprintf("\nGATE FAILED: %d of %d gates failed; no tarball handed off\n",
