@@ -9,8 +9,14 @@
 # speed in full mode.
 #
 # Usage, from the package root:
-#   Rscript tools/release_gate.R            # full mode, before any tarball
-#   Rscript tools/release_gate.R --quick    # after any documentation edit
+#   caffeinate -i Rscript tools/release_gate.R            # full mode, before any tarball
+#   Rscript tools/release_gate.R --quick                  # after any documentation edit
+#
+# Full mode runs under caffeinate on macOS because the example timing gate
+# reads wall-clock times from the check: a machine that sleeps mid-run
+# records minutes of elapsed time against seconds of CPU (2026-09-04, a
+# run that slept reported 76 minutes of examples for 2 minutes of CPU and
+# failed the gate on pages that take under a second awake).
 #
 # Quick mode runs the static invariants, regenerates the Rd files and
 # refuses stale documentation, renders the whole PDF manual through

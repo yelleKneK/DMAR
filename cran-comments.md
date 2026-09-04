@@ -7,11 +7,14 @@ answered below, and each now has a mechanical detector in the test
 suite (`tests/testthat/test-rd_hygiene.R`, which runs on CRAN) and in
 the maintainer's release tooling, so none can return.
 
-* **"in R" in the title and description.** Removed from both. The
-  title is "Design, Measurement, and Analysis"; the description opens
-  "Methods for design, measurement, and analysis, with the aim of ...".
-  The expansion of the package name remains where it explains the
-  acronym (the package help page and the README).
+* **"in R" in the title and description.** The description no longer
+  says it: it opens "Methods for design, measurement, and analysis,
+  with the aim of ...". The title keeps it, because the title is the
+  expansion of the package name: DMAR stands for Design, Measurement,
+  and Analysis in R, as MBESS stood for Methods for the Behavioral,
+  Educational, and Social Sciences, and a title that dropped the last
+  two words would no longer spell the name. An exception for the title
+  was requested by email on 2026-09-04.
 
 * **Code lines in examples commented out.** Every example line in the
   package now runs. The comment idiom was adopted in the 2026-07-31
@@ -29,8 +32,8 @@ the maintainer's release tooling, so none can return.
   their comments were reworded anyway so that no comment line reads
   like code. The package still contains no `\donttest{}` and no
   `\dontrun{}`: with every line live, the slowest help page takes
-  <<SLOWEST>> s locally, and all <<N_PAGES>> pages with examples run in
-  <<EX_TOTAL>> s in a single pass (<<EX_WIN>> s on win-builder).
+  1.3 s locally, and all 312 pages with examples run in 29 s in a
+  single pass.
 
 * **Functions writing to the home filespace, and default paths.** The
   twenty-seven sensitivity functions that carried
@@ -63,8 +66,11 @@ the maintainer's release tooling, so none can return.
   warning reaches the user.
 
 The local check for this round, `R CMD check --as-cran` on the tarball
-with both manuals built, ran with <<STATUS>>. The full local test
-suite runs <<N_TESTS>> expectations with no failures.
+with both manuals built, ran with 0 errors, 0 warnings, and the two
+NOTEs described under "R CMD check results" below. The full local test
+suite runs 8,479 expectations with no failures and none skipped; the
+CRAN path runs 7,014 of them, with the Monte Carlo blocks skipped
+and their published-value anchors retained.
 
 
 ## Response to the incoming pretest of 2026-08-19
@@ -210,13 +216,14 @@ MBESS package (on CRAN since 2004, by the same author).
 
 ## Test environments
 
-* local macOS (Apple Silicon), R 4.6.1: full `R CMD check --as-cran`
-  from the release tarball, built from a clean archive of the
-  repository
-* win-builder, R-release 4.6.1 on Windows Server 2022 (2026-08-17):
-  full check of this tarball, Status: 1 NOTE (the new-submission
+* local macOS (Apple Silicon), R 4.6.1 (2026-09-04): full
+  `R CMD check --as-cran` with both manuals built, from the release
+  tarball, built from a clean archive of the repository
+* win-builder, R-release 4.6.1 on Windows Server 2022: the 2026-08-17
+  check of the previous tarball returned 1 NOTE (the new-submission
   NOTE, with the five domain terms addressed under "Possibly
-  misspelled words" below)
+  misspelled words" below). [Run win-builder on this round's tarball
+  before upload and record its date and status here.]
 
 ## R CMD check results
 
@@ -259,13 +266,17 @@ reported no size NOTE.
 
 ## Check time
 
-On win-builder's R-release the whole check completed without any
-step being flagged for time: examples 122 seconds across 313 pages
-in a single pass (the package contains no `\donttest{}` block),
-tests 115 seconds, vignette rebuild 53 seconds. The four
-computation-heavy vignettes are precomputed, and the Monte Carlo,
-repeated model fitting, and numeric integration test blocks are
-skipped on CRAN with their published-value anchors retained.
+Locally the check ran examples in 62 seconds across 312 pages in a
+single pass (the package contains no `\donttest{}` block), tests in
+38 seconds, and the vignette rebuild in 25 seconds, with no step
+flagged for time; the slowest help page took 1.3 seconds. The
+2026-08-17 win-builder run of the previous tarball took about three
+times the local elapsed time at each step (examples 122 seconds,
+tests 115, vignette rebuild 53), which keeps every page well under
+the 5 second flag there. The four computation-heavy vignettes are
+precomputed, and the Monte Carlo, repeated model fitting, and numeric
+integration test blocks are skipped on CRAN with their
+published-value anchors retained.
 
 ## Possibly misspelled words in DESCRIPTION
 
