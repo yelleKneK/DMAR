@@ -1,6 +1,6 @@
 Package: DMAR
 Type: Package
-Title: Design, Measurement, and Analysis
+Title: Design, Measurement, and Analysis in R
 Version: 1.0.0
 Date: 2026-09-04
 Authors@R: c(person("Ken", "Kelley", role = c("aut", "cre"),

@@ -8,7 +8,7 @@ template:
     border-radius: 0.5rem
 
 home:
-  title: "DMAR: Design, Measurement, and Analysis"
+  title: "DMAR: Design, Measurement, and Analysis in R"
   description: >
     Design, measurement, and analysis, with emphasis on methods for
     human-centered research. Effect sizes reported with confidence intervals,

@@ -40,10 +40,6 @@ of the MBESS package.
   warnings on borderline replicates, the noncentral clamp); any other
   warning reaches the user.
 
-* The package title is "Design, Measurement, and Analysis"; the
-  expansion of the name stays on the package help page and in the
-  README.
-
 * The Bryant-Paulson distribution function integrates over the
   covariate shrinkage factor after the change of variables
   delta = 1 - u^2, under which the Beta weight of Bryant and Paulson

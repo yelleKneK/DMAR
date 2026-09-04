@@ -6,7 +6,7 @@ citHeader(
 
 bibentry(
   bibtype  = "Manual",
-  title    = "{DMAR}: Design, Measurement, and Analysis",
+  title    = "{DMAR}: Design, Measurement, and Analysis in {R}",
   author   = person("Ken", "Kelley",
                     email = "kkelley@nd.edu",
                     comment = c(ORCID = "0000-0002-4756-8360")),
