@@ -50,23 +50,69 @@ grep_files <- function(pattern, files, ...) {
 h <- grep_files("\\\\donttest|\\\\dontrun", c(r_files, rd_files))
 check("no \\donttest or \\dontrun anywhere", length(h) == 0, h)
 
-# No example runs a bootstrap confidence interval. (The randomization tests
-# resample by definition and are exempt.)
-boot_hits <- character()
-for (f in setdiff(r_files, c("R/randomization_test.R", "R/randomization_test_paired.R"))) {
+# No commented-out code in any @examples block (the 2026-09-04 CRAN return:
+# "Some code lines in examples are commented out. Please never do that.").
+# Every contiguous window of comment lines inside an @examples block is
+# parsed with the markers stripped; a window that parses to a call or an
+# assignment is commented-out code. Prose does not parse and is never
+# flagged. The same detector runs on the built Rd files in
+# tests/testthat/test-rd_hygiene.R; this one reads the roxygen sources so it
+# fires before documentation is regenerated.
+is_code <- function(txt) {
+  parsed <- tryCatch(parse(text = txt, keep.source = FALSE), error = function(e) NULL)
+  if (is.null(parsed) || !length(parsed)) return(FALSE)
+  any(vapply(parsed, function(e) is.call(e) && !identical(e[[1L]], as.name("~")), logical(1)))
+}
+commented_hits <- character()
+for (f in r_files) {
   lines <- readLines(f, warn = FALSE)
-  in_ex <- FALSE
-  for (i in seq_along(lines)) {
-    l <- lines[i]
-    if (grepl("^#' @examples", l)) { in_ex <- TRUE; next }
-    if (in_ex && !grepl("^#'", l)) in_ex <- FALSE
-    if (in_ex && grepl("^#' [^#]", l) &&
-        grepl('ci_method *= *"(percentile|bca|boot|bootstrap)"|boot *= *TRUE|method *= *"bootstrap"', l)) {
-      boot_hits <- c(boot_hits, sprintf("%s:%d", f, i))
+  for (s in grep("^#' @examples", lines)) {
+    i <- s + 1L; ex <- character(); idx <- integer()
+    while (i <= length(lines) && grepl("^#'", lines[i]) && !grepl("^#' @[a-zA-Z]", lines[i])) {
+      ex <- c(ex, sub("^#' ?", "", lines[i])); idx <- c(idx, i); i <- i + 1L
+    }
+    cm <- grep("^\\s*#", ex)
+    if (!length(cm)) next
+    for (run in split(cm, cumsum(c(1L, diff(cm) != 1L)))) {
+      txt <- sub("^\\s*#+\\s?", "", ex[run]); n <- length(run); flagged <- integer()
+      for (a in seq_len(n)) for (b in a:n) {
+        w <- paste(txt[a:b], collapse = "\n")
+        if (nzchar(trimws(w)) && is_code(w)) flagged <- c(flagged, run[a:b])
+      }
+      if (length(flagged)) commented_hits <- c(commented_hits, sprintf("%s:%d", f, idx[sort(unique(flagged))]))
     }
   }
 }
-check("no example executes a bootstrap interval", length(boot_hits) == 0, boot_hits)
+check("no commented-out code in any @examples block", length(commented_hits) == 0, commented_hits)
+
+# The run-time policies from the same review, grepped in the sources with
+# comment and roxygen lines excluded: nothing reads or writes .Random.seed or
+# the global environment (seeds go through .dmar_local_seed()), no <<-, no
+# options(warn = -1), and no function that writes a file carries a default
+# path (the sensitivity family writes only when `filename` is supplied and
+# has no `save` switch).
+code_lines <- function(f) {
+  lines <- readLines(f, warn = FALSE)
+  lines[!grepl("^\\s*#", lines)]
+}
+grep_code <- function(pattern) {
+  hits <- character()
+  for (f in r_files) {
+    m <- grep(pattern, code_lines(f))
+    if (length(m)) hits <- c(hits, sprintf("%s (%d line%s)", f, length(m), if (length(m) == 1) "" else "s"))
+  }
+  hits
+}
+h <- grep_code("\\.Random\\.seed|\\.GlobalEnv|globalenv\\(\\)")
+check("no function reads or writes .Random.seed or the global environment", length(h) == 0, h)
+h <- grep_code("<<-")
+check("no <<- anywhere in R/", length(h) == 0, h)
+h <- grep_code("options\\(\\s*warn")
+check("no options(warn = ...) anywhere in R/", length(h) == 0, h)
+h <- grep_code("(filename|file|path)\\s*=\\s*[\"']")
+check("no default file path in any function signature or call", length(h) == 0, h)
+h <- grep_code("^\\s*(save\\s*=\\s*(TRUE|FALSE)|.*_sensitivity\\s*<-\\s*function\\(.*\\bsave\\s*=)")
+check("no `save` switch in the sensitivity family", length(h) == 0, h)
 
 ## ---- Vignette invariants ----
 

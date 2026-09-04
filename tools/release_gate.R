@@ -183,6 +183,27 @@ if (any(grepl("recent enough HTML Tidy", log)))
 timings <- grep("checking (examples|tests|re-building of vignette outputs) \\.\\.\\.", log, value = TRUE)
 for (t in timings) cat("        ", t, "\n", sep = "")
 
+# Per-page example times from the check just run. CRAN flags a page over
+# 5 s on its farm, and win-builder has run this package's examples at about
+# three times the local elapsed time (122 s against 42 s, 2026-08-17), so
+# the local ceiling is 1.7 s per page. Pages over 1 s are listed so a creep
+# toward the ceiling is visible before it arrives.
+ex_timings <- file.path(src, paste0(pkg[, "Package"], ".Rcheck"), paste0(pkg[, "Package"], "-Ex.timings"))
+if (file.exists(ex_timings)) {
+  et <- utils::read.table(ex_timings, header = TRUE)
+  et$max <- pmax(et$user + et$system, et$elapsed)
+  et <- et[order(-et$max), ]
+  over <- et[et$max > 1.7, ]
+  near <- et[et$max > 1.0 & et$max <= 1.7, ]
+  gate(sprintf("no example page over 1.7 s locally (slowest %.2f s: %s; %d pages, %.0f s in all)",
+               et$max[1], et$name[1], nrow(et), sum(et$elapsed)),
+       nrow(over) == 0L,
+       c(sprintf("%s %.2f s", over$name, over$max),
+         if (nrow(near)) c("pages over 1 s:", sprintf("%s %.2f s", near$name, near$max))))
+} else {
+  gate("example timings file present after the check", FALSE, ex_timings)
+}
+
 ## ---- 8. The full local test suite, Monte Carlo blocks included ----------
 Sys.setenv(NOT_CRAN = "true")
 tst <- tryCatch(as.data.frame(testthat::test_local(".", reporter = "silent", stop_on_failure = FALSE)),
