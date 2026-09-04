@@ -33,8 +33,15 @@
 #' @param assurance Optional assurance probability.
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample standardized mean difference, the two
+#'   confidence limits, the interval width, whether the interval fell
+#'   inside the equivalence region, and two indicators of whether the
+#'   interval missed \code{true_smd} below or above): nothing is written when
+#'   \code{filename} is \code{NULL} (the default), a new file with a
+#'   header row is created otherwise, an existing file at that path is
+#'   appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized SMD and CI width, the proportion of intervals at or
@@ -87,8 +94,7 @@ ss_aipe_equivalence_smd_sensitivity <- function(true_smd = 0,
                                          conf_level = 0.95,
                                          assurance = NULL,
                                          G = 1000, print_iter = FALSE,
-                                         save = FALSE,
-                                         filename = "ss_aipe_equivalence_smd_sensitivity_result.csv") {
+                                         filename = NULL) {
   if (is.null(estimated_smd) && is.null(n_per_group))
     stop("You must specify either 'estimated_smd' or 'n_per_group'.", call. = FALSE)
   if (!is.null(estimated_smd) && !is.null(n_per_group))
@@ -104,6 +110,7 @@ ss_aipe_equivalence_smd_sensitivity <- function(true_smd = 0,
   if (is.null(delta_lower)) delta_lower <- delta_upper
   if (!is.numeric(delta_lower) || delta_lower <= 0)
     stop("'delta_lower' must be a positive number.", call. = FALSE)
+  .check_filename(filename)
 
   # ss_aipe_equivalence_smd() plans the width of a (1 - 2 * alpha) confidence interval,
   # and the simulation below evaluates ci_smd() at conf_level, so the two match
@@ -150,7 +157,7 @@ ss_aipe_equivalence_smd_sensitivity <- function(true_smd = 0,
     tI_upper[g]   <- true_smd > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(smd = smd_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           equivalent = equivalent,

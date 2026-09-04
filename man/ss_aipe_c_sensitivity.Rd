@@ -15,8 +15,7 @@ ss_aipe_c_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_c_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -52,10 +51,12 @@ resolving the planned sample size.}
 \item{print_iter}{Logical. Print the iteration index after each
 replication (helpful for long runs); default \code{FALSE}.}
 
-\item{save}{Logical. If \code{TRUE} the per-replication results are
-appended to \code{filename}; default \code{FALSE}.}
-
-\item{filename}{Path used when \code{save = TRUE}.}
+\item{filename}{Optional path of a CSV file to receive the
+per-replication results (the contrast estimate, the confidence limits,
+the interval width, and the two tail misses), appended when the file
+already exists and created otherwise; the default \code{NULL} writes
+nothing, and a throwaway run that wants the file should point it at
+\code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with rows for mean / median / SD of
@@ -80,8 +81,9 @@ confidence interval via \code{\link{ci_c}}, and summarizes the
 realized widths and coverage of \code{true_psi}.
 }
 \examples{
-# Monte Carlo sweep; G is small here so the example runs quickly.
-# Well-specified: planner used error_variance = 4, truth is 4.
+# G = 50 keeps the example quick; a reported analysis deserves the
+# default G of 1000. First the well-specified case: the planner used an
+# error variance of 4, and the truth is 4.
 set.seed(113)
 ss_aipe_c_sensitivity(
   true_error_variance      = 4,

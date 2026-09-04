@@ -46,8 +46,14 @@
 #'   planner.
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample reliability estimate, the two confidence
+#'   limits, the interval width, and two indicators of whether the
+#'   interval missed \code{true_reliability} below or above): nothing is
+#'   written when \code{filename} is \code{NULL} (the default), a new
+#'   file with a header row is created otherwise, an existing file at
+#'   that path is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized reliability and CI width, the proportion of intervals
@@ -105,8 +111,7 @@ ss_aipe_reliability_sensitivity <- function(true_reliability = NULL,
                                             conf_level = 0.95,
                                             assurance = NULL,
                                             G = 1000, print_iter = FALSE,
-                                            save = FALSE,
-                                            filename = "ss_aipe_reliability_sensitivity_result.csv") {
+                                            filename = NULL) {
   estimator <- match.arg(estimator)
   if (is.null(ci_method))
     ci_method <- if (estimator == "alpha") "bonett" else "mlr"
@@ -120,6 +125,7 @@ ss_aipe_reliability_sensitivity <- function(true_reliability = NULL,
     stop("'true_reliability' must be a single value in [0, 1).", call. = FALSE)
   if (!is.numeric(i) || length(i) != 1L || i < 2)
     stop("'i' (number of items) must be a single integer >= 2.", call. = FALSE)
+  .check_filename(filename)
 
   # Solve for parallel-tests lambda^2 and psi^2 that produce the requested rho
   # at unit per-item variance.
@@ -198,7 +204,7 @@ ss_aipe_reliability_sensitivity <- function(true_reliability = NULL,
     tI_upper[g] <- isTRUE(true_reliability > hi)
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(rel_hat = rel_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_w,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

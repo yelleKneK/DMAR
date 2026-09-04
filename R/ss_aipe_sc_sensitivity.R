@@ -13,9 +13,14 @@
 #' @param conf_level the desired confidence interval coverage, (i.e., 1 - Type I error rate)
 #' @param G number of generations (i.e., replications) of the simulation
 #' @param print_iter to print the current value of the iterations
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
-#' @param \dots allows one to potentially include parameter values for inner functions
+#' @param filename an optional path for a comma separated file recording
+#'   every replication (the realized standardized contrast, the full and
+#'   the two one-sided interval widths, the three non-coverage indicators,
+#'   and the two confidence limits): nothing is written when
+#'   \code{filename} is \code{NULL} (the default), a new file with a header
+#'   row is created otherwise, an existing file at that path is appended
+#'   to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}
 #'
 #' @return
 #' A \code{data.frame} with columns \code{term} and \code{value}
@@ -92,9 +97,10 @@
 
 ss_aipe_sc_sensitivity <- function(true_psi = NULL, estimated_psi = NULL, c_weights, desired_width = NULL,
                                    n_per_group = NULL, assurance = NULL, conf_level = .95, G = 10000,
-                                   print_iter = TRUE, save = FALSE, filename = "ss_aipe_sc_sensitivity_result.csv", ...) {
+                                   print_iter = TRUE, filename = NULL) {
   if (is.null(estimated_psi) && is.null(n_per_group)) stop("You must specify either \'estimated_psi\' or \'n_per_group\' (i.e., the sample size per group ).", call. = FALSE)
   if (!is.null(estimated_psi) && !is.null(n_per_group)) stop("You must specify either \'estimated_psi\' or \'n_per_group\' (i.e., the per group sample size), but not both.", call. = FALSE)
+  .check_filename(filename)
 
   if (abs(sum(c_weights)) > 1e-8) stop("The sum of the coefficients must be zero")
   if (sum(c_weights[c_weights > 0]) > 1) stop("Please use fractions to specify the contrast weights")
@@ -178,15 +184,12 @@ ss_aipe_sc_sensitivity <- function(true_psi = NULL, estimated_psi = NULL, c_weig
     upper_limit = Upper_Limit
   )
 
-  if (save) {
-    result_file <- filename
-    # print("Simulation results will be saved to a .csv file")
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+  if (!is.null(filename)) {
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
     } else {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, append = FALSE)
     }
   }
 

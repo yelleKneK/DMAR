@@ -27,3 +27,30 @@ test_that("ss_aipe_sm() assurance branch returns a sensible, finite sample size"
   expect_true(is.finite(n_85) && n_85 > 1)
   expect_gte(n_85, n_plain)
 })
+
+test_that("ss_aipe_sm_sensitivity() writes per-replication results only when 'filename' is supplied", {
+  skip_on_cran()
+  csv <- tempfile(fileext = ".csv")
+  on.exit(unlink(csv), add = TRUE)
+  args <- list(true_sm = 0.5, specified_N = 30, desired_width = 0.5,
+               G = 3, print_iter = FALSE)
+  set.seed(113)
+  res_none <- do.call(ss_aipe_sm_sensitivity, args)
+  expect_false(file.exists(csv))
+  set.seed(113)
+  res_file <- do.call(ss_aipe_sm_sensitivity, c(args, list(filename = csv)))
+  expect_equal(res_file, res_none)
+  written <- utils::read.csv(csv)
+  expect_equal(nrow(written), 3L)
+  expect_named(written, c("sm_obs", "full_width", "width_lower", "width_upper",
+                          "type_I_error_upper", "type_I_error_lower",
+                          "type_I_error", "lower_limit", "upper_limit"))
+  # A second run appends to the existing file.
+  set.seed(113)
+  do.call(ss_aipe_sm_sensitivity, c(args, list(filename = csv)))
+  expect_equal(nrow(utils::read.csv(csv)), 6L)
+  expect_error(
+    do.call(ss_aipe_sm_sensitivity, c(args, list(filename = 1))),
+    "'filename' must be NULL or a single file path"
+  )
+})

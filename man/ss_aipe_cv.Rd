@@ -54,7 +54,7 @@ ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99)
 # deviation: mu = 10 and sigma = 1 imply the same coefficient of variation, .10.
 ss_aipe_cv(mu = 10, sigma = 1, width = .1, conf_level = .99)
 
-# Ensuring that the confidence interval will be sufficiently narrow with a 99\\%
+# Ensuring that the confidence interval will be sufficiently narrow with a 99\%
 # certainty for the situation above.
 ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99, assurance = .99)
 

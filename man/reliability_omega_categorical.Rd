@@ -82,6 +82,15 @@ They specifically recommend BCa for categorical omega. Because no bootstrap runs
 \pkg{DMAR} unless the user requests one, the default output is the
 point estimate with a message naming the call that produces the
 recommended interval; request \code{ci_method = "bca"} to obtain it.
+The interval is not a quick one. Every replication refits the
+ordered-categorical factor model and the saturated polychoric model
+behind the denominator, a fraction of a second for a scale of
+moderate length, and the jackknife behind the BCa acceleration adds
+one such refit per case, so the recommended interval at the default
+\code{B = 10000} runs for tens of minutes. The example on this page
+therefore stops at the point estimate; the reported analysis adds
+\code{ci_method = "bca"} to the same call, with \code{seed} for
+reproducibility.
 
 \strong{When to use.} Use \code{reliability_omega_categorical} when items are
 ordered-categorical, especially when (a) the number of categories is
@@ -153,21 +162,12 @@ colnames(items) <- paste0("y", seq_len(J))
 # produces the recommended interval.
 reliability_omega_categorical(data = items)
 
-# The same items treated as continuous, for contrast. That call fits a
-# second factor analysis model, so it is shown rather than run:
-#   reliability_omega(data = items)
-# With five categories and thresholds spread across the latent scale
-# the two coefficients nearly agree on these data; the gap widens as
-# the categories get coarser and as the thresholds move into the
-# tails, which is where the categorical coefficient is worth its cost.
-
-# Every interval for categorical omega is bootstrap based, and each
-# replication refits the ordered-categorical factor analysis model.
-# That refitting is why it is not run here; the call is
-#   reliability_omega_categorical(data = items, ci_method = "bca",
-#                                 B = 10000, seed = 113)
-# and a reported interval deserves the BCa method at the default
-# B = 10000.
+# The same items treated as continuous, for contrast. With five
+# categories and thresholds spread across the latent scale the two
+# coefficients nearly agree on these data; the gap widens as the
+# categories get coarser and as the thresholds move into the tails,
+# which is where the categorical coefficient is worth its cost.
+reliability_omega(data = items)
 
 }
 \references{

@@ -8,10 +8,15 @@
 
 test_that("ss_aipe_rmsea_sensitivity() is exported with the documented API", {
   expect_true(is.function(ss_aipe_rmsea_sensitivity))
-  expect_true(all(c("width", "model", "Sigma", "N", "conf_level", "G") %in%
+  expect_true(all(c("width", "model", "Sigma", "N", "conf_level", "G",
+                    "filename") %in%
                     names(formals(ss_aipe_rmsea_sensitivity))))
   expect_equal(eval(formals(ss_aipe_rmsea_sensitivity)$conf_level), 0.95)
   expect_null(eval(formals(ss_aipe_rmsea_sensitivity)$N))
+  # Nothing is written unless the caller names a file; the old `save`
+  # switch and its default path in the working directory are gone.
+  expect_null(eval(formals(ss_aipe_rmsea_sensitivity)$filename))
+  expect_false("save" %in% names(formals(ss_aipe_rmsea_sensitivity)))
 })
 
 test_that("ss_aipe_rmsea_sensitivity() recovers the population RMSEA and runs end to end", {
@@ -57,4 +62,41 @@ test_that("ss_aipe_rmsea_sensitivity() requires named Sigma", {
                               Sigma = diag(3), G = 2),
     "row and column names"
   )
+})
+
+test_that("ss_aipe_rmsea_sensitivity() writes per-replication results only to a named file", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("MASS")
+
+  Lambda <- matrix(0, 6, 2); Lambda[1:3, 1] <- 0.7; Lambda[4:6, 2] <- 0.7
+  Phi   <- matrix(c(1, 0.5, 0.5, 1), 2, 2)
+  Sigma <- Lambda %*% Phi %*% t(Lambda) + diag(1 - 0.7^2, 6)
+  dimnames(Sigma) <- list(paste0("x", 1:6), paste0("x", 1:6))
+  proposed <- "g =~ x1 + x2 + x3 + x4 + x5 + x6"
+
+  # A malformed filename is refused before any replication runs.
+  expect_error(
+    ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
+                              N = 200, G = 3, filename = 42),
+    "'filename' must be NULL or a single character string", fixed = TRUE)
+
+  out_file <- tempfile(fileext = ".csv")
+  on.exit(unlink(out_file), add = TRUE)
+  set.seed(113)
+  res <- ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed,
+                                   Sigma = Sigma, N = 200, G = 3,
+                                   filename = out_file)
+  written <- utils::read.csv(out_file)
+  expect_named(written, c("iteration", "rmsea_hat", "ci_low", "ci_up", "width"))
+  expect_equal(nrow(written), res$value[res$term == "suc_rep"])
+  expect_equal(written$width, written$ci_up - written$ci_low)
+
+  # A second run appends to the existing file and says so.
+  set.seed(113)
+  expect_message(
+    ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
+                              N = 200, G = 3, filename = out_file),
+    "already exists", fixed = TRUE)
+  expect_equal(nrow(utils::read.csv(out_file)), 2L * nrow(written))
 })

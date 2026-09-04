@@ -43,8 +43,12 @@
 #'   planner.
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path to a CSV file; when supplied, the
+#'   per-replication results (the slope difference, its interval limits and
+#'   width, and the two tail misses) are written there, appended when the
+#'   file already exists, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}; the default \code{NULL} writes
+#'   nothing.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized estimated slope difference and CI width, the
@@ -68,21 +72,19 @@
 #' @seealso \code{\link{ss_aipe_pcm}}, \code{\link{ss_aipe_mixed_effects_sensitivity}}
 #'
 #' @examples
-#' # Every replication simulates two full groups of subjects, fits a
-#' # slope for each subject, and forms a confidence interval on the
-#' # difference in mean slopes, so the sweep is not run at example time.
-#' # The G below is far smaller than a reported sensitivity study would
-#' # use; the default of 1000 is the realistic setting. The call is:
-#' # set.seed(113)
-#' # ss_aipe_pcm_sensitivity(
-#' #   true_variance_trend       = 0.003,
-#' #   true_error_variance       = 0.0262,
-#' #   estimated_variance_trend  = 0.003,
-#' #   estimated_error_variance  = 0.0262,
-#' #   duration  = 4, frequency = 1,
-#' #   width     = 0.05,
-#' #   G = 20, print_iter = FALSE
-#' # )
+#' # Every replication simulates two full groups of subjects, fits a slope
+#' # for each subject, and forms a confidence interval on the difference in
+#' # mean slopes. G = 20 keeps the example quick; a reported sensitivity
+#' # study deserves the default G = 1000. With the planning values equal to
+#' # the population values, the realized mean width should sit at or just
+#' # under the target.
+#' set.seed(113)
+#' ss_aipe_pcm_sensitivity(
+#'   true_variance_trend = 0.003, true_error_variance = 0.0262,
+#'   estimated_variance_trend = 0.003, estimated_error_variance = 0.0262,
+#'   duration = 4, frequency = 1, width = 0.05,
+#'   G = 20, print_iter = FALSE
+#' )
 #'
 #' @keywords design multivariate
 #'
@@ -102,8 +104,7 @@ ss_aipe_pcm_sensitivity <- function(true_variance_trend = NULL,
                                     conf_level = 0.95,
                                     assurance = NULL,
                                     G = 1000, print_iter = FALSE,
-                                    save = FALSE,
-                                    filename = "ss_aipe_pcm_sensitivity_result.csv") {
+                                    filename = NULL) {
   est_supplied <- !is.null(estimated_variance_trend) && !is.null(estimated_error_variance)
   if (!est_supplied && is.null(n_per_group))
     stop("Supply (estimated_variance_trend, estimated_error_variance) or 'n_per_group'.", call. = FALSE)
@@ -113,6 +114,7 @@ ss_aipe_pcm_sensitivity <- function(true_variance_trend = NULL,
     stop("'true_variance_trend' must be a positive number.", call. = FALSE)
   if (is.null(true_error_variance) || true_error_variance <= 0)
     stop("'true_error_variance' must be a positive number.", call. = FALSE)
+  .check_filename(filename)
 
   if (est_supplied) {
     plan <- ss_aipe_pcm(variance_trend = estimated_variance_trend,
@@ -182,7 +184,7 @@ ss_aipe_pcm_sensitivity <- function(true_variance_trend = NULL,
     tI_upper[g] <- 0 > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(slope_diff = beta_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_w,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

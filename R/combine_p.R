@@ -125,8 +125,14 @@ combine_p <- function(p,
   }
 
   k <- length(p)
-  term <- character(0); value <- numeric(0); p_terms <- character(0)
-  add <- function(t, v) { term <<- c(term, t); value <<- c(value, v) }
+  # The rows accumulate in an environment made for them, so that add() can
+  # extend them with ordinary assignment.
+  rows <- new.env(parent = emptyenv())
+  rows$term <- character(0); rows$value <- numeric(0)
+  p_terms <- character(0)
+  add <- function(t, v) {
+    rows$term <- c(rows$term, t); rows$value <- c(rows$value, v)
+  }
 
   if ("fisher" %in% method) {
     X2 <- -2 * sum(log(p))
@@ -153,7 +159,7 @@ combine_p <- function(p,
   }
   add("k", k)
 
-  .as_dmar_tbl(data.frame(term = term, value = value,
+  .as_dmar_tbl(data.frame(term = rows$term, value = rows$value,
                           stringsAsFactors = FALSE),
                p_terms = p_terms)
 }

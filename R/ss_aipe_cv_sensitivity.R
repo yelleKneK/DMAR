@@ -28,10 +28,11 @@
 #'   stable Type I error estimates.
 #' @param print_iter Logical. If \code{TRUE} the simulation prints the iteration index after each
 #'   replication (helpful for long runs); default \code{FALSE}.
-#' @param save Logical. If \code{TRUE} the per-replication results are appended to a CSV file at
-#'   \code{filename}; default \code{FALSE}.
-#' @param filename Path used when \code{save = TRUE}; default
-#'   \code{"ss_aipe_cv_sensitivity_result.csv"} in the current working directory.
+#' @param filename An optional path for a comma separated file recording every replication (the two
+#'   confidence limits, the realized coefficient of variation, a coverage indicator, and the interval
+#'   width): nothing is written when \code{filename} is \code{NULL} (the default), a new file with a
+#'   header row is created otherwise, an existing file at that path is appended to, and a throwaway
+#'   run should point it at \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' Sample size planning for the coefficient of variation under the Accuracy in Parameter Estimation
@@ -127,13 +128,14 @@
 #' @export
 ss_aipe_cv_sensitivity <- function(true_cv = NULL, estimated_cv = NULL, width = NULL, assurance = NULL, mean = 100,
                                    specified_N = NULL, conf_level = .95, G = 1000, print_iter = FALSE,
-                                   save = FALSE, filename = "ss_aipe_cv_sensitivity_result.csv") {
+                                   filename = NULL) {
   if (is.null(estimated_cv) && is.null(specified_N)) {
     stop("You must specify either 'estimated_cv' or 'specified_N'.", call. = FALSE)
   }
   if (!is.null(estimated_cv) && !is.null(specified_N)) {
     stop("You must specify 'estimated_cv' or 'specified_N', but not both.", call. = FALSE)
   }
+  .check_filename(filename)
 
   if (!is.null(estimated_cv)) {
     if (estimated_cv <= 0) {
@@ -148,6 +150,12 @@ ss_aipe_cv_sensitivity <- function(true_cv = NULL, estimated_cv = NULL, width = 
     stop("'true_cv' must be specified and positive.", call. = FALSE)
   }
 
+  nc_state <- new.env(parent = emptyenv())
+  nc_state$n <- 0L
+  on.exit(if (nc_state$n > 0L) warning(sprintf(
+    "The noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in %d of the %d replications, so those interval limits may be inaccurate; see ?ci_nc_t.",
+    nc_state$n, G), call. = FALSE), add = TRUE)
+
   CN <- c("lower_limit", "upper_limit", "cv", "int_ok", "Width")
   Results <- matrix(NA, G, length(CN))
   colnames(Results) <- CN
@@ -156,7 +164,19 @@ ss_aipe_cv_sensitivity <- function(true_cv = NULL, estimated_cv = NULL, width = 
   {
     if (print_iter == TRUE) cat(c(i), "\n")
     X <- rnorm(N, mean = mean, sd = true_cv * mean)
-    CI_for_CV <- ci_cv(data = X, conf_level = conf_level)
+    # ci_cv() reports, through ci_nc_t(), when the noncentrality parameter
+    # sqrt(N) / cv exceeds 37.62, the limit of R's noncentral t accuracy. A
+    # planned N near 100 with a cv near 0.25 sits at that limit on every
+    # replication, so the warning is counted here and reported once after
+    # the sweep, with the count, instead of G times.
+    CI_for_CV <- withCallingHandlers(
+      ci_cv(data = X, conf_level = conf_level),
+      warning = function(w) {
+        if (grepl("noncentrality parameter exceeds 37.62", conditionMessage(w))) {
+          nc_state$n <- nc_state$n + 1L
+          invokeRestart("muffleWarning")
+        }
+      })
 
     Results[i, 1] <- CI_for_CV$value[CI_for_CV$term == "lower_limit"]
     Results[i, 2] <- CI_for_CV$value[CI_for_CV$term == "upper_limit"]
@@ -171,15 +191,12 @@ ss_aipe_cv_sensitivity <- function(true_cv = NULL, estimated_cv = NULL, width = 
 
   Results <- as.data.frame(Results)
 
-  if (save) {
-    result_file <- filename
-    # print("Simulation results will be saved to a .csv file")
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+  if (!is.null(filename)) {
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
     } else {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, append = FALSE)
     }
   }
 

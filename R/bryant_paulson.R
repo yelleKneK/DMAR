@@ -1,14 +1,14 @@
-#' The Bryant--Paulson Generalized Studentized Range Distribution
+#' The Bryant-Paulson Generalized Studentized Range Distribution
 #'
 #' @description
 #' Distribution function (\code{pbryant_paulson}), quantile/critical-value
 #' function (\code{qbryant_paulson}), and density (\code{dbryant_paulson})
-#' for the Bryant--Paulson generalized studentized range, the sampling
+#' for the Bryant-Paulson generalized studentized range, the sampling
 #' distribution of the studentized range of covariate-\emph{adjusted} means
 #' in the analysis of covariance (ANCOVA) when the covariate(s) are
 #' \emph{random}. These are the analysis-of-covariance analogues of
 #' \code{\link[stats]{ptukey}} / \code{\link[stats]{qtukey}} and supply the
-#' critical values needed for Tukey--Kramer-type simultaneous confidence
+#' critical values needed for Tukey-Kramer-type simultaneous confidence
 #' intervals on (and tests of) contrasts of adjusted means.
 #'
 #' @param q Vector of quantiles (values of the generalized studentized
@@ -33,7 +33,7 @@
 #' \strong{The statistic.} In a balanced ANCOVA with \eqn{k} groups and
 #' \eqn{p} random covariates, let \eqn{\hat\theta_i} be the adjusted group
 #' means and \eqn{\hat\sigma_{y \mid x}} the square root of the ANCOVA error
-#' mean square (on \eqn{\nu} degrees of freedom). The Bryant--Paulson
+#' mean square (on \eqn{\nu} degrees of freedom). The Bryant-Paulson
 #' statistic is the studentized range of the adjusted means,
 #' \deqn{Q \;=\; \frac{\max_i \hat\theta_i - \min_i \hat\theta_i}{\hat\sigma_{y\mid x}\sqrt{K_1 - K_2}},}
 #' where \eqn{K_1 - K_2} is the design constant that scales the variance of a
@@ -59,7 +59,10 @@
 #' factor \eqn{\delta} degenerates at 1 and \eqn{Q_p} is exactly the ordinary
 #' studentized range (Bryant and Paulson, 1976, Sec. 1), so the code
 #' short-circuits to \code{ptukey}. The integral is evaluated with
-#' \code{\link[stats]{integrate}}; \code{qbryant_paulson} inverts it with
+#' \code{\link[stats]{integrate}} after the change of variables
+#' \eqn{\delta = 1 - u^2}, which removes the endpoint singularity of the Beta
+#' weight at \eqn{\delta = 1} when \eqn{p = 1} and makes the quadrature
+#' converge in a few subdivisions; \code{qbryant_paulson} inverts it with
 #' \code{\link[stats]{uniroot}}. Bryant and Bruvold (1980) later showed the
 #' same distribution and critical values remain valid when the covariates are
 #' \emph{not} identically distributed across groups (their grouped-covariate
@@ -127,19 +130,14 @@
 #'
 #' @examples
 #' # Critical value from the worked example of Bryant and Bruvold (1980):
-#' # k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. Getting a
-#' # quantile means inverting the distribution function with uniroot, and every
-#' # step of that root search evaluates the integral over the covariate-shrinkage
-#' # factor, so the call takes about half a second and is shown here rather than
-#' # run.
-#' # qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
-#' # It returns 4.83, the entry in Table 1 of Bryant and Paulson (1976). The
-#' # distribution function itself is a single integral and is quick, so the
-#' # pbryant_paulson calls below do run.
+#' # k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. The quantile
+#' # is found by inverting the distribution function with uniroot; it is 4.83,
+#' # the entry in Table 1 of Bryant and Paulson (1976).
+#' qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
 #'
 #' # The ordinary Tukey value (ignoring that the covariate is random and
-#' # estimated) is smaller, so it yields intervals that are too narrow:
-#' qtukey(0.95, nmeans = 6, df = 14)                                   # 4.64
+#' # estimated) is smaller, 4.64, so it yields intervals that are too narrow:
+#' qtukey(0.95, nmeans = 6, df = 14)
 #'
 #' # How much too narrow: the Bryant-Paulson area beyond the Tukey value is the
 #' # familywise error rate Tukey's method actually delivers in this design.
@@ -276,25 +274,43 @@ NULL
   min(1, max(0, below + tail))
 }
 
+# The integral over the covariate-shrinkage factor is carried out after the
+# change of variables delta = 1 - u^2. The Beta((nu + 1)/2, p/2) density of delta
+# (Bryant & Paulson, 1976, Equation 12) carries the factor (1 - delta)^(p/2 - 1),
+# which for p = 1 is an integrable singularity at delta = 1, right where the
+# distribution puts most of its mass; integrate() copes with it only by
+# subdividing heavily near that endpoint, so the CDF cost several hundred
+# studentized-range evaluations. Under delta = 1 - u^2 the weight becomes
+#     2 u^(p - 1) (1 - u^2)^((nu - 1)/2) / B((nu + 1)/2, p/2),
+# which is smooth on [0, 1] for every p >= 1, and the same integral converges in
+# a handful of subdivisions: a critical value costs about a twentieth of what it
+# did, and the two forms agree to about 1e-10. The change of variables is exact,
+# so the Table 1 reproduction in the tests is unaffected.
+.bp_shrink_weight <- function(u, p, nu) {
+  a <- (nu + 1) / 2
+  2 * u^(p - 1) * (1 - u^2)^(a - 1) / beta(a, p / 2)
+}
+
 .pbp_one <- function(q, p, k, nu) {
   if (is.na(q) || is.na(p) || is.na(k) || is.na(nu)) return(NA_real_)
   if (q <= 0) return(0)
   # p = 0: ordinary studentized range (Bryant & Paulson, 1976, Section 1).
   if (p == 0) return(stats::ptukey(q, nmeans = k, df = nu))
   # Studentized-range CDF: exact for small nu, ptukey otherwise (see the note
-  # above). dbeta((nu+1)/2, p/2) is the covariate-shrinkage factor (Eq. 12).
+  # above), integrated against the covariate-shrinkage weight (Eq. 12) in the
+  # substituted variable u, with delta = 1 - u^2.
   if (nu < .BP_NU_EXACT) {
     rs <- .bp_get_range_spline(k)
-    integrand <- function(delta)
-      vapply(delta, function(dd) .bp_qsr_cdf(q * sqrt(dd), k, nu, rs), numeric(1)) *
-        stats::dbeta(delta, (nu + 1) / 2, p / 2)
+    integrand <- function(u)
+      vapply(u, function(uu) .bp_qsr_cdf(q * sqrt(1 - uu^2), k, nu, rs),
+             numeric(1)) * .bp_shrink_weight(u, p, nu)
     val <- stats::integrate(integrand, 0, 1, rel.tol = 1e-10,
                             stop.on.error = FALSE)$value
     return(min(max(val, 0), 1))
   }
-  integrand <- function(delta)
-    stats::ptukey(q * sqrt(delta), nmeans = k, df = nu) *
-      stats::dbeta(delta, (nu + 1) / 2, p / 2)
+  integrand <- function(u)
+    stats::ptukey(q * sqrt(1 - u^2), nmeans = k, df = nu) *
+      .bp_shrink_weight(u, p, nu)
   val <- stats::integrate(integrand, 0, 1, rel.tol = 1e-9,
                           stop.on.error = FALSE)$value
   min(max(val, 0), 1)

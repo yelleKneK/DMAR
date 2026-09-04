@@ -116,11 +116,11 @@
 #' krippendorff_alpha(cbind(r1, r2), level = "interval")
 #'
 #' # The percentile bootstrap interval for the same ratings, which
-#' # recomputes alpha on each of B resamples of the units. Not run
-#' # here, because 500 refits of alpha is more than a help page should
-#' # do; the call is:
-#' # krippendorff_alpha(cbind(r1, r2), level = "interval",
-#' #                    boot = TRUE, B = 500L, seed = 113)
+#' # recomputes alpha on each of B resamples of the units; the table
+#' # gains lower_limit, upper_limit, and B_used rows. B = 200 keeps the
+#' # example quick; a reported interval deserves the default B = 1000.
+#' krippendorff_alpha(cbind(r1, r2), level = "interval",
+#'                    boot = TRUE, B = 200L, seed = 113)
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
@@ -157,15 +157,7 @@ krippendorff_alpha <- function(ratings,
   )
 
   if (isTRUE(boot)) {
-    if (!is.null(seed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv)) {
-        .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-      } else {
-        on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-      }
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     n <- nrow(ratings)
     boot_a <- numeric(B)
     for (i in seq_len(B)) {

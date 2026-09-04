@@ -25,8 +25,14 @@
 #' @param assurance Optional assurance probability.
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample semipartial correlation, the two confidence
+#'   limits, the interval width, and two indicators of whether the
+#'   interval missed \code{true_r_sp} below or above): nothing is
+#'   written when \code{filename} is \code{NULL} (the default), a new
+#'   file with a header row is created otherwise, an existing file at
+#'   that path is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for the realized
 #'   semipartial correlation, the interval width, the proportion of
@@ -71,8 +77,7 @@ ss_aipe_semipartial_r_sensitivity <- function(true_r_sp = NULL,
                                               conf_level = 0.95,
                                               assurance = NULL,
                                               G = 1000, print_iter = FALSE,
-                                              save = FALSE,
-                                              filename = "ss_aipe_semipartial_r_sensitivity_result.csv") {
+                                              filename = NULL) {
   if (is.null(estimated_r_sp) && is.null(specified_N))
     stop("You must specify either 'estimated_r_sp' or 'specified_N'.", call. = FALSE)
   if (!is.null(estimated_r_sp) && !is.null(specified_N))
@@ -81,6 +86,7 @@ ss_aipe_semipartial_r_sensitivity <- function(true_r_sp = NULL,
     stop("'true_r_sp' must be a single value in (-1, 1).", call. = FALSE)
   if (!is.numeric(J) || J < 1)
     stop("'J' must be a positive integer.", call. = FALSE)
+  .check_filename(filename)
 
   if (!is.null(estimated_r_sp)) {
     plan <- ss_aipe_semipartial_r(r_sp = estimated_r_sp, J = J, width = width,
@@ -141,7 +147,7 @@ ss_aipe_semipartial_r_sensitivity <- function(true_r_sp = NULL,
     tI_upper[g] <- true_r_sp > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(r_sp = sp_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

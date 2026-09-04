@@ -75,6 +75,17 @@ its squared correlations with the other constructs. AVE is closely
 related to composite reliability (omega); the modern complement on the
 discriminant side is \code{\link{htmt}}.
 }
+\details{
+The percentile bootstrap interval resamples the cases behind
+\code{fit} and refits the model once per replication, so its cost is
+\code{B} model fits. That refitting is why the examples below stop at
+the point estimates: even the smallest permitted \code{B = 100} runs
+for several seconds on the two-factor model there. To obtain the
+interval, pass \code{ci_method = "percentile"} together with a
+\code{seed}, as in \code{average_variance_extracted(fit, ci_method =
+"percentile", seed = 113)}, and keep the default \code{B = 1000} or
+more for a reported analysis.
+}
 \examples{
 # Directly from the standardized loadings a paper reports:
 average_variance_extracted(loadings = c(.8, .7, .6))
@@ -98,13 +109,6 @@ ave_tbl
 # variance. Fitting with cfa_k(..., output = "measurement") puts the
 # AVE values and the latent correlations in one table.
 lavaan::lavInspect(fit, "cor.lv")["verbal", "deduction"]^2
-
-# An interval comes from ci_method = "percentile", which resamples the
-# cases and refits the model once per replication. That refitting is
-# why it is not run here; the call is
-#   average_variance_extracted(fit, ci_method = "percentile",
-#                              B = 1000, seed = 113)
-# and a reported interval deserves the default B = 1000 or more.
 
 # The broom verbs: one row per factor.
 generics::tidy(ave_tbl)

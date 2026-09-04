@@ -105,7 +105,7 @@ Auto-detection rules (used only when \code{type = NULL}):
 \itemize{
   \item If raw items are integer-valued and every column has at most
         10 distinct values, \code{type = "omega_categorical"} (categorical
-        omega; appropriate when items are ordered-categorical and
+        omega; appropriate when items are ordered categorical and
         the relationship between the underlying factor and the
         observed items is non-linear).
   \item Otherwise, \code{type = "omega"} (McDonald's coefficient
@@ -149,7 +149,7 @@ the observed composite variance in the denominator (see the
 \code{\link{reliability_omega}} help page for the properties of that
 choice). For well-behaved homogeneous measurement
 instruments these coefficients typically yield very similar values.
-For ordered-categorical items the relationship between the latent
+For ordered categorical items the relationship between the latent
 factor and the observed responses is non-linear, and
 \code{reliability_omega_categorical} handles that case explicitly via a
 probit-link single-factor model.
@@ -170,9 +170,11 @@ reliability(data = items)
 reliability(data = items, type = "alpha")
 
 # A covariance matrix and its sample size stand in for raw data, and
-# auto-detection again picks coefficient omega. The call fits the
-# single factor model a second time, so it is shown rather than run:
-#   reliability(S = cov(items), N = 200)
+# auto-detection again picks coefficient omega. The point estimate is
+# the same as from the raw data; the message explains why no interval
+# accompanies it, since the bootstrap behind robust omega resamples
+# rows that a covariance matrix does not carry.
+reliability(S = cov(items), N = 200)
 
 }
 \references{

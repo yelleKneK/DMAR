@@ -420,16 +420,7 @@ measurement_alignment <- function(data, items, group, model = NULL,
   }
 
   # ---- minimize the simplicity function -----------------------------------
-  if (!is.null(seed)) {
-    has_old <- exists(".Random.seed", envir = globalenv())
-    old <- if (has_old) get(".Random.seed", envir = globalenv()) else NULL
-    on.exit({
-      if (has_old) assign(".Random.seed", old, envir = globalenv())
-      else if (exists(".Random.seed", envir = globalenv()))
-        rm(".Random.seed", envir = globalenv())
-    }, add = TRUE)
-    set.seed(seed)
-  }
+  .dmar_local_seed(seed)
   machinery <- .alignment_machinery(lambda_0, nu_0, n, epsilon, alignment)
   starts <- .alignment_starts(lambda_0, nu_0, n_starts, alignment)
   runs <- lapply(starts, function(par) {

@@ -124,12 +124,13 @@ fit <- lme4::lmer(Reaction ~ Days + (Days | Subject),
 # between the two is what the subject-level terms buy.
 R2_mixed_effects(fit)
 
-# A bootstrap interval is available through ci_method = "boot". It refits
-# the model once per replication, so it is not run here; the call is
-#   R2_mixed_effects(fit, ci_method = "boot", B = 1000, seed = 113)
-# where B = 1000 is the default and seed is supplied because the limits
-# otherwise move from run to run. Raise B when the Monte Carlo error of
-# the reported limits needs to be smaller.
+# A parametric bootstrap percentile interval for both quantities. Each
+# replication refits the model, so B = 20 keeps the example quick; a
+# reported interval deserves the default B = 1000, and raising B
+# further tightens the Monte Carlo error of the limits. The seed makes
+# the limits reproducible and leaves the caller's generator state as
+# it was.
+R2_mixed_effects(fit, ci_method = "boot", B = 20, seed = 113)
 
 }
 \references{

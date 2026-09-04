@@ -63,11 +63,14 @@
 # per effect; each clamped effect signals the classed clamp warning, and
 # without deduplication a small factorial fit would print several identical
 # messages. The first clamp warning propagates untouched; later ones are
-# muffled.
+# muffled. The handler records what it has seen in an environment made for
+# it, since a handler cannot update its enclosing function's locals with
+# ordinary assignment.
 .warn_ncf_clamp_once <- function(expr) {
-  clamp_seen <- FALSE
+  state <- new.env(parent = emptyenv())
+  state$clamp_seen <- FALSE
   withCallingHandlers(expr, dmar_nc_F_clamp = function(w) {
-    if (clamp_seen) invokeRestart("muffleWarning")
-    clamp_seen <<- TRUE
+    if (state$clamp_seen) invokeRestart("muffleWarning")
+    state$clamp_seen <- TRUE
   })
 }

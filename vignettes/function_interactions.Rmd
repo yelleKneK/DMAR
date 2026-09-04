@@ -242,8 +242,9 @@ indirect effect \(ab\):
 # Asymptotic variance: var_indirect_effect(a, b, var_a, var_b, cov_ab)
 #   - returns Sobel, Aroian, Goodman, and second-order delta variances.
 # AIPE planning:       ss_aipe_indirect_effect(a, b, width, method)
-#   - method = "sobel"      → asymptotic SE
-#   - method = "monte_carlo"→ Tofighi & MacKinnon (2011) MC CI
+#   - method = "closed_form": the delta method (Sobel, 1982) width
+#   - method = "monte_carlo": the Monte Carlo interval width, simulated
+#     at each candidate n (Tofighi & MacKinnon, 2011)
 ```
 
 The two methods correspond to the two main approaches in the mediation
@@ -392,7 +393,7 @@ var_indirect_effect(a = a_hat, b = b_hat,
 
 # Plan an n for the next study:
 ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20,
-                         method = "sobel")
+                         method = "closed_form")
 ```
 
 ### E. Two-Method Agreement Study

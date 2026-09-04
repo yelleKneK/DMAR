@@ -49,6 +49,17 @@
 #'   a supplied seed is set internally and the prior state restored on
 #'   exit.
 #'
+#' @details
+#' The percentile bootstrap interval resamples the cases behind
+#' \code{fit} and refits the model once per replication, so its cost is
+#' \code{B} model fits. That refitting is why the examples below stop at
+#' the point estimates: even the smallest permitted \code{B = 100} runs
+#' for several seconds on the two-factor model there. To obtain the
+#' interval, pass \code{ci_method = "percentile"} together with a
+#' \code{seed}, as in \code{average_variance_extracted(fit, ci_method =
+#' "percentile", seed = 113)}, and keep the default \code{B = 1000} or
+#' more for a reported analysis.
+#'
 #' @return A \code{data.frame} (class \code{dmar_tbl}) with one row
 #'   per factor: \code{factor} (label), \code{ave}, and
 #'   \code{ci_lower} / \code{ci_upper} (the percentile bootstrap
@@ -97,13 +108,6 @@
 #' # AVE values and the latent correlations in one table.
 #' lavaan::lavInspect(fit, "cor.lv")["verbal", "deduction"]^2
 #'
-#' # An interval comes from ci_method = "percentile", which resamples the
-#' # cases and refits the model once per replication. That refitting is
-#' # why it is not run here; the call is
-#' #   average_variance_extracted(fit, ci_method = "percentile",
-#' #                              B = 1000, seed = 113)
-#' # and a reported interval deserves the default B = 1000 or more.
-#'
 #' # The broom verbs: one row per factor.
 #' generics::tidy(ave_tbl)
 #' generics::glance(ave_tbl)
@@ -145,7 +149,11 @@ average_variance_extracted <- function(fit = NULL, loadings = NULL,
     stop("'fit' must be a lavaan fit object.", call. = FALSE)
   }
   ave_from <- function(f) {
-    std <- lavaan::standardizedSolution(f)
+    # Only est.std is used, so the delta method standard errors, z
+    # statistics, p values, and intervals are switched off; that roughly
+    # halves the cost of each bootstrap refit.
+    std <- lavaan::standardizedSolution(f, se = FALSE, zstat = FALSE,
+                                        pvalue = FALSE, ci = FALSE)
     lam <- std[std$op == "=~", c("lhs", "est.std")]
     if (nrow(lam) == 0L) return(NULL)
     tapply(lam$est.std^2, lam$lhs, mean)
@@ -168,23 +176,14 @@ average_variance_extracted <- function(fit = NULL, loadings = NULL,
            "fits; refit per group or bootstrap by hand for a ",
            "multiple-group model.", call. = FALSE)
     }
-    if (!is.null(seed)) {
-      has_old <- exists(".Random.seed", envir = globalenv())
-      old_seed <- if (has_old) get(".Random.seed", envir = globalenv())
-      on.exit({
-        if (has_old) assign(".Random.seed", old_seed, envir = globalenv())
-        else if (exists(".Random.seed", envir = globalenv()))
-          rm(".Random.seed", envir = globalenv())
-      }, add = TRUE)
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     fac <- names(ave)
     boot_fun <- function(f) {
       a <- ave_from(f)
       if (is.null(a)) rep(NA_real_, length(fac)) else as.numeric(a[fac])
     }
     boots <- try(suppressWarnings(
-      lavaan::bootstrapLavaan(fit, R = as.integer(B), FUN = boot_fun)),
+      lavaan::lavBootstrap(fit, r = as.integer(B), fun = boot_fun)),
       silent = TRUE)
     if (inherits(boots, "try-error")) {
       stop("The bootstrap failed: ",

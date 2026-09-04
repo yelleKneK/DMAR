@@ -126,3 +126,34 @@ test_that("plot_trajectories_fitted() respects the n_random subset", {
   obs_layer <- p$layers[[1]]$data  # geom_point layer
   expect_equal(length(unique(obs_layer$Subject)), 5L)
 })
+
+test_that("plot_trajectories() seed makes the n_random draw reproducible and leaves the RNG state alone", {
+  skip_if_not_installed("ggplot2")
+  d <- data.frame(id = rep(1:10, each = 2), t = rep(1:2, 10), y = 1:20)
+  set.seed(1)
+  before <- get(".Random.seed", envir = globalenv())
+  p1 <- plot_trajectories(d, id = "id", time = "t", outcome = "y",
+                          n_random = 3, seed = 113)
+  # The seed is local to the call: the caller's generator state is restored.
+  expect_identical(get(".Random.seed", envir = globalenv()), before)
+  p2 <- plot_trajectories(d, id = "id", time = "t", outcome = "y",
+                          n_random = 3, seed = 113)
+  expect_identical(sort(unique(p1$data$id)), sort(unique(p2$data$id)))
+  expect_length(unique(p1$data$id), 3L)
+})
+
+test_that("plot_trajectories_fitted() seed makes the n_random draw reproducible and leaves the RNG state alone", {
+  skip_if_not_installed("ggplot2")
+  skip_if_not_installed("nlme")
+  fm <- nlme::lme(distance ~ age, random = ~ age | Subject,
+                  data = nlme::Orthodont)
+  set.seed(1)
+  before <- get(".Random.seed", envir = globalenv())
+  p1 <- plot_trajectories_fitted(fm, n_random = 4, seed = 113)
+  expect_identical(get(".Random.seed", envir = globalenv()), before)
+  p2 <- plot_trajectories_fitted(fm, n_random = 4, seed = 113)
+  q1 <- attr(p1, "quality_of_fit")
+  q2 <- attr(p2, "quality_of_fit")
+  expect_identical(as.character(q1$Subject), as.character(q2$Subject))
+  expect_equal(nrow(q1), 4L)
+})

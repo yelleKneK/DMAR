@@ -77,7 +77,7 @@ d <- simulate_regression_data(
   p      = 5,
   rho_YX = rep(0.30, 5)
 )
-summary(lm(y ~ ., data = d))$r.squared   # ~ 5 * 0.30^2 = 0.45
+summary(lm(y ~ ., data = d))$r.squared   # about 0.45: five predictors, each 0.30^2
 
 # Predictors with shared structure (exchangeable correlation matrix).
 rho_XX <- matrix(0.5, nrow = 5, ncol = 5); diag(rho_XX) <- 1

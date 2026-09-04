@@ -194,8 +194,8 @@ depend.
   S3 methods for many families; `set.seed(113)` as the
   package-wide reproducibility seed for examples and tests;
   `seed = NULL` as the default for every bootstrap and Monte
-  Carlo function, with explicit save/restore of
-  `.Random.seed` when the user supplies a seed.
+  Carlo function, with the caller's generator state restored
+  when a function given a seed returns.
 
 ## A Short Worked Migration
 

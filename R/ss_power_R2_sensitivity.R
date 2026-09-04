@@ -26,9 +26,11 @@
 #' @param rho_xx Correlation among the \emph{X} variables (off-diagonal of the predictor correlation matrix)
 #' @param G Number of Monte Carlo replications
 #' @param print_iter Whether to print the iteration number during the simulation
-#' @param save Whether to write the per-replication results to a CSV file
-#' @param filename Name of the CSV file written when \code{save = TRUE}
-#' @param \dots Additional arguments forwarded to internal helpers
+#' @param filename Optional path of a CSV file to receive the per-replication
+#'   results (the observed \eqn{R^2} and \eqn{F} statistic), overwriting any
+#'   file already at that path; the default \code{NULL} writes nothing, and a
+#'   throwaway run that wants the file should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' When \code{estimated_R2} equals \code{true_R2}, the function performs a
@@ -93,8 +95,8 @@
 #' @examples
 #' set.seed(113)
 #' # Realized power when planning under the fixed-predictor model but the
-#' # data are actually generated with random predictors. G is small here
-#' # for illustration; use G = 10,000 in practice.
+#' # data are actually generated with random predictors. G = 200 keeps the
+#' # example quick; a reported analysis deserves the default G of 10000.
 #' ss_power_R2_sensitivity(true_R2 = 0.30, estimated_R2 = 0.30,
 #'                         desired_power = 0.80, p = 5,
 #'                         random_predictors = FALSE,
@@ -120,9 +122,7 @@ ss_power_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL,
                                     specified_N = NULL,
                                     generate_random_predictors = TRUE,
                                     rho_yx = .3, rho_xx = .3, G = 10000,
-                                    print_iter = TRUE, save = FALSE,
-                                    filename = "ss_power_r2_sensitivity_result.csv",
-                                    ...) {
+                                    print_iter = TRUE, filename = NULL) {
   if (is.null(true_R2)) stop("You must specify \'true_R2\'.")
   if (true_R2 >= 1 || true_R2 <= 0) stop("\'true_R2\' must be between zero and one.")
   if (is.null(p)) stop("You must specify \'p\' (the number of predictors).")
@@ -137,11 +137,11 @@ ss_power_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL,
     stop("You must specify either \'estimated_R2\' or \'specified_N\'.", call. = FALSE)
   if (!is.null(estimated_R2) && !is.null(specified_N))
     stop("You must specify either \'estimated_R2\' or \'specified_N\', not both.", call. = FALSE)
+  .check_filename(filename)
 
-  prev_warn <- getOption("warn")
-  on.exit(options(warn = prev_warn), add = TRUE)
-  options(warn = -1)
-
+  # No warning is muffled in this function: the planner and the
+  # per-replication least squares fits are silent in ordinary use, and a
+  # warning that does surface is information the user should see.
   if (!is.null(estimated_R2)) {
     if (estimated_R2 >= 1 || estimated_R2 <= 0) stop("\'estimated_R2\' must be between zero and one.")
     N <- ss_power_R2(population_R2 = estimated_R2,
@@ -195,8 +195,8 @@ ss_power_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL,
   }
 
   Results_df <- as.data.frame(Results)
-  if (save) {
-    message("Simulation results will be saved to a .csv file; overwriting an existing file of the same name.")
+  if (!is.null(filename)) {
+    message("Writing the per-replication results to '", filename, "' (any file already there is overwritten).")
     utils::write.csv(Results_df, filename, row.names = FALSE)
   }
 

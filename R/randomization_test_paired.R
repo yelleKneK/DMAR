@@ -30,7 +30,7 @@
 #'   forces Monte Carlo.
 #' @param n_resamples Number of Monte Carlo resamples when exact
 #'   enumeration is not used. Default \code{10000L}.
-#' @param seed Optional integer seed for reproducibility of the Monte-
+#' @param seed Optional integer seed for reproducibility of the Monte
 #'   Carlo branch. Default \code{NULL}, which leaves the user's current RNG state intact; supply an integer for reproducibility.
 #'
 #' @return A \code{data.frame} with rows for the observed test
@@ -131,15 +131,7 @@ randomization_test_paired <- function(x, y,
     p_value <- extreme / n_perm
     n_eval  <- n_perm
   } else {
-    if (!is.null(seed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv)) {
-        .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-      } else {
-        on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-      }
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     T_null <- numeric(n_resamples)
     for (j in seq_len(n_resamples)) {
       signs <- sample(c(-1L, 1L), n, replace = TRUE)

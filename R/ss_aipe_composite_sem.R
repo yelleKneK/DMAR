@@ -112,8 +112,17 @@
 #' variances before any simulation), brackets the crossing geometrically, and
 #' bisects to adjacent integers, each candidate evaluated with its own
 #' \code{G} replications. A planning call therefore fits the analysis model
-#' several thousand times, which is why the examples on this page are shown
-#' but not run.
+#' several thousand times at the default \code{G}, and even at the smallest
+#' admissible \code{G} the search runs for several seconds, so the example
+#' below evaluates a stated \code{N}, which is the cheap half of the method.
+#' A planning call is the same call with \code{N} left out: supplying
+#' \code{assurance} plans against the joint event, and leaving
+#' \code{assurance} out as well plans against the expected widths; either way
+#' the first row of the result is \code{necessary_N} rather than
+#' \code{specified_N}. The vignette
+#' \code{vignette("composite_sem_planning", package = "DMAR")} works through
+#' both planning calls for a mediation model and a latent growth curve
+#' model, with reference values computed at \code{G = 10000}.
 #'
 #' Each reported proportion carries a simulation standard error of about
 #' \eqn{\sqrt{p(1 - p)/G}}, and the necessary sample size inherits that
@@ -181,61 +190,44 @@
 #'
 #' @examples
 #' # A mediation model whose research questions concern the magnitudes of
-#' # both individual paths and the indirect effect. Every quantity this
-#' # function reports comes out of a Monte Carlo study: each evaluated sample
-#' # size refits the analysis model G times, and a planning search refits it
-#' # several thousand times. Even a single evaluation at a small G takes long
-#' # enough that the worked example below is shown here rather than run.
-#' #
-#' # The population model fixes every parameter to its purported population
-#' # value.
-#' #   pop_model <- "
-#' #     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-#' #     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-#' #     f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
-#' #     f2 ~ 0.4*f1
-#' #     f3 ~ 0.5*f2 + 0.2*f1
-#' #     f1 ~~ 1*f1
-#' #     f2 ~~ 0.84*f2
-#' #     f3 ~~ 0.7*f3
-#' #     y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
-#' #     y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
-#' #     y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
-#' #   "
-#' #
+#' # both individual paths and the indirect effect. The population model
+#' # fixes every parameter to its purported population value.
+#' pop_model <- "
+#'   f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+#'   f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+#'   f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
+#'   f2 ~ 0.4*f1
+#'   f3 ~ 0.5*f2 + 0.2*f1
+#'   f1 ~~ 1*f1
+#'   f2 ~~ 0.84*f2
+#'   f3 ~~ 0.7*f3
+#'   y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+#'   y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+#'   y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
+#' "
+#'
 #' # The analysis model labels the two paths and defines the indirect
 #' # effect; all three make up the set of interest.
-#' #   analysis_model <- "
-#' #     f1 =~ y1 + y2 + y3
-#' #     f2 =~ y4 + y5 + y6
-#' #     f3 =~ y7 + y8 + y9
-#' #     f2 ~ a*f1
-#' #     f3 ~ b*f2 + cp*f1
-#' #     ab := a*b
-#' #   "
-#' #
+#' analysis_model <- "
+#'   f1 =~ y1 + y2 + y3
+#'   f2 =~ y4 + y5 + y6
+#'   f3 =~ y7 + y8 + y9
+#'   f2 ~ a*f1
+#'   f3 ~ b*f2 + cp*f1
+#'   ab := a*b
+#' "
+#'
 #' # Realized interval widths at N = 200, with the indirect effect held to a
 #' # narrower interval than the paths through a named vector of widths. Each
 #' # interval lands within its desired width in most of the replications, yet
 #' # all three do so together in far fewer of them: that joint proportion,
 #' # reported as composite_assurance, is what a design of this kind has to be
-#' # planned against.
-#' #   set.seed(113)
-#' #   ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
-#' #                         parameters = c("a", "b", "ab"),
-#' #                         desired_width = c(a = 0.35, b = 0.40, ab = 0.25),
-#' #                         N = 200, G = 1000)
-#' #
-#' # Leaving N out plans the necessary sample size instead, here for all
-#' # three intervals to be simultaneously within their desired widths in 80
-#' # percent of studies. That search evaluates a sequence of candidate sample
-#' # sizes, each with its own G replications, so it costs several thousand
-#' # model fits:
-#' #   set.seed(113)
-#' #   ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
-#' #                         parameters = c("a", "b", "ab"),
-#' #                         desired_width = c(a = 0.35, b = 0.40, ab = 0.25),
-#' #                         assurance = 0.80, G = 1000)
+#' # planned against. G = 20 keeps the example quick; a reported plan
+#' # deserves the default G = 1000 or more.
+#' ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
+#'                       parameters = c("a", "b", "ab"),
+#'                       desired_width = c(a = 0.35, b = 0.40, ab = 0.25),
+#'                       N = 200, G = 20, seed = 113)
 #'
 #' @keywords design multivariate
 #'
@@ -272,21 +264,9 @@ ss_aipe_composite_sem <- function(model, Sigma = NULL, pop_model = NULL,
     .composite_sem_check_resolution(assurance, G, "assurance")
   }
 
-  if (!is.null(seed)) {
-    if (!is.numeric(seed) || length(seed) != 1L || is.na(seed)) {
-      stop("'seed' must be NULL or a single number.", call. = FALSE)
-    }
-    if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
-      old_seed <- get(".Random.seed", envir = globalenv(), inherits = FALSE)
-      on.exit(assign(".Random.seed", old_seed, envir = globalenv()),
-              add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = globalenv(),
-                         inherits = FALSE))
-        rm(".Random.seed", envir = globalenv()), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  # A supplied seed governs the Monte Carlo draws of this call only; the
+  # caller's generator state is restored when the function exits.
+  .dmar_local_seed(seed)
 
   setup <- .composite_sem_setup(model, Sigma, pop_model, parameters,
                                 mu = mu, ...)
@@ -317,7 +297,12 @@ ss_aipe_composite_sem <- function(model, Sigma = NULL, pop_model = NULL,
   N_min <- max(10L, setup$n_obs_vars + 2L)
   z <- stats::qnorm(1 - (1 - conf_level) / 2)
 
-  short_evals <- 0L
+  # Evaluations where fewer than G replications converged within the attempts
+  # cap are counted in a state environment that evaluate() updates, so a
+  # single summary warning is issued at the end rather than one per
+  # evaluation.
+  state <- new.env(parent = emptyenv())
+  state$short_evals <- 0L
   evaluate <- function(n) {
     mc <- .composite_sem_mc(model, setup$Sigma, setup$mu, labels, n, G, ...)
     if (mc$converged == 0L) {
@@ -326,7 +311,7 @@ ss_aipe_composite_sem <- function(model, Sigma = NULL, pop_model = NULL,
            "Reconsider the model or the candidate sample size.",
            call. = FALSE)
     }
-    if (mc$converged < G) short_evals <<- short_evals + 1L
+    if (mc$converged < G) state$short_evals <- state$short_evals + 1L
     width <- 2 * z * mc$se
     within <- sweep(width, 2L, omega, "<=")
     list(mean_width = colMeans(width),
@@ -357,9 +342,9 @@ ss_aipe_composite_sem <- function(model, Sigma = NULL, pop_model = NULL,
     res <- searched$eval
   }
 
-  if (short_evals > 0L) {
-    warning("In ", short_evals, " Monte Carlo evaluation",
-            if (short_evals > 1L) "s" else "", " fewer than G = ", G,
+  if (state$short_evals > 0L) {
+    warning("In ", state$short_evals, " Monte Carlo evaluation",
+            if (state$short_evals > 1L) "s" else "", " fewer than G = ", G,
             " replications converged within the attempts cap; those ",
             "summaries are based on the converged replications.",
             call. = FALSE)

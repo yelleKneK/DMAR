@@ -218,3 +218,30 @@ test_that("ss_aipe_pcm() scales the error variance of the slope by frequency^(2p
   expect_equal(V_slope, 0.0262 * 2^2 / 10)
   expect_equal(V_slope, 0.0262 / sum((seq(0, 2, length.out = 5) - 1)^2))
 })
+
+test_that("ss_aipe_pcm_sensitivity() writes per-replication results only when 'filename' is supplied", {
+  skip_on_cran()
+  csv <- tempfile(fileext = ".csv")
+  on.exit(unlink(csv), add = TRUE)
+  args <- list(true_variance_trend = 0.1, true_error_variance = 1,
+               n_per_group = 10, duration = 4, frequency = 1, width = 0.5,
+               G = 3, print_iter = FALSE)
+  set.seed(113)
+  res_none <- do.call(ss_aipe_pcm_sensitivity, args)
+  expect_false(file.exists(csv))
+  set.seed(113)
+  res_file <- do.call(ss_aipe_pcm_sensitivity, c(args, list(filename = csv)))
+  expect_equal(res_file, res_none)
+  written <- utils::read.csv(csv)
+  expect_equal(nrow(written), 3L)
+  expect_named(written, c("slope_diff", "ci_lower", "ci_upper", "ci_width",
+                          "type_I_lower", "type_I_upper"))
+  # A second run appends to the existing file.
+  set.seed(113)
+  do.call(ss_aipe_pcm_sensitivity, c(args, list(filename = csv)))
+  expect_equal(nrow(utils::read.csv(csv)), 6L)
+  expect_error(
+    do.call(ss_aipe_pcm_sensitivity, c(args, list(filename = c(csv, csv)))),
+    "'filename' must be NULL or a single character string"
+  )
+})

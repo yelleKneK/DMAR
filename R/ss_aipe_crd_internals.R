@@ -100,15 +100,7 @@
 
 # Simulate multiple datasets and find the average of the width of CI of ES (with or without the degree of assurance)
 .find_width_crd_es <- function(nrep, n_clusters, n_treat_clus, n_individuals, icc_Y, es, es_type = 1, total_var = 1, covariate = FALSE, icc_Z = NULL, R2_within = NULL, R2_between = NULL, total_var_Z = 1, assurance = NULL, seed = NULL, multicore = FALSE, num_proc = NULL, conf_level = 0.95, diff_size = NULL) {
-    if (!is.null(seed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv)) {
-        .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-      } else {
-        on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-      }
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
 
     seed_list <- as.list(sample(1:999999, nrep))
     result_l <- NULL
@@ -138,15 +130,7 @@
 
 # Create data and find the width of the likelihood-based CI of ES
 .runrep_width_es_crd <- function(seed, n_clusters, n_treat_clus, n_individuals, icc_Y, es, es_type = 1, total_var = 1, covariate = FALSE, icc_Z = NULL, R2_within = NULL, R2_between = NULL, total_var_Z = 1, conf_level = 0.95, diff_size = NULL) {
-    if (!is.null(seed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv)) {
-        .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-      } else {
-        on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-      }
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     datawide <- .create_data_crd_wide(n_clusters = n_clusters, n_treat_clus = n_treat_clus, n_individuals = n_individuals, icc_Y = icc_Y, es = es, es_type = es_type, total_var = total_var, covariate = covariate, icc_Z = icc_Z, R2_within = R2_within, R2_between = R2_between, total_var_Z = total_var_Z, diff_size = diff_size)
     y_label <- NULL
     if (!is.null(diff_size)) {

@@ -95,20 +95,20 @@
 #'   trajectories together with a fitted multilevel model's predictions.
 #'
 #' @examples
-#' # Built-in Orthodont data: 27 children, 4 measurements each.
+#' # The Orthodont data from nlme: 27 children, 4 measurements each.
 #' d <- nlme::Orthodont
 #'
 #' # Overlay all trajectories, colored by sex.
 #' plot_trajectories(d, id = "Subject", time = "age",
 #'                   outcome = "distance", group = "Sex")
 #'
-#' # One panel per child, for twelve children drawn at random. Not run
-#' # here because faceting draws twelve small plots instead of one, which
-#' # costs about twice what the overlay above does. The call is:
-#' # plot_trajectories(d, id = "Subject", time = "age",
-#' #                   outcome = "distance",
-#' #                   n_random = 12, facet = TRUE, ncol = 4,
-#' #                   seed = 113)
+#' # One panel per child, for twelve children drawn at random. The seed
+#' # makes the draw reproducible, and the session's generator state is
+#' # left as it was.
+#' plot_trajectories(d, id = "Subject", time = "age",
+#'                   outcome = "distance",
+#'                   n_random = 12, facet = TRUE, ncol = 4,
+#'                   seed = 113)
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
@@ -134,16 +134,9 @@ plot_trajectories <- function(data, id, time, outcome,
                               xlab        = NULL,
                               ylab        = NULL,
                               seed        = NULL) {
-  if (!is.null(seed) &&
-      (!is.null(n_random) || !is.null(pct_random))) {
-    if (exists(".Random.seed", envir = .GlobalEnv)) {
-      .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  # The seed matters only when subjects are sampled. It is set for this
+  # call and the caller's generator state is restored on exit.
+  if (!is.null(n_random) || !is.null(pct_random)) .dmar_local_seed(seed)
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required. Install with install.packages(\"ggplot2\").",
          call. = FALSE)
@@ -392,8 +385,8 @@ plot_trajectories <- function(data, id, time, outcome,
 #'   \item returning a \pkg{ggplot2} object instead of writing to graphics
 #'         devices,
 #'   \item attaching per-subject quality-of-fit as an attribute rather than
-#'         assigning it to the global environment via \code{<<-} (a serious
-#'         side effect of the original),
+#'         assigning it into the global environment, a serious side effect
+#'         of the original,
 #'   \item drawing a smooth fitted curve from a per-subject time grid via
 #'         \code{predict(..., re.form = NULL)} for \pkg{lme4} fits and
 #'         \code{predict(..., level = 1)} for \pkg{nlme} fits,
@@ -407,22 +400,21 @@ plot_trajectories <- function(data, id, time, outcome,
 #' @seealso \code{\link{plot_trajectories}}
 #'
 #' @examples
-#' # nlme: linear growth in tooth distance over age (Orthodont, 27 children).
-#' # Four of the children are paneled here so the figure is quick to draw;
-#' # drop n_random to get a panel for every child.
+#' # nlme: linear growth in tooth distance over age for the 27 Orthodont
+#' # children. Four of the children are paneled here so the figure is
+#' # quick to draw; drop n_random to get a panel for every child.
 #' fm_nlme <- nlme::lme(distance ~ age, random = ~ age | Subject,
 #'                      data = nlme::Orthodont)
 #' p <- plot_trajectories_fitted(fm_nlme, n_random = 4, seed = 113)
 #' p
 #' attr(p, "quality_of_fit")  # per-subject R^2 and RMSE
 #'
-#' # An lme4 fit is handled the same way. Not run here because the call
-#' # loads the lme4 namespace and then draws a panel for each of the
-#' # eighteen subjects, which is where the time goes; fitting the model
-#' # is quick by comparison. The calls are:
-#' # fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
-#' #                       data = lme4::sleepstudy)
-#' # plot_trajectories_fitted(fm_lme4)
+#' # An lme4 fit is handled the same way: the outcome, the subject
+#' # identifier, and the time variable are read from the model. Six of
+#' # the eighteen sleepstudy subjects are paneled here.
+#' fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
+#'                       data = lme4::sleepstudy)
+#' plot_trajectories_fitted(fm_lme4, n_random = 6, seed = 113)
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
@@ -452,16 +444,9 @@ plot_trajectories_fitted <- function(model,
                                      xlab         = NULL,
                                      ylab         = NULL,
                                      seed         = NULL) {
-  if (!is.null(seed) &&
-      (!is.null(n_random) || !is.null(pct_random))) {
-    if (exists(".Random.seed", envir = .GlobalEnv)) {
-      .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  # The seed matters only when subjects are sampled. It is set for this
+  # call and the caller's generator state is restored on exit.
+  if (!is.null(n_random) || !is.null(pct_random)) .dmar_local_seed(seed)
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is required. Install with install.packages(\"ggplot2\").",
          call. = FALSE)

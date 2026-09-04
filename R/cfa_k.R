@@ -87,7 +87,7 @@
 #'   maximum likelihood). Ignored with \code{S}.
 #'   With \code{ordered} items, \code{"ml"}/\code{"fiml"} are not
 #'   available; use \code{"pairwise"} or \code{"listwise"}.
-#' @param ordered Ordered-categorical items: \code{NULL} (none, the
+#' @param ordered Ordered categorical items: \code{NULL} (none, the
 #'   default), \code{TRUE} (every item), or a character vector of item
 #'   names. Requires raw data. Each factor must be all ordered or all
 #'   continuous. Declaring ordered items switches the estimator to
@@ -331,43 +331,47 @@
 #' # correlations, and the htmt ratios.
 #' cfa_k(holzinger_swineford, hs_factors, output = "measurement")
 #'
-#' # The rest of the descriptor menu is shown but not run here, since
-#' # each call refits the model. Descriptors can differ by factor:
-#' # cfa_k(holzinger_swineford, hs_factors,
-#' #       equal_loading = c(verbal = TRUE, deduction = FALSE))
-#' #
+#' # Descriptors can differ by factor: here the verbal loadings are
+#' # equated and the deduction loadings are left free, and the header
+#' # names each factor's structure separately.
+#' cfa_k(holzinger_swineford, hs_factors,
+#'       equal_loading = c(verbal = TRUE, deduction = FALSE))
+#'
 #' # Equal loadings and intercepts (tau-equivalent), then also equal
 #' # error variances (parallel). The mean structure is added because
-#' # equal_intercept asks about it:
-#' # cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
-#' #       equal_intercept = TRUE)
-#' # cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
-#' #       equal_intercept = TRUE, equal_error = TRUE)
-#' #
-#' # Ordered-categorical items: the model is fit by WLSMV to polychoric
-#' # correlations, and each ordered factor's omega is reported on the
-#' # categorical sum score metric (Green & Yang, 2009):
-#' # set.seed(113)
-#' # eta <- rnorm(200)
-#' # lat <- sweep(matrix(rep(eta, 6), 200, 6), 2,
-#' #              seq(0.5, 0.8, length.out = 6), `*`) +
-#' #   matrix(rnorm(200 * 6), 200, 6) %*%
-#' #   diag(sqrt(1 - seq(0.5, 0.8, length.out = 6)^2))
-#' # likert <- as.data.frame(apply(lat, 2, function(x)
-#' #   as.integer(cut(x, breaks = c(-Inf, -1, 0, 1, Inf)))))
-#' # names(likert) <- paste0("item_", 1:6)
-#' # cfa_k(likert,
-#' #       list(scale_a = paste0("item_", 1:3),
-#' #            scale_b = paste0("item_", 4:6)),
-#' #       ordered = TRUE, output = "measurement")
-#' #
+#' # equal_intercept asks about it, so the nu terms join the table.
+#' cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
+#'       equal_intercept = TRUE)
+#' cfa_k(holzinger_swineford, hs_factors, equal_loading = TRUE,
+#'       equal_intercept = TRUE, equal_error = TRUE)
+#'
+#' # Ordered categorical items: two correlated factors of three
+#' # four-category items each, generated here. The model is fit by WLSMV
+#' # to polychoric correlations, and each ordered factor's omega is
+#' # reported on the categorical sum score metric (Green & Yang, 2009),
+#' # which is why the interval columns of those two rows are NA.
+#' set.seed(113)
+#' n <- 200
+#' eta_a <- rnorm(n)
+#' eta_b <- 0.5 * eta_a + sqrt(1 - 0.5^2) * rnorm(n)
+#' lambda <- c(0.6, 0.7, 0.8)
+#' lat <- cbind(outer(eta_a, lambda), outer(eta_b, lambda)) +
+#'   matrix(rnorm(n * 6), n, 6) %*% diag(sqrt(1 - c(lambda, lambda)^2))
+#' likert <- as.data.frame(apply(lat, 2, function(x)
+#'   as.integer(cut(x, breaks = c(-Inf, -1, 0, 1, Inf)))))
+#' names(likert) <- paste0("item_", 1:6)
+#' cfa_k(likert,
+#'       list(scale_a = paste0("item_", 1:3),
+#'            scale_b = paste0("item_", 4:6)),
+#'       ordered = TRUE, output = "measurement")
+#'
 #' # Does the equal-loadings description hold? Two fits that differ only
 #' # in a descriptor are nested, so output = "fit" hands them straight to
-#' # lavaan's likelihood ratio test:
-#' # fit_free  <- cfa_k(holzinger_swineford, hs_factors, output = "fit")
-#' # fit_equal <- cfa_k(holzinger_swineford, hs_factors,
-#' #                    equal_loading = TRUE, output = "fit")
-#' # lavaan::lavTestLRT(fit_free, fit_equal)
+#' # lavaan's likelihood ratio test.
+#' fit_free  <- cfa_k(holzinger_swineford, hs_factors, output = "fit")
+#' fit_equal <- cfa_k(holzinger_swineford, hs_factors,
+#'                    equal_loading = TRUE, output = "fit")
+#' lavaan::lavTestLRT(fit_free, fit_equal)
 #'
 #' @export
 cfa_k <- function(data = NULL, factors, S = NULL, N = NULL, M = NULL,

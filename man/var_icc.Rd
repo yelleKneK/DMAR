@@ -94,13 +94,15 @@ themselves, prefer \code{\link{icc}}, which uses the exact
 # Single-rater one-way ICC at rho = .60 with 30 subjects and 4 raters.
 var_icc(rho = 0.60, n = 30, k = 4, type = "ICC(1,1)")
 
-# Same study, but expressed at the average-of-4-rater level.
-#     The Spearman-Brown-transformed population value is
-#     rho_k = 4*.6 / (1 + 3*.6) = 0.857
-var_icc(rho = 0.857, n = 30, k = 4, type = "ICC(1,k)")
+# Same study, but expressed at the average-of-4-rater level. The
+# Spearman-Brown relation carries the single-rater value of .60 up
+# to the average-of-4 scale, about .857.
+rho_k <- 4 * 0.60 / (1 + 3 * 0.60)
+rho_k
+var_icc(rho = rho_k, n = 30, k = 4, type = "ICC(1,k)")
 
-# Two-way mixed-model consistency ICC (uses the same one-way
-#     asymptotic variance as a large-sample approximation; see Details).
+# Two-way mixed-model consistency ICC, which uses the same one-way
+# asymptotic variance as a large-sample approximation (see Details).
 var_icc(rho = 0.60, n = 30, k = 4, type = "ICC(3,1)")
 
 }

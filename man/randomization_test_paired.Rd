@@ -37,7 +37,7 @@ forces Monte Carlo.}
 \item{n_resamples}{Number of Monte Carlo resamples when exact
 enumeration is not used. Default \code{10000L}.}
 
-\item{seed}{Optional integer seed for reproducibility of the Monte-
+\item{seed}{Optional integer seed for reproducibility of the Monte
 Carlo branch. Default \code{NULL}, which leaves the user's current RNG state intact; supply an integer for reproducibility.}
 }
 \value{

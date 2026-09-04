@@ -15,8 +15,7 @@ ss_aipe_icc_sensitivity(
   type = c("ICC(1,1)", "ICC(2,1)", "ICC(3,1)", "ICC(1,k)", "ICC(2,k)", "ICC(3,k)"),
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_icc_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -64,12 +63,13 @@ estimates.}
 iteration index after each replication (helpful for long runs);
 default \code{FALSE}.}
 
-\item{save}{Logical. If \code{TRUE} the per-replication results are
-appended to a CSV file at \code{filename}; default \code{FALSE}.}
-
-\item{filename}{Path used when \code{save = TRUE}; default
-\code{"ss_aipe_icc_sensitivity_result.csv"} in the current working
-directory.}
+\item{filename}{An optional path for a comma separated file recording
+every replication (the realized ICC, the two confidence limits, the
+interval width, and the two tail-specific non-coverage indicators):
+nothing is written when \code{filename} is \code{NULL} (the default),
+a new file with a header row is created otherwise, an existing file
+at that path is appended to, and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}

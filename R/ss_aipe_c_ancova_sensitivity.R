@@ -19,8 +19,14 @@
 #' @param width the desired full width of the obtained confidence interval
 #' @param conf_level the desired confidence interval coverage, (i.e., 1 - Type I error rate)
 #' @param assurance parameter to ensure that the obtained confidence interval width is narrower than the desired width with a specified degree of certainty (must be NULL or between zero and unity)
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
+#' @param filename an optional path for a comma separated file recording
+#'   every replication (the realized contrast, its full and
+#'   covariate-ignoring standard errors and their ratio, the interval
+#'   width, and the three non-coverage indicators): nothing is written
+#'   when \code{filename} is \code{NULL} (the default), a new file with a
+#'   header row is created otherwise, an existing file at that path is
+#'   appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}
 #'
 #' @details
 #' The arguments \code{mu_y}, \code{mu_x}, \code{sigma_y}, and \code{sigma_x} are used to generate random data in the simulations
@@ -52,8 +58,8 @@
 #' proportion rows are on the 0 to 1 scale, not percentages. The
 #' per-replication vectors (\code{psi_obs}, \code{se_psi},
 #' \code{se_psi_restricted}, \code{width_obs}) are not returned; they
-#' are written to the CSV named by \code{filename} when
-#' \code{save = TRUE}.
+#' are written to the comma separated file named by \code{filename} when
+#' one is supplied.
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
@@ -92,8 +98,9 @@
 
 ss_aipe_c_ancova_sensitivity <- function(true_error_var_ancova = NULL, est_error_var_ancova = NULL, true_error_var_anova = NULL, est_error_var_anova = NULL,
                                          rho, est_rho = NULL, G = 10000, mu_y, sigma_y, mu_x, sigma_x, c_weights, width, conf_level = .95, assurance = NULL,
-                                         save = FALSE, filename = "ss_aipe_c_ancova_sensitivity_result.csv") {
+                                         filename = NULL) {
   if (!requireNamespace("MASS", quietly = TRUE)) stop("The package 'MASS' is needed; please install the package and try again.")
+  .check_filename(filename)
 
   if (!is.null(sigma_y) && !is.null(true_error_var_anova)) {
     if (sigma_y != sqrt(true_error_var_anova)) stop("'sigma_y' and 'true_error_var_anova' should be the same")
@@ -193,15 +200,12 @@ ss_aipe_c_ancova_sensitivity <- function(true_error_var_ancova = NULL, est_error
     type_I_error_lower = Type_I_Error_Lower
   )
 
-  if (save) {
-    result_file <- filename
-    # print("Simulation results will be saved to a .csv file")
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+  if (!is.null(filename)) {
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
     } else {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, append = FALSE)
     }
   }
 

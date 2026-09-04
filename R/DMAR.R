@@ -1,11 +1,11 @@
-#' Design, Measurement, and Analysis in R
+#' Design, Measurement, and Analysis
 #'
 #' A modern R package for design, measurement, and analysis, 
 #' with special strength in effect sizes, confidence intervals, 
 #' size planning, reliability and agreement, mediation analysis,
 #' equivalence testing, meta-analysis, experimental and quasi-experimental designs, repeated measures, and
-#' model comparison-based inference. DMAR (pronounced \dQuote{Dee-Mar})
-#' is heavily methodological in nature, drawing on the psychometric and
+#' model comparison-based inference. DMAR (pronounced \dQuote{Dee-Mar}, for
+#' design, measurement, and analysis in R) is heavily methodological in nature, drawing on the psychometric and
 #' statistical traditions, and is aligned with the methodological and
 #' applied research program and interests of the author.
 #' Many aspects of the package traces to the author's methodological work

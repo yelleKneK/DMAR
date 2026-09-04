@@ -19,8 +19,12 @@
 #' @param assurance degree of certainty that the obtained confidence interval will be sufficiently narrow
 #' @param G the number of generations/replication of the simulation study within the function
 #' @param print_iter specify with a \code{TRUE/FALSE} statement if the iteration number should be printed as the simulation within the function runs
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
+#' @param filename Optional path for a comma separated file recording
+#'   every replication, forwarded to
+#'   \code{\link{ss_aipe_reg_coef_sensitivity}}, which does the writing:
+#'   nothing is written when \code{filename} is \code{NULL} (the default),
+#'   and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' Direct specification of \code{true_cov_YX} and \code{true_cov_XX} is necessary, even if one is interested in
@@ -90,12 +94,11 @@
 ss_aipe_src_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL, true_cov_XX = NULL,
                                     estimated_var_Y = NULL, estimated_cov_YX = NULL, estimated_cov_XX = NULL, specified_N = NULL,
                                     which_predictor = 1, w = NULL, noncentral = TRUE, standardize = TRUE, conf_level = .95,
-                                    assurance = NULL, G = 1000, print_iter = TRUE, save = FALSE,
-                                    filename = "ss_aipe_src_sensitivity_result.csv") {
+                                    assurance = NULL, G = 1000, print_iter = TRUE, filename = NULL) {
   return(ss_aipe_reg_coef_sensitivity(
     true_var_Y = true_var_Y, true_cov_YX = true_cov_YX, true_cov_XX = true_cov_XX,
     estimated_var_Y = estimated_var_Y, estimated_cov_YX = estimated_cov_YX, estimated_cov_XX = estimated_cov_XX, specified_N = specified_N,
     which_predictor = which_predictor, w = w, noncentral = noncentral, standardize = standardize, conf_level = conf_level,
-    assurance = assurance, G = G, print_iter = print_iter, save = save, filename = filename
+    assurance = assurance, G = G, print_iter = print_iter, filename = filename
   ))
 }

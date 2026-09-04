@@ -7,6 +7,9 @@
 #   .composite_sem_mc()           the a priori Monte Carlo engine: G converged
 #                                 fits of the analysis model to data drawn
 #                                 from Sigma at sample size N
+#   .composite_sem_mc_muffle()    the calling handler that silences the
+#                                 lavaan warnings a single borderline
+#                                 replication raises inside that engine
 #   .composite_sem_search()       the smallest integer N whose Monte Carlo
 #                                 criterion holds, by geometric bracketing
 #                                 and integer bisection
@@ -152,6 +155,37 @@
 }
 
 
+# Warnings that are noise inside the Monte Carlo loop -------------------------
+#
+# Fitting the analysis model to a borderline sample makes lavaan warn, and
+# every such warning concerns that one replication. Three kinds occur, all
+# observed by running the engine at the smallest admissible N with nothing
+# muffled: the optimizer reports that no solution was found, or that the
+# gradient is not near zero at the solution it claims (the replication is
+# discarded by the convergence check in .composite_sem_mc()); the post-fit
+# check finds a negative residual or latent variance, or a latent covariance
+# matrix that is not positive definite (an improper solution at that N, which
+# the summaries condition on exactly as a study at that N would); or the
+# first indicator of a factor is a poor marker in that sample and lavaan
+# switches to another indicator to set the metric, to avoid convergence
+# problems. Repeated G times, these tell a user nothing to act on, so the
+# handler muffles exactly these, matched on the message text because lavaan
+# gives them no condition class of their own, and lets every other warning
+# through to the user.
+.composite_sem_mc_noise <- c("solution has NOT been found",
+                             "claimed the model converged",
+                             "variances are negative",
+                             "not positive definite",
+                             "switching to another marker item")
+
+.composite_sem_mc_muffle <- function(w) {
+  if (grepl(paste(.composite_sem_mc_noise, collapse = "|"),
+            conditionMessage(w))) {
+    invokeRestart("muffleWarning")
+  }
+}
+
+
 # The a priori Monte Carlo engine ---------------------------------------------
 #
 # Draw a sample of size N from the multivariate normal population with mean
@@ -163,13 +197,6 @@
 # ss_aipe_sem_path_sensitivity()); the caller decides what to do when fewer
 # than G converge.
 .composite_sem_mc <- function(model, Sigma, mu, labels, N, G, ...) {
-  # Borderline samples make lavaan warn (nonconvergence, negative variances);
-  # muffle for the duration of the replications and restore the user's
-  # setting on exit, as in ss_aipe_sem_path_sensitivity().
-  prev_warn <- getOption("warn")
-  on.exit(options(warn = prev_warn), add = TRUE)
-  options(warn = -1)
-
   vars <- rownames(Sigma)
   k <- length(labels)
   est <- matrix(NA_real_, nrow = G, ncol = k)
@@ -185,9 +212,13 @@
     # suppressMessages: lavaan narrates marker-item fallbacks through
     # message(), which try(silent = TRUE) does not muffle, so a hard
     # replication would otherwise print a note per failed fit inside the
-    # Monte Carlo loop. Errors and nonconvergence are still counted below.
-    fit <- try(suppressMessages(
-      lavaan::sem(model, data = as.data.frame(Data), ...)),
+    # Monte Carlo loop. The calling handler muffles only the warnings lavaan
+    # raises about a single borderline sample (see .composite_sem_mc_muffle
+    # above); any other warning reaches the user. Errors and nonconvergence
+    # are still counted below.
+    fit <- try(withCallingHandlers(
+      suppressMessages(lavaan::sem(model, data = as.data.frame(Data), ...)),
+      warning = .composite_sem_mc_muffle),
       silent = TRUE)
     if (inherits(fit, "try-error") ||
         !isTRUE(lavaan::lavInspect(fit, "converged"))) {

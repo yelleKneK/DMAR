@@ -14,9 +14,14 @@
 #' @param conf_level the desired degree of confidence (i.e., 1-Type I error rate)
 #' @param G number of generations (i.e., replications) of the simulation
 #' @param print_iter to print the current value of the iterations
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
-#' @param ... for modifying parameters of functions this function calls
+#' @param filename an optional path for a comma separated file recording
+#'   every replication (the realized standardized mean difference, the
+#'   full and the two one-sided interval widths, the three non-coverage
+#'   indicators, and the two confidence limits): nothing is written when
+#'   \code{filename} is \code{NULL} (the default), a new file with a header
+#'   row is created otherwise, an existing file at that path is appended
+#'   to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}
 #'
 #' @details
 #' For sensitivity analysis when planning sample size given the desire to obtain narrow confidence intervals
@@ -117,9 +122,10 @@
 
 ss_aipe_smd_sensitivity <- function(true_delta = NULL, estimated_delta = NULL, desired_width = NULL, n_per_group = NULL,
                                     assurance = NULL, conf_level = .95, G = 1000, print_iter = FALSE,
-                                    save = FALSE, filename = "ss_aipe_smd_sensitivity_result.csv", ...) {
+                                    filename = NULL) {
   if (is.null(estimated_delta) && is.null(n_per_group)) stop("You must specify either \'estimated_delta\' or \'n_per_group\' (i.e., the per group sample size).", call. = FALSE)
   if (!is.null(estimated_delta) && !is.null(n_per_group)) stop("You must specify either \'estimated_delta\' or \'n_per_group\' (i.e., the per group sample size), but not both.", call. = FALSE)
+  .check_filename(filename)
 
   if (!is.null(estimated_delta)) {
     n <- ss_aipe_smd(
@@ -171,15 +177,12 @@ ss_aipe_smd_sensitivity <- function(true_delta = NULL, estimated_delta = NULL, d
     upper_limit = Upper_Limit
   )
 
-  if (save) {
-    result_file <- filename
-    # print("Simulation results will be saved to a .csv file")
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
-      utils::write.table(result, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+  if (!is.null(filename)) {
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
+      utils::write.table(result, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
     } else {
-      utils::write.table(result, result_file, sep = ",", row.names = FALSE, append = FALSE)
+      utils::write.table(result, filename, sep = ",", row.names = FALSE, append = FALSE)
     }
   }
 

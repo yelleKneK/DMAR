@@ -161,11 +161,12 @@
 #' ci_eta_squared_generalized(fit, observed = "grade", method = "parametric")
 #'
 #' # The third option is a residual bootstrap, which refits the model once per
-#' # replication. It is not run here: B is required to be at least 1000, and
-#' # even that is slower than an example should be, while a reported interval
-#' # deserves B = 10000 or more. The call is
-#' #   ci_eta_squared_generalized(fit, observed = "grade",
-#' #                              method = "bootstrap", B = 10000, seed = 113)
+#' # replication. B = 1000 is the smallest count the function accepts and is
+#' # what keeps this page quick; a reported interval deserves B = 10000 or
+#' # more. The seed makes the interval reproducible and leaves the random
+#' # number stream of the surrounding session as it was.
+#' ci_eta_squared_generalized(fit, observed = "grade",
+#'                            method = "bootstrap", B = 1000, seed = 113)
 #'
 #' # Within-subjects ANOVA. The parametric CI uses each effect's own stratum.
 #' set.seed(113)
@@ -402,15 +403,7 @@ ci_eta_squared_generalized <- function(
 # Residual bootstrap CI from a fitted model.
 .ci_eta_g_bootstrap <- function(object, observed, B,
                                 alpha_lower, alpha_upper, seed) {
-  if (!is.null(seed)) {
-    if (exists(".Random.seed", envir = .GlobalEnv)) {
-      .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  .dmar_local_seed(seed)
   fitted_vals <- stats::fitted(object)
   resid_vals  <- stats::residuals(object)
   if (length(fitted_vals) != length(resid_vals)) {

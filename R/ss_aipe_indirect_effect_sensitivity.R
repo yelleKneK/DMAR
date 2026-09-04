@@ -38,8 +38,14 @@
 #'   when \code{method = "monte_carlo"} (default 5000).
 #' @param G Number of outer simulation replications (default 1000).
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample indirect effect \eqn{\hat a \hat b}, the
+#'   two confidence limits, the interval width, and two indicators of
+#'   whether the interval missed \code{true_a * true_b} below or above):
+#'   nothing is written when \code{filename} is \code{NULL} (the default),
+#'   a new file with a header row is created otherwise, an existing file
+#'   at that path is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   \eqn{\hat a \hat b} and the CI width, the proportion of intervals
@@ -93,8 +99,7 @@ ss_aipe_indirect_effect_sensitivity <- function(true_a = NULL, true_b = NULL,
                                                 conf_level = 0.95,
                                                 B = 5000L,
                                                 G = 1000, print_iter = FALSE,
-                                                save = FALSE,
-                                                filename = "ss_aipe_indirect_effect_sensitivity_result.csv") {
+                                                filename = NULL) {
   method <- match.arg(method)
   est_supplied <- !is.null(estimated_a) && !is.null(estimated_b)
   if (!est_supplied && is.null(specified_N))
@@ -103,6 +108,7 @@ ss_aipe_indirect_effect_sensitivity <- function(true_a = NULL, true_b = NULL,
     stop("Supply estimated paths or 'specified_N', but not both.", call. = FALSE)
   if (is.null(true_a) || is.null(true_b) || !is.numeric(true_a) || !is.numeric(true_b))
     stop("'true_a' and 'true_b' must both be numeric.", call. = FALSE)
+  .check_filename(filename)
 
   if (est_supplied) {
     plan <- ss_aipe_indirect_effect(a = estimated_a, b = estimated_b,
@@ -165,7 +171,7 @@ ss_aipe_indirect_effect_sensitivity <- function(true_a = NULL, true_b = NULL,
     tI_upper[g] <- true_ab > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(ab = ab_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

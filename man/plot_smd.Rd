@@ -82,25 +82,27 @@ Requires \pkg{ggplot2} (listed in \code{Suggests}). Install it with
   \code{install.packages("ggplot2")} if needed.
 }
 \examples{
-# From a known effect size and sample sizes.
+# From a known standardized mean difference and the two sample sizes:
+# the two curves, the interval beneath them, and the sample sizes in
+# the corner are the default display.
 plot_smd(smd = 0.50, n_1 = 50, n_2 = 50)
 
-# The variations below are not run, since the call above already shows
-# the default display and each additional figure has to be drawn. From
-# raw data, where the standardized mean difference and both sample
-# sizes are taken from the data:
-# set.seed(113)
-# g1 <- rnorm(40, mean = 0.6, sd = 1)
-# g2 <- rnorm(40, mean = 0.0, sd = 1)
-# plot_smd(group_1 = g1, group_2 = g2)
+# From raw data, where the standardized mean difference and both
+# sample sizes are taken from the data. The d annotation now reports
+# the sample value rather than a supplied one.
+set.seed(113)
+g1 <- rnorm(40, mean = 0.6, sd = 1)
+g2 <- rnorm(40, mean = 0.0, sd = 1)
+plot_smd(group_1 = g1, group_2 = g2)
 
-# Without the confidence interval or the sample size annotations:
-# plot_smd(smd = 0.80, show_ci = FALSE, show_n = FALSE)
+# Without the confidence interval or the sample size annotations, the
+# figure is the two curves alone.
+plot_smd(smd = 0.80, show_ci = FALSE, show_n = FALSE)
 
-# Custom group labels and title:
-# plot_smd(smd = 0.45, n_1 = 75, n_2 = 75,
-#          group_labels = c("Treatment", "Control"),
-#          title = "Treatment Effect on Reading Scores")
+# Group labels and a title of the reader's own.
+plot_smd(smd = 0.45, n_1 = 75, n_2 = 75,
+         group_labels = c("Treatment", "Control"),
+         title = "Treatment Effect on Reading Scores")
 
 }
 \references{

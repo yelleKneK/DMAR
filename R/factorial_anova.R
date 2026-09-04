@@ -200,13 +200,16 @@ factorial_anova <- function(formula, data, ss_type = 3L, conf_level = 0.95) {
   # to 0 for a small effect; surfacing that warning once per effect produces
   # many identical messages. Muffle the per-effect warnings, count them, and
   # emit a single summary warning at the end (via on.exit so it fires on any
-  # return path). This is the ss_aipe_R2() dedup pattern.
-  .clamp_count <- 0L
+  # return path). This is the ss_aipe_R2() dedup pattern. The count lives in
+  # an environment made for the handler, which updates it with ordinary
+  # assignment.
+  state <- new.env(parent = emptyenv())
+  state$n_clamped <- 0L
   on.exit({
-    if (.clamp_count > 0L) {
+    if (state$n_clamped > 0L) {
       warning(sprintf(
         "The noncentral F lower-limit clamp in ci_nc_F() fired for %d of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?ci_nc_F for the meaning of the clamp.",
-        .clamp_count
+        state$n_clamped
       ), call. = FALSE)
     }
   }, add = TRUE)
@@ -240,7 +243,7 @@ factorial_anova <- function(formula, data, ss_type = 3L, conf_level = 0.95) {
   },
   warning = function(w) {
     if (inherits(w, "dmar_nc_F_clamp")) {
-      .clamp_count <<- .clamp_count + 1L
+      state$n_clamped <- state$n_clamped + 1L
       invokeRestart("muffleWarning")
     }
   })

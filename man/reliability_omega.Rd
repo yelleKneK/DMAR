@@ -344,31 +344,35 @@ reliability_omega(data = items)
 # The closed-form standard errors are derived under the model implied
 # ratio, so with the observed denominator the interval comes from a
 # bootstrap, which refits the single factor model once per
-# replication. That refitting is why it is not run here; the call is
-#   reliability_omega(data = items, ci_method = "percentile", B = 10000,
-#                     seed = 113)
-# with ci_method = "bca" as the alternative. The percentile interval is
-# what Kelley and Pornprasertmanit (2016) recommend for hierarchical
-# omega, and the default B = 10000 is an accuracy choice rather than a
-# formality: a reported interval deserves the full count (see Details).
+# replication. B = 40 keeps the example quick, and it is about the
+# smallest count from which a 95 percent percentile interval can be
+# read at all; a reported interval deserves the default B = 10000,
+# an accuracy choice rather than a formality (see Details). The
+# percentile interval is what Kelley and Pornprasertmanit (2016)
+# recommend for this coefficient, with ci_method = "bca" as the
+# alternative, and seed makes the interval reproducible.
+reliability_omega(data = items, ci_method = "percentile", B = 40,
+                  seed = 113)
 
 # Model implied denominator with its closed-form robust ML interval.
 reliability_omega(data = items, denominator = "model_implied")
 
-# Two further routes into the same coefficient are shown rather than
-# run, since each one fits the single factor model again. The first
-# works from the summary statistics a paper reports, a covariance
-# matrix and its sample size:
-#   reliability_omega(S = cov(items), N = 200,
-#                     denominator = "model_implied", ci_method = "ml")
+# Two further routes into the same coefficient. The first works from
+# the summary statistics a paper reports, a covariance matrix and its
+# sample size, with the maximum likelihood interval that summary
+# input supports.
+reliability_omega(S = cov(items), N = 200,
+                  denominator = "model_implied", ci_method = "ml")
+
 # The second is full information maximum likelihood with an auxiliary
 # variable, where missingness on y2 depends on an auxiliary z (missing
-# at random given z). Supplying aux implies missing = "fiml":
-#   z <- eta + rnorm(200, sd = 0.5)
-#   d <- data.frame(items, z = z)
-#   d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
-#   reliability_omega(data = d, aux = "z",
-#                     denominator = "model_implied")
+# at random given z). Supplying aux implies missing = "fiml"; the
+# N_complete row shows how many rows listwise deletion would have
+# kept.
+z <- eta + rnorm(200, sd = 0.5)
+d <- data.frame(items, z = z)
+d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
+reliability_omega(data = d, aux = "z", denominator = "model_implied")
 
 }
 \references{

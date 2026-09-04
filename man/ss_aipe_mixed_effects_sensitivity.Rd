@@ -18,8 +18,7 @@ ss_aipe_mixed_effects_sensitivity(
   conf_level = 0.95,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_mixed_effects_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -50,9 +49,14 @@ balanced).}
 
 \item{print_iter}{Logical.}
 
-\item{save}{Logical. Save per-replication CSV.}
-
-\item{filename}{Path used when \code{save = TRUE}.}
+\item{filename}{Optional path for a comma separated file recording
+every replication (the fixed effect estimate, the two confidence
+limits, the interval width, and two indicators of whether the
+interval missed \code{true_beta} below or above): nothing is written
+when \code{filename} is \code{NULL} (the default), a new file with a
+header row is created otherwise, an existing file at that path is
+appended to, and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with rows for mean / median / SD of

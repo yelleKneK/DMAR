@@ -29,9 +29,14 @@
 #'   sample size.
 #' @param G Number of Monte Carlo replications (default 1000).
 #' @param print_iter Logical. Print iteration index per replication.
-#' @param save Logical. If \code{TRUE} write per-replication results to
-#'   \code{filename}.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample \eqn{\hat\omega^2}, the two confidence
+#'   limits, the interval width, and two indicators of whether the
+#'   interval missed \code{true_omega_squared} below or above): nothing is
+#'   written when \code{filename} is \code{NULL} (the default), a new file
+#'   with a header row is created otherwise, an existing file at that path
+#'   is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized \eqn{\hat\omega^2} and interval width, the proportion
@@ -81,8 +86,7 @@ ss_aipe_omega_squared_sensitivity <- function(true_omega_squared = NULL,
                                               conf_level = 0.95,
                                               assurance = NULL,
                                               G = 1000, print_iter = FALSE,
-                                              save = FALSE,
-                                              filename = "ss_aipe_omega_squared_sensitivity_result.csv") {
+                                              filename = NULL) {
   if (is.null(estimated_omega_squared) && is.null(specified_N))
     stop("You must specify either 'estimated_omega_squared' or 'specified_N'.", call. = FALSE)
   if (!is.null(estimated_omega_squared) && !is.null(specified_N))
@@ -92,6 +96,7 @@ ss_aipe_omega_squared_sensitivity <- function(true_omega_squared = NULL,
     stop("'true_omega_squared' must be a single value in [0, 1).", call. = FALSE)
   if (!is.numeric(df_effect) || df_effect < 1)
     stop("'df_effect' must be a positive integer (groups - 1).", call. = FALSE)
+  .check_filename(filename)
 
   if (!is.null(estimated_omega_squared)) {
     plan <- suppressWarnings(
@@ -153,7 +158,7 @@ ss_aipe_omega_squared_sensitivity <- function(true_omega_squared = NULL,
     tI_upper[g]  <- true_omega_squared > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(omega_hat = omega_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

@@ -115,11 +115,11 @@ r2 <- r1 + rnorm(30, 0, 0.3)
 krippendorff_alpha(cbind(r1, r2), level = "interval")
 
 # The percentile bootstrap interval for the same ratings, which
-# recomputes alpha on each of B resamples of the units. Not run
-# here, because 500 refits of alpha is more than a help page should
-# do; the call is:
-# krippendorff_alpha(cbind(r1, r2), level = "interval",
-#                    boot = TRUE, B = 500L, seed = 113)
+# recomputes alpha on each of B resamples of the units; the table
+# gains lower_limit, upper_limit, and B_used rows. B = 200 keeps the
+# example quick; a reported interval deserves the default B = 1000.
+krippendorff_alpha(cbind(r1, r2), level = "interval",
+                   boot = TRUE, B = 200L, seed = 113)
 
 }
 \references{

@@ -109,36 +109,32 @@ double-count it.
 typically very close to nominal and slightly conservative.
 }
 \examples{
-# The multiplier for these intervals is a Bryant-Paulson quantile, which has
-# no closed form: it is obtained by inverting a numerical integral with a
-# root search. With the single random covariate of the worked example below
-# that takes about half a second per call, so nothing on this page is run;
-# the calls, with the values they produce, are given here.
-
 # Bryant and Bruvold (1980) worked example: 6 panels, 1 covariate, nu = 14,
 # ANCOVA error MS = 0.01326. Here the design is a randomized block with
 # s = 4 blocks, so the per-group "n" for the adjusted-mean SE is 4 and the
-# error df (14) must be supplied directly.
-# adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
-# bp <- ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-#                      n = 4, num_covariates = 1, df = 14)
-# bp
+# error df (14) must be supplied directly. The multiplier for these
+# intervals is a Bryant-Paulson quantile, which has no closed form; it is
+# obtained by inverting the distribution function with a root search.
+adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
+bp <- ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+                     n = 4, num_covariates = 1, df = 14)
+bp
 # The multiplier is 4.83 and every pairwise critical difference is 0.278,
 # matching the paper; the 15 intervals hold jointly at the 95 percent level.
 # The multiplier is kept on the result, so the critical difference can be
 # rebuilt by hand as q * s_ancova * sqrt(1/n):
-# attr(bp, "critical_value")
-# attr(bp, "critical_value") * sqrt(0.01326) * sqrt(1 / 4)
+attr(bp, "critical_value")
+attr(bp, "critical_value") * sqrt(0.01326) * sqrt(1 / 4)
 
 # A complex contrast (say panels 1 and 2 against panels 3 through 6) is
 # requested by passing its weights to c_weights, together with
 # contrast_type = "allowance", the all-contrasts form of Eq. (2.4) of
 # Bryant and Bruvold. That contrast of adjusted means is -0.921, with
 # simultaneous limits of -1.199 and -0.643.
-# ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-#                c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
-#                n = 4, num_covariates = 1, df = 14,
-#                contrast_type = "allowance")
+ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+               c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
+               n = 4, num_covariates = 1, df = 14,
+               contrast_type = "allowance")
 
 }
 \references{

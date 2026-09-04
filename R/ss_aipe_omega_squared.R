@@ -142,13 +142,16 @@ ss_aipe_omega_squared <- function(population_omega_squared,
         (df_effect * (1 - population_omega_squared))
   }
 
-  # Muffle the per-iteration clamp warnings; count and report once.
-  .clamp_count <- 0L
+  # Muffle the per-iteration clamp warnings; count and report once. The
+  # count lives in an environment made for the handler, which updates it
+  # with ordinary assignment.
+  state <- new.env(parent = emptyenv())
+  state$n_clamped <- 0L
   on.exit({
-    if (.clamp_count > 0L) {
+    if (state$n_clamped > 0L) {
       message(sprintf(
         "During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in %d intermediate evaluations.",
-        .clamp_count))
+        state$n_clamped))
     }
   }, add = TRUE)
 
@@ -165,7 +168,7 @@ ss_aipe_omega_squared <- function(population_omega_squared,
                          conf_level = conf_level),
         warning = function(w) {
           if (inherits(w, "dmar_nc_F_clamp")) {
-            .clamp_count <<- .clamp_count + 1L
+            state$n_clamped <- state$n_clamped + 1L
             invokeRestart("muffleWarning")
           }
         }

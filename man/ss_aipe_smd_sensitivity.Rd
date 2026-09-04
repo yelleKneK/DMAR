@@ -13,9 +13,7 @@ ss_aipe_smd_sensitivity(
   conf_level = 0.95,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_smd_sensitivity_result.csv",
-  ...
+  filename = NULL
 )
 }
 \arguments{
@@ -35,11 +33,14 @@ ss_aipe_smd_sensitivity(
 
 \item{print_iter}{to print the current value of the iterations}
 
-\item{save}{option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results}
-
-\item{filename}{the name of the file that simulation results will be saved to}
-
-\item{...}{for modifying parameters of functions this function calls}
+\item{filename}{an optional path for a comma separated file recording
+every replication (the realized standardized mean difference, the
+full and the two one-sided interval widths, the three non-coverage
+indicators, and the two confidence limits): nothing is written when
+\code{filename} is \code{NULL} (the default), a new file with a header
+row is created otherwise, an existing file at that path is appended
+to, and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}

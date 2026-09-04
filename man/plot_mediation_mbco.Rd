@@ -136,32 +136,43 @@ Requires \pkg{ggplot2} (listed in \code{Suggests}).
 }
 \examples{
 # First-stage moderated mediation: the effect of x on m depends on
-# w, so the indirect effect of x on y is a line in w; the direct
-# effect is unmoderated and is not drawn.
+# w, so the indirect effect of x on y through m is a line in w. The
+# simulated x reaches y only through m, and the model fit below
+# carries no direct path, so the indirect effect is the whole effect
+# of x and the picture has one curve.
 set.seed(113)
 n <- 300
 x <- rnorm(n)
 w <- rnorm(n)
 m <- 0.5 * x + 0.3 * w + 0.4 * x * w + rnorm(n)
-y <- 0.5 * m + 0.2 * x + 0.1 * w + rnorm(n)
+y <- 0.5 * m + 0.1 * w + rnorm(n)
 d_mod <- data.frame(x = x, w = w, m = m, y = y)
 
-# Neither the fit nor the plot is run here: every probed effect costs
-# its own constrained null model fit in OpenMx, and the band draws B
-# coefficient vectors from their joint normal approximation. The Wald
-# interval and the two probe values keep a hand run of these lines
-# quick; the default probe values are the moderator's mean and one
-# standard deviation either side, and the curve and its band cover
-# the whole range of w either way. The calls are:
-# res <- mediation_mbco("m ~ x + w + x:w \n y ~ m + x + w",
-#                       data = d_mod, x = "x", y = "y",
-#                       moderator = "w", ci_method = "wald",
-#                       probe_values = c(low = -1, high = 1))
-# plot_mediation_mbco(res, seed = 113)
+# Fit with the moderator declared. Every reported row costs its own
+# constrained null model fit in OpenMx, so the Wald interval and two
+# probe values keep the fit quick; the default probe values are the
+# moderator's mean and one standard deviation either side, and the
+# curve and its band cover the whole range of w either way.
+model_mod <- "
+  m ~ x + w + x:w
+  y ~ m + w
+"
+res <- mediation_mbco(model_mod, data = d_mod, x = "x", y = "y",
+                      moderator = "w", ci_method = "wald",
+                      probe_values = c(low = -1, high = 1))
 
-# Only the indirect pathway, over a chosen moderator range:
-# plot_mediation_mbco(res, effects = "indirect_via_m",
-#                     from = -2, to = 2, seed = 113)
+# The band draws B coefficient vectors from their joint normal
+# approximation. B = 2000 keeps the example quick; a reported figure
+# deserves the default B = 10000. The probed values are marked on
+# the curve, and the rug shows where w was observed.
+plot_mediation_mbco(res, B = 2000, seed = 113)
+
+# The same curve over a chosen range of w, with a 90\% band. The
+# 'effects' argument names the pathway to draw; in a model that also
+# carries a direct path the total effect is moderated too, and it is
+# drawn as a second curve unless 'effects' selects one of them.
+plot_mediation_mbco(res, effects = "indirect_via_m", from = -2,
+                    to = 2, conf_level = 0.90, B = 2000, seed = 113)
 
 }
 \references{

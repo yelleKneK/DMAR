@@ -14,8 +14,7 @@ ss_aipe_partial_r_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_partial_r_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -46,10 +45,14 @@ correlation.}
 
 \item{print_iter}{Logical. Print iteration index per replication.}
 
-\item{save}{Logical. If \code{TRUE} write per-replication results to
-\code{filename}.}
-
-\item{filename}{Path used when \code{save = TRUE}.}
+\item{filename}{Optional path for a comma separated file recording
+every replication (the sample partial correlation, the two confidence
+limits, the interval width, and two indicators of whether the
+interval missed \code{true_rho} below or above): nothing is
+written when \code{filename} is \code{NULL} (the default), a new
+file with a header row is created otherwise, an existing file at
+that path is appended to, and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with rows for the realized partial

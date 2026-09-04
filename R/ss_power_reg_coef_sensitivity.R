@@ -26,8 +26,11 @@
 #' @param standardize Whether each replication's data should be standardized prior to fitting (giving a standardized regression coefficient)
 #' @param G Number of Monte Carlo replications
 #' @param print_iter Whether to print the iteration number during the simulation
-#' @param save Whether to write the per-replication results to a CSV file
-#' @param filename Name of the CSV file written when \code{save = TRUE}
+#' @param filename Optional path of a CSV file to receive the per-replication
+#'   results (the coefficient estimate, its standard error, the \emph{t}
+#'   statistic, and the observed \eqn{R^2}), overwriting any file already at
+#'   that path; the default \code{NULL} writes nothing, and a throwaway run
+#'   that wants the file should point it at \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' When the estimated and true covariance structures are identical, the
@@ -121,8 +124,7 @@ ss_power_reg_coef_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL,
                                           which_predictor = 1, desired_power = .85,
                                           alpha_level = .05, directional = FALSE,
                                           standardize = FALSE, G = 1000,
-                                          print_iter = TRUE, save = FALSE,
-                                          filename = "ss_power_reg_coef_sensitivity_result.csv") {
+                                          print_iter = TRUE, filename = NULL) {
   if (!requireNamespace("MASS", quietly = TRUE))
     stop("The package \'MASS\' is needed; please install it.")
 
@@ -148,6 +150,7 @@ ss_power_reg_coef_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL,
     stop("\'alpha_level\' must be in (0, 1).")
   if (!is.numeric(G) || length(G) != 1L || G < 1 || G != as.integer(G))
     stop("\'G\' must be a positive integer.")
+  .check_filename(filename)
 
   if (is.null(estimated_var_Y))  estimated_var_Y  <- true_var_Y
   if (is.null(estimated_cov_XX)) estimated_cov_XX <- true_cov_XX
@@ -214,8 +217,8 @@ ss_power_reg_coef_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL,
   }
 
   Results_df <- as.data.frame(Results)
-  if (save) {
-    message("Simulation results will be saved to a .csv file; overwriting an existing file of the same name.")
+  if (!is.null(filename)) {
+    message("Writing the per-replication results to '", filename, "' (any file already there is overwritten).")
     utils::write.csv(Results_df, filename, row.names = FALSE)
   }
 

@@ -129,3 +129,38 @@ test_that("ss_aipe_icc_sensitivity() supports the two-way random and mixed types
   expect_identical(attr(res3, "icc_type"), "ICC(3,1)")
   expect_gt(res3$value[res3$term == "mean_icc"], 0.10)
 })
+
+test_that("ss_aipe_icc_sensitivity() writes per-replication results only to a named file", {
+  skip_on_cran()
+  # Nothing is written unless the caller names a file; the old `save`
+  # switch and its default path in the working directory are gone, and a
+  # malformed filename is refused before any replication runs.
+  expect_null(eval(formals(ss_aipe_icc_sensitivity)$filename))
+  expect_false("save" %in% names(formals(ss_aipe_icc_sensitivity)))
+  expect_error(
+    ss_aipe_icc_sensitivity(true_rho = 0.5, specified_N = 40, k = 3,
+                            width = 0.30, G = 3, print_iter = FALSE,
+                            filename = 42),
+    "'filename' must be NULL or a single character string", fixed = TRUE)
+
+  out_file <- tempfile(fileext = ".csv")
+  on.exit(unlink(out_file), add = TRUE)
+  set.seed(113)
+  ss_aipe_icc_sensitivity(true_rho = 0.5, specified_N = 40, k = 3,
+                          width = 0.30, G = 3, print_iter = FALSE,
+                          filename = out_file)
+  written <- utils::read.csv(out_file)
+  expect_named(written, c("icc_hat", "ci_lower", "ci_upper", "ci_width",
+                          "type_I_lower", "type_I_upper"))
+  expect_equal(nrow(written), 3L)
+  expect_equal(written$ci_width, written$ci_upper - written$ci_lower)
+
+  # A second run appends to the existing file and says so.
+  set.seed(113)
+  expect_message(
+    ss_aipe_icc_sensitivity(true_rho = 0.5, specified_N = 40, k = 3,
+                            width = 0.30, G = 3, print_iter = FALSE,
+                            filename = out_file),
+    "already exists", fixed = TRUE)
+  expect_equal(nrow(utils::read.csv(out_file)), 6L)
+})

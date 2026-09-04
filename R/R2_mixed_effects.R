@@ -121,12 +121,13 @@
 #' # between the two is what the subject-level terms buy.
 #' R2_mixed_effects(fit)
 #'
-#' # A bootstrap interval is available through ci_method = "boot". It refits
-#' # the model once per replication, so it is not run here; the call is
-#' #   R2_mixed_effects(fit, ci_method = "boot", B = 1000, seed = 113)
-#' # where B = 1000 is the default and seed is supplied because the limits
-#' # otherwise move from run to run. Raise B when the Monte Carlo error of
-#' # the reported limits needs to be smaller.
+#' # A parametric bootstrap percentile interval for both quantities. Each
+#' # replication refits the model, so B = 20 keeps the example quick; a
+#' # reported interval deserves the default B = 1000, and raising B
+#' # further tightens the Monte Carlo error of the limits. The seed makes
+#' # the limits reproducible and leaves the caller's generator state as
+#' # it was.
+#' R2_mixed_effects(fit, ci_method = "boot", B = 20, seed = 113)
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
@@ -168,16 +169,9 @@ R2_mixed_effects <- function(model, conf_level = 0.95, ci_method = c("none", "bo
     stop("The 'lme4' package is required. Install it with: ",
          "install.packages('lme4')")
 
-  if (!is.null(seed)) {
-    if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-      old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-      on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv), add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-        rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  # A supplied seed is set for this call and the caller's generator state
+  # is restored on exit; NULL leaves the generator alone.
+  .dmar_local_seed(seed)
 
   stat <- function(m) {
     p <- .R2_mixed_effects_parts(m)

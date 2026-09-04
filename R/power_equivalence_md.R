@@ -179,13 +179,15 @@
 #'   \code{\link{power_density_equivalence_md}}
 #'
 #' @examples
-#' # Phillips (1990) Table 1, 5th row, 5th column. Expected: 0.8029678.
+#' # Table 1 of Phillips, 1990, fifth row and fifth column, where the
+#' # published power is 0.8029678.
 #' power_equivalence_md(alpha_level = .05, logscale = FALSE,
 #'                      ltheta1 = -.2, ltheta2 = .2, ldiff = .05,
 #'                      sigma = .20, n = 24, nu = 22)
 #'
-#' # Diletti (1991) Table 1, on the log scale (ratio of test to reference).
-#' # Expected: 0.7922796.
+#' # Table 1 of Diletti et al., 1991, on the log scale, so the limits and
+#' # the true difference are ratios of test to reference. The published
+#' # power is 0.7922796.
 #' power_equivalence_md(alpha_level = .05, logscale = TRUE,
 #'                      ltheta1 = .8, ltheta2 = 1.25, ldiff = 1.05,
 #'                      sigma = .20, n = 18, nu = 16)
@@ -383,13 +385,16 @@ power_density_equivalence_md <- function(power_sigma, alpha_level, theta1, theta
 #'
 #' @examples
 #' # One curve per sample size, showing power against the true mean
-#' # difference. Two of the seven sample sizes behind Phillips (1990)
-#' # Figure 3 are drawn here so the example stays quick; the full
-#' # reproduction is given below.
+#' # difference. The seven sample sizes are the ones behind Figure 3 of
+#' # Phillips, 1990, so the figure reproduces that one; every curve
+#' # evaluates the power integral at 201 true differences.
+#' n  <- c(9, 12, 18, 24, 30, 40, 60)
+#' nu <- c(7, 10, 16, 22, 28, 38, 58)
 #' fig <- power_equivalence_md_plot(
 #'   alpha_level = .05, logscale = FALSE,
 #'   theta1 = -.2, theta2 = .2, sigma = .20,
-#'   n = c(24, 60), nu = c(22, 58)
+#'   n = n, nu = nu,
+#'   subtitle = "Phillips Figure 3"
 #' )
 #' fig
 #'
@@ -400,30 +405,17 @@ power_density_equivalence_md <- function(power_sigma, alpha_level, theta1, theta
 #' power_grid <- attr(fig, "power_grid")
 #' power_grid[which.min(abs(power_grid[, 1])), ]
 #'
-#' # The two published figures are not run here because every curve
-#' # evaluates the power integral at 201 true differences, so a
-#' # seven-curve figure costs a few tenths of a second. Phillips (1990)
-#' # Figure 3 is:
-#' # n  <- c(9, 12, 18, 24, 30, 40, 60)
-#' # nu <- c(7, 10, 16, 22, 28, 38, 58)
-#' # power_equivalence_md_plot(
-#' #   alpha_level = .05, logscale = FALSE,
-#' #   theta1 = -.2, theta2 = .2, sigma = .20,
-#' #   n = n, nu = nu,
-#' #   subtitle = "Phillips Figure 3"
-#' # )
-#'
-#' # Diletti (1991) Figure 1c is the same idea on the log scale, where the
-#' # equivalence limits are the 0.80 to 1.25 ratio bounds used in
-#' # bioequivalence work:
-#' # n_d  <- c(8, 12, 18, 24, 30, 40, 60)
-#' # nu_d <- c(6, 10, 16, 22, 28, 38, 58)
-#' # power_equivalence_md_plot(
-#' #   alpha_level = .05, logscale = TRUE,
-#' #   theta1 = .8, theta2 = 1.25, sigma = .20,
-#' #   n = n_d, nu = nu_d,
-#' #   subtitle = "Diletti, Figure 1c"
-#' # )
+#' # Figure 1c of Diletti et al., 1991, is the same idea on the log scale,
+#' # where the equivalence limits are the 0.80 to 1.25 ratio bounds used
+#' # in bioequivalence work.
+#' n_d  <- c(8, 12, 18, 24, 30, 40, 60)
+#' nu_d <- c(6, 10, 16, 22, 28, 38, 58)
+#' power_equivalence_md_plot(
+#'   alpha_level = .05, logscale = TRUE,
+#'   theta1 = .8, theta2 = 1.25, sigma = .20,
+#'   n = n_d, nu = nu_d,
+#'   subtitle = "Diletti, Figure 1c"
+#' )
 #'
 #' @keywords hplot design
 #'

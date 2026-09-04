@@ -266,12 +266,13 @@
 #' # Unweighted kappa, all disagreements equal (Cohen's Formula 4): .492.
 #' cohen_kappa(table = tab)
 #'
-#' # A bootstrap interval for the same table, which expands it to its
-#' # 200 paired ratings and resamples the subjects. Not run here,
-#' # because 2000 refits of kappa is more than a help page should do;
-#' # the call is:
-#' # cohen_kappa(table = tab, ci_method = "percentile", B = 2000,
-#' #             seed = 113)
+#' # A percentile bootstrap interval for the same table, which expands
+#' # it to its 200 paired ratings and resamples the subjects. The point
+#' # estimate and the asymptotic standard error are unchanged; only the
+#' # interval is read off the bootstrap distribution. B = 2000 keeps the
+#' # example quick; a reported interval deserves the default B = 10000.
+#' cohen_kappa(table = tab, ci_method = "percentile", B = 2000,
+#'             seed = 113)
 #'
 #' # Cohen's ratio-scaled disagreement weights: a neurosis-psychosis
 #' # confusion (weight 6) is six times as grave as a personality
@@ -522,16 +523,7 @@ cohen_kappa <- function(rater_1 = NULL, rater_2 = NULL,
       if (1 - pe <= .Machine$double.eps) return(NA_real_)
       (po - pe) / (1 - pe)
     }
-    if (!is.null(seed)) {
-      has_old <- exists(".Random.seed", envir = globalenv())
-      old_seed <- if (has_old) get(".Random.seed", envir = globalenv())
-      on.exit({
-        if (has_old) assign(".Random.seed", old_seed, envir = globalenv())
-        else if (exists(".Random.seed", envir = globalenv()))
-          rm(".Random.seed", envir = globalenv())
-      }, add = TRUE)
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     B <- as.integer(B)
     boots <- vapply(seq_len(B), function(b) {
       kappa_at(sample.int(N, N, replace = TRUE))

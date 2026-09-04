@@ -85,20 +85,20 @@ d <- descriptives(holzinger_swineford[, c("t1_visual_perception",
 end <- now()
 end - start
 
-# A deliberate wait shows the same pattern on a longer interval.
-# Not run here because the only way to demonstrate a wait is to
-# make the example wait; the calls are:
-# start <- now()
-# Sys.sleep(0.5)
-# end <- now()
-# end - start          # elapsed time, here about 0.5 seconds
+# A deliberate wait shows the same pattern on a longer interval. The
+# pause is a fifth of a second, long enough to register in the
+# difference and short enough not to slow the help page.
+start <- now()
+Sys.sleep(0.2)
+end <- now()
+end - start
 
 # Date only.
 now(time = FALSE)
 
 # Tidy data.frame form, when the components are needed
-# individually for programmatic processing (e.g., embedding in a
-# report's metadata block).
+# individually for programmatic processing, for example when the
+# stamp is embedded in a report's metadata block.
 now(tidy = TRUE)
 
 }

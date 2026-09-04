@@ -14,8 +14,7 @@ ss_aipe_cv_sensitivity(
   conf_level = 0.95,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_cv_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -47,11 +46,11 @@ stable Type I error estimates.}
 \item{print_iter}{Logical. If \code{TRUE} the simulation prints the iteration index after each
 replication (helpful for long runs); default \code{FALSE}.}
 
-\item{save}{Logical. If \code{TRUE} the per-replication results are appended to a CSV file at
-\code{filename}; default \code{FALSE}.}
-
-\item{filename}{Path used when \code{save = TRUE}; default
-\code{"ss_aipe_cv_sensitivity_result.csv"} in the current working directory.}
+\item{filename}{An optional path for a comma separated file recording every replication (the two
+confidence limits, the realized coefficient of variation, a coverage indicator, and the interval
+width): nothing is written when \code{filename} is \code{NULL} (the default), a new file with a
+header row is created otherwise, an existing file at that path is appended to, and a throwaway
+run should point it at \code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}

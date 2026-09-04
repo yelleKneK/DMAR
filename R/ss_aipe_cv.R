@@ -50,7 +50,7 @@
 #' # deviation: mu = 10 and sigma = 1 imply the same coefficient of variation, .10.
 #' ss_aipe_cv(mu = 10, sigma = 1, width = .1, conf_level = .99)
 #'
-#' # Ensuring that the confidence interval will be sufficiently narrow with a 99\%
+#' # Ensuring that the confidence interval will be sufficiently narrow with a 99%
 #' # certainty for the situation above.
 #' ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99, assurance = .99)
 #'
@@ -126,8 +126,11 @@ ss_aipe_cv <- function(C_of_V = NULL, width = NULL, conf_level = .95, assurance 
   # t is inaccurate, and ci_nc_t() warns on each such call. Surfacing
   # that warning once per iteration produces dozens of identical messages, so
   # we muffle the per-iteration warnings, count them, and emit a single
-  # summary warning after the search completes.
-  .ncp_count <- 0L
+  # summary warning after the search completes. The count lives in an
+  # environment made for the handler, which updates it with ordinary
+  # assignment.
+  state <- new.env(parent = emptyenv())
+  state$n_ncp <- 0L
   # An explicit cap on the increment-by-one search so a pathological input
   # cannot loop without terminating.
   .iter <- 0L
@@ -145,17 +148,20 @@ ss_aipe_cv <- function(C_of_V = NULL, width = NULL, conf_level = .95, assurance 
     },
     warning = function(w) {
       if (grepl("noncentrality parameter exceeds 37.62", conditionMessage(w))) {
-        .ncp_count <<- .ncp_count + 1L
+        state$n_ncp <- state$n_ncp + 1L
         invokeRestart("muffleWarning")
       }
     }
   )
-  if (.ncp_count > 0L) {
+  # The summary is issued once, on exit, so the assurance step below (which
+  # runs the same search again through a recursive call) folds its count
+  # into this one instead of warning a second time.
+  on.exit(if (state$n_ncp > 0L) {
     warning(sprintf(
       "During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in %d intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.",
-      .ncp_count
+      state$n_ncp
     ), call. = FALSE)
-  }
+  }, add = TRUE)
 
   #############################################################################################
 
@@ -168,7 +174,16 @@ ss_aipe_cv <- function(C_of_V = NULL, width = NULL, conf_level = .95, assurance 
     Lim_for_Certainty <- sqrt(N) / beyond_CV_NCP
 
     # Now calculate sample size using the value not to be exceeded more than (1-assurance)100% of the time.
-    N_gamma <- ss_aipe_cv(C_of_V = cv(cv = Lim_for_Certainty, N = N, unbiased = TRUE)$value, width = width, alpha_lower = alpha_lower, alpha_upper = alpha_upper, conf_level = NULL, assurance = NULL)[1, 2]
+    N_gamma <- withCallingHandlers(
+      ss_aipe_cv(C_of_V = cv(cv = Lim_for_Certainty, N = N, unbiased = TRUE)$value, width = width, alpha_lower = alpha_lower, alpha_upper = alpha_upper, conf_level = NULL, assurance = NULL)[1, 2],
+      warning = function(w) {
+        inner <- regmatches(conditionMessage(w),
+                            regexpr("[0-9]+(?= intermediate evaluations)", conditionMessage(w), perl = TRUE))
+        if (length(inner)) {
+          state$n_ncp <- state$n_ncp + as.integer(inner)
+          invokeRestart("muffleWarning")
+        }
+      })
   }
 
   if (is.null(assurance)) {

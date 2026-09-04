@@ -129,17 +129,7 @@ ss_seq_c_sensitivity <- function(c_weights, half_width, true_sigma,
     stop("'true_means' must give one mean per group, aligned with ",
          "'c_weights'.")
 
-  if (!is.null(seed)) {
-    if (exists(".Random.seed", envir = globalenv())) {
-      old_seed <- get(".Random.seed", envir = globalenv())
-      on.exit(assign(".Random.seed", old_seed, envir = globalenv()),
-              add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = globalenv()))
-                rm(list = ".Random.seed", envir = globalenv()), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  .dmar_local_seed(seed)
 
   involved <- which(c_weights != 0)
   J0       <- length(involved)

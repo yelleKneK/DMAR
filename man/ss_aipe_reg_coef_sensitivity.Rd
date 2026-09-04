@@ -20,8 +20,7 @@ ss_aipe_reg_coef_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_reg_coef_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -55,9 +54,12 @@ ss_aipe_reg_coef_sensitivity(
 
 \item{print_iter}{Specify with a \code{TRUE}/\code{FALSE} statement if the iteration number should be printed as the simulation within the function runs}
 
-\item{save}{option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results}
-
-\item{filename}{the name of the file that simulation results will be saved to}
+\item{filename}{Optional path of a CSV file to receive the per-replication
+results (the coefficient estimate, its confidence limits, the observed
+\eqn{R^2}, the standard error, and the \emph{t} statistic), appended when
+the file already exists and created otherwise; the default \code{NULL}
+writes nothing, and a throwaway run that wants the file should point it
+at \code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}

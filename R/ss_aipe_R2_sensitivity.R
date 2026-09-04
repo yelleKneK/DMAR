@@ -19,9 +19,11 @@
 #' @param rho_xx Value of the correlation among the \emph{x} variables (independent variables)
 #' @param G Number of generations (i.e., replications) of the simulation
 #' @param print_iter Should the iteration number (between 1 and \code{G}) during the run of the function
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
-#' @param ... for modifying parameters of functions this function calls upon
+#' @param filename Optional path of a CSV file to receive the per-replication
+#'   results (the confidence limits, the observed \eqn{R^2}, and the
+#'   one-sided and full interval widths), overwriting any file already at
+#'   that path; the default \code{NULL} writes nothing, and a throwaway run
+#'   that wants the file should point it at \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' When \code{estimated_R2}=\code{true_R2}, the results are that of a simulation study when all assumptions
@@ -108,7 +110,9 @@
 #' \code{\link{ci_R2}}, \code{\link{ci_nc_t}}, \code{\link{ss_aipe_R2}}
 #'
 #' @examples
-#' # Change 'G' to some large number (e.g., G=10,000)
+#' # The planner used .4 for a population squared multiple correlation
+#' # coefficient that is really .5. G = 25 keeps the example quick; a
+#' # reported sensitivity analysis deserves the default G of 10000.
 #' set.seed(113)
 #' ss_aipe_R2_sensitivity(true_R2 = .5, estimated_R2 = .4, w = .10, p = 5,
 #'                        conf_level = 0.95, G = 25, print_iter = FALSE)
@@ -127,12 +131,10 @@
 ss_aipe_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL, w = NULL, p = NULL,
                                    random_predictors = TRUE, specified_N = NULL, assurance = NULL, conf_level = .95,
                                    generate_random_predictors = TRUE, rho_yx = .3, rho_xx = .3, G = 10000, print_iter = TRUE,
-                                   save = FALSE, filename = "ss_aipe_r2_sensitivity_result.csv", ...) {
-  # requireNamespace("MASS", quietly = TRUE)
-
+                                   filename = NULL) {
   if (true_R2 >= 1 || true_R2 <= 0) stop("The values of \'true_R2\' (i.e., the squared multiple correlation coefficient (R^2)) must be between zero and one.")
   if (w == 0 || w >= 1) stop("The width is not specified correctly.")
-  if (w == 0 || w >= 1) stop("The width is not specified correctly.")
+  .check_filename(filename)
 
   if (is.null(estimated_R2) && is.null(specified_N)) stop("You must specify either \'estimated_R2\' or \'specified_N\'.", call. = FALSE)
 
@@ -140,13 +142,22 @@ ss_aipe_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL, w = NULL
     if (assurance < 0 || assurance > 1) stop("You must specify either \'assurance\' to be a value between 0 and 1.", call. = FALSE)
   }
 
-  prev_warn <- getOption("warn")
-  on.exit(options(warn = prev_warn), add = TRUE)
-  options(warn = -1)
-
   if (!is.null(estimated_R2)) {
     if (estimated_R2 >= 1 || estimated_R2 <= 0) stop("The values of \'estimated_R2\' (i.e., the squared multiple correlation coefficient (R^2)) must be between zero and one.")
-    N <- ss_aipe_R2(population_R2 = estimated_R2, conf_level = conf_level, width = w, which_width = "Full", p = p, assurance = assurance, random_predictors = random_predictors)[1, 2]
+    # ss_aipe_R2() closes its iterative search with one summary warning when
+    # the noncentral F lower-limit clamp in ci_nc_F() fired at intermediate
+    # sample sizes along the way. That note describes the search path, not
+    # the returned sample size (which, as the warning itself says, accounts
+    # for the clamp), and this function goes on to evaluate that sample size
+    # empirically and to echo it as total_N, so the note is muffled here.
+    # Every other warning from the planner reaches the user.
+    N <- withCallingHandlers(
+      ss_aipe_R2(population_R2 = estimated_R2, conf_level = conf_level, width = w, which_width = "Full", p = p, assurance = assurance, random_predictors = random_predictors)[1, 2],
+      warning = function(cnd) {
+        if (grepl("lower-limit clamp in ci_nc_F() fired", conditionMessage(cnd), fixed = TRUE))
+          invokeRestart("muffleWarning")
+      }
+    )
   } else {
     N <- specified_N
   }
@@ -173,6 +184,28 @@ ss_aipe_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL, w = NULL
   #############################################################################################################################
 
 
+  # ci_R2() inverts the noncentral F distribution when random_predictors is
+  # FALSE, and on a replication whose observed R^2 is small enough that the
+  # F statistic falls below the central critical value, ci_nc_F() clamps the
+  # lower limit at zero and says so (condition class dmar_nc_F_clamp); on a
+  # still smaller F it also reports that the upper limit is undefined and
+  # returns NA for it. Both are the ordinary consequence of a small observed
+  # R^2 on a single replication rather than a fault in the sensitivity
+  # analysis: the clamped interval enters the width and coverage rows like
+  # any other, and the NA interval is counted in num_probs_with_cis. Those
+  # two warnings are muffled on the per-replication call only; every other
+  # warning reaches the user.
+  ci_R2_replication <- function(R2_obs) {
+    withCallingHandlers(
+      try(ci_R2(R2 = R2_obs, conf_level = conf_level, N = N, p = p, random_predictors = random_predictors)),
+      warning = function(cnd) {
+        if (inherits(cnd, "dmar_nc_F_clamp") ||
+            grepl("upper noncentrality limit is undefined", conditionMessage(cnd), fixed = TRUE))
+          invokeRestart("muffleWarning")
+      }
+    )
+  }
+
   R_Square_Results <- matrix(NA, G, 3)
   colnames(R_Square_Results) <- c("lower_limit", "observed_r2", "upper_limit")
 
@@ -187,7 +220,7 @@ ss_aipe_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL, w = NULL
 
       R_Square_Results[i, 2] <- Summary_Regression_Results$r.squared
 
-      CI_Limits_R2 <- try(ci_R2(R2 = R_Square_Results[i, 2], conf_level = conf_level, N = N, p = p, random_predictors = random_predictors))
+      CI_Limits_R2 <- ci_R2_replication(R_Square_Results[i, 2])
 
       R_Square_Results[i, 1] <- CI_Limits_R2[1, 2]
       R_Square_Results[i, 3] <- CI_Limits_R2[3, 2]
@@ -211,8 +244,7 @@ ss_aipe_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL, w = NULL
       Summary_Regression_Results <- summary(Regression_Results)
 
       R_Square_Results[i, 2] <- Summary_Regression_Results$r.squared
-      # print(Summary_Regression_Results$r.squared)
-      CI_Limits_R2 <- try(ci_R2(R2 = R_Square_Results[i, 2], conf_level = conf_level, N = N, p = p, random_predictors = random_predictors))
+      CI_Limits_R2 <- ci_R2_replication(R_Square_Results[i, 2])
 
       R_Square_Results[i, 1] <- CI_Limits_R2[1, 2]
       R_Square_Results[i, 3] <- CI_Limits_R2[3, 2]
@@ -239,10 +271,9 @@ ss_aipe_R2_sensitivity <- function(true_R2 = NULL, estimated_R2 = NULL, w = NULL
     lower_width_ci = Lower_Width_CI, upper_width_ci = Upper_Width_CI, width_ci = Width_CI
   )
 
-  if (save) {
-    result_file <- filename
-    message("Simulation results will be saved to a .csv file; overwriting a file of the same name if it exists in the directory.")
-    utils::write.csv(Results, result_file, row.names = FALSE)
+  if (!is.null(filename)) {
+    message("Writing the per-replication results to '", filename, "' (any file already there is overwritten).")
+    utils::write.csv(Results, filename, row.names = FALSE)
   }
 
   Num_Probs_with_CIs <- G - length(na.omit(Results$width_ci))

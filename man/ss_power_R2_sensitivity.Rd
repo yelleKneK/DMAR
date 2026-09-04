@@ -17,9 +17,7 @@ ss_power_R2_sensitivity(
   rho_xx = 0.3,
   G = 10000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_power_r2_sensitivity_result.csv",
-  ...
+  filename = NULL
 )
 }
 \arguments{
@@ -47,11 +45,11 @@ ss_power_R2_sensitivity(
 
 \item{print_iter}{Whether to print the iteration number during the simulation}
 
-\item{save}{Whether to write the per-replication results to a CSV file}
-
-\item{filename}{Name of the CSV file written when \code{save = TRUE}}
-
-\item{\dots}{Additional arguments forwarded to internal helpers}
+\item{filename}{Optional path of a CSV file to receive the per-replication
+results (the observed \eqn{R^2} and \eqn{F} statistic), overwriting any
+file already at that path; the default \code{NULL} writes nothing, and a
+throwaway run that wants the file should point it at
+\code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}
@@ -101,8 +99,8 @@ test.
 \examples{
 set.seed(113)
 # Realized power when planning under the fixed-predictor model but the
-# data are actually generated with random predictors. G is small here
-# for illustration; use G = 10,000 in practice.
+# data are actually generated with random predictors. G = 200 keeps the
+# example quick; a reported analysis deserves the default G of 10000.
 ss_power_R2_sensitivity(true_R2 = 0.30, estimated_R2 = 0.30,
                         desired_power = 0.80, p = 5,
                         random_predictors = FALSE,

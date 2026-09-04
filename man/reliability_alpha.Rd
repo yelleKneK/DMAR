@@ -71,8 +71,8 @@ selected. Defaults to \code{10000}.}
 \item{seed}{Random number seed used for bootstrap reproducibility.
 Defaults to \code{NULL}, which leaves the user's current RNG
 state intact; supply an integer for reproducibility. When set,
-the function saves and restores \code{.Random.seed} so the
-user's global RNG state is not polluted.}
+the seed applies inside the function only, and the user's
+generator state is restored when the function returns.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}
@@ -127,7 +127,7 @@ instruments coefficient \eqn{\alpha} and McDonald's (1999) coefficient
 \eqn{\omega} (\code{\link{reliability_omega}}) typically yield very
 similar values; \eqn{\omega} extends to congeneric items
 (heterogeneous loadings) without the lower-bound caveat. For
-ordered-categorical items see \code{\link{reliability_omega_categorical}}.
+ordered categorical items see \code{\link{reliability_omega_categorical}}.
 
 \strong{Two estimators of the same coefficient.} The argument
 \code{estimator} selects how \eqn{\alpha} is estimated from the data.
@@ -306,29 +306,30 @@ S <- cov(items)
 reliability_alpha(S = S, N = 200, ci_method = "feldt")
 
 # The bootstrap intervals resample the rows and recompute the
-# coefficient B times, so they are shown rather than run. The
-# percentile interval reads its limits off the empirical quantiles of
-# the bootstrap estimates:
-#   reliability_alpha(data = items, ci_method = "percentile",
-#                     B = 10000, seed = 113)
+# coefficient on each replication. The percentile interval reads its
+# limits off the empirical quantiles of the bootstrap estimates.
+# B = 500 keeps the example quick; a reported interval deserves the
+# default B = 10000, and seed makes the interval reproducible.
+reliability_alpha(data = items, ci_method = "percentile", B = 500,
+                  seed = 113)
+
 # The bias-corrected and accelerated interval adjusts those two
 # quantile positions for median bias and for acceleration, and is the
-# better choice for a reported interval:
-#   reliability_alpha(data = items, ci_method = "bca", B = 10000,
-#                     seed = 113)
-# The default B = 10000 is an accuracy choice, not a formality, since
-# BCa works farther into the tails of the bootstrap distribution than
-# the percentile interval does (see Details).
+# better choice for a reported interval. The default B = 10000 is an
+# accuracy choice, not a formality, since BCa works farther into the
+# tails of the bootstrap distribution than the percentile interval
+# does (see Details).
+reliability_alpha(data = items, ci_method = "bca", B = 500, seed = 113)
 
-# Full information maximum likelihood with an auxiliary variable,
-# shown rather than run because it fits a model over the items and
-# the auxiliary. Missingness on y2 depends on an auxiliary z (missing
-# at random given z), so listwise deletion is biased and FIML with z
-# is not. Supplying aux implies missing = "fiml":
-#   z <- eta + rnorm(200, sd = 0.5)
-#   d <- data.frame(items, z = z)
-#   d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
-#   reliability_alpha(data = d, aux = "z")
+# Full information maximum likelihood with an auxiliary variable.
+# Missingness on y2 depends on an auxiliary z (missing at random given
+# z), so listwise deletion is biased and FIML with z is not. Supplying
+# aux implies missing = "fiml"; the N_complete row shows how many
+# rows listwise deletion would have kept.
+z <- eta + rnorm(200, sd = 0.5)
+d <- data.frame(items, z = z)
+d$y2[runif(200) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
+reliability_alpha(data = d, aux = "z")
 
 }
 \references{

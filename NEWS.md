@@ -4,6 +4,76 @@ First public release of DMAR (pronounced "Dee-Mar," for "Design,
 Measurement, and Analysis in R"), a greatly expanded reimagining
 of the MBESS package.
 
+## Every Example Runs, and Nothing Writes or Seeds Behind the User's Back
+
+* Every line of code in every help page example now runs. Earlier
+  drafts carried a slow call (a bootstrap interval, a Monte Carlo
+  planner, a refit) as a comment so that a reader could see the
+  syntax without the check paying for it; the CRAN review of 2026-09-04
+  asked that no example line be commented out, and none is. Where a
+  call was slow, it runs with a small replication count and a comment
+  naming the count a reported analysis deserves (the defaults are
+  unchanged); where a page demonstrated the same thing twice, it now
+  demonstrates it once. The package still ships no `\donttest{}`
+  and no `\dontrun{}`, and a parse-based detector in the test suite
+  fails on any comment line that would parse as code.
+
+* The sensitivity family no longer writes a file unless asked to, and
+  never to a default location. The `save` argument is gone from
+  <<SAVE_LIST>>; the single switch is `filename`, which defaults to
+  `NULL`. Supplying a path writes the per-replication results there
+  exactly as `save = TRUE` used to; a throwaway run points it at
+  `tempfile(fileext = ".csv")`.
+
+* A supplied `seed` is now set through `withr::local_seed()` (withr,
+  which has no dependencies of its own, joins Imports), by way of one
+  internal helper that every seeded function calls. The behavior is
+  what it was, the user's generator state is restored when the
+  function returns, but the package no longer touches
+  `.Random.seed` or the global environment to do it, and no function
+  uses `<<-`: the handlers that count clamped or non-converged
+  replications keep their counts in a local environment.
+
+* The six Monte Carlo functions that silenced every warning for their
+  duration with `options(warn = -1)` now muffle only the warnings
+  their loops are known to raise (lavaan convergence and variance
+  warnings on borderline replicates, the noncentral clamp); any other
+  warning reaches the user.
+
+* The package title is "Design, Measurement, and Analysis"; the
+  expansion of the name stays on the package help page and in the
+  README.
+
+* The Bryant-Paulson distribution function integrates over the
+  covariate shrinkage factor after the change of variables
+  delta = 1 - u^2, under which the Beta weight of Bryant and Paulson
+  (1976, Equation 12) is smooth on the unit interval for every number
+  of covariates instead of carrying an integrable singularity at the
+  endpoint where the distribution puts most of its mass. The two
+  forms agree to about 1e-10 (checked on a grid of 288 quantile,
+  covariate, group, and degrees of freedom combinations), the Table 1
+  reproduction in the tests is unchanged, and a critical value now
+  costs about a twentieth of what it did, which is what lets every
+  `qbryant_paulson()`, `cv_bryant_paulson()`, and `ci_c_ancova_bp()`
+  example run live.
+
+* Two smaller changes from the same pass. `mlmr()`, `mlmr_mv()`, and
+  `average_variance_extracted()` resample through
+  `lavaan::lavBootstrap()`, the entry point that replaced
+  `bootstrapLavaan()` in lavaan 0.7-2 (the package already requires
+  that version); the results are identical. The five sensitivity
+  functions whose `...` was never forwarded anywhere
+  (`ss_aipe_sc_sensitivity()`, `ss_aipe_smd_sensitivity()`,
+  `ss_aipe_sm_sensitivity()`, `ss_aipe_R2_sensitivity()`, and
+  `ss_power_R2_sensitivity()`) no longer accept it, so a misspelled
+  or retired argument such as `save = TRUE` now stops with an error
+  instead of being swallowed. `ss_aipe_cv()` with `assurance`
+  supplied reports its noncentral accuracy note once, with the
+  combined count, where it used to report it twice; and
+  `ss_aipe_cv_sensitivity()` and `ss_aipe_sc_ancova_sensitivity()`
+  report that note once per run, with the number of replications it
+  arose in, rather than once per replication.
+
 ## An Adversarial Quality Control Pass
 
 * A package-wide audit (numerical verification against complex-step

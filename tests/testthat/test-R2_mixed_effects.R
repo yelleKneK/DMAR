@@ -162,3 +162,25 @@ test_that("R2_mixed_effects treats the double-bar form as the split form", {
   expect_equal(R2_mixed_effects(fit_bar)$value, R2_mixed_effects(fit_split)$value,
                tolerance = 1e-8)
 })
+
+test_that("R2_mixed_effects bootstrap honors seed and leaves the caller's RNG state alone", {
+  skip_if_not_installed("lme4")
+  fit <- lme4::lmer(Reaction ~ Days + (1 | Subject), data = lme4::sleepstudy)
+  set.seed(1)
+  before <- get(".Random.seed", envir = globalenv())
+  r1 <- R2_mixed_effects(fit, ci_method = "boot", B = 10, seed = 113)
+  # The seed is local to the call: the caller's generator state is restored.
+  expect_identical(get(".Random.seed", envir = globalenv()), before)
+  r2 <- R2_mixed_effects(fit, ci_method = "boot", B = 10, seed = 113)
+  expect_equal(r1$value, r2$value)
+  expect_identical(r1$term,
+                   c("R2_marginal", "R2_marginal_lower", "R2_marginal_upper",
+                     "R2_conditional", "R2_conditional_lower",
+                     "R2_conditional_upper"))
+  expect_true(all(r1$value >= 0 & r1$value <= 1))
+  expect_lte(r1$value[r1$term == "R2_marginal_lower"],
+             r1$value[r1$term == "R2_marginal_upper"])
+  expect_lte(r1$value[r1$term == "R2_conditional_lower"],
+             r1$value[r1$term == "R2_conditional_upper"])
+  expect_identical(attr(r1, "conf_level"), 0.95)
+})

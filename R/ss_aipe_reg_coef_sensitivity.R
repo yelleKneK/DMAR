@@ -19,8 +19,12 @@
 #' @param assurance Degree of certainty that the obtained confidence interval will be sufficiently narrow
 #' @param G The number of generations (i.e., replications) of the simulation within the function
 #' @param print_iter Specify with a \code{TRUE}/\code{FALSE} statement if the iteration number should be printed as the simulation within the function runs
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
+#' @param filename Optional path of a CSV file to receive the per-replication
+#'   results (the coefficient estimate, its confidence limits, the observed
+#'   \eqn{R^2}, the standard error, and the \emph{t} statistic), appended when
+#'   the file already exists and created otherwise; the default \code{NULL}
+#'   writes nothing, and a throwaway run that wants the file should point it
+#'   at \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' Direct specification of \code{true_cov_YX} and \code{true_cov_XX} is necessary, even if one is
@@ -103,8 +107,7 @@
 ss_aipe_reg_coef_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL, true_cov_XX = NULL,
                                          estimated_var_Y = NULL, estimated_cov_YX = NULL, estimated_cov_XX = NULL, specified_N = NULL,
                                          which_predictor = 1, w = NULL, noncentral = FALSE, standardize = FALSE, conf_level = .95,
-                                         assurance = NULL, G = 1000, print_iter = TRUE, save = FALSE,
-                                         filename = "ss_aipe_reg_coef_sensitivity_result.csv") {
+                                         assurance = NULL, G = 1000, print_iter = TRUE, filename = NULL) {
   if (!requireNamespace("MASS", quietly = TRUE)) stop("The package 'MASS' is needed; please install the package and try again.")
 
   if (noncentral == TRUE && is.null(true_var_Y)) true_var_Y <- 1
@@ -112,7 +115,8 @@ ss_aipe_reg_coef_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL, 
   if (is.null(w)) stop("You must specify \'w\' (i.e., a confidence interval width).")
   width <- w
   if (is.null(conf_level)) stop("You must specify a confidence level (i.e., 1 - Type I error rate).")
-  if (is.null(G)) stop("You must specify 'G/' (i.e., the number of generations of the simulation).")
+  if (is.null(G)) stop("You must specify 'G' (i.e., the number of generations of the simulation).")
+  .check_filename(filename)
 
   if (is.null(true_cov_XX)) stop("You must specify 'true_cov_XX' (i.e., the covariance matrix of the predictors).")
   if (is.null(true_cov_YX)) stop("You must specify 'true_cov_YX' (i.e., the covariance vector of the predictors with the dependent variable).")
@@ -194,15 +198,13 @@ ss_aipe_reg_coef_sensitivity <- function(true_var_Y = NULL, true_cov_YX = NULL, 
 
   Results <- as.data.frame(Results)
 
-  if (save) {
-    result_file <- filename
-    # print("Simulation results will be saved to a .csv file")
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
+  if (!is.null(filename)) {
+    suppressWarnings(file_exist <- try(utils::read.csv(filename), silent = TRUE))
     if (!is.null(dim(file_exist))) {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+      cat("The file '", filename, "' already exists; the simulation results were appended to it.\n", sep = "")
     } else {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
+      utils::write.table(Results, filename, sep = ",", row.names = FALSE, append = FALSE)
     }
   }
 

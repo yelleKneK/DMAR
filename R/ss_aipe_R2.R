@@ -33,10 +33,11 @@
 #' sample size as an estimate and then evaluates with an internal Monte Carlo simulation
 #' (i.e., via "brute-force" methods) the exact sample size given the goals specified. When \code{verify_ss=TRUE},
 #' the default number of iterations is 10,000 but this can be changed by specifying G=5000 (or some other value;
-#' 10000 is the recommended) When \code{verify_ss=TRUE} is specified, an internal function \code{verify_ss_aipe_r2}
+#' 10000 is the recommended). When \code{verify_ss=TRUE} is specified, an internal function \code{verify_ss_aipe_r2}
 #' calls upon the \code{ss_aipe_R2_sensitivity} function for purposes of the internal Monte Carlo simulation
-#' study. See the \code{verify_ss_aipe_r2} function for arguments that can be passed from \code{ss_aipe_R2}
-#' to \code{verify_ss_aipe_r2}.
+#' study. Two of its arguments pass through \code{\dots}: \code{g} (default 500), the number of replications
+#' used for each candidate \emph{N} in the coarse search that brackets the answer, and \code{G} (default 10000),
+#' the number used in the final pass that confirms the sample size near that bracket.
 #'
 #' @return
 #' A 1-row \code{data.frame} with columns \code{term} and \code{value}.
@@ -93,31 +94,29 @@
 #'            which_width = "Full", p = 5, random_predictors = TRUE)
 #'
 #' # 2. The same target under fixed predictors (planned dosing levels,
-#' #    factorial covariates, and the like) needs a smaller N, and adding an
-#' #    assurance of .85, so that the realized width is no larger than the
-#' #    target in 85 percent of replications rather than only on average,
-#' #    needs a larger one. Each is another pass of the same iterative search
-#' #    over N, so the two calls are shown here rather than run:
-#' #
-#' #    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-#' #               which_width = "Full", p = 5, random_predictors = FALSE)
-#' #
-#' #    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-#' #               which_width = "Full", p = 5, assurance = .85,
-#' #               random_predictors = TRUE)
+#' #    factorial covariates, and the like) needs a smaller N, since fixed
+#' #    predictors contribute no sampling variability of their own.
+#' ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+#'            which_width = "Full", p = 5, random_predictors = FALSE)
 #'
-#' # 3. verify_ss = TRUE follows the closed form approximation with an a
+#' # 3. An assurance of .85, so that the realized width is no larger than the
+#' #    target in 85 percent of replications rather than only on average,
+#' #    needs a larger N than the expected width plan in (1).
+#' ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+#'            which_width = "Full", p = 5, assurance = .85,
+#'            random_predictors = TRUE)
+#'
+#' # 4. verify_ss = TRUE follows the closed form approximation with an a
 #' #    priori Monte Carlo simulation of the realized width, starting from
 #' #    the closed form answer and returning the sample size the simulation
-#' #    settles on, which is what a plan meant to be defended deserves. G is
-#' #    the number of replications in that simulation; 10000 is the default
-#' #    and the recommendation. The call runs for several minutes, so it too
-#' #    is shown rather than run:
-#' #
-#' #    set.seed(113)
-#' #    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-#' #               which_width = "Full", p = 5, random_predictors = TRUE,
-#' #               verify_ss = TRUE, G = 10000)
+#' #    settles on, which is what a plan meant to be defended deserves. The
+#' #    coarse search runs g replications per candidate N and the final pass
+#' #    runs G; the small counts here keep the example quick, and a reported
+#' #    plan deserves the defaults of g = 500 and G = 10000.
+#' set.seed(113)
+#' ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+#'            which_width = "Full", p = 5, random_predictors = TRUE,
+#'            verify_ss = TRUE, g = 10, G = 30)
 #'
 #' @keywords design
 #'
@@ -136,13 +135,15 @@ ss_aipe_R2 <- function(population_R2 = NULL, conf_level = 0.95, width = NULL, ra
   # signals via a warning. Surfacing that warning once per iteration produces
   # dozens of identical messages. We muffle the per-iteration warnings with
   # withCallingHandlers, count them, and emit a single summary warning at the
-  # end (via on.exit so it fires on any return path).
-  .clamp_count <- 0L
+  # end (via on.exit so it fires on any return path). The count lives in an
+  # environment made for it so the handler updates it by ordinary assignment.
+  state <- new.env(parent = emptyenv())
+  state$clamp_count <- 0L
   on.exit({
-    if (.clamp_count > 0L) {
+    if (state$clamp_count > 0L) {
       warning(sprintf(
         "During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in %d intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.",
-        .clamp_count
+        state$clamp_count
       ), call. = FALSE)
     }
   }, add = TRUE)
@@ -234,7 +235,6 @@ ss_aipe_R2 <- function(population_R2 = NULL, conf_level = 0.95, width = NULL, ra
       To_Use <- min(E_Width_Info[Contending, 2])
       Here <- E_Width_Info[which(E_Width_Info[, 2] == To_Use), ]
 
-      # Result_Full <- list(Required.Sample.Size = as.numeric(Here[2]), Expected.Width = as.numeric(Here[1]))
       Result_Full <- as.numeric(Here[2])
 
       return(Result_Full)
@@ -1094,7 +1094,7 @@ ss_aipe_R2 <- function(population_R2 = NULL, conf_level = 0.95, width = NULL, ra
   }
   }, warning = function(w) {
     if (inherits(w, "dmar_nc_F_clamp")) {
-      .clamp_count <<- .clamp_count + 1L
+      state$clamp_count <- state$clamp_count + 1L
       invokeRestart("muffleWarning")
     }
   })

@@ -13,9 +13,7 @@ ss_aipe_sm_sensitivity(
   conf_level = 0.95,
   G = 10000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_sm_sensitivity_result.csv",
-  ...
+  filename = NULL
 )
 }
 \arguments{
@@ -35,11 +33,10 @@ ss_aipe_sm_sensitivity(
 
 \item{print_iter}{to print the current value of the iterations}
 
-\item{save}{option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results}
-
-\item{filename}{the name of the file that simulation results will be saved to}
-
-\item{\dots}{allows one to potentially include parameter values for inner functions}
+\item{filename}{Optional path to a CSV file; when supplied, the per-replication results (the
+observed standardized mean, the full and one-sided widths, the tail misses, and the interval
+limits) are written there, appended when the file already exists, and a throwaway run should
+point it at \code{tempfile(fileext = ".csv")}; the default \code{NULL} writes nothing.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}
@@ -66,28 +63,32 @@ Performs a sensitivity analysis when planning sample size from the Accuracy in P
 Perspective for the standardized mean.
 }
 \examples{
-# Since 'true_sm' equals 'estimated_sm', this usage
-# returns the results of a correctly specified situation.
-# Note that 'G' should be large (10 is used to make the
-# example run easily)
-#Res.1 <- ss_aipe_sm_sensitivity(true_sm=10, estimated_sm=10,
-#desired_width=.5, assurance=.95, conf_level=.95, G=10,
-#print_iter=FALSE)
+# With true_sm equal to estimated_sm the planning value is correct, and
+# the sweep reports what a correctly specified plan delivers: the share of
+# intervals no wider than the target should sit near the assurance. G = 10
+# keeps the example quick; a reported sensitivity study deserves the
+# default G = 10000.
+set.seed(113)
+res_correct <- ss_aipe_sm_sensitivity(true_sm = 1.5, estimated_sm = 1.5,
+  desired_width = 0.5, assurance = 0.95, conf_level = 0.95, G = 10,
+  print_iter = FALSE)
+res_correct
 
-# Objects contained in the 'Summary'.
-# Res.1$term
+# The terms the summary reports.
+res_correct$term
 
-# What proportion of the obtained full widths are narrower than the
-# desired one?
-# Res.1[which(Res.1$term == 'pct_ci_less_w'),2]
+# The proportion of realized full widths no wider than the target.
+res_correct$value[res_correct$term == "pct_ci_less_w"]
 
-# True standardized mean difference is 10, but specified at 12.
-# Change 'G' to some large number (e.g., G=20)
-#Res.2 <- ss_aipe_sm_sensitivity(true_sm=10, estimated_sm=12,
-#desired_width=.5, assurance=NULL, conf_level=.95, G=20)
+# The population standardized mean is 1.5 but the plan assumed 2, so the
+# planner sizes the study for a wider sampling distribution than the data
+# will show, and the realized intervals come in narrower than the target.
+set.seed(113)
+res_misspecified <- ss_aipe_sm_sensitivity(true_sm = 1.5, estimated_sm = 2,
+  desired_width = 0.5, G = 20, print_iter = FALSE)
 
-# The effect of the misspecification on mean confidence intervals is:
-# Res.2[which(Res.2$term == 'mean_ci_width'),2]
+# The effect of the misspecification on the mean interval width.
+res_misspecified$value[res_misspecified$term == "mean_ci_width"]
 
 }
 \references{

@@ -138,8 +138,16 @@ independence approximation computed from the asymptotic variances, spent
 before any simulation) reaches \code{desired_power}, brackets the crossing
 geometrically, and bisects to adjacent integers, each candidate evaluated
 with its own \code{G} replications. A planning call therefore fits the
-analysis model several thousand times, which is why the examples on this
-page are shown but not run.
+analysis model several thousand times at the default \code{G}, and even
+at the smallest admissible \code{G} the search runs for several seconds,
+so the example below evaluates a stated \code{N}, which is the cheap half
+of the method. A planning call is the same call with \code{N} left out
+and \code{desired_power} stated or left at its default, and the first row
+of the result is then \code{necessary_N} rather than
+\code{specified_N}. The vignette
+\code{vignette("composite_sem_planning", package = "DMAR")} works through
+the planning calls for a mediation model and a latent growth curve model,
+with reference values computed at \code{G = 10000}.
 }
 \note{
 A replication whose fit does not converge, or converges without a usable
@@ -172,53 +180,38 @@ resolution guard applies to \code{\link{ss_aipe_composite_sem}}'s
 \examples{
 # A three-factor model whose conclusion rests on three structural paths
 # at once: f1 predicting f2, f2 predicting f3, and f1 predicting f3
-# directly. Composite power here is a simulated quantity, so every call
-# refits the analysis model G times and a planning search refits it several
-# thousand times. The worked example that follows is therefore shown rather
-# than run.
-#
-# The population model fixes every parameter to its purported population
-# value.
-#   pop_model <- "
-#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-#     f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
-#     f2 ~ 0.4*f1
-#     f3 ~ 0.3*f2 + 0.25*f1
-#     f1 ~~ 1*f1
-#     f2 ~~ 0.84*f2
-#     f3 ~~ 0.8*f3
-#     y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
-#     y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
-#     y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
-#   "
-#
+# directly. The population model fixes every parameter to its purported
+# population value.
+pop_model <- "
+  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+  f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
+  f2 ~ 0.4*f1
+  f3 ~ 0.3*f2 + 0.25*f1
+  f1 ~~ 1*f1
+  f2 ~~ 0.84*f2
+  f3 ~~ 0.8*f3
+  y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+  y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+  y7 ~~ 0.5*y7; y8 ~~ 0.5*y8; y9 ~~ 0.5*y9
+"
+
 # The analysis model is free; the labels name the parameters of interest.
-#   analysis_model <- "
-#     f1 =~ y1 + y2 + y3
-#     f2 =~ y4 + y5 + y6
-#     f3 =~ y7 + y8 + y9
-#     f2 ~ a*f1
-#     f3 ~ b*f2 + c*f1
-#   "
-#
+analysis_model <- "
+  f1 =~ y1 + y2 + y3
+  f2 =~ y4 + y5 + y6
+  f3 =~ y7 + y8 + y9
+  f2 ~ a*f1
+  f3 ~ b*f2 + c*f1
+"
+
 # Realized composite power at N = 200. The probability that all three
 # paths come out significant in the same study is lower than the marginal
 # power of any one of them: the composite event sits inside each marginal
-# event, so the weakest parameter governs the design.
-#   set.seed(113)
-#   ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
-#                          N = 200, G = 1000)
-#
-# Leaving N out plans the necessary sample size for a desired composite
-# power instead, here over the two structural paths a and b with c left
-# out of the composite. That search evaluates a sequence of candidate
-# sample sizes, each with its own G replications, so it costs several
-# thousand model fits:
-#   set.seed(113)
-#   ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
-#                          parameters = c("a", "b"),
-#                          desired_power = 0.80, G = 1000)
+# event, so the weakest parameter governs the design. G = 20 keeps the
+# example quick; a reported plan deserves the default G = 1000 or more.
+ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
+                       N = 200, G = 20, seed = 113)
 
 }
 \references{

@@ -230,13 +230,16 @@ simple_effects_AB <- function(
   # below the alpha_lower critical value of the central F (lower NCP limit
   # clamped to 0). For a family of a + b simple effects this can produce
   # several identical warnings. Muffle them per call and report a single
-  # summary warning at the end. Pattern matches ss_aipe_R2().
-  .clamp_count <- 0L
+  # summary warning at the end. Pattern matches ss_aipe_R2(). The count
+  # lives in an environment made for the handler, which updates it with
+  # ordinary assignment.
+  state <- new.env(parent = emptyenv())
+  state$n_clamped <- 0L
   on.exit({
-    if (.clamp_count > 0L) {
+    if (state$n_clamped > 0L) {
       warning(sprintf(
         "The ci_nc_F() lower-limit clamp fired in %d of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.",
-        .clamp_count
+        state$n_clamped
       ), call. = FALSE)
     }
   }, add = TRUE)
@@ -445,7 +448,7 @@ simple_effects_AB <- function(
   .as_dmar_tbl(out, conf_level = conf_level)
   }, warning = function(w) {
     if (inherits(w, "dmar_nc_F_clamp")) {
-      .clamp_count <<- .clamp_count + 1L
+      state$n_clamped <- state$n_clamped + 1L
       invokeRestart("muffleWarning")
     }
   })

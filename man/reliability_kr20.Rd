@@ -125,10 +125,10 @@ reliability_kr20(data = items)
 reliability_kr20(data = items, ci_method = "bonett")
 
 # A bootstrap interval recomputes KR-20 on each of B resamples of the
-# rows, so it is shown rather than run; the call is
-#   reliability_kr20(data = items, ci_method = "percentile",
-#                    B = 10000, seed = 113)
-# and the default B = 10000 is what a reported interval deserves.
+# rows. B = 500 keeps the example quick; a reported interval deserves
+# the default B = 10000, and seed makes the interval reproducible.
+reliability_kr20(data = items, ci_method = "percentile", B = 500,
+                 seed = 113)
 
 }
 \references{

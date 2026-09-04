@@ -72,7 +72,9 @@
 #' reparameterizations, often have better coverage in small samples,
 #' and respect parameter boundaries (Pawitan, 2001). The cost is
 #' computational: each parameter requires a sequence of refits with
-#' that parameter constrained.
+#' that parameter constrained. The examples below ask for the Wald and
+#' bootstrap intervals so the help page stays quick; a reported
+#' analysis leaves \code{ci_method} at its default.
 #'
 #' \strong{The bootstrap interval.} With \code{ci_method = "boot"} the
 #' rows of \code{data} are resampled with replacement \code{B}
@@ -318,10 +320,8 @@
 #'
 #' @examples
 #' # Complete data: the maximum likelihood estimates agree with lm() to
-#' # working precision. This block asks for the Wald interval, the one
-#' # member of the CI menu cheap enough to run at example time. It is
-#' # the only block here that runs; the rest is left as commented code
-#' # so a reader can see the syntax without paying the run time.
+#' # working precision. The fit asks for the Wald interval; the choice
+#' # among the intervals is taken up below.
 #' fit_mlmr <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
 #'                    t9_word_meaning,
 #'                  data = holzinger_swineford, ci_method = "wald")
@@ -340,18 +340,23 @@
 #'
 #' # The interval menu is profile, Wald, and bootstrap. The default,
 #' # ci_method = "profile", inverts the likelihood ratio test one
-#' # parameter at a time through a sequence of constrained refits, and
-#' # it is what a reported interval deserves. The bootstrap resamples
-#' # rows and takes percentile limits; it is what to ask for when the
-#' # normality the likelihood assumes is doubtful. Both refit the model
-#' # many times, so neither is run here; the calls are
-#' #   mlmr(t6_paragraph_comprehension ~ t5_general_information +
-#' #          t9_word_meaning, data = holzinger_swineford)
-#' #   mlmr(t6_paragraph_comprehension ~ t5_general_information +
-#' #          t9_word_meaning, data = holzinger_swineford,
-#' #        ci_method = "boot", B = 1000, boot_seed = 113)
-#' # with boot_seed supplied because bootstrap limits otherwise move
-#' # from run to run.
+#' # parameter at a time through a sequence of constrained refits; it
+#' # is what a reported interval deserves, and leaving ci_method at its
+#' # default asks for it. The fits on this page ask for the Wald or the
+#' # bootstrap interval because those refits take longer than a help
+#' # page should. The bootstrap resamples rows and takes percentile
+#' # limits; it is what to ask for when the normality the likelihood
+#' # assumes is doubtful. B = 20 keeps the example quick, since every
+#' # resample refits the model; a reported interval deserves the
+#' # default B = 1000. boot_seed fixes the resamples, so the limits
+#' # are reproducible rather than moving from run to run, and
+#' # effect_sizes = FALSE skips the effect size refits, which
+#' # summary() above already showed.
+#' fit_boot <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
+#'                    t9_word_meaning, data = holzinger_swineford,
+#'                  ci_method = "boot", B = 20, boot_seed = 113,
+#'                  effect_sizes = FALSE)
+#' confint(fit_boot)
 #'
 #' # Missing values on a predictor are where maximum likelihood and
 #' # least squares part company. The full information likelihood keeps
@@ -360,32 +365,35 @@
 #' # carries real missingness for this: the revised second-form test
 #' # t26_flags was administered to only 145 of the 301 students, so a
 #' # model using it loses more than half the sample under listwise
-#' # deletion while the full information fit keeps all 301 rows. Not
-#' # run here because the comparison costs two more fits; the code is:
-#' #   fit_fiml <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
-#' #                      t26_flags, data = holzinger_swineford,
-#' #                    ci_method = "wald", effect_sizes = FALSE)
-#' #   fit_lwd  <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
-#' #                      t26_flags, data = holzinger_swineford,
-#' #                    missing = "listwise",
-#' #                    ci_method = "wald", effect_sizes = FALSE)
-#' #   rbind(FIML = coef(fit_fiml), listwise = coef(fit_lwd))
-#' #   c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
-#' # Passing effect_sizes = FALSE there skips the constrained refits the
-#' # effect size block needs, which are not what is being compared.
+#' # deletion while the full information fit keeps all 301 rows. Notice
+#' # the two sample sizes, and that the two fits do not agree on the
+#' # intercept.
+#' fit_fiml <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
+#'                    t26_flags, data = holzinger_swineford,
+#'                  ci_method = "wald", effect_sizes = FALSE)
+#' fit_lwd  <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
+#'                    t26_flags, data = holzinger_swineford,
+#'                  missing = "listwise",
+#'                  ci_method = "wald", effect_sizes = FALSE)
+#' rbind(FIML = coef(fit_fiml), listwise = coef(fit_lwd))
+#' c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
 #'
 #' # An auxiliary variable is not a predictor. The complete speed test
 #' # t13_straight_and_curved_capitals enters as a saturated correlate,
 #' # correlated with the outcome residual and with the predictors, so
 #' # the likelihood can draw on it for the rows where t26_flags is
 #' # missing while the coefficients keep their meaning. Continuing from
-#' # the model above, and again not run here:
-#' #   fit_aux <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
-#' #                     t26_flags, data = holzinger_swineford,
-#' #                   ci_method = "wald",
-#' #                   auxiliary = "t13_straight_and_curved_capitals",
-#' #                   effect_sizes = FALSE)
-#' #   cbind(no_aux = coef(fit_fiml), aux = coef(fit_aux))
+#' # the model above, the coefficients move a little and the slope
+#' # standard errors shrink: the information the auxiliary recovers
+#' # shows mostly as precision.
+#' fit_aux <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
+#'                   t26_flags, data = holzinger_swineford,
+#'                 ci_method = "wald",
+#'                 auxiliary = "t13_straight_and_curved_capitals",
+#'                 effect_sizes = FALSE)
+#' cbind(no_aux = coef(fit_fiml), aux = coef(fit_aux))
+#' cbind(se_no_aux = sqrt(diag(vcov(fit_fiml))),
+#'       se_aux = sqrt(diag(vcov(fit_aux))))
 #'
 #' @keywords regression models
 #'

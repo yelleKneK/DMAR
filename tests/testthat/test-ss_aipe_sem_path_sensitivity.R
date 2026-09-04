@@ -35,3 +35,57 @@ test_that("ss_aipe_sem_path_sensitivity runs a lavaan-backed Monte Carlo study",
   expect_true(is.finite(mean_width))
   expect_gt(mean_width, 0)
 })
+
+test_that("ss_aipe_sem_path_sensitivity() writes per-replication results only to a named file", {
+  skip_on_cran()
+  skip_if_not_installed("lavaan")
+  skip_if_not_installed("MASS")
+
+  pop_model <- "
+    f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+    f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+    f2 ~ 0.5*f1
+    f1 ~~ 1*f1
+    f2 ~~ 0.75*f2
+    y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+    y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+  "
+  Sigma <- cov_sem(pop_model)$sigma_theta
+  analysis_model <- "
+    f1 =~ y1 + y2 + y3
+    f2 =~ y4 + y5 + y6
+    f2 ~ b*f1
+  "
+
+  # Nothing is written unless the caller names a file; the old `save`
+  # switch and its default path in the working directory are gone, and a
+  # malformed filename is refused before any replication runs.
+  expect_null(eval(formals(ss_aipe_sem_path_sensitivity)$filename))
+  expect_false("save" %in% names(formals(ss_aipe_sem_path_sensitivity)))
+  expect_error(
+    ss_aipe_sem_path_sensitivity(model = analysis_model, est_Sigma = Sigma,
+                                 which_path = "b", desired_width = 0.30,
+                                 N = 150, G = 3,
+                                 filename = c("a.csv", "b.csv")),
+    "'filename' must be NULL or a single character string", fixed = TRUE)
+
+  out_file <- tempfile(fileext = ".csv")
+  on.exit(unlink(out_file), add = TRUE)
+  set.seed(113)
+  ss_aipe_sem_path_sensitivity(model = analysis_model, est_Sigma = Sigma,
+                               which_path = "b", desired_width = 0.30,
+                               N = 150, G = 3, filename = out_file)
+  written <- utils::read.csv(out_file)
+  expect_named(written, c("theta_hat", "se_theta_hat", "ci_low", "ci_up", "width"))
+  expect_equal(nrow(written), 3L)
+  expect_equal(written$width, written$ci_up - written$ci_low)
+
+  # A second run appends to the existing file and says so.
+  set.seed(113)
+  expect_message(
+    ss_aipe_sem_path_sensitivity(model = analysis_model, est_Sigma = Sigma,
+                                 which_path = "b", desired_width = 0.30,
+                                 N = 150, G = 3, filename = out_file),
+    "already exists", fixed = TRUE)
+  expect_equal(nrow(utils::read.csv(out_file)), 6L)
+})

@@ -390,16 +390,7 @@ randomization_test <- function(x = NULL, group = NULL, data = NULL,
     perm   <- utils::combn(N, n_1)
     n_eval <- ncol(perm)
   } else {
-    if (!is.null(seed)) {
-      if (exists(".Random.seed", envir = .GlobalEnv)) {
-        .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-      } else {
-        on.exit(if (exists(".Random.seed", envir = .GlobalEnv))
-          rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-      }
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     perm   <- matrix(replicate(n_resamples, sample.int(N, n_1)), nrow = n_1)
     n_eval <- n_resamples
   }

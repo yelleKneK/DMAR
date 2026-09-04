@@ -250,7 +250,8 @@ mlmr_wald_ci <- function(est, se, conf_level) {
 # only when failure happens far from the maximum likelihood estimate.
 #
 # Iterative refits emit one warning per refit when lavaan reports
-# convergence issues; these are collected and re-emitted as a single
+# convergence issues; these are counted in a small state environment
+# that the objective closure updates, and re-emitted as a single
 # summary warning at the end so the caller is not flooded.
 mlmr_profile_ci <- function(fit, syntax, fit_args, beta_labels,
                             est, se, conf_level) {
@@ -260,7 +261,8 @@ mlmr_profile_ci <- function(fit, syntax, fit_args, beta_labels,
   ci <- matrix(NA_real_, nrow = length(beta_labels), ncol = 2L,
                dimnames = list(NULL, c("lower", "upper")))
 
-  warn_count <- 0L
+  state <- new.env(parent = emptyenv())
+  state$warn_count <- 0L
   refit_with_constraint <- function(label, value) {
     constrained_syntax <- paste0(syntax, "\n", label, " == ",
                                  formatC(value, format = "g",
@@ -283,7 +285,7 @@ mlmr_profile_ci <- function(fit, syntax, fit_args, beta_labels,
     obj <- function(b) {
       ll_c <- refit_with_constraint(lab, b)
       if (!is.finite(ll_c)) {
-        warn_count <<- warn_count + 1L
+        state$warn_count <- state$warn_count + 1L
         return(Inf)
       }
       2 * (ll_full - ll_c) - crit
@@ -308,8 +310,8 @@ mlmr_profile_ci <- function(fit, syntax, fit_args, beta_labels,
     if (!inherits(upper_root, "try-error")) ci[i, 2L] <- upper_root
   }
 
-  if (warn_count > 0L) {
-    warning("mlmr profile CI: ", warn_count,
+  if (state$warn_count > 0L) {
+    warning("mlmr profile CI: ", state$warn_count,
             " constrained refits did not converge and were treated ",
             "as outside the confidence region. CI bounds for the ",
             "affected parameter may be conservative or NA.",
@@ -398,29 +400,20 @@ mlmr_compute_effect_sizes <- function(fit_args, syntax, slope_labels,
 
 # Bootstrap confidence intervals.
 #
-# Uses lavaan::bootstrapLavaan with FUN returning the slopes of
+# Uses lavaan::lavBootstrap with fun returning the slopes of
 # interest. type = "ordinary" resamples the rows of the original
 # data; type = "bollen.stine" applies the Bollen and Stine (1992)
 # model-based bootstrap.
 #
 # boot_seed: optional integer for RNG reproducibility. If supplied,
-# the function saves the existing .Random.seed, sets the requested
-# seed, runs the bootstrap, and restores the prior state on exit so
-# the user's global RNG is not polluted. If NULL (the default),
-# successive calls draw fresh resamples from the user's current RNG.
+# the seed is set for the duration of this function through
+# .dmar_local_seed(), which restores the caller's generator state when
+# the function exits so the user's random stream is not perturbed. If
+# NULL (the default), successive calls draw fresh resamples from the
+# user's current RNG.
 mlmr_boot_ci <- function(fit, fit_args, beta_labels, conf_level,
                          R, type, boot_seed = NULL) {
-  if (!is.null(boot_seed)) {
-    if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-      old_seed <- get(".Random.seed", envir = .GlobalEnv,
-                      inherits = FALSE)
-      on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv),
-              add = TRUE)
-    } else {
-      on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(as.integer(boot_seed))
-  }
+  .dmar_local_seed(boot_seed)
 
   boot_fun <- function(fit_b) {
     pe <- lavaan::parameterEstimates(fit_b, ci = FALSE)
@@ -430,8 +423,8 @@ mlmr_boot_ci <- function(fit, fit_args, beta_labels, conf_level,
     }, numeric(1))
   }
 
-  boot_res <- try(lavaan::bootstrapLavaan(fit, R = R, type = type,
-                                          FUN = boot_fun),
+  boot_res <- try(lavaan::lavBootstrap(fit, r = R, type = type,
+                                       fun = boot_fun),
                   silent = TRUE)
   if (inherits(boot_res, "try-error")) {
     stop("Bootstrap failed: ",

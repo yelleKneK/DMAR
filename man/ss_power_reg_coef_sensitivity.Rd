@@ -19,8 +19,7 @@ ss_power_reg_coef_sensitivity(
   standardize = FALSE,
   G = 1000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_power_reg_coef_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -52,9 +51,11 @@ ss_power_reg_coef_sensitivity(
 
 \item{print_iter}{Whether to print the iteration number during the simulation}
 
-\item{save}{Whether to write the per-replication results to a CSV file}
-
-\item{filename}{Name of the CSV file written when \code{save = TRUE}}
+\item{filename}{Optional path of a CSV file to receive the per-replication
+results (the coefficient estimate, its standard error, the \emph{t}
+statistic, and the observed \eqn{R^2}), overwriting any file already at
+that path; the default \code{NULL} writes nothing, and a throwaway run
+that wants the file should point it at \code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}

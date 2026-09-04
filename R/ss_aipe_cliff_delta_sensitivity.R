@@ -29,8 +29,14 @@
 #' @param assurance Optional assurance probability.
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample Cliff's delta, the two confidence limits, the
+#'   interval width, and two indicators of whether the interval missed
+#'   \code{true_delta} below or above): nothing is written when
+#'   \code{filename} is \code{NULL} (the default), a new file with a
+#'   header row is created otherwise, an existing file at that path is
+#'   appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized Cliff's delta and CI width, the proportion of
@@ -76,14 +82,14 @@ ss_aipe_cliff_delta_sensitivity <- function(true_delta = NULL,
                                             conf_level = 0.95,
                                             assurance = NULL,
                                             G = 1000, print_iter = FALSE,
-                                            save = FALSE,
-                                            filename = "ss_aipe_cliff_delta_sensitivity_result.csv") {
+                                            filename = NULL) {
   if (is.null(estimated_delta) && is.null(specified_N))
     stop("You must specify either 'estimated_delta' or 'specified_N'.", call. = FALSE)
   if (!is.null(estimated_delta) && !is.null(specified_N))
     stop("You must specify 'estimated_delta' or 'specified_N', but not both.", call. = FALSE)
   if (is.null(true_delta) || !is.numeric(true_delta) || abs(true_delta) >= 1)
     stop("'true_delta' must be a single value in (-1, 1).", call. = FALSE)
+  .check_filename(filename)
 
   if (!is.null(estimated_delta)) {
     plan <- ss_aipe_cliff_delta(delta = estimated_delta, width = width,
@@ -126,7 +132,7 @@ ss_aipe_cliff_delta_sensitivity <- function(true_delta = NULL,
     tI_upper[g] <- true_delta > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(cliff_delta = cd_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

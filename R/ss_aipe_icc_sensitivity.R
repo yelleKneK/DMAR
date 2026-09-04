@@ -47,11 +47,13 @@
 #' @param print_iter Logical. If \code{TRUE} the simulation prints the
 #'   iteration index after each replication (helpful for long runs);
 #'   default \code{FALSE}.
-#' @param save Logical. If \code{TRUE} the per-replication results are
-#'   appended to a CSV file at \code{filename}; default \code{FALSE}.
-#' @param filename Path used when \code{save = TRUE}; default
-#'   \code{"ss_aipe_icc_sensitivity_result.csv"} in the current working
-#'   directory.
+#' @param filename An optional path for a comma separated file recording
+#'   every replication (the realized ICC, the two confidence limits, the
+#'   interval width, and the two tail-specific non-coverage indicators):
+#'   nothing is written when \code{filename} is \code{NULL} (the default),
+#'   a new file with a header row is created otherwise, an existing file
+#'   at that path is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @details
 #' Sample size planning for the intraclass correlation coefficient under
@@ -192,8 +194,7 @@ ss_aipe_icc_sensitivity <- function(true_rho = NULL, estimated_rho = NULL, k, wi
                                     type = c("ICC(1,1)", "ICC(2,1)", "ICC(3,1)",
                                              "ICC(1,k)", "ICC(2,k)", "ICC(3,k)"),
                                     G = 1000, print_iter = FALSE,
-                                    save = FALSE,
-                                    filename = "ss_aipe_icc_sensitivity_result.csv") {
+                                    filename = NULL) {
   type <- match.arg(type)
   if (is.null(estimated_rho) && is.null(specified_N)) {
     stop("You must specify either 'estimated_rho' or 'specified_N'.", call. = FALSE)
@@ -201,6 +202,7 @@ ss_aipe_icc_sensitivity <- function(true_rho = NULL, estimated_rho = NULL, k, wi
   if (!is.null(estimated_rho) && !is.null(specified_N)) {
     stop("You must specify 'estimated_rho' or 'specified_N', but not both.", call. = FALSE)
   }
+  .check_filename(filename)
   if (is.null(true_rho) || !is.numeric(true_rho) || true_rho < 0 || true_rho >= 1) {
     stop("'true_rho' must be a single value in [0, 1).", call. = FALSE)
   }
@@ -304,14 +306,14 @@ ss_aipe_icc_sensitivity <- function(true_rho = NULL, estimated_rho = NULL, k, wi
     type_I_upper[g] <- true_rho > fit$upper_limit
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     out_per_rep <- data.frame(
       icc_hat = icc_hat, ci_lower = ci_lo, ci_upper = ci_hi,
       ci_width = ci_width, type_I_lower = type_I_lower,
       type_I_upper = type_I_upper
     )
-    suppressWarnings(file_exist <- try(utils::read.csv(filename), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
       utils::write.table(out_per_rep, filename, sep = ",", row.names = FALSE,
                          col.names = FALSE, append = TRUE)
     } else {

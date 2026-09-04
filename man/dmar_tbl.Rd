@@ -155,8 +155,9 @@ x$value[x$term == "upper_limit"]
 generics::tidy(x)
 generics::glance(x)
 
-# The same display rules apply to wide tables (several typed columns),
-# for example an effect size with its confidence interval per effect.
+# The same display rules apply to a wide table, one with several typed
+# columns, for example an effect size with its confidence interval per
+# effect.
 ci_eta_squared(aov(iq_8 ~ treatment, data = pygmalion))
 
 }

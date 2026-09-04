@@ -129,11 +129,12 @@ joint normal approximation of the estimates, the same construction
 necessary sample size is the smallest \eqn{n} whose mean simulated
 width is at or below \code{width}; the search starts from the
 closed-form answer, brackets the crossing geometrically, and bisects.
-A planning call fits the mediation model several thousand times and
-takes a few seconds, which is why the Monte Carlo example below is
-shown rather than run. The necessary sample size inherits the
-simulation error of the mean widths; raising \code{G} narrows it, and
-supplying \code{seed} makes a plan reproducible.
+A planning call at the default \code{G} and \code{B} fits the
+mediation model several thousand times and takes a few seconds; the
+Monte Carlo example below lowers both to keep the page quick. The
+necessary sample size inherits the simulation error of the mean
+widths; raising \code{G} narrows it, and supplying \code{seed} makes
+a plan reproducible.
 
 \strong{Relation to the MBCO procedure.} The model-based constrained
 optimization (MBCO) likelihood ratio test of Tofighi and Kelley
@@ -176,13 +177,14 @@ ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20)
 
 # 2. The recommended plan targets the Monte Carlo interval directly:
 #        every candidate sample size fits the mediation model to G
-#        simulated data sets and measures the realized widths. The
-#        call takes a few seconds, so it is shown here rather than
-#        run. It returns a slightly larger sample size than the
-#        closed form because the interval it plans for is a little
-#        wider than the Wald interval:
-# ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20,
-#                         method = "monte_carlo", seed = 113)
+#        simulated data sets and measures the realized widths. G = 100
+#        and B = 1000 keep the example quick; a reported plan deserves
+#        the defaults G = 1000 and B = 5000. The answer sits a little
+#        above the closed form because the interval it plans for is a
+#        little wider than the Wald interval:
+ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20,
+                        method = "monte_carlo", G = 100, B = 1000,
+                        seed = 113)
 
 }
 \references{

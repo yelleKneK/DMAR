@@ -29,9 +29,14 @@
 #'   \code{\link{ss_aipe_partial_r}}.
 #' @param G Number of Monte Carlo replications (default 1000).
 #' @param print_iter Logical. Print iteration index per replication.
-#' @param save Logical. If \code{TRUE} write per-replication results to
-#'   \code{filename}.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample partial correlation, the two confidence
+#'   limits, the interval width, and two indicators of whether the
+#'   interval missed \code{true_rho} below or above): nothing is
+#'   written when \code{filename} is \code{NULL} (the default), a new
+#'   file with a header row is created otherwise, an existing file at
+#'   that path is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for the realized partial
 #'   correlation, the interval width, the proportion of intervals at
@@ -77,8 +82,7 @@ ss_aipe_partial_r_sensitivity <- function(true_rho = NULL,
                                           conf_level = 0.95,
                                           assurance = NULL,
                                           G = 1000, print_iter = FALSE,
-                                          save = FALSE,
-                                          filename = "ss_aipe_partial_r_sensitivity_result.csv") {
+                                          filename = NULL) {
   if (is.null(estimated_rho) && is.null(specified_N))
     stop("You must specify either 'estimated_rho' or 'specified_N'.", call. = FALSE)
   if (!is.null(estimated_rho) && !is.null(specified_N))
@@ -87,6 +91,7 @@ ss_aipe_partial_r_sensitivity <- function(true_rho = NULL,
     stop("'true_rho' must be a single value in (-1, 1).", call. = FALSE)
   if (!is.numeric(J) || length(J) != 1L || J < 1)
     stop("'J' must be a positive integer.", call. = FALSE)
+  .check_filename(filename)
 
   if (!is.null(estimated_rho)) {
     plan <- ss_aipe_partial_r(rho = estimated_rho, J = J, width = width,
@@ -144,7 +149,7 @@ ss_aipe_partial_r_sensitivity <- function(true_rho = NULL,
     tI_upper[g] <- true_rho > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(partial_r = pr_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

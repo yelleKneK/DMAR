@@ -72,7 +72,8 @@
 #'
 #' @examples
 #' # Population model with all parameters fixed to their values: two factors,
-#' # three indicators each, and a structural path f2 ~ f1 of 0.5.
+#' # three indicators each, and a structural path of 0.5 from the first
+#' # factor to the second.
 #' pop_model <- "
 #'   f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
 #'   f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
@@ -86,7 +87,8 @@
 #'
 #' # A population model with a mean structure: a linear latent growth curve
 #' # over four waves. The intercepts and latent means are fixed too, and
-#' # mu_theta carries the model implied means (5.0, 5.3, 5.6, 5.9).
+#' # mu_theta carries the model implied wave means, which start at 5.0 and
+#' # rise by 0.3 per wave.
 #' pop_lgm <- "
 #'   i =~ 1*t1 + 1*t2 + 1*t3 + 1*t4
 #'   s =~ 0*t1 + 1*t2 + 2*t3 + 3*t4

@@ -1,8 +1,8 @@
 Package: DMAR
 Type: Package
-Title: Design, Measurement, and Analysis in R
+Title: Design, Measurement, and Analysis
 Version: 1.0.0
-Date: 2026-08-21
+Date: 2026-09-04
 Authors@R: c(person("Ken", "Kelley", role = c("aut", "cre"),
                     email = "kkelley@nd.edu",
                     comment = c(ORCID = "0000-0002-4756-8360")))
@@ -11,7 +11,8 @@ Imports: grDevices,
          generics,
          parallel,
          stats,
-         utils
+         utils,
+         withr
 Suggests: boot,
           car,
           ggplot2 (>= 3.4.0),
@@ -27,9 +28,8 @@ Suggests: boot,
           reformulas,
           rmarkdown,
           testthat (>= 3.2.0)
-Description: Methods for design, measurement, and analysis in R, with
-    the aim of being user friendly yet
-    methodologically sound. 'DMAR' (pronounced "Dee-Mar") implements
+Description: Methods for design, measurement, and analysis, with the
+    aim of being user friendly yet methodologically sound. 'DMAR' (pronounced "Dee-Mar") implements
     many advanced and nonstandard methods and makes them available for
     straightforward use, with interfaces, defaults, and documentation
     that are consistent across the package and grounded in the

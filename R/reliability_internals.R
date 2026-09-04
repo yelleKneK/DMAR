@@ -240,8 +240,11 @@
   # the inner loop of the reliability bootstrap, where one warning per
   # replication would bury the user. The fact travels back on the returned
   # list as `improper`, so the single-fit callers can warn once and the
-  # bootstrap can count.
-  improper <- FALSE
+  # bootstrap can count. The handler records it on a small state
+  # environment, the package's idiom for a handler that must report back
+  # to the function that installed it.
+  state <- new.env(parent = emptyenv())
+  state$improper <- FALSE
   fit <- try(
     withCallingHandlers(
       cfa_1(data = if (is.null(cfa_N)) cfa_input else NULL,
@@ -253,7 +256,7 @@
             missing   = missing,
             output    = "fit"),
       dmar_heywood_warning = function(w) {
-        improper <<- TRUE
+        state$improper <- TRUE
         invokeRestart("muffleWarning")
       }
     ),
@@ -281,7 +284,7 @@
   }
 
   list(converged = TRUE,
-       improper = improper,
+       improper = state$improper,
        omega = om_row$est[1],
        se_omega = se_omega,
        loadings = ld_rows,
@@ -1327,10 +1330,12 @@
 #   "bca"                   : bias-corrected and accelerated bootstrap
 #                             (delegates to boot::boot.ci with type = "bca").
 #
-# Seed handling: if seed is not NULL, set.seed(seed) is called before
-# resampling so that runs are reproducible, and the caller's RNG state
-# is saved on entry and restored on exit (the package-wide seed
-# discipline; see the roxygen of every caller).
+# Seed handling: if seed is not NULL, .dmar_local_seed() sets it before
+# resampling so that runs are reproducible, and the caller's RNG state is
+# restored when this function exits (the package-wide seed discipline;
+# see R/dmar_seed.R and the roxygen of every caller). This function is
+# where the random draws begin and end, so it is the one that owns the
+# seed.
 #
 # Inputs:
 #   data       : data frame or matrix passed row-wise to boot::boot.
@@ -1348,19 +1353,7 @@
     stop("Bootstrap CIs require the 'boot' package. ",
          "Install with install.packages(\"boot\").", call. = FALSE)
   }
-  if (!is.null(seed)) {
-    # Save and restore the user's RNG state so that supplying a seed
-    # for reproducibility does not pollute their global RNG.
-    if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-      old_seed <- get(".Random.seed", envir = .GlobalEnv,
-                      inherits = FALSE)
-      on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv),
-              add = TRUE)
-    } else {
-      on.exit(rm(".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(as.integer(seed))
-  }
+  .dmar_local_seed(seed)
 
   statistic <- function(d, i) {
     val <- tryCatch(point_fn(d[i, , drop = FALSE]),

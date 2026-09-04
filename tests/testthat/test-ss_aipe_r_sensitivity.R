@@ -8,8 +8,12 @@
 test_that("ss_aipe_r_sensitivity() is exported with the documented API", {
   expect_true(is.function(ss_aipe_r_sensitivity))
   expect_true(all(c("true_rho", "estimated_rho", "width", "specified_N",
-                    "conf_level", "assurance", "G", "print_iter", "save",
+                    "conf_level", "assurance", "G", "print_iter",
                     "filename") %in% names(formals(ss_aipe_r_sensitivity))))
+  # `filename` is the only writing switch and defaults to NULL; the old
+  # `save` argument and its default path in the working directory are gone.
+  expect_false("save" %in% names(formals(ss_aipe_r_sensitivity)))
+  expect_null(eval(formals(ss_aipe_r_sensitivity)$filename))
   expect_equal(eval(formals(ss_aipe_r_sensitivity)$conf_level), 0.95)
   expect_equal(eval(formals(ss_aipe_r_sensitivity)$G), 1000)
   expect_null(eval(formals(ss_aipe_r_sensitivity)$assurance))
@@ -27,6 +31,10 @@ test_that("ss_aipe_r_sensitivity() validates its inputs", {
   expect_error(ss_aipe_r_sensitivity(true_rho = 0.3, specified_N = 3,
                                      width = 0.2),
                "at least 4")
+  expect_error(ss_aipe_r_sensitivity(true_rho = 0.3, specified_N = 50,
+                                     width = 0.2, G = 3, filename = 42),
+               "'filename' must be NULL or a single character string",
+               fixed = TRUE)
 })
 
 test_that("ss_aipe_r_sensitivity() empirical widths match the planner's promise", {
@@ -97,4 +105,29 @@ test_that("ss_aipe_r_sensitivity() specified_N path echoes the evaluated size", 
                                width = 0.25, G = 50)
   expect_equal(res$value[res$term == "total_N"], 100)
   expect_true(is.na(res$value[res$term == "estimated_rho"]))
+})
+
+test_that("ss_aipe_r_sensitivity() writes per-replication results only to a named file", {
+  skip_on_cran()
+  skip_if_not_installed("MASS")
+
+  out_file <- tempfile(fileext = ".csv")
+  set.seed(113)
+  res <- ss_aipe_r_sensitivity(true_rho = 0.30, specified_N = 50,
+                               width = 0.25, G = 3, filename = out_file)
+  written <- utils::read.csv(out_file)
+  expect_named(written, c("r", "ci_lower", "ci_upper", "ci_width",
+                          "type_I_lower", "type_I_upper"))
+  expect_equal(nrow(written), 3L)
+  # The summary rows are computed from the replications the file holds.
+  expect_equal(res$value[res$term == "mean_r"], mean(written$r))
+  expect_equal(res$value[res$term == "mean_ci_width"],
+               mean(written$ci_width))
+
+  # A second run appends to the existing file without repeating the header.
+  set.seed(113)
+  ss_aipe_r_sensitivity(true_rho = 0.30, specified_N = 50,
+                        width = 0.25, G = 3, filename = out_file)
+  expect_equal(nrow(utils::read.csv(out_file)), 6L)
+  unlink(out_file)
 })

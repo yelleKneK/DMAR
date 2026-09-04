@@ -7,8 +7,8 @@
 #' randomly assigning them to retail outlets within \eqn{s = 4} blocks of
 #' outlets that were homogeneous in size, locality, and ownership (a
 #' randomized complete block design, one outlet per panel-by-block cell).
-#' During the experiment a concomitant variable -- the remaining category
-#' movement in each outlet -- becomes available; it cannot be controlled by
+#' During the experiment a concomitant variable, the remaining category
+#' movement in each outlet, becomes available; it cannot be controlled by
 #' the experimenter and is best modeled as a random covariate. Adjusting
 #' brand movement for this covariate sharply reduces unexplained error,
 #' permitting far finer comparison of the panels than the raw outcome allows.
@@ -48,14 +48,14 @@
 #' \code{lm(brand_movement ~ panel + block + category_movement)} gives a
 #' covariate slope of \eqn{0.4079} and an error mean square of
 #' \eqn{0.01326} on \eqn{\nu = 14} degrees of freedom, with adjusted panel
-#' means \eqn{3.595, 3.619, 4.102, 4.515, 4.618, 4.876} -- exactly the values
+#' means \eqn{3.595, 3.619, 4.102, 4.515, 4.618, 4.876}, exactly the values
 #' reported in the paper. With \eqn{q_{.05;\,1,6,14} = 4.83}
 #' (\code{\link{qbryant_paulson}}), every pairwise simultaneous 95\%
 #' interval is a difference of adjusted panel means plus or minus
 #' \eqn{0.278}, so two panels differ at the simultaneous 95\% level
 #' exactly when their adjusted means are more than \eqn{0.278} apart.
 #' Had the covariate not been measured, the error mean square
-#' would have been \eqn{0.2368} -- roughly eighteen times larger -- and the
+#' would have been \eqn{0.2368}, roughly eighteen times larger, and the
 #' intervals about four times wider. See \code{data-raw/test_market.R} for
 #' the construction script and its verification checks.
 #'
@@ -100,11 +100,8 @@
 #' adj  # 3.595 3.619 4.102 4.515 4.618 4.876
 #'
 #' # Bryant-Paulson simultaneous 95% intervals (s = 4 blocks => n = 4,
-#' # df 14), every one of them the difference plus or minus 0.278. Not
-#' # run here, because the Bryant-Paulson critical value is obtained by
-#' # inverting an integral with uniroot, which takes about half a
-#' # second; the call is:
-#' # ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-#' #                n = 4, num_covariates = 1, df = 14)
+#' # df 14), every one of them the difference plus or minus 0.278.
+#' ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+#'                n = 4, num_covariates = 1, df = 14)
 #' @keywords datasets
 "test_market"

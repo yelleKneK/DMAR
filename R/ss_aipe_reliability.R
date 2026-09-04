@@ -42,6 +42,19 @@
 #' no normal theory form, so \code{type = "Normal Theory"} is an error
 #' there.
 #'
+#' The cost of the assurance search depends on the interval. The normal
+#' theory intervals are closed forms, so a search at the default
+#' \code{initial_iter = 500} and \code{final_iter = 5000} finishes in
+#' seconds. With the factor analytic interval a one factor model is fit
+#' at every Monte Carlo iteration and at every candidate sample size the
+#' search visits, so a congeneric plan with an assurance runs for tens of
+#' seconds even at \code{initial_iter = 50} and \code{final_iter = 200}
+#' and for many minutes at the defaults. The examples on this page
+#' therefore stop at the closed form for the congeneric plan; the
+#' assurance version is the same call with \code{assurance} supplied
+#' (for example, \code{assurance = .80}), and \code{set.seed()} before
+#' the call makes the search reproducible.
+#'
 #' @param model The measurement model assumed for the population.
 #'   Accepts (case-sensitive aliases shown in parentheses):
 #'   \code{"Parallel"} (\code{"parallel"}, \code{"SB"},
@@ -150,9 +163,9 @@
 #' ss_aipe_reliability(model = "Parallel", type = "Normal Theory", width = .1,
 #'   i = 6, cor_est = .3, psi_square = .2, conf_level = .95, assurance = NULL)
 #'
-#' # The assurance cases run a Monte Carlo search; the iteration counts below are
-#' # reduced so the example runs quickly. Raise initial_iter and final_iter for a
-#' # production plan.
+#' # The assurance cases run a Monte Carlo search. initial_iter = 50 and
+#' # final_iter = 200 keep the examples quick; a reported plan deserves the
+#' # defaults of 500 and 5000, and set.seed() makes the search reproducible.
 #' set.seed(113)
 #'
 #' # Same population, now targeting an assurance.
@@ -161,33 +174,22 @@
 #'   initial_iter = 50, final_iter = 200)
 #'
 #' # The true score (tau equivalent) model takes psi_square as a vector of
-#' # length i (number of items) while cor_est stays a single value. Its
-#' # assurance search is the slowest of the normal theory calls on this page,
-#' # and the S matrix example at the end already plans for the true score
-#' # model, so this one is shown rather than run:
-#' #   ss_aipe_reliability(model = "True Score", type = "Normal Theory",
-#' #     width = .1, i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3),
-#' #     conf_level = .95, assurance = .85, initial_iter = 50,
-#' #     final_iter = 200)
+#' # length i (number of items) while cor_est stays a single value.
+#' ss_aipe_reliability(model = "True Score", type = "Normal Theory",
+#'   width = .1, i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3),
+#'   conf_level = .95, assurance = .85, initial_iter = 50, final_iter = 200)
 #'
 #' # Congeneric model, planned from the item loadings and error variances rather
 #' # than from a single correlation. With assurance = NULL the necessary N comes
 #' # from the closed form expected width evaluated at the implied population
 #' # correlation matrix, so type does not enter the answer; type selects the
-#' # interval that the Monte Carlo assurance search evaluates.
+#' # interval that the Monte Carlo assurance search evaluates. Adding an
+#' # assurance to this plan fits a one factor model at every Monte Carlo
+#' # iteration and is the slow case, so the page stops at the closed form
+#' # (see Details).
 #' ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic", width = .15,
 #'   i = 4, lambda = c(.8, .7, .7, .8), psi_square = c(.4, .5, .5, .4),
 #'   conf_level = .95, assurance = NULL)
-#'
-#' # Adding an assurance to that congeneric plan is the expensive case: with the
-#' # factor analytic interval a one factor model is fit at every Monte Carlo
-#' # iteration and at every candidate sample size the search visits, so it runs
-#' # for tens of seconds at the reduced counts used above and for many minutes at
-#' # the defaults. That is why it is not run here; the call is
-#' #   ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic",
-#' #     width = .15, i = 4, lambda = c(.8, .7, .7, .8),
-#' #     psi_square = c(.4, .5, .5, .4), conf_level = .95, assurance = .80,
-#' #     initial_iter = 50, final_iter = 200)
 #'
 #' # Planning from a presumed population correlation matrix among the items.
 #' pop_mat <- rbind(
@@ -437,7 +439,6 @@ ss_aipe_reliability <- function(model = NULL, type = NULL, width = NULL, S = NUL
       if (length(cor_est) >= 2) {
         stop("If you have multiple values for 'cor_est', please put them as 'lambda' values. The square root of cor_est equals lambda.")
       }
-      # print("You entered one value for 'cor_est' with the Congeneric model. This model allows for multiple 'lambda' values. If you have only one 'cor_est' or 'lambda' value, you might want to use the True Score model.")
       lambda_1 <- sqrt(cor_est)
       v_lambda <- matrix(data = lambda_1, nrow = 1, ncol = i)
       v_Psi <- matrix(data = psi_square, nrow = 1, ncol = i)
@@ -508,7 +509,6 @@ ss_aipe_reliability <- function(model = NULL, type = NULL, width = NULL, S = NUL
     if (assurance > 1) {
       assurance <- assurance / 100
     }
-    # print("An a priori Monte Carlo simulation study has been started so that the exact sample size for the requested condition can be determined. Please be patient, as this process may take several minutes (or longer given the computer and condition).")
     initial_assurance_N <- ceiling(Nec_N) + 1
     if (sum(model == model_type1) == 1) {
       Model_to_Use <- "Parallel"
@@ -639,7 +639,6 @@ ss_aipe_reliability <- function(model = NULL, type = NULL, width = NULL, S = NUL
     }
     Nec_N_assurance <- n_i
     empirical_assurance <- mean(na.omit(CI_Result) < width)
-    # print(paste("A sample size of", n_i, "leads to an empirical assurance of", round(mean(na.omit(CI_Result) < width), 3)))
   }
   if (is.null(assurance)) {
     return(.as_dmar_tbl(data.frame(term = "necessary_N", value = ceiling(Nec_N)), conf_level = conf_level, subclass = "dmar_ss_aipe"))

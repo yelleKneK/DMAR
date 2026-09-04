@@ -58,7 +58,7 @@
 #'   p      = 5,
 #'   rho_YX = rep(0.30, 5)
 #' )
-#' summary(lm(y ~ ., data = d))$r.squared   # ~ 5 * 0.30^2 = 0.45
+#' summary(lm(y ~ ., data = d))$r.squared   # about 0.45: five predictors, each 0.30^2
 #'
 #' # Predictors with shared structure (exchangeable correlation matrix).
 #' rho_XX <- matrix(0.5, nrow = 5, ncol = 5); diag(rho_XX) <- 1
@@ -142,15 +142,7 @@ simulate_regression_data <- function(N, p, rho_YX,
          "structure is internally consistent.", call. = FALSE)
   }
 
-  if (!is.null(seed)) {
-    if (exists(".Random.seed", envir = .GlobalEnv)) {
-      .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  .dmar_local_seed(seed)
   M <- MASS::mvrnorm(N, mu = mu_vec, Sigma = Sigma)
 
   if (is.null(column_names)) {

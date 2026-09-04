@@ -107,8 +107,10 @@ test_that("corp 2400 spans regions 2 and 3 (data integrity note)", {
 })
 
 test_that("three-level null model recovers documented ICCs", {
-  # Slow (a three-level fit on all 10,927 students), so it skips on CRAN;
-  # the corporation cluster-size anchor above is the fast check that stays.
+  # A three-level fit on all 10,927 students; the help page runs the same
+  # fit as an example, and this anchor is kept off CRAN so the check budget
+  # pays for it once. The corporation cluster-size anchor above is the fast
+  # check that stays.
   # The expected values anchor the Details prose, computed from corp_id;
   # the looser 0.059 the page previously reported came from grouping on
   # the bare corp column.

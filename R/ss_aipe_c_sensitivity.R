@@ -36,9 +36,12 @@
 #' @param G Number of Monte Carlo replications (default 1000).
 #' @param print_iter Logical. Print the iteration index after each
 #'   replication (helpful for long runs); default \code{FALSE}.
-#' @param save Logical. If \code{TRUE} the per-replication results are
-#'   appended to \code{filename}; default \code{FALSE}.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path of a CSV file to receive the
+#'   per-replication results (the contrast estimate, the confidence limits,
+#'   the interval width, and the two tail misses), appended when the file
+#'   already exists and created otherwise; the default \code{NULL} writes
+#'   nothing, and a throwaway run that wants the file should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized estimator and interval width, the proportion of
@@ -64,8 +67,9 @@
 #' @seealso \code{\link{ss_aipe_c}}, \code{\link{ci_c}}, \code{\link{ss_aipe_sc_sensitivity}}
 #'
 #' @examples
-#' # Monte Carlo sweep; G is small here so the example runs quickly.
-#' # Well-specified: planner used error_variance = 4, truth is 4.
+#' # G = 50 keeps the example quick; a reported analysis deserves the
+#' # default G of 1000. First the well-specified case: the planner used an
+#' # error variance of 4, and the truth is 4.
 #' set.seed(113)
 #' ss_aipe_c_sensitivity(
 #'   true_error_variance      = 4,
@@ -100,8 +104,7 @@ ss_aipe_c_sensitivity <- function(true_error_variance = NULL,
                                   conf_level = 0.95,
                                   assurance = NULL,
                                   G = 1000, print_iter = FALSE,
-                                  save = FALSE,
-                                  filename = "ss_aipe_c_sensitivity_result.csv") {
+                                  filename = NULL) {
   if (is.null(estimated_error_variance) && is.null(n_per_group))
     stop("You must specify either 'estimated_error_variance' or 'n_per_group'.", call. = FALSE)
   if (!is.null(estimated_error_variance) && !is.null(n_per_group))
@@ -112,6 +115,7 @@ ss_aipe_c_sensitivity <- function(true_error_variance = NULL,
     stop("'c_weights' must be numeric and sum to zero.", call. = FALSE)
   if (!is.numeric(width) || length(width) != 1L || width <= 0)
     stop("'width' must be a single positive number.", call. = FALSE)
+  .check_filename(filename)
 
   J <- length(c_weights)
 
@@ -162,7 +166,7 @@ ss_aipe_c_sensitivity <- function(true_error_variance = NULL,
     tI_upper[g] <- true_psi > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(psi_hat = psi_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)
@@ -195,8 +199,23 @@ ss_aipe_c_sensitivity <- function(true_error_variance = NULL,
   .as_dmar_tbl(out, conf_level = conf_level)
 }
 
-# Shared writer for *_sensitivity CSV saves. Uses base R so no
-# Suggests dependency is needed at write time.
+# The one place the sensitivity family validates its `filename` argument:
+# NULL means nothing is written; anything else must be a single non-empty
+# string. Called before any replication runs so a bad path fails at once.
+.check_filename <- function(filename) {
+  if (is.null(filename)) return(invisible(NULL))
+  if (!is.character(filename) || length(filename) != 1L || is.na(filename) ||
+      !nzchar(filename)) {
+    stop("'filename' must be NULL or a single character string naming the file to write.",
+         call. = FALSE)
+  }
+  invisible(filename)
+}
+
+# Shared writer for the ss_aipe_*_sensitivity() family when a filename is
+# supplied: the per-replication rows are appended without a header when the
+# file already holds a table and written with a header otherwise. Base R
+# only, so no Suggests dependency is needed at write time.
 .write_sensitivity_csv <- function(per_rep, filename) {
   suppressWarnings(file_exist <- try(utils::read.csv(filename), silent = TRUE))
   if (!is.null(dim(file_exist))) {

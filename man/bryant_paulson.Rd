@@ -5,7 +5,7 @@
 \alias{pbryant_paulson}
 \alias{qbryant_paulson}
 \alias{dbryant_paulson}
-\title{The Bryant--Paulson Generalized Studentized Range Distribution}
+\title{The Bryant-Paulson Generalized Studentized Range Distribution}
 \usage{
 pbryant_paulson(q, num_covariates, num_groups, df, lower_tail = TRUE, ...)
 
@@ -48,19 +48,19 @@ longest of \code{q}/\code{prob} and the parameter arguments.
 \description{
 Distribution function (\code{pbryant_paulson}), quantile/critical-value
 function (\code{qbryant_paulson}), and density (\code{dbryant_paulson})
-for the Bryant--Paulson generalized studentized range, the sampling
+for the Bryant-Paulson generalized studentized range, the sampling
 distribution of the studentized range of covariate-\emph{adjusted} means
 in the analysis of covariance (ANCOVA) when the covariate(s) are
 \emph{random}. These are the analysis-of-covariance analogues of
 \code{\link[stats]{ptukey}} / \code{\link[stats]{qtukey}} and supply the
-critical values needed for Tukey--Kramer-type simultaneous confidence
+critical values needed for Tukey-Kramer-type simultaneous confidence
 intervals on (and tests of) contrasts of adjusted means.
 }
 \details{
 \strong{The statistic.} In a balanced ANCOVA with \eqn{k} groups and
 \eqn{p} random covariates, let \eqn{\hat\theta_i} be the adjusted group
 means and \eqn{\hat\sigma_{y \mid x}} the square root of the ANCOVA error
-mean square (on \eqn{\nu} degrees of freedom). The Bryant--Paulson
+mean square (on \eqn{\nu} degrees of freedom). The Bryant-Paulson
 statistic is the studentized range of the adjusted means,
 \deqn{Q \;=\; \frac{\max_i \hat\theta_i - \min_i \hat\theta_i}{\hat\sigma_{y\mid x}\sqrt{K_1 - K_2}},}
 where \eqn{K_1 - K_2} is the design constant that scales the variance of a
@@ -86,7 +86,10 @@ Bryant and Paulson's p. 634 conditioning argument). When \eqn{p = 0} the
 factor \eqn{\delta} degenerates at 1 and \eqn{Q_p} is exactly the ordinary
 studentized range (Bryant and Paulson, 1976, Sec. 1), so the code
 short-circuits to \code{ptukey}. The integral is evaluated with
-\code{\link[stats]{integrate}}; \code{qbryant_paulson} inverts it with
+\code{\link[stats]{integrate}} after the change of variables
+\eqn{\delta = 1 - u^2}, which removes the endpoint singularity of the Beta
+weight at \eqn{\delta = 1} when \eqn{p = 1} and makes the quadrature
+converge in a few subdivisions; \code{qbryant_paulson} inverts it with
 \code{\link[stats]{uniroot}}. Bryant and Bruvold (1980) later showed the
 same distribution and critical values remain valid when the covariates are
 \emph{not} identically distributed across groups (their grouped-covariate
@@ -125,19 +128,14 @@ well. See the package tests.
 }
 \examples{
 # Critical value from the worked example of Bryant and Bruvold (1980):
-# k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. Getting a
-# quantile means inverting the distribution function with uniroot, and every
-# step of that root search evaluates the integral over the covariate-shrinkage
-# factor, so the call takes about half a second and is shown here rather than
-# run.
-# qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
-# It returns 4.83, the entry in Table 1 of Bryant and Paulson (1976). The
-# distribution function itself is a single integral and is quick, so the
-# pbryant_paulson calls below do run.
+# k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. The quantile
+# is found by inverting the distribution function with uniroot; it is 4.83,
+# the entry in Table 1 of Bryant and Paulson (1976).
+qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
 
 # The ordinary Tukey value (ignoring that the covariate is random and
-# estimated) is smaller, so it yields intervals that are too narrow:
-qtukey(0.95, nmeans = 6, df = 14)                                   # 4.64
+# estimated) is smaller, 4.64, so it yields intervals that are too narrow:
+qtukey(0.95, nmeans = 6, df = 14)
 
 # How much too narrow: the Bryant-Paulson area beyond the Tukey value is the
 # familywise error rate Tukey's method actually delivers in this design.

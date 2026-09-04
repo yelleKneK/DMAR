@@ -426,3 +426,135 @@ test_that("evaluating at a fixed size echoes NA for the planning value", {
   expect_equal(unname(v["n_per_group"]), 30)
   expect_equal(unname(v["total_N"]), 60)
 })
+
+test_that("the contrast, SMD, and CV members write per-replication results only to a named file", {
+  skip_on_cran()
+  # Nothing is written unless the caller names a file; the old `save`
+  # switch and its default path in the working directory are gone, and a
+  # malformed filename is refused before any replication runs. Each entry
+  # is a function of the filename so the same call runs three times: once
+  # refused, once creating the file, once appending to it.
+  members <- list(
+    ss_aipe_c_ancova_sensitivity = function(f) ss_aipe_c_ancova_sensitivity(
+      true_error_var_ancova = 0.8, est_error_var_ancova = 0.8, rho = 0.4,
+      G = 3, mu_y = c(10, 11, 12), sigma_y = 1, mu_x = 5, sigma_x = 1,
+      c_weights = c(-1, 0, 1), width = 0.40, filename = f),
+    ss_aipe_sc_sensitivity = function(f) ss_aipe_sc_sensitivity(
+      true_psi = 0.5, estimated_psi = 0.5, c_weights = c(-1, 0, 1),
+      desired_width = 0.80, G = 3, print_iter = FALSE, filename = f),
+    ss_aipe_smd_sensitivity = function(f) ss_aipe_smd_sensitivity(
+      true_delta = 0.5, estimated_delta = 0.5, desired_width = 0.80,
+      G = 3, print_iter = FALSE, filename = f),
+    ss_aipe_cv_sensitivity = function(f) ss_aipe_cv_sensitivity(
+      true_cv = 0.25, estimated_cv = 0.25, width = 0.20, G = 3,
+      print_iter = FALSE, filename = f)
+  )
+  columns <- list(
+    ss_aipe_c_ancova_sensitivity = c("psi_obs", "se_psi", "se_psi_restricted",
+                                     "ratio", "width_obs", "type_I_error",
+                                     "type_I_error_upper", "type_I_error_lower"),
+    ss_aipe_sc_sensitivity = c("psi_obs", "full_width", "width_lower",
+                               "width_upper", "type_I_error_upper",
+                               "type_I_error_lower", "type_I_error",
+                               "lower_limit", "upper_limit"),
+    ss_aipe_smd_sensitivity = c("d", "full_width", "width_lower",
+                                "width_upper", "type_I_error_upper",
+                                "type_I_error_lower", "type_I_error",
+                                "lower_limit", "upper_limit"),
+    ss_aipe_cv_sensitivity = c("lower_limit", "upper_limit", "cv", "int_ok",
+                               "Width")
+  )
+  for (member in names(members)) {
+    fn <- get(member)
+    expect_null(eval(formals(fn)$filename), info = member)
+    expect_false("save" %in% names(formals(fn)), info = member)
+    expect_error(members[[member]](42),
+                 "'filename' must be NULL or a single character string",
+                 fixed = TRUE, info = member)
+
+    out_file <- tempfile(fileext = ".csv")
+    set.seed(113)
+    suppressWarnings(members[[member]](out_file))
+    written <- utils::read.csv(out_file)
+    expect_named(written, columns[[member]], info = member)
+    expect_equal(nrow(written), 3L, info = member)
+
+    # A second run appends to the existing file and says so.
+    set.seed(113)
+    expect_message(suppressWarnings(members[[member]](out_file)),
+                   "already exists", fixed = TRUE, info = member)
+    expect_equal(nrow(utils::read.csv(out_file)), 6L, info = member)
+    unlink(out_file)
+  }
+})
+
+test_that("the correlation, reliability, and regression coefficient members write per-replication results only to a named file", {
+  skip_on_cran()
+  skip_if_not_installed("MASS")
+  # Nothing is written unless the caller names a file; the old `save`
+  # switch and its default path in the working directory are gone, and a
+  # malformed filename is refused before any replication runs. The two
+  # regression coefficient wrappers forward `filename` alone to
+  # ss_aipe_reg_coef_sensitivity(), which does their writing, so for them
+  # the check is that the forwarded path receives one row per replication
+  # and is appended to on a second run; the column names are that
+  # function's to test.
+  Sigma_X <- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+  cov_YX  <- c(0.4, 0.3)
+  members <- list(
+    ss_aipe_partial_r_sensitivity = function(f) ss_aipe_partial_r_sensitivity(
+      true_rho = 0.4, estimated_rho = 0.4, J = 2, width = 0.40,
+      G = 3, print_iter = FALSE, filename = f),
+    ss_aipe_semipartial_r_sensitivity = function(f) ss_aipe_semipartial_r_sensitivity(
+      true_r_sp = 0.4, estimated_r_sp = 0.4, J = 2, width = 0.40,
+      G = 3, print_iter = FALSE, filename = f),
+    ss_aipe_reliability_sensitivity = function(f) ss_aipe_reliability_sensitivity(
+      true_reliability = 0.8, estimated_reliability = 0.8, i = 5,
+      width = 0.20, G = 3, print_iter = FALSE, filename = f),
+    ss_aipe_rc_sensitivity = function(f) ss_aipe_rc_sensitivity(
+      true_var_Y = 1, true_cov_YX = cov_YX, true_cov_XX = Sigma_X,
+      estimated_var_Y = 1, estimated_cov_YX = cov_YX,
+      estimated_cov_XX = Sigma_X, which_predictor = 1, w = 0.60,
+      G = 3, print_iter = FALSE, filename = f),
+    ss_aipe_src_sensitivity = function(f) ss_aipe_src_sensitivity(
+      true_var_Y = 1, true_cov_YX = cov_YX, true_cov_XX = Sigma_X,
+      estimated_var_Y = 1, estimated_cov_YX = cov_YX,
+      estimated_cov_XX = Sigma_X, which_predictor = 1, w = 0.60,
+      G = 3, print_iter = FALSE, filename = f)
+  )
+  columns <- list(
+    ss_aipe_partial_r_sensitivity = c("partial_r", "ci_lower", "ci_upper",
+                                      "ci_width", "type_I_lower",
+                                      "type_I_upper"),
+    ss_aipe_semipartial_r_sensitivity = c("r_sp", "ci_lower", "ci_upper",
+                                          "ci_width", "type_I_lower",
+                                          "type_I_upper"),
+    ss_aipe_reliability_sensitivity = c("rel_hat", "ci_lower", "ci_upper",
+                                        "ci_width", "type_I_lower",
+                                        "type_I_upper")
+  )
+  for (member in names(members)) {
+    fn <- get(member)
+    expect_null(eval(formals(fn)$filename), info = member)
+    expect_false("save" %in% names(formals(fn)), info = member)
+    expect_error(members[[member]](42), "filename", info = member)
+
+    out_file <- tempfile(fileext = ".csv")
+    set.seed(113)
+    invisible(utils::capture.output(
+      suppressMessages(suppressWarnings(members[[member]](out_file)))
+    ))
+    written <- utils::read.csv(out_file)
+    if (!is.null(columns[[member]]))
+      expect_named(written, columns[[member]], info = member)
+    expect_equal(nrow(written), 3L, info = member)
+
+    # A second run appends to the existing file without repeating the header.
+    set.seed(113)
+    invisible(utils::capture.output(
+      suppressMessages(suppressWarnings(members[[member]](out_file)))
+    ))
+    expect_equal(nrow(utils::read.csv(out_file)), 6L, info = member)
+    unlink(out_file)
+  }
+})

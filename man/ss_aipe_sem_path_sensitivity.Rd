@@ -14,8 +14,7 @@ ss_aipe_sem_path_sensitivity(
   conf_level = 0.95,
   assurance = NULL,
   G = 100,
-  save = FALSE,
-  filename = "ss_aipe_sem_path_sensitivity_result.csv",
+  filename = NULL,
   ...
 )
 }
@@ -45,9 +44,13 @@ character string, for example \code{"b"} for the path labeled
 
 \item{G}{number of replications in the Monte Carlo simulation}
 
-\item{save}{option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results}
-
-\item{filename}{the name of the file that simulation results will be saved to}
+\item{filename}{an optional path for a comma separated file recording
+every replication (the estimate of the targeted path, its standard
+error, the two confidence limits, and the interval width): nothing is
+written when \code{filename} is \code{NULL} (the default), a new file
+with a header row is created otherwise, an existing file at that path
+is appended to, and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}}
 
 \item{\dots}{allows one to potentially include parameter values for inner functions}
 }
@@ -96,54 +99,53 @@ continues. A safety cap stops the loop after \code{20 * G} attempts, and a
 single warning is issued if fewer than \code{G} replications converged.
 }
 \examples{
-# This function is itself a Monte Carlo study: it plans a sample size and
-# then fits the analysis model to G freshly simulated data sets, so even a
-# modest G takes long enough that the worked example below is shown here
-# rather than run.
-#
-# The planning values a researcher would bring to ss_aipe_sem_path():
-# each factor is measured by three indicators, each with a residual
-# variance of 0.5.
-#   planning_model <- "
-#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-#     f2 ~ 0.5*f1
-#     f1 ~~ 1*f1
-#     f2 ~~ 0.75*f2
-#     y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
-#     y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
-#   "
-#
+# The planning values a researcher would bring to ss_aipe_sem_path(): two
+# factors, each measured by three indicators, joined by a structural path
+# of 0.5, with every residual variance at 0.5.
+planning_model <- "
+  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+  f2 ~ 0.5*f1
+  f1 ~~ 1*f1
+  f2 ~~ 0.75*f2
+  y1 ~~ 0.5*y1; y2 ~~ 0.5*y2; y3 ~~ 0.5*y3
+  y4 ~~ 0.5*y4; y5 ~~ 0.5*y5; y6 ~~ 0.5*y6
+"
+
 # The population the study will actually sample from: the same structural
-# path of 0.5, but noisier indicators than the planning values assumed,
-# with residual variances of 0.8.
-#   true_model <- "
-#     f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
-#     f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
-#     f2 ~ 0.5*f1
-#     f1 ~~ 1*f1
-#     f2 ~~ 0.75*f2
-#     y1 ~~ 0.8*y1; y2 ~~ 0.8*y2; y3 ~~ 0.8*y3
-#     y4 ~~ 0.8*y4; y5 ~~ 0.8*y5; y6 ~~ 0.8*y6
-#   "
-#
-#   analysis_model <- "
-#     f1 =~ y1 + y2 + y3
-#     f2 =~ y4 + y5 + y6
-#     f2 ~ b*f1
-#   "
-#
-#   est_Sigma <- cov_sem(planning_model)$sigma_theta
-#   true_Sigma <- cov_sem(true_model)$sigma_theta
-#
+# path, but noisier indicators than the planning values assumed, with
+# every residual variance at 0.8.
+true_model <- "
+  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
+  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
+  f2 ~ 0.5*f1
+  f1 ~~ 1*f1
+  f2 ~~ 0.75*f2
+  y1 ~~ 0.8*y1; y2 ~~ 0.8*y2; y3 ~~ 0.8*y3
+  y4 ~~ 0.8*y4; y5 ~~ 0.8*y5; y6 ~~ 0.8*y6
+"
+
+# The free analysis model, with the targeted path labeled "b".
+analysis_model <- "
+  f1 =~ y1 + y2 + y3
+  f2 =~ y4 + y5 + y6
+  f2 ~ b*f1
+"
+
+est_Sigma <- cov_sem(planning_model)$sigma_theta
+true_Sigma <- cov_sem(true_model)$sigma_theta
+
 # The sample size planned from the optimistic measurement quality is
-# evaluated against the population that actually holds: the realized
-# intervals are wider than desired, and few of them meet the target.
-#   set.seed(113)
-#   ss_aipe_sem_path_sensitivity(model = analysis_model,
-#                                est_Sigma = est_Sigma,
-#                                true_Sigma = true_Sigma, which_path = "b",
-#                                desired_width = 0.30, G = 1000)
+# evaluated against the population that actually holds. Notice that the
+# mean realized width (mean_ci_width) exceeds the desired 0.30, and that
+# pct_ci_less_w, the proportion of intervals no wider than desired, falls
+# well below the one half that the planned sample size would deliver if
+# the planning values were right. G = 20 keeps the example quick; a
+# reported sensitivity study deserves the default G = 100 or more.
+set.seed(113)
+ss_aipe_sem_path_sensitivity(model = analysis_model, est_Sigma = est_Sigma,
+                             true_Sigma = true_Sigma, which_path = "b",
+                             desired_width = 0.30, G = 20)
 
 }
 \references{

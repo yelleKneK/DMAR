@@ -83,8 +83,8 @@ Modernizes the original \code{vit_fitted()} function by:
   \item returning a \pkg{ggplot2} object instead of writing to graphics
         devices,
   \item attaching per-subject quality-of-fit as an attribute rather than
-        assigning it to the global environment via \code{<<-} (a serious
-        side effect of the original),
+        assigning it into the global environment, a serious side effect
+        of the original,
   \item drawing a smooth fitted curve from a per-subject time grid via
         \code{predict(..., re.form = NULL)} for \pkg{lme4} fits and
         \code{predict(..., level = 1)} for \pkg{nlme} fits,
@@ -97,22 +97,21 @@ Requires \pkg{ggplot2} plus, depending on the model class,
   \pkg{nlme} or \pkg{lme4} (\code{Suggests} dependencies).
 }
 \examples{
-# nlme: linear growth in tooth distance over age (Orthodont, 27 children).
-# Four of the children are paneled here so the figure is quick to draw;
-# drop n_random to get a panel for every child.
+# nlme: linear growth in tooth distance over age for the 27 Orthodont
+# children. Four of the children are paneled here so the figure is
+# quick to draw; drop n_random to get a panel for every child.
 fm_nlme <- nlme::lme(distance ~ age, random = ~ age | Subject,
                      data = nlme::Orthodont)
 p <- plot_trajectories_fitted(fm_nlme, n_random = 4, seed = 113)
 p
 attr(p, "quality_of_fit")  # per-subject R^2 and RMSE
 
-# An lme4 fit is handled the same way. Not run here because the call
-# loads the lme4 namespace and then draws a panel for each of the
-# eighteen subjects, which is where the time goes; fitting the model
-# is quick by comparison. The calls are:
-# fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
-#                       data = lme4::sleepstudy)
-# plot_trajectories_fitted(fm_lme4)
+# An lme4 fit is handled the same way: the outcome, the subject
+# identifier, and the time variable are read from the model. Six of
+# the eighteen sleepstudy subjects are paneled here.
+fm_lme4 <- lme4::lmer(Reaction ~ Days + (Days | Subject),
+                      data = lme4::sleepstudy)
+plot_trajectories_fitted(fm_lme4, n_random = 6, seed = 113)
 
 }
 \seealso{

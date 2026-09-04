@@ -98,13 +98,13 @@
 #'
 #' # The upper confidence bound, which is the quantity the validity
 #' # literature compares against 0.85 or 0.90, comes from a bootstrap
-#' # that recomputes every pairwise ratio on each of B resamples. It is
-#' # shown rather than run; the call is
-#' #   htmt(d, blocks = list(A = c("a1", "a2", "a3"),
-#' #                         B = c("b1", "b2", "b3")),
-#' #        B = 10000, seed = 113)
-#' # and a claim about discriminant validity deserves that bound rather
-#' # than the point estimate alone.
+#' # that recomputes every pairwise ratio on each of B resamples; the
+#' # table gains an upper_limit column. B = 1000 keeps the example
+#' # quick; a claim about discriminant validity deserves the bound at
+#' # B = 10000 rather than the point estimate alone.
+#' htmt(d, blocks = list(A = c("a1", "a2", "a3"),
+#'                       B = c("b1", "b2", "b3")),
+#'      B = 1000, seed = 113)
 #'
 #' @export
 #' @importFrom stats cor quantile
@@ -165,16 +165,7 @@ htmt <- function(data, blocks, B = 0, conf_level = 0.95, seed = NULL) {
   )
 
   if (B > 0) {
-    if (!is.null(seed)) {
-      has_old <- exists(".Random.seed", envir = globalenv())
-      old <- if (has_old) get(".Random.seed", envir = globalenv()) else NULL
-      on.exit({
-        if (has_old) assign(".Random.seed", old, envir = globalenv())
-        else if (exists(".Random.seed", envir = globalenv()))
-          rm(".Random.seed", envir = globalenv())
-      }, add = TRUE)
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     N <- nrow(data)
     # A resample can draw a case mix whose average within-construct
     # correlation is not positive, which leaves HTMT undefined there;

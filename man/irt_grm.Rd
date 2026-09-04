@@ -226,12 +226,12 @@ a_pop
 # Model fit travels with the item parameters.
 attr(grm, "fit_measures")[c("cfi", "tli", "rmsea", "srmr")]
 
-# Two further calls, each of which refits the model and so is not run
-# here. The first reports the same fit with logistic slopes (about
-# 1.702 times larger than the normal ogive slopes above), the second
-# fits a subset of the items selected by name:
-# irt_grm(responses, metric = "logistic")
-# irt_grm(responses, items = c("item1", "item3", "item5"))
+# The same fit reported with logistic slopes, about 1.702 times the
+# normal ogive slopes above; the boundary locations do not change.
+irt_grm(responses, metric = "logistic")
+
+# A subset of the items, selected by name, is fit on its own.
+irt_grm(responses, items = c("item1", "item3", "item5"))
 
 # The boundary response function of the first item at theta = 0.
 first <- grm[grm$item == "item1", ]

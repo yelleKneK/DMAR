@@ -12,9 +12,10 @@
 #' @param conf_level the desired confidence interval coverage, (i.e., 1 - Type I error rate)
 #' @param G number of generations (i.e., replications) of the simulation
 #' @param print_iter to print the current value of the iterations
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
-#' @param \dots allows one to potentially include parameter values for inner functions
+#' @param filename Optional path to a CSV file; when supplied, the per-replication results (the
+#'   observed standardized mean, the full and one-sided widths, the tail misses, and the interval
+#'   limits) are written there, appended when the file already exists, and a throwaway run should
+#'   point it at \code{tempfile(fileext = ".csv")}; the default \code{NULL} writes nothing.
 #'
 #' @return
 #' A \code{data.frame} with columns \code{term} and \code{value}
@@ -69,28 +70,32 @@
 #' @seealso \code{\link{ss_aipe_sm}}
 #'
 #' @examples
-#' # Since 'true_sm' equals 'estimated_sm', this usage
-#' # returns the results of a correctly specified situation.
-#' # Note that 'G' should be large (10 is used to make the
-#' # example run easily)
-#' #Res.1 <- ss_aipe_sm_sensitivity(true_sm=10, estimated_sm=10,
-#' #desired_width=.5, assurance=.95, conf_level=.95, G=10,
-#' #print_iter=FALSE)
+#' # With true_sm equal to estimated_sm the planning value is correct, and
+#' # the sweep reports what a correctly specified plan delivers: the share of
+#' # intervals no wider than the target should sit near the assurance. G = 10
+#' # keeps the example quick; a reported sensitivity study deserves the
+#' # default G = 10000.
+#' set.seed(113)
+#' res_correct <- ss_aipe_sm_sensitivity(true_sm = 1.5, estimated_sm = 1.5,
+#'   desired_width = 0.5, assurance = 0.95, conf_level = 0.95, G = 10,
+#'   print_iter = FALSE)
+#' res_correct
 #'
-#' # Objects contained in the 'Summary'.
-#' # Res.1$term
+#' # The terms the summary reports.
+#' res_correct$term
 #'
-#' # What proportion of the obtained full widths are narrower than the
-#' # desired one?
-#' # Res.1[which(Res.1$term == 'pct_ci_less_w'),2]
+#' # The proportion of realized full widths no wider than the target.
+#' res_correct$value[res_correct$term == "pct_ci_less_w"]
 #'
-#' # True standardized mean difference is 10, but specified at 12.
-#' # Change 'G' to some large number (e.g., G=20)
-#' #Res.2 <- ss_aipe_sm_sensitivity(true_sm=10, estimated_sm=12,
-#' #desired_width=.5, assurance=NULL, conf_level=.95, G=20)
+#' # The population standardized mean is 1.5 but the plan assumed 2, so the
+#' # planner sizes the study for a wider sampling distribution than the data
+#' # will show, and the realized intervals come in narrower than the target.
+#' set.seed(113)
+#' res_misspecified <- ss_aipe_sm_sensitivity(true_sm = 1.5, estimated_sm = 2,
+#'   desired_width = 0.5, G = 20, print_iter = FALSE)
 #'
-#' # The effect of the misspecification on mean confidence intervals is:
-#' # Res.2[which(Res.2$term == 'mean_ci_width'),2]
+#' # The effect of the misspecification on the mean interval width.
+#' res_misspecified$value[res_misspecified$term == "mean_ci_width"]
 #'
 #' @keywords design htest
 #' @seealso \code{\link{design_consequences}} for what a chosen design delivers:
@@ -101,9 +106,10 @@
 
 ss_aipe_sm_sensitivity <- function(true_sm = NULL, estimated_sm = NULL, desired_width = NULL, specified_N = NULL,
                                    assurance = NULL, conf_level = .95, G = 10000, print_iter = TRUE,
-                                   save = FALSE, filename = "ss_aipe_sm_sensitivity_result.csv", ...) {
+                                   filename = NULL) {
   if (is.null(estimated_sm) && is.null(specified_N)) stop("You must specify either 'estimated_sm' or 'specified_N' (i.e., the total sample size ).", call. = FALSE)
   if (!is.null(estimated_sm) && !is.null(specified_N)) stop("You must specify either 'estimated_sm' or 'specified_N' (i.e., the total sample size), but not both.", call. = FALSE)
+  .check_filename(filename)
 
   # The planner search and the Monte Carlo loop both call ci_nc_t() many
   # times. When the observed standardized mean is large the noncentrality
@@ -112,20 +118,22 @@ ss_aipe_sm_sensitivity <- function(true_sm = NULL, estimated_sm = NULL, desired_
   # evaluation produces dozens of identical messages. We muffle only that
   # specific warning with withCallingHandlers, count it, and emit a single
   # summary warning at the end (via on.exit so it fires on any return path).
-  # Warnings from any other source still surface normally.
-  .nct_ncp_count <- 0L
+  # Warnings from any other source still surface normally. The count lives in
+  # an environment made for it so the handler updates it by ordinary assignment.
+  state <- new.env(parent = emptyenv())
+  state$nct_ncp_count <- 0L
   on.exit({
-    if (.nct_ncp_count > 0L) {
+    if (state$nct_ncp_count > 0L) {
       warning(sprintf(
         "During the sample size search and Monte Carlo sensitivity loop, the noncentrality parameter exceeded the accurate range of R's noncentral t functions in %d evaluations (see ?ci_nc_t). Those evaluations may be inaccurate.",
-        .nct_ncp_count
+        state$nct_ncp_count
       ), call. = FALSE)
     }
   }, add = TRUE)
 
   .muffle_nct_ncp <- function(w) {
     if (grepl("noncentrality parameter exceeds", conditionMessage(w), fixed = TRUE)) {
-      .nct_ncp_count <<- .nct_ncp_count + 1L
+      state$nct_ncp_count <- state$nct_ncp_count + 1L
       invokeRestart("muffleWarning")
     }
   }
@@ -188,17 +196,9 @@ ss_aipe_sm_sensitivity <- function(true_sm = NULL, estimated_sm = NULL, desired_
     upper_limit = Upper_Limit
   )
 
-  if (save) {
-    result_file <- filename
-    # print("Simulation results will be saved to a .csv file")
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
-    } else {
-      utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
-    }
-  }
+  # The family's writer: a new file gets a header, an existing file is
+  # appended to without one.
+  if (!is.null(filename)) .write_sensitivity_csv(Results, filename)
 
   Summary <- data.frame(
     term = c(

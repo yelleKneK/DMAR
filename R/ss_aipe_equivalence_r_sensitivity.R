@@ -33,8 +33,15 @@
 #' @param assurance Optional assurance probability.
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample correlation, the two confidence limits, the
+#'   interval width, whether the interval fell inside the equivalence
+#'   region, and two indicators of whether the interval missed
+#'   \code{true_r} below or above): nothing is written when
+#'   \code{filename} is \code{NULL} (the default), a new file with a
+#'   header row is created otherwise, an existing file at that path is
+#'   appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized correlation and CI width, the proportion of
@@ -86,8 +93,7 @@ ss_aipe_equivalence_r_sensitivity <- function(true_r = 0,
                                        conf_level = 0.95,
                                        assurance = NULL,
                                        G = 1000, print_iter = FALSE,
-                                       save = FALSE,
-                                       filename = "ss_aipe_equivalence_r_sensitivity_result.csv") {
+                                       filename = NULL) {
   if (is.null(estimated_r) && is.null(specified_N))
     stop("You must specify either 'estimated_r' or 'specified_N'.",
          call. = FALSE)
@@ -105,6 +111,7 @@ ss_aipe_equivalence_r_sensitivity <- function(true_r = 0,
   if (is.null(rho_lower)) rho_lower <- rho_upper
   if (!is.numeric(rho_lower) || rho_lower <= 0 || rho_lower >= 1)
     stop("'rho_lower' must be in (0, 1).", call. = FALSE)
+  .check_filename(filename)
 
   # ss_aipe_equivalence_r() plans the width of a (1 - 2 * alpha) confidence
   # interval, and the simulation below evaluates ci_r() at conf_level, so
@@ -148,7 +155,7 @@ ss_aipe_equivalence_r_sensitivity <- function(true_r = 0,
     tI_upper[g]   <- true_r > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(r = r_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_width,
                           equivalent = equivalent,

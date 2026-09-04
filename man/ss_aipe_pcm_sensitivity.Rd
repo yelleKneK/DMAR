@@ -17,8 +17,7 @@ ss_aipe_pcm_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_pcm_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -57,9 +56,12 @@ planner.}
 
 \item{print_iter}{Logical.}
 
-\item{save}{Logical. Save per-replication CSV.}
-
-\item{filename}{Path used when \code{save = TRUE}.}
+\item{filename}{Optional path to a CSV file; when supplied, the
+per-replication results (the slope difference, its interval limits and
+width, and the two tail misses) are written there, appended when the
+file already exists, and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}; the default \code{NULL} writes
+nothing.}
 }
 \value{
 A \code{data.frame} with rows for mean / median / SD of
@@ -89,21 +91,19 @@ the simulator; for quadratic / cubic trends, the planner's
 closed-form solution is still available via \code{\link{ss_aipe_pcm}}.
 }
 \examples{
-# Every replication simulates two full groups of subjects, fits a
-# slope for each subject, and forms a confidence interval on the
-# difference in mean slopes, so the sweep is not run at example time.
-# The G below is far smaller than a reported sensitivity study would
-# use; the default of 1000 is the realistic setting. The call is:
-# set.seed(113)
-# ss_aipe_pcm_sensitivity(
-#   true_variance_trend       = 0.003,
-#   true_error_variance       = 0.0262,
-#   estimated_variance_trend  = 0.003,
-#   estimated_error_variance  = 0.0262,
-#   duration  = 4, frequency = 1,
-#   width     = 0.05,
-#   G = 20, print_iter = FALSE
-# )
+# Every replication simulates two full groups of subjects, fits a slope
+# for each subject, and forms a confidence interval on the difference in
+# mean slopes. G = 20 keeps the example quick; a reported sensitivity
+# study deserves the default G = 1000. With the planning values equal to
+# the population values, the realized mean width should sit at or just
+# under the target.
+set.seed(113)
+ss_aipe_pcm_sensitivity(
+  true_variance_trend = 0.003, true_error_variance = 0.0262,
+  estimated_variance_trend = 0.003, estimated_error_variance = 0.0262,
+  duration = 4, frequency = 1, width = 0.05,
+  G = 20, print_iter = FALSE
+)
 
 }
 \references{

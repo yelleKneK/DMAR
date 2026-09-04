@@ -17,8 +17,12 @@
 #' @param conf_level the desired confidence interval coverage, (i.e., 1 - Type I error rate)
 #' @param G number of generations (i.e., replications) of the simulation
 #' @param print_iter to print the current value of the iterations
-#' @param save option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results
-#' @param filename the name of the file that simulation results will be saved to
+#' @param filename Optional path of a CSV file to receive the per-replication
+#'   results (the observed standardized contrast, the full and one-sided
+#'   interval widths, the tail and overall misses, and the confidence
+#'   limits), appended when the file already exists and created otherwise;
+#'   the default \code{NULL} writes nothing, and a throwaway run that wants
+#'   the file should point it at \code{tempfile(fileext = ".csv")}.
 #' @param \dots allows one to potentially include parameter values for inner functions
 #'
 #' @details
@@ -87,9 +91,9 @@
 #' @examples
 #' # Sensitivity analysis for a standardized ANCOVA contrast across
 #' # three groups, contrast (-1, 0, 1), a covariate-outcome correlation
-#' # of 0.4, and a planning target width of 0.5. Sizes are kept small
-#' # here so the Monte Carlo sweep runs quickly; raise G for a stable
-#' # estimate in practice.
+#' # of 0.4, and a planning target width of 0.5. G = 50 keeps the
+#' # example quick; a reported sensitivity analysis deserves the default of
+#' # G = 10000 replications.
 #' set.seed(113)
 #' ss_aipe_sc_ancova_sensitivity(
 #'   true_psi = 0.5, estimated_psi = 0.5,
@@ -109,11 +113,27 @@
 ss_aipe_sc_ancova_sensitivity <- function(true_psi = NULL, estimated_psi = NULL, c_weights,
                                           desired_width = NULL, n_per_group = NULL, mu_x = 0, sigma_x = 1, rho, divisor = "s_ancova",
                                           assurance = NULL, conf_level = .95, G = 10000, print_iter = TRUE,
-                                          save = FALSE, filename = "ss_aipe_sc_ancova_sensitivity_result.csv", ...) {
-  prev_warn <- getOption("warn")
-  on.exit(options(warn = prev_warn), add = TRUE)
-  options(warn = -1)
+                                          filename = NULL, ...) {
   if (divisor != "s_ancova" && divisor != "s_anova") stop("The argument 'divisor' must be either 's_ancova' or 's_anova'")
+  .check_filename(filename)
+
+  # The planner and the ANCOVA fits are silent in ordinary use. The one
+  # warning that can surface inside the loop is the accuracy limit ci_nc_t()
+  # reports, through ci_sc_ancova(), when the noncentrality parameter exceeds
+  # 37.62 in magnitude; a large standardized contrast raises it on every
+  # replication, so it is counted and reported once, with the count, when
+  # the function returns, rather than G times.
+  nc_state <- new.env(parent = emptyenv())
+  nc_state$n <- 0L
+  on.exit(if (nc_state$n > 0L) warning(sprintf(
+    "The noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in %d of the %d replications, so those interval limits may be inaccurate; see ?ci_nc_t.",
+    nc_state$n, G), call. = FALSE), add = TRUE)
+  .count_nc_t <- function(w) {
+    if (grepl("noncentrality parameter exceeds 37.62", conditionMessage(w))) {
+      nc_state$n <- nc_state$n + 1L
+      invokeRestart("muffleWarning")
+    }
+  }
 
   if (divisor == "s_ancova") {
     ##  standardized ANCOVA contrast using s_ancova as divisor
@@ -215,10 +235,10 @@ ss_aipe_sc_ancova_sensitivity <- function(true_psi = NULL, estimated_psi = NULL,
       # calculate the observed psi and CI for psi
       psi_obs[g] <- sum(c_weights * y_bar_adj) / s_ancova
 
-      ci_psi <- ci_sc_ancova(
+      ci_psi <- withCallingHandlers(ci_sc_ancova(
         adj_means = y_bar_adj, s_ancova = s_ancova, c_weights = c_weights, n = n, cov_means = cov_means,
         SSwithin_x = SSwithin_x, conf_level = conf_level
-      )
+      ), warning = .count_nc_t)
 
       psi_limit_lower <- ci_psi$value[ci_psi$term == "lower_limit"]
       psi_limit_upper <- ci_psi$value[ci_psi$term == "upper_limit"]
@@ -244,15 +264,13 @@ ss_aipe_sc_ancova_sensitivity <- function(true_psi = NULL, estimated_psi = NULL,
       upper_limit = Upper_Limit
     )
 
-    if (save) {
-      result_file <- filename
-      # print("Simulation results will be saved to a .csv file")
-      suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
+    if (!is.null(filename)) {
+      suppressWarnings(file_exist <- try(utils::read.csv(filename), silent = TRUE))
       if (!is.null(dim(file_exist))) {
-        utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-        cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+        utils::write.table(Results, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+        cat("The file '", filename, "' already exists; the simulation results were appended to it.\n", sep = "")
       } else {
-        utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
+        utils::write.table(Results, filename, sep = ",", row.names = FALSE, append = FALSE)
       }
     }
 
@@ -395,10 +413,10 @@ ss_aipe_sc_ancova_sensitivity <- function(true_psi = NULL, estimated_psi = NULL,
         # calculate the observed psi and CI for psi based on s_anova
         psi_obs[g] <- sum(c_weights * y_bar_adj) / s_anova
 
-        ci_psi <- ci_sc_ancova(
+        ci_psi <- withCallingHandlers(ci_sc_ancova(
           psi = sum(c_weights * y_bar_adj), s_anova = s_anova, s_ancova = s_ancova, standardizer = "s_anova",
           c_weights = c_weights, n = n, cov_means = cov_means, SSwithin_x = SSwithin_x, conf_level = conf_level
-        )
+        ), warning = .count_nc_t)
 
         psi_limit_lower <- ci_psi$value[ci_psi$term == "lower_limit"]
         psi_limit_upper <- ci_psi$value[ci_psi$term == "upper_limit"]
@@ -424,15 +442,13 @@ ss_aipe_sc_ancova_sensitivity <- function(true_psi = NULL, estimated_psi = NULL,
         upper_limit = Upper_Limit
       )
 
-      if (save) {
-        result_file <- filename
-        # print("Simulation results will be saved to a .csv file")
-        suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
+      if (!is.null(filename)) {
+        suppressWarnings(file_exist <- try(utils::read.csv(filename), silent = TRUE))
         if (!is.null(dim(file_exist))) {
-          utils::write.table(Results, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
-          cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+          utils::write.table(Results, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+          cat("The file '", filename, "' already exists; the simulation results were appended to it.\n", sep = "")
         } else {
-          utils::write.table(Results, result_file, sep = ",", row.names = FALSE, append = FALSE)
+          utils::write.table(Results, filename, sep = ",", row.names = FALSE, append = FALSE)
         }
       }
 

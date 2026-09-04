@@ -8,9 +8,9 @@ template:
     border-radius: 0.5rem
 
 home:
-  title: "DMAR: Design, Measurement, and Analysis in R"
+  title: "DMAR: Design, Measurement, and Analysis"
   description: >
-    Design, measurement, and analysis in R, with emphasis on methods for
+    Design, measurement, and analysis, with emphasis on methods for
     human-centered research. Effect sizes reported with confidence intervals,
     sample size planning by power analysis and by accuracy in parameter
     estimation (AIPE), reliability and measurement, mediation analysis with

@@ -99,20 +99,20 @@ of producing graphical side effects. Saving is handled by the user via
 Requires \pkg{ggplot2} (a \code{Suggests} dependency).
 }
 \examples{
-# Built-in Orthodont data: 27 children, 4 measurements each.
+# The Orthodont data from nlme: 27 children, 4 measurements each.
 d <- nlme::Orthodont
 
 # Overlay all trajectories, colored by sex.
 plot_trajectories(d, id = "Subject", time = "age",
                   outcome = "distance", group = "Sex")
 
-# One panel per child, for twelve children drawn at random. Not run
-# here because faceting draws twelve small plots instead of one, which
-# costs about twice what the overlay above does. The call is:
-# plot_trajectories(d, id = "Subject", time = "age",
-#                   outcome = "distance",
-#                   n_random = 12, facet = TRUE, ncol = 4,
-#                   seed = 113)
+# One panel per child, for twelve children drawn at random. The seed
+# makes the draw reproducible, and the session's generator state is
+# left as it was.
+plot_trajectories(d, id = "Subject", time = "age",
+                  outcome = "distance",
+                  n_random = 12, facet = TRUE, ncol = 4,
+                  seed = 113)
 
 }
 \seealso{

@@ -31,8 +31,14 @@
 #' @param conf_level Confidence level (default \code{0.95}).
 #' @param G Number of Monte Carlo replications.
 #' @param print_iter Logical.
-#' @param save Logical. Save per-replication CSV.
-#' @param filename Path used when \code{save = TRUE}.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the fixed effect estimate, the two confidence
+#'   limits, the interval width, and two indicators of whether the
+#'   interval missed \code{true_beta} below or above): nothing is written
+#'   when \code{filename} is \code{NULL} (the default), a new file with a
+#'   header row is created otherwise, an existing file at that path is
+#'   appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #'
 #' @return A \code{data.frame} with rows for mean / median / SD of
 #'   the realized fixed-effect estimate and CI width, the proportion of
@@ -87,8 +93,7 @@ ss_aipe_mixed_effects_sensitivity <- function(true_sigma2_y = NULL,
                                                    specified_K = NULL,
                                                    conf_level = 0.95,
                                                    G = 1000, print_iter = FALSE,
-                                                   save = FALSE,
-                                                   filename = "ss_aipe_mixed_effects_sensitivity_result.csv") {
+                                                   filename = NULL) {
   est_supplied <- !is.null(estimated_sigma2_y) && !is.null(estimated_sigma2_x) &&
                   !is.null(estimated_icc)
   if (!est_supplied && is.null(specified_K))
@@ -101,6 +106,7 @@ ss_aipe_mixed_effects_sensitivity <- function(true_sigma2_y = NULL,
     stop("'true_sigma2_x' must be a positive number.", call. = FALSE)
   if (is.null(true_icc) || true_icc < 0 || true_icc >= 1)
     stop("'true_icc' must be in [0, 1).", call. = FALSE)
+  .check_filename(filename)
 
   if (est_supplied) {
     plan <- ss_aipe_mixed_effects(sigma2_y = estimated_sigma2_y,
@@ -183,7 +189,7 @@ ss_aipe_mixed_effects_sensitivity <- function(true_sigma2_y = NULL,
     tI_upper[g] <- true_beta > hi
   }
 
-  if (isTRUE(save)) {
+  if (!is.null(filename)) {
     per_rep <- data.frame(beta = beta_hat, ci_lower = ci_lo,
                           ci_upper = ci_hi, ci_width = ci_w,
                           type_I_lower = tI_lower, type_I_upper = tI_upper)

@@ -204,6 +204,33 @@
 #' \code{ci_method} confidence interval, and the MBCO likelihood ratio
 #' test with its degrees of freedom and \emph{p}-value.
 #'
+#' \strong{The parallel two-mediator model.} Tofighi and Kelley (2020)
+#' continue the memory example with imagery and repetition as parallel
+#' mediators and a residual covariance between them, asking whether the
+#' indirect effect through repetition is zero and whether the two
+#' specific indirect effects differ (their Research Questions 2 and 3).
+#' That analysis is the single-mediator call of the examples with the
+#' parallel model in place of the single one and the contrast supplied
+#' through \code{hypotheses}:
+#' \preformatted{parallel <- "
+#'   imagery    ~ b1*instruction
+#'   repetition ~ b3*instruction
+#'   recall     ~ b2*imagery + b4*repetition + b5*instruction
+#'   imagery ~~ repetition
+#' "
+#' mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
+#'                x = "instruction", y = "recall",
+#'                hypotheses = c(imagery_minus_repetition =
+#'                  "indirect_via_imagery - indirect_via_repetition"),
+#'                ci_method = "monte_carlo", seed = 113)}
+#' Six effects are reported, so six constrained null models are fit,
+#' about twice the cost of the single-mediator analysis. The indirect
+#' effect through repetition is near zero (the paper reports
+#' \eqn{\mathrm{LRT}_{\mathrm{MBCO}} = 0.083}, \emph{p} = .773), while
+#' the contrast shows the imagery pathway is larger (the paper reports
+#' \eqn{\mathrm{LRT}_{\mathrm{MBCO}} = 25.828}, difference = 2.222,
+#' SE = 0.445).
+#'
 #' \strong{Choosing the confidence interval.} The default profile
 #' likelihood interval inverts the likelihood ratio test for the effect
 #' itself (Neale & Miller, 1997), so its limits are free to sit
@@ -241,7 +268,18 @@
 #' identically zero and its row is dropped); to let a path differ by
 #' group, leave it unlabeled or give per-group labels with the vector
 #' form \code{c("b1_f", "b1_m")*x}. With more than two groups, each
-#' non-reference group is compared with the reference group.
+#' non-reference group is compared with the reference group. The call
+#' below fits the simple model in both groups of a data frame
+#' \code{d} whose \code{condition} column takes two values, and reports
+#' every effect per group beside its between-group difference; leaving
+#' the paths unlabeled lets them differ by group.
+#' \preformatted{mediation_mbco("m ~ x
+#'                 y ~ m + x",
+#'                data = d, group = "condition", x = "x", y = "y",
+#'                ci_method = "wald")}
+#' Each reported row costs its own constrained null model fit, so this
+#' two-group analysis fits nine null models where the single-group
+#' analysis fits three.
 #'
 #' \strong{Moderated mediation, probed.} With \code{moderator}, every
 #' regression coefficient along a pathway becomes a linear function of
@@ -470,53 +508,31 @@
 #' M_tk <- c(instruction = 0.51, imagery = 5.66, repetition = 6.08,
 #'           recall = 12.07)
 #'
-#' # Single-mediator model: instruction -> imagery -> recall. The fit is
-#' # not run here because every reported effect costs its own constrained
-#' # null model fit in OpenMx, on top of the B Monte Carlo replications
-#' # the interval draws. The call is:
-#' # single <- "
-#' #   imagery ~ b1*instruction
-#' #   recall  ~ b2*imagery + b3*instruction
-#' # "
-#' # mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
-#' #                x = "instruction", y = "recall",
-#' #                ci_method = "monte_carlo", seed = 113)
-#' # The indirect effect is about 2.1 words (the paper reports 2.121,
-#' # SE = 0.276, 95% Monte Carlo CI [1.600, 2.682]).
+#' # Single-mediator model: instruction -> imagery -> recall. Every
+#' # reported effect costs its own constrained null model fit in OpenMx,
+#' # which is where the run time goes; the Monte Carlo interval itself
+#' # is inexpensive at any B. The indirect effect is about 2.1 words
+#' # (the paper reports 2.121, SE = 0.276, 95% Monte Carlo CI
+#' # [1.600, 2.682]), and its likelihood ratio statistic of 71.31 is the
+#' # value discussed under Details.
+#' single <- "
+#'   imagery ~ b1*instruction
+#'   recall  ~ b2*imagery + b3*instruction
+#' "
+#' mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
+#'                x = "instruction", y = "recall",
+#'                ci_method = "monte_carlo", seed = 113)
 #'
-#' # Parallel two-mediator model, with the contrast of the two specific
-#' # indirect effects (the paper's Research Questions 2 and 3). Not run
-#' # here for the same reason; the call is:
-#' # parallel <- "
-#' #   imagery    ~ b1*instruction
-#' #   repetition ~ b3*instruction
-#' #   recall     ~ b2*imagery + b4*repetition + b5*instruction
-#' #   imagery ~~ repetition
-#' # "
-#' # mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
-#' #                x = "instruction", y = "recall",
-#' #                hypotheses = c(imagery_minus_repetition =
-#' #                  "indirect_via_imagery - indirect_via_repetition"),
-#' #                ci_method = "monte_carlo", seed = 113)
-#' # The indirect effect through repetition is near zero (the paper
-#' # reports LRT = 0.083, p = .773), while the contrast shows the
-#' # imagery pathway is larger (the paper reports LRT = 25.828,
-#' # difference = 2.222, SE = 0.445).
-#'
-#' # Raw data go in through 'data' rather than 'S', 'M', and 'N'. Adding
-#' # 'group' fits the model in every group and tests the between-group
-#' # difference of each effect, which is moderated mediation with a
-#' # categorical moderator. Leaving the paths unlabeled lets them differ
-#' # by group. It is not run here because each reported difference costs
-#' # its own constrained null model fit:
-#' #   mediation_mbco("m ~ x \n y ~ m + x", data = two_groups,
-#' #                  group = "condition", x = "x", y = "y",
-#' #                  ci_method = "wald")
-#' #
-#' # A continuous moderator goes in through 'moderator'. That analysis,
-#' # fit from a data frame with the conditional effects it estimates
-#' # drawn as curves over the moderator's range, is shown at
-#' # ?plot_mediation_mbco.
+#' # The parallel two-mediator model of the same paper, with the contrast
+#' # of its two specific indirect effects, is described under Details;
+#' # it is fit the same way from the same summary statistics, adding the
+#' # 'hypotheses' argument. Raw data go in through 'data' rather than
+#' # 'S', 'M', and 'N'; adding 'group' fits the model in every group and
+#' # tests the between-group difference of each effect, which is
+#' # moderated mediation with a categorical moderator (see Details). A
+#' # continuous moderator goes in through 'moderator', and the help page
+#' # for plot_mediation_mbco fits that analysis from a data frame and
+#' # draws the conditional effects it estimates.
 #'
 #' @export
 #' @importFrom stats coef vcov qnorm pchisq quantile setNames
@@ -548,24 +564,10 @@ mediation_mbco <- function(model, data = NULL, S = NULL, M = NULL,
       B != round(B)) {
     stop("'B' must be a single integer of at least 100.", call. = FALSE)
   }
-  # Local RNG: seed if asked (covering the Monte Carlo interval and any
-  # optimizer restarts), and restore the caller's state on exit.
-  if (!is.null(seed)) {
-    has_old_seed <- exists(".Random.seed", envir = globalenv())
-    old_seed <- if (has_old_seed) {
-      get(".Random.seed", envir = globalenv())
-    } else {
-      NULL
-    }
-    on.exit({
-      if (has_old_seed) {
-        assign(".Random.seed", old_seed, envir = globalenv())
-      } else if (exists(".Random.seed", envir = globalenv())) {
-        rm(".Random.seed", envir = globalenv())
-      }
-    }, add = TRUE)
-    set.seed(seed)
-  }
+  # A supplied seed is local to this call (covering the Monte Carlo
+  # interval and any optimizer restarts); the caller's random number
+  # generator state is restored on exit.
+  .dmar_local_seed(seed)
   if (!optimizer %in% OpenMx::mxAvailableOptimizers()) {
     stop("The '", optimizer, "' optimizer is not available in this ",
          "build of OpenMx. The CRAN build ships 'SLSQP' and 'CSOLNP'; ",
@@ -1160,42 +1162,47 @@ mediation_mbco <- function(model, data = NULL, S = NULL, M = NULL,
   # A feedback loop makes "the pathways from x to y" ill defined (total
   # effects would be infinite series, not sums of simple paths), so
   # automatic enumeration refuses rather than mislabel.
-  color <- stats::setNames(rep(0L, length(vars)), vars)
-  cyc <- FALSE
+  # The depth-first search keeps its vertex colors and the cycle flag in
+  # one state object that every recursive call reads and updates.
+  dfs <- new.env(parent = emptyenv())
+  dfs$color <- stats::setNames(rep(0L, length(vars)), vars)
+  dfs$cyc <- FALSE
   visit <- function(v) {
-    color[[v]] <<- 1L
+    dfs$color[[v]] <- 1L
     for (w in to[from == v]) {
-      if (cyc) return(invisible(NULL))
-      if (color[[w]] == 1L) {
-        cyc <<- TRUE
+      if (dfs$cyc) return(invisible(NULL))
+      if (dfs$color[[w]] == 1L) {
+        dfs$cyc <- TRUE
         return(invisible(NULL))
       }
-      if (color[[w]] == 0L) visit(w)
+      if (dfs$color[[w]] == 0L) visit(w)
     }
-    color[[v]] <<- 2L
+    dfs$color[[v]] <- 2L
   }
-  for (v in vars) if (color[[v]] == 0L) visit(v)
-  if (cyc) {
+  for (v in vars) if (dfs$color[[v]] == 0L) visit(v)
+  if (dfs$cyc) {
     stop("The regression structure is nonrecursive (a feedback loop ",
          "connects the equations), so enumerating pathways from ",
          sQuote(x), " to ", sQuote(y), " is not meaningful. State the ",
          "quantities to test through ':=' definitions or 'hypotheses' ",
          "and omit 'x' and 'y'.", call. = FALSE)
   }
-  # Depth-first enumeration of simple directed pathways x -> ... -> y.
-  paths <- list()
+  # Depth-first enumeration of simple directed pathways x -> ... -> y;
+  # each call returns the pathways found below its node, in edge order.
   walk <- function(node, seen) {
+    found <- list()
     for (i in which(from == node)) {
       nxt <- to[i]
       if (nxt %in% seen) next
       if (nxt == y) {
-        paths[[length(paths) + 1L]] <<- c(seen, nxt)
+        found[[length(found) + 1L]] <- c(seen, nxt)
       } else {
-        walk(nxt, c(seen, nxt))
+        found <- c(found, walk(nxt, c(seen, nxt)))
       }
     }
+    found
   }
-  walk(x, x)
+  paths <- walk(x, x)
   if (length(paths) == 0L) {
     stop("No directed pathway from ", sQuote(x), " to ", sQuote(y),
          " exists in the model.", call. = FALSE)
@@ -1838,10 +1845,8 @@ mediation_mbco <- function(model, data = NULL, S = NULL, M = NULL,
     stop("'S' is not positive definite; check the covariance ",
          "(or correlation) matrix.", call. = FALSE)
   }
-  .mbco_local_rng(1L, {
-    as.data.frame(MASS::mvrnorm(N, mu = mu, Sigma = S,
-                                empirical = TRUE))
-  })
+  .dmar_local_seed(1L)
+  as.data.frame(MASS::mvrnorm(N, mu = mu, Sigma = S, empirical = TRUE))
 }
 
 # mxTryHard writes progress to the console even when asked to be
@@ -1854,23 +1859,6 @@ mediation_mbco <- function(model, data = NULL, S = NULL, M = NULL,
       intervals = intervals))),
     file = NULL, type = "output")
   fit
-}
-
-# Evaluate an expression under a locally seeded RNG, restoring the
-# caller's state on exit. With seed = NULL the state is still saved and
-# restored, so internal draws leave the caller's stream untouched.
-.mbco_local_rng <- function(seed, expr) {
-  has_old <- exists(".Random.seed", envir = globalenv())
-  old <- if (has_old) get(".Random.seed", envir = globalenv()) else NULL
-  on.exit({
-    if (has_old) {
-      assign(".Random.seed", old, envir = globalenv())
-    } else if (exists(".Random.seed", envir = globalenv())) {
-      rm(".Random.seed", envir = globalenv())
-    }
-  }, add = TRUE)
-  if (!is.null(seed)) set.seed(seed)
-  expr
 }
 
 #' @export

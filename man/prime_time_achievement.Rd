@@ -419,7 +419,7 @@ dim(prime_time_achievement)
 attr(prime_time_achievement$nctotal, "label")
 attr(prime_time_achievement$ptia,    "label")
 
-# Cluster counts (reconciled with Lapsley et al., 2002):
+# Cluster counts, reconciled with Lapsley et al., 2002:
 length(unique(prime_time_achievement$corp_id))    # 61
 length(unique(prime_time_achievement$school_id))  # 163
 length(unique(prime_time_achievement$class_id))   # 586
@@ -432,15 +432,15 @@ table(prime_time_achievement$classize)
 
 # ----- Selecting subsets of interest -----
 
-# Caucasian and African American only (the matched-race
-# supplementary analyses in Lapsley et al., 2002):
+# Caucasian and African American only, the matched race
+# supplementary analyses in Lapsley et al., 2002:
 pt_wb <- subset(prime_time_achievement, race \%in\% c(2L, 5L))
 
 # Drop the few "other assistant listed" cases for a clean
 # aide / no-aide contrast:
 pt_clean <- subset(prime_time_achievement, ptia \%in\% c(1L, 2L))
 
-# Only rural corporations (geog == 4), which is what the source
+# Only rural corporations, coded 4 on geog, which is what the source
 # SPSS file's FILTER_$ variable encoded:
 pt_rural <- subset(prime_time_achievement, geog == 4L)
 
@@ -454,35 +454,33 @@ pt_complete <- prime_time_achievement[
 
 # ----- Multilevel fits -----
 
-# The three fits below are shown but not run, because each one
-# estimates a multilevel model on the full student level file and
-# together they cost more time than a help page should take.
-# Uncomment to fit them.
+# Three-level null random intercept model on the full student level
+# file. The variance components in the random effects block of the
+# summary are the corporation, school within corporation, and residual
+# variances behind the intraclass correlations reported in the Details
+# section.
+m_null <- lme4::lmer(nctotal ~ 1 + (1 | corp_id/school_id),
+                     data = prime_time_achievement)
+summary(m_null)
 
-# Three-level null random intercept model. The variance
-# decomposition gives the corp, school | corp, and within
-# ICCs reported in the Details section.
-# m_null <- lme4::lmer(nctotal ~ 1 + (1 | corp_id/school_id),
-#                      data = prime_time_achievement)
-# summary(m_null)
+# Main effects of race, a student level variable, of ptia and
+# classize, classroom level variables, and of ses, a school level
+# variable. Compare to Lapsley et al., 2002, which fit closely related
+# HLM specifications.
+m_main <- lme4::lmer(
+  nctotal ~ factor(race) + factor(ptia) + classize + ses +
+    (1 | corp_id/school_id),
+  data = prime_time_achievement)
+summary(m_main)
 
-# Level-1 (race), level-2 (ptia and classize), and level-3
-# (ses) main-effect model. Compare to Lapsley et al. (2002),
-# which fit closely related HLM specifications.
-# m_main <- lme4::lmer(
-#   nctotal ~ factor(race) + factor(ptia) + classize + ses +
-#     (1 | corp_id/school_id),
-#   data = prime_time_achievement)
-# summary(m_main)
-
-# Cross-level interaction: ptia x ses (the published finding
-# was that aide benefit was concentrated in higher-SES
-# schools).
-# m_inter <- lme4::lmer(
-#   nctotal ~ factor(race) + factor(ptia) * ses + classize +
-#     (1 | corp_id/school_id),
-#   data = prime_time_achievement)
-# summary(m_inter)
+# Cross-level interaction of ptia with ses. The published finding was
+# that the aide benefit was concentrated in higher SES schools, which
+# is what the interaction coefficient carries.
+m_inter <- lme4::lmer(
+  nctotal ~ factor(race) + factor(ptia) * ses + classize +
+    (1 | corp_id/school_id),
+  data = prime_time_achievement)
+summary(m_inter)
 
 }
 \references{

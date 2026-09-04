@@ -62,17 +62,19 @@ bar and sample size / predictor-count annotations.
 Requires \pkg{ggplot2} (listed in \code{Suggests}).
 }
 \examples{
-# Basic call.
+# The default display: the observed R2 fills its share of the bar, the
+# confidence interval sits beneath it, and N and p are annotated.
 plot_R2(R2 = 0.25, N = 100, p = 5)
 
-# The variations below are not run, since the call above already shows
-# the default display and each additional figure has to be drawn. With
-# fixed predictors and a 90\% confidence interval:
-# plot_R2(R2 = 0.35, N = 200, p = 3, conf_level = 0.90,
-#         random_predictors = FALSE)
+# With fixed predictors and a 90\% confidence interval. The interval
+# beneath the bar is now the fixed predictor interval from ci_R2, and
+# its label reads 90\% rather than 95\%.
+plot_R2(R2 = 0.35, N = 200, p = 3, conf_level = 0.90,
+        random_predictors = FALSE)
 
-# Without the annotations:
-# plot_R2(R2 = 0.10, show_ci = FALSE, show_n = FALSE)
+# Without the interval or the sample size annotation, the bar stands
+# alone, which is the display to use when N and p are not known.
+plot_R2(R2 = 0.10, show_ci = FALSE, show_n = FALSE)
 
 }
 \references{

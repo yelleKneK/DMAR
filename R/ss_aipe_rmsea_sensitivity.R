@@ -23,9 +23,13 @@
 #'   population RMSEA is no larger than \code{width}.
 #' @param conf_level confidence level (i.e., 1 - the Type I error rate).
 #' @param G number of replications in the Monte Carlo simulation.
-#' @param save option to save simulation results. With \code{save = TRUE} the
-#'   per-replication results are written to \code{filename}.
-#' @param filename the name of the file that simulation results are saved to.
+#' @param filename an optional path for a comma separated file recording
+#'   every converged replication (its index, the RMSEA estimate, the two
+#'   confidence limits, and the interval width): nothing is written when
+#'   \code{filename} is \code{NULL} (the default), a new file with a header
+#'   row is created otherwise, an existing file at that path is appended to,
+#'   and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
 #' @param \dots additional arguments passed to \code{\link[lavaan]{sem}} when
 #'   fitting the model (for example \code{estimator} or \code{missing}).
 #'
@@ -94,11 +98,11 @@
 #'   \code{\link{ci_rmsea}}
 #'
 #' @examples
-#' set.seed(113)
-#'
-#' # True data generating model: two correlated factors (r = 0.5), three
-#' # standardized indicators each (loadings 0.7). Build the implied population
-#' # covariance matrix Sigma = Lambda Phi Lambda' + Psi.
+#' # True data generating model: two correlated factors, each measured by
+#' # three standardized indicators. The factor correlation is 0.5 and every
+#' # loading is 0.7. The implied population covariance matrix is assembled
+#' # from the loading matrix, the factor correlation matrix, and the
+#' # residual variances.
 #' Lambda <- matrix(0, 6, 2)
 #' Lambda[1:3, 1] <- 0.7
 #' Lambda[4:6, 2] <- 0.7
@@ -109,27 +113,50 @@
 #' # Proposed (misspecified) model: a single common factor.
 #' proposed <- "g =~ x1 + x2 + x3 + x4 + x5 + x6"
 #'
-#' # The simulation itself is not run at example time: it fits the proposed
-#' # model once at a very large N to recover the population RMSEA, then
-#' # generates and fits a fresh sample on every replication. The G below is
-#' # already far smaller than a study one would report; the default of 200,
-#' # or more, is the realistic setting. The call is:
-#' # ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
-#' #                           G = 25)
+#' # The proposed model is fit once at a very large N to recover the
+#' # population RMSEA, the sample size is planned so that the expected width
+#' # of the 95 percent interval is 0.05, and a fresh sample of that size is
+#' # drawn and fit on every replication. Notice that true_rmsea is about
+#' # 0.20, since a single factor is a poor description of two-factor data,
+#' # that the realized widths sit close to the target, and that
+#' # pct_ci_less_w is near one half, which is what planning for the expected
+#' # width delivers. G = 20 keeps the example quick; a reported sensitivity
+#' # study deserves the default G = 200 or more.
+#' set.seed(113)
+#' ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
+#'                           G = 20)
 #'
 #' @export
-ss_aipe_rmsea_sensitivity <- function(width, model, Sigma, N = NULL, conf_level = 0.95, G = 200, save = FALSE,
-                                      filename = "ss_aipe_rmsea_sensitivity_result.csv", ...) {
+ss_aipe_rmsea_sensitivity <- function(width, model, Sigma, N = NULL, conf_level = 0.95, G = 200,
+                                      filename = NULL, ...) {
   if (!requireNamespace("MASS", quietly = TRUE)) stop("The package 'MASS' is needed; please install the package and try again.")
   if (!requireNamespace("lavaan", quietly = TRUE)) stop("The package 'lavaan' is needed; please install the package and try again.")
 
   if (is.null(rownames(Sigma)) || is.null(colnames(Sigma))) {
     stop("'Sigma' must have row and column names that match the observed variables in 'model'.", call. = FALSE)
   }
+  .check_filename(filename)
 
-  prev_warn <- getOption("warn")
-  on.exit(options(warn = prev_warn), add = TRUE)
-  options(warn = -1)
+  # A borderline sample makes lavaan warn through the per-replication fit:
+  # that the optimizer has not found a solution, that an estimated observed
+  # variable variance is negative, that the gradient at the reported
+  # solution is not near zero, or that a poor marker item was swapped for
+  # another. Nonconvergence is handled by the convergence check in the loop,
+  # which skips the replication; the others describe one sample's fit, and
+  # the summary statistics absorb them as sampling variability. Each is
+  # noise at the level of the Monte Carlo study, so every warning lavaan
+  # raises inside this one fit (all carry lavaan's prefix) is muffled here.
+  # Warnings from the population fit, the sample size planning, and
+  # ci_rmsea() reach the caller.
+  fit_one <- function(Data) {
+    withCallingHandlers(
+      lavaan::sem(model, data = as.data.frame(Data), ...),
+      warning = function(w) {
+        if (grepl("^lavaan", conditionMessage(w))) {
+          invokeRestart("muffleWarning")
+        }
+      })
+  }
 
   # Population fit: fit the proposed (possibly misspecified) model to the true
   # covariance matrix at a very large N to recover the population RMSEA and the
@@ -145,14 +172,12 @@ ss_aipe_rmsea_sensitivity <- function(width, model, Sigma, N = NULL, conf_level 
   CI_upper  <- rep(NA_real_, G)
   CI_lower  <- rep(NA_real_, G)
 
-  res_col_names <- data.frame("iteration", "rmsea_hat", "ci_low", "ci_up", "width")
-  result_file <- filename
-  if (save) {
-    suppressWarnings(file_exist <- try(utils::read.csv(result_file), silent = TRUE))
-    if (!is.null(dim(file_exist))) {
-      cat("A file in the local directory has the same name as the file where simulation", "\n", "results will be saved to. Simulation results will be appended to this file.", "\n", sep = "")
+  if (!is.null(filename)) {
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
     } else {
-      utils::write.table(res_col_names, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+      res_col_names <- data.frame("iteration", "rmsea_hat", "ci_low", "ci_up", "width")
+      utils::write.table(res_col_names, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
     }
   }
 
@@ -160,7 +185,7 @@ ss_aipe_rmsea_sensitivity <- function(width, model, Sigma, N = NULL, conf_level 
     Data <- MASS::mvrnorm(n = N, mu = rep(0, p), Sigma = Sigma)
     colnames(Data) <- rownames(Sigma)
 
-    m_fit <- try(lavaan::sem(model, data = as.data.frame(Data), ...), silent = TRUE)
+    m_fit <- try(fit_one(Data), silent = TRUE)
     if (inherits(m_fit, "try-error") || !isTRUE(lavaan::lavInspect(m_fit, "converged"))) {
       next
     }
@@ -172,9 +197,9 @@ ss_aipe_rmsea_sensitivity <- function(width, model, Sigma, N = NULL, conf_level 
     CI <- ci_rmsea(rmsea_hat[g], df = df, N = N, conf_level = conf_level)
     CI_lower[g] <- CI[1, 2]
     CI_upper[g] <- CI[3, 2]
-    if (save) {
+    if (!is.null(filename)) {
       sim_result <- cbind(g, rmsea_hat[g], CI_lower[g], CI_upper[g], CI_upper[g] - CI_lower[g])
-      utils::write.table(sim_result, result_file, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
+      utils::write.table(sim_result, filename, sep = ",", row.names = FALSE, col.names = FALSE, append = TRUE)
     }
   }
 

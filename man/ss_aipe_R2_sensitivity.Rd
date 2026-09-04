@@ -18,9 +18,7 @@ ss_aipe_R2_sensitivity(
   rho_xx = 0.3,
   G = 10000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_r2_sensitivity_result.csv",
-  ...
+  filename = NULL
 )
 }
 \arguments{
@@ -50,11 +48,11 @@ ss_aipe_R2_sensitivity(
 
 \item{print_iter}{Should the iteration number (between 1 and \code{G}) during the run of the function}
 
-\item{save}{option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results}
-
-\item{filename}{the name of the file that simulation results will be saved to}
-
-\item{...}{for modifying parameters of functions this function calls upon}
+\item{filename}{Optional path of a CSV file to receive the per-replication
+results (the confidence limits, the observed \eqn{R^2}, and the
+one-sided and full interval widths), overwriting any file already at
+that path; the default \code{NULL} writes nothing, and a throwaway run
+that wants the file should point it at \code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}
@@ -113,7 +111,9 @@ of sensitivity analysis random/fixed can be crossed to examine the effects of sp
 based on one but using it on data based on the other.
 }
 \examples{
-# Change 'G' to some large number (e.g., G=10,000)
+# The planner used .4 for a population squared multiple correlation
+# coefficient that is really .5. G = 25 keeps the example quick; a
+# reported sensitivity analysis deserves the default G of 10000.
 set.seed(113)
 ss_aipe_R2_sensitivity(true_R2 = .5, estimated_R2 = .4, w = .10, p = 5,
                        conf_level = 0.95, G = 25, print_iter = FALSE)

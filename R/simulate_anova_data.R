@@ -103,15 +103,7 @@ simulate_anova_data <- function(mu, sigma, a, n, seed = NULL) {
          call. = FALSE)
   }
 
-  if (!is.null(seed)) {
-    if (exists(".Random.seed", envir = .GlobalEnv)) {
-      .old_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
-    } else {
-      on.exit(if (exists(".Random.seed", envir = .GlobalEnv)) rm(list = ".Random.seed", envir = .GlobalEnv), add = TRUE)
-    }
-    set.seed(seed)
-  }
+  .dmar_local_seed(seed)
 
   N_total <- sum(n_per_group)
   group   <- factor(rep(seq_len(a), times = n_per_group),

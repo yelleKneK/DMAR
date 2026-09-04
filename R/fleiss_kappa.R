@@ -155,12 +155,13 @@
 #' ), nrow = 30, byrow = TRUE)
 #' fleiss_kappa(fleiss_1971)
 #'
-#' # A bootstrap interval, which resamples the subjects (rows) with
-#' # replacement and recomputes kappa on each resample. Not run here,
-#' # because 2000 refits of kappa is more than a help page should do;
-#' # the call is:
-#' # fleiss_kappa(fleiss_1971, ci_method = "percentile", B = 2000,
-#' #              seed = 113)
+#' # A percentile bootstrap interval, which resamples the subjects (rows)
+#' # with replacement and recomputes kappa on each resample. Compare its
+#' # limits with the Wald interval above; z_value and p_value keep their
+#' # asymptotic definitions. B = 2000 keeps the example quick; a reported
+#' # interval deserves the default B = 10000.
+#' fleiss_kappa(fleiss_1971, ci_method = "percentile", B = 2000,
+#'              seed = 113)
 #'
 #' @author Ken Kelley \email{kkelley@@nd.edu}
 #'
@@ -261,16 +262,7 @@ fleiss_kappa <- function(ratings, conf_level = 0.95,
       if (1 - Pe <= .Machine$double.eps) return(NA_real_)
       (Pb - Pe) / (1 - Pe)
     }
-    if (!is.null(seed)) {
-      has_old <- exists(".Random.seed", envir = globalenv())
-      old_seed <- if (has_old) get(".Random.seed", envir = globalenv())
-      on.exit({
-        if (has_old) assign(".Random.seed", old_seed, envir = globalenv())
-        else if (exists(".Random.seed", envir = globalenv()))
-          rm(".Random.seed", envir = globalenv())
-      }, add = TRUE)
-      set.seed(seed)
-    }
+    .dmar_local_seed(seed)
     B <- as.integer(B)
     boots <- vapply(seq_len(B), function(b) {
       kappa_at(sample.int(N, N, replace = TRUE))

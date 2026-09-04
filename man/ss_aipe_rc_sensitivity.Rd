@@ -21,8 +21,7 @@ ss_aipe_rc_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_rc_sensitivity_result.csv"
+  filename = NULL
 )
 }
 \arguments{
@@ -46,7 +45,7 @@ ss_aipe_rc_sensitivity(
 
 \item{noncentral}{specify with a \code{TRUE} or \code{FALSE} statement whether or not the noncentral approach to sample size planning should be used}
 
-\item{standardize}{specify with a \code{TRUE} or \code{FALSE} statement whether or not the regression coefficient will be standardized; default is \code{TRUE}}
+\item{standardize}{specify with a \code{TRUE} or \code{FALSE} statement whether or not the regression coefficient will be standardized; default is \code{FALSE}}
 
 \item{conf_level}{desired level of confidence for the computed interval (i.e., 1 - the Type I error rate)}
 
@@ -56,9 +55,12 @@ ss_aipe_rc_sensitivity(
 
 \item{print_iter}{specify with a \code{TRUE/FALSE} statement if the iteration number should be printed as the simulation within the function runs}
 
-\item{save}{option to save simulation results. It can be saved with \code{save = TRUE} outside of the printed results}
-
-\item{filename}{the name of the file that simulation results will be saved to}
+\item{filename}{Optional path for a comma separated file recording
+every replication, forwarded to
+\code{\link{ss_aipe_reg_coef_sensitivity}}, which does the writing:
+nothing is written when \code{filename} is \code{NULL} (the default),
+and a throwaway run should point it at
+\code{tempfile(fileext = ".csv")}.}
 }
 \value{
 A \code{data.frame} with columns \code{term} and \code{value}
