@@ -1,5 +1,72 @@
 # DMAR 1.0.0 submission (resubmission)
 
+## Response to the CRAN review of 2026-09-04
+
+The review of the 2026-08-21 submission named five things. Each is
+answered below, and each now has a mechanical detector in the test
+suite (`tests/testthat/test-rd_hygiene.R`, which runs on CRAN) and in
+the maintainer's release tooling, so none can return.
+
+* **"in R" in the title and description.** Removed from both. The
+  title is "Design, Measurement, and Analysis"; the description opens
+  "Methods for design, measurement, and analysis, with the aim of ...".
+  The expansion of the package name remains where it explains the
+  acronym (the package help page and the README).
+
+* **Code lines in examples commented out.** Every example line in the
+  package now runs. The comment idiom was adopted in the 2026-07-31
+  round in place of `\donttest{}` (which makes `R CMD check --as-cran`
+  run the whole example corpus a second time), and it is gone from
+  every page: the eighteen pages the review listed and twenty-nine
+  others that a parse-based detector found (every window of comment
+  lines in every examples block is parsed; a window that parses to a
+  call or an assignment is commented-out code). The detector is now a
+  permanent test. Calls that were commented out because they were
+  slow run with a small replication count, stated in a comment along
+  with the count a reported analysis deserves; nothing was replaced by
+  smaller or artificial data. Three pages in the list (`cov_sem`,
+  `dmar_tbl`, `holzinger_swineford`) carried prose comments only;
+  their comments were reworded anyway so that no comment line reads
+  like code. The package still contains no `\donttest{}` and no
+  `\dontrun{}`: with every line live, the slowest help page takes
+  <<SLOWEST>> s locally, and all <<N_PAGES>> pages with examples run in
+  <<EX_TOTAL>> s in a single pass (<<EX_WIN>> s on win-builder).
+
+* **Functions writing to the home filespace, and default paths.** The
+  twenty-seven sensitivity functions that carried
+  `save = FALSE, filename = "<name>.csv"` no longer have a default path:
+  the `save` switch is gone and `filename` defaults to `NULL`, so
+  nothing is written unless the user supplies a path.
+  `correlations_test()` already took `file = NULL`. No other function
+  writes a file. The examples and tests that exercise writing use
+  `tempfile()` and remove the file afterwards; no example, test, or
+  vignette writes anywhere but `tempdir()`.
+
+* **Modifying `.GlobalEnv`.** The package restored the user's random
+  number generator state after a seeded call with
+  `assign(".Random.seed", ..., envir = .GlobalEnv)` in twenty-five
+  functions, and counted warnings inside calling handlers with `<<-`
+  (each modifying a local of the enclosing function, but the operator
+  is the operator). Both are gone. A supplied seed now goes through
+  `withr::local_seed()` in one internal helper, which is why `withr`
+  (which has no dependencies of its own) joined Imports, the only
+  dependency change; the counters live in local environments. A test
+  deparses every function in the namespace and fails on any
+  `.GlobalEnv`, `globalenv()`, `.Random.seed`, `<<-`, or `options(warn`.
+
+* **`options(warn = -1)`.** Removed from the six functions that set
+  it (each had restored the previous value on exit). Each now muffles
+  only the specific warnings its Monte Carlo loop is known to raise
+  (lavaan convergence and variance warnings on borderline replicates,
+  the noncentral clamp), with `withCallingHandlers()` or
+  `suppressWarnings()` on the call that emits them; every other
+  warning reaches the user.
+
+The local check for this round, `R CMD check --as-cran` on the tarball
+with both manuals built, ran with <<STATUS>>. The full local test
+suite runs <<N_TESTS>> expectations with no failures.
+
+
 ## Response to the incoming pretest of 2026-08-19
 
 The 2026-08-19 pretest (Debian and Windows) returned the package for
