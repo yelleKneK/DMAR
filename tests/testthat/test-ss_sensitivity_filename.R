@@ -110,7 +110,7 @@ test_that("a filename that is not a single string is refused before any replicat
     calls <- .direct_writer_calls(G = 10000, path = bad)
     for (member in names(calls)) {
       expect_error(eval(calls[[member]]),
-                   "'filename' must be NULL or a single string",
+                   "'filename' must be NULL or a single character string",
                    info = member)
     }
   }

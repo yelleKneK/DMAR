@@ -51,6 +51,6 @@ test_that("ss_aipe_sm_sensitivity() writes per-replication results only when 'fi
   expect_equal(nrow(utils::read.csv(csv)), 6L)
   expect_error(
     do.call(ss_aipe_sm_sensitivity, c(args, list(filename = 1))),
-    "'filename' must be NULL or a single file path"
+    "'filename' must be NULL or a single character string"
   )
 })
