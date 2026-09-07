@@ -1,7 +1,7 @@
 ---
 title: "Moving From MBESS to DMAR: A Migration Guide and a Tour of the New Methods"
 author: "Ken Kelley"
-date: "September 2026"
+date: "`r format(Sys.Date(), '%B %Y')`"
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -12,10 +12,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
 
-
-
-``` r
+```{r}
 library(DMAR)
 ```
 
@@ -200,8 +204,7 @@ standardized mean difference (Cohen's $d$),
 its companion AIPE sample size plan, and the realized CI width
 under the plan looks like this in MBESS:
 
-
-``` r
+```{r, eval = FALSE, purl = FALSE}
 # MBESS, classic
 library(MBESS)
 out_ci  <- ci.smd(ncp = 4, n.1 = 30, n.2 = 30, conf.level = 0.95)
@@ -213,37 +216,12 @@ out_ci$Upper.Conf.Limit.smd
 The DMAR equivalent, with tidy returns and the
 `generics::tidy()` route into a unified table:
 
-
-``` r
+```{r}
 ci  <- ci_smd(ncp = 4, n_1 = 30, n_2 = 30, conf_level = 0.95)
 ss  <- ss_aipe_smd(delta = 0.5, conf_level = 0.95, width = 0.40)
 ci
-```
-
-|term        |value |
-|:-----------|:-----|
-|lower_limit |0.489 |
-|smd         |1.03  |
-|upper_limit |1.57  |
-
-Confidence level: 95%
-
-``` r
 ss
-```
-
-|term                  |value |
-|:---------------------|:-----|
-|necessary_n_per_group |199   |
-|supposed_smd          |0.5   |
-|width                 |0.4   |
-
-Confidence level: 95%
-
-``` r
 generics::tidy(ci)
-#>   term estimate  ci_lower ci_upper conf_level
-#> 1  smd 1.032796 0.4891759 1.568559       0.95
 ```
 
 The two return values compose with `dplyr` summaries and `ggplot2`

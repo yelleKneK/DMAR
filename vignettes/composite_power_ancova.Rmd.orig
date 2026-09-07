@@ -1,7 +1,7 @@
 ---
 title: "Composite Power for Factorial ANCOVA: Planning Simple Effects, an Interaction, and a Moderator"
 author: "Ken Kelley"
-date: "September 2026"
+date: "`r format(Sys.Date(), '%B %Y')`"
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -13,7 +13,35 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width = 7.2, fig.height = 4.2,
+  fig.align = "center",
+  dpi = 110
+)
+library(DMAR)
+set.seed(113)
 
+has_ggplot2   <- requireNamespace("ggplot2",   quietly = TRUE)
+has_patchwork <- requireNamespace("patchwork", quietly = TRUE)
+
+if (has_ggplot2) {
+  library(ggplot2)
+  theme_dmar <- theme_minimal(base_size = 12) +
+    theme(plot.title    = element_text(face = "bold"),
+          plot.subtitle = element_text(color = "grey30"),
+          legend.position = "top",
+          panel.grid.minor = element_blank())
+  theme_set(theme_dmar)
+}
+if (has_patchwork) library(patchwork)
+
+## Okabe-Ito, colorblind-safe (base R palette.colors).
+agent_cols <- setNames(unname(grDevices::palette.colors(2)), c("Human", "Machine"))
+accent     <- unname(grDevices::palette.colors(4))[4]
+```
 
 > **The simulations below run 25 replications, and their answers are
 > wrong.** Twenty five replications keep the document knitting in under a
@@ -71,8 +99,7 @@ $\sigma^{2} = 2$ in every cell.
 Displayed the way an analysis of variance text would display them, with the
 marginal (main effect) means in the margins:
 
-
-``` r
+```{r design-table}
 mu     <- c(6, 4, 3.1, 2.9)      # Agent varies fastest: HC, MC, HT, MT
 sigma2 <- 2
 sigma  <- sqrt(sigma2)
@@ -87,22 +114,9 @@ knitr::kable(layout_2x2, digits = 2,
              caption = "Population cell means, with marginal means. Higher scores are better; the common within-cell variance is 2.")
 ```
 
-
-
-Table: Population cell means, with marginal means. Higher scores are better; the common within-cell variance is 2.
-
-|            | Control| Treatment| Row mean|
-|:-----------|-------:|---------:|--------:|
-|Human       |       6|       3.1|     4.55|
-|Machine     |       4|       2.9|     3.45|
-|Column mean |       5|       3.0|     4.00|
-
-
-
 The same layout as a figure, with the four cells shaded and the margins in gray:
 
-
-``` r
+```{r design-figure, fig.height = 3.6, eval = has_ggplot2}
 base <- data.frame(
   Agent     = rep(c("Human", "Machine"), 2),
   Condition = rep(c("Control", "Treatment"), each = 2),
@@ -133,11 +147,6 @@ ggplot(grid_all, aes(Condition, Agent, fill = type)) +
        x = "Condition", y = "Agent")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-design-figure-1.png" alt="plot of chunk design-figure"  />
-<p class="caption">plot of chunk design-figure</p>
-</div>
-
 ## Viewing the Population
 
 The most informative figure in a power analysis is drawn before any power is
@@ -147,8 +156,7 @@ $\pm 1$ within-cell standard deviation as a reminder of the variability each
 effect must be detected against. On the right are the marginal means that the
 two main effects compare.
 
-
-``` r
+```{r population-figure, fig.height = 4.0, eval = has_ggplot2}
 pop <- expand.grid(Agent = c("Human", "Machine"),
                    Condition = c("Control", "Treatment"))
 pop$mu <- mu
@@ -183,11 +191,6 @@ p_marginals <- ggplot(marg, aes(label, value, fill = kind)) +
 
 if (has_patchwork) p_interaction + p_marginals else p_interaction
 ```
-
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-population-figure-1.png" alt="plot of chunk population-figure"  />
-<p class="caption">plot of chunk population-figure</p>
-</div>
 
 The substantive pattern is visible before any arithmetic. Under the Control
 protocol, humans (6.0) outperform machines (4.0). The Treatment lowers
@@ -243,8 +246,7 @@ $$
 The figure below annotates the two Treatment-cost simple effects directly on the
 population means.
 
-
-``` r
+```{r decomposition-figure, fig.height = 4.0, eval = has_ggplot2}
 ggplot(pop, aes(Condition, mu, color = Agent, group = Agent)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 3) +
@@ -265,11 +267,6 @@ ggplot(pop, aes(Condition, mu, color = Agent, group = Agent)) +
   coord_cartesian(xlim = c(1, 2.5), ylim = c(2.5, 6.5))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-decomposition-figure-1.png" alt="plot of chunk decomposition-figure"  />
-<p class="caption">plot of chunk decomposition-figure</p>
-</div>
-
 ## Contrast Weights
 
 Every effect above is a **contrast**, a set of weights on the cell means. `DMAR`
@@ -279,8 +276,7 @@ this way, $\psi = \sum_j c_j \mu_j$ is directly interpretable as a difference
 between (possibly averaged) means, and effects expressed on different slices
 remain comparable.
 
-
-``` r
+```{r contrast-weights}
 contrasts_list <- list(
   "Treatment cost | Human"   = c(  1,   0,  -1,   0),
   "Treatment cost | Machine" = c(  0,   1,   0,  -1),
@@ -296,20 +292,6 @@ wt$`psi`   <- sapply(contrasts_list, function(w) sum(w * mu))
 knitr::kable(wt, digits = 2,
              caption = "Contrast weights in normalized form. Positive weights sum to 1, negative weights to -1.")
 ```
-
-
-
-Table: Contrast weights in normalized form. Positive weights sum to 1, negative weights to -1.
-
-|                              | H,C|  M,C|  H,T|  M,T| sum +| sum -| psi|
-|:-----------------------------|---:|----:|----:|----:|-----:|-----:|---:|
-|Treatment cost &#124; Human   | 1.0|  0.0| -1.0|  0.0|     1|    -1| 2.9|
-|Treatment cost &#124; Machine | 0.0|  1.0|  0.0| -1.0|     1|    -1| 1.1|
-|Human adv. &#124; Control     | 1.0| -1.0|  0.0|  0.0|     1|    -1| 2.0|
-|Human adv. &#124; Treatment   | 0.0|  0.0|  1.0| -1.0|     1|    -1| 0.2|
-|Interaction                   | 0.5| -0.5| -0.5|  0.5|     1|    -1| 0.9|
-
-
 
 Note the interaction row: the weights are $\pm\tfrac{1}{2}$ rather than $\pm 1$,
 which is what places the interaction on the same per-comparison scale as the
@@ -355,8 +337,7 @@ $$
 Applying that approximation to all five contrasts, and comparing it with the
 exact noncentral $t$ search performed by `ss_power_contrast`:
 
-
-``` r
+```{r by-hand-table}
 lambda_target <- 2.80
 
 hand <- data.frame(
@@ -374,20 +355,6 @@ knitr::kable(hand, digits = 3, row.names = FALSE,
              caption = "Approximate n (from lambda = 2.80) and DMAR's exact search, for each contrast planned alone to power .80.")
 ```
 
-
-
-Table: Approximate n (from lambda = 2.80) and DMAR's exact search, for each contrast planned alone to power .80.
-
-|effect                        | psi| sum_c2| n_approx| n_exact| total_N|     f|
-|:-----------------------------|---:|------:|--------:|-------:|-------:|-----:|
-|Treatment cost &#124; Human   | 2.9|      2|        4|       5|      20| 0.725|
-|Treatment cost &#124; Machine | 1.1|      2|       26|      27|     108| 0.275|
-|Human adv. &#124; Control     | 2.0|      2|        8|       9|      36| 0.500|
-|Human adv. &#124; Treatment   | 0.2|      2|      784|     786|    3144| 0.050|
-|Interaction                   | 0.9|      1|       20|      20|      80| 0.318|
-
-
-
 The approximation and the exact search agree closely; they differ slightly
 because the exact critical value depends on $df$, which itself depends on $n$.
 
@@ -399,21 +366,12 @@ interaction expresses. It is therefore not a sensible planning target, and the
 design instead targets the three effects that can be detected at a common
 sample size: the two Treatment costs and the interaction.
 
-
-``` r
+```{r single-effect-output}
 targets <- contrasts_list[c("Treatment cost | Human",
                             "Treatment cost | Machine", "Interaction")]
 ss_power_contrast(targets[["Treatment cost | Machine"]],
                   mu = mu, sigma_squared = sigma2, desired_power = .80)
 ```
-
-|term                  |value |
-|:---------------------|:-----|
-|necessary_n_per_group |27    |
-|total_N               |108   |
-|actual_power          |0.808 |
-|noncentral_t_parm     |2.86  |
-|effect_size_f         |0.275 |
 
 Cohen's $f$ for a one-degree-of-freedom effect is $\lambda / \sqrt{N}$.
 
@@ -424,8 +382,7 @@ required sample size, the sampling distribution of $t$ under the null hypothesis
 (centered at zero) and under the alternative (shifted to $\lambda$). Power is the
 shaded area of the alternative distribution beyond the critical value.
 
-
-``` r
+```{r noncentral-figure, fig.height = 3.8, eval = has_ggplot2}
 w_mach <- contrasts_list[["Treatment cost | Machine"]]
 n_m  <- ss_power_contrast(w_mach, mu = mu, sigma_squared = sigma2,
                           desired_power = .80)$value[1]
@@ -455,40 +412,27 @@ ggplot(den, aes(t)) +
        x = "t statistic", y = "Density")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-noncentral-figure-1.png" alt="plot of chunk noncentral-figure"  />
-<p class="caption">plot of chunk noncentral-figure</p>
-</div>
-
 ## The Shared Design
 
 A design that must detect all three targeted effects has to satisfy the most
 demanding of them, so the required per-cell sample size is the largest:
 
-
-``` r
+```{r shared-n}
 per_cell <- sapply(targets, function(w)
   ss_power_contrast(w, mu = mu, sigma_squared = sigma2, desired_power = .80)$value[1])
 n_design <- max(per_cell)
 c(per_cell, chosen_n = n_design, total_N = 4 * n_design)
-#>   Treatment cost | Human Treatment cost | Machine              Interaction 
-#>                        5                       27                       20 
-#>                 chosen_n                  total_N 
-#>                       27                      108
 ```
 
-At $n =$ 27 per cell, a total of $N =$ 108, each targeted
+At $n =$ `r n_design` per cell, a total of $N =$ `r 4*n_design`, each targeted
 effect attains at least $.80$. This is its **marginal power**, meaning the power
 of that effect considered on its own:
 
-
-``` r
+```{r marginals}
 marg_pow <- sapply(targets, function(w)
   ss_power_contrast(w, mu = mu, sigma_squared = sigma2,
                     n_per_group = n_design)$value[3])
 round(marg_pow, 3)
-#>   Treatment cost | Human Treatment cost | Machine              Interaction 
-#>                    1.000                    0.808                    0.906
 ```
 
 Power curves display the same information across sample sizes. All five
@@ -496,8 +440,7 @@ contrasts are shown; the curve that reaches $.80$ farthest to the right among th
 targeted effects determines the sample size, and the human advantage under
 Treatment remains near the nominal $\alpha$ level throughout this range.
 
-
-``` r
+```{r power-curves, fig.height = 4.4, eval = has_ggplot2}
 n_grid <- 3:45
 curve_df <- do.call(rbind, Map(function(w, nm) {
   data.frame(effect = nm, n = n_grid,
@@ -520,11 +463,6 @@ ggplot(curve_df, aes(n, power, color = effect)) +
        x = "n per cell", y = "Marginal power (analytic)") +
   ylim(0, 1)
 ```
-
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-power-curves-1.png" alt="plot of chunk power-curves"  />
-<p class="caption">plot of chunk power-curves</p>
-</div>
 
 # Composite Power: Detecting Every Effect in One Study
 
@@ -555,8 +493,7 @@ the document knits quickly, and the answers at that setting are
 correspondingly poor; the reference column added below each result is the
 same computation at `reps = 10000`.
 
-
-``` r
+```{r reference-values}
 # Computed by tools/composite_power_reference.R, which runs the code in this
 # vignette at reps = 10000. Kept as literals because a 10,000-replication
 # sweep is far too slow to run while the document is being knitted.
@@ -575,8 +512,7 @@ ref <- list(
 )
 ```
 
-
-``` r
+```{r composite-fn}
 composite_power <- function(n, mu, sigma2, reps = 25, alpha = 0.05, seed = 113) {
   set.seed(seed)
   a <- length(mu); N <- a * n; df <- N - a
@@ -604,28 +540,23 @@ data.frame(
   `reps = 25`    = round(c(min(mc$marginal), mc$product, mc$composite), 3),
   `reps = 10000` = round(c(min(ref$marginal), ref$product, ref$composite), 3),
   check.names = FALSE)
-#>                        reps = 25 reps = 10000
-#> smallest_marginal          0.840        0.806
-#> product_if_independent     0.806        0.731
-#> composite                  0.800        0.713
 ```
 
 Read the right-hand column. At the sample size chosen for $.80$ marginal
-power, composite power is 0.71: the design that gives
+power, composite power is `r round(ref$composite, 2)`: the design that gives
 each effect an $80\%$ chance of being detected gives the whole predicted
 pattern only about a
-71% chance. The product of the marginals,
-0.73, is close to the composite but not equal to it,
+`r round(100 * ref$composite)`% chance. The product of the marginals,
+`r round(ref$product, 2)`, is close to the composite but not equal to it,
 since independence does not hold.
 
 The left-hand column is the same quantity from 25 replications. It is off by
-0.09 on the composite, which is
+`r round(abs(mc$composite - ref$composite), 2)` on the composite, which is
 about what a simulation standard error of
-0.09 predicts, and it
+`r round(sqrt(ref$composite * (1 - ref$composite) / 25), 2)` predicts, and it
 is the reason the reference column exists.
 
-
-``` r
+```{r composite-bar, fig.height = 3.6, eval = has_ggplot2}
 bar_df <- data.frame(
   quantity = factor(c("Treatment | Human", "Treatment | Machine", "Interaction",
                       "Product (independence)", "Composite (all three)"),
@@ -648,19 +579,13 @@ ggplot(bar_df, aes(quantity, power, fill = kind)) +
   theme(axis.text.x = element_text(size = 8.5))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-composite-bar-1.png" alt="plot of chunk composite-bar"  />
-<p class="caption">plot of chunk composite-bar</p>
-</div>
-
 ## Sizing the Study for Composite Power
 
 To obtain composite power of $.80$, meaning an $80\%$ probability that the entire
 predicted pattern is detected, the sample size must increase until the simulation
 reaches that value.
 
-
-``` r
+```{r composite-curve, fig.height = 4.2, eval = has_ggplot2}
 n_seq    <- ref$n_seq
 comp_seq <- sapply(n_seq, function(nn) composite_power(nn, mu, sigma2)$composite)
 weakest  <- sapply(n_seq, function(nn)
@@ -690,38 +615,21 @@ ggplot(comp_plot, aes(n, power, color = curve)) +
   theme(legend.text = element_text(size = 9))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-composite-curve-1.png" alt="plot of chunk composite-curve"  />
-<p class="caption">plot of chunk composite-curve</p>
-</div>
-
 The gray curve is what 25 replications produce: it wanders around the
 converged curve and is not monotone, even though composite power must
 increase with sample size. Reading a required sample size off a curve like
 that is how a plan acquires an error nobody can see afterward.
 
+```{r composite-table, echo = FALSE}
+knitr::kable(data.frame(`n per cell` = n_seq, `total N` = 4 * n_seq,
+                        `reps = 25` = round(comp_seq, 3),
+                        `reps = 10000` = round(ref$comp_seq, 3),
+                        check.names = FALSE),
+             caption = "Monte Carlo composite power by sample size, at 25 replications and at 10,000.")
+```
 
-
-Table: Monte Carlo composite power by sample size, at 25 replications and at 10,000.
-
-| n per cell| total N| reps = 25| reps = 10000|
-|----------:|-------:|---------:|------------:|
-|         20|      80|      0.32|        0.484|
-|         22|      88|      0.52|        0.570|
-|         24|      96|      0.56|        0.625|
-|         26|     104|      0.76|        0.691|
-|         28|     112|      0.80|        0.731|
-|         30|     120|      0.68|        0.773|
-|         32|     128|      0.80|        0.814|
-|         34|     136|      0.80|        0.845|
-|         36|     144|      0.96|        0.873|
-|         38|     152|      0.88|        0.892|
-|         40|     160|      0.88|        0.910|
-
-
-
-Composite power reaches $.80$ at approximately 32 per cell, a total of
-$N =$ 128, compared with the 108 required for each effect
+Composite power reaches $.80$ at approximately `r n_comp80` per cell, a total of
+$N =$ `r 4*n_comp80`, compared with the `r 4*n_design` required for each effect
 individually. Because these are simulation estimates, the exact crossing point
 varies slightly between runs; increasing `reps` reduces that variability. The
 distinction between powering each effect and powering the complete pattern is
@@ -766,62 +674,27 @@ size $f$ on the analysis of variance metric behaves as $f / \sqrt{1 - R^{2}}$
 under analysis of covariance, at a cost of one error degree of freedom per
 covariate:
 
-
-``` r
+```{r ancova-arithmetic}
 rho <- 0.2
 R2  <- rho^2
 f_int <- ss_power_contrast(contrasts_list[["Interaction"]], mu = mu,
                            sigma_squared = sigma2, desired_power = .80)$value[5]
 c(R2 = R2, variance_retained = 1 - R2,
   f_unadjusted = f_int, f_adjusted = f_int / sqrt(1 - R2))
-#>                R2 variance_retained      f_unadjusted        f_adjusted 
-#>         0.0400000         0.9600000         0.3181981         0.3247595
 ```
 
 With $\rho = .2$ the squared correlation is only $R^{2} = .04$, so the error
 variance is reduced by four percent and the interaction's $f$ increases from
-$0.318$ to about $0.325$:
+$`r round(f_int,3)`$ to about $`r round(f_int/sqrt(1-R2),3)`$:
 
-
-``` r
+```{r ancova-power}
 ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
                           f = f_int, covariate_R2 = 0, n_covariates = 0,
                           desired_power = .80)
-```
-
-|term                 |value |
-|:--------------------|:-----|
-|necessary_n_per_cell |20    |
-|total_N              |80    |
-|actual_power         |0.802 |
-|df_effect            |1     |
-|df_error             |76    |
-|f                    |0.318 |
-|f_adjusted           |0.318 |
-|covariate_R2         |0     |
-|n_covariates         |0     |
-|noncentrality        |8.1   |
-|alpha_level          |0.05  |
-
-``` r
 ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
                           f = f_int, covariate_R2 = R2, n_covariates = 1,
                           desired_power = .80)
 ```
-
-|term                 |value |
-|:--------------------|:-----|
-|necessary_n_per_cell |20    |
-|total_N              |80    |
-|actual_power         |0.818 |
-|df_effect            |1     |
-|df_error             |75    |
-|f                    |0.318 |
-|f_adjusted           |0.325 |
-|covariate_R2         |0.04  |
-|n_covariates         |1     |
-|noncentrality        |8.44  |
-|alpha_level          |0.05  |
 
 Power at $n = 20$ per cell increases from about $.80$ to about $.82$. The gain is
 real but modest. The figure below shows why, by varying the covariate's
@@ -830,8 +703,7 @@ $n = 20$ per cell. Meaningful reductions in required sample size occur only when
 the covariate correlates substantially with the outcome; at $\rho = .2$ the
 improvement is negligible relative to the degree of freedom expended.
 
-
-``` r
+```{r covariate-curve, fig.height = 3.9, eval = has_ggplot2}
 rho_grid <- seq(0, 0.7, by = 0.025)
 cov_pow  <- sapply(rho_grid, function(rr)
   ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
@@ -850,11 +722,6 @@ ggplot(data.frame(rho = rho_grid, power = cov_pow), aes(rho, power)) +
        subtitle = "Interaction power at n = 20 per cell, with one covariate",
        x = "Covariate correlation with the outcome", y = "Interaction power")
 ```
-
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-covariate-curve-1.png" alt="plot of chunk covariate-curve"  />
-<p class="caption">plot of chunk covariate-curve</p>
-</div>
 
 # The Moderator as a Three-Way Interaction
 
@@ -895,8 +762,7 @@ three-way interaction, included only to calibrate the eye. The separation betwee
 the two lines at the Treatment level increases with $M$, and it does so gradually
 when the three-way interaction is small.
 
-
-``` r
+```{r threeway-figure, fig.height = 5.2, eval = has_ggplot2}
 b0 <- 4; bA <- 1.1; bB <- 2.0; bAB <- 1.8; bM <- 0.38
 
 cell_mean <- function(agent, cond, m, gamma) {
@@ -925,11 +791,6 @@ ggplot(grid3, aes(Condition, mu, color = Agent, group = Agent)) +
   theme(panel.spacing = unit(0.9, "lines"))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-threeway-figure-1.png" alt="plot of chunk threeway-figure"  />
-<p class="caption">plot of chunk threeway-figure</p>
-</div>
-
 ## Effect Sizes for the Moderated Model
 
 With effect coding and mutually independent, mean-centered predictors, the terms
@@ -949,14 +810,11 @@ f^{2}_{\text{3-way}}
   = 0.03125\,\gamma^{2}.
 $$
 
-
-``` r
+```{r f2-calc}
 f2_2way <- bAB^2 * 0.0625 / sigma2
 f2_3way <- function(gamma) 0.03125 * gamma^2
 gamma_small <- 0.8
 c(f2_2way = f2_2way, f2_3way_small = f2_3way(gamma_small))
-#>       f2_2way f2_3way_small 
-#>       0.10125       0.02000
 ```
 
 Two features are worth noting. The expression for $f^{2}_{\text{3-way}}$ involves
@@ -966,15 +824,12 @@ $\gamma = 0.8$ yields $f^{2} = .02$ exactly, whereas the two-way
 interaction's $f^{2} = .101$ is roughly five times larger. Supplying each $f^{2}$ to `ss_power_reg_coef`, with
 $p = 7$ predictors in the full model ($A$, $B$, $M$, $AB$, $AM$, $BM$, $ABM$):
 
-
-``` r
+```{r regcoef-N}
 getN <- function(res) res$value[res$term == "necessary_N"]
 N_2way <- getN(ss_power_reg_coef(cohen_f2 = f2_2way, p = 7, desired_power = .80))
 N_3way <- getN(ss_power_reg_coef(cohen_f2 = f2_3way(gamma_small), p = 7,
                                  desired_power = .80))
 c(two_way = N_2way, three_way_small = N_3way)
-#>         two_way three_way_small 
-#>              80             395
 ```
 
 Required sample size is inversely proportional to $f^{2}$, so the small three-way
@@ -982,8 +837,7 @@ interaction requires roughly five times the total sample size of the two-way
 interaction. The figure below traces that relationship across values of $\gamma$
 and marks the value adopted here.
 
-
-``` r
+```{r gamma-curve, fig.height = 4.0, eval = has_ggplot2}
 g_grid <- seq(0.5, 2.0, by = 0.05)
 N_grid <- sapply(g_grid, function(g)
   getN(ss_power_reg_coef(cohen_f2 = f2_3way(g), p = 7, desired_power = .80)))
@@ -1001,11 +855,6 @@ ggplot(data.frame(gamma = g_grid, N = N_grid), aes(gamma, N)) +
        y = "Total N required")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-gamma-curve-1.png" alt="plot of chunk gamma-curve"  />
-<p class="caption">plot of chunk gamma-curve</p>
-</div>
-
 ## Confirming the Plan by Simulation
 
 The analytic sample size treats the predictors as fixed. A continuous moderator
@@ -1015,8 +864,7 @@ estimated. The population is constructed as specified, with $\beta_M$ chosen so
 that $\mathrm{cor}(M, Y) = .2$, and the model `lm(y ~ A*B*M)` is fitted to each
 generated sample:
 
-
-``` r
+```{r threeway-mc}
 simulate_threeway_power <- function(N, gamma, rho = .2, reps = 25, seed = 113) {
   sigma_e <- sqrt(2)
   varY_less_M <- bA^2*.25 + bB^2*.25 + bAB^2*.0625 + gamma^2*.0625 + sigma_e^2
@@ -1039,20 +887,16 @@ data.frame(row.names = names(ref$threeway),
            `reps = 25`    = round(mc_small, 3),
            `reps = 10000` = round(ref$threeway, 3),
            check.names = FALSE)
-#>           reps = 25 reps = 10000
-#> three_way      0.88        0.791
-#> two_way        1.00        1.000
 ```
 
 At the analytic sample size the simulated power for the three-way interaction
-is 0.79, slightly below $.80$. This
+is `r round(ref$threeway[["three_way"]], 2)`, slightly below $.80$. This
 reflects the difference between fixed and random predictors noted in the
 `ss_power_reg_coef` documentation, under which random predictors require a
 somewhat larger sample for the same power. Sweeping across sample sizes locates
 the value that achieves $.80$ in the random-predictor case:
 
-
-``` r
+```{r threeway-mc-curve, fig.height = 4.0, eval = has_ggplot2}
 N_try   <- ref$N_try
 mc_by_N <- sapply(N_try, function(NN)
   simulate_threeway_power(NN, gamma = gamma_small)["three_way"])
@@ -1080,21 +924,15 @@ ggplot(tw_plot, aes(N, power, color = reps)) +
   ylim(0.72, 0.90)
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-threeway-mc-curve-1.png" alt="plot of chunk threeway-mc-curve"  />
-<p class="caption">plot of chunk threeway-mc-curve</p>
-</div>
-
-Power of $.80$ is reached near $N =$ 420, above the fixed-predictor value
-of 395. A design required to detect both the two-way interaction and this
+Power of $.80$ is reached near $N =$ `r N_mc80`, above the fixed-predictor value
+of `r N_3way`. A design required to detect both the two-way interaction and this
 small three-way interaction is governed entirely by the latter, so
-$N \approx$ 420 satisfies both; the two-way interaction, requiring only
-80, is then powered well beyond $.80$.
+$N \approx$ `r N_mc80` satisfies both; the two-way interaction, requiring only
+`r N_2way`, is then powered well beyond $.80$.
 
 # Summary
 
-
-``` r
+```{r final-ladder, fig.height = 3.8, eval = has_ggplot2}
 ladder <- data.frame(
   plan = c("Each targeted effect alone (.80)",
            "Composite: all three jointly (.80)",
@@ -1113,18 +951,13 @@ ggplot(ladder, aes(N, plan, fill = N)) +
   xlim(0, max(ladder$N) * 1.18)
 ```
 
-<div class="figure" style="text-align: center">
-<img src="composite_power_ancova-fig-final-ladder-1.png" alt="plot of chunk final-ladder"  />
-<p class="caption">plot of chunk final-ladder</p>
-</div>
-
 | Planning objective | Function | Method | Total $N$ |
 |---|---|---|:--:|
-| Each targeted effect alone at $.80$ | `ss_power_contrast` | analytic | 108 |
-| Composite power of $.80$ for all three | simulation | Monte Carlo | 128 |
+| Each targeted effect alone at $.80$ | `ss_power_contrast` | analytic | `r 4*n_design` |
+| Composite power of $.80$ for all three | simulation | Monte Carlo | `r 4*n_comp80` |
 | Two-way interaction with $\rho = .2$ covariate | `ss_power_factorial_ancova` | analytic | 80 |
-| Two-way interaction in the moderated model | `ss_power_reg_coef` | analytic | 80 |
-| Small three-way interaction ($\gamma = 0.8$, $f^{2} = .02$) | `ss_power_reg_coef` and simulation | both | 395 and 420 |
+| Two-way interaction in the moderated model | `ss_power_reg_coef` | analytic | `r N_2way` |
+| Small three-way interaction ($\gamma = 0.8$, $f^{2} = .02$) | `ss_power_reg_coef` and simulation | both | `r N_3way` and `r N_mc80` |
 
 Four conclusions follow from this analysis.
 

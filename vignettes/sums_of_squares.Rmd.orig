@@ -1,7 +1,7 @@
 ---
 title: "Sums of Squares in Nonorthogonal Designs"
 author: "Ken Kelley"
-date: "September 2026"
+date: "`r format(Sys.Date(), '%B %Y')`"
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -12,7 +12,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+library(DMAR)
+has_car <- requireNamespace("car", quietly = TRUE)
+```
 
 ## Why the Question Arises
 
@@ -93,8 +100,7 @@ the terms in \(Z\):
 The types diverge only for nonorthogonal data, so the demonstration needs an
 unbalanced design. The cells below have deliberately unequal sizes.
 
-
-``` r
+```{r unbalanced-data}
 set.seed(113)
 cell <- function(a, b, n, mu) data.frame(A = a, B = b, y = rnorm(n, mu, 1))
 d <- rbind(
@@ -104,10 +110,6 @@ d <- rbind(
 d$A <- factor(d$A)
 d$B <- factor(d$B)
 table(d$A, d$B)
-#>     
-#>      b1 b2 b3
-#>   a1  8  5 12
-#>   a2  6 11  4
 ```
 
 DMAR's `factorial_anova()` computes all three types by model comparison in base
@@ -115,73 +117,18 @@ R, choosing the type through an argument. It reports each effect's sum of
 squares, its \emph{F} test, and partial \eqn{\eta^2} and partial \eqn{\omega^2}
 with confidence intervals, and it notes the type beneath the table.
 
-
-``` r
+```{r factorial-anova}
 factorial_anova(y ~ A * B, data = d, ss_type = 1)   # sequential
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-```
-
-|effect    |SS   |df |F_value |p_value |eta_squared_partial |eta_squared_partial_lower |eta_squared_partial_upper |omega_squared_partial |omega_squared_partial_lower |omega_squared_partial_upper |
-|:---------|:----|:--|:-------|:-------|:-------------------|:-------------------------|:-------------------------|:---------------------|:---------------------------|:---------------------------|
-|A         |8.74 |1  |7.55    |0.0090  |0.159               |0.00971                   |0.332                     |0.125                 |0.00971                     |0.332                       |
-|B         |14.2 |2  |6.11    |0.0048  |0.234               |0.0259                    |0.394                     |0.182                 |0.0259                      |0.394                       |
-|A:B       |1.47 |2  |0.636   |0.5345  |0.0308              |0                         |0.146                     |0                     |0                           |0.146                       |
-|Residuals |46.3 |40 |NA      |NA      |NA                  |NA                        |NA                        |NA                    |NA                          |NA                          |
-
-Sum of squares: Type I
-Confidence level: 95%
-
-``` r
 factorial_anova(y ~ A * B, data = d, ss_type = 2)
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-```
-
-|effect    |SS   |df |F_value |p_value |eta_squared_partial |eta_squared_partial_lower |eta_squared_partial_upper |omega_squared_partial |omega_squared_partial_lower |omega_squared_partial_upper |
-|:---------|:----|:--|:-------|:-------|:-------------------|:-------------------------|:-------------------------|:---------------------|:---------------------------|:---------------------------|
-|A         |7.4  |1  |6.39    |0.0155  |0.138               |0.0041                    |0.31                      |0.105                 |0.0041                      |0.31                        |
-|B         |14.2 |2  |6.11    |0.0048  |0.234               |0.0259                    |0.394                     |0.182                 |0.0259                      |0.394                       |
-|A:B       |1.47 |2  |0.636   |0.5345  |0.0308              |0                         |0.146                     |0                     |0                           |0.146                       |
-|Residuals |46.3 |40 |NA      |NA      |NA                  |NA                        |NA                        |NA                    |NA                          |NA                          |
-
-Sum of squares: Type II
-Confidence level: 95%
-
-``` r
 factorial_anova(y ~ A * B, data = d, ss_type = 3)
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
 ```
-
-|effect    |SS   |df |F_value |p_value |eta_squared_partial |eta_squared_partial_lower |eta_squared_partial_upper |omega_squared_partial |omega_squared_partial_lower |omega_squared_partial_upper |
-|:---------|:----|:--|:-------|:-------|:-------------------|:-------------------------|:-------------------------|:---------------------|:---------------------------|:---------------------------|
-|A         |7.64 |1  |6.6     |0.0141  |0.142               |0.00504                   |0.314                     |0.108                 |0.00504                     |0.314                       |
-|B         |14.7 |2  |6.34    |0.0041  |0.241               |0.0292                    |0.4                       |0.188                 |0.0292                      |0.4                         |
-|A:B       |1.47 |2  |0.636   |0.5345  |0.0308              |0                         |0.146                     |0                     |0                           |0.146                       |
-|Residuals |46.3 |40 |NA      |NA      |NA                  |NA                        |NA                        |NA                    |NA                          |NA                          |
-
-Sum of squares: Type III
-Confidence level: 95%
 
 Type I is sequential, so listing the factors in the other order changes it,
 while Type II and Type III do not depend on the order:
 
-
-``` r
+```{r type1-order}
 factorial_anova(y ~ A * B, data = d, ss_type = 1)$SS[1:3]  # A entered first
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1]  8.743295 14.159731  1.474433
 factorial_anova(y ~ B * A, data = d, ss_type = 1)$SS[1:3]  # B first: different
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1] 15.500188  7.402838  1.474433
 ```
 
 The main-effect sums of squares differ across the three types here precisely
@@ -194,17 +141,11 @@ check.
 sum-to-zero contrasts, which `factorial_anova()` applies internally and which
 `car::Anova()` needs on the refit model:
 
-
-``` r
+```{r type23-car, eval = has_car}
 fit_sum <- lm(y ~ A * B, data = d,
               contrasts = list(A = contr.sum, B = contr.sum))
 car::Anova(fit_sum, type = 3)[c("A", "B", "A:B"), "Sum Sq"]
-#> [1]  7.641891 14.692503  1.474433
 factorial_anova(y ~ A * B, data = d, ss_type = 3)$SS[1:3]   # matches
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1]  7.641891 14.692503  1.474433
 ```
 
 ## How `factorial_anova()` Computes the Types
@@ -240,8 +181,7 @@ design, and onward to any number of factors and any interaction order. The
 values agree with `car::Anova()` from one-way through three-way unbalanced
 designs, which the package tests verify. A three-way check:
 
-
-``` r
+```{r generality, eval = has_car}
 set.seed(113)
 g <- expand.grid(A = factor(1:2), B = factor(1:2), C = factor(1:3))
 g <- g[rep(seq_len(nrow(g)), c(6, 4, 5, 7, 3, 8, 6, 5, 4, 7, 5, 6)), ]  # unbalanced
@@ -251,22 +191,14 @@ gs <- lm(y ~ A * B * C, data = g,
 
 effs <- c("A", "B", "C", "A:B", "A:C", "B:C", "A:B:C")
 factorial_anova(y ~ A * B * C, data = g, ss_type = 3)$SS[1:7]  # DMAR
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 10 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1] 13.71618522  8.32810994  1.06755478  0.06162124  0.32821820  2.47361380
-#> [7]  1.02265698
 car::Anova(gs, type = 3)[effs, "Sum Sq"]                        # matches
-#> [1] 13.71618522  8.32810994  1.06755478  0.06162124  0.32821820  2.47361380
-#> [7]  1.02265698
 ```
 
 ## Balanced Data: The Types Coincide
 
 With equal cell sizes the effects are orthogonal and the question disappears.
 
-
-``` r
+```{r balanced}
 set.seed(113)
 db <- do.call(rbind, lapply(c("a1", "a2"), function(a)
   do.call(rbind, lapply(c("b1", "b2", "b3"), function(b)
@@ -274,20 +206,8 @@ db <- do.call(rbind, lapply(c("a1", "a2"), function(a)
 db$A <- factor(db$A); db$B <- factor(db$B)
 
 factorial_anova(y ~ A * B, data = db, ss_type = 1)$SS[1:3]   # Type I
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1] 0.06622407 2.54191761 1.35217335
 factorial_anova(y ~ A * B, data = db, ss_type = 2)$SS[1:3]   # Type II
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1] 0.06622407 2.54191761 1.35217335
 factorial_anova(y ~ A * B, data = db, ss_type = 3)$SS[1:3]   # Type III
-#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the
-#> effect size confidence intervals; the affected lower limits were clamped to 0.
-#> See ?ci_nc_F for the meaning of the clamp.
-#> [1] 0.06622407 2.54191761 1.35217335
 ```
 
 The three sets of sums of squares match to numerical precision. This is the
@@ -301,38 +221,24 @@ covariate-adjusted treatment test is already a choice of adjustment. DMAR's
 `ancova()` reports the covariate-adjusted (Type III, equivalently Type II for a
 single grouping factor) effect, and records the sum-of-squares type it used.
 
-
-``` r
+```{r ancova}
 res <- ancova(outcome = "iq_8", treatment = "treatment",
               covariates = "iq_pre", data = pygmalion)
 res[res$term %in% c("F_value", "df_1", "df_2", "p_value",
                     "sum_of_squares_type"), ]
 ```
 
-|term                |value  |
-|:-------------------|:------|
-|F_value             |5.38   |
-|df_1                |1      |
-|df_2                |307    |
-|p_value             |0.0210 |
-|sum_of_squares_type |3      |
-
-Confidence level: 95%
-
 The adjusted \emph{F} matches what `car::Anova()` returns at Type III (and Type
 II, which coincides here because there is a single factor).
 
-
-``` r
+```{r ancova-car, eval = has_car}
 dd <- pygmalion[stats::complete.cases(
   pygmalion[, c("iq_8", "treatment", "iq_pre")]), ]
 dd$treatment <- factor(dd$treatment)
 fit_anc <- lm(iq_8 ~ treatment + iq_pre, data = dd,
               contrasts = list(treatment = contr.sum))
 car::Anova(fit_anc, type = 3)["treatment", "F value"]
-#> [1] 5.382682
 res$value[res$term == "F_value"]
-#> [1] 5.382682
 ```
 
 For a one-way ANCOVA there is nothing to toggle: the covariate-adjusted test is

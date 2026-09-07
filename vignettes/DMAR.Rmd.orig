@@ -1,7 +1,7 @@
 ---
 title: "Introduction to DMAR"
 author: "Ken Kelley"
-date: "September 2026"
+date: "`r format(Sys.Date(), '%B %Y')`"
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -12,7 +12,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width  = 7,
+  fig.height = 4.5
+)
+library(DMAR)
+```
 
 ## What Is DMAR?
 
@@ -126,27 +134,15 @@ matches the question you are trying to answer.
 
 Use the `ci_*` family.
 
-
-``` r
+```{r}
 # Confidence interval for omega squared (proportion of variance accounted
 # for) from a one-way ANOVA with F = 11.221 on (4, 50) df, total N = 55.
 ci_omega_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55)
-```
-
-|effect  |omega_squared |lower_limit |upper_limit |F_value |df_effect |df_error |N  |
-|:-------|:-------------|:-----------|:-----------|:-------|:---------|:--------|:--|
-|overall |0.426         |0.226       |0.587       |11.2    |4         |50       |55 |
-
-``` r
 
 # More naturally, from a fitted model:
 fit <- aov(weight ~ group, data = PlantGrowth)
 ci_omega_squared(fit)
 ```
-
-|effect |omega_squared |lower_limit |upper_limit |F_value |df_effect |df_error |N  |
-|:------|:-------------|:-----------|:-----------|:-------|:---------|:--------|:--|
-|group  |0.204         |0.0099      |0.464       |4.85    |2         |27       |30 |
 
 The output is a tidy `data.frame`: an effect label, the point estimate
 (`omega_squared`), the lower and upper limits of the CI, and the inputs
@@ -168,8 +164,7 @@ others.
 Use `ss_power_*` for sufficient power, or `ss_aipe_*` for sufficient
 precision. The same effect can be approached from either angle.
 
-
-``` r
+```{r}
 # Power-based: per-group n needed for 90% power to detect a contrast among
 # 4 groups with population means (90, 92, 88, 81) and within-group
 # variance 144. The contrast compares the average of the first three
@@ -182,28 +177,11 @@ ss_power_contrast(
 )
 ```
 
-|term                  |value |
-|:---------------------|:-----|
-|necessary_n_per_group |26    |
-|total_N               |104   |
-|actual_power          |0.907 |
-|noncentral_t_parm     |3.31  |
-|effect_size_f         |0.325 |
-
-
-``` r
+```{r}
 # AIPE-based: n needed so a 95% CI around a standardized mean difference
 # (delta) of 0.50 is no wider than 0.30 units (a tight interval).
 ss_aipe_smd(delta = 0.50, conf_level = 0.95, width = 0.30)
 ```
-
-|term                  |value |
-|:---------------------|:-----|
-|necessary_n_per_group |353   |
-|supposed_smd          |0.5   |
-|width                 |0.3   |
-
-Confidence level: 95%
 
 The `ss_power_*` family in v1.0.0 spans most of the standard designs
 covered in MDK: one-way ANOVA (`ss_power_one_way_anova`), factorial ANOVA
@@ -223,20 +201,11 @@ correspondingly named effects.
 Use `contrast_test()` for arbitrary contrasts in a one-way ANOVA, with
 optional multiple-comparison adjustment.
 
-
-``` r
+```{r}
 fit <- aov(weight ~ group, data = PlantGrowth)
 # All pairwise comparisons, Tukey-protected family-wise error rate:
 contrast_test(fit, contrasts = "pairwise", adjust = "tukey")
 ```
-
-|contrast    |estimate |se    |t     |df |p_value |p_adjusted |ci_lower |ci_upper |
-|:-----------|:--------|:-----|:-----|:--|:-------|:----------|:--------|:--------|
-|trt1 - ctrl |-0.371   |0.279 |-1.33 |27 |0.1944  |0.3909     |-1.06    |0.32     |
-|trt2 - ctrl |0.494    |0.279 |1.77  |27 |0.0877  |0.1980     |-0.197   |1.19     |
-|trt2 - trt1 |0.865    |0.279 |3.1   |27 |0.0045  |0.0120     |0.174    |1.56     |
-
-Confidence level: 95%
 
 For the bare critical value of a particular procedure, see the `cv_*`
 family: `cv_t()`, `cv_tukey_hsd()`, `cv_scheffe()`, `cv_smm()` (the
@@ -254,21 +223,13 @@ uncorrected within-subjects *F* test can be substantially anticonservative
 when the sphericity assumption fails, and `anova_within()` puts the
 diagnostic and the correction in one place.
 
-
-``` r
+```{r}
 if (requireNamespace("nlme", quietly = TRUE)) {
   res <- anova_within(nlme::Orthodont,
                       id = "Subject", time = "age", outcome = "distance")
   res
 }
 ```
-
-|adjustment         |F_value |df_1 |df_2 |p_value  |epsilon |
-|:------------------|:-------|:----|:----|:--------|:-------|
-|none               |38      |3    |78   |< 0.0001 |NA      |
-|Greenhouse-Geisser |38      |2.63 |68.4 |< 0.0001 |0.877   |
-|Huynh-Feldt        |38      |2.95 |76.8 |< 0.0001 |0.984   |
-|lower_bound        |38      |1    |26   |< 0.0001 |0.333   |
 
 For the underlying components separately, see `mauchly_test()` and
 `epsilon_corrections()`. For visualizing individual subject trajectories,
@@ -278,25 +239,8 @@ see `plot_trajectories()` and `plot_trajectories_fitted()`.
 
 `descriptives()` returns a tidy summary suitable for screening:
 
-
-``` r
+```{r}
 descriptives(attitude)$descriptives
-#>     variable    type  n n_missing prop_missing     mean median        sd min
-#> 1     rating numeric 30         0            0 64.63333   65.5 12.172562  40
-#> 2 complaints numeric 30         0            0 66.60000   65.0 13.314757  37
-#> 3 privileges numeric 30         0            0 53.13333   51.5 12.235430  30
-#> 4   learning numeric 30         0            0 56.36667   56.5 11.737013  34
-#> 5     raises numeric 30         0            0 64.63333   63.5 10.397226  43
-#> 6   critical numeric 30         0            0 74.76667   77.5  9.894908  49
-#> 7    advance numeric 30         0            0 42.93333   41.0 10.288706  25
-#>   max   q25   q75   skewness    kurtosis
-#> 1  85 58.75 71.75 -0.3967148 -0.49460977
-#> 2  90 58.50 77.00 -0.2387632 -0.38172518
-#> 3  83 45.00 62.50  0.4202101 -0.04219127
-#> 4  75 47.00 66.75 -0.0598894 -1.07638294
-#> 5  88 58.25 71.00  0.2189518 -0.28201359
-#> 6  92 69.25 80.00 -0.9596072  0.69175815
-#> 7  72 35.00 47.75  0.9425594  1.07314413
 ```
 
 Adding `correlations = TRUE` appends a Pearson correlation matrix. For a
@@ -304,49 +248,8 @@ publication-ready correlation table with *p*-values, confidence intervals,
 and significance stars (and, optionally, HTML or LaTeX export), use
 `correlations_test()`:
 
-
-``` r
+```{r}
 correlations_test(attitude, stars = TRUE)
-#> Correlations (Pearson, 95% CI)
-#> 
-#>               rating        complaints    privileges    learning      raises        critical      advance       
-#> ----------------------------------------------------------------------------------------------------------------
-#> rating        -                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
-#>                                                                                                                 
-#> 
-#> complaints    .83***        -                                                                                   
-#>               p < .0001                                                                                         
-#>               [.66, .91]                                                                                        
-#>               N = 30                                                                                            
-#> 
-#> privileges    .43*          .56**         -                                                                     
-#>               p = .0189     p = .0013                                                                           
-#>               [.08, .68]    [.25, .76]                                                                          
-#>               N = 30        N = 30                                                                              
-#> 
-#> learning      .62***        .60***        .49**         -                                                       
-#>               p = .0002     p = .0005     p = .0056                                                             
-#>               [.34, .80]    [.30, .79]    [.16, .72]                                                            
-#>               N = 30        N = 30        N = 30                                                                
-#> 
-#> raises        .59***        .67***        .45*          .64***        -                                         
-#>               p = .0006     p < .0001     p = .0136     p = .0001                                               
-#>               [.29, .78]    [.41, .83]    [.10, .69]    [.36, .81]                                              
-#>               N = 30        N = 30        N = 30        N = 30                                                  
-#> 
-#> critical      .16           .19           .15           .12           .38*          -                           
-#>               p = .4091     p = .3205     p = .4375     p = .5417     p = .0401                                 
-#>               [-.22, .49]   [-.19, .51]   [-.22, .48]   [-.25, .46]   [.02, .65]                                
-#>               N = 30        N = 30        N = 30        N = 30        N = 30                                    
-#> 
-#> advance       .16           .22           .34           .53**         .57***        .28           -             
-#>               p = .4132     p = .2328     p = .0633     p = .0025     p = .0009     p = .1292                   
-#>               [-.22, .49]   [-.15, .54]   [-.02, .63]   [.21, .75]    [.27, .77]    [-.09, .58]                 
-#>               N = 30        N = 30        N = 30        N = 30        N = 30        N = 30                      
-#> 
-#> Note. * p < .05, ** p < .01, *** p < .001.
 ```
 
 For interrater agreement, use `cohen_kappa()` (two raters), `fleiss_kappa()`
@@ -377,8 +280,7 @@ covariance matrix, `Lambda` for a factor-loadings matrix, `F_value` for
 an *F* statistic. Every other argument is lowercase, with the result
 that examples read consistently regardless of discipline:
 
-
-``` r
+```{r show-args, eval = FALSE}
 ci_R2(R2 = 0.25, N = 100, p = 5, random_predictors = TRUE)
 ss_power_reg_coef(rho2_Y_X = 0.78, rho2_Y_X_without_j = 0.74,
                   p = 5, desired_power = 0.85)

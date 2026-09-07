@@ -1,7 +1,7 @@
 ---
 title: "Visualizing Effect Sizes and Distributions With DMAR"
 author: "Ken Kelley"
-date: "2026-09-07"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Visualizing Effect Sizes and Distributions With DMAR}
@@ -9,7 +9,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 7,
+  fig.height = 4.5,
+  fig.align = "center",
+  dpi       = 150
+)
+has_ggplot2 <- requireNamespace("ggplot2", quietly = TRUE)
+has_ggrain  <- requireNamespace("ggrain",  quietly = TRUE)
+```
 
 ## Introduction
 
@@ -62,13 +73,11 @@ a deliberate editorial decision rather than an oversight.
 
 ## Setup
 
-
-``` r
+```{r load-packages, message = FALSE}
 library(DMAR)
 ```
 
-
-``` r
+```{r load-ggplot2, eval = has_ggplot2, message = FALSE}
 library(ggplot2)
 ```
 
@@ -93,34 +102,17 @@ measured before the manipulation and at two follow-ups.
 | `iq_8`      | Total IQ at the end-of-study follow-up                       |
 | `iq_gain`   | `iq_8 - iq_pre`                                              |
 
-
-``` r
+```{r load-data}
 data(pygmalion)
 
 table(pygmalion$treatment)
-#> 
-#> Control Bloomer 
-#>     246      64
 
 knitr::kable(head(pygmalion))
 ```
 
-
-
-| grade|treatment | iq_pre| iq_4| iq_8| iq_gain|
-|-----:|:---------|------:|----:|----:|-------:|
-|     1|Control   |     45|   58|   76|      31|
-|     1|Control   |     75|   62|   85|      10|
-|     1|Control   |     61|   82|   87|      26|
-|     1|Control   |     84|   86|   86|       2|
-|     1|Control   |     65|   76|   78|      13|
-|     1|Control   |     72|   94|   94|      22|
-
-
-
 Two features of the design shape everything that follows. The arms are
-very unequal, 64 bloomers against
-246 controls, so precision is
+very unequal, `r sum(pygmalion$treatment == "Bloomer")` bloomers against
+`r sum(pygmalion$treatment == "Control")` controls, so precision is
 governed by the smaller arm. And because assignment was random, `iq_pre`
 carries no treatment effect to find; the difference it shows is the
 chance variation a randomized experiment leaves behind, which makes it a
@@ -139,24 +131,12 @@ screening and psychometric work. It reports per-variable sample size,
 missingness, central tendency, spread, skewness, and excess kurtosis, all
 in a single tidy data frame.
 
-
-``` r
+```{r descriptives}
 desc <- descriptives(
   pygmalion[, c("iq_pre", "iq_4", "iq_8", "iq_gain")]
 )
 knitr::kable(desc$descriptives, digits = 3)
 ```
-
-
-
-|variable |type    |   n| n_missing| prop_missing|    mean| median|     sd| min| max|   q25| q75| skewness| kurtosis|
-|:--------|:-------|---:|---------:|------------:|-------:|------:|------:|---:|---:|-----:|---:|--------:|--------:|
-|iq_pre   |integer | 310|         0|            0|  98.465|     98| 18.679|  39| 158| 86.00| 109|    0.126|    0.602|
-|iq_4     |integer | 310|         0|            0| 101.677|    101| 17.823|  58| 157| 89.25| 112|    0.369|    0.411|
-|iq_8     |integer | 310|         0|            0| 107.897|    105| 20.445|  63| 202| 93.00| 120|    0.731|    1.209|
-|iq_gain  |integer | 310|         0|            0|   9.432|      9| 13.757| -20|  69|  1.00|  17|    0.796|    1.767|
-
-
 
 Skewness and kurtosis values close to zero suggest approximate normality.
 As a rough guideline, $|\text{skewness}| > 2$ or $|\text{kurtosis}| > 7$
@@ -165,25 +145,13 @@ may warrant concern for normal-theory methods.
 Adding `correlations = TRUE` appends a correlation matrix, which is handy
 during scale development or when checking multicollinearity.
 
-
-``` r
+```{r descriptives-cor}
 desc_cor <- descriptives(
   pygmalion[, c("iq_pre", "iq_4", "iq_8", "iq_gain")],
   correlations = TRUE
 )
 knitr::kable(desc_cor$correlations, digits = 3)
 ```
-
-
-
-|        | iq_pre|  iq_4|  iq_8| iq_gain|
-|:-------|------:|-----:|-----:|-------:|
-|iq_pre  |  1.000| 0.720| 0.756|  -0.234|
-|iq_4    |  0.720| 1.000| 0.819|   0.240|
-|iq_8    |  0.756| 0.819| 1.000|   0.459|
-|iq_gain | -0.234| 0.240| 0.459|   1.000|
-
-
 
 The pretest correlates strongly with both follow-ups, which is why the
 pretest earns its place as a covariate, and it correlates negatively
@@ -199,8 +167,7 @@ distributional shape, individual observations, and summary statistics at once.
 The **ggrain** package (Patil, 2023) makes them easy to produce with a
 single `geom_rain()` call.
 
-
-``` r
+```{r raincloud-gain, eval = has_ggrain, fig.height = 5, fig.cap = "Raincloud plot of total IQ change from pretest to the end-of-study follow-up, by treatment arm, combining a half-violin density, jittered raw scores, and a boxplot summary (Allen et al., 2019)."}
 library(ggrain)
 
 # Source group colors from base R's colorblind-safe Okabe-Ito palette, the
@@ -224,13 +191,7 @@ ggplot(pygmalion, aes(x = treatment, y = iq_gain, fill = treatment)) +
         plot.title = element_text(face = "bold"))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-raincloud-gain-1.png" alt="Raincloud plot of total IQ change from pretest to the end-of-study follow-up, by treatment arm, combining a half-violin density, jittered raw scores, and a boxplot summary (Allen et al., 2019)."  />
-<p class="caption">Raincloud plot of total IQ change from pretest to the end-of-study follow-up, by treatment arm, combining a half-violin density, jittered raw scores, and a boxplot summary (Allen et al., 2019).</p>
-</div>
-
-
-``` r
+```{r raincloud-post, eval = has_ggrain, fig.height = 5, fig.cap = "Raincloud plot of total IQ at the end-of-study follow-up, by treatment arm. The two distributions overlap heavily, and the bloomer arm holds far fewer pupils, which the density curve smooths over and the jittered points do not."}
 ggplot(pygmalion, aes(x = treatment, y = iq_8, fill = treatment)) +
   geom_rain(alpha = 0.5) +
   scale_fill_manual(values = arm_fills) +
@@ -245,12 +206,10 @@ ggplot(pygmalion, aes(x = treatment, y = iq_8, fill = treatment)) +
         plot.title = element_text(face = "bold"))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-raincloud-post-1.png" alt="Raincloud plot of total IQ at the end-of-study follow-up, by treatment arm. The two distributions overlap heavily, and the bloomer arm holds far fewer pupils, which the density curve smooths over and the jittered points do not."  />
-<p class="caption">Raincloud plot of total IQ at the end-of-study follow-up, by treatment arm. The two distributions overlap heavily, and the bloomer arm holds far fewer pupils, which the density curve smooths over and the jittered points do not.</p>
-</div>
-
-
+```{r raincloud-note, eval = !has_ggrain, echo = FALSE, results = "asis"}
+cat("> **Note:** Install the **ggrain** package to see the raincloud plots:\n>",
+    "`install.packages(\"ggrain\")`\n")
+```
 
 The raincloud plots give an immediate qualitative impression of group
 differences. The next sections quantify those differences with
@@ -265,51 +224,31 @@ different measurement scales.
 DMAR's `smd()` computes the biased (Cohen) or unbiased (Hedges)
 estimate; `ci_smd()` wraps it in a noncentral $t$-based confidence interval.
 
-
-``` r
+```{r smd-gain}
 # Split the data by treatment arm.
 ctrl <- pygmalion$iq_gain[pygmalion$treatment == "Control"]
 bloom <- pygmalion$iq_gain[pygmalion$treatment == "Bloomer"]
 
 # Point estimate (Hedges' unbiased g).
 smd(group_1 = bloom, group_2 = ctrl, unbiased = TRUE)
-```
-
-|term |value |
-|:----|:-----|
-|smd  |0.272 |
-
-``` r
 
 # 95% confidence interval.
 d_hat <- smd(group_1 = bloom, group_2 = ctrl)$value
 d_ci  <- ci_smd(smd = d_hat, n_1 = length(bloom), n_2 = length(ctrl))
 d_ci
-```
-
-|term        |value    |
-|:-----------|:--------|
-|lower_limit |-0.00388 |
-|smd         |0.272    |
-|upper_limit |0.548    |
-
-Confidence level: 95%
-
-``` r
 
 # The results-section sentence, written by the package so the numbers
 # can never drift from the table they came from.
 results_sentence(d_ci, label = "the standardized mean difference")
-#> [1] "the standardized mean difference = 0.27, 95% CI [-0.00, 0.55]"
 ```
 
 Reported as one would in a results section, pupils in the bloomer arm
 gained more total IQ than controls, but not by an amount this study
 pins down:
-the standardized mean difference = 0.27, 95% CI [-0.00, 0.55].
+`r results_sentence(d_ci, label = "the standardized mean difference")`.
 The interval includes zero, so the data are consistent with no effect,
 which matches the omnibus test below
-($p = 0.0533$).
+($p = `r format_p(anova(lm(iq_gain ~ treatment, data = pygmalion))[1, "Pr(>F)"])`$).
 The point estimate alone would overstate what the study established; the
 interval is what makes the uncertainty visible.
 
@@ -317,24 +256,15 @@ The pretest is the yardstick for reading that interval. Random
 assignment guarantees no treatment effect on `iq_pre`, yet the two arms
 differ there too:
 
-
-``` r
+```{r smd-pretest}
 d_pre <- smd(group_1 = pygmalion$iq_pre[pygmalion$treatment == "Bloomer"],
              group_2 = pygmalion$iq_pre[pygmalion$treatment == "Control"])$value
 ci_smd(smd = d_pre, n_1 = sum(pygmalion$treatment == "Bloomer"),
        n_2 = sum(pygmalion$treatment == "Control"))
 ```
 
-|term        |value   |
-|:-----------|:-------|
-|lower_limit |-0.0916 |
-|smd         |0.184   |
-|upper_limit |0.459   |
-
-Confidence level: 95%
-
 A standardized difference of
-0.184 on a measure taken before anything happened is a
+`r round(d_pre, 3)` on a measure taken before anything happened is a
 reminder of how much of an observed difference this design can generate
 on its own. That is the number against which the follow-up differences
 have to be read.
@@ -346,8 +276,7 @@ The overlap makes the practical meaning of the effect size immediately
 visible. A confidence interval and the per-group sample sizes are displayed
 by default.
 
-
-``` r
+```{r plot-smd, eval = has_ggplot2, fig.height = 4, fig.cap = "Standardized mean difference in total IQ change between the bloomer and control arms, with 95\\% confidence interval and per-arm sample sizes, displayed as two unit-variance normal curves separated by the observed \\(d\\)."}
 plot_smd(
   group_1      = bloom,
   group_2      = ctrl,
@@ -356,27 +285,16 @@ plot_smd(
 )
 ```
 
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-plot-smd-1.png" alt="Standardized mean difference in total IQ change between the bloomer and control arms, with 95\% confidence interval and per-arm sample sizes, displayed as two unit-variance normal curves separated by the observed \(d\)."  />
-<p class="caption">Standardized mean difference in total IQ change between the bloomer and control arms, with 95\% confidence interval and per-arm sample sizes, displayed as two unit-variance normal curves separated by the observed \(d\).</p>
-</div>
-
 ### Visual Representation of $d = 0.50$
 
 `plot_smd()` also accepts a value of $d$ and the sample sizes directly,
 which is how it is used to calibrate intuition about a magnitude rather
 than to display a particular result.
 
-
-``` r
+```{r plot-smd-known, eval = has_ggplot2, fig.height = 4, fig.cap = "Two unit-variance normal distributions separated by \\(d = 0.50\\). The separation is real and the overlap is still substantial."}
 plot_smd(smd = 0.50, n_1 = 30, n_2 = 30,
          title = expression(paste("Visual Representation of ", italic(d), " = 0.50")))
 ```
-
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-plot-smd-known-1.png" alt="Two unit-variance normal distributions separated by \(d = 0.50\). The separation is real and the overlap is still substantial."  />
-<p class="caption">Two unit-variance normal distributions separated by \(d = 0.50\). The separation is real and the overlap is still substantial.</p>
-</div>
 
 The figure is a corrective to the common misconception that a
 significant $p$-value implies distributions that come apart. At
@@ -406,26 +324,15 @@ accounted for by the fixed effect, correcting for the upward bias
 of $\eta^2$ (Olejnik & Algina, 2003). DMAR's `ci_omega_squared()` accepts
 either raw ANOVA summary values or a fitted `aov()` object.
 
-
-``` r
+```{r anova-fit}
 fit <- aov(iq_gain ~ treatment, data = pygmalion)
 print_anova(summary(fit)[[1]])
-#>              Df     Sum Sq  Mean Sq  F value Pr(>F)
-#> treatment     1   705.8471 705.8471 3.763069 0.0533
-#> Residuals   308 57772.2303 187.5722       NA   <NA>
 ```
 
-
-``` r
+```{r omega-squared}
 omega_result <- ci_omega_squared(fit)
-#> Warning: The observed F_value is below the alpha_lower critical value of the
-#> central F-distribution, so the lower confidence limit on omega squared is 0.
 omega_result
 ```
-
-|effect    |omega_squared |lower_limit |upper_limit |F_value |df_effect |df_error |N   |
-|:---------|:-------------|:-----------|:-----------|:-------|:---------|:--------|:---|
-|treatment |0.00883       |0           |0.0469      |3.76    |1         |308      |310 |
 
 ### Visualizing With `plot_ci()`
 
@@ -434,18 +341,12 @@ DMAR confidence interval output. When it receives output from
 `ci_omega_squared()`, it automatically extracts effect names, point
 estimates, confidence bounds, and sample sizes.
 
-
-``` r
+```{r plot-ci-omega, eval = has_ggplot2, fig.height = 3, fig.cap = "Forest-plot display of partial \\(\\omega^2\\) with 95\\% noncentral \\(F\\) confidence interval (Steiger, 2004) for the treatment effect on IQ change."}
 plot_ci(omega_result,
         reference_line = 0,
         xlab  = expression(omega^2),
         title = expression(paste("Partial ", omega^2, " for the Treatment Effect on IQ Change")))
 ```
-
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-plot-ci-omega-1.png" alt="Forest-plot display of partial \(\omega^2\) with 95\% noncentral \(F\) confidence interval (Steiger, 2004) for the treatment effect on IQ change."  />
-<p class="caption">Forest-plot display of partial \(\omega^2\) with 95\% noncentral \(F\) confidence interval (Steiger, 2004) for the treatment effect on IQ change.</p>
-</div>
 
 The estimate is small and its interval reaches the zero line, which is
 the same conclusion the standardized mean difference reached, expressed
@@ -454,34 +355,17 @@ in variance-explained units rather than standard-deviation units.
 For factorial designs, `plot_ci()` produces a multi-row forest plot
 with one row per effect:
 
-
-``` r
+```{r plot-ci-factorial, eval = has_ggplot2, fig.height = 3.5, fig.cap = "Multi-row forest plot of partial \\(\\omega^2\\) for each effect in a 2 by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney, & Kelley, 2027)."}
 # Using the built-in warpbreaks data (2 by 3 factorial).
 fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
 omega_factorial <- ci_omega_squared(fit_factorial)
-#> Warning: The observed F_value is below the alpha_lower critical value of the
-#> central F-distribution, so the lower confidence limit on omega squared is 0.
 omega_factorial
-```
-
-|effect       |omega_squared |lower_limit |upper_limit |F_value |df_effect |df_error |N  |
-|:------------|:-------------|:-----------|:-----------|:-------|:---------|:--------|:--|
-|wool         |0.0487        |0           |0.222       |3.77    |1         |48       |54 |
-|tension      |0.217         |0.0558      |0.411       |8.5     |2         |48       |54 |
-|wool:tension |0.106         |0.00191     |0.298       |4.19    |2         |48       |54 |
-
-``` r
 
 plot_ci(omega_factorial,
         reference_line = 0,
         xlab  = expression(omega^2),
         title = expression(paste("Warpbreaks: Partial ", omega^2, " per Effect")))
 ```
-
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-plot-ci-factorial-1.png" alt="Multi-row forest plot of partial \(\omega^2\) for each effect in a 2 by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney, &amp; Kelley, 2027)."  />
-<p class="caption">Multi-row forest plot of partial \(\omega^2\) for each effect in a 2 by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney, & Kelley, 2027).</p>
-</div>
 
 A multi-row forest plot of this kind is read row by row. Each row gives
 the partial $\omega^2$ for one effect, with the horizontal bar covering
@@ -501,19 +385,9 @@ variance in the outcome is linearly predictable from the set of
 predictors?" `plot_R2()` displays this as a horizontal proportion bar,
 making the magnitude immediately interpretable.
 
-
-``` r
+```{r regression}
 reg_fit <- lm(iq_8 ~ iq_pre + grade, data = pygmalion)
 print_summary(reg_fit)
-#> Coefficients:
-#>               Estimate Std. Error    t value Pr(>|t|)
-#> (Intercept) 25.8966232 4.16995307  6.2102913 < 0.0001
-#> iq_pre       0.8231070 0.04156389 19.8034180 < 0.0001
-#> grade        0.2795918 0.45619178  0.6128821   0.5404
-#> 
-#> Residual standard error: 13.41 on 307 degrees of freedom
-#> Multiple R-squared: 0.5725,  Adjusted R-squared: 0.5697
-#> F-statistic: 205.6 on 2 and 307 DF, p-value: < 0.0001
 ```
 
 The number of predictors is a single quantity here (there are two:
@@ -521,8 +395,7 @@ pretest IQ and grade), and every sibling function names it the
 same way: `p`, whether in `ci_R2()`, `plot_R2()`, or `ci_R()`. We
 store it once and pass it along.
 
-
-``` r
+```{r r2-ci}
 R2_obs <- summary(reg_fit)$r.squared
 N      <- nrow(pygmalion)
 p      <- 2  # number of predictors
@@ -531,38 +404,24 @@ R2_ci <- ci_R2(R2 = R2_obs, N = N, p = p, random_predictors = TRUE)
 R2_ci
 ```
 
-|term        |value |prob_less |prob_greater |
-|:-----------|:-----|:---------|:------------|
-|lower_limit |0.494 |0.025     |0.975        |
-|R2          |0.573 |NA        |NA           |
-|upper_limit |0.639 |0.975     |0.025        |
-
-Confidence level: 95%
-
-
-``` r
+```{r plot-r2, eval = has_ggplot2, fig.height = 3, fig.cap = "Squared multiple correlation \\(R^2\\) with 95\\% confidence interval for the regression of end-of-study IQ on pretest IQ and grade."}
 plot_R2(R2 = R2_obs, N = N, p = p,
         title = expression(paste(italic(R)^2, " for Follow-Up IQ on Pretest IQ and Grade")))
 ```
-
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-plot-r2-1.png" alt="Squared multiple correlation \(R^2\) with 95\% confidence interval for the regression of end-of-study IQ on pretest IQ and grade."  />
-<p class="caption">Squared multiple correlation \(R^2\) with 95\% confidence interval for the regression of end-of-study IQ on pretest IQ and grade.</p>
-</div>
 
 The bar makes the "glass half-full, glass half-empty" nature of $R^2$
 vivid: even an $R^2$ that is statistically significant may leave
 substantial unexplained variance. Here the pretest and grade together
 account for
-57.3% of the variance in follow-up IQ, so most of
+`r round(100 * R2_obs, 1)`% of the variance in follow-up IQ, so most of
 it is accounted for and a substantial share is not.
 
 The accompanying confidence interval makes a second, equally important
 point. The interval runs from
-0.494 to
-0.639, a span of
-0.145
-even at $N = 310$. Intervals on $R^2$ are wide, and they widen quickly
+`r round(R2_ci$value[R2_ci$term == "lower_limit"], 3)` to
+`r round(R2_ci$value[R2_ci$term == "upper_limit"], 3)`, a span of
+`r round(R2_ci$value[R2_ci$term == "upper_limit"] - R2_ci$value[R2_ci$term == "lower_limit"], 3)`
+even at $N = `r N`$. Intervals on $R^2$ are wide, and they widen quickly
 as the sample gets smaller. Treating the point estimate as the answer,
 while ignoring that range, overstates what the data actually show.
 
@@ -571,22 +430,10 @@ while ignoring that range, overstates what the data actually show.
 For the multiple correlation $R$ itself, `ci_R()` provides a
 confidence interval that can be displayed with `plot_ci()`:
 
-
-``` r
+```{r ci-r, eval = has_ggplot2, fig.height = 3, fig.cap = "Confidence interval for the multiple correlation \\(R\\), constructed from the random-predictor sampling distribution of \\(R^2\\) (Lee, 1971), the default for `ci_R()`. The sample size is annotated above the interval, where the width of the interval cannot push it off the panel."}
 R_obs <- sqrt(R2_obs)
 r_ci  <- ci_R(R = R_obs, N = N, p = p)
 r_ci
-```
-
-|term        |value |prob_less |prob_greater |
-|:-----------|:-----|:---------|:------------|
-|lower_limit |0.703 |0.025     |0.975        |
-|R           |0.757 |NA        |NA           |
-|upper_limit |0.799 |0.975     |0.025        |
-
-Confidence level: 95%
-
-``` r
 
 plot_ci(r_ci,
         estimate = R_obs,
@@ -596,19 +443,13 @@ plot_ci(r_ci,
         title = expression(paste("Confidence Interval for the Multiple Correlation ", italic(R))))
 ```
 
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-ci-r-1.png" alt="Confidence interval for the multiple correlation \(R\), constructed from the random-predictor sampling distribution of \(R^2\) (Lee, 1971), the default for `ci_R()`. The sample size is annotated above the interval, where the width of the interval cannot push it off the panel."  />
-<p class="caption">Confidence interval for the multiple correlation \(R\), constructed from the random-predictor sampling distribution of \(R^2\) (Lee, 1971), the default for `ci_R()`. The sample size is annotated above the interval, where the width of the interval cannot push it off the panel.</p>
-</div>
-
 
 ## Combining Multiple Effect Sizes
 
 `plot_ci()` also accepts explicit vectors, so you can build a
 side-by-side comparison of different effects:
 
-
-``` r
+```{r combined-forest, eval = has_ggplot2, fig.height = 4, fig.cap = "Standardized mean differences with 95\\% confidence intervals for the bloomer effect at three points in the study, displayed as a combined forest plot. The sample size is annotated above each interval, so an interval that runs wide cannot push it off the panel."}
 # One standardized mean difference per measurement occasion, all from the
 # same two arms, so the sample size is the same on every row.
 n_b <- sum(pygmalion$treatment == "Bloomer")
@@ -637,11 +478,6 @@ plot_ci(
 )
 ```
 
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-combined-forest-1.png" alt="Standardized mean differences with 95\% confidence intervals for the bloomer effect at three points in the study, displayed as a combined forest plot. The sample size is annotated above each interval, so an interval that runs wide cannot push it off the panel."  />
-<p class="caption">Standardized mean differences with 95\% confidence intervals for the bloomer effect at three points in the study, displayed as a combined forest plot. The sample size is annotated above each interval, so an interval that runs wide cannot push it off the panel.</p>
-</div>
-
 Read down the rows, the display says something the individual estimates
 do not. The pretest row, where random assignment guarantees no effect,
 is not centered on zero. The two follow-up rows sit further from zero
@@ -658,16 +494,10 @@ by default, because these are essential for transparent scientific
 reporting. However, for presentations or simplified displays, both can be
 suppressed:
 
-
-``` r
+```{r plot-smd-minimal, eval = has_ggplot2, fig.height = 3.5, fig.cap = "Minimal plot suitable for a slide or teaching figure, with confidence interval and sample size suppressed via `show_ci = FALSE` and `show_n = FALSE`."}
 plot_smd(smd = 0.50, show_ci = FALSE, show_n = FALSE,
          title = expression(paste("Minimal Display of ", italic(d), " = 0.50")))
 ```
-
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-plot-smd-minimal-1.png" alt="Minimal plot suitable for a slide or teaching figure, with confidence interval and sample size suppressed via `show_ci = FALSE` and `show_n = FALSE`."  />
-<p class="caption">Minimal plot suitable for a slide or teaching figure, with confidence interval and sample size suppressed via `show_ci = FALSE` and `show_n = FALSE`.</p>
-</div>
 
 In a manuscript or report, the recommendation is to leave both
 annotations on. In a slide deck where the same information appears in
@@ -680,8 +510,7 @@ Every DMAR plot function returns a `ggplot2` object, which means the
 output is a fully editable plot rather than a fixed image. Any layer,
 scale, theme, or annotation supported by `ggplot2` can be added on top.
 
-
-``` r
+```{r customize, eval = has_ggplot2, fig.height = 4, fig.cap = "Every DMAR plot returns a `ggplot2` object, so additional `ggplot2` layers can be added with `+`. Here the legend is moved to the top, the title is bold, and the group fills follow a colorblind-friendly palette."}
 plot_smd(smd = 0.65, n_1 = 80, n_2 = 80,
          group_labels = c("Treatment", "Control"),
          title = "Reading Intervention") +
@@ -691,14 +520,7 @@ plot_smd(smd = 0.65, n_1 = 80, n_2 = 80,
   ggplot2::scale_fill_manual(
     values = c("Treatment" = "#1B7837", "Control" = "#762A83"), name = NULL
   )
-#> Scale for fill is already present.
-#> Adding another scale for fill, which will replace the existing scale.
 ```
-
-<div class="figure" style="text-align: center">
-<img src="effect-size-visualization-fig-customize-1.png" alt="Every DMAR plot returns a `ggplot2` object, so additional `ggplot2` layers can be added with `+`. Here the legend is moved to the top, the title is bold, and the group fills follow a colorblind-friendly palette."  />
-<p class="caption">Every DMAR plot returns a `ggplot2` object, so additional `ggplot2` layers can be added with `+`. Here the legend is moved to the top, the title is bold, and the group fills follow a colorblind-friendly palette.</p>
-</div>
 
 The same idiom (add `+` followed by another `ggplot2` layer) works for
 `plot_ci()` and `plot_R2()` as well. Because the underlying object is

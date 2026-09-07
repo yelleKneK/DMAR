@@ -1,7 +1,7 @@
 ---
 title: "Heterogeneity of Regression in the Pygmalion Data"
 author: "Ken Kelley"
-date: "September 2026"
+date: "`r format(Sys.Date(), '%B %Y')`"
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -12,7 +12,16 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 7,
+  fig.height = 4.6,
+  fig.align = "center"
+)
+library(DMAR)
+```
 
 The Pygmalion data are the running heterogeneity-of-regression example
 in Maxwell, Delaney, and Kelley's *Designing Experiments and Analyzing
@@ -40,30 +49,15 @@ manipulation was the expectation planted in the teachers. Intelligence
 was measured before the manipulation (`iq_pre`) and again at follow-up
 (`iq_8`).
 
-
-``` r
+```{r}
 data(pygmalion)
 
 # A curated summary of the substantive IQ variables; the 'type' column
 # reports each variable's class.
 descriptives(pygmalion[, c("iq_pre", "iq_4", "iq_8", "iq_gain")])$descriptives
-#>   variable    type   n n_missing prop_missing       mean median       sd min
-#> 1   iq_pre integer 310         0            0  98.464516     98 18.67913  39
-#> 2     iq_4 integer 310         0            0 101.677419    101 17.82327  58
-#> 3     iq_8 integer 310         0            0 107.896774    105 20.44542  63
-#> 4  iq_gain integer 310         0            0   9.432258      9 13.75680 -20
-#>   max   q25 q75  skewness  kurtosis
-#> 1 158 86.00 109 0.1259678 0.6021197
-#> 2 157 89.25 112 0.3690189 0.4106643
-#> 3 202 93.00 120 0.7312527 1.2090930
-#> 4  69  1.00  17 0.7959656 1.7672510
 
 # Pupils per condition within each grade.
 table(pygmalion$treatment, pygmalion$grade)
-#>          
-#>            1  2  3  4  5  6
-#>   Control 45 46 40 47 25 43
-#>   Bloomer  7 12 13 12  9 11
 ```
 
 The same numbers ship with the book's data companion package
@@ -84,22 +78,16 @@ assumes that the regression of the outcome on the covariate has the
 **same slope in every group**. We can look at that assumption directly
 by fitting separate slopes and overlaying them.
 
-
-``` r
+```{r}
 fit_het <- lm(iq_8 ~ iq_pre * treatment, data = pygmalion)
 round(coef(fit_het), 5)
-#>             (Intercept)                  iq_pre        treatmentBloomer 
-#>                30.36587                 0.77799               -14.83283 
-#> iq_pre:treatmentBloomer 
-#>                 0.19096
 ```
 
-The control slope is 0.778; adding the
+The control slope is `r round(coef(fit_het)["iq_pre"], 3)`; adding the
 interaction gives a steeper bloomer slope of
-0.969.
+`r round(coef(fit_het)["iq_pre"] + coef(fit_het)["iq_pre:treatmentBloomer"], 3)`.
 
-
-``` r
+```{r}
 cols <- c(Control = "#1b9e77", Bloomer = "#d95f02")
 plot(pygmalion$iq_pre, pygmalion$iq_8,
      col = cols[pygmalion$treatment], pch = 19, cex = 0.6,
@@ -112,29 +100,15 @@ for (g in levels(pygmalion$treatment)) {
 legend("topleft", legend = names(cols), col = cols, pch = 19, lwd = 2, bty = "n")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="pygmalion-fig-unnamed-chunk-3-1.png" alt="plot of chunk unnamed-chunk-3"  />
-<p class="caption">plot of chunk unnamed-chunk-3</p>
-</div>
-
 The lines are not parallel: the relationship between pretest and
 follow-up IQ is stronger for the bloomers. The formal test is the
 treatment-by-covariate interaction, which is a **1-degree-of-freedom**
 comparison of the additive (common-slope) model to the separate-slopes
 model:
 
-
-``` r
+```{r}
 fit_add <- lm(iq_8 ~ iq_pre + treatment, data = pygmalion)
 print_anova(anova(fit_add, fit_het))
-#> Analysis of Variance Table
-#> 
-#> Model 1: iq_8 ~ iq_pre + treatment
-#> Model 2: iq_8 ~ iq_pre * treatment
-#> 
-#>   Res.Df      RSS Df Sum of Sq        F Pr(>F)
-#> 1    307 54329.63 NA        NA       NA   <NA>
-#> 2    306 53649.49  1  680.1436 3.879327 0.0498
 ```
 
 ## A Tidy ANCOVA With `ancova()`
@@ -144,39 +118,11 @@ the omnibus *F* for the treatment effect, partial `eta^2` and partial
 `omega^2` with noncentral *F* confidence intervals, and the
 homogeneity-of-regression test, all in one tidy data frame.
 
-
-``` r
+```{r}
 res <- ancova(pygmalion, outcome = "iq_8", treatment = "treatment",
               covariates = "iq_pre")
 as_kable(res)
 ```
-
-
-
-Table: Confidence level: 95%
-
-|term                         |value    |
-|:----------------------------|:--------|
-|F_value                      |5.38     |
-|df_1                         |1        |
-|df_2                         |307      |
-|p_value                      |0.0210   |
-|sum_of_squares_type          |3        |
-|eta_squared_partial          |0.0172   |
-|eta_squared_partial_lower    |0.000201 |
-|eta_squared_partial_upper    |0.056    |
-|omega_squared_partial        |0.0139   |
-|omega_squared_partial_lower  |0.000201 |
-|omega_squared_partial_upper  |0.056    |
-|adjusted_mean[Control]       |107      |
-|adjusted_mean[Bloomer]       |111      |
-|se_adjusted_mean[Control]    |0.849    |
-|se_adjusted_mean[Bloomer]    |1.67     |
-|F_homogeneity_of_regression  |3.88     |
-|df_homogeneity_of_regression |1        |
-|p_homogeneity_of_regression  |0.0498   |
-
-
 
 Note that the `F_homogeneity_of_regression` row reproduces the 1-df
 interaction test above, and that the adjusted means come from the
@@ -186,12 +132,12 @@ of the next section.
 
 Reported in a results-section sentence, the common-slope model shows a
 treatment effect adjusting for pretest IQ,
-*F*(1, 307) =
-5.38,
-*p* = 0.0210, with partial
-$\eta^2$ = 0.017,
-95% CI [0,
-0.056].
+*F*(`r res$value[res$term == "df_1"]`, `r res$value[res$term == "df_2"]`) =
+`r round(res$value[res$term == "F_value"], 2)`,
+*p* = `r format_p(res$value[res$term == "p_value"])`, with partial
+$\eta^2$ = `r round(res$value[res$term == "eta_squared_partial"], 3)`,
+95% CI [`r round(res$value[res$term == "eta_squared_partial_lower"], 3)`,
+`r round(res$value[res$term == "eta_squared_partial_upper"], 3)`].
 
 ## The Treatment Effect Depends on the Covariate
 
@@ -208,8 +154,7 @@ We can read it straight off the fitted separate-slopes model at any
 pretest value. Below we evaluate it at the covariate grand mean and at
 one standard deviation on either side.
 
-
-``` r
+```{r}
 x_bar <- mean(pygmalion$iq_pre)
 x_sd  <- sd(pygmalion$iq_pre)
 x_at  <- c(low = x_bar - x_sd, mean = x_bar, high = x_bar + x_sd)
@@ -223,23 +168,18 @@ effect_at <- function(x) {
 
 data.frame(iq_pre = round(x_at, 2),
            estimated_effect = round(vapply(x_at, effect_at, numeric(1)), 3))
-#>      iq_pre estimated_effect
-#> low   79.79            0.403
-#> mean  98.46            3.970
-#> high 117.14            7.537
 ```
 
 The estimated expectancy effect grows as pretest IQ increases, from
-roughly 0.4 points at one SD below the
-mean to about 7.5 points at one SD
+roughly `r round(effect_at(x_at["low"]), 1)` points at one SD below the
+mean to about `r round(effect_at(x_at["high"]), 1)` points at one SD
 above it. Evaluating, testing, and *planning for* a treatment effect at
 chosen covariate values, rather than only at the grand mean, is exactly
 the problem treated by the variance of the estimated treatment effect
 methodology of Li, McLouth, and Delaney (2020), implemented natively
 as `var_ete()`.
 
-
-``` r
+```{r}
 # Ingredients for that methodology (cf. var_ete()):
 n_bloomer <- sum(pygmalion$treatment == "Bloomer")
 n_control <- sum(pygmalion$treatment == "Control")
@@ -251,8 +191,6 @@ slopes    <- c(
 )
 round(c(n_bloomer = n_bloomer, n_control = n_control,
         sigma2 = sigma2, sigmaz2 = sigmaz2, slopes), 5)
-#> n_bloomer n_control    sigma2   sigmaz2   Control   Bloomer 
-#>  64.00000 246.00000 175.32513 348.90974   0.77799   0.96894
 
 # Variance of the estimated treatment effect at the covariate mean.
 var_ete(sigma2 = sigma2, sigma2_Z = sigmaz2,
@@ -261,10 +199,6 @@ var_ete(sigma2 = sigma2, sigma2_Z = sigmaz2,
         beta_2 = unname(slopes["Control"]),
         type = "sample", covariate_value = "sample_mean")
 ```
-
-|term    |value |
-|:-------|:-----|
-|var_ete |3.52  |
 
 ## One Study and Its Literature
 
