@@ -217,7 +217,7 @@ MBESS package (on CRAN since 2004, by the same author).
 
 ## Test environments
 
-* local macOS (Apple Silicon), R 4.6.1 (2026-09-04): full
+* local macOS (Apple Silicon), R 4.6.1 (2026-09-07): full
   `R CMD check --as-cran` with both manuals built, from the release
   tarball, built from a clean archive of the repository
 * win-builder, R-release 4.6.1 on Windows Server 2022: the 2026-08-17
@@ -267,10 +267,10 @@ reported no size NOTE.
 
 ## Check time
 
-Locally the check ran examples in 62 seconds across 312 pages in a
-single pass (the package contains no `\donttest{}` block), tests in
-38 seconds, and the vignette rebuild in 25 seconds, with no step
-flagged for time; the slowest help page took 1.3 seconds. The
+Locally the check (2026-09-07) ran examples in 58 seconds across 312
+pages in a single pass (the package contains no `\donttest{}` block),
+tests in 34 seconds, and the vignette rebuild in 22 seconds, with no
+step flagged for time; the slowest help page took 1.2 seconds. The
 2026-08-17 win-builder run of the previous tarball took about three
 times the local elapsed time at each step (examples 122 seconds,
 tests 115, vignette rebuild 53), which keeps every page well under
