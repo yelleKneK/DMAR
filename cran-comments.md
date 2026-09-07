@@ -304,10 +304,12 @@ reported no size NOTE.
 
 ## Check time
 
-Locally the check (2026-09-07) ran examples in 58 seconds across 312
-pages in a single pass (the package contains no `\donttest{}` block),
-tests in 34 seconds, and the vignette rebuild in 22 seconds, with no
-step flagged for time; the slowest help page took 1.2 seconds. The
+Locally the release-gate check (2026-09-07, on the submitted tarball)
+ran examples in 59 seconds across 312 pages in a single pass (the
+package contains no `\donttest{}` block), the curated test subset in
+about 19 seconds serially, and the vignette rebuild in 14 seconds
+(rendering only; every vignette is precomputed), with no step flagged
+for time; the slowest help page took 1.3 seconds. The
 2026-08-17 win-builder run of the previous tarball took about three
 times the local elapsed time at each step (examples 122 seconds,
 tests 115, vignette rebuild 53), which keeps every page well under
