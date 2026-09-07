@@ -9,12 +9,13 @@ the maintainer's release tooling, so none can return.
 
 * **"in R" in the title and description.** The description no longer
   says it: it opens "Methods for design, measurement, and analysis,
-  with the aim of ...". The title keeps it, because the title is the
+  with the aim of ...". The title keeps it because the title is the
   expansion of the package name: DMAR stands for Design, Measurement,
-  and Analysis in R, as MBESS stood for Methods for the Behavioral,
-  Educational, and Social Sciences, and a title that dropped the last
-  two words would no longer spell the name. An exception for the title
-  was requested by email on 2026-09-04.
+  and Analysis in R. An exception was requested by email on 2026-09-04
+  and granted on 2026-09-05 (K. Lauseker), with the request that the
+  acronym be added in parentheses directly after the title so the
+  connection is obvious; the Title field is now "Design, Measurement,
+  and Analysis in R (DMAR)".
 
 * **Code lines in examples commented out.** Every example line in the
   package now runs. The comment idiom was adopted in the 2026-07-31
