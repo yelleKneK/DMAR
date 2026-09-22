@@ -1,5 +1,18 @@
 # DMAR 1.0.0 submission (resubmission)
 
+Outcome: accepted. The automated pretest passed, Uwe Ligges moved the
+submission to the manual inspection queue for first submissions on
+2026-09-08 ("Not so much you can do, hence moved to the manual newbie
+inspection queue"), and DMAR 1.0.0 was published on CRAN on 2026-09-21
+from the tarball packaged 2026-09-07 23:48 UTC (the gate run of that
+evening; CRAN adds Repository and Date/Publication fields to the
+DESCRIPTION it publishes, so the published file's checksum differs from
+the certified one by design). The farm's first results (2026-09-22) are
+OK on every flavor, with total check times of 399 to 403 s on the Linux
+flavors and 632 to 681 s on the Intel macOS flavors; `tools/cran_status.R`
+carries those values and reports any drift. The next submission starts a
+new letter; this one stays as the record of the four rounds.
+
 ## Response to the CRAN review of 2026-09-04
 
 The review of the 2026-08-21 submission named five things. Each is

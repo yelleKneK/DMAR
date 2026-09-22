@@ -114,7 +114,60 @@ check("no default file path in any function signature or call", length(h) == 0, 
 h <- grep_code("^\\s*(save\\s*=\\s*(TRUE|FALSE)|.*_sensitivity\\s*<-\\s*function\\(.*\\bsave\\s*=)")
 check("no `save` switch in the sensitivity family", length(h) == 0, h)
 
+## ---- DESCRIPTION, NEWS, and the CRAN test subset ----
+
+# The title is the one CRAN granted by email (K. Lauseker, 2026-09-05):
+# the expansion of the name with the acronym in parentheses. The
+# description does not say "in R" (the 2026-09-04 review). Both are
+# checked as strings so a well-meant edit cannot reopen the exchange.
+desc <- read.dcf("DESCRIPTION")
+title_ok <- identical(unname(desc[, "Title"]), "Design, Measurement, and Analysis in R (DMAR)")
+check("DESCRIPTION Title is the granted form", title_ok, unname(desc[, "Title"]))
+desc_text <- gsub("\\s+", " ", unname(desc[, "Description"]))
+h <- grepl("\\bin R\\b", desc_text)
+check("DESCRIPTION Description does not say \"in R\"", !h,
+      if (h) regmatches(desc_text, regexpr(".{0,40}\\bin R\\b.{0,40}", desc_text)))
+
+# NEWS.md leads with the version in DESCRIPTION, so a release cannot ship
+# with last release's notes on top.
+news_head <- grep("^# ", readLines("NEWS.md", warn = FALSE), value = TRUE)[1]
+news_ver <- sub("^# [A-Za-z]+ ", "", news_head)
+check(sprintf("NEWS.md leads with version %s", desc[, "Version"]),
+      identical(news_ver, unname(desc[, "Version"])), news_head)
+
+# The curated CRAN test subset (tests/testthat.R, cran_files): every name
+# in it must be a file that exists, because a renamed or deleted test file
+# drops out of the CRAN path silently (test_check's filter matches
+# nothing and reports nothing), and the mechanical detectors the review
+# rounds promised must be in it. Files outside the subset are listed for
+# information, so a new test file is placed deliberately.
+tt_exprs <- parse("tests/testthat.R", keep.source = FALSE)
+cf_expr <- Filter(function(e) is.call(e) && identical(e[[1L]], as.name("<-")) &&
+                    identical(e[[2L]], as.name("cran_files")), tt_exprs)
+if (length(cf_expr) == 1L) {
+  cran_files <- eval(cf_expr[[1L]][[3L]], envir = baseenv())
+  present <- file.exists(file.path("tests/testthat", paste0("test-", cran_files, ".R")))
+  check("every name in the CRAN test subset is an existing test file", all(present),
+        cran_files[!present])
+  promised <- c("rd_hygiene", "ss_sensitivity_filename")
+  check("the promised detectors are in the CRAN test subset", all(promised %in% cran_files),
+        setdiff(promised, cran_files))
+  all_tests <- sub("^test-(.*)[.]R$", "\\1", basename(test_files))
+  outside <- setdiff(all_tests, cran_files)
+  cat(sprintf("       CRAN subset: %d of %d test files; %d run locally only\n",
+              length(cran_files), length(all_tests), length(outside)))
+} else {
+  check("tests/testthat.R defines cran_files once", FALSE)
+}
+
 ## ---- Vignette invariants ----
+
+# Since 2026-09-07 every vignette is a precomputed twin of a .Rmd.orig
+# source (the 2026-09-05 pretest's overall checktime NOTE). A .Rmd with no
+# .orig is a live vignette that the check would knit on CRAN's clock.
+no_orig <- vig_rmd[!file.exists(paste0(vig_rmd, ".orig"))]
+check("every vignette is a precomputed twin (has a .Rmd.orig source)",
+      length(no_orig) == 0, no_orig)
 
 # Every precomputed twin is newer than its source. A twin older than its
 # .orig means someone edited the source and forgot tools/precompute_vignettes.R,
