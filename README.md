@@ -29,10 +29,10 @@ where the independent or dependent variables involve the person.
 ## Installation
 
 ``` r
-# Once on CRAN:
+# The released version, from CRAN:
 install.packages("DMAR")
 
-# Development version from GitHub:
+# The development version, from GitHub:
 # install.packages("remotes")
 remotes::install_github("yelleKneK/DMAR")
 ```
