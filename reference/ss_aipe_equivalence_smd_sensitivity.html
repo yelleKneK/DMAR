@@ -25,7 +25,7 @@ specified equivalence bounds."><meta property="og:image" content="https://yellek
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,8 +84,7 @@ specified equivalence bounds.</p>
 <span>  assurance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_equivalence_smd_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -113,7 +112,8 @@ but not both.</p></dd>
 <dd><p>Equivalence bounds on the SMD, as
 positive magnitudes with the same meaning as in
 <code><a href="equivalence_smd.html">equivalence_smd</a></code>: the region is
-\((-\code{delta_lower}, \code{delta_upper})\).
+\((-\delta_L, +\delta_U)\), with <code>delta_lower</code> as
+\(\delta_L\) and <code>delta_upper</code> as \(\delta_U\).
 <code>delta_upper</code> is required; <code>delta_lower</code> defaults to
 <code>delta_upper</code> (a symmetric region). The simulator records
 whether the realized CI falls entirely inside the region.</p></dd>
@@ -139,12 +139,16 @@ whether the realized CI falls entirely inside the region.</p></dd>
 <dd><p>Logical.</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>Logical. Save per-replication CSV.</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>Path used when <code>save = TRUE</code>.</p></dd>
+<dd><p>Optional path for a comma separated file recording
+every replication (the sample standardized mean difference, the two
+confidence limits, the interval width, whether the interval fell
+inside the equivalence region, and two indicators of whether the
+interval missed <code>true_smd</code> below or above): nothing is written when
+<code>filename</code> is <code>NULL</code> (the default), a new file with a
+header row is created otherwise, an existing file at that path is
+appended to, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

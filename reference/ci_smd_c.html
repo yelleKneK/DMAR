@@ -15,7 +15,7 @@ matters when the treatment may alter variability as well as the mean."><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,9 +123,9 @@ standardized by the control group standard deviation), and
     <h2 id="warning">Warning<a class="anchor" aria-label="anchor" href="#warning"></a></h2>
 
 
-<p>This function uses <code>conf_limits_nct</code>, which has as one of its arguments <code>tol</code> (and can be modified with <code>tol</code> of the present function).
+<p>This function uses <code>ci_nc_t</code>, which has as one of its arguments <code>tol</code> (and can be modified with <code>tol</code> of the present function).
 If the present function fails to converge (i.e., if it runs but does not report a solution), it is likely that the <code>tol</code> value is too restrictive and should be increased by a factor of 10, but probably by no more than 100.
-Running the function <code>conf_limits_nct</code> directly will report the actual probability values of the limits found. This should be done if any modification to <code>tol</code> is necessary in order to ensure acceptable confidence limits for the noncentral <em>t</em> parameter have been achieved.</p>
+Running the function <code>ci_nc_t</code> directly will report the actual probability values of the limits found. This should be done if any modification to <code>tol</code> is necessary in order to ensure acceptable confidence limits for the noncentral <em>t</em> parameter have been achieved.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -154,7 +154,7 @@ Running the function <code>conf_limits_nct</code> directly will report the actua
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="smd_c.html">smd_c</a></code>, <code><a href="smd.html">smd</a></code>, <code><a href="ci_smd.html">ci_smd</a></code>, <code><a href="conf_limits_nct.html">conf_limits_nct</a></code></p>
+    <div class="dont-index"><p><code><a href="smd_c.html">smd_c</a></code>, <code><a href="smd.html">smd</a></code>, <code><a href="ci_smd.html">ci_smd</a></code>, <code><a href="ci_nc_t.html">ci_nc_t</a></code></p>
 <p>Other confidence intervals for effect sizes:
 <code><a href="ci_R2.html">ci_R2()</a></code>,
 <code><a href="ci_c.html">ci_c()</a></code>,

@@ -88,8 +88,8 @@ to zero.
 Proposition 1) confidence interval transformation principle: a CI for
 the noncentrality parameter \\\lambda\\ of the *F* distribution is
 obtained (via
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md))
-and then mapped through \$\$\omega^2\_{\text{bound}} =
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)) and
+then mapped through \$\$\omega^2\_{\text{bound}} =
 \frac{\lambda\_{\text{bound}}}{\lambda\_{\text{bound}} + N}.\$\$ When
 the lower CI on \\\lambda\\ is not identified (i.e., the observed *F* is
 below the one-sided critical value), the lower limit on \\\omega^2\\ is
@@ -150,7 +150,7 @@ contrast analysis. *Psychological Methods, 9*(2), 164–182.
 ## See also
 
 [`ci_pvaf`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

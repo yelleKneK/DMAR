@@ -27,8 +27,7 @@ ss_aipe_indirect_effect_sensitivity(
   B = 5000L,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_indirect_effect_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -85,13 +84,15 @@ ss_aipe_indirect_effect_sensitivity(
 
   Logical.
 
-- save:
-
-  Logical. Save per-replication CSV.
-
 - filename:
 
-  Path used when `save = TRUE`.
+  Optional path for a comma separated file recording every replication
+  (the sample indirect effect \\\hat a \hat b\\, the two confidence
+  limits, the interval width, and two indicators of whether the interval
+  missed `true_a * true_b` below or above): nothing is written when
+  `filename` is `NULL` (the default), a new file with a header row is
+  created otherwise, an existing file at that path is appended to, and a
+  throwaway run should point it at `tempfile(fileext = ".csv")`.
 
 ## Value
 

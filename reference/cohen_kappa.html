@@ -19,7 +19,7 @@ error of Fleiss, Cohen, and Everitt (1969)."><meta property="og:image" content="
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -317,12 +317,19 @@ the caller's state restored on exit).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># A bootstrap interval for the same table, which expands it to its</span></span></span>
-<span class="r-in"><span><span class="co"># 200 paired ratings and resamples the subjects. Not run here,</span></span></span>
-<span class="r-in"><span><span class="co"># because 2000 refits of kappa is more than a help page should do;</span></span></span>
-<span class="r-in"><span><span class="co"># the call is:</span></span></span>
-<span class="r-in"><span><span class="co"># cohen_kappa(table = tab, ci_method = "percentile", B = 2000,</span></span></span>
-<span class="r-in"><span><span class="co">#             seed = 113)</span></span></span>
+<span class="r-in"><span><span class="co"># A percentile bootstrap interval for the same table, which expands</span></span></span>
+<span class="r-in"><span><span class="co"># it to its 200 paired ratings and resamples the subjects. The point</span></span></span>
+<span class="r-in"><span><span class="co"># estimate and the asymptotic standard error are unchanged; only the</span></span></span>
+<span class="r-in"><span><span class="co"># interval is read off the bootstrap distribution. B = 2000 keeps the</span></span></span>
+<span class="r-in"><span><span class="co"># example quick; a reported interval deserves the default B = 10000.</span></span></span>
+<span class="r-in"><span><span class="fu">cohen_kappa</span><span class="op">(</span>table <span class="op">=</span> <span class="va">tab</span>, ci_method <span class="op">=</span> <span class="st">"percentile"</span>, B <span class="op">=</span> <span class="fl">2000</span>,</span></span>
+<span class="r-in"><span>            seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  weights    kappa se    lower_limit upper_limit z_value p_value  n  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  unweighted 0.492 0.051 0.387       0.592       9.64    &lt; 0.0001 200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  n_categories</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Cohen's ratio-scaled disagreement weights: a neurosis-psychosis</span></span></span>
 <span class="r-in"><span><span class="co"># confusion (weight 6) is six times as grave as a personality</span></span></span>

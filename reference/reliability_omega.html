@@ -23,7 +23,7 @@ run unless requested; see ci_method."><meta property="og:image" content="https:/
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -550,13 +550,24 @@ items),
 <span class="r-in"><span><span class="co"># The closed-form standard errors are derived under the model implied</span></span></span>
 <span class="r-in"><span><span class="co"># ratio, so with the observed denominator the interval comes from a</span></span></span>
 <span class="r-in"><span><span class="co"># bootstrap, which refits the single factor model once per</span></span></span>
-<span class="r-in"><span><span class="co"># replication. That refitting is why it is not run here; the call is</span></span></span>
-<span class="r-in"><span><span class="co">#   reliability_omega(data = items, ci_method = "percentile", B = 10000,</span></span></span>
-<span class="r-in"><span><span class="co">#                     seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co"># with ci_method = "bca" as the alternative. The percentile interval is</span></span></span>
-<span class="r-in"><span><span class="co"># what Kelley and Pornprasertmanit (2016) recommend for hierarchical</span></span></span>
-<span class="r-in"><span><span class="co"># omega, and the default B = 10000 is an accuracy choice rather than a</span></span></span>
-<span class="r-in"><span><span class="co"># formality: a reported interval deserves the full count (see Details).</span></span></span>
+<span class="r-in"><span><span class="co"># replication. B = 40 keeps the example quick, and it is about the</span></span></span>
+<span class="r-in"><span><span class="co"># smallest count from which a 95 percent percentile interval can be</span></span></span>
+<span class="r-in"><span><span class="co"># read at all; a reported interval deserves the default B = 10000,</span></span></span>
+<span class="r-in"><span><span class="co"># an accuracy choice rather than a formality (see Details). The</span></span></span>
+<span class="r-in"><span><span class="co"># percentile interval is what Kelley and Pornprasertmanit (2016)</span></span></span>
+<span class="r-in"><span><span class="co"># recommend for this coefficient, with ci_method = "bca" as the</span></span></span>
+<span class="r-in"><span><span class="co"># alternative, and seed makes the interval reproducible.</span></span></span>
+<span class="r-in"><span><span class="fu">reliability_omega</span><span class="op">(</span>data <span class="op">=</span> <span class="va">items</span>, ci_method <span class="op">=</span> <span class="st">"percentile"</span>, B <span class="op">=</span> <span class="fl">40</span>,</span></span>
+<span class="r-in"><span>                  seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.821</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se          0.019</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit 0.781</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit 0.859</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level  0.95 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N           200  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  J           6    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model implied denominator with its closed-form robust ML interval.</span></span></span>
 <span class="r-in"><span><span class="fu">reliability_omega</span><span class="op">(</span>data <span class="op">=</span> <span class="va">items</span>, denominator <span class="op">=</span> <span class="st">"model_implied"</span><span class="op">)</span></span></span>
@@ -570,20 +581,40 @@ items),
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J           6     </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Two further routes into the same coefficient are shown rather than</span></span></span>
-<span class="r-in"><span><span class="co"># run, since each one fits the single factor model again. The first</span></span></span>
-<span class="r-in"><span><span class="co"># works from the summary statistics a paper reports, a covariance</span></span></span>
-<span class="r-in"><span><span class="co"># matrix and its sample size:</span></span></span>
-<span class="r-in"><span><span class="co">#   reliability_omega(S = cov(items), N = 200,</span></span></span>
-<span class="r-in"><span><span class="co">#                     denominator = "model_implied", ci_method = "ml")</span></span></span>
+<span class="r-in"><span><span class="co"># Two further routes into the same coefficient. The first works from</span></span></span>
+<span class="r-in"><span><span class="co"># the summary statistics a paper reports, a covariance matrix and its</span></span></span>
+<span class="r-in"><span><span class="co"># sample size, with the maximum likelihood interval that summary</span></span></span>
+<span class="r-in"><span><span class="co"># input supports.</span></span></span>
+<span class="r-in"><span><span class="fu">reliability_omega</span><span class="op">(</span>S <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov</a></span><span class="op">(</span><span class="va">items</span><span class="op">)</span>, N <span class="op">=</span> <span class="fl">200</span>,</span></span>
+<span class="r-in"><span>                  denominator <span class="op">=</span> <span class="st">"model_implied"</span>, ci_method <span class="op">=</span> <span class="st">"ml"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.82  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se          0.0197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit 0.781 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit 0.858 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level  0.95  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N           200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  J           6     </span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The second is full information maximum likelihood with an auxiliary</span></span></span>
 <span class="r-in"><span><span class="co"># variable, where missingness on y2 depends on an auxiliary z (missing</span></span></span>
-<span class="r-in"><span><span class="co"># at random given z). Supplying aux implies missing = "fiml":</span></span></span>
-<span class="r-in"><span><span class="co">#   z &lt;- eta + rnorm(200, sd = 0.5)</span></span></span>
-<span class="r-in"><span><span class="co">#   d &lt;- data.frame(items, z = z)</span></span></span>
-<span class="r-in"><span><span class="co">#   d$y2[runif(200) &lt; plogis(-1 + 1.5 * as.numeric(scale(z)))] &lt;- NA</span></span></span>
-<span class="r-in"><span><span class="co">#   reliability_omega(data = d, aux = "z",</span></span></span>
-<span class="r-in"><span><span class="co">#                     denominator = "model_implied")</span></span></span>
+<span class="r-in"><span><span class="co"># at random given z). Supplying aux implies missing = "fiml"; the</span></span></span>
+<span class="r-in"><span><span class="co"># N_complete row shows how many rows listwise deletion would have</span></span></span>
+<span class="r-in"><span><span class="co"># kept.</span></span></span>
+<span class="r-in"><span><span class="va">z</span> <span class="op">&lt;-</span> <span class="va">eta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span>, sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">items</span>, z <span class="op">=</span> <span class="va">z</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">d</span><span class="op">$</span><span class="va">y2</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
+<span class="r-in"><span><span class="fu">reliability_omega</span><span class="op">(</span>data <span class="op">=</span> <span class="va">d</span>, aux <span class="op">=</span> <span class="st">"z"</span>, denominator <span class="op">=</span> <span class="st">"model_implied"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.819 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se          0.0201</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit 0.78  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit 0.859 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level  0.95  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N           200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  140   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  J           6     </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

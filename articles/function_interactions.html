@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>How DMAR's Functions Fit Together: A Deep Dive</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">August 2026</h4>
+            <h4 data-toc-skip class="date">September 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/function_interactions.Rmd" class="external-link"><code>vignettes/function_interactions.Rmd</code></a></small>
       <div class="d-none name"><code>function_interactions.Rmd</code></div>
@@ -508,8 +508,9 @@ with indirect effect
 <code class="sourceCode R"><span><span class="co"># Asymptotic variance: var_indirect_effect(a, b, var_a, var_b, cov_ab)</span></span>
 <span><span class="co">#   - returns Sobel, Aroian, Goodman, and second-order delta variances.</span></span>
 <span><span class="co"># AIPE planning:       ss_aipe_indirect_effect(a, b, width, method)</span></span>
-<span><span class="co">#   - method = "sobel"      → asymptotic SE</span></span>
-<span><span class="co">#   - method = "monte_carlo"→ Tofighi &amp; MacKinnon (2011) MC CI</span></span></code></pre></div>
+<span><span class="co">#   - method = "closed_form": the delta method (Sobel, 1982) width</span></span>
+<span><span class="co">#   - method = "monte_carlo": the Monte Carlo interval width, simulated</span></span>
+<span><span class="co">#     at each candidate n (Tofighi &amp; MacKinnon, 2011)</span></span></code></pre></div>
 <p>The two methods correspond to the two main approaches in the
 mediation literature; <code><a href="../reference/var_indirect_effect.html">var_indirect_effect()</a></code> makes the
 underlying SE formulas explicit so the user can see what the planner is
@@ -746,7 +747,7 @@ compose: the wide form can always be reshaped to long with
 <span></span>
 <span><span class="co"># Plan an n for the next study:</span></span>
 <span><span class="fu"><a href="../reference/ss_aipe_indirect_effect.html">ss_aipe_indirect_effect</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">0.40</span>, b <span class="op">=</span> <span class="fl">0.40</span>, width <span class="op">=</span> <span class="fl">0.20</span>,</span>
-<span>                         method <span class="op">=</span> <span class="st">"sobel"</span><span class="op">)</span></span></code></pre></div>
+<span>                         method <span class="op">=</span> <span class="st">"closed_form"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="e--two-method-agreement-study">E. Two-Method Agreement Study<a class="anchor" aria-label="anchor" href="#e--two-method-agreement-study"></a>

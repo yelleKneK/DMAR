@@ -179,15 +179,16 @@ Ken Kelley <kkelley@nd.edu>
 # alpha_level = .05. The single-step value is the multiplier for simultaneous
 # confidence intervals on the pairwise differences of adjusted means. With a
 # covariate present there is no closed form for it: the Bryant-Paulson
-# distribution function is integrated numerically and then inverted, which
-# takes about half a second, so the call is shown here rather than run.
-# cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1)
-# It returns 4.83, the entry in Table 1 of Bryant and Paulson (1976) and the
+# distribution function is integrated numerically and then inverted. The
+# value is 4.83, the entry in Table 1 of Bryant and Paulson (1976) and the
 # multiplier behind the simultaneous intervals of the 1980 worked example.
+cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1)
+#>  term     value area_less area_greater
+#>  upper_cv 4.83  0.95      0.05        
 
 # With no covariates the reference distribution is the ordinary studentized
-# range, which base R supplies directly, so these calls are quick and do run
-# here. The critical value is sqrt(2) times the Tukey HSD critical value.
+# range, which base R supplies directly. The critical value is then sqrt(2)
+# times the Tukey HSD critical value.
 cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 0)$value
 #> [1] 4.638538
 sqrt(2) * cv_tukey_hsd(alpha_level = .05, df = 14, groups = 6)$value
@@ -202,10 +203,12 @@ cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 0,
 #>  term     value area_less area_greater
 #>  upper_cv 3.37  <NA>      <NA>        
 # One random covariate raises that range to 3.50, the entry in Table 2 of
-# Bryant and Bruvold (1980). Being stepwise, it inverts a separate
-# Bryant-Paulson quantile for every stretch from 2 to 6 groups, so it costs
-# several seconds and is not run here either. The package tests and the
-# tests check it against the paper's Section 4 example.
-# cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
-#                   procedure = "duncan")
+# Bryant and Bruvold (1980). Being stepwise, the value is a running maximum
+# of Bryant-Paulson quantiles, one inverted for every stretch from 2 to 6
+# groups at that stretch's own protection level; the package tests check
+# the full sequence against the paper's Section 4 example.
+cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
+                  procedure = "duncan")
+#>  term     value area_less area_greater
+#>  upper_cv 3.5   <NA>      <NA>        
 ```

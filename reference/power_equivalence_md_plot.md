@@ -133,13 +133,16 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # One curve per sample size, showing power against the true mean
-# difference. Two of the seven sample sizes behind Phillips (1990)
-# Figure 3 are drawn here so the example stays quick; the full
-# reproduction is given below.
+# difference. The seven sample sizes are the ones behind Figure 3 of
+# Phillips, 1990, so the figure reproduces that one; every curve
+# evaluates the power integral at 201 true differences.
+n  <- c(9, 12, 18, 24, 30, 40, 60)
+nu <- c(7, 10, 16, 22, 28, 38, 58)
 fig <- power_equivalence_md_plot(
   alpha_level = .05, logscale = FALSE,
   theta1 = -.2, theta2 = .2, sigma = .20,
-  n = c(24, 60), nu = c(22, 58)
+  n = n, nu = nu,
+  subtitle = "Phillips Figure 3"
 )
 fig
 
@@ -150,31 +153,19 @@ fig
 # per sample size. Power is highest where the true difference is zero.
 power_grid <- attr(fig, "power_grid")
 power_grid[which.min(abs(power_grid[, 1])), ]
-#>      diff      n=24      n=60 
-#> 0.0000000 0.9127046 0.9998349 
+#>      diff       n=9      n=12      n=18      n=24      n=30      n=40      n=60 
+#> 0.0000000 0.2774020 0.4815125 0.7793013 0.9127046 0.9670072 0.9939640 0.9998349 
 
-# The two published figures are not run here because every curve
-# evaluates the power integral at 201 true differences, so a
-# seven-curve figure costs a few tenths of a second. Phillips (1990)
-# Figure 3 is:
-# n  <- c(9, 12, 18, 24, 30, 40, 60)
-# nu <- c(7, 10, 16, 22, 28, 38, 58)
-# power_equivalence_md_plot(
-#   alpha_level = .05, logscale = FALSE,
-#   theta1 = -.2, theta2 = .2, sigma = .20,
-#   n = n, nu = nu,
-#   subtitle = "Phillips Figure 3"
-# )
+# Figure 1c of Diletti et al., 1991, is the same idea on the log scale,
+# where the equivalence limits are the 0.80 to 1.25 ratio bounds used
+# in bioequivalence work.
+n_d  <- c(8, 12, 18, 24, 30, 40, 60)
+nu_d <- c(6, 10, 16, 22, 28, 38, 58)
+power_equivalence_md_plot(
+  alpha_level = .05, logscale = TRUE,
+  theta1 = .8, theta2 = 1.25, sigma = .20,
+  n = n_d, nu = nu_d,
+  subtitle = "Diletti, Figure 1c"
+)
 
-# Diletti (1991) Figure 1c is the same idea on the log scale, where the
-# equivalence limits are the 0.80 to 1.25 ratio bounds used in
-# bioequivalence work:
-# n_d  <- c(8, 12, 18, 24, 30, 40, 60)
-# nu_d <- c(6, 10, 16, 22, 28, 38, 58)
-# power_equivalence_md_plot(
-#   alpha_level = .05, logscale = TRUE,
-#   theta1 = .8, theta2 = 1.25, sigma = .20,
-#   n = n_d, nu = nu_d,
-#   subtitle = "Diletti, Figure 1c"
-# )
 ```

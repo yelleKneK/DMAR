@@ -31,7 +31,7 @@ Details for which to use when.'><meta property="og:image" content="https://yelle
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -266,14 +266,17 @@ be specified as c(0.5, 0.5, -0.5, -0.5) rather than c(1, 1, -1, -1). Make sure t
 <span class="r-in"><span><span class="co"># For the family of all three pairwise comparisons of the adjusted means,</span></span></span>
 <span class="r-in"><span><span class="co"># with coverage that holds simultaneously across the family, select</span></span></span>
 <span class="r-in"><span><span class="co"># procedure = "bryant_paulson"; the call is forwarded to ci_c_ancova_bp().</span></span></span>
-<span class="r-in"><span><span class="co"># That route inverts the Bryant-Paulson distribution numerically to get its</span></span></span>
-<span class="r-in"><span><span class="co"># multiplier, which takes about half a second, so it is shown here rather</span></span></span>
-<span class="r-in"><span><span class="co"># than run.</span></span></span>
-<span class="r-in"><span><span class="co"># ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n = 10,</span></span></span>
-<span class="r-in"><span><span class="co">#             procedure = "bryant_paulson")</span></span></span>
 <span class="r-in"><span><span class="co"># The simultaneous limits are wider, which is the price of the family</span></span></span>
 <span class="r-in"><span><span class="co"># statement: group 1 against group 2 runs from -10.61 to 1.61, where the</span></span></span>
-<span class="r-in"><span><span class="co"># single planned contrast above ran from -9.47 to 0.47.</span></span></span>
+<span class="r-in"><span><span class="co"># single planned contrast above ran from -9.46 to 0.46.</span></span></span>
+<span class="r-in"><span><span class="fu">ci_c_ancova</span><span class="op">(</span>adj_means <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7.5</span>, <span class="fl">12</span>, <span class="fl">14</span><span class="op">)</span>, s_ancova <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">29</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>            procedure <span class="op">=</span> <span class="st">"bryant_paulson"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  contrast          estimate lower_limit upper_limit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  group_1 - group_2 -4.5     -10.6       1.61       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  group_1 - group_3 -6.5     -12.6       -0.393     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  group_2 - group_3 -2       -8.11       4.11       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

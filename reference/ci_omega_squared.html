@@ -19,7 +19,7 @@ factorial designs)."><meta property="og:image" content="https://yelleknek.github
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,7 +138,7 @@ below zero are truncated to zero.</p>
 <p><strong>Confidence interval.</strong> The CI is constructed by Steiger's (2004,
 Proposition 1) confidence interval transformation principle: a CI for the
 noncentrality parameter \(\lambda\) of the <em>F</em> distribution is
-obtained (via <code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>) and then mapped through
+obtained (via <code><a href="ci_nc_F.html">ci_nc_F</a></code>) and then mapped through
 $$\omega^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N}.$$
 When the lower CI on \(\lambda\) is not identified (i.e., the observed
 <em>F</em> is below the one-sided critical value), the lower limit on
@@ -185,7 +185,7 @@ with e.g.\ <code>car::Anova(object, type = 3)</code> and pass the relevant
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="ci_pvaf.html">ci_pvaf</a></code>, <code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code></p>
+    <div class="dont-index"><p><code><a href="ci_pvaf.html">ci_pvaf</a></code>, <code><a href="ci_nc_F.html">ci_nc_F</a></code></p>
 <p>Other confidence intervals for effect sizes:
 <code><a href="ci_R2.html">ci_R2()</a></code>,
 <code><a href="ci_c.html">ci_c()</a></code>,

@@ -111,16 +111,16 @@ res <- cfa_k(holzinger_swineford, hs_factors)
 plot_cfa_k(res)
 
 
-# Two further displays are shown but not run here, since each draws
-# another figure and the second refits the model as well. The same
-# question for the error variances, the additional constraint that
-# separates essentially parallel from essentially tau-equivalent:
-# plot_cfa_k(res, what = "errors")
-#
+# The same question for the error variances, the additional constraint
+# that separates essentially parallel from essentially tau-equivalent.
+plot_cfa_k(res, what = "errors")
+
+
 # After imposing the constraint, every item in a factor sits at the
 # common estimate and the dashed line is that estimate rather than
-# the mean of the free ones:
-# res_equal <- cfa_k(holzinger_swineford, hs_factors,
-#                    equal_loading = TRUE)
-# plot_cfa_k(res_equal)
+# the mean of the free ones.
+res_equal <- cfa_k(holzinger_swineford, hs_factors,
+                   equal_loading = TRUE)
+plot_cfa_k(res_equal)
+
 ```

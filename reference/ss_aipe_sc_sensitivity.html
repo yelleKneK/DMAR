@@ -9,7 +9,7 @@ Perspective for the standardized ANOVA contrast."><meta property="og:image" cont
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,9 +59,7 @@ Perspective for the standardized ANOVA contrast.</p>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_sc_sensitivity_result.csv"</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,16 +103,15 @@ Perspective for the standardized ANOVA contrast.</p>
 <dd><p>to print the current value of the iterations</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. It can be saved with <code>save = TRUE</code> outside of the printed results</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results will be saved to</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>allows one to potentially include parameter values for inner functions</p></dd>
+<dd><p>an optional path for a comma separated file recording
+every replication (the realized standardized contrast, the full and
+the two one-sided interval widths, the three non-coverage indicators,
+and the two confidence limits): nothing is written when
+<code>filename</code> is <code>NULL</code> (the default), a new file with a header
+row is created otherwise, an existing file at that path is appended
+to, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code></p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -164,7 +161,7 @@ confidence intervals.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="ss_aipe_sc.html">ss_aipe_sc</a></code>, <code><a href="ss_aipe_c.html">ss_aipe_c</a></code>, <code><a href="conf_limits_nct.html">conf_limits_nct</a></code></p>
+    <div class="dont-index"><p><code><a href="ss_aipe_sc.html">ss_aipe_sc</a></code>, <code><a href="ss_aipe_c.html">ss_aipe_c</a></code>, <code><a href="ci_nc_t.html">ci_nc_t</a></code></p>
 <p><code><a href="design_consequences.html">design_consequences</a></code> for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the
   significance filter, and the expected confidence interval width.</p></div>

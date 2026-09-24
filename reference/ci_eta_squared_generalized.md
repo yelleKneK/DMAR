@@ -110,8 +110,8 @@ than as defaults.
 **`method = "parametric"`.** The function first obtains a confidence
 interval for the population noncentrality parameter \\\lambda\\ of the
 focal effect's *F*-test via
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md).
-The NCP bounds are mapped through the partial-\\\eta^2\\ transformation
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md). The
+NCP bounds are mapped through the partial-\\\eta^2\\ transformation
 \\\eta^2\_{p,\text{bound}} =
 \lambda\_{\text{bound}}/(\lambda\_{\text{bound}} + N)\\ (matching the
 convention used by
@@ -271,11 +271,19 @@ ci_eta_squared_generalized(fit, observed = "grade", method = "parametric")
 #> Confidence level: 95%
 
 # The third option is a residual bootstrap, which refits the model once per
-# replication. It is not run here: B is required to be at least 1000, and
-# even that is slower than an example should be, while a reported interval
-# deserves B = 10000 or more. The call is
-#   ci_eta_squared_generalized(fit, observed = "grade",
-#                              method = "bootstrap", B = 10000, seed = 113)
+# replication. B = 1000 is the smallest count the function accepts and is
+# what keeps this page quick; a reported interval deserves B = 10000 or
+# more. The seed makes the interval reproducible and leaves the random
+# number stream of the surrounding session as it was.
+ci_eta_squared_generalized(fit, observed = "grade",
+                           method = "bootstrap", B = 1000, seed = 113)
+#> Warning: Bootstrap CI resamples the fitted model's residuals nonparametrically (B = 1000). Coverage has not been broadly validated for generalized eta squared; results should be treated as preliminary.
+#>  effect          eta_squared_generalized lower_limit upper_limit method   
+#>  treatment       0.0202                  0.00123     0.063       bootstrap
+#>  grade           0.044                   0.0193      0.111       bootstrap
+#>  treatment:grade 0.0187                  0.00714     0.0756      bootstrap
+#> 
+#> Confidence level: 95%
 
 # Within-subjects ANOVA. The parametric CI uses each effect's own stratum.
 set.seed(113)

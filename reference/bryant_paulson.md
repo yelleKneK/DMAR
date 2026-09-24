@@ -1,14 +1,14 @@
-# The Bryant–Paulson Generalized Studentized Range Distribution
+# The Bryant-Paulson Generalized Studentized Range Distribution
 
 Distribution function (`pbryant_paulson`), quantile/critical-value
 function (`qbryant_paulson`), and density (`dbryant_paulson`) for the
-Bryant–Paulson generalized studentized range, the sampling distribution
+Bryant-Paulson generalized studentized range, the sampling distribution
 of the studentized range of covariate-*adjusted* means in the analysis
 of covariance (ANCOVA) when the covariate(s) are *random*. These are the
 analysis-of-covariance analogues of
 [`ptukey`](https://rdrr.io/r/stats/Tukey.html) /
 [`qtukey`](https://rdrr.io/r/stats/Tukey.html) and supply the critical
-values needed for Tukey–Kramer-type simultaneous confidence intervals on
+values needed for Tukey-Kramer-type simultaneous confidence intervals on
 (and tests of) contrasts of adjusted means.
 
 ## Usage
@@ -74,7 +74,7 @@ studentized range. Results are recycled to the length of the longest of
 **The statistic.** In a balanced ANCOVA with \\k\\ groups and \\p\\
 random covariates, let \\\hat\theta_i\\ be the adjusted group means and
 \\\hat\sigma\_{y \mid x}\\ the square root of the ANCOVA error mean
-square (on \\\nu\\ degrees of freedom). The Bryant–Paulson statistic is
+square (on \\\nu\\ degrees of freedom). The Bryant-Paulson statistic is
 the studentized range of the adjusted means, \$\$Q \\=\\ \frac{\max_i
 \hat\theta_i - \min_i \hat\theta_i}{\hat\sigma\_{y\mid x}\sqrt{K_1 -
 K_2}},\$\$ where \\K_1 - K_2\\ is the design constant that scales the
@@ -102,7 +102,10 @@ Paulson's p. 634 conditioning argument). When \\p = 0\\ the factor
 \\\delta\\ degenerates at 1 and \\Q_p\\ is exactly the ordinary
 studentized range (Bryant and Paulson, 1976, Sec. 1), so the code
 short-circuits to `ptukey`. The integral is evaluated with
-[`integrate`](https://rdrr.io/r/stats/integrate.html); `qbryant_paulson`
+[`integrate`](https://rdrr.io/r/stats/integrate.html) after the change
+of variables \\\delta = 1 - u^2\\, which removes the endpoint
+singularity of the Beta weight at \\\delta = 1\\ when \\p = 1\\ and
+makes the quadrature converge in a few subdivisions; `qbryant_paulson`
 inverts it with [`uniroot`](https://rdrr.io/r/stats/uniroot.html).
 Bryant and Bruvold (1980) later showed the same distribution and
 critical values remain valid when the covariates are *not* identically
@@ -173,19 +176,15 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # Critical value from the worked example of Bryant and Bruvold (1980):
-# k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. Getting a
-# quantile means inverting the distribution function with uniroot, and every
-# step of that root search evaluates the integral over the covariate-shrinkage
-# factor, so the call takes about half a second and is shown here rather than
-# run.
-# qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
-# It returns 4.83, the entry in Table 1 of Bryant and Paulson (1976). The
-# distribution function itself is a single integral and is quick, so the
-# pbryant_paulson calls below do run.
+# k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. The quantile
+# is found by inverting the distribution function with uniroot; it is 4.83,
+# the entry in Table 1 of Bryant and Paulson (1976).
+qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
+#> [1] 4.829856
 
 # The ordinary Tukey value (ignoring that the covariate is random and
-# estimated) is smaller, so it yields intervals that are too narrow:
-qtukey(0.95, nmeans = 6, df = 14)                                   # 4.64
+# estimated) is smaller, 4.64, so it yields intervals that are too narrow:
+qtukey(0.95, nmeans = 6, df = 14)
 #> [1] 4.638538
 
 # How much too narrow: the Bryant-Paulson area beyond the Tukey value is the

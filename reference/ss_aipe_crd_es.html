@@ -15,7 +15,7 @@ Pornprasertmanit and Schneider (2014)."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -305,7 +305,27 @@ cluster size, respectively.</p>
 <dd><p>Find the sample size combinations (the number of clusters and that cluster size) providing the lowest cost given the specified width of the confidence interval</p></dd>
 
 
-</dl></div>
+</dl><p>Every answer that targets a width, and the expected width a budget planner reports when
+<code>nrep</code> and the population values are supplied, rests on an a priori Monte Carlo
+simulation: a candidate design is evaluated by generating <code>nrep</code> data sets and reading
+the likelihood-based confidence interval on the standardized effect size from OpenMx. The
+planners whose answer needs one such evaluation, or a handful, run in about a second at a
+small <code>nrep</code> and are the ones shown in the examples. The two that search over the
+number of clusters, <code>ss_aipe_crd_es_n_clusters_fixed_width</code> at a fixed cluster size and
+<code>ss_aipe_crd_es_both_fixed_width</code>, which repeats that search across candidate cluster
+sizes and keeps the least costly combination that reaches the width, evaluate many
+candidates in turn and run for minutes at the default <code>nrep = 1000</code>, so they are not
+among the examples. A call such as
+<code>ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5,
+es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000, seed = 113)</code> returns the number of
+clusters of 20 individuals that brings the expected width of the interval on the
+individual-level standardized effect size to 0.3, and
+<code>ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5, indiv_cost = 1, es = 0.5,
+es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000, seed = 113)</code> returns the least
+costly pairing of clusters and cluster size at those costs that reaches a width of 0.5.
+Both accept <code>diff_size</code> for unequal cluster sizes, in which case the simulated data
+sets carry the unequal sizes and the confidence interval comes from a multiple-group model.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Boker, S. M., Neale, M. C., Maes, H. H., Wilde, M., Spiegel, M.,
@@ -359,59 +379,92 @@ estimation in two-group cluster randomized design</em> (Master Thesis). Illinois
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The interval width these planners can report, and every answer that</span></span></span>
 <span class="r-in"><span><span class="co"># targets a width, rests on an a priori Monte Carlo simulation: a candidate</span></span></span>
-<span class="r-in"><span><span class="co"># is evaluated by generating nrep data sets and reading the</span></span></span>
+<span class="r-in"><span><span class="co"># design is evaluated by generating nrep data sets and reading the</span></span></span>
 <span class="r-in"><span><span class="co"># likelihood-based confidence interval on the standardized effect size from</span></span></span>
-<span class="r-in"><span><span class="co"># OpenMx, and the planners that search over the number of clusters evaluate</span></span></span>
-<span class="r-in"><span><span class="co"># many candidates in turn. Those calls run for seconds to minutes apiece,</span></span></span>
-<span class="r-in"><span><span class="co"># so they are shown below but not run; the package's tests exercise them.</span></span></span>
-<span class="r-in"><span><span class="co"># Each one describes a population standardized effect size of 0.5, with</span></span></span>
-<span class="r-in"><span><span class="co"># es_type = 1 putting that effect size in individual-level standard</span></span></span>
-<span class="r-in"><span><span class="co"># deviation units and a quarter of the outcome variance lying between</span></span></span>
-<span class="r-in"><span><span class="co"># clusters.</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># OpenMx. The calls below use nrep = 2 so that the page runs quickly; a</span></span></span>
+<span class="r-in"><span><span class="co"># reported plan deserves the default nrep = 1000. Each call describes a</span></span></span>
+<span class="r-in"><span><span class="co"># population standardized effect size of 0.5, with es_type = 1 putting that</span></span></span>
+<span class="r-in"><span><span class="co"># effect size in individual-level standard deviation units and a quarter of</span></span></span>
+<span class="r-in"><span><span class="co"># the outcome variance lying between clusters.</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Supplying nrep and the population values to a budget planner adds the</span></span></span>
-<span class="r-in"><span><span class="co"># expected width of the interval the affordable design buys:</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,</span></span></span>
-<span class="r-in"><span><span class="co">#     clus_cost = 0, indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25,</span></span></span>
-<span class="r-in"><span><span class="co">#     pr_treat = 0.5, nrep = 1000, seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># expected width of the interval the affordable design buys.</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>,</span></span>
+<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, es <span class="op">=</span> <span class="fl">0.5</span>, es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>,</span></span>
+<span class="r-in"><span>  pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters                      50   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  budget                                    1000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Cluster size needed for a target width, given the number of clusters.</span></span></span>
 <span class="r-in"><span><span class="co"># With 250 clusters the planner settles on the smallest cluster size it</span></span></span>
 <span class="r-in"><span><span class="co"># will consider, two individuals per cluster, and the expected width still</span></span></span>
 <span class="r-in"><span><span class="co"># comes in well under the target: for a contrast between conditions that</span></span></span>
 <span class="r-in"><span><span class="co"># are assigned at the cluster level, precision is bought with clusters</span></span></span>
 <span class="r-in"><span><span class="co"># rather than with what happens inside them.</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_n_individuals_fixed_width(width = 0.5, n_clusters = 250,</span></span></span>
-<span class="r-in"><span><span class="co">#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,</span></span></span>
-<span class="r-in"><span><span class="co">#     seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_individuals_fixed_width</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.5</span>, n_clusters <span class="op">=</span> <span class="fl">250</span>,</span></span>
+<span class="r-in"><span>  es <span class="op">=</span> <span class="fl">0.5</span>, es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>, nrep <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cluster_size                              2    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.233</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Once recruiting a cluster costs 5, the number of clusters and the cluster</span></span></span>
 <span class="r-in"><span><span class="co"># size trade off against each other, and this planner searches the</span></span></span>
-<span class="r-in"><span><span class="co"># combinations the budget allows for the narrowest expected interval:</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5,</span></span></span>
-<span class="r-in"><span><span class="co">#     indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,</span></span></span>
-<span class="r-in"><span><span class="co">#     nrep = 1000, seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co"># Number of clusters needed for a target width, given the cluster size:</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,</span></span></span>
-<span class="r-in"><span><span class="co">#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,</span></span></span>
-<span class="r-in"><span><span class="co">#     seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co"># Both quantities under a target width, taking the least costly combination</span></span></span>
-<span class="r-in"><span><span class="co"># that reaches it:</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5,</span></span></span>
-<span class="r-in"><span><span class="co">#     indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,</span></span></span>
-<span class="r-in"><span><span class="co">#     nrep = 1000, seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co"># Unequal cluster sizes: diff_size gives each cluster's deviation from</span></span></span>
-<span class="r-in"><span><span class="co"># n_individuals (additive) or its multiplicative factor.</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,</span></span></span>
-<span class="r-in"><span><span class="co">#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,</span></span></span>
-<span class="r-in"><span><span class="co">#     seed = 113, diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,</span></span></span>
-<span class="r-in"><span><span class="co">#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,</span></span></span>
-<span class="r-in"><span><span class="co">#     seed = 113, diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))</span></span></span>
+<span class="r-in"><span><span class="co"># combinations the budget allows for the narrowest expected interval.</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_crd_es_both_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, clus_cost <span class="op">=</span> <span class="fl">5</span>,</span></span>
+<span class="r-in"><span>  indiv_cost <span class="op">=</span> <span class="fl">1</span>, es <span class="op">=</span> <span class="fl">0.5</span>, es_type <span class="op">=</span> <span class="fl">1</span>, icc_Y <span class="op">=</span> <span class="fl">0.25</span>, pr_treat <span class="op">=</span> <span class="fl">0.5</span>,</span></span>
+<span class="r-in"><span>  nrep <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                                      value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters                      110  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cluster_size                              4    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  exp_width_of_individual-level_effect_size 0.293</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  budget                                    990  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Unequal cluster sizes. Every planner accepts diff_size, which gives each</span></span></span>
+<span class="r-in"><span><span class="co"># cluster's deviation from n_individuals as an integer offset or as a</span></span></span>
+<span class="r-in"><span><span class="co"># multiplicative factor, recycled across the clusters; the planner prints</span></span></span>
+<span class="r-in"><span><span class="co"># the resulting cluster sizes and their frequencies ahead of its table.</span></span></span>
+<span class="r-in"><span><span class="co"># The budget planner shows both forms here.</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>,</span></span>
+<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>, diff_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="op">-</span><span class="fl">3</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   cluster_size freq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           17    5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           18    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           19    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4           20   16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           21    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6           22    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7           23    5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                 value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters 50   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  budget               1000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_crd_es_n_clusters_fixed_budget</span><span class="op">(</span>budget <span class="op">=</span> <span class="fl">1000</span>, n_individuals <span class="op">=</span> <span class="fl">20</span>,</span></span>
+<span class="r-in"><span>  clus_cost <span class="op">=</span> <span class="fl">0</span>, indiv_cost <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>  diff_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1.2</span>, <span class="fl">0.8</span>, <span class="fl">1.4</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1.1</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   cluster_size freq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           12    7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           16    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           18    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4           20   12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           22    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6           24    7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7           28    6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                 value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_n_clusters 50   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  budget               996  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

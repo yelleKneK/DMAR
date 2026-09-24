@@ -19,7 +19,7 @@ ordinal, interval, ratio) via a user-specified distance metric."><meta property=
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -227,11 +227,21 @@ the cost of acting on unreliable data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The percentile bootstrap interval for the same ratings, which</span></span></span>
-<span class="r-in"><span><span class="co"># recomputes alpha on each of B resamples of the units. Not run</span></span></span>
-<span class="r-in"><span><span class="co"># here, because 500 refits of alpha is more than a help page should</span></span></span>
-<span class="r-in"><span><span class="co"># do; the call is:</span></span></span>
-<span class="r-in"><span><span class="co"># krippendorff_alpha(cbind(r1, r2), level = "interval",</span></span></span>
-<span class="r-in"><span><span class="co">#                    boot = TRUE, B = 500L, seed = 113)</span></span></span>
+<span class="r-in"><span><span class="co"># recomputes alpha on each of B resamples of the units; the table</span></span></span>
+<span class="r-in"><span><span class="co"># gains lower_limit, upper_limit, and B_used rows. B = 200 keeps the</span></span></span>
+<span class="r-in"><span><span class="co"># example quick; a reported interval deserves the default B = 1000.</span></span></span>
+<span class="r-in"><span><span class="fu">krippendorff_alpha</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">r1</span>, <span class="va">r2</span><span class="op">)</span>, level <span class="op">=</span> <span class="st">"interval"</span>,</span></span>
+<span class="r-in"><span>                   boot <span class="op">=</span> <span class="cn">TRUE</span>, B <span class="op">=</span> <span class="fl">200L</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term               value </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  krippendorff_alpha 0.956 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  D_observed         0.0955</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  D_expected         2.16  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  n_pairable         60    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit        0.919 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit        0.974 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  B_used             200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

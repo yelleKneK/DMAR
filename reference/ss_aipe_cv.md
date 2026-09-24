@@ -108,7 +108,7 @@ Ken Kelley <kkelley@nd.edu>
 # Suppose one wishes to have a confidence interval with an expected width of .10
 # for a 99% confidence interval when the population coefficient of variation is .10.
 ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99)
-#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.
+#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.
 #>  term        value
 #>  necessary_N 20   
 #> 
@@ -117,17 +117,16 @@ ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99)
 # The same planning problem parameterized by the population mean and standard
 # deviation: mu = 10 and sigma = 1 imply the same coefficient of variation, .10.
 ss_aipe_cv(mu = 10, sigma = 1, width = .1, conf_level = .99)
-#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.
+#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.
 #>  term        value
 #>  necessary_N 20   
 #> 
 #> Confidence level: 99%
 
-# Ensuring that the confidence interval will be sufficiently narrow with a 99\%
+# Ensuring that the confidence interval will be sufficiently narrow with a 99%
 # certainty for the situation above.
 ss_aipe_cv(C_of_V = .1, width = .1, conf_level = .99, assurance = .99)
-#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.
-#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.
+#> Warning: During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 12 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.
 #>  term        value
 #>  necessary_N 33   
 #> 

@@ -125,7 +125,10 @@ plot(d18 ~ wk18,
      ylab = "Effect size d", pch = 16)
 ```
 
-![](teacher_expectancy_files/figure-html/unnamed-chunk-4-1.png)
+![plot of chunk
+unnamed-chunk-4](teacher_expectancy-fig-unnamed-chunk-4-1.png)
+
+plot of chunk unnamed-chunk-4
 
 The raw correlation and Raudenbush’s linearized (reciprocal-transformed)
 version:
@@ -326,7 +329,9 @@ plot_forest(d, vi, labels = teacher_expectancy$author,
             xlab = "Standardized mean difference (d)")
 ```
 
-![](teacher_expectancy_files/figure-html/forest-1.png)
+![plot of chunk forest](teacher_expectancy-fig-forest-1.png)
+
+plot of chunk forest
 
 The pooled average is small and its confidence interval narrow, but the
 summary that respects the heterogeneity is conditional: pooling

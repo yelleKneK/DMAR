@@ -219,12 +219,15 @@ ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29),
 # For the family of all three pairwise comparisons of the adjusted means,
 # with coverage that holds simultaneously across the family, select
 # procedure = "bryant_paulson"; the call is forwarded to ci_c_ancova_bp().
-# That route inverts the Bryant-Paulson distribution numerically to get its
-# multiplier, which takes about half a second, so it is shown here rather
-# than run.
-# ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n = 10,
-#             procedure = "bryant_paulson")
 # The simultaneous limits are wider, which is the price of the family
 # statement: group 1 against group 2 runs from -10.61 to 1.61, where the
-# single planned contrast above ran from -9.47 to 0.47.
+# single planned contrast above ran from -9.46 to 0.46.
+ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n = 10,
+            procedure = "bryant_paulson")
+#>  contrast          estimate lower_limit upper_limit
+#>  group_1 - group_2 -4.5     -10.6       1.61       
+#>  group_1 - group_3 -6.5     -12.6       -0.393     
+#>  group_2 - group_3 -2       -8.11       4.11       
+#> 
+#> Confidence level: 95%
 ```

@@ -293,7 +293,7 @@ distribution (Kelley, 2007; Steiger, 2004). Given an observed *F*, DMAR
 finds the noncentrality values whose noncentral *F* distributions place
 the observed *F* at the chosen lower and upper tail probabilities (this
 is what
-[`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 does), then transforms those noncentrality endpoints into the metric
 requested: a proportion of variance, a signal to noise ratio, or its
 square root.
@@ -505,7 +505,7 @@ $`-1`$:
 
 c_weights <- c(1/3, 1/3, 1/3, -1)
 sum(c_weights)                  # all weights sum to zero
-#> [1] -5.551115e-17
+#> [1] 0
 sum(c_weights[c_weights > 0])   # the positive weights sum to 1
 #> [1] 1
 sum(c_weights[c_weights < 0])   # the negative weights sum to -1

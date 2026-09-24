@@ -75,13 +75,13 @@ ci_mahalanobis(
   set `conf_level = NULL` and supply both (an asymmetric or one-sided
   interval with coverage `1 - alpha_lower - alpha_upper`); supplying
   either alongside a non-`NULL` `conf_level` is an error, as in
-  [`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
-  to which they are passed.
+  [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md), to
+  which they are passed.
 
 - ...:
 
   Additional arguments passed to
-  [`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+  [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
   (for example `tol`).
 
 ## Value
@@ -119,14 +119,14 @@ Section 5.2).
 **Confidence interval.** The CI on \\\Delta^2\\ is obtained by inverting
 these distributional results (Reiser, 2001): a CI on the noncentrality
 parameter \\\lambda\\ is constructed via
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
-and then mapped back to \\\Delta^2\\ by \\\Delta^2 = \lambda\\(n_1 +
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) and
+then mapped back to \\\Delta^2\\ by \\\Delta^2 = \lambda\\(n_1 +
 n_2)/(n_1 n_2)\\ (two sample) or \\\Delta^2 = \lambda / n\\ (one
 sample). When the observed \\F\\ is below the lower-tail critical value
 of the central *F*-distribution at the requested confidence level, the
 lower CI on \\\lambda\\ (and hence on \\\Delta^2\\) is clamped to zero,
 in keeping with the
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 convention.
 
 **Bias.** The plug-in estimator \\D^2\\ is upward biased for
@@ -162,7 +162,7 @@ Software, 20*(8), 1–24.
 
 ## See also
 
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md),
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md)
 

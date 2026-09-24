@@ -85,8 +85,8 @@ boundary of the support, so `lower_cv` is 0 under the default.
 A noncentral parameter can be supplied, which is what a power analysis
 needs, though it would not be used for a standard null hypothesis
 significance test. See
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
-for confidence limits on the noncentral parameter itself.
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) for
+confidence limits on the noncentral parameter itself.
 
 ## References
 
@@ -102,7 +102,7 @@ values.)
 [`cv_chisq`](https://yelleknek.github.io/DMAR/reference/cv_chisq.md),
 [`cv_bonferroni_f`](https://yelleknek.github.io/DMAR/reference/cv_bonferroni_f.md),
 [`cv_scheffe`](https://yelleknek.github.io/DMAR/reference/cv_scheffe.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 Other critical values:
 [`cv_bonferroni_f()`](https://yelleknek.github.io/DMAR/reference/cv_bonferroni_f.md),

@@ -51,9 +51,9 @@ most-used MBESS calls to their DMAR equivalents.
 | `MBESS::ci.c(...)`, `MBESS::ci.c.ancova(...)` | `DMAR::ci_c(...)`, `DMAR::ci_c_ancova(...)` | Unstandardized contrast CIs. |
 | `MBESS::ci.rmsea(...)` | `DMAR::ci_rmsea(...)` | Noncentral-$`\chi^2`$ inversion for RMSEA. |
 | `MBESS::ci.cc(...)` | `DMAR::ci_r(...)` | Correlation CI; `r` and `n` arguments. |
-| `MBESS::conf.limits.nct(...)` | `DMAR::conf_limits_nct(...)` | Noncentral *t*; `t.value -> t_value`. |
-| `MBESS::conf.limits.ncf(...)` | `DMAR::conf_limits_ncf(...)` | Noncentral $`F`$. |
-| `MBESS::conf.limits.nc.chisq(...)` | `DMAR::conf_limits_nc_chisq(...)` | Noncentral $`\chi^2`$. |
+| `MBESS::conf.limits.nct(...)` | `DMAR::ci_nc_t(...)` | Noncentral *t*; `t.value -> t_value`. |
+| `MBESS::conf.limits.ncf(...)` | `DMAR::ci_nc_F(...)` | Noncentral $`F`$. |
+| `MBESS::conf.limits.nc.chisq(...)` | `DMAR::ci_nc_chisq(...)` | Noncentral $`\chi^2`$. |
 | `MBESS::ss.aipe.smd(delta, conf.level, width, ...)` | `DMAR::ss_aipe_smd(delta, conf_level, width, ...)` | Same AIPE planner; tidy return. |
 | `MBESS::ss.aipe.R2(...)` | `DMAR::ss_aipe_R2(...)` | AIPE planner for $`R^2`$; `K -> p`; `random.regressors` argument retired in favor of `random_predictors`. |
 | `MBESS::ss.aipe.reg.coef(...)` | `DMAR::ss_aipe_reg_coef(...)` | AIPE planner for a regression coefficient. |
@@ -188,8 +188,9 @@ depend.
 - A package-wide `term`/`value` `data.frame` schema; broom-style S3
   methods for many families; `set.seed(113)` as the package-wide
   reproducibility seed for examples and tests; `seed = NULL` as the
-  default for every bootstrap and Monte Carlo function, with explicit
-  save/restore of `.Random.seed` when the user supplies a seed.
+  default for every bootstrap and Monte Carlo function, with the
+  caller’s generator state restored when a function given a seed
+  returns.
 
 ## A Short Worked Migration
 

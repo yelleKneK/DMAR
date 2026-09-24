@@ -23,8 +23,7 @@ ss_aipe_c_ancova_sensitivity(
   width,
   conf_level = 0.95,
   assurance = NULL,
-  save = FALSE,
-  filename = "ss_aipe_c_ancova_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -95,14 +94,15 @@ ss_aipe_c_ancova_sensitivity(
   narrower than the desired width with a specified degree of certainty
   (must be NULL or between zero and unity)
 
-- save:
-
-  option to save simulation results. It can be saved with `save = TRUE`
-  outside of the printed results
-
 - filename:
 
-  the name of the file that simulation results will be saved to
+  an optional path for a comma separated file recording every
+  replication (the realized contrast, its full and covariate-ignoring
+  standard errors and their ratio, the interval width, and the three
+  non-coverage indicators): nothing is written when `filename` is `NULL`
+  (the default), a new file with a header row is created otherwise, an
+  existing file at that path is appended to, and a throwaway run should
+  point it at `tempfile(fileext = ".csv")`
 
 ## Value
 
@@ -124,7 +124,7 @@ supplied or as resolved from `est_error_var_anova` and `est_rho`),
 assurance was supplied). The proportion rows are on the 0 to 1 scale,
 not percentages. The per-replication vectors (`psi_obs`, `se_psi`,
 `se_psi_restricted`, `width_obs`) are not returned; they are written to
-the CSV named by `filename` when `save = TRUE`.
+the comma separated file named by `filename` when one is supplied.
 
 ## Details
 

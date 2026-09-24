@@ -185,7 +185,7 @@ Review of Psychology, 59*, 537–563.
 ## See also
 
 [`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
 for what a chosen design delivers: power, the Type S (sign) and Type M

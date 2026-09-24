@@ -11,7 +11,7 @@ deviation, from the accuracy in parameter estimation (AIPE) perspective."><meta 
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,7 @@ and implementation. <em>Journal of Statistical Software, 20</em>(8), 1–24.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="conf_limits_nct.html">conf_limits_nct</a></code>, <code><a href="ci_sm.html">ci_sm</a></code></p>
+    <div class="dont-index"><p><code><a href="ci_nc_t.html">ci_nc_t</a></code>, <code><a href="ci_sm.html">ci_sm</a></code></p>
 <p><code><a href="design_consequences.html">design_consequences</a></code> for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the
   significance filter, and the expected confidence interval width.</p></div>
@@ -131,7 +131,7 @@ and implementation. <em>Journal of Statistical Software, 20</em>(8), 1–24.
 <span class="r-in"><span><span class="co"># the function should be specified as follows.</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_sm</span><span class="op">(</span>sm <span class="op">=</span> <span class="fl">10</span>, width <span class="op">=</span> <span class="fl">2.5</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, assurance <span class="op">=</span> <span class="fl">.90</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, conf_limits_nct() reported a noncentrality parameter exceeding 37.62 in magnitude in 254 intermediate evaluations, the limit at which R's pt()/qt() can return accurate noncentral t probabilities. The returned sample size may be affected; see ?conf_limits_nct.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, ci_nc_t() reported a noncentrality parameter exceeding 37.62 in magnitude in 254 intermediate evaluations, the limit at which R's pt()/qt() can return accurate noncentral t probabilities. The returned sample size may be affected; see ?ci_nc_t.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 150  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

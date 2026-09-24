@@ -86,9 +86,9 @@ in either of two equivalent metrics: the observed *t*-statistic (via
 paths are mathematically equivalent under the equal variances assumption
 (since \\t = \hat d \sqrt{n_1 n_2 / (n_1 + n_2)}\\); pick whichever is
 easier to obtain. Supply exactly one. Both paths internally call
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
-to invert the noncentral *t* distribution at the specified two-tailed
-(or asymmetric, via `alpha_lower` / `alpha_upper`) confidence level.
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md) to
+invert the noncentral *t* distribution at the specified two-tailed (or
+asymmetric, via `alpha_lower` / `alpha_upper`) confidence level.
 
 **Independent vs.\\ paired comparison.** `ci_smd` assumes two
 *independent* groups with a common variance. DMAR does not currently
@@ -109,12 +109,12 @@ rescaling preserves coverage.
 
 ## Warning
 
-This function uses `conf_limits_nct`, which has as one of its arguments
-`tol` (and can be modified with `tol` of the present function). If the
-present function fails to converge (i.e., if it runs but does not report
-a solution), it is likely that the `tol` value is too restrictive and
+This function uses `ci_nc_t`, which has as one of its arguments `tol`
+(and can be modified with `tol` of the present function). If the present
+function fails to converge (i.e., if it runs but does not report a
+solution), it is likely that the `tol` value is too restrictive and
 should be increased by a factor of 10, but probably by no more than 100.
-Running the function `conf_limits_nct` directly will report the actual
+Running the function `ci_nc_t` directly will report the actual
 probability values of the limits found. This should be done if any
 modification to `tol` is necessary in order to ensure acceptable
 confidence limits for the noncentral *t* parameter have been achieved.
@@ -181,7 +181,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 [`ss_aipe_smd`](https://yelleknek.github.io/DMAR/reference/ss_aipe_smd.md),
 [`ss_power_smd`](https://yelleknek.github.io/DMAR/reference/ss_power_smd.md),
 [`plot_smd`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

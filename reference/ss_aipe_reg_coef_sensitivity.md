@@ -23,8 +23,7 @@ ss_aipe_reg_coef_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_reg_coef_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -100,14 +99,14 @@ ss_aipe_reg_coef_sensitivity(
   Specify with a `TRUE`/`FALSE` statement if the iteration number should
   be printed as the simulation within the function runs
 
-- save:
-
-  option to save simulation results. It can be saved with `save = TRUE`
-  outside of the printed results
-
 - filename:
 
-  the name of the file that simulation results will be saved to
+  Optional path of a CSV file to receive the per-replication results
+  (the coefficient estimate, its confidence limits, the observed
+  \\R^2\\, the standard error, and the *t* statistic), appended when the
+  file already exists and created otherwise; the default `NULL` writes
+  nothing, and a throwaway run that wants the file should point it at
+  `tempfile(fileext = ".csv")`.
 
 ## Value
 

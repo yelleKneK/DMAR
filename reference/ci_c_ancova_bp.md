@@ -185,34 +185,54 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# The multiplier for these intervals is a Bryant-Paulson quantile, which has
-# no closed form: it is obtained by inverting a numerical integral with a
-# root search. With the single random covariate of the worked example below
-# that takes about half a second per call, so nothing on this page is run;
-# the calls, with the values they produce, are given here.
-
 # Bryant and Bruvold (1980) worked example: 6 panels, 1 covariate, nu = 14,
 # ANCOVA error MS = 0.01326. Here the design is a randomized block with
 # s = 4 blocks, so the per-group "n" for the adjusted-mean SE is 4 and the
-# error df (14) must be supplied directly.
-# adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
-# bp <- ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-#                      n = 4, num_covariates = 1, df = 14)
-# bp
+# error df (14) must be supplied directly. The multiplier for these
+# intervals is a Bryant-Paulson quantile, which has no closed form; it is
+# obtained by inverting the distribution function with a root search.
+adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
+bp <- ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+                     n = 4, num_covariates = 1, df = 14)
+bp
+#>  contrast          estimate lower_limit upper_limit
+#>  group_1 - group_2 -0.024   -0.302      0.254      
+#>  group_1 - group_3 -0.507   -0.785      -0.229     
+#>  group_1 - group_4 -0.92    -1.2        -0.642     
+#>  group_1 - group_5 -1.02    -1.3        -0.745     
+#>  group_1 - group_6 -1.28    -1.56       -1         
+#>  group_2 - group_3 -0.483   -0.761      -0.205     
+#>  group_2 - group_4 -0.896   -1.17       -0.618     
+#>  group_2 - group_5 -0.999   -1.28       -0.721     
+#>  group_2 - group_6 -1.26    -1.54       -0.979     
+#>  group_3 - group_4 -0.413   -0.691      -0.135     
+#>  group_3 - group_5 -0.516   -0.794      -0.238     
+#>  group_3 - group_6 -0.774   -1.05       -0.496     
+#>  group_4 - group_5 -0.103   -0.381      0.175      
+#>  group_4 - group_6 -0.361   -0.639      -0.0829    
+#>  group_5 - group_6 -0.258   -0.536      0.0201     
+#> 
+#> Confidence level: 95%
 # The multiplier is 4.83 and every pairwise critical difference is 0.278,
 # matching the paper; the 15 intervals hold jointly at the 95 percent level.
 # The multiplier is kept on the result, so the critical difference can be
 # rebuilt by hand as q * s_ancova * sqrt(1/n):
-# attr(bp, "critical_value")
-# attr(bp, "critical_value") * sqrt(0.01326) * sqrt(1 / 4)
+attr(bp, "critical_value")
+#> [1] 4.829856
+attr(bp, "critical_value") * sqrt(0.01326) * sqrt(1 / 4)
+#> [1] 0.278084
 
 # A complex contrast (say panels 1 and 2 against panels 3 through 6) is
 # requested by passing its weights to c_weights, together with
 # contrast_type = "allowance", the all-contrasts form of Eq. (2.4) of
 # Bryant and Bruvold. That contrast of adjusted means is -0.921, with
 # simultaneous limits of -1.199 and -0.643.
-# ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-#                c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
-#                n = 4, num_covariates = 1, df = 14,
-#                contrast_type = "allowance")
+ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
+               c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
+               n = 4, num_covariates = 1, df = 14,
+               contrast_type = "allowance")
+#>  contrast   estimate lower_limit upper_limit
+#>  contrast_1 -0.921   -1.2        -0.643     
+#> 
+#> Confidence level: 95%
 ```

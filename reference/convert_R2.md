@@ -58,7 +58,7 @@ converted scalar. The conversions are exact inverses of one another
 which is what makes them useful inside the noncentrality-parameter
 confidence interval machinery of
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md) and
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md).
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md).
 
 ## Details
 
@@ -77,8 +77,8 @@ Software, 20*(8), 1–24.
 
 [`ss_aipe_R2`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2.md),
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 Other parameterization conversions:
 [`convert_F_chisq()`](https://yelleknek.github.io/DMAR/reference/convert_F_chisq.md),

@@ -90,7 +90,14 @@ items and the population reliability were both high. They specifically
 recommend BCa for categorical omega. Because no bootstrap runs in DMAR
 unless the user requests one, the default output is the point estimate
 with a message naming the call that produces the recommended interval;
-request `ci_method = "bca"` to obtain it.
+request `ci_method = "bca"` to obtain it. The interval is not a quick
+one. Every replication refits the ordered-categorical factor model and
+the saturated polychoric model behind the denominator, a fraction of a
+second for a scale of moderate length, and the jackknife behind the BCa
+acceleration adds one such refit per case, so the recommended interval
+at the default `B = 10000` runs for tens of minutes. The example on this
+page therefore stops at the point estimate; the reported analysis adds
+`ci_method = "bca"` to the same call, with `seed` for reproducibility.
 
 **When to use.** Use `reliability_omega_categorical` when items are
 ordered-categorical, especially when (a) the number of categories is
@@ -247,19 +254,20 @@ reliability_omega_categorical(data = items)
 #>  N_complete  200  
 #>  J           6    
 
-# The same items treated as continuous, for contrast. That call fits a
-# second factor analysis model, so it is shown rather than run:
-#   reliability_omega(data = items)
-# With five categories and thresholds spread across the latent scale
-# the two coefficients nearly agree on these data; the gap widens as
-# the categories get coarser and as the thresholds move into the
-# tails, which is where the categorical coefficient is worth its cost.
-
-# Every interval for categorical omega is bootstrap based, and each
-# replication refits the ordered-categorical factor analysis model.
-# That refitting is why it is not run here; the call is
-#   reliability_omega_categorical(data = items, ci_method = "bca",
-#                                 B = 10000, seed = 113)
-# and a reported interval deserves the BCa method at the default
-# B = 10000.
+# The same items treated as continuous, for contrast. With five
+# categories and thresholds spread across the latent scale the two
+# coefficients nearly agree on these data; the gap widens as the
+# categories get coarser and as the thresholds move into the tails,
+# which is where the categorical coefficient is worth its cost.
+reliability_omega(data = items)
+#> Robust omega is reported without a confidence interval by default because its interval is bootstrap based. Request it with ci_method = "percentile" (or "bca"); B = 10000 replications is the default when you do.
+#>  term        value
+#>  estimate    0.83 
+#>  se          <NA> 
+#>  lower_limit <NA> 
+#>  upper_limit <NA> 
+#>  conf_level  0.95 
+#>  N           200  
+#>  N_complete  200  
+#>  J           6    
 ```

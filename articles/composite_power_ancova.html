@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Composite Power for Factorial ANCOVA: Planning Simple Effects, an Interaction, and a Moderator</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">August 2026</h4>
+            <h4 data-toc-skip class="date">September 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/composite_power_ancova.Rmd" class="external-link"><code>vignettes/composite_power_ancova.Rmd</code></a></small>
       <div class="d-none name"><code>composite_power_ancova.Rmd</code></div>
@@ -214,7 +214,11 @@ margins in gray:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"The 2 × 2 design with population cell means"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Grey margins are the marginal (main-effect) means"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Condition"</span>, y <span class="op">=</span> <span class="st">"Agent"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/design-figure-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-design-figure-1.png" alt="plot of chunk design-figure"><p class="caption">
+plot of chunk design-figure
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="viewing-the-population">Viewing the Population<a class="anchor" aria-label="anchor" href="#viewing-the-population"></a>
@@ -261,7 +265,11 @@ that the two main effects compare.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6.5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="va">has_patchwork</span><span class="op">)</span> <span class="va">p_interaction</span> <span class="op">+</span> <span class="va">p_marginals</span> <span class="kw">else</span> <span class="va">p_interaction</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/population-figure-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-population-figure-1.png" alt="plot of chunk population-figure"><p class="caption">
+plot of chunk population-figure
+</p>
+</div>
 <p>The substantive pattern is visible before any arithmetic. Under the
 Control protocol, humans (6.0) outperform machines (4.0). The Treatment
 lowers performance for both, but it lowers human performance
@@ -334,7 +342,11 @@ directly on the population means.</p>
 <span>       subtitle <span class="op">=</span> <span class="st">"psi_AB = (psi_1 - psi_2)/2 = (2.9 - 1.1)/2 = 0.9"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Performance score"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2.5</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2.5</span>, <span class="fl">6.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/decomposition-figure-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-decomposition-figure-1.png" alt="plot of chunk decomposition-figure"><p class="caption">
+plot of chunk decomposition-figure
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="contrast-weights">Contrast Weights<a class="anchor" aria-label="anchor" href="#contrast-weights"></a>
@@ -690,7 +702,11 @@ critical value.</p>
 <span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Treatment cost among Machines: n = %d per cell, lambda = %.2f, critical t = %.2f"</span>,</span>
 <span>                           <span class="va">n_m</span>, <span class="va">lam</span>, <span class="va">tcrit</span><span class="op">)</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"t statistic"</span>, y <span class="op">=</span> <span class="st">"Density"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/noncentral-figure-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-noncentral-figure-1.png" alt="plot of chunk noncentral-figure"><p class="caption">
+plot of chunk noncentral-figure
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="the-shared-design">The Shared Design<a class="anchor" aria-label="anchor" href="#the-shared-design"></a>
@@ -751,7 +767,11 @@ level throughout this range.</p>
 <span>       subtitle <span class="op">=</span> <span class="st">"Among the targeted effects, the Treatment cost for Machines reaches .80 last"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"n per cell"</span>, y <span class="op">=</span> <span class="st">"Marginal power (analytic)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/power-curves-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-power-curves-1.png" alt="plot of chunk power-curves"><p class="caption">
+plot of chunk power-curves
+</p>
+</div>
 </div>
 </div>
 <div class="section level2">
@@ -869,7 +889,11 @@ exists.</p>
 <span>       x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1.05</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">8.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/composite-bar-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-composite-bar-1.png" alt="plot of chunk composite-bar"><p class="caption">
+plot of chunk composite-bar
+</p>
+</div>
 <div class="section level3">
 <h3 id="sizing-the-study-for-composite-power">Sizing the Study for Composite Power<a class="anchor" aria-label="anchor" href="#sizing-the-study-for-composite-power"></a>
 </h3>
@@ -907,7 +931,11 @@ size must increase until the simulation reaches that value.</p>
 <span>       x <span class="op">=</span> <span class="st">"n per cell"</span>, y <span class="op">=</span> <span class="st">"Power"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/composite-curve-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-composite-curve-1.png" alt="plot of chunk composite-curve"><p class="caption">
+plot of chunk composite-curve
+</p>
+</div>
 <p>The gray curve is what 25 replications produce: it wanders around the
 converged curve and is not monotone, even though composite power must
 increase with sample size. Reading a required sample size off a curve
@@ -1221,7 +1249,11 @@ expended.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Power gain as a function of covariate strength"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Interaction power at n = 20 per cell, with one covariate"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Covariate correlation with the outcome"</span>, y <span class="op">=</span> <span class="st">"Interaction power"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/covariate-curve-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-covariate-curve-1.png" alt="plot of chunk covariate-curve"><p class="caption">
+plot of chunk covariate-curve
+</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="the-moderator-as-a-three-way-interaction">The Moderator as a Three-Way Interaction<a class="anchor" aria-label="anchor" href="#the-moderator-as-a-three-way-interaction"></a>
@@ -1319,7 +1351,11 @@ and it does so gradually when the three-way interaction is small.</p>
 <span>       subtitle <span class="op">=</span> <span class="st">"The Agent × Condition interaction changes across levels of the moderator"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Performance score"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.spacing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="st">"lines"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/threeway-figure-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-threeway-figure-1.png" alt="plot of chunk threeway-figure"><p class="caption">
+plot of chunk threeway-figure
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="effect-sizes-for-the-moderated-model">Effect Sizes for the Moderated Model<a class="anchor" aria-label="anchor" href="#effect-sizes-for-the-moderated-model"></a>
@@ -1415,7 +1451,11 @@ and marks the value adopted here.</p>
 <span>       subtitle <span class="op">=</span> <span class="st">"Total N for power of .80, as a function of the three-way coefficient"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"gamma (change in the interaction per SD of the moderator)"</span>,</span>
 <span>       y <span class="op">=</span> <span class="st">"Total N required"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/gamma-curve-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-gamma-curve-1.png" alt="plot of chunk gamma-curve"><p class="caption">
+plot of chunk gamma-curve
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="confirming-the-plan-by-simulation">Confirming the Plan by Simulation<a class="anchor" aria-label="anchor" href="#confirming-the-plan-by-simulation"></a>
@@ -1491,7 +1531,11 @@ in the random-predictor case:</p>
 <span>       subtitle <span class="op">=</span> <span class="st">"Monte Carlo power for the small three-way interaction (gamma = 0.8)"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Total N"</span>, y <span class="op">=</span> <span class="st">"Three-way power (Monte Carlo)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0.72</span>, <span class="fl">0.90</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/threeway-mc-curve-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-threeway-mc-curve-1.png" alt="plot of chunk threeway-mc-curve"><p class="caption">
+plot of chunk threeway-mc-curve
+</p>
+</div>
 <p>Power of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>.80</mn><annotation encoding="application/x-tex">.80</annotation></semantics></math>
 is reached near
@@ -1525,7 +1569,11 @@ powered well beyond
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Total sample size by planning objective"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Total N"</span>, y <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">xlim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">ladder</span><span class="op">$</span><span class="va">N</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1.18</span><span class="op">)</span></span></code></pre></div>
-<p><img src="composite_power_ancova_files/figure-html/final-ladder-1.png" class="r-plt" alt="" width="792" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="composite_power_ancova-fig-final-ladder-1.png" alt="plot of chunk final-ladder"><p class="caption">
+plot of chunk final-ladder
+</p>
+</div>
 <table class="table">
 <colgroup>
 <col width="23%">

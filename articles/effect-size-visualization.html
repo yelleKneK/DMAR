@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Visualizing Effect Sizes and Distributions With DMAR</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">2026-08-17</h4>
+            <h4 data-toc-skip class="date">2026-09-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/effect-size-visualization.Rmd" class="external-link"><code>vignettes/effect-size-visualization.Rmd</code></a></small>
       <div class="d-none name"><code>effect-size-visualization.Rmd</code></div>
@@ -464,7 +464,7 @@ to produce with a single <code><a href="https://rdrr.io/pkg/ggrain/man/geom_rain
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/raincloud-gain-1.png" class="r-plt" alt="Raincloud plot of total IQ change from pretest to the end-of-study follow-up, by treatment arm, combining a half-violin density, jittered raw scores, and a boxplot summary (Allen et al., 2019)." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-raincloud-gain-1.png" alt="Raincloud plot of total IQ change from pretest to the end-of-study follow-up, by treatment arm, combining a half-violin density, jittered raw scores, and a boxplot summary (Allen et al., 2019)."><p class="caption">
 Raincloud plot of total IQ change from pretest to the end-of-study
 follow-up, by treatment arm, combining a half-violin density, jittered
 raw scores, and a boxplot summary (Allen et al., 2019).
@@ -484,7 +484,7 @@ raw scores, and a boxplot summary (Allen et al., 2019).
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/raincloud-post-1.png" class="r-plt" alt="Raincloud plot of total IQ at the end-of-study follow-up, by treatment arm. The two distributions overlap heavily, and the bloomer arm holds far fewer pupils, which the density curve smooths over and the jittered points do not." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-raincloud-post-1.png" alt="Raincloud plot of total IQ at the end-of-study follow-up, by treatment arm. The two distributions overlap heavily, and the bloomer arm holds far fewer pupils, which the density curve smooths over and the jittered points do not."><p class="caption">
 Raincloud plot of total IQ at the end-of-study follow-up, by treatment
 arm. The two distributions overlap heavily, and the bloomer arm holds
 far fewer pupils, which the density curve smooths over and the jittered
@@ -614,7 +614,7 @@ displayed by default.</p>
 <span>  title        <span class="op">=</span> <span class="st">"IQ Change: Bloomer Against Control"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/plot-smd-1.png" class="r-plt" alt="Standardized mean difference in total IQ change between the bloomer and control arms, with 95\% confidence interval and per-arm sample sizes, displayed as two unit-variance normal curves separated by the observed \(d\)." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-plot-smd-1.png" alt="Standardized mean difference in total IQ change between the bloomer and control arms, with 95\% confidence interval and per-arm sample sizes, displayed as two unit-variance normal curves separated by the observed \(d\)."><p class="caption">
 Standardized mean difference in total IQ change between the bloomer and
 control arms, with 95% confidence interval and per-arm sample sizes,
 displayed as two unit-variance normal curves separated by the observed
@@ -635,7 +635,7 @@ result.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_smd.html">plot_smd</a></span><span class="op">(</span>smd <span class="op">=</span> <span class="fl">0.50</span>, n_1 <span class="op">=</span> <span class="fl">30</span>, n_2 <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>         title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Visual Representation of "</span>, <span class="fu">italic</span><span class="op">(</span><span class="va">d</span><span class="op">)</span>, <span class="st">" = 0.50"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/plot-smd-known-1.png" class="r-plt" alt="Two unit-variance normal distributions separated by \(d = 0.50\). The separation is real and the overlap is still substantial." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-plot-smd-known-1.png" alt="Two unit-variance normal distributions separated by \(d = 0.50\). The separation is real and the overlap is still substantial."><p class="caption">
 Two unit-variance normal distributions separated by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>=</mo><mn>0.50</mn></mrow><annotation encoding="application/x-tex">d = 0.50</annotation></semantics></math>.
 The separation is real and the overlap is still substantial.
@@ -741,7 +741,7 @@ point estimates, confidence bounds, and sample sizes.</p>
 <span>        xlab  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">omega</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>,</span>
 <span>        title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Partial "</span>, <span class="va">omega</span><span class="op">^</span><span class="fl">2</span>, <span class="st">" for the Treatment Effect on IQ Change"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/plot-ci-omega-1.png" class="r-plt" alt="Forest-plot display of partial \(\omega^2\) with 95\% noncentral \(F\) confidence interval (Steiger, 2004) for the treatment effect on IQ change." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-plot-ci-omega-1.png" alt="Forest-plot display of partial \(\omega^2\) with 95\% noncentral \(F\) confidence interval (Steiger, 2004) for the treatment effect on IQ change."><p class="caption">
 Forest-plot display of partial
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ω</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\omega^2</annotation></semantics></math>
 with 95% noncentral
@@ -824,7 +824,7 @@ forest plot with one row per effect:</p>
 <span>        xlab  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="va">omega</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>,</span>
 <span>        title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Warpbreaks: Partial "</span>, <span class="va">omega</span><span class="op">^</span><span class="fl">2</span>, <span class="st">" per Effect"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/plot-ci-factorial-1.png" class="r-plt" alt="Multi-row forest plot of partial \(\omega^2\) for each effect in a 2 by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney, &amp; Kelley, 2027)." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-plot-ci-factorial-1.png" alt="Multi-row forest plot of partial \(\omega^2\) for each effect in a 2 by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney, &amp; Kelley, 2027)."><p class="caption">
 Multi-row forest plot of partial
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ω</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\omega^2</annotation></semantics></math>
 for each effect in a 2 by 3 factorial ANOVA on the warpbreaks data.
@@ -911,7 +911,7 @@ or <code><a href="../reference/ci_correlation.html">ci_R()</a></code>. We store 
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_R2.html">plot_R2</a></span><span class="op">(</span>R2 <span class="op">=</span> <span class="va">R2_obs</span>, N <span class="op">=</span> <span class="va">N</span>, p <span class="op">=</span> <span class="va">p</span>,</span>
 <span>        title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">italic</span><span class="op">(</span><span class="va">R</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span>, <span class="st">" for Follow-Up IQ on Pretest IQ and Grade"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/plot-r2-1.png" class="r-plt" alt="Squared multiple correlation \(R^2\) with 95\% confidence interval for the regression of end-of-study IQ on pretest IQ and grade." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-plot-r2-1.png" alt="Squared multiple correlation \(R^2\) with 95\% confidence interval for the regression of end-of-study IQ on pretest IQ and grade."><p class="caption">
 Squared multiple correlation
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>
 with 95% confidence interval for the regression of end-of-study IQ on
@@ -985,7 +985,7 @@ displayed with <code><a href="../reference/plot_ci.html">plot_ci()</a></code>:</
 <span>        xlab  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Multiple "</span>, <span class="fu">italic</span><span class="op">(</span><span class="va">R</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>        title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Confidence Interval for the Multiple Correlation "</span>, <span class="fu">italic</span><span class="op">(</span><span class="va">R</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/ci-r-1.png" class="r-plt" alt="Confidence interval for the multiple correlation \(R\), constructed from the random-predictor sampling distribution of \(R^2\) (Lee, 1971), the default for `ci_R()`. The sample size is annotated above the interval, where the width of the interval cannot push it off the panel." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-ci-r-1.png" alt="Confidence interval for the multiple correlation \(R\), constructed from the random-predictor sampling distribution of \(R^2\) (Lee, 1971), the default for `ci_R()`. The sample size is annotated above the interval, where the width of the interval cannot push it off the panel."><p class="caption">
 Confidence interval for the multiple correlation
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>,
 constructed from the random-predictor sampling distribution of
@@ -1030,7 +1030,7 @@ build a side-by-side comparison of different effects:</p>
 <span>  title <span class="op">=</span> <span class="st">"The Bloomer Effect Across Measurement Occasions"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/combined-forest-1.png" class="r-plt" alt="Standardized mean differences with 95\% confidence intervals for the bloomer effect at three points in the study, displayed as a combined forest plot. The sample size is annotated above each interval, so an interval that runs wide cannot push it off the panel." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-combined-forest-1.png" alt="Standardized mean differences with 95\% confidence intervals for the bloomer effect at three points in the study, displayed as a combined forest plot. The sample size is annotated above each interval, so an interval that runs wide cannot push it off the panel."><p class="caption">
 Standardized mean differences with 95% confidence intervals for the
 bloomer effect at three points in the study, displayed as a combined
 forest plot. The sample size is annotated above each interval, so an
@@ -1057,7 +1057,7 @@ be suppressed:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_smd.html">plot_smd</a></span><span class="op">(</span>smd <span class="op">=</span> <span class="fl">0.50</span>, show_ci <span class="op">=</span> <span class="cn">FALSE</span>, show_n <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>         title <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Minimal Display of "</span>, <span class="fu">italic</span><span class="op">(</span><span class="va">d</span><span class="op">)</span>, <span class="st">" = 0.50"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/plot-smd-minimal-1.png" class="r-plt" alt="Minimal plot suitable for a slide or teaching figure, with confidence interval and sample size suppressed via `show_ci = FALSE` and `show_n = FALSE`." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-plot-smd-minimal-1.png" alt="Minimal plot suitable for a slide or teaching figure, with confidence interval and sample size suppressed via `show_ci = FALSE` and `show_n = FALSE`."><p class="caption">
 Minimal plot suitable for a slide or teaching figure, with confidence
 interval and sample size suppressed via <code>show_ci = FALSE</code> and
 <code>show_n = FALSE</code>.
@@ -1084,10 +1084,10 @@ be added on top.</p>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span></span>
 <span>    values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Treatment"</span> <span class="op">=</span> <span class="st">"#1B7837"</span>, <span class="st">"Control"</span> <span class="op">=</span> <span class="st">"#762A83"</span><span class="op">)</span>, name <span class="op">=</span> <span class="cn">NULL</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Scale for <span style="color: #00BB00;">fill</span> is already present.</span></span>
-<span><span class="co">#&gt; Adding another scale for <span style="color: #00BB00;">fill</span>, which will replace the existing scale.</span></span></code></pre></div>
+<span><span class="co">#&gt; Scale for fill is already present.</span></span>
+<span><span class="co">#&gt; Adding another scale for fill, which will replace the existing scale.</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="effect-size-visualization_files/figure-html/customize-1.png" class="r-plt" alt="Every DMAR plot returns a `ggplot2` object, so additional `ggplot2` layers can be added with `+`. Here the legend is moved to the top, the title is bold, and the group fills follow a colorblind-friendly palette." width="1050"><p class="caption">
+<img src="effect-size-visualization-fig-customize-1.png" alt="Every DMAR plot returns a `ggplot2` object, so additional `ggplot2` layers can be added with `+`. Here the legend is moved to the top, the title is bold, and the group fills follow a colorblind-friendly palette."><p class="caption">
 Every DMAR plot returns a <code>ggplot2</code> object, so additional
 <code>ggplot2</code> layers can be added with <code>+</code>. Here the
 legend is moved to the top, the title is bold, and the group fills

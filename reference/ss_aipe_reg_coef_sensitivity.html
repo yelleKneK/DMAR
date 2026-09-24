@@ -9,7 +9,7 @@ Estimation Perspective for the standardized or unstandardized regression coeffic
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,8 +65,7 @@ Estimation Perspective for the standardized or unstandardized regression coeffic
 <span>  assurance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_reg_coef_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -134,12 +133,13 @@ Estimation Perspective for the standardized or unstandardized regression coeffic
 <dd><p>Specify with a <code>TRUE</code>/<code>FALSE</code> statement if the iteration number should be printed as the simulation within the function runs</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. It can be saved with <code>save = TRUE</code> outside of the printed results</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results will be saved to</p></dd>
+<dd><p>Optional path of a CSV file to receive the per-replication
+results (the coefficient estimate, its confidence limits, the observed
+\(R^2\), the standard error, and the <em>t</em> statistic), appended when
+the file already exists and created otherwise; the default <code>NULL</code>
+writes nothing, and a throwaway run that wants the file should point it
+at <code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

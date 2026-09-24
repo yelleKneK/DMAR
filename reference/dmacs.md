@@ -258,19 +258,19 @@ dmacs(fit)
 #>  t2_cubes             0.495            0.52         23.9         24.8    
 #>  t3_paper_form_board  0.308            0.308        14.2         14.2    
 #>  t4_lozenges          1.28             1.37         19.9         15.8    
-#>  sd_pooled dmacs
-#>  7.02      0    
-#>  4.7       0.175
-#>  2.83      0    
-#>  8.85      0.461
+#>  sd_pooled dmacs   
+#>  7.02      0       
+#>  4.7       0.175   
+#>  2.83      2.79e-15
+#>  8.85      0.461   
 
 # The broom verbs: one row per item, and the group metadata.
 generics::tidy(dmacs(fit))
-#>                   term  estimate lambda_reference lambda_focal nu_reference
-#> 1 t1_visual_perception 0.0000000        1.0000000    1.0000000     29.56940
-#> 2             t2_cubes 0.1754320        0.4953945    0.5199470     23.93590
-#> 3  t3_paper_form_board 0.0000000        0.3084177    0.3084177     14.21526
-#> 4          t4_lozenges 0.4606217        1.2796675    1.3720483     19.89744
+#>                   term     estimate lambda_reference lambda_focal nu_reference
+#> 1 t1_visual_perception 0.000000e+00        1.0000000    1.0000000     29.56940
+#> 2             t2_cubes 1.754320e-01        0.4953945    0.5199470     23.93590
+#> 3  t3_paper_form_board 2.786534e-15        0.3084177    0.3084177     14.21526
+#> 4          t4_lozenges 4.606217e-01        1.2796675    1.3720483     19.89744
 #>   nu_focal sd_pooled
 #> 1 29.56940  7.016213
 #> 2 24.75043  4.697740

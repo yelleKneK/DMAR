@@ -29,7 +29,7 @@ ss_power_indirect_effect."><meta property="og:image" content="https://yelleknek.
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -243,10 +243,62 @@ computes; the design earns the interpretation.</p>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">x</span> <span class="op">+</span> <span class="fl">0.4</span> <span class="op">*</span> <span class="va">m</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">0</span>, <span class="fl">0.8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, m <span class="op">=</span> <span class="va">m</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The Sobel interval is closed form, so it is the call that runs here.</span></span></span>
-<span class="r-in"><span><span class="co"># It assumes the product ab is normally distributed, which is why it is</span></span></span>
-<span class="r-in"><span><span class="co"># reported for comparison rather than used for inference. The B row of</span></span></span>
-<span class="r-in"><span><span class="co"># the result is NA because no replications are drawn.</span></span></span>
+<span class="r-in"><span><span class="co"># The percentile bootstrap is the default and is what a reported</span></span></span>
+<span class="r-in"><span><span class="co"># analysis would use. Each resample refits both regressions, so</span></span></span>
+<span class="r-in"><span><span class="co"># B = 200 keeps the example quick; a reported interval deserves the</span></span></span>
+<span class="r-in"><span><span class="co"># default B = 2000 or more.</span></span></span>
+<span class="r-in"><span><span class="fu">mediate</span><span class="op">(</span><span class="va">d</span>, x <span class="op">=</span> <span class="st">"x"</span>, m <span class="op">=</span> <span class="st">"m"</span>, y <span class="op">=</span> <span class="st">"y"</span>, B <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                value </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_effect     0.182 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_lower      0.116 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_upper      0.268 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  direct_effect       0.194 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  direct_lower        0.0634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  direct_upper        0.324 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_effect        0.375 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_lower         0.25  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_upper         0.501 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  a                   0.449 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  b                   0.404 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_a                0.0615</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_b                0.0678</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_indirect         0.0393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  proportion_mediated 0.484 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N                   200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  B                   200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The Monte Carlo interval draws a and b from their joint normal</span></span></span>
+<span class="r-in"><span><span class="co"># approximation instead of refitting, so it stays quick even at a</span></span></span>
+<span class="r-in"><span><span class="co"># large B. Its limits sit close to the bootstrap limits here.</span></span></span>
+<span class="r-in"><span><span class="fu">mediate</span><span class="op">(</span><span class="va">d</span>, x <span class="op">=</span> <span class="st">"x"</span>, m <span class="op">=</span> <span class="st">"m"</span>, y <span class="op">=</span> <span class="st">"y"</span>, ci_method <span class="op">=</span> <span class="st">"monte_carlo"</span>,</span></span>
+<span class="r-in"><span>        B <span class="op">=</span> <span class="fl">10000</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                value </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_effect     0.182 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_lower      0.109 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_upper      0.266 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  direct_effect       0.194 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  direct_lower        0.0634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  direct_upper        0.324 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_effect        0.375 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_lower         0.25  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_upper         0.501 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  a                   0.449 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  b                   0.404 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_a                0.0615</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_b                0.0678</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se_indirect         0.0393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  proportion_mediated 0.484 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N                   200   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  B                   10000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The Sobel interval is closed form. It assumes the product ab is</span></span></span>
+<span class="r-in"><span><span class="co"># normally distributed, which is why it is reported for comparison</span></span></span>
+<span class="r-in"><span><span class="co"># rather than used for inference; its B row is NA because no</span></span></span>
+<span class="r-in"><span><span class="co"># replications are drawn.</span></span></span>
 <span class="r-in"><span><span class="fu">mediate</span><span class="op">(</span><span class="va">d</span>, x <span class="op">=</span> <span class="st">"x"</span>, m <span class="op">=</span> <span class="st">"m"</span>, y <span class="op">=</span> <span class="st">"y"</span>, ci_method <span class="op">=</span> <span class="st">"sobel"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                value </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  indirect_effect     0.182 </span>
@@ -268,16 +320,6 @@ computes; the design earns the interpretation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  B                   &lt;NA&gt;  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The percentile bootstrap is the default and is what a reported</span></span></span>
-<span class="r-in"><span><span class="co"># analysis would use. It is not run here because it refits both</span></span></span>
-<span class="r-in"><span><span class="co"># regressions in each of the B resamples; the call is:</span></span></span>
-<span class="r-in"><span><span class="co"># mediate(d, x = "x", m = "m", y = "y", seed = 113)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The Monte Carlo interval needs no refitting, so it stays quick even</span></span></span>
-<span class="r-in"><span><span class="co"># for a large B, but it still draws B replications. Also not run here:</span></span></span>
-<span class="r-in"><span><span class="co"># mediate(d, x = "x", m = "m", y = "y", ci_method = "monte_carlo",</span></span></span>
-<span class="r-in"><span><span class="co">#         B = 10000, seed = 113)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

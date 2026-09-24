@@ -27,7 +27,7 @@ fixed and random parts of the model account for."><meta property="og:image" cont
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -243,12 +243,22 @@ reported limits. Bootstrap results vary from run to run; supply
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># A bootstrap interval is available through ci_method = "boot". It refits</span></span></span>
-<span class="r-in"><span><span class="co"># the model once per replication, so it is not run here; the call is</span></span></span>
-<span class="r-in"><span><span class="co">#   R2_mixed_effects(fit, ci_method = "boot", B = 1000, seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co"># where B = 1000 is the default and seed is supplied because the limits</span></span></span>
-<span class="r-in"><span><span class="co"># otherwise move from run to run. Raise B when the Monte Carlo error of</span></span></span>
-<span class="r-in"><span><span class="co"># the reported limits needs to be smaller.</span></span></span>
+<span class="r-in"><span><span class="co"># A parametric bootstrap percentile interval for both quantities. Each</span></span></span>
+<span class="r-in"><span><span class="co"># replication refits the model, so B = 20 keeps the example quick; a</span></span></span>
+<span class="r-in"><span><span class="co"># reported interval deserves the default B = 1000, and raising B</span></span></span>
+<span class="r-in"><span><span class="co"># further tightens the Monte Carlo error of the limits. The seed makes</span></span></span>
+<span class="r-in"><span><span class="co"># the limits reproducible and leaves the caller's generator state as</span></span></span>
+<span class="r-in"><span><span class="co"># it was.</span></span></span>
+<span class="r-in"><span><span class="fu">R2_mixed_effects</span><span class="op">(</span><span class="va">fit</span>, ci_method <span class="op">=</span> <span class="st">"boot"</span>, B <span class="op">=</span> <span class="fl">20</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                 value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  R2_marginal          0.279</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  R2_marginal_lower    0.151</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  R2_marginal_upper    0.47 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  R2_conditional       0.799</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  R2_conditional_lower 0.71 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  R2_conditional_upper 0.855</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

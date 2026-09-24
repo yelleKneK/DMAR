@@ -114,7 +114,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 ## See also
 
 [`ci_sc`](https://yelleknek.github.io/DMAR/reference/ci_sc.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
 [`ss_aipe_c`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)

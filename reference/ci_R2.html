@@ -37,7 +37,7 @@ a noncentral distribution based CI on a standardized effect size
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -154,7 +154,7 @@ a noncentral distribution based CI on a standardized effect size
 <dd><p>The convergence tolerance passed to <code><a href="https://rdrr.io/r/stats/uniroot.html" class="external-link">uniroot</a></code>
 when <code>random_predictors = FALSE</code> and the confidence limits are found
 by inverting the noncentral <em>F</em> distribution (see
-<code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>); ignored when
+<code><a href="ci_nc_F.html">ci_nc_F</a></code>); ignored when
 <code>random_predictors = TRUE</code>, where the Lee (1971) bisection uses its
 own fixed tolerance</p></dd>
 
@@ -187,7 +187,7 @@ study, and the omnibus \(F\)-statistic
 <em>F</em> with \(p\) and \(N - p - 1\) degrees of freedom and
 noncentrality \(\lambda = N \rho^2 / (1 - \rho^2)\) (Cohen, 1988); the
 CI is obtained by inverting that distribution at the supplied
-confidence level (see <code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>). Under random
+confidence level (see <code><a href="ci_nc_F.html">ci_nc_F</a></code>). Under random
 predictors the design matrix is itself a draw from a joint multivariate
 normal distribution and the unconditional sampling distribution of the
 sample \(R^2\) is given by Lee (1971); <code>ci_R2</code> uses the Lee
@@ -233,7 +233,7 @@ for designs in which the predictor variables are fixed by design.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="ss_aipe_R2.html">ss_aipe_R2</a></code>, <code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code></p>
+    <div class="dont-index"><p><code><a href="ss_aipe_R2.html">ss_aipe_R2</a></code>, <code><a href="ci_nc_F.html">ci_nc_F</a></code></p>
 <p>Other confidence intervals for effect sizes:
 <code><a href="ci_c.html">ci_c()</a></code>,
 <code><a href="ci_c_ancova.html">ci_c_ancova()</a></code>,

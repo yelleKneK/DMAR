@@ -5,7 +5,7 @@ covariate-adjusted means in the analysis of covariance (ANCOVA): fit the
 model, read off the adjusted means and the error term, and then place
 **simultaneous** confidence intervals on the differences with
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
-which uses the Bryant–Paulson generalized studentized range
+which uses the Bryant-Paulson generalized studentized range
 ([`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)).
 The simulation study maintained alongside the package shows **why** the
 ordinary Tukey distribution is the wrong reference when the covariate is
@@ -73,7 +73,7 @@ round(adj_means, 3)     # 3.595 3.619 4.102 4.515 4.618 4.876
 #> 3.595 3.619 4.102 4.515 4.618 4.876
 ```
 
-### Simultaneous Bryant–Paulson Intervals
+### Simultaneous Bryant-Paulson Intervals
 
 With six panels there are 15 pairwise comparisons. We want all of them
 to hold at a *familywise* 95% level. Because the design has `s = 4`
@@ -260,7 +260,7 @@ ci_c_ancova_bp(adj_means = adj, s_ancova = s_yx, n = n, num_covariates = 1)
 Confidence level: 95%
 
 The intervals that exclude zero identify the groups whose adjusted means
-differ, with familywise 95% protection and, through the Bryant–Paulson
+differ, with familywise 95% protection and, through the Bryant-Paulson
 critical value, an accounting for the extra sampling variability the
 random covariate introduces.
 

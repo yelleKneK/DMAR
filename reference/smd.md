@@ -128,7 +128,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 [`ss_aipe_smd`](https://yelleknek.github.io/DMAR/reference/ss_aipe_smd.md),
 [`ss_power_smd`](https://yelleknek.github.io/DMAR/reference/ss_power_smd.md),
 [`plot_smd`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 ## Author
 

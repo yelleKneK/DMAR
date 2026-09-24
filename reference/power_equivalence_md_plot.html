@@ -15,7 +15,7 @@ attr(&amp;lt;plot&amp;gt;, "power_grid").'><meta property="og:image" content="ht
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -180,13 +180,16 @@ as <code>n</code>.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># One curve per sample size, showing power against the true mean</span></span></span>
-<span class="r-in"><span><span class="co"># difference. Two of the seven sample sizes behind Phillips (1990)</span></span></span>
-<span class="r-in"><span><span class="co"># Figure 3 are drawn here so the example stays quick; the full</span></span></span>
-<span class="r-in"><span><span class="co"># reproduction is given below.</span></span></span>
+<span class="r-in"><span><span class="co"># difference. The seven sample sizes are the ones behind Figure 3 of</span></span></span>
+<span class="r-in"><span><span class="co"># Phillips, 1990, so the figure reproduces that one; every curve</span></span></span>
+<span class="r-in"><span><span class="co"># evaluates the power integral at 201 true differences.</span></span></span>
+<span class="r-in"><span><span class="va">n</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span>, <span class="fl">30</span>, <span class="fl">40</span>, <span class="fl">60</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">nu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">10</span>, <span class="fl">16</span>, <span class="fl">22</span>, <span class="fl">28</span>, <span class="fl">38</span>, <span class="fl">58</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fig</span> <span class="op">&lt;-</span> <span class="fu">power_equivalence_md_plot</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  alpha_level <span class="op">=</span> <span class="fl">.05</span>, logscale <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>  theta1 <span class="op">=</span> <span class="op">-</span><span class="fl">.2</span>, theta2 <span class="op">=</span> <span class="fl">.2</span>, sigma <span class="op">=</span> <span class="fl">.20</span>,</span></span>
-<span class="r-in"><span>  n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">24</span>, <span class="fl">60</span><span class="op">)</span>, nu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">22</span>, <span class="fl">58</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  n <span class="op">=</span> <span class="va">n</span>, nu <span class="op">=</span> <span class="va">nu</span>,</span></span>
+<span class="r-in"><span>  subtitle <span class="op">=</span> <span class="st">"Phillips Figure 3"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fig</span></span></span>
 <span class="r-plt img"><img src="power_equivalence_md_plot-1.png" alt="" width="700" height="433"></span>
@@ -197,33 +200,21 @@ as <code>n</code>.</p></dd>
 <span class="r-in"><span><span class="co"># per sample size. Power is highest where the true difference is zero.</span></span></span>
 <span class="r-in"><span><span class="va">power_grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fig</span>, <span class="st">"power_grid"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">power_grid</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">power_grid</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      diff      n=24      n=60 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9127046 0.9998349 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      diff       n=9      n=12      n=18      n=24      n=30      n=40      n=60 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.2774020 0.4815125 0.7793013 0.9127046 0.9670072 0.9939640 0.9998349 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The two published figures are not run here because every curve</span></span></span>
-<span class="r-in"><span><span class="co"># evaluates the power integral at 201 true differences, so a</span></span></span>
-<span class="r-in"><span><span class="co"># seven-curve figure costs a few tenths of a second. Phillips (1990)</span></span></span>
-<span class="r-in"><span><span class="co"># Figure 3 is:</span></span></span>
-<span class="r-in"><span><span class="co"># n  &lt;- c(9, 12, 18, 24, 30, 40, 60)</span></span></span>
-<span class="r-in"><span><span class="co"># nu &lt;- c(7, 10, 16, 22, 28, 38, 58)</span></span></span>
-<span class="r-in"><span><span class="co"># power_equivalence_md_plot(</span></span></span>
-<span class="r-in"><span><span class="co">#   alpha_level = .05, logscale = FALSE,</span></span></span>
-<span class="r-in"><span><span class="co">#   theta1 = -.2, theta2 = .2, sigma = .20,</span></span></span>
-<span class="r-in"><span><span class="co">#   n = n, nu = nu,</span></span></span>
-<span class="r-in"><span><span class="co">#   subtitle = "Phillips Figure 3"</span></span></span>
-<span class="r-in"><span><span class="co"># )</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Diletti (1991) Figure 1c is the same idea on the log scale, where the</span></span></span>
-<span class="r-in"><span><span class="co"># equivalence limits are the 0.80 to 1.25 ratio bounds used in</span></span></span>
-<span class="r-in"><span><span class="co"># bioequivalence work:</span></span></span>
-<span class="r-in"><span><span class="co"># n_d  &lt;- c(8, 12, 18, 24, 30, 40, 60)</span></span></span>
-<span class="r-in"><span><span class="co"># nu_d &lt;- c(6, 10, 16, 22, 28, 38, 58)</span></span></span>
-<span class="r-in"><span><span class="co"># power_equivalence_md_plot(</span></span></span>
-<span class="r-in"><span><span class="co">#   alpha_level = .05, logscale = TRUE,</span></span></span>
-<span class="r-in"><span><span class="co">#   theta1 = .8, theta2 = 1.25, sigma = .20,</span></span></span>
-<span class="r-in"><span><span class="co">#   n = n_d, nu = nu_d,</span></span></span>
-<span class="r-in"><span><span class="co">#   subtitle = "Diletti, Figure 1c"</span></span></span>
-<span class="r-in"><span><span class="co"># )</span></span></span>
+<span class="r-in"><span><span class="co"># Figure 1c of Diletti et al., 1991, is the same idea on the log scale,</span></span></span>
+<span class="r-in"><span><span class="co"># where the equivalence limits are the 0.80 to 1.25 ratio bounds used</span></span></span>
+<span class="r-in"><span><span class="co"># in bioequivalence work.</span></span></span>
+<span class="r-in"><span><span class="va">n_d</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span>, <span class="fl">30</span>, <span class="fl">40</span>, <span class="fl">60</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">nu_d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">10</span>, <span class="fl">16</span>, <span class="fl">22</span>, <span class="fl">28</span>, <span class="fl">38</span>, <span class="fl">58</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">power_equivalence_md_plot</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  alpha_level <span class="op">=</span> <span class="fl">.05</span>, logscale <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  theta1 <span class="op">=</span> <span class="fl">.8</span>, theta2 <span class="op">=</span> <span class="fl">1.25</span>, sigma <span class="op">=</span> <span class="fl">.20</span>,</span></span>
+<span class="r-in"><span>  n <span class="op">=</span> <span class="va">n_d</span>, nu <span class="op">=</span> <span class="va">nu_d</span>,</span></span>
+<span class="r-in"><span>  subtitle <span class="op">=</span> <span class="st">"Diletti, Figure 1c"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="power_equivalence_md_plot-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

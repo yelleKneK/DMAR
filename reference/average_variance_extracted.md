@@ -85,6 +85,17 @@ A `data.frame` (class `dmar_tbl`) with one row per factor: `factor`
 (label), `ave`, and `ci_lower` / `ci_upper` (the percentile bootstrap
 limits; `NA` when `ci_method = "none"`).
 
+## Details
+
+The percentile bootstrap interval resamples the cases behind `fit` and
+refits the model once per replication, so its cost is `B` model fits.
+That refitting is why the examples below stop at the point estimates:
+even the smallest permitted `B = 100` runs for several seconds on the
+two-factor model there. To obtain the interval, pass
+`ci_method = "percentile"` together with a `seed`, as in
+`average_variance_extracted(fit, ci_method = "percentile", seed = 113)`,
+and keep the default `B = 1000` or more for a reported analysis.
+
 ## References
 
 Efron, B., & Tibshirani, R. J. (1993). *An introduction to the
@@ -157,13 +168,6 @@ ave_tbl
 # AVE values and the latent correlations in one table.
 lavaan::lavInspect(fit, "cor.lv")["verbal", "deduction"]^2
 #> [1] 0.5327517
-
-# An interval comes from ci_method = "percentile", which resamples the
-# cases and refits the model once per replication. That refitting is
-# why it is not run here; the call is
-#   average_variance_extracted(fit, ci_method = "percentile",
-#                              B = 1000, seed = 113)
-# and a reported interval deserves the default B = 1000 or more.
 
 # The broom verbs: one row per factor.
 generics::tidy(ave_tbl)

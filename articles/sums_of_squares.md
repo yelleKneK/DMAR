@@ -115,9 +115,9 @@ the type beneath the table.
 ``` r
 
 factorial_anova(y ~ A * B, data = d, ss_type = 1)   # sequential
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 ```
 
 | effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
@@ -132,9 +132,9 @@ Sum of squares: Type I Confidence level: 95%
 ``` r
 
 factorial_anova(y ~ A * B, data = d, ss_type = 2)
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 ```
 
 | effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
@@ -149,9 +149,9 @@ Sum of squares: Type II Confidence level: 95%
 ``` r
 
 factorial_anova(y ~ A * B, data = d, ss_type = 3)
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 ```
 
 | effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
@@ -169,14 +169,14 @@ it, while Type II and Type III do not depend on the order:
 ``` r
 
 factorial_anova(y ~ A * B, data = d, ss_type = 1)$SS[1:3]  # A entered first
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1]  8.743295 14.159731  1.474433
 factorial_anova(y ~ B * A, data = d, ss_type = 1)$SS[1:3]  # B first: different
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1] 15.500188  7.402838  1.474433
 ```
 
@@ -201,9 +201,9 @@ fit_sum <- lm(y ~ A * B, data = d,
 car::Anova(fit_sum, type = 3)[c("A", "B", "A:B"), "Sum Sq"]
 #> [1]  7.641891 14.692503  1.474433
 factorial_anova(y ~ A * B, data = d, ss_type = 3)$SS[1:3]   # matches
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1]  7.641891 14.692503  1.474433
 ```
 
@@ -257,9 +257,9 @@ gs <- lm(y ~ A * B * C, data = g,
 
 effs <- c("A", "B", "C", "A:B", "A:C", "B:C", "A:B:C")
 factorial_anova(y ~ A * B * C, data = g, ss_type = 3)$SS[1:7]  # DMAR
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 10
-#> of the effect size confidence intervals; the affected lower limits were clamped
-#> to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 10 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1] 13.71618522  8.32810994  1.06755478  0.06162124  0.32821820  2.47361380
 #> [7]  1.02265698
 car::Anova(gs, type = 3)[effs, "Sum Sq"]                        # matches
@@ -281,19 +281,19 @@ db <- do.call(rbind, lapply(c("a1", "a2"), function(a)
 db$A <- factor(db$A); db$B <- factor(db$B)
 
 factorial_anova(y ~ A * B, data = db, ss_type = 1)$SS[1:3]   # Type I
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1] 0.06622407 2.54191761 1.35217335
 factorial_anova(y ~ A * B, data = db, ss_type = 2)$SS[1:3]   # Type II
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1] 0.06622407 2.54191761 1.35217335
 factorial_anova(y ~ A * B, data = db, ss_type = 3)$SS[1:3]   # Type III
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of
-#> the effect size confidence intervals; the affected lower limits were clamped to
-#> 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the
+#> effect size confidence intervals; the affected lower limits were clamped to 0.
+#> See ?ci_nc_F for the meaning of the clamp.
 #> [1] 0.06622407 2.54191761 1.35217335
 ```
 

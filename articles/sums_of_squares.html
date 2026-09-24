@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Sums of Squares in Nonorthogonal Designs</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">August 2026</h4>
+            <h4 data-toc-skip class="date">September 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/sums_of_squares.Rmd" class="external-link"><code>vignettes/sums_of_squares.Rmd</code></a></small>
       <div class="d-none name"><code>sums_of_squares.Rmd</code></div>
@@ -204,9 +204,9 @@ reports each effect’s sum of squares, its test, and partial and partial
 with confidence intervals, and it notes the type beneath the table.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">d</span>, ss_type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>   <span class="co"># sequential</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="5%">
@@ -292,9 +292,9 @@ with confidence intervals, and it notes the type beneath the table.</p>
 <p>Sum of squares: Type I Confidence level: 95%</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">d</span>, ss_type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="5%">
@@ -380,9 +380,9 @@ with confidence intervals, and it notes the type beneath the table.</p>
 <p>Sum of squares: Type II Confidence level: 95%</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">d</span>, ss_type <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="5%">
@@ -470,14 +470,14 @@ with confidence intervals, and it notes the type beneath the table.</p>
 changes it, while Type II and Type III do not depend on the order:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">d</span>, ss_type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>  <span class="co"># A entered first</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1]  8.743295 14.159731  1.474433</span></span>
 <span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">B</span> <span class="op">*</span> <span class="va">A</span>, data <span class="op">=</span> <span class="va">d</span>, ss_type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>  <span class="co"># B first: different</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1] 15.500188  7.402838  1.474433</span></span></code></pre></div>
 <p>The main-effect sums of squares differ across the three types here
 precisely because the cells are unequal. The interaction sum of squares
@@ -494,9 +494,9 @@ main-effect tests need sum-to-zero contrasts, which
 <span><span class="fu">car</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/car/man/Anova.html" class="external-link">Anova</a></span><span class="op">(</span><span class="va">fit_sum</span>, type <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"A:B"</span><span class="op">)</span>, <span class="st">"Sum Sq"</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1]  7.641891 14.692503  1.474433</span></span>
 <span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">d</span>, ss_type <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>   <span class="co"># matches</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 2 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 2 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1]  7.641891 14.692503  1.474433</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -549,9 +549,9 @@ designs, which the package tests verify. A three-way check:</p>
 <span></span>
 <span><span class="va">effs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"A:B"</span>, <span class="st">"A:C"</span>, <span class="st">"B:C"</span>, <span class="st">"A:B:C"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span> <span class="op">*</span> <span class="va">C</span>, data <span class="op">=</span> <span class="va">g</span>, ss_type <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span>  <span class="co"># DMAR</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 10</span></span>
-<span><span class="co">#&gt; of the effect size confidence intervals; the affected lower limits were clamped</span></span>
-<span><span class="co">#&gt; to 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 10 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1] 13.71618522  8.32810994  1.06755478  0.06162124  0.32821820  2.47361380</span></span>
 <span><span class="co">#&gt; [7]  1.02265698</span></span>
 <span><span class="fu">car</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/car/man/Anova.html" class="external-link">Anova</a></span><span class="op">(</span><span class="va">gs</span>, type <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">[</span><span class="va">effs</span>, <span class="st">"Sum Sq"</span><span class="op">]</span>                        <span class="co"># matches</span></span>
@@ -571,19 +571,19 @@ disappears.</p>
 <span><span class="va">db</span><span class="op">$</span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">A</span><span class="op">)</span>; <span class="va">db</span><span class="op">$</span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">db</span><span class="op">$</span><span class="va">B</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">db</span>, ss_type <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>   <span class="co"># Type I</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1] 0.06622407 2.54191761 1.35217335</span></span>
 <span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">db</span>, ss_type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>   <span class="co"># Type II</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1] 0.06622407 2.54191761 1.35217335</span></span>
 <span><span class="fu"><a href="../reference/factorial_anova.html">factorial_anova</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">A</span> <span class="op">*</span> <span class="va">B</span>, data <span class="op">=</span> <span class="va">db</span>, ss_type <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">$</span><span class="va">SS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>   <span class="co"># Type III</span></span>
-<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 6 of</span></span>
-<span><span class="co">#&gt; the effect size confidence intervals; the affected lower limits were clamped to</span></span>
-<span><span class="co">#&gt; 0. See ?conf_limits_ncf for the meaning of the clamp.</span></span>
+<span><span class="co">#&gt; Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 6 of the</span></span>
+<span><span class="co">#&gt; effect size confidence intervals; the affected lower limits were clamped to 0.</span></span>
+<span><span class="co">#&gt; See ?ci_nc_F for the meaning of the clamp.</span></span>
 <span><span class="co">#&gt; [1] 0.06622407 2.54191761 1.35217335</span></span></code></pre></div>
 <p>The three sets of sums of squares match to numerical precision. This
 is the deeper point: the type matters only when the design is

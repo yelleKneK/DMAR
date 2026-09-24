@@ -51,11 +51,11 @@ A data frame with 88 observations on 5 variables.
 
 - `log_drinks`:
 
-  Common-log transformation \\\log\_{10}(\code{drinks\\per\\week} +
-  1)\\, the scale on which Smith, Meyers, and Delaney (1998) ran their
-  primary between-groups analyses to obtain approximate normality. The
-  plus-one inside the logarithm keeps the zero values finite (and mapped
-  to zero).
+  Common-log transformation \\\log\_{10}(x + 1)\\ of \\x = \\
+  `drinks_per_week`, the scale on which Smith, Meyers, and
+  Delaney (1998) ran their primary between-groups analyses to obtain
+  approximate normality. The plus-one inside the logarithm keeps the
+  zero values finite (and mapped to zero).
 
 ## Source
 

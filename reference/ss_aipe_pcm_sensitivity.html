@@ -39,7 +39,7 @@ closed-form solution is still available via ss_aipe_pcm."><meta property="og:ima
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,8 +107,7 @@ closed-form solution is still available via <code><a href="ss_aipe_pcm.html">ss_
 <span>  assurance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_pcm_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -175,12 +174,13 @@ planner.</p></dd>
 <dd><p>Logical.</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>Logical. Save per-replication CSV.</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>Path used when <code>save = TRUE</code>.</p></dd>
+<dd><p>Optional path to a CSV file; when supplied, the
+per-replication results (the slope difference, its interval limits and
+width, and the two tail misses) are written there, appended when the
+file already exists, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code>; the default <code>NULL</code> writes
+nothing.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -239,21 +239,42 @@ planner.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Every replication simulates two full groups of subjects, fits a</span></span></span>
-<span class="r-in"><span><span class="co"># slope for each subject, and forms a confidence interval on the</span></span></span>
-<span class="r-in"><span><span class="co"># difference in mean slopes, so the sweep is not run at example time.</span></span></span>
-<span class="r-in"><span><span class="co"># The G below is far smaller than a reported sensitivity study would</span></span></span>
-<span class="r-in"><span><span class="co"># use; the default of 1000 is the realistic setting. The call is:</span></span></span>
-<span class="r-in"><span><span class="co"># set.seed(113)</span></span></span>
-<span class="r-in"><span><span class="co"># ss_aipe_pcm_sensitivity(</span></span></span>
-<span class="r-in"><span><span class="co">#   true_variance_trend       = 0.003,</span></span></span>
-<span class="r-in"><span><span class="co">#   true_error_variance       = 0.0262,</span></span></span>
-<span class="r-in"><span><span class="co">#   estimated_variance_trend  = 0.003,</span></span></span>
-<span class="r-in"><span><span class="co">#   estimated_error_variance  = 0.0262,</span></span></span>
-<span class="r-in"><span><span class="co">#   duration  = 4, frequency = 1,</span></span></span>
-<span class="r-in"><span><span class="co">#   width     = 0.05,</span></span></span>
-<span class="r-in"><span><span class="co">#   G = 20, print_iter = FALSE</span></span></span>
-<span class="r-in"><span><span class="co"># )</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Every replication simulates two full groups of subjects, fits a slope</span></span></span>
+<span class="r-in"><span><span class="co"># for each subject, and forms a confidence interval on the difference in</span></span></span>
+<span class="r-in"><span><span class="co"># mean slopes. G = 20 keeps the example quick; a reported sensitivity</span></span></span>
+<span class="r-in"><span><span class="co"># study deserves the default G = 1000. With the planning values equal to</span></span></span>
+<span class="r-in"><span><span class="co"># the population values, the realized mean width should sit at or just</span></span></span>
+<span class="r-in"><span><span class="co"># under the target.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_pcm_sensitivity</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  true_variance_trend <span class="op">=</span> <span class="fl">0.003</span>, true_error_variance <span class="op">=</span> <span class="fl">0.0262</span>,</span></span>
+<span class="r-in"><span>  estimated_variance_trend <span class="op">=</span> <span class="fl">0.003</span>, estimated_error_variance <span class="op">=</span> <span class="fl">0.0262</span>,</span></span>
+<span class="r-in"><span>  duration <span class="op">=</span> <span class="fl">4</span>, frequency <span class="op">=</span> <span class="fl">1</span>, width <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
+<span class="r-in"><span>  G <span class="op">=</span> <span class="fl">20</span>, print_iter <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                     value  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_slope_diff          0.00529</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  median_slope_diff        0.00307</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_slope_diff            0.0104 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_ci_width            0.0511 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  median_ci_width          0.051  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_ci_width              0.00298</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pct_ci_less_w            0.45   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pct_ci_miss_low          0.05   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pct_ci_miss_high         0      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_type_I_error       0.05   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  n_per_group              71     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  n_timepoints             5      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  true_variance_trend      0.003  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  true_error_variance      0.0262 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimated_variance_trend 0.003  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimated_error_variance 0.0262 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  duration                 4      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  frequency                1      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width                    0.05   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level               0.95   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

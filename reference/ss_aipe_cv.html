@@ -15,7 +15,7 @@ as sigma / mu. The value of C_of_V should be positive."><meta property="og:image
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,7 +147,7 @@ as <code>sigma / mu</code>. The value of <code>C_of_V</code> should be positive.
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Suppose one wishes to have a confidence interval with an expected width of .10</span></span></span>
 <span class="r-in"><span><span class="co"># for a 99% confidence interval when the population coefficient of variation is .10.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_cv</span><span class="op">(</span>C_of_V <span class="op">=</span> <span class="fl">.1</span>, width <span class="op">=</span> <span class="fl">.1</span>, conf_level <span class="op">=</span> <span class="fl">.99</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 20   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -156,17 +156,16 @@ as <code>sigma / mu</code>. The value of <code>C_of_V</code> should be positive.
 <span class="r-in"><span><span class="co"># The same planning problem parameterized by the population mean and standard</span></span></span>
 <span class="r-in"><span><span class="co"># deviation: mu = 10 and sigma = 1 imply the same coefficient of variation, .10.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_cv</span><span class="op">(</span>mu <span class="op">=</span> <span class="fl">10</span>, sigma <span class="op">=</span> <span class="fl">1</span>, width <span class="op">=</span> <span class="fl">.1</span>, conf_level <span class="op">=</span> <span class="fl">.99</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 20   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 99%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Ensuring that the confidence interval will be sufficiently narrow with a 99\%</span></span></span>
+<span class="r-in"><span><span class="co"># Ensuring that the confidence interval will be sufficiently narrow with a 99%</span></span></span>
 <span class="r-in"><span><span class="co"># certainty for the situation above.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_cv</span><span class="op">(</span>C_of_V <span class="op">=</span> <span class="fl">.1</span>, width <span class="op">=</span> <span class="fl">.1</span>, conf_level <span class="op">=</span> <span class="fl">.99</span>, assurance <span class="op">=</span> <span class="fl">.99</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_nct.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 12 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_t.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 33   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

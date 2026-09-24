@@ -253,7 +253,10 @@ ggplot(grid, aes(x = B, y = fit, group = A, color = A)) +
   theme_minimal(base_size = 12)
 ```
 
-![](ancova_2x4x3_power_files/figure-html/interaction-plot-1.png)
+![plot of chunk
+interaction-plot](ancova_2x4x3_power-fig-interaction-plot-1.png)
+
+plot of chunk interaction-plot
 
 Read the plot before any table: the B profiles climb steeply (the large
 main effect), the two A lines separate modestly and not identically

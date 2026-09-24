@@ -64,7 +64,7 @@ freedom and noncentrality parameter \\\lambda = (N - 1) df \cdot
 \mathrm{RMSEA}^2\\. The CI on \\\mathrm{RMSEA}^2\\ is obtained by
 inverting the noncentral chi square distribution at the requested
 confidence level
-([`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+([`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
 does the inversion); the bounds are then mapped back to the RMSEA scale
 via the square root. When the lower noncentrality limit hits zero
 (*i.e.*, the data are compatible with a well-fitting model), the lower

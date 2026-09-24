@@ -173,7 +173,7 @@ Science, 28*(11), 1547–1562.
 [`ss_aipe_R2`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2.md),
 [`ss_power_R2_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md),
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)

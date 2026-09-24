@@ -300,8 +300,8 @@ table(holzinger_swineford$school, holzinger_swineford$grade)
 #>   Grant-White 79 66
 #>   Pasteur     78 78
 
-# The 9 test subset drawn by Jöreskog (1969) from the Grant-White
-# sample, which became the modern confirmatory factor analysis
+# Jöreskog (1969) drew nine tests from the Grant-White sample, and
+# that subset became the modern confirmatory factor analysis
 # benchmark.
 joreskog_subset <- subset(
   holzinger_swineford,

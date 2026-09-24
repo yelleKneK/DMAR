@@ -21,7 +21,7 @@ target width."><meta property="og:image" content="https://yelleknek.github.io/DM
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -142,7 +142,7 @@ is \(F = 1 + \omega^2 N / [df_{\text{eff}} (1 - \omega^2)]\). This is
 the <em>F</em> value used at each iteration of the search.</p>
 <p><strong>Tolerance behavior at small <em>N</em>.</strong> For small candidate
 <em>N</em> the noncentral <em>F</em> lower limit is often clamped to zero
-(see <code><a href="conf_limits_ncf.html">?conf_limits_ncf</a></code>). The search ignores these clamps in the
+(see <code><a href="ci_nc_F.html">?ci_nc_F</a></code>). The search ignores these clamps in the
 iteration and reports the final clamp count, if any, as an informational
 message; this matches the convention in <code><a href="ss_aipe_R2.html">ss_aipe_R2</a></code>.</p>
     </div>
@@ -215,7 +215,7 @@ message; this matches the convention in <code><a href="ss_aipe_R2.html">ss_aipe_
 <span class="r-in"><span><span class="fu">ss_aipe_omega_squared</span><span class="op">(</span>population_omega_squared <span class="op">=</span> <span class="fl">0.10</span>,</span></span>
 <span class="r-in"><span>                      df_effect <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>                      width <span class="op">=</span> <span class="fl">0.10</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 10 intermediate evaluations.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 10 intermediate evaluations.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                     value </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N              473   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  expected_width           0.0999</span>
@@ -231,7 +231,7 @@ message; this matches the convention in <code><a href="ss_aipe_R2.html">ss_aipe_
 <span class="r-in"><span>                      df_effect <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>                      width <span class="op">=</span> <span class="fl">0.10</span>,</span></span>
 <span class="r-in"><span>                      assurance <span class="op">=</span> <span class="fl">0.80</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 10 intermediate evaluations.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 10 intermediate evaluations.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                     value </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N              499   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  expected_width           0.0973</span>

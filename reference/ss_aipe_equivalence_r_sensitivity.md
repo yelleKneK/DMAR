@@ -25,8 +25,7 @@ ss_aipe_equivalence_r_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_equivalence_r_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -77,13 +76,16 @@ ss_aipe_equivalence_r_sensitivity(
 
   Logical.
 
-- save:
-
-  Logical. Save per-replication CSV.
-
 - filename:
 
-  Path used when `save = TRUE`.
+  Optional path for a comma separated file recording every replication
+  (the sample correlation, the two confidence limits, the interval
+  width, whether the interval fell inside the equivalence region, and
+  two indicators of whether the interval missed `true_r` below or
+  above): nothing is written when `filename` is `NULL` (the default), a
+  new file with a header row is created otherwise, an existing file at
+  that path is appended to, and a throwaway run should point it at
+  `tempfile(fileext = ".csv")`.
 
 ## Value
 

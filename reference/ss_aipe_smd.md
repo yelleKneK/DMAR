@@ -124,7 +124,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 [`smd_c`](https://yelleknek.github.io/DMAR/reference/smd_c.md),
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
 [`ci_smd_c`](https://yelleknek.github.io/DMAR/reference/ci_smd_c.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
 [`stats::power.t.test()`](https://rdrr.io/r/stats/power.t.test.html)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)

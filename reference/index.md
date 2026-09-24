@@ -796,7 +796,7 @@ Confidence intervals for effect sizes and related quantities.
 - [`pbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
   [`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
   [`dbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
-  : The Bryant–Paulson Generalized Studentized Range Distribution
+  : The Bryant-Paulson Generalized Studentized Range Distribution
 
 ## Parameterization conversions
 
@@ -890,34 +890,32 @@ Confidence intervals for effect sizes and related quantities.
 
 ## Noncentral distributions
 
-- [`moments_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/moments_nc_chisq.md)
-  : Moments of the Noncentral Chi Square Distribution
-
-- [`moments_ncf()`](https://yelleknek.github.io/DMAR/reference/moments_ncf.md)
+- [`moments_nc_F()`](https://yelleknek.github.io/DMAR/reference/moments_nc_F.md)
   :
 
   Moments of the Noncentral *F* Distribution
 
-- [`moments_nct()`](https://yelleknek.github.io/DMAR/reference/moments_nct.md)
+- [`moments_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/moments_nc_chisq.md)
+  : Moments of the Noncentral Chi Square Distribution
+
+- [`moments_nc_t()`](https://yelleknek.github.io/DMAR/reference/moments_nc_t.md)
   :
 
   Moments of the Noncentral *t* Distribution
 
-- [`conf_limits_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
-  : Confidence Limits for the Noncentrality Parameter of a Noncentral
+- [`ci_nc_t()`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md) :
+
+  Confidence Interval for the Noncentrality Parameter of a Noncentral
+  *t* Distribution
+
+- [`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) :
+
+  Confidence Interval for the Noncentrality Parameter of a Noncentral
+  *F* Distribution
+
+- [`ci_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
+  : Confidence Interval for the Noncentrality Parameter of a Noncentral
   Chi Square Distribution
-
-- [`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
-  :
-
-  Confidence Limits for the Noncentrality Parameter of a Noncentral
-  *F*-distribution
-
-- [`conf_limits_nct()`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
-  :
-
-  Confidence Limits for a Noncentrality Parameter From a
-  *t*-distribution
 
 ## Data simulation
 

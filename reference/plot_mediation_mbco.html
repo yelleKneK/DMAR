@@ -25,7 +25,7 @@ range the data can support either statement."><meta property="og:image" content=
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -261,32 +261,45 @@ scales) can be added to the returned value with <code>+</code>.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># First-stage moderated mediation: the effect of x on m depends on</span></span></span>
-<span class="r-in"><span><span class="co"># w, so the indirect effect of x on y is a line in w; the direct</span></span></span>
-<span class="r-in"><span><span class="co"># effect is unmoderated and is not drawn.</span></span></span>
+<span class="r-in"><span><span class="co"># w, so the indirect effect of x on y through m is a line in w. The</span></span></span>
+<span class="r-in"><span><span class="co"># simulated x reaches y only through m, and the model fit below</span></span></span>
+<span class="r-in"><span><span class="co"># carries no direct path, so the indirect effect is the whole effect</span></span></span>
+<span class="r-in"><span><span class="co"># of x and the picture has one curve.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">300</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">x</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="va">w</span> <span class="op">+</span> <span class="fl">0.4</span> <span class="op">*</span> <span class="va">x</span> <span class="op">*</span> <span class="va">w</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">m</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">x</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">w</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">m</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">w</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, w <span class="op">=</span> <span class="va">w</span>, m <span class="op">=</span> <span class="va">m</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Neither the fit nor the plot is run here: every probed effect costs</span></span></span>
-<span class="r-in"><span><span class="co"># its own constrained null model fit in OpenMx, and the band draws B</span></span></span>
-<span class="r-in"><span><span class="co"># coefficient vectors from their joint normal approximation. The Wald</span></span></span>
-<span class="r-in"><span><span class="co"># interval and the two probe values keep a hand run of these lines</span></span></span>
-<span class="r-in"><span><span class="co"># quick; the default probe values are the moderator's mean and one</span></span></span>
-<span class="r-in"><span><span class="co"># standard deviation either side, and the curve and its band cover</span></span></span>
-<span class="r-in"><span><span class="co"># the whole range of w either way. The calls are:</span></span></span>
-<span class="r-in"><span><span class="co"># res &lt;- mediation_mbco("m ~ x + w + x:w \n y ~ m + x + w",</span></span></span>
-<span class="r-in"><span><span class="co">#                       data = d_mod, x = "x", y = "y",</span></span></span>
-<span class="r-in"><span><span class="co">#                       moderator = "w", ci_method = "wald",</span></span></span>
-<span class="r-in"><span><span class="co">#                       probe_values = c(low = -1, high = 1))</span></span></span>
-<span class="r-in"><span><span class="co"># plot_mediation_mbco(res, seed = 113)</span></span></span>
+<span class="r-in"><span><span class="co"># Fit with the moderator declared. Every reported row costs its own</span></span></span>
+<span class="r-in"><span><span class="co"># constrained null model fit in OpenMx, so the Wald interval and two</span></span></span>
+<span class="r-in"><span><span class="co"># probe values keep the fit quick; the default probe values are the</span></span></span>
+<span class="r-in"><span><span class="co"># moderator's mean and one standard deviation either side, and the</span></span></span>
+<span class="r-in"><span><span class="co"># curve and its band cover the whole range of w either way.</span></span></span>
+<span class="r-in"><span><span class="va">model_mod</span> <span class="op">&lt;-</span> <span class="st">"</span></span></span>
+<span class="r-in"><span><span class="st">  m ~ x + w + x:w</span></span></span>
+<span class="r-in"><span><span class="st">  y ~ m + w</span></span></span>
+<span class="r-in"><span><span class="st">"</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="mediation_mbco.html">mediation_mbco</a></span><span class="op">(</span><span class="va">model_mod</span>, data <span class="op">=</span> <span class="va">d_mod</span>, x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>,</span></span>
+<span class="r-in"><span>                      moderator <span class="op">=</span> <span class="st">"w"</span>, ci_method <span class="op">=</span> <span class="st">"wald"</span>,</span></span>
+<span class="r-in"><span>                      probe_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>low <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, high <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Only the indirect pathway, over a chosen moderator range:</span></span></span>
-<span class="r-in"><span><span class="co"># plot_mediation_mbco(res, effects = "indirect_via_m",</span></span></span>
-<span class="r-in"><span><span class="co">#                     from = -2, to = 2, seed = 113)</span></span></span>
+<span class="r-in"><span><span class="co"># The band draws B coefficient vectors from their joint normal</span></span></span>
+<span class="r-in"><span><span class="co"># approximation. B = 2000 keeps the example quick; a reported figure</span></span></span>
+<span class="r-in"><span><span class="co"># deserves the default B = 10000. The probed values are marked on</span></span></span>
+<span class="r-in"><span><span class="co"># the curve, and the rug shows where w was observed.</span></span></span>
+<span class="r-in"><span><span class="fu">plot_mediation_mbco</span><span class="op">(</span><span class="va">res</span>, B <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_mediation_mbco-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The same curve over a chosen range of w, with a 90% band. The</span></span></span>
+<span class="r-in"><span><span class="co"># 'effects' argument names the pathway to draw; in a model that also</span></span></span>
+<span class="r-in"><span><span class="co"># carries a direct path the total effect is moderated too, and it is</span></span></span>
+<span class="r-in"><span><span class="co"># drawn as a second curve unless 'effects' selects one of them.</span></span></span>
+<span class="r-in"><span><span class="fu">plot_mediation_mbco</span><span class="op">(</span><span class="va">res</span>, effects <span class="op">=</span> <span class="st">"indirect_via_m"</span>, from <span class="op">=</span> <span class="op">-</span><span class="fl">2</span>,</span></span>
+<span class="r-in"><span>                    to <span class="op">=</span> <span class="fl">2</span>, conf_level <span class="op">=</span> <span class="fl">0.90</span>, B <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_mediation_mbco-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

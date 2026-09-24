@@ -18,10 +18,10 @@ where the independent or dependent variables involve the person.
 
 ``` r
 
-# Once on CRAN:
+# The released version, from CRAN:
 install.packages("DMAR")
 
-# Development version from GitHub:
+# The development version, from GitHub:
 # install.packages("remotes")
 remotes::install_github("yelleKneK/DMAR")
 ```
@@ -412,7 +412,7 @@ and incomplete category sets in
 
 ## Learn more
 
-- **Package website:** <https://yelleknek.github.io/DMAR>
+- **Package website:** <https://yelleknek.github.io/DMAR/>
 - **Start here:**
   [`vignette("DMAR")`](https://yelleknek.github.io/DMAR/articles/DMAR.md)
   (overview),
@@ -471,7 +471,7 @@ most informative for a given planning question.
 If you use DMAR in published work, please cite
 
 > Kelley, K. (2026). *DMAR: Design, Measurement, and Analysis in R*. R
-> package version 1.0.0.
+> package version 1.0.0.0.
 
 and, where appropriate, the original MBESS references for the
 methodological lineage:

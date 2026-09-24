@@ -25,8 +25,7 @@ ss_aipe_equivalence_smd_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_equivalence_smd_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -52,10 +51,11 @@ ss_aipe_equivalence_smd_sensitivity(
   Equivalence bounds on the SMD, as positive magnitudes with the same
   meaning as in
   [`equivalence_smd`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md):
-  the region is \\(-\code{delta_lower}, \code{delta_upper})\\.
-  `delta_upper` is required; `delta_lower` defaults to `delta_upper` (a
-  symmetric region). The simulator records whether the realized CI falls
-  entirely inside the region.
+  the region is \\(-\delta_L, +\delta_U)\\, with `delta_lower` as
+  \\\delta_L\\ and `delta_upper` as \\\delta_U\\. `delta_upper` is
+  required; `delta_lower` defaults to `delta_upper` (a symmetric
+  region). The simulator records whether the realized CI falls entirely
+  inside the region.
 
 - n_per_group:
 
@@ -77,13 +77,16 @@ ss_aipe_equivalence_smd_sensitivity(
 
   Logical.
 
-- save:
-
-  Logical. Save per-replication CSV.
-
 - filename:
 
-  Path used when `save = TRUE`.
+  Optional path for a comma separated file recording every replication
+  (the sample standardized mean difference, the two confidence limits,
+  the interval width, whether the interval fell inside the equivalence
+  region, and two indicators of whether the interval missed `true_smd`
+  below or above): nothing is written when `filename` is `NULL` (the
+  default), a new file with a header row is created otherwise, an
+  existing file at that path is appended to, and a throwaway run should
+  point it at `tempfile(fileext = ".csv")`.
 
 ## Value
 

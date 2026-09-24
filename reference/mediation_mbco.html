@@ -51,7 +51,7 @@ Details)."><meta property="og:image" content="https://yelleknek.github.io/DMAR/l
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -384,6 +384,30 @@ their difference. Every reported row carries its estimate, a delta
 method standard error (via <code><a href="https://rdrr.io/pkg/OpenMx/man/mxSE.html" class="external-link">mxSE</a></code>), the
 <code>ci_method</code> confidence interval, and the MBCO likelihood ratio
 test with its degrees of freedom and <em>p</em>-value.</p>
+<p><strong>The parallel two-mediator model.</strong> Tofighi and Kelley (2020)
+continue the memory example with imagery and repetition as parallel
+mediators and a residual covariance between them, asking whether the
+indirect effect through repetition is zero and whether the two
+specific indirect effects differ (their Research Questions 2 and 3).
+That analysis is the single-mediator call of the examples with the
+parallel model in place of the single one and the contrast supplied
+through <code>hypotheses</code>:</p><div class="sourceCode"><pre><code><span><span class="va">parallel</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
+<span><span class="st">  imagery    ~ b1*instruction</span></span>
+<span><span class="st">  repetition ~ b3*instruction</span></span>
+<span><span class="st">  recall     ~ b2*imagery + b4*repetition + b5*instruction</span></span>
+<span><span class="st">  imagery ~~ repetition</span></span>
+<span><span class="st">"</span></span>
+<span><span class="fu"><a href="../reference/mediation_mbco.html">mediation_mbco</a></span><span class="op">(</span><span class="va">parallel</span>, S <span class="op">=</span> <span class="va">S_tk</span>, M <span class="op">=</span> <span class="va">M_tk</span>, N <span class="op">=</span> <span class="fl">369</span>,</span>
+<span>               x <span class="op">=</span> <span class="st">"instruction"</span>, y <span class="op">=</span> <span class="st">"recall"</span>,</span>
+<span>               hypotheses <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>imagery_minus_repetition <span class="op">=</span></span>
+<span>                 <span class="st">"indirect_via_imagery - indirect_via_repetition"</span><span class="op">)</span>,</span>
+<span>               ci_method <span class="op">=</span> <span class="st">"monte_carlo"</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></code></pre></div><p>Six effects are reported, so six constrained null models are fit,
+about twice the cost of the single-mediator analysis. The indirect
+effect through repetition is near zero (the paper reports
+\(\mathrm{LRT}_{\mathrm{MBCO}} = 0.083\), <em>p</em> = .773), while
+the contrast shows the imagery pathway is larger (the paper reports
+\(\mathrm{LRT}_{\mathrm{MBCO}} = 25.828\), difference = 2.222,
+SE = 0.445).</p>
 <p><strong>Choosing the confidence interval.</strong> The default profile
 likelihood interval inverts the likelihood ratio test for the effect
 itself (Neale &amp; Miller, 1997), so its limits are free to sit
@@ -420,7 +444,16 @@ imposes cross-group equality (the corresponding difference is
 identically zero and its row is dropped); to let a path differ by
 group, leave it unlabeled or give per-group labels with the vector
 form <code>c("b1_f", "b1_m")*x</code>. With more than two groups, each
-non-reference group is compared with the reference group.</p>
+non-reference group is compared with the reference group. The call
+below fits the simple model in both groups of a data frame
+<code>d</code> whose <code>condition</code> column takes two values, and reports
+every effect per group beside its between-group difference; leaving
+the paths unlabeled lets them differ by group.</p><div class="sourceCode"><pre><code><span><span class="fu"><a href="../reference/mediation_mbco.html">mediation_mbco</a></span><span class="op">(</span><span class="st">"m ~ x</span></span>
+<span><span class="st">                y ~ m + x"</span>,</span>
+<span>               data <span class="op">=</span> <span class="va">d</span>, group <span class="op">=</span> <span class="st">"condition"</span>, x <span class="op">=</span> <span class="st">"x"</span>, y <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>               ci_method <span class="op">=</span> <span class="st">"wald"</span><span class="op">)</span></span></code></pre></div><p>Each reported row costs its own constrained null model fit, so this
+two-group analysis fits nine null models where the single-group
+analysis fits three.</p>
 <p><strong>Moderated mediation, probed.</strong> With <code>moderator</code>, every
 regression coefficient along a pathway becomes a linear function of
 the moderator wherever the model contains the matching interaction
@@ -610,53 +643,49 @@ of the endogenous variables.</p>
 <span class="r-in"><span><span class="va">M_tk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>instruction <span class="op">=</span> <span class="fl">0.51</span>, imagery <span class="op">=</span> <span class="fl">5.66</span>, repetition <span class="op">=</span> <span class="fl">6.08</span>,</span></span>
 <span class="r-in"><span>          recall <span class="op">=</span> <span class="fl">12.07</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Single-mediator model: instruction -&gt; imagery -&gt; recall. The fit is</span></span></span>
-<span class="r-in"><span><span class="co"># not run here because every reported effect costs its own constrained</span></span></span>
-<span class="r-in"><span><span class="co"># null model fit in OpenMx, on top of the B Monte Carlo replications</span></span></span>
-<span class="r-in"><span><span class="co"># the interval draws. The call is:</span></span></span>
-<span class="r-in"><span><span class="co"># single &lt;- "</span></span></span>
-<span class="r-in"><span><span class="co">#   imagery ~ b1*instruction</span></span></span>
-<span class="r-in"><span><span class="co">#   recall  ~ b2*imagery + b3*instruction</span></span></span>
-<span class="r-in"><span><span class="co"># "</span></span></span>
-<span class="r-in"><span><span class="co"># mediation_mbco(single, S = S_tk, M = M_tk, N = 369,</span></span></span>
-<span class="r-in"><span><span class="co">#                x = "instruction", y = "recall",</span></span></span>
-<span class="r-in"><span><span class="co">#                ci_method = "monte_carlo", seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co"># The indirect effect is about 2.1 words (the paper reports 2.121,</span></span></span>
-<span class="r-in"><span><span class="co"># SE = 0.276, 95% Monte Carlo CI [1.600, 2.682]).</span></span></span>
+<span class="r-in"><span><span class="co"># Single-mediator model: instruction -&gt; imagery -&gt; recall. Every</span></span></span>
+<span class="r-in"><span><span class="co"># reported effect costs its own constrained null model fit in OpenMx,</span></span></span>
+<span class="r-in"><span><span class="co"># which is where the run time goes; the Monte Carlo interval itself</span></span></span>
+<span class="r-in"><span><span class="co"># is inexpensive at any B. The indirect effect is about 2.1 words</span></span></span>
+<span class="r-in"><span><span class="co"># (the paper reports 2.121, SE = 0.276, 95% Monte Carlo CI</span></span></span>
+<span class="r-in"><span><span class="co"># [1.600, 2.682]), and its likelihood ratio statistic of 71.31 is the</span></span></span>
+<span class="r-in"><span><span class="co"># value discussed under Details.</span></span></span>
+<span class="r-in"><span><span class="va">single</span> <span class="op">&lt;-</span> <span class="st">"</span></span></span>
+<span class="r-in"><span><span class="st">  imagery ~ b1*instruction</span></span></span>
+<span class="r-in"><span><span class="st">  recall  ~ b2*imagery + b3*instruction</span></span></span>
+<span class="r-in"><span><span class="st">"</span></span></span>
+<span class="r-in"><span><span class="fu">mediation_mbco</span><span class="op">(</span><span class="va">single</span>, S <span class="op">=</span> <span class="va">S_tk</span>, M <span class="op">=</span> <span class="va">M_tk</span>, N <span class="op">=</span> <span class="fl">369</span>,</span></span>
+<span class="r-in"><span>               x <span class="op">=</span> <span class="st">"instruction"</span>, y <span class="op">=</span> <span class="st">"recall"</span>,</span></span>
+<span class="r-in"><span>               ci_method <span class="op">=</span> <span class="st">"monte_carlo"</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mediation tests via model-based constrained optimization (MBCO)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Effects of instruction on recall; N = 369; optimizer: SLSQP</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Full model: deviance = 4040.806567, AIC = 4058.806567, BIC = 4094.003737</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   R2 (full model): imagery = 0.384, recall = 0.260</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Each p_value is from the MBCO likelihood ratio test of the</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   null model constraining that effect to zero. Causal readings</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   rest on the no omitted confounder assumption.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pathway                              term                 estimate se   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  instruction -&gt; recall (all pathways) total_effect         2.18     0.335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  instruction -&gt; recall                direct_effect        0.042    0.388</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  instruction -&gt; imagery -&gt; recall     indirect_via_imagery 2.13     0.279</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ci_lower ci_upper lrt    df p_value  delta_aic delta_bic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.51     2.84     39.9   1  &lt; 0.0001 37.9      34       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -0.724   0.804    0.0117 1  0.9139   -1.99     -5.9     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1.61     2.7      71.3   1  &lt; 0.0001 69.3      65.4     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Parallel two-mediator model, with the contrast of the two specific</span></span></span>
-<span class="r-in"><span><span class="co"># indirect effects (the paper's Research Questions 2 and 3). Not run</span></span></span>
-<span class="r-in"><span><span class="co"># here for the same reason; the call is:</span></span></span>
-<span class="r-in"><span><span class="co"># parallel &lt;- "</span></span></span>
-<span class="r-in"><span><span class="co">#   imagery    ~ b1*instruction</span></span></span>
-<span class="r-in"><span><span class="co">#   repetition ~ b3*instruction</span></span></span>
-<span class="r-in"><span><span class="co">#   recall     ~ b2*imagery + b4*repetition + b5*instruction</span></span></span>
-<span class="r-in"><span><span class="co">#   imagery ~~ repetition</span></span></span>
-<span class="r-in"><span><span class="co"># "</span></span></span>
-<span class="r-in"><span><span class="co"># mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,</span></span></span>
-<span class="r-in"><span><span class="co">#                x = "instruction", y = "recall",</span></span></span>
-<span class="r-in"><span><span class="co">#                hypotheses = c(imagery_minus_repetition =</span></span></span>
-<span class="r-in"><span><span class="co">#                  "indirect_via_imagery - indirect_via_repetition"),</span></span></span>
-<span class="r-in"><span><span class="co">#                ci_method = "monte_carlo", seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co"># The indirect effect through repetition is near zero (the paper</span></span></span>
-<span class="r-in"><span><span class="co"># reports LRT = 0.083, p = .773), while the contrast shows the</span></span></span>
-<span class="r-in"><span><span class="co"># imagery pathway is larger (the paper reports LRT = 25.828,</span></span></span>
-<span class="r-in"><span><span class="co"># difference = 2.222, SE = 0.445).</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Raw data go in through 'data' rather than 'S', 'M', and 'N'. Adding</span></span></span>
-<span class="r-in"><span><span class="co"># 'group' fits the model in every group and tests the between-group</span></span></span>
-<span class="r-in"><span><span class="co"># difference of each effect, which is moderated mediation with a</span></span></span>
-<span class="r-in"><span><span class="co"># categorical moderator. Leaving the paths unlabeled lets them differ</span></span></span>
-<span class="r-in"><span><span class="co"># by group. It is not run here because each reported difference costs</span></span></span>
-<span class="r-in"><span><span class="co"># its own constrained null model fit:</span></span></span>
-<span class="r-in"><span><span class="co">#   mediation_mbco("m ~ x \n y ~ m + x", data = two_groups,</span></span></span>
-<span class="r-in"><span><span class="co">#                  group = "condition", x = "x", y = "y",</span></span></span>
-<span class="r-in"><span><span class="co">#                  ci_method = "wald")</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co"># A continuous moderator goes in through 'moderator'. That analysis,</span></span></span>
-<span class="r-in"><span><span class="co"># fit from a data frame with the conditional effects it estimates</span></span></span>
-<span class="r-in"><span><span class="co"># drawn as curves over the moderator's range, is shown at</span></span></span>
-<span class="r-in"><span><span class="co"># ?plot_mediation_mbco.</span></span></span>
+<span class="r-in"><span><span class="co"># The parallel two-mediator model of the same paper, with the contrast</span></span></span>
+<span class="r-in"><span><span class="co"># of its two specific indirect effects, is described under Details;</span></span></span>
+<span class="r-in"><span><span class="co"># it is fit the same way from the same summary statistics, adding the</span></span></span>
+<span class="r-in"><span><span class="co"># 'hypotheses' argument. Raw data go in through 'data' rather than</span></span></span>
+<span class="r-in"><span><span class="co"># 'S', 'M', and 'N'; adding 'group' fits the model in every group and</span></span></span>
+<span class="r-in"><span><span class="co"># tests the between-group difference of each effect, which is</span></span></span>
+<span class="r-in"><span><span class="co"># moderated mediation with a categorical moderator (see Details). A</span></span></span>
+<span class="r-in"><span><span class="co"># continuous moderator goes in through 'moderator', and the help page</span></span></span>
+<span class="r-in"><span><span class="co"># for plot_mediation_mbco fits that analysis from a data frame and</span></span></span>
+<span class="r-in"><span><span class="co"># draws the conditional effects it estimates.</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -282,6 +282,34 @@ Every reported row carries its estimate, a delta method standard error
 `ci_method` confidence interval, and the MBCO likelihood ratio test with
 its degrees of freedom and *p*-value.
 
+**The parallel two-mediator model.** Tofighi and Kelley (2020) continue
+the memory example with imagery and repetition as parallel mediators and
+a residual covariance between them, asking whether the indirect effect
+through repetition is zero and whether the two specific indirect effects
+differ (their Research Questions 2 and 3). That analysis is the
+single-mediator call of the examples with the parallel model in place of
+the single one and the contrast supplied through `hypotheses`:
+
+    parallel <- "
+      imagery    ~ b1*instruction
+      repetition ~ b3*instruction
+      recall     ~ b2*imagery + b4*repetition + b5*instruction
+      imagery ~~ repetition
+    "
+    mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
+                   x = "instruction", y = "recall",
+                   hypotheses = c(imagery_minus_repetition =
+                     "indirect_via_imagery - indirect_via_repetition"),
+                   ci_method = "monte_carlo", seed = 113)
+
+Six effects are reported, so six constrained null models are fit, about
+twice the cost of the single-mediator analysis. The indirect effect
+through repetition is near zero (the paper reports
+\\\mathrm{LRT}\_{\mathrm{MBCO}} = 0.083\\, *p* = .773), while the
+contrast shows the imagery pathway is larger (the paper reports
+\\\mathrm{LRT}\_{\mathrm{MBCO}} = 25.828\\, difference = 2.222, SE =
+0.445).
+
 **Choosing the confidence interval.** The default profile likelihood
 interval inverts the likelihood ratio test for the effect itself (Neale
 & Miller, 1997), so its limits are free to sit asymmetrically about the
@@ -316,7 +344,20 @@ applies to every group and therefore imposes cross-group equality (the
 corresponding difference is identically zero and its row is dropped); to
 let a path differ by group, leave it unlabeled or give per-group labels
 with the vector form `c("b1_f", "b1_m")*x`. With more than two groups,
-each non-reference group is compared with the reference group.
+each non-reference group is compared with the reference group. The call
+below fits the simple model in both groups of a data frame `d` whose
+`condition` column takes two values, and reports every effect per group
+beside its between-group difference; leaving the paths unlabeled lets
+them differ by group.
+
+    mediation_mbco("m ~ x
+                    y ~ m + x",
+                   data = d, group = "condition", x = "x", y = "y",
+                   ci_method = "wald")
+
+Each reported row costs its own constrained null model fit, so this
+two-group analysis fits nine null models where the single-group analysis
+fits three.
 
 **Moderated mediation, probed.** With `moderator`, every regression
 coefficient along a pathway becomes a linear function of the moderator
@@ -525,51 +566,47 @@ S_tk <- outer(sds, sds) * R_tk
 M_tk <- c(instruction = 0.51, imagery = 5.66, repetition = 6.08,
           recall = 12.07)
 
-# Single-mediator model: instruction -> imagery -> recall. The fit is
-# not run here because every reported effect costs its own constrained
-# null model fit in OpenMx, on top of the B Monte Carlo replications
-# the interval draws. The call is:
-# single <- "
-#   imagery ~ b1*instruction
-#   recall  ~ b2*imagery + b3*instruction
-# "
-# mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
-#                x = "instruction", y = "recall",
-#                ci_method = "monte_carlo", seed = 113)
-# The indirect effect is about 2.1 words (the paper reports 2.121,
-# SE = 0.276, 95% Monte Carlo CI [1.600, 2.682]).
+# Single-mediator model: instruction -> imagery -> recall. Every
+# reported effect costs its own constrained null model fit in OpenMx,
+# which is where the run time goes; the Monte Carlo interval itself
+# is inexpensive at any B. The indirect effect is about 2.1 words
+# (the paper reports 2.121, SE = 0.276, 95% Monte Carlo CI
+# [1.600, 2.682]), and its likelihood ratio statistic of 71.31 is the
+# value discussed under Details.
+single <- "
+  imagery ~ b1*instruction
+  recall  ~ b2*imagery + b3*instruction
+"
+mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
+               x = "instruction", y = "recall",
+               ci_method = "monte_carlo", seed = 113)
+#> Mediation tests via model-based constrained optimization (MBCO)
+#>   Effects of instruction on recall; N = 369; optimizer: SLSQP
+#>   Full model: deviance = 4040.806567, AIC = 4058.806567, BIC = 4094.003737
+#>   R2 (full model): imagery = 0.384, recall = 0.260
+#>   Each p_value is from the MBCO likelihood ratio test of the
+#>   null model constraining that effect to zero. Causal readings
+#>   rest on the no omitted confounder assumption.
+#> 
+#>  pathway                              term                 estimate se   
+#>  instruction -> recall (all pathways) total_effect         2.18     0.335
+#>  instruction -> recall                direct_effect        0.042    0.388
+#>  instruction -> imagery -> recall     indirect_via_imagery 2.13     0.279
+#>  ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
+#>  1.51     2.84     39.9   1  < 0.0001 37.9      34       
+#>  -0.724   0.804    0.0117 1  0.9139   -1.99     -5.9     
+#>  1.61     2.7      71.3   1  < 0.0001 69.3      65.4     
+#> 
+#> Confidence level: 95%
 
-# Parallel two-mediator model, with the contrast of the two specific
-# indirect effects (the paper's Research Questions 2 and 3). Not run
-# here for the same reason; the call is:
-# parallel <- "
-#   imagery    ~ b1*instruction
-#   repetition ~ b3*instruction
-#   recall     ~ b2*imagery + b4*repetition + b5*instruction
-#   imagery ~~ repetition
-# "
-# mediation_mbco(parallel, S = S_tk, M = M_tk, N = 369,
-#                x = "instruction", y = "recall",
-#                hypotheses = c(imagery_minus_repetition =
-#                  "indirect_via_imagery - indirect_via_repetition"),
-#                ci_method = "monte_carlo", seed = 113)
-# The indirect effect through repetition is near zero (the paper
-# reports LRT = 0.083, p = .773), while the contrast shows the
-# imagery pathway is larger (the paper reports LRT = 25.828,
-# difference = 2.222, SE = 0.445).
-
-# Raw data go in through 'data' rather than 'S', 'M', and 'N'. Adding
-# 'group' fits the model in every group and tests the between-group
-# difference of each effect, which is moderated mediation with a
-# categorical moderator. Leaving the paths unlabeled lets them differ
-# by group. It is not run here because each reported difference costs
-# its own constrained null model fit:
-#   mediation_mbco("m ~ x \n y ~ m + x", data = two_groups,
-#                  group = "condition", x = "x", y = "y",
-#                  ci_method = "wald")
-#
-# A continuous moderator goes in through 'moderator'. That analysis,
-# fit from a data frame with the conditional effects it estimates
-# drawn as curves over the moderator's range, is shown at
-# ?plot_mediation_mbco.
+# The parallel two-mediator model of the same paper, with the contrast
+# of its two specific indirect effects, is described under Details;
+# it is fit the same way from the same summary statistics, adding the
+# 'hypotheses' argument. Raw data go in through 'data' rather than
+# 'S', 'M', and 'N'; adding 'group' fits the model in every group and
+# tests the between-group difference of each effect, which is
+# moderated mediation with a categorical moderator (see Details). A
+# continuous moderator goes in through 'moderator', and the help page
+# for plot_mediation_mbco fits that analysis from a data frame and
+# draws the conditional effects it estimates.
 ```

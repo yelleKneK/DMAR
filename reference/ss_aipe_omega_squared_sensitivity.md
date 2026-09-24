@@ -25,8 +25,7 @@ ss_aipe_omega_squared_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_omega_squared_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -73,13 +72,15 @@ ss_aipe_omega_squared_sensitivity(
 
   Logical. Print iteration index per replication.
 
-- save:
-
-  Logical. If `TRUE` write per-replication results to `filename`.
-
 - filename:
 
-  Path used when `save = TRUE`.
+  Optional path for a comma separated file recording every replication
+  (the sample \\\hat\omega^2\\, the two confidence limits, the interval
+  width, and two indicators of whether the interval missed
+  `true_omega_squared` below or above): nothing is written when
+  `filename` is `NULL` (the default), a new file with a header row is
+  created otherwise, an existing file at that path is appended to, and a
+  throwaway run should point it at `tempfile(fileext = ".csv")`.
 
 ## Value
 
@@ -151,7 +152,7 @@ ss_aipe_omega_squared_sensitivity(
   df_effect = 2, width = 0.10,
   G = 25, print_iter = FALSE
 )
-#> During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 10 intermediate evaluations.
+#> During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 10 intermediate evaluations.
 #>  term                    value 
 #>  mean_omega_squared      0.0665
 #>  median_omega_squared    0.0703

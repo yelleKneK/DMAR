@@ -13,7 +13,7 @@ interval will be no wider than desired."><meta property="og:image" content="http
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,7 +106,7 @@ interval will be no wider than desired.</p>
 
 
 <dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>
-<dd><p>The tolerance of the iterative function <code>conf_limits_nct</code> for convergence</p></dd>
+<dd><p>The tolerance of the iterative function <code>ci_nc_t</code> for convergence</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -135,10 +135,11 @@ on random regressors and the latter on fixed regressors.</p>
 sample size as an estimate and then evaluates with an internal Monte Carlo simulation
 (i.e., via "brute-force" methods) the exact sample size given the goals specified. When <code>verify_ss=TRUE</code>,
 the default number of iterations is 10,000 but this can be changed by specifying G=5000 (or some other value;
-10000 is the recommended) When <code>verify_ss=TRUE</code> is specified, an internal function <code>verify_ss_aipe_r2</code>
+10000 is the recommended). When <code>verify_ss=TRUE</code> is specified, an internal function <code>verify_ss_aipe_r2</code>
 calls upon the <code>ss_aipe_R2_sensitivity</code> function for purposes of the internal Monte Carlo simulation
-study. See the <code>verify_ss_aipe_r2</code> function for arguments that can be passed from <code>ss_aipe_R2</code>
-to <code>verify_ss_aipe_r2</code>.</p>
+study. Two of its arguments pass through <code>...</code>: <code>g</code> (default 500), the number of replications
+used for each candidate <em>N</em> in the coarse search that brackets the answer, and <code>G</code> (default 10000),
+the number used in the final pass that confirms the sample size near that bracket.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -177,7 +178,7 @@ multiple correlation coefficient. <em>Multivariate Behavioral Research, 35</em>,
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="ci_R2.html">ci_R2</a></code>, <code><a href="conf_limits_nct.html">conf_limits_nct</a></code>, <code><a href="ss_aipe_R2_sensitivity.html">ss_aipe_R2_sensitivity</a></code></p>
+    <div class="dont-index"><p><code><a href="ci_R2.html">ci_R2</a></code>, <code><a href="ci_nc_t.html">ci_nc_t</a></code>, <code><a href="ss_aipe_R2_sensitivity.html">ss_aipe_R2_sensitivity</a></code></p>
 <p><code><a href="design_consequences.html">design_consequences</a></code> for what a chosen design delivers:
   power, the Type S (sign) and Type M (exaggeration) errors of the
   significance filter, and the expected confidence interval width.</p></div>
@@ -193,38 +194,51 @@ multiple correlation coefficient. <em>Multivariate Behavioral Research, 35</em>,
 <span class="r-in"><span><span class="co">#    Sample size sufficient for the expected CI width on rho^2 to be .10.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_R2</span><span class="op">(</span>population_R2 <span class="op">=</span> <span class="fl">.50</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, width <span class="op">=</span> <span class="fl">.10</span>,</span></span>
 <span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, random_predictors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 773  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># 2. The same target under fixed predictors (planned dosing levels,</span></span></span>
-<span class="r-in"><span><span class="co">#    factorial covariates, and the like) needs a smaller N, and adding an</span></span></span>
-<span class="r-in"><span><span class="co">#    assurance of .85, so that the realized width is no larger than the</span></span></span>
-<span class="r-in"><span><span class="co">#    target in 85 percent of replications rather than only on average,</span></span></span>
-<span class="r-in"><span><span class="co">#    needs a larger one. Each is another pass of the same iterative search</span></span></span>
-<span class="r-in"><span><span class="co">#    over N, so the two calls are shown here rather than run:</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co">#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,</span></span></span>
-<span class="r-in"><span><span class="co">#               which_width = "Full", p = 5, random_predictors = FALSE)</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co">#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,</span></span></span>
-<span class="r-in"><span><span class="co">#               which_width = "Full", p = 5, assurance = .85,</span></span></span>
-<span class="r-in"><span><span class="co">#               random_predictors = TRUE)</span></span></span>
+<span class="r-in"><span><span class="co">#    factorial covariates, and the like) needs a smaller N, since fixed</span></span></span>
+<span class="r-in"><span><span class="co">#    predictors contribute no sampling variability of their own.</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_R2</span><span class="op">(</span>population_R2 <span class="op">=</span> <span class="fl">.50</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, width <span class="op">=</span> <span class="fl">.10</span>,</span></span>
+<span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, random_predictors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 584  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># 3. verify_ss = TRUE follows the closed form approximation with an a</span></span></span>
+<span class="r-in"><span><span class="co"># 3. An assurance of .85, so that the realized width is no larger than the</span></span></span>
+<span class="r-in"><span><span class="co">#    target in 85 percent of replications rather than only on average,</span></span></span>
+<span class="r-in"><span><span class="co">#    needs a larger N than the expected width plan in (1).</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_R2</span><span class="op">(</span>population_R2 <span class="op">=</span> <span class="fl">.50</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, width <span class="op">=</span> <span class="fl">.10</span>,</span></span>
+<span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, assurance <span class="op">=</span> <span class="fl">.85</span>,</span></span>
+<span class="r-in"><span>           random_predictors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 815  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 4. verify_ss = TRUE follows the closed form approximation with an a</span></span></span>
 <span class="r-in"><span><span class="co">#    priori Monte Carlo simulation of the realized width, starting from</span></span></span>
 <span class="r-in"><span><span class="co">#    the closed form answer and returning the sample size the simulation</span></span></span>
-<span class="r-in"><span><span class="co">#    settles on, which is what a plan meant to be defended deserves. G is</span></span></span>
-<span class="r-in"><span><span class="co">#    the number of replications in that simulation; 10000 is the default</span></span></span>
-<span class="r-in"><span><span class="co">#    and the recommendation. The call runs for several minutes, so it too</span></span></span>
-<span class="r-in"><span><span class="co">#    is shown rather than run:</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
-<span class="r-in"><span><span class="co">#    set.seed(113)</span></span></span>
-<span class="r-in"><span><span class="co">#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,</span></span></span>
-<span class="r-in"><span><span class="co">#               which_width = "Full", p = 5, random_predictors = TRUE,</span></span></span>
-<span class="r-in"><span><span class="co">#               verify_ss = TRUE, G = 10000)</span></span></span>
+<span class="r-in"><span><span class="co">#    settles on, which is what a plan meant to be defended deserves. The</span></span></span>
+<span class="r-in"><span><span class="co">#    coarse search runs g replications per candidate N and the final pass</span></span></span>
+<span class="r-in"><span><span class="co">#    runs G; the small counts here keep the example quick, and a reported</span></span></span>
+<span class="r-in"><span><span class="co">#    plan deserves the defaults of g = 500 and G = 10000.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_R2</span><span class="op">(</span>population_R2 <span class="op">=</span> <span class="fl">.50</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, width <span class="op">=</span> <span class="fl">.10</span>,</span></span>
+<span class="r-in"><span>           which_width <span class="op">=</span> <span class="st">"Full"</span>, p <span class="op">=</span> <span class="fl">5</span>, random_predictors <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>           verify_ss <span class="op">=</span> <span class="cn">TRUE</span>, g <span class="op">=</span> <span class="fl">10</span>, G <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 766  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

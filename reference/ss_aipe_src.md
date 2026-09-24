@@ -145,7 +145,7 @@ Chapter 6 on trend analysis.)
 ## See also
 
 [`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
 [`ss_aipe_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef.md),
 [`ss_aipe_rc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc.md)
 

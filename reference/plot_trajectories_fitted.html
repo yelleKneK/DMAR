@@ -17,7 +17,7 @@ quality_of_fit attribute."><meta property="og:image" content="https://yelleknek.
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -156,8 +156,8 @@ supply an integer for reproducible subject sampling.</p></dd>
     <p>Modernizes the original <code>vit_fitted()</code> function by:</p><ul><li><p>returning a <span class="pkg">ggplot2</span> object instead of writing to graphics
         devices,</p></li>
 <li><p>attaching per-subject quality-of-fit as an attribute rather than
-        assigning it to the global environment via <code>&lt;&lt;-</code> (a serious
-        side effect of the original),</p></li>
+        assigning it into the global environment, a serious side effect
+        of the original,</p></li>
 <li><p>drawing a smooth fitted curve from a per-subject time grid via
         <code>predict(..., re.form = NULL)</code> for <span class="pkg">lme4</span> fits and
         <code>predict(..., level = 1)</code> for <span class="pkg">nlme</span> fits,</p></li>
@@ -199,9 +199,9 @@ supply an integer for reproducible subject sampling.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># nlme: linear growth in tooth distance over age (Orthodont, 27 children).</span></span></span>
-<span class="r-in"><span><span class="co"># Four of the children are paneled here so the figure is quick to draw;</span></span></span>
-<span class="r-in"><span><span class="co"># drop n_random to get a panel for every child.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># nlme: linear growth in tooth distance over age for the 27 Orthodont</span></span></span>
+<span class="r-in"><span><span class="co"># children. Four of the children are paneled here so the figure is</span></span></span>
+<span class="r-in"><span><span class="co"># quick to draw; drop n_random to get a panel for every child.</span></span></span>
 <span class="r-in"><span><span class="va">fm_nlme</span> <span class="op">&lt;-</span> <span class="fu">nlme</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">lme</a></span><span class="op">(</span><span class="va">distance</span> <span class="op">~</span> <span class="va">age</span>, random <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">|</span> <span class="va">Subject</span>,</span></span>
 <span class="r-in"><span>                     data <span class="op">=</span> <span class="fu">nlme</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/nlme/man/Orthodont.html" class="external-link">Orthodont</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plot_trajectories_fitted</span><span class="op">(</span><span class="va">fm_nlme</span>, n_random <span class="op">=</span> <span class="fl">4</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
@@ -214,13 +214,13 @@ supply an integer for reproducible subject sampling.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3     F05 0.6914286 0.6397144</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     F10 0.7363636 0.7785559</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># An lme4 fit is handled the same way. Not run here because the call</span></span></span>
-<span class="r-in"><span><span class="co"># loads the lme4 namespace and then draws a panel for each of the</span></span></span>
-<span class="r-in"><span><span class="co"># eighteen subjects, which is where the time goes; fitting the model</span></span></span>
-<span class="r-in"><span><span class="co"># is quick by comparison. The calls are:</span></span></span>
-<span class="r-in"><span><span class="co"># fm_lme4 &lt;- lme4::lmer(Reaction ~ Days + (Days | Subject),</span></span></span>
-<span class="r-in"><span><span class="co">#                       data = lme4::sleepstudy)</span></span></span>
-<span class="r-in"><span><span class="co"># plot_trajectories_fitted(fm_lme4)</span></span></span>
+<span class="r-in"><span><span class="co"># An lme4 fit is handled the same way: the outcome, the subject</span></span></span>
+<span class="r-in"><span><span class="co"># identifier, and the time variable are read from the model. Six of</span></span></span>
+<span class="r-in"><span><span class="co"># the eighteen sleepstudy subjects are paneled here.</span></span></span>
+<span class="r-in"><span><span class="va">fm_lme4</span> <span class="op">&lt;-</span> <span class="fu">lme4</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span><span class="va">Reaction</span> <span class="op">~</span> <span class="va">Days</span> <span class="op">+</span> <span class="op">(</span><span class="va">Days</span> <span class="op">|</span> <span class="va">Subject</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                      data <span class="op">=</span> <span class="fu">lme4</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/lme4/man/sleepstudy.html" class="external-link">sleepstudy</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_trajectories_fitted</span><span class="op">(</span><span class="va">fm_lme4</span>, n_random <span class="op">=</span> <span class="fl">6</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_trajectories_fitted-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

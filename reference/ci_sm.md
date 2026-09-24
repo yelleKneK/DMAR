@@ -77,7 +77,7 @@ confidence interval coverage (`conf_level`), or lower and upper
 confidence limits (`alpha_lower` and `alpha_upper`). This function uses
 the exact confidence interval method based on noncentral
 *t*-distributions. The confidence interval for noncentral *t*-parameter
-can be obtained from the `conf_limits_nct` function in DMAR.
+can be obtained from the `ci_nc_t` function in DMAR.
 
 ## Note
 
@@ -97,7 +97,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 ## See also
 
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

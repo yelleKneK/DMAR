@@ -51,7 +51,9 @@ plot_trajectories(panel, id = "id", time = "time",
                   outcome = "true_score", group = "population")
 ```
 
-![](nonlinear_growth_files/figure-html/negexp-curves-1.png)
+![plot of chunk negexp-curves](nonlinear_growth-fig-negexp-curves-1.png)
+
+plot of chunk negexp-curves
 
 The three rising curves share the same start (0) and end (1) and differ
 only in `gamma`; the three falling curves mirror them. That is the point
@@ -73,7 +75,9 @@ d_ne <- simulate_longitudinal_negative_exponential(
 plot_trajectories(d_ne, id = "id", time = "time", outcome = "y")
 ```
 
-![](nonlinear_growth_files/figure-html/negexp-sample-1.png)
+![plot of chunk negexp-sample](nonlinear_growth-fig-negexp-sample-1.png)
+
+plot of chunk negexp-sample
 
 ## The Logistic: Symmetric S-Shaped Change
 
@@ -109,7 +113,10 @@ ggplot2::ggplot(curves, ggplot2::aes(t, y, color = gamma)) +
   ggplot2::theme_minimal()
 ```
 
-![](nonlinear_growth_files/figure-html/logistic-curves-1.png)
+![plot of chunk
+logistic-curves](nonlinear_growth-fig-logistic-curves-1.png)
+
+plot of chunk logistic-curves
 
 All three curves pass through the same inflection point (the dot at t =
 6, y = 50): `gamma` concentrates the change around that moment without
@@ -144,7 +151,10 @@ plot_trajectories(panel, id = "id", time = "time",
                   outcome = "true_score", group = "population")
 ```
 
-![](nonlinear_growth_files/figure-html/gompertz-curves-1.png)
+![plot of chunk
+gompertz-curves](nonlinear_growth-fig-gompertz-curves-1.png)
+
+plot of chunk gompertz-curves
 
 This reproduces the illustration from Kelley (2005): the three rising
 curves share the inflection time beta = 2, the three falling curves
@@ -187,7 +197,10 @@ ggplot2::ggplot(curves, ggplot2::aes(t, y, color = shape)) +
   ggplot2::theme_minimal()
 ```
 
-![](nonlinear_growth_files/figure-html/richards-family-1.png)
+![plot of chunk
+richards-family](nonlinear_growth-fig-richards-family-1.png)
+
+plot of chunk richards-family
 
 The simulator enforces delta \> 0 and, when `delta` is given a
 between-subject variance, refuses draws that cross zero rather than
@@ -231,7 +244,10 @@ ggplot2::ggplot(d_all,
   ggplot2::theme_minimal()
 ```
 
-![](nonlinear_growth_files/figure-html/single-parameter-1.png)
+![plot of chunk
+single-parameter](nonlinear_growth-fig-single-parameter-1.png)
+
+plot of chunk single-parameter
 
 Each panel is a different substantive claim. Floors that vary mean
 children start in different places; total change that varies means they
@@ -252,7 +268,10 @@ d_mix <- simulate_longitudinal_logistic(
 plot_trajectories(d_mix, id = "id", time = "time", outcome = "y")
 ```
 
-![](nonlinear_growth_files/figure-html/all-parameters-1.png)
+![plot of chunk
+all-parameters](nonlinear_growth-fig-all-parameters-1.png)
+
+plot of chunk all-parameters
 
 ## Nonlinear Versus Polynomial: Why the Parameters Matter
 
@@ -281,7 +300,9 @@ ggplot2::ggplot(fits, ggplot2::aes(t, y, color = order)) +
   ggplot2::theme_minimal()
 ```
 
-![](nonlinear_growth_files/figure-html/poly-approx-1.png)
+![plot of chunk poly-approx](nonlinear_growth-fig-poly-approx-1.png)
+
+plot of chunk poly-approx
 
 The ninth-order polynomial tracks the curve well. But it needed ten
 parameters to do what the Gompertz does with four, and not one of the
@@ -316,7 +337,10 @@ ggplot2::ggplot(long, ggplot2::aes(t, y, color = model)) +
   ggplot2::theme_minimal()
 ```
 
-![](nonlinear_growth_files/figure-html/poly-extrapolate-1.png)
+![plot of chunk
+poly-extrapolate](nonlinear_growth-fig-poly-extrapolate-1.png)
+
+plot of chunk poly-extrapolate
 
 Inside the observed window the two are indistinguishable; past it, the
 polynomial rockets out the top of the figure while the Gompertz does
@@ -396,40 +420,40 @@ of the National Academy of Sciences, 18*(1), 1–8.
 ``` r
 
 sessionInfo()
-#> R version 4.6.1 (2026-06-24)
-#> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.4 LTS
+#> R version 4.5.2 (2025-10-31)
+#> Platform: aarch64-apple-darwin20
+#> Running under: macOS Tahoe 26.6.2
 #> 
 #> Matrix products: default
-#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+#> BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
 #> 
 #> locale:
-#>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
-#>  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   
-#>  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          
-#> [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   
+#> [1] en_US/en_US/en_US/C/en_US/en_US
 #> 
-#> time zone: UTC
-#> tzcode source: system (glibc)
+#> time zone: America/Indiana/Indianapolis
+#> tzcode source: internal
 #> 
 #> attached base packages:
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] DMAR_1.0.0
+#> [1] ggrain_0.1.2    patchwork_1.3.2 ggplot2_4.0.1   DMAR_1.0.0     
+#> [5] testthat_3.3.1 
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1        compiler_4.6.1    
-#>  [5] tidyselect_1.2.1   jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
-#>  [9] textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0      ggplot2_4.0.3     
-#> [13] R6_2.6.1           labeling_0.4.3     generics_0.1.4     knitr_1.51        
-#> [17] MASS_7.3-65        tibble_3.3.1       desc_1.4.3         bslib_0.12.0      
-#> [21] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.3.0        cachem_1.1.0      
-#> [25] xfun_0.60          fs_2.1.0           sass_0.4.10        S7_0.2.2          
-#> [29] otel_0.2.0         cli_3.6.6          pkgdown_2.2.1      withr_3.0.3       
-#> [33] magrittr_2.0.5     digest_0.6.39      grid_4.6.1         lifecycle_1.0.5   
-#> [37] vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1         farver_2.1.2      
-#> [41] ragg_1.5.2         rmarkdown_2.31     tools_4.6.1        pkgconfig_2.0.3   
-#> [45] htmltools_0.5.9
+#>  [1] generics_0.1.4     lattice_0.22-7     magrittr_2.0.4     evaluate_1.0.5    
+#>  [5] grid_4.5.2         RColorBrewer_1.1-3 pkgload_1.4.1      fastmap_1.2.0     
+#>  [9] rprojroot_2.1.1    pkgbuild_1.4.8     sessioninfo_1.2.3  brio_1.1.5        
+#> [13] Formula_1.2-5      purrr_1.2.0        scales_1.4.0       abind_1.4-8       
+#> [17] cli_3.6.5          ggpp_0.6.1         rlang_1.1.6        ellipsis_0.3.2    
+#> [21] remotes_2.5.0      withr_3.0.2        cachem_1.1.0       devtools_2.4.6    
+#> [25] otel_0.2.0         tools_4.5.2        parallel_4.5.2     polynom_1.4-1     
+#> [29] memoise_2.0.1      dplyr_1.1.4        vctrs_0.6.5        R6_2.6.1          
+#> [33] lifecycle_1.0.4    fs_1.6.6           car_3.1-3          usethis_3.2.1     
+#> [37] MASS_7.3-65        pkgconfig_2.0.3    desc_1.4.3         pillar_1.11.1     
+#> [41] gtable_0.3.6       glue_1.8.0         xfun_0.55          tibble_3.3.0      
+#> [45] tidyselect_1.2.1   rstudioapi_0.17.1  knitr_1.51         farver_2.1.2      
+#> [49] nlme_3.1-168       carData_3.0-5      labeling_0.4.3     compiler_4.5.2    
+#> [53] S7_0.2.1
 ```

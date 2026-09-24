@@ -13,7 +13,7 @@ width of the obtained (two-sided) confidence intervals."><meta property="og:imag
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,9 +64,7 @@ width of the obtained (two-sided) confidence intervals.</p>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_smd_sensitivity_result.csv"</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -106,16 +104,15 @@ width of the obtained (two-sided) confidence intervals.</p>
 <dd><p>to print the current value of the iterations</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. It can be saved with <code>save = TRUE</code> outside of the printed results</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results will be saved to</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>for modifying parameters of functions this function calls</p></dd>
+<dd><p>an optional path for a comma separated file recording
+every replication (the realized standardized mean difference, the
+full and the two one-sided interval widths, the three non-coverage
+indicators, and the two confidence limits): nothing is written when
+<code>filename</code> is <code>NULL</code> (the default), a new file with a header
+row is created otherwise, an existing file at that path is appended
+to, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code></p></dd>
 
 </dl></div>
     <div class="section level2">

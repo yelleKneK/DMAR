@@ -2,7 +2,7 @@
 
 The tables of critical values printed in the back of a statistics
 textbook, for the *t*, *F*, studentized range, studentized maximum
-modulus, Dunnett, and Bryant–Paulson distributions, are not data to be
+modulus, Dunnett, and Bryant-Paulson distributions, are not data to be
 trusted on faith. Each one is the quantile of a known distribution, so
 each one can be recomputed. This vignette shows that DMAR’s
 critical-value family reproduces those tables, walks through the
@@ -137,9 +137,9 @@ its own, several hundredths at the .01 level, which is why
 [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md)
 integrates rather than simulates.)
 
-## Bryant–Paulson (A.8): Where Recomputation Caught an Error
+## Bryant-Paulson (A.8): Where Recomputation Caught an Error
 
-The Bryant–Paulson generalized studentized range is the
+The Bryant-Paulson generalized studentized range is the
 analysis-of-covariance analogue of Tukey’s range, for comparing
 covariate-**adjusted** means when the covariate is random. It is the one
 distribution here that most software, including base R, does not compute

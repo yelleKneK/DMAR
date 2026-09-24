@@ -19,7 +19,7 @@ three types coincide and the choice is immaterial."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -240,7 +240,7 @@ depends on an arbitrary choice.</p>
 <span class="r-in"><span><span class="co"># statistics drop, and a warning reports that the affected noncentral F</span></span></span>
 <span class="r-in"><span><span class="co"># lower limits are clamped to 0.</span></span></span>
 <span class="r-in"><span><span class="fu">factorial_anova</span><span class="op">(</span><span class="va">iq_gain</span> <span class="op">~</span> <span class="va">treatment</span> <span class="op">*</span> <span class="va">grade_band</span>, data <span class="op">=</span> <span class="va">pyg</span>, ss_type <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The noncentral F lower-limit clamp in conf_limits_ncf() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The noncentral F lower-limit clamp in ci_nc_F() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?ci_nc_F for the meaning of the clamp.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  effect               SS    df  F_value p_value eta_squared_partial</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  treatment            798   1   4.37    0.0374  0.0141             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  grade_band           790   1   4.33    0.0384  0.0139             </span>

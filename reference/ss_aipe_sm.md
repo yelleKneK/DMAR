@@ -80,7 +80,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 ## See also
 
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
 [`ci_sm`](https://yelleknek.github.io/DMAR/reference/ci_sm.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
@@ -103,7 +103,7 @@ Ken Kelley <kkelley@nd.edu>
 # the function should be specified as follows.
 
 ss_aipe_sm(sm = 10, width = 2.5, conf_level = .95, assurance = .90)
-#> Warning: During the iterative sample size search, conf_limits_nct() reported a noncentrality parameter exceeding 37.62 in magnitude in 254 intermediate evaluations, the limit at which R's pt()/qt() can return accurate noncentral t probabilities. The returned sample size may be affected; see ?conf_limits_nct.
+#> Warning: During the iterative sample size search, ci_nc_t() reported a noncentrality parameter exceeding 37.62 in magnitude in 254 intermediate evaluations, the limit at which R's pt()/qt() can return accurate noncentral t probabilities. The returned sample size may be affected; see ?ci_nc_t.
 #>  term        value
 #>  necessary_N 150  
 #> 

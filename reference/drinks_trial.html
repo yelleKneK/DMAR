@@ -43,7 +43,7 @@ outcome."><meta property="og:image" content="https://yelleknek.github.io/DMAR/lo
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -129,7 +129,8 @@ outcome.</p>
 
   <dt><code>log_drinks</code></dt>
 <dd><p>Common-log transformation
-    \(\log_{10}(\code{drinks\_per\_week} + 1)\), the scale on
+    \(\log_{10}(x + 1)\) of \(x = \) <code>drinks_per_week</code>,
+    the scale on
     which Smith, Meyers, and Delaney (1998) ran their primary
     between-groups analyses to obtain approximate normality.
     The plus-one inside the logarithm keeps the zero values

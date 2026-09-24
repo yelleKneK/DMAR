@@ -30,8 +30,7 @@ ss_power_reg_coef_sensitivity(
   standardize = FALSE,
   G = 1000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_power_reg_coef_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -101,13 +100,13 @@ ss_power_reg_coef_sensitivity(
 
   Whether to print the iteration number during the simulation
 
-- save:
-
-  Whether to write the per-replication results to a CSV file
-
 - filename:
 
-  Name of the CSV file written when `save = TRUE`
+  Optional path of a CSV file to receive the per-replication results
+  (the coefficient estimate, its standard error, the *t* statistic, and
+  the observed \\R^2\\), overwriting any file already at that path; the
+  default `NULL` writes nothing, and a throwaway run that wants the file
+  should point it at `tempfile(fileext = ".csv")`.
 
 ## Value
 

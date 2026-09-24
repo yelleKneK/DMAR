@@ -1,10 +1,92 @@
 # Changelog
 
-## DMAR 1.0.0
+## DMAR 1.0.0.0
 
 First public release of DMAR (pronounced “Dee-Mar,” for “Design,
 Measurement, and Analysis in R”), a greatly expanded reimagining of the
-MBESS package.
+MBESS package. The package was published on CRAN on 2026-09-21, where
+the version is listed as 1.0.0; on GitHub the same release carries a
+fourth component, 1.0.0.0, which is zero at a release and counts the
+development builds that follow it.
+
+### Every Example Runs, and Nothing Writes or Seeds Behind the User’s Back
+
+- Every line of code in every help page example now runs. Earlier drafts
+  carried a slow call (a bootstrap interval, a Monte Carlo planner, a
+  refit) as a comment so that a reader could see the syntax without the
+  check paying for it; the CRAN review of 2026-09-04 asked that no
+  example line be commented out, and none is. Where a call was slow, it
+  runs with a small replication count and a comment naming the count a
+  reported analysis deserves (the defaults are unchanged); where a page
+  demonstrated the same thing twice, it now demonstrates it once. The
+  package still ships no `\donttest{}` and no `\dontrun{}`, and a
+  parse-based detector in the test suite fails on any comment line that
+  would parse as code.
+
+- The sensitivity family no longer writes a file unless asked to, and
+  never to a default location. The `save` argument is gone from \<\>;
+  the single switch is `filename`, which defaults to `NULL`. Supplying a
+  path writes the per-replication results there exactly as `save = TRUE`
+  used to; a throwaway run points it at `tempfile(fileext = ".csv")`.
+
+- A supplied `seed` is now set through
+  [`withr::local_seed()`](https://withr.r-lib.org/reference/with_seed.html)
+  (withr, which has no dependencies of its own, joins Imports), by way
+  of one internal helper that every seeded function calls. The behavior
+  is what it was, the user’s generator state is restored when the
+  function returns, but the package no longer touches `.Random.seed` or
+  the global environment to do it, and no function uses `<<-`: the
+  handlers that count clamped or non-converged replications keep their
+  counts in a local environment.
+
+- The six Monte Carlo functions that silenced every warning for their
+  duration with `options(warn = -1)` now muffle only the warnings their
+  loops are known to raise (lavaan convergence and variance warnings on
+  borderline replicates, the noncentral clamp); any other warning
+  reaches the user.
+
+- The Bryant-Paulson distribution function integrates over the covariate
+  shrinkage factor after the change of variables delta = 1 - u^2, under
+  which the Beta weight of Bryant and Paulson (1976, Equation 12) is
+  smooth on the unit interval for every number of covariates instead of
+  carrying an integrable singularity at the endpoint where the
+  distribution puts most of its mass. The two forms agree to about 1e-10
+  (checked on a grid of 288 quantile, covariate, group, and degrees of
+  freedom combinations), the Table 1 reproduction in the tests is
+  unchanged, and a critical value now costs about a twentieth of what it
+  did, which is what lets every
+  [`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md),
+  [`cv_bryant_paulson()`](https://yelleknek.github.io/DMAR/reference/cv_bryant_paulson.md),
+  and
+  [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md)
+  example run live.
+
+- Two smaller changes from the same pass.
+  [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md),
+  [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md),
+  and
+  [`average_variance_extracted()`](https://yelleknek.github.io/DMAR/reference/average_variance_extracted.md)
+  resample through
+  [`lavaan::lavBootstrap()`](https://rdrr.io/pkg/lavaan/man/bootstrap.html),
+  the entry point that replaced `bootstrapLavaan()` in lavaan 0.7-2 (the
+  package already requires that version); the results are identical. The
+  five sensitivity functions whose `...` was never forwarded anywhere
+  ([`ss_aipe_sc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_sensitivity.md),
+  [`ss_aipe_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_smd_sensitivity.md),
+  [`ss_aipe_sm_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sm_sensitivity.md),
+  [`ss_aipe_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2_sensitivity.md),
+  and
+  [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md))
+  no longer accept it, so a misspelled or retired argument such as
+  `save = TRUE` now stops with an error instead of being swallowed.
+  [`ss_aipe_cv()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv.md)
+  with `assurance` supplied reports its noncentral accuracy note once,
+  with the combined count, where it used to report it twice; and
+  [`ss_aipe_cv_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv_sensitivity.md)
+  and
+  [`ss_aipe_sc_ancova_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_ancova_sensitivity.md)
+  report that note once per run, with the number of replications it
+  arose in, rather than once per replication.
 
 ### An Adversarial Quality Control Pass
 
@@ -84,6 +166,32 @@ MBESS package.
   prefix, and each function now pairs with its critical-value sibling
   (`cv_dunnett`, `cv_scheffe`, `cv_tukey_hsd`). The package is
   unreleased, so the old names are gone rather than aliased.
+
+- The noncentral-distribution toolkit is named by one rule (2026-08-21):
+  `nc_` and then the distribution, so
+  [`ci_nc_t()`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
+  [`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md),
+  and
+  [`ci_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
+  replace `conf_limits_nct()`, `conf_limits_ncf()`, and
+  `conf_limits_nc_chisq()` (the snake-cased descendants of MBESS’s
+  `conf.limits.nct()` and kin), and
+  [`moments_nc_t()`](https://yelleknek.github.io/DMAR/reference/moments_nc_t.md)
+  and
+  [`moments_nc_F()`](https://yelleknek.github.io/DMAR/reference/moments_nc_F.md)
+  replace `moments_nct()` and `moments_ncf()` to match
+  [`moments_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/moments_nc_chisq.md).
+  The intervals join the `ci_*` family because a confidence interval, on
+  the noncentrality parameter that the effect size intervals are built
+  from, is what they compute, and “confidence limits” was vocabulary
+  that existed only in MBESS. Splitting `nc` from the distribution token
+  retires the one inherited exception (`nct`, `ncf` against `nc_chisq`)
+  and restores the capital the package writes everywhere else
+  (`F_value`, `convert_F_chisq`). The noncentral marker stays because
+  the noncentrality parameter is the estimand.
+  [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md)
+  keeps its name: it is a plot first. The old names are gone rather than
+  aliased; each page names its earlier self in the description.
 
 - The correlation intervals now carry the names of their estimands,
   matching the rest of the correlation family (`ss_aipe_r`,
@@ -439,7 +547,7 @@ MBESS package.
   the central *F*-distribution, the lower noncentrality limit is 0 by
   construction; that is a normal consequence of a small observed effect,
   not a failure.
-  [`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+  [`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
   still warns once in that case, but the message now states the
   consequence for the interval (the lower confidence limit is 0) instead
   of describing achieved tail probabilities, and every function that
@@ -462,7 +570,7 @@ MBESS package.
   [`ci_srsnr()`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md)
   surfaced the inner wording, which pointed users to a `prob_greater`
   column those functions do not return. The warning carries the
-  condition class `dmar_ncf_clamp`, which the iterative callers
+  condition class `dmar_nc_F_clamp`, which the iterative callers
   ([`ss_aipe_R2()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2.md),
   [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
   [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
@@ -1186,13 +1294,13 @@ a test now recomputes it independently.
   that supplying `alpha_lower` and `alpha_upper` recomputes
   `conf_level`; that call errors, because the tails pass straight
   through to
-  [`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
+  [`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md),
   which refuses a non-NULL `conf_level` beside them. The page now
   directs users to set `conf_level = NULL` and supply both alphas, and a
   test pins the contract.
-- **[`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+- **[`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
   and
-  [`conf_limits_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+  [`ci_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
   state the monotonicity each search actually exploits.** The pages
   claimed each tail probability is strictly decreasing in the
   noncentrality parameter; the lower-limit condition works on the upper
@@ -1732,7 +1840,7 @@ stable on CRAN; DMAR is the recommended path forward for new users.
   gives the Browne and Cudeck (1989) expected cross-validation index for
   a covariance-structure model, with a confidence interval derived from
   the noncentral chi square
-  ([`conf_limits_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md));
+  ([`ci_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md));
   accepts a `lavaan` fit or a published fit table.
 
 - **[`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md)**
@@ -2566,8 +2674,8 @@ under-developed in MBESS. New families include:
   correlation to the plug-in formula.
 
 - Moments of the noncentral distributions:
-  [`moments_nct()`](https://yelleknek.github.io/DMAR/reference/moments_nct.md),
-  [`moments_ncf()`](https://yelleknek.github.io/DMAR/reference/moments_ncf.md),
+  [`moments_nc_t()`](https://yelleknek.github.io/DMAR/reference/moments_nc_t.md),
+  [`moments_nc_F()`](https://yelleknek.github.io/DMAR/reference/moments_nc_F.md),
   and
   [`moments_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/moments_nc_chisq.md)
   return the mean, variance, standard deviation, skewness, and excess
@@ -2659,9 +2767,9 @@ under-developed in MBESS. New families include:
   accurate past *F* = 1e20. Each help page states the exact computation.
   The map preserves the *p*-value but does not transport a noncentrality
   parameter, so noncentral work belongs in
-  [`conf_limits_ncf()`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+  [`ci_nc_F()`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
   and
-  [`conf_limits_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md).
+  [`ci_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md).
 
 - Display helpers extending the package’s *p*-value convention to
   objects DMAR does not produce:

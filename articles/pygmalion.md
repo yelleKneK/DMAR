@@ -98,7 +98,9 @@ for (g in levels(pygmalion$treatment)) {
 legend("topleft", legend = names(cols), col = cols, pch = 19, lwd = 2, bty = "n")
 ```
 
-![](pygmalion_files/figure-html/unnamed-chunk-3-1.png)
+![plot of chunk unnamed-chunk-3](pygmalion-fig-unnamed-chunk-3-1.png)
+
+plot of chunk unnamed-chunk-3
 
 The lines are not parallel: the relationship between pretest and
 follow-up IQ is stronger for the bloomers. The formal test is the

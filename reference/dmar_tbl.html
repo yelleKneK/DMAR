@@ -33,7 +33,7 @@ clearer choice (for example, a very small p-value)."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -260,8 +260,9 @@ or <code>x[["p_value"]]</code> returns the numbers at full precision.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   term estimate  ci_lower  ci_upper conf_level</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  smd      0.5 0.1005857 0.8969414       0.95</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The same display rules apply to wide tables (several typed columns),</span></span></span>
-<span class="r-in"><span><span class="co"># for example an effect size with its confidence interval per effect.</span></span></span>
+<span class="r-in"><span><span class="co"># The same display rules apply to a wide table, one with several typed</span></span></span>
+<span class="r-in"><span><span class="co"># columns, for example an effect size with its confidence interval per</span></span></span>
+<span class="r-in"><span><span class="co"># effect.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="ci_eta_squared.html">ci_eta_squared</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/aov.html" class="external-link">aov</a></span><span class="op">(</span><span class="va">iq_8</span> <span class="op">~</span> <span class="va">treatment</span>, data <span class="op">=</span> <span class="va">pygmalion</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  effect    eta_squared lower_limit upper_limit F_value df_effect df_error N  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  treatment 0.0202      0.000881    0.0609      6.34    1         308      310</span>

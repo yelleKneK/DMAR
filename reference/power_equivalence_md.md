@@ -140,15 +140,17 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Phillips (1990) Table 1, 5th row, 5th column. Expected: 0.8029678.
+# Table 1 of Phillips, 1990, fifth row and fifth column, where the
+# published power is 0.8029678.
 power_equivalence_md(alpha_level = .05, logscale = FALSE,
                      ltheta1 = -.2, ltheta2 = .2, ldiff = .05,
                      sigma = .20, n = 24, nu = 22)
 #>  term  value
 #>  power 0.803
 
-# Diletti (1991) Table 1, on the log scale (ratio of test to reference).
-# Expected: 0.7922796.
+# Table 1 of Diletti et al., 1991, on the log scale, so the limits and
+# the true difference are ratios of test to reference. The published
+# power is 0.7922796.
 power_equivalence_md(alpha_level = .05, logscale = TRUE,
                      ltheta1 = .8, ltheta2 = 1.25, ldiff = 1.05,
                      sigma = .20, n = 18, nu = 16)

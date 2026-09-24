@@ -266,12 +266,19 @@ cohen_kappa(table = tab)
 #> 
 #> Confidence level: 95%
 
-# A bootstrap interval for the same table, which expands it to its
-# 200 paired ratings and resamples the subjects. Not run here,
-# because 2000 refits of kappa is more than a help page should do;
-# the call is:
-# cohen_kappa(table = tab, ci_method = "percentile", B = 2000,
-#             seed = 113)
+# A percentile bootstrap interval for the same table, which expands
+# it to its 200 paired ratings and resamples the subjects. The point
+# estimate and the asymptotic standard error are unchanged; only the
+# interval is read off the bootstrap distribution. B = 2000 keeps the
+# example quick; a reported interval deserves the default B = 10000.
+cohen_kappa(table = tab, ci_method = "percentile", B = 2000,
+            seed = 113)
+#>  weights    kappa se    lower_limit upper_limit z_value p_value  n  
+#>  unweighted 0.492 0.051 0.387       0.592       9.64    < 0.0001 200
+#>  n_categories
+#>  3           
+#> 
+#> Confidence level: 95%
 
 # Cohen's ratio-scaled disagreement weights: a neurosis-psychosis
 # confusion (weight 6) is six times as grave as a personality

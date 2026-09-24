@@ -127,7 +127,7 @@ Contrast Analysis. *Psychological Methods, 9*(2), 164–182.
 
 ## See also
 
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
 [`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md),
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
 [`ci_smd_c`](https://yelleknek.github.io/DMAR/reference/ci_smd_c.md),

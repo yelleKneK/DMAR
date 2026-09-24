@@ -192,8 +192,9 @@ generics::glance(x)
 #>   term estimate  ci_lower  ci_upper conf_level
 #> 1  smd      0.5 0.1005857 0.8969414       0.95
 
-# The same display rules apply to wide tables (several typed columns),
-# for example an effect size with its confidence interval per effect.
+# The same display rules apply to a wide table, one with several typed
+# columns, for example an effect size with its confidence interval per
+# effect.
 ci_eta_squared(aov(iq_8 ~ treatment, data = pygmalion))
 #>  effect    eta_squared lower_limit upper_limit F_value df_effect df_error N  
 #>  treatment 0.0202      0.000881    0.0609      6.34    1         308      310

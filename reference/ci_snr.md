@@ -71,8 +71,8 @@ This function uses the confidence interval transformation principle
 (Steiger, 2004) to transform the confidence limits for the noncentrality
 parameter to the confidence limits for the population's signal-to-noise
 ratio. The confidence interval for noncentral *F* parameter can be
-obtained from the `conf_limits_ncf` function in DMAR, which is used
-internally within this function.
+obtained from the `ci_nc_F` function in DMAR, which is used internally
+within this function.
 
 ## Note
 
@@ -97,7 +97,7 @@ Contrast Analysis. *Psychological Methods, 9*(2), 164–182.
 ## See also
 
 [`ci_srsnr`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

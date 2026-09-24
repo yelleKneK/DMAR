@@ -23,7 +23,7 @@ mlmr fit."><meta property="og:image" content="https://yelleknek.github.io/DMAR/l
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,7 +123,10 @@ refits. <code>"boot"</code> resamples the rows of <code>data</code>
 refits on each, drops resamples whose refit does not converge, and
 reports each coefficient's percentile interval, the empirical
 quantiles of its resampled estimates; as in <code><a href="mlmr.html">mlmr</a></code>,
-the percentile interval is the only bootstrap interval offered.</p></dd>
+the percentile interval is the only bootstrap interval offered.
+The examples ask for the Wald and bootstrap intervals so the help
+page stays quick; a reported analysis leaves <code>ci_method</code> at
+its default.</p></dd>
 
 
 <dt id="arg-conf-level">conf_level<a class="anchor" aria-label="anchor" href="#arg-conf-level"></a></dt>
@@ -144,8 +147,9 @@ the percentile interval is the only bootstrap interval offered.</p></dd>
 <dt id="arg-boot-seed">boot_seed<a class="anchor" aria-label="anchor" href="#arg-boot-seed"></a></dt>
 <dd><p>Integer or <code>NULL</code>. Defaults to <code>NULL</code>,
 which leaves the user's current RNG state intact; supply an
-integer for reproducible bootstraps. When set, the function
-saves and restores <code>.Random.seed</code> on exit.</p></dd>
+integer for reproducible bootstraps. When set, the seed applies
+for the duration of the call and the caller's generator state is
+restored on exit.</p></dd>
 
 
 <dt id="arg-estimator">estimator<a class="anchor" aria-label="anchor" href="#arg-estimator"></a></dt>
@@ -327,18 +331,19 @@ outcome.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Two outcomes on a shared predictor set. The residual covariance</span></span></span>
 <span class="r-in"><span><span class="co"># between the outcomes is estimated as part of the model, which is</span></span></span>
-<span class="r-in"><span><span class="co"># what separates this from two separate regressions. This fit asks</span></span></span>
-<span class="r-in"><span><span class="co"># for the Wald interval and leaves the effect sizes off so that it</span></span></span>
-<span class="r-in"><span><span class="co"># runs at example time. It is the only block here that runs; the</span></span></span>
-<span class="r-in"><span><span class="co"># rest is left as commented code so a reader can see the syntax</span></span></span>
-<span class="r-in"><span><span class="co"># without paying the run time.</span></span></span>
+<span class="r-in"><span><span class="co"># what separates this from two separate regressions. The fit asks</span></span></span>
+<span class="r-in"><span><span class="co"># for the Wald interval, a choice taken up below, and keeps the</span></span></span>
+<span class="r-in"><span><span class="co"># default effect_sizes = TRUE: the per-outcome effect sizes come</span></span></span>
+<span class="r-in"><span><span class="co"># back on the fit rather than in summary(), one row per outcome and</span></span></span>
+<span class="r-in"><span><span class="co"># predictor, giving the semi-partial R^2 and Cohen's f^2, and they</span></span></span>
+<span class="r-in"><span><span class="co"># are what fills the standardized coefficients in coef_table.</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">mlmr_mv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">t6_paragraph_comprehension</span>, <span class="va">t9_word_meaning</span><span class="op">)</span> <span class="op">~</span></span></span>
 <span class="r-in"><span>                 <span class="va">t5_general_information</span> <span class="op">+</span> <span class="va">t7_sentence</span>,</span></span>
 <span class="r-in"><span>               data <span class="op">=</span> <span class="va">holzinger_swineford</span>,</span></span>
-<span class="r-in"><span>               ci_method <span class="op">=</span> <span class="st">"wald"</span>, effect_sizes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>               ci_method <span class="op">=</span> <span class="st">"wald"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>              <span class="co"># matrix: rows = predictors, cols = outcomes</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        t6_paragraph_comprehension t9_word_meaning</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                           -0.25416035      -6.3377552</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                           -0.25416032      -6.3377552</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t5_general_information                 0.07653333       0.2844663</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t7_sentence                            0.36460353       0.5811433</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
@@ -346,7 +351,7 @@ outcome.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> mlmr_mv(formula = cbind(t6_paragraph_comprehension, t9_word_meaning) ~ </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     t5_general_information + t7_sentence, data = holzinger_swineford, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     ci_method = "wald", effect_sizes = FALSE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ci_method = "wald")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Missing: fiml | Estimator: ML | SE: standard</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Sample size used: 301   Complete cases: 301</span>
@@ -379,77 +384,95 @@ outcome.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log likelihood: -3552   AIC: 7132   BIC: 7184</span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">R2</span>                 <span class="co"># per-outcome R^2</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t6_paragraph_comprehension            t9_word_meaning </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  0.5734131                  0.6211091 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  0.5734130                  0.6211091 </span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">residual_cov</span>       <span class="co"># residual covariance among outcomes</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            t6_paragraph_comprehension t9_word_meaning</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t6_paragraph_comprehension                   5.185583        3.094177</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning                              3.094177       22.211178</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning                              3.094177       22.211177</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">effect_sizes</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     outcome                   term        sr2         f2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  t6_paragraph_comprehension t5_general_information 0.03587460 0.08409679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  t6_paragraph_comprehension            t7_sentence 0.14153119 0.33177571</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             t9_word_meaning t5_general_information 0.10277302 0.27124699</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             t9_word_meaning            t7_sentence 0.07456052 0.19678625</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The interval menu is profile, Wald, and bootstrap. The default,</span></span></span>
 <span class="r-in"><span><span class="co"># ci_method = "profile", inverts the likelihood ratio test one</span></span></span>
 <span class="r-in"><span><span class="co"># coefficient at a time, and with two outcomes there are twice as</span></span></span>
 <span class="r-in"><span><span class="co"># many coefficients to profile; it is what a reported interval</span></span></span>
-<span class="r-in"><span><span class="co"># deserves. The bootstrap resamples rows and takes percentile</span></span></span>
-<span class="r-in"><span><span class="co"># limits; it is what to ask for when the multivariate normality the</span></span></span>
-<span class="r-in"><span><span class="co"># likelihood assumes is doubtful. Each refits the model many times,</span></span></span>
-<span class="r-in"><span><span class="co"># so neither is run here; the calls are</span></span></span>
-<span class="r-in"><span><span class="co">#   mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~</span></span></span>
-<span class="r-in"><span><span class="co">#             t5_general_information + t7_sentence,</span></span></span>
-<span class="r-in"><span><span class="co">#           data = holzinger_swineford)</span></span></span>
-<span class="r-in"><span><span class="co">#   mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~</span></span></span>
-<span class="r-in"><span><span class="co">#             t5_general_information + t7_sentence,</span></span></span>
-<span class="r-in"><span><span class="co">#           data = holzinger_swineford,</span></span></span>
-<span class="r-in"><span><span class="co">#           ci_method = "boot", B = 1000, boot_seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co"># with boot_seed supplied because bootstrap limits otherwise move</span></span></span>
-<span class="r-in"><span><span class="co"># from run to run.</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The per-outcome effect sizes come back on the fit rather than in</span></span></span>
-<span class="r-in"><span><span class="co"># summary(): one row per outcome and predictor, giving the</span></span></span>
-<span class="r-in"><span><span class="co"># semi-partial R^2 and Cohen's f^2. They cost one constrained refit</span></span></span>
-<span class="r-in"><span><span class="co"># per outcome and predictor, so they are left off above, which also</span></span></span>
-<span class="r-in"><span><span class="co"># leaves the standardized coefficients in coef_table missing. With</span></span></span>
-<span class="r-in"><span><span class="co"># the default effect_sizes = TRUE the table is</span></span></span>
-<span class="r-in"><span><span class="co">#   fit_es &lt;- mlmr_mv(cbind(t6_paragraph_comprehension,</span></span></span>
-<span class="r-in"><span><span class="co">#                           t9_word_meaning) ~</span></span></span>
-<span class="r-in"><span><span class="co">#                       t5_general_information + t7_sentence,</span></span></span>
-<span class="r-in"><span><span class="co">#                     data = holzinger_swineford,</span></span></span>
-<span class="r-in"><span><span class="co">#                     ci_method = "wald")</span></span></span>
-<span class="r-in"><span><span class="co">#   print(fit_es$effect_sizes, row.names = FALSE)</span></span></span>
+<span class="r-in"><span><span class="co"># deserves, and leaving ci_method at its default asks for it. The</span></span></span>
+<span class="r-in"><span><span class="co"># fits on this page ask for the Wald or the bootstrap interval</span></span></span>
+<span class="r-in"><span><span class="co"># because those refits take longer than a help page should. The</span></span></span>
+<span class="r-in"><span><span class="co"># bootstrap resamples rows and takes percentile limits; it is what</span></span></span>
+<span class="r-in"><span><span class="co"># to ask for when the multivariate normality the likelihood assumes</span></span></span>
+<span class="r-in"><span><span class="co"># is doubtful. B = 10 keeps the example quick, since every resample</span></span></span>
+<span class="r-in"><span><span class="co"># refits the two-outcome model; a reported interval deserves the</span></span></span>
+<span class="r-in"><span><span class="co"># default B = 1000. boot_seed fixes the resamples, so the limits</span></span></span>
+<span class="r-in"><span><span class="co"># are reproducible rather than moving from run to run. The effect</span></span></span>
+<span class="r-in"><span><span class="co"># sizes cost one constrained refit per outcome and predictor, so this</span></span></span>
+<span class="r-in"><span><span class="co"># fit and the ones after it leave them off.</span></span></span>
+<span class="r-in"><span><span class="va">fit_boot</span> <span class="op">&lt;-</span> <span class="fu">mlmr_mv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">t6_paragraph_comprehension</span>, <span class="va">t9_word_meaning</span><span class="op">)</span> <span class="op">~</span></span></span>
+<span class="r-in"><span>                      <span class="va">t5_general_information</span> <span class="op">+</span> <span class="va">t7_sentence</span>,</span></span>
+<span class="r-in"><span>                    data <span class="op">=</span> <span class="va">holzinger_swineford</span>,</span></span>
+<span class="r-in"><span>                    ci_method <span class="op">=</span> <span class="st">"boot"</span>, B <span class="op">=</span> <span class="fl">10</span>, boot_seed <span class="op">=</span> <span class="fl">113</span>,</span></span>
+<span class="r-in"><span>                    effect_sizes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_boot</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      outcome                   term       2.5 %      97.5 %</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 t6_paragraph_comprehension            (Intercept) -1.00690701  0.27654636</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 t6_paragraph_comprehension t5_general_information  0.07182434  0.09680779</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 t6_paragraph_comprehension            t7_sentence  0.29716900  0.40923300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            t9_word_meaning            (Intercept) -7.78549657 -4.94677137</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5            t9_word_meaning t5_general_information  0.26989256  0.33955085</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6            t9_word_meaning            t7_sentence  0.45180978  0.67755562</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># FIML versus listwise when one outcome has missing values. The</span></span></span>
 <span class="r-in"><span><span class="co"># revised second-form test t26_flags was administered to only 145</span></span></span>
 <span class="r-in"><span><span class="co"># of the 301 students, so it carries real missingness. A row with</span></span></span>
 <span class="r-in"><span><span class="co"># t26_flags missing still informs the likelihood about the other</span></span></span>
 <span class="r-in"><span><span class="co"># outcome, about the predictors, and, through the residual</span></span></span>
-<span class="r-in"><span><span class="co"># covariance, about t26_flags itself, so no row is discarded. Not</span></span></span>
-<span class="r-in"><span><span class="co"># run here because the comparison costs two more fits; the code is:</span></span></span>
-<span class="r-in"><span><span class="co">#   fit_fiml &lt;- mlmr_mv(cbind(t6_paragraph_comprehension,</span></span></span>
-<span class="r-in"><span><span class="co">#                             t26_flags) ~</span></span></span>
-<span class="r-in"><span><span class="co">#                         t7_sentence + t9_word_meaning,</span></span></span>
-<span class="r-in"><span><span class="co">#                       data = holzinger_swineford,</span></span></span>
-<span class="r-in"><span><span class="co">#                       ci_method = "wald", effect_sizes = FALSE)</span></span></span>
-<span class="r-in"><span><span class="co">#   fit_lwd  &lt;- mlmr_mv(cbind(t6_paragraph_comprehension,</span></span></span>
-<span class="r-in"><span><span class="co">#                             t26_flags) ~</span></span></span>
-<span class="r-in"><span><span class="co">#                         t7_sentence + t9_word_meaning,</span></span></span>
-<span class="r-in"><span><span class="co">#                       data = holzinger_swineford,</span></span></span>
-<span class="r-in"><span><span class="co">#                       missing = "listwise", ci_method = "wald",</span></span></span>
-<span class="r-in"><span><span class="co">#                       effect_sizes = FALSE)</span></span></span>
-<span class="r-in"><span><span class="co">#   c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))</span></span></span>
-<span class="r-in"><span><span class="co">#   cbind(FIML = coef(fit_fiml)[, "t6_paragraph_comprehension"],</span></span></span>
-<span class="r-in"><span><span class="co">#         listwise = coef(fit_lwd)[, "t6_paragraph_comprehension"])</span></span></span>
+<span class="r-in"><span><span class="co"># covariance, about t26_flags itself, so no row is discarded. Notice</span></span></span>
+<span class="r-in"><span><span class="co"># the two sample sizes, and that the coefficients of the complete</span></span></span>
+<span class="r-in"><span><span class="co"># outcome differ between the fits: listwise deletion drops 156 of</span></span></span>
+<span class="r-in"><span><span class="co"># its observed rows along with the missing t26_flags values.</span></span></span>
+<span class="r-in"><span><span class="va">fit_fiml</span> <span class="op">&lt;-</span> <span class="fu">mlmr_mv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">t6_paragraph_comprehension</span>,</span></span>
+<span class="r-in"><span>                          <span class="va">t26_flags</span><span class="op">)</span> <span class="op">~</span></span></span>
+<span class="r-in"><span>                      <span class="va">t7_sentence</span> <span class="op">+</span> <span class="va">t9_word_meaning</span>,</span></span>
+<span class="r-in"><span>                    data <span class="op">=</span> <span class="va">holzinger_swineford</span>,</span></span>
+<span class="r-in"><span>                    ci_method <span class="op">=</span> <span class="st">"wald"</span>, effect_sizes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit_lwd</span>  <span class="op">&lt;-</span> <span class="fu">mlmr_mv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">t6_paragraph_comprehension</span>,</span></span>
+<span class="r-in"><span>                          <span class="va">t26_flags</span><span class="op">)</span> <span class="op">~</span></span></span>
+<span class="r-in"><span>                      <span class="va">t7_sentence</span> <span class="op">+</span> <span class="va">t9_word_meaning</span>,</span></span>
+<span class="r-in"><span>                    data <span class="op">=</span> <span class="va">holzinger_swineford</span>,</span></span>
+<span class="r-in"><span>                    missing <span class="op">=</span> <span class="st">"listwise"</span>, ci_method <span class="op">=</span> <span class="st">"wald"</span>,</span></span>
+<span class="r-in"><span>                    effect_sizes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>N_fiml <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs</a></span><span class="op">(</span><span class="va">fit_fiml</span><span class="op">)</span>, N_listwise <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs</a></span><span class="op">(</span><span class="va">fit_lwd</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     N_fiml N_listwise </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        301        145 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>FIML <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_fiml</span><span class="op">)</span><span class="op">[</span>, <span class="st">"t6_paragraph_comprehension"</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>      listwise <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_lwd</span><span class="op">)</span><span class="op">[</span>, <span class="st">"t6_paragraph_comprehension"</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      FIML  listwise</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     1.1169740 0.9709397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t7_sentence     0.3174143 0.3134578</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning 0.1669888 0.1777868</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Auxiliary variable (saturated correlates): the complete speed test</span></span></span>
 <span class="r-in"><span><span class="co"># t13_straight_and_curved_capitals informs the likelihood without</span></span></span>
-<span class="r-in"><span><span class="co"># entering either regression. Continuing from the model above, and</span></span></span>
-<span class="r-in"><span><span class="co"># again not run here:</span></span></span>
-<span class="r-in"><span><span class="co">#   fit_aux &lt;- mlmr_mv(cbind(t6_paragraph_comprehension,</span></span></span>
-<span class="r-in"><span><span class="co">#                            t26_flags) ~</span></span></span>
-<span class="r-in"><span><span class="co">#                        t7_sentence + t9_word_meaning,</span></span></span>
-<span class="r-in"><span><span class="co">#                      data = holzinger_swineford,</span></span></span>
-<span class="r-in"><span><span class="co">#                      ci_method = "wald",</span></span></span>
-<span class="r-in"><span><span class="co">#                      auxiliary = "t13_straight_and_curved_capitals",</span></span></span>
-<span class="r-in"><span><span class="co">#                      effect_sizes = FALSE)</span></span></span>
-<span class="r-in"><span><span class="co">#   coef(fit_aux)</span></span></span>
+<span class="r-in"><span><span class="co"># entering either regression. Continuing from the model above, the</span></span></span>
+<span class="r-in"><span><span class="co"># coefficients of the complete outcome are unchanged to working</span></span></span>
+<span class="r-in"><span><span class="co"># precision, while those of t26_flags move, since the auxiliary</span></span></span>
+<span class="r-in"><span><span class="co"># carries information about the rows where t26_flags is missing.</span></span></span>
+<span class="r-in"><span><span class="va">fit_aux</span> <span class="op">&lt;-</span> <span class="fu">mlmr_mv</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">t6_paragraph_comprehension</span>,</span></span>
+<span class="r-in"><span>                         <span class="va">t26_flags</span><span class="op">)</span> <span class="op">~</span></span></span>
+<span class="r-in"><span>                     <span class="va">t7_sentence</span> <span class="op">+</span> <span class="va">t9_word_meaning</span>,</span></span>
+<span class="r-in"><span>                   data <span class="op">=</span> <span class="va">holzinger_swineford</span>,</span></span>
+<span class="r-in"><span>                   ci_method <span class="op">=</span> <span class="st">"wald"</span>,</span></span>
+<span class="r-in"><span>                   auxiliary <span class="op">=</span> <span class="st">"t13_straight_and_curved_capitals"</span>,</span></span>
+<span class="r-in"><span>                   effect_sizes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_aux</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 t6_paragraph_comprehension  t26_flags</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                      1.1169740 27.0919095</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t7_sentence                      0.3174143  0.3408605</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning                  0.1669888  0.1749609</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

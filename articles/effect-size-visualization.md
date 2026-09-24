@@ -207,7 +207,7 @@ ggplot(pygmalion, aes(x = treatment, y = iq_gain, fill = treatment)) +
 ![Raincloud plot of total IQ change from pretest to the end-of-study
 follow-up, by treatment arm, combining a half-violin density, jittered
 raw scores, and a boxplot summary (Allen et al.,
-2019).](effect-size-visualization_files/figure-html/raincloud-gain-1.png)
+2019).](effect-size-visualization-fig-raincloud-gain-1.png)
 
 Raincloud plot of total IQ change from pretest to the end-of-study
 follow-up, by treatment arm, combining a half-violin density, jittered
@@ -232,8 +232,7 @@ ggplot(pygmalion, aes(x = treatment, y = iq_8, fill = treatment)) +
 ![Raincloud plot of total IQ at the end-of-study follow-up, by treatment
 arm. The two distributions overlap heavily, and the bloomer arm holds
 far fewer pupils, which the density curve smooths over and the jittered
-points do
-not.](effect-size-visualization_files/figure-html/raincloud-post-1.png)
+points do not.](effect-size-visualization-fig-raincloud-post-1.png)
 
 Raincloud plot of total IQ at the end-of-study follow-up, by treatment
 arm. The two distributions overlap heavily, and the bloomer arm holds
@@ -348,8 +347,7 @@ plot_smd(
 ![Standardized mean difference in total IQ change between the bloomer
 and control arms, with 95\\ confidence interval and per-arm sample
 sizes, displayed as two unit-variance normal curves separated by the
-observed
-\\d\\.](effect-size-visualization_files/figure-html/plot-smd-1.png)
+observed \\d\\.](effect-size-visualization-fig-plot-smd-1.png)
 
 Standardized mean difference in total IQ change between the bloomer and
 control arms, with 95% confidence interval and per-arm sample sizes,
@@ -371,7 +369,7 @@ plot_smd(smd = 0.50, n_1 = 30, n_2 = 30,
 
 ![Two unit-variance normal distributions separated by \\d = 0.50\\. The
 separation is real and the overlap is still
-substantial.](effect-size-visualization_files/figure-html/plot-smd-known-1.png)
+substantial.](effect-size-visualization-fig-plot-smd-known-1.png)
 
 Two unit-variance normal distributions separated by $`d = 0.50`$. The
 separation is real and the overlap is still substantial.
@@ -445,7 +443,7 @@ plot_ci(omega_result,
 
 ![Forest-plot display of partial \\\omega^2\\ with 95\\ noncentral \\F\\
 confidence interval (Steiger, 2004) for the treatment effect on IQ
-change.](effect-size-visualization_files/figure-html/plot-ci-omega-1.png)
+change.](effect-size-visualization-fig-plot-ci-omega-1.png)
 
 Forest-plot display of partial $`\omega^2`$ with 95% noncentral $`F`$
 confidence interval (Steiger, 2004) for the treatment effect on IQ
@@ -487,8 +485,7 @@ plot_ci(omega_factorial,
 ![Multi-row forest plot of partial \\\omega^2\\ for each effect in a 2
 by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is
 the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney,
-& Kelley,
-2027).](effect-size-visualization_files/figure-html/plot-ci-factorial-1.png)
+& Kelley, 2027).](effect-size-visualization-fig-plot-ci-factorial-1.png)
 
 Multi-row forest plot of partial $`\omega^2`$ for each effect in a 2 by
 3 factorial ANOVA on the warpbreaks data. Reading down the rows is the
@@ -563,7 +560,7 @@ plot_R2(R2 = R2_obs, N = N, p = p,
 
 ![Squared multiple correlation \\R^2\\ with 95\\ confidence interval for
 the regression of end-of-study IQ on pretest IQ and
-grade.](effect-size-visualization_files/figure-html/plot-r2-1.png)
+grade.](effect-size-visualization-fig-plot-r2-1.png)
 
 Squared multiple correlation $`R^2`$ with 95% confidence interval for
 the regression of end-of-study IQ on pretest IQ and grade.
@@ -617,7 +614,7 @@ plot_ci(r_ci,
 from the random-predictor sampling distribution of \\R^2\\ (Lee, 1971),
 the default for \`ci_R()\`. The sample size is annotated above the
 interval, where the width of the interval cannot push it off the
-panel.](effect-size-visualization_files/figure-html/ci-r-1.png)
+panel.](effect-size-visualization-fig-ci-r-1.png)
 
 Confidence interval for the multiple correlation $`R`$, constructed from
 the random-predictor sampling distribution of $`R^2`$ (Lee, 1971), the
@@ -666,7 +663,7 @@ plot_ci(
 bloomer effect at three points in the study, displayed as a combined
 forest plot. The sample size is annotated above each interval, so an
 interval that runs wide cannot push it off the
-panel.](effect-size-visualization_files/figure-html/combined-forest-1.png)
+panel.](effect-size-visualization-fig-combined-forest-1.png)
 
 Standardized mean differences with 95% confidence intervals for the
 bloomer effect at three points in the study, displayed as a combined
@@ -696,8 +693,7 @@ plot_smd(smd = 0.50, show_ci = FALSE, show_n = FALSE,
 
 ![Minimal plot suitable for a slide or teaching figure, with confidence
 interval and sample size suppressed via \`show_ci = FALSE\` and \`show_n
-=
-FALSE\`.](effect-size-visualization_files/figure-html/plot-smd-minimal-1.png)
+= FALSE\`.](effect-size-visualization-fig-plot-smd-minimal-1.png)
 
 Minimal plot suitable for a slide or teaching figure, with confidence
 interval and sample size suppressed via `show_ci = FALSE` and
@@ -732,7 +728,7 @@ plot_smd(smd = 0.65, n_1 = 80, n_2 = 80,
 \`ggplot2\` layers can be added with \`+\`. Here the legend is moved to
 the top, the title is bold, and the group fills follow a
 colorblind-friendly
-palette.](effect-size-visualization_files/figure-html/customize-1.png)
+palette.](effect-size-visualization-fig-customize-1.png)
 
 Every DMAR plot returns a `ggplot2` object, so additional `ggplot2`
 layers can be added with `+`. Here the legend is moved to the top, the

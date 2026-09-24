@@ -118,9 +118,8 @@ distributions and preserve the *p*-value; neither transports a
 noncentrality parameter (a noncentral *F* is not carried to a noncentral
 chi square with the same \\\lambda\\, except in the \\\nu_2 \to \infty\\
 limit). For noncentral work use
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
-and
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md).
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) and
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md).
 
 **Special case.** With \\\nu_1 = 1\\ this is the squared form of the
 relation between *t* and *z*, since \\F(1, \nu) = t(\nu)^2\\ and
@@ -139,8 +138,8 @@ ed.). Routledge.
 
 [`cv_f`](https://yelleknek.github.io/DMAR/reference/cv_f.md),
 [`cv_chisq`](https://yelleknek.github.io/DMAR/reference/cv_chisq.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md),
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
 
 Other parameterization conversions:
 [`convert_R2`](https://yelleknek.github.io/DMAR/reference/convert_R2.md),

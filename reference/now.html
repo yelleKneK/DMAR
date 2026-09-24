@@ -17,7 +17,7 @@ the two stamps.'><meta property="og:image" content="https://yelleknek.github.io/
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +139,7 @@ correct with the other attached; only the printed form differs.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Print the current date and time.</span></span></span>
 <span class="r-in"><span><span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> August 17, 2026 (12:51 PM)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> September 24, 2026 (7:55 PM)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Time how long a piece of work takes. The pattern is the same</span></span></span>
 <span class="r-in"><span><span class="co"># whether the work is a bootstrap, a simulation, or a numeric</span></span></span>
@@ -153,29 +153,30 @@ correct with the other attached; only the printed form differs.</p>
 <span class="r-in"><span>                                          <span class="st">"t2_cubes"</span>, <span class="st">"t4_lozenges"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">end</span> <span class="op">&lt;-</span> <span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.003771305 secs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.002737522 secs</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># A deliberate wait shows the same pattern on a longer interval.</span></span></span>
-<span class="r-in"><span><span class="co"># Not run here because the only way to demonstrate a wait is to</span></span></span>
-<span class="r-in"><span><span class="co"># make the example wait; the calls are:</span></span></span>
-<span class="r-in"><span><span class="co"># start &lt;- now()</span></span></span>
-<span class="r-in"><span><span class="co"># Sys.sleep(0.5)</span></span></span>
-<span class="r-in"><span><span class="co"># end &lt;- now()</span></span></span>
-<span class="r-in"><span><span class="co"># end - start          # elapsed time, here about 0.5 seconds</span></span></span>
+<span class="r-in"><span><span class="co"># A deliberate wait shows the same pattern on a longer interval. The</span></span></span>
+<span class="r-in"><span><span class="co"># pause is a fifth of a second, long enough to register in the</span></span></span>
+<span class="r-in"><span><span class="co"># difference and short enough not to slow the help page.</span></span></span>
+<span class="r-in"><span><span class="va">start</span> <span class="op">&lt;-</span> <span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">end</span> <span class="op">&lt;-</span> <span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.2015111 secs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Date only.</span></span></span>
 <span class="r-in"><span><span class="fu">now</span><span class="op">(</span>time <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> August 17, 2026</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> September 24, 2026</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Tidy data.frame form, when the components are needed</span></span></span>
-<span class="r-in"><span><span class="co"># individually for programmatic processing (e.g., embedding in a</span></span></span>
-<span class="r-in"><span><span class="co"># report's metadata block).</span></span></span>
+<span class="r-in"><span><span class="co"># individually for programmatic processing, for example when the</span></span></span>
+<span class="r-in"><span><span class="co"># stamp is embedded in a report's metadata block.</span></span></span>
 <span class="r-in"><span><span class="fu">now</span><span class="op">(</span>tidy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     term value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    day    17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    day    24</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   year  2026</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   hour    12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 minute    51</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   hour     7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 minute    55</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

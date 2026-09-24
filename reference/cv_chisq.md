@@ -80,7 +80,7 @@ default.
 A noncentral parameter can be supplied, which is what a power analysis
 for a test of model fit needs, though it would not be used for a
 standard null hypothesis significance test. See
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
 for confidence limits on the noncentral parameter itself.
 
 ## References
@@ -93,7 +93,7 @@ ed.). Routledge. (Appendix Table A.9 reports these critical values.)
 
 [`cv_t`](https://yelleknek.github.io/DMAR/reference/cv_t.md),
 [`cv_f`](https://yelleknek.github.io/DMAR/reference/cv_f.md),
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
 
 Other critical values:
 [`cv_bonferroni_f()`](https://yelleknek.github.io/DMAR/reference/cv_bonferroni_f.md),

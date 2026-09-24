@@ -9,7 +9,7 @@ Perspective for the (unstandardized) contrast in randomized ANCOVA design."><met
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,8 +65,7 @@ Perspective for the (unstandardized) contrast in randomized ANCOVA design.</p>
 <span>  <span class="va">width</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  assurance <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_c_ancova_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -134,12 +133,15 @@ Perspective for the (unstandardized) contrast in randomized ANCOVA design.</p>
 <dd><p>parameter to ensure that the obtained confidence interval width is narrower than the desired width with a specified degree of certainty (must be NULL or between zero and unity)</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. It can be saved with <code>save = TRUE</code> outside of the printed results</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results will be saved to</p></dd>
+<dd><p>an optional path for a comma separated file recording
+every replication (the realized contrast, its full and
+covariate-ignoring standard errors and their ratio, the interval
+width, and the three non-coverage indicators): nothing is written
+when <code>filename</code> is <code>NULL</code> (the default), a new file with a
+header row is created otherwise, an existing file at that path is
+appended to, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code></p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -166,8 +168,8 @@ supplied or as resolved from <code>est_error_var_anova</code> and
 proportion rows are on the 0 to 1 scale, not percentages. The
 per-replication vectors (<code>psi_obs</code>, <code>se_psi</code>,
 <code>se_psi_restricted</code>, <code>width_obs</code>) are not returned; they
-are written to the CSV named by <code>filename</code> when
-<code>save = TRUE</code>.</p>
+are written to the comma separated file named by <code>filename</code> when
+one is supplied.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

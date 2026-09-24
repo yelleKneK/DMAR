@@ -21,7 +21,7 @@ recommendations of Kelley and Pornprasertmanit (2016)."><meta property="og:image
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -186,7 +186,7 @@ identifies which coefficient was computed.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Auto-detection rules (used only when <code>type = NULL</code>):</p><ul><li><p>If raw items are integer-valued and every column has at most
         10 distinct values, <code>type = "omega_categorical"</code> (categorical
-        omega; appropriate when items are ordered-categorical and
+        omega; appropriate when items are ordered categorical and
         the relationship between the underlying factor and the
         observed items is non-linear).</p></li>
 <li><p>Otherwise, <code>type = "omega"</code> (McDonald's coefficient
@@ -224,7 +224,7 @@ the observed composite variance in the denominator (see the
 <code><a href="reliability_omega.html">reliability_omega</a></code> help page for the properties of that
 choice). For well-behaved homogeneous measurement
 instruments these coefficients typically yield very similar values.
-For ordered-categorical items the relationship between the latent
+For ordered categorical items the relationship between the latent
 factor and the observed responses is non-linear, and
 <code>reliability_omega_categorical</code> handles that case explicitly via a
 probit-link single-factor model.</p>
@@ -308,9 +308,22 @@ probit-link single-factor model.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J              6     </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A covariance matrix and its sample size stand in for raw data, and</span></span></span>
-<span class="r-in"><span><span class="co"># auto-detection again picks coefficient omega. The call fits the</span></span></span>
-<span class="r-in"><span><span class="co"># single factor model a second time, so it is shown rather than run:</span></span></span>
-<span class="r-in"><span><span class="co">#   reliability(S = cov(items), N = 200)</span></span></span>
+<span class="r-in"><span><span class="co"># auto-detection again picks coefficient omega. The point estimate is</span></span></span>
+<span class="r-in"><span><span class="co"># the same as from the raw data; the message explains why no interval</span></span></span>
+<span class="r-in"><span><span class="co"># accompanies it, since the bootstrap behind robust omega resamples</span></span></span>
+<span class="r-in"><span><span class="co"># rows that a covariance matrix does not carry.</span></span></span>
+<span class="r-in"><span><span class="fu">reliability</span><span class="op">(</span>S <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cov</a></span><span class="op">(</span><span class="va">items</span><span class="op">)</span>, N <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Auto-detected type = "omega" (McDonald's coefficient omega from a single-factor CFA).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Robust omega is reported without a confidence interval: its interval is bootstrap based, which requires raw data rather than a covariance matrix.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term        value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  estimate    0.781</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  se          &lt;NA&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lower_limit &lt;NA&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_limit &lt;NA&gt; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level  0.95 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N           200  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  J           6    </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -210,7 +210,7 @@ factorial_anova(iq_gain ~ treatment * grade_band, data = pyg)
 # statistics drop, and a warning reports that the affected noncentral F
 # lower limits are clamped to 0.
 factorial_anova(iq_gain ~ treatment * grade_band, data = pyg, ss_type = 2)
-#> Warning: The noncentral F lower-limit clamp in conf_limits_ncf() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?ci_nc_F for the meaning of the clamp.
 #>  effect               SS    df  F_value p_value eta_squared_partial
 #>  treatment            798   1   4.37    0.0374  0.0141             
 #>  grade_band           790   1   4.33    0.0384  0.0139             

@@ -92,8 +92,8 @@ factorial design the same expression gives the per-effect *partial*
 **Confidence interval.** The CI is constructed by Steiger's (2004)
 confidence interval transformation principle: a CI for the noncentrality
 parameter \\\lambda\\ of the *F* distribution is obtained (via
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md))
-and then mapped through \$\$\eta^2\_{\text{bound}} =
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)) and
+then mapped through \$\$\eta^2\_{\text{bound}} =
 \frac{\lambda\_{\text{bound}}}{\lambda\_{\text{bound}} + N}.\$\$ This is
 the same transformation used by
 [`ci_pvaf`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md) and
@@ -159,7 +159,7 @@ contrast analysis. *Psychological Methods, 9*(2), 164–182.
 [`ci_eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

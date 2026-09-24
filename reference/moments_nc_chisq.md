@@ -54,17 +54,17 @@ univariate distributions* (Vol. 2, 2nd ed., Chapter 29). Wiley.
 
 ## See also
 
-[`moments_ncf`](https://yelleknek.github.io/DMAR/reference/moments_ncf.md)
+[`moments_nc_F`](https://yelleknek.github.io/DMAR/reference/moments_nc_F.md)
 (whose numerator is a noncentral chi square) and
-[`moments_nct`](https://yelleknek.github.io/DMAR/reference/moments_nct.md)
+[`moments_nc_t`](https://yelleknek.github.io/DMAR/reference/moments_nc_t.md)
 for the other noncentral moments;
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md)
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
 for the noncentral chi square confidence limits;
 [`dchisq`](https://rdrr.io/r/stats/Chisquare.html) for the density.
 
 Other noncentral distribution moments:
-[`moments_ncf()`](https://yelleknek.github.io/DMAR/reference/moments_ncf.md),
-[`moments_nct()`](https://yelleknek.github.io/DMAR/reference/moments_nct.md)
+[`moments_nc_F()`](https://yelleknek.github.io/DMAR/reference/moments_nc_F.md),
+[`moments_nc_t()`](https://yelleknek.github.io/DMAR/reference/moments_nc_t.md)
 
 ## Author
 

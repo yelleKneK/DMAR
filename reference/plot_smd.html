@@ -13,7 +13,7 @@ annotations, both shown by default."><meta property="og:image" content="https://
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -214,26 +214,31 @@ confidence bounds.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># From a known effect size and sample sizes.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># From a known standardized mean difference and the two sample sizes:</span></span></span>
+<span class="r-in"><span><span class="co"># the two curves, the interval beneath them, and the sample sizes in</span></span></span>
+<span class="r-in"><span><span class="co"># the corner are the default display.</span></span></span>
 <span class="r-in"><span><span class="fu">plot_smd</span><span class="op">(</span>smd <span class="op">=</span> <span class="fl">0.50</span>, n_1 <span class="op">=</span> <span class="fl">50</span>, n_2 <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_smd-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The variations below are not run, since the call above already shows</span></span></span>
-<span class="r-in"><span><span class="co"># the default display and each additional figure has to be drawn. From</span></span></span>
-<span class="r-in"><span><span class="co"># raw data, where the standardized mean difference and both sample</span></span></span>
-<span class="r-in"><span><span class="co"># sizes are taken from the data:</span></span></span>
-<span class="r-in"><span><span class="co"># set.seed(113)</span></span></span>
-<span class="r-in"><span><span class="co"># g1 &lt;- rnorm(40, mean = 0.6, sd = 1)</span></span></span>
-<span class="r-in"><span><span class="co"># g2 &lt;- rnorm(40, mean = 0.0, sd = 1)</span></span></span>
-<span class="r-in"><span><span class="co"># plot_smd(group_1 = g1, group_2 = g2)</span></span></span>
+<span class="r-in"><span><span class="co"># From raw data, where the standardized mean difference and both</span></span></span>
+<span class="r-in"><span><span class="co"># sample sizes are taken from the data. The d annotation now reports</span></span></span>
+<span class="r-in"><span><span class="co"># the sample value rather than a supplied one.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">g1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span>, mean <span class="op">=</span> <span class="fl">0.6</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">g2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span>, mean <span class="op">=</span> <span class="fl">0.0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">plot_smd</span><span class="op">(</span>group_1 <span class="op">=</span> <span class="va">g1</span>, group_2 <span class="op">=</span> <span class="va">g2</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_smd-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Without the confidence interval or the sample size annotations:</span></span></span>
-<span class="r-in"><span><span class="co"># plot_smd(smd = 0.80, show_ci = FALSE, show_n = FALSE)</span></span></span>
+<span class="r-in"><span><span class="co"># Without the confidence interval or the sample size annotations, the</span></span></span>
+<span class="r-in"><span><span class="co"># figure is the two curves alone.</span></span></span>
+<span class="r-in"><span><span class="fu">plot_smd</span><span class="op">(</span>smd <span class="op">=</span> <span class="fl">0.80</span>, show_ci <span class="op">=</span> <span class="cn">FALSE</span>, show_n <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_smd-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Custom group labels and title:</span></span></span>
-<span class="r-in"><span><span class="co"># plot_smd(smd = 0.45, n_1 = 75, n_2 = 75,</span></span></span>
-<span class="r-in"><span><span class="co">#          group_labels = c("Treatment", "Control"),</span></span></span>
-<span class="r-in"><span><span class="co">#          title = "Treatment Effect on Reading Scores")</span></span></span>
+<span class="r-in"><span><span class="co"># Group labels and a title of the reader's own.</span></span></span>
+<span class="r-in"><span><span class="fu">plot_smd</span><span class="op">(</span>smd <span class="op">=</span> <span class="fl">0.45</span>, n_1 <span class="op">=</span> <span class="fl">75</span>, n_2 <span class="op">=</span> <span class="fl">75</span>,</span></span>
+<span class="r-in"><span>         group_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Treatment"</span>, <span class="st">"Control"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>         title <span class="op">=</span> <span class="st">"Treatment Effect on Reading Scores"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_smd-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -62,11 +62,11 @@ trimmed-mean difference (their Equation 8) is referred to a noncentral
 *t* distribution with the Yuen-Welch approximate degrees of freedom
 (their Equation 9), the noncentrality parameters whose tail
 probabilities bracket the observed statistic are located with
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
-and those limits are rescaled to the \\d_R\\ metric. The degrees of
-freedom are reported in the `df_yuen` row of the returned table. At
-`trim = 0` the construction reduces to the Welch approximate degrees of
-freedom interval; for the exact equal-variance interval on the untrimmed
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md), and
+those limits are rescaled to the \\d_R\\ metric. The degrees of freedom
+are reported in the `df_yuen` row of the returned table. At `trim = 0`
+the construction reduces to the Welch approximate degrees of freedom
+interval; for the exact equal-variance interval on the untrimmed
 standardized mean difference use
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md).
 
@@ -111,7 +111,7 @@ variances. *Biometrika, 61*(1), 165–170.
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md),
 [`var_smd_trimmed`](https://yelleknek.github.io/DMAR/reference/var_smd_trimmed.md),
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 Other effect size estimates:
 [`cles()`](https://yelleknek.github.io/DMAR/reference/cles.md),

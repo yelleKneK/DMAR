@@ -21,8 +21,7 @@ ss_aipe_sc_ancova_sensitivity(
   conf_level = 0.95,
   G = 10000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_sc_ancova_sensitivity_result.csv",
+  filename = NULL,
   ...
 )
 ```
@@ -87,14 +86,14 @@ ss_aipe_sc_ancova_sensitivity(
 
   to print the current value of the iterations
 
-- save:
-
-  option to save simulation results. It can be saved with `save = TRUE`
-  outside of the printed results
-
 - filename:
 
-  the name of the file that simulation results will be saved to
+  Optional path of a CSV file to receive the per-replication results
+  (the observed standardized contrast, the full and one-sided interval
+  widths, the tail and overall misses, and the confidence limits),
+  appended when the file already exists and created otherwise; the
+  default `NULL` writes nothing, and a throwaway run that wants the file
+  should point it at `tempfile(fileext = ".csv")`.
 
 - ...:
 
@@ -181,9 +180,9 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Sensitivity analysis for a standardized ANCOVA contrast across
 # three groups, contrast (-1, 0, 1), a covariate-outcome correlation
-# of 0.4, and a planning target width of 0.5. Sizes are kept small
-# here so the Monte Carlo sweep runs quickly; raise G for a stable
-# estimate in practice.
+# of 0.4, and a planning target width of 0.5. G = 50 keeps the
+# example quick; a reported sensitivity analysis deserves the default of
+# G = 10000 replications.
 set.seed(113)
 ss_aipe_sc_ancova_sensitivity(
   true_psi = 0.5, estimated_psi = 0.5,

@@ -82,7 +82,7 @@ parameter to the confidence limits for the population proportion of
 variance accounted for by knowing the group status. The confidence
 interval for the noncentral *F* parameter can be obtained from the
 function
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md),
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md),
 which is used within this function.
 
 ## Note
@@ -116,7 +116,7 @@ Contrast Analysis. *Psychological Methods, 9*(2), 164–182.
 
 ## See also
 
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

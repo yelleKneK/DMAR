@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Power and Precision for the One-Way ANOVA: A Model Comparison Perspective</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">August 2026</h4>
+            <h4 data-toc-skip class="date">September 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/one_way_anova_power.Rmd" class="external-link"><code>vignettes/one_way_anova_power.Rmd</code></a></small>
       <div class="d-none name"><code>one_way_anova_power.Rmd</code></div>
@@ -380,10 +380,10 @@ confidence interval, obtained by inverting the noncentral <em>F</em>
 distribution (Kelley, 2007; Steiger, 2004). Given an observed
 <em>F</em>, DMAR finds the noncentrality values whose noncentral
 <em>F</em> distributions place the observed <em>F</em> at the chosen
-lower and upper tail probabilities (this is what
-<code><a href="../reference/conf_limits_ncf.html">conf_limits_ncf()</a></code> does), then transforms those
-noncentrality endpoints into the metric requested: a proportion of
-variance, a signal to noise ratio, or its square root.</p>
+lower and upper tail probabilities (this is what <code><a href="../reference/ci_nc_F.html">ci_nc_F()</a></code>
+does), then transforms those noncentrality endpoints into the metric
+requested: a proportion of variance, a signal to noise ratio, or its
+square root.</p>
 <p>The canonical illustration in the literature is Bargman’s (1970)
 five-group analysis with 11 per group and an observed <em>F</em> of
 11.221 (also used by Steiger, 2004). The point estimate of omega
@@ -715,7 +715,7 @@ weights must sum to 1 and the negative weights must sum to
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">c_weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span><span class="op">)</span>                  <span class="co"># all weights sum to zero</span></span>
-<span><span class="co">#&gt; [1] -5.551115e-17</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span><span class="op">[</span><span class="va">c_weights</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span>   <span class="co"># the positive weights sum to 1</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">c_weights</span><span class="op">[</span><span class="va">c_weights</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span>   <span class="co"># the negative weights sum to -1</span></span>

@@ -56,6 +56,9 @@
 <url><loc>https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/ci_games_howell.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.html</loc></url>
+<url><loc>https://yelleknek.github.io/DMAR/reference/ci_nc_F.html</loc></url>
+<url><loc>https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.html</loc></url>
+<url><loc>https://yelleknek.github.io/DMAR/reference/ci_nc_t.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/ci_omega_squared.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/ci_proportion.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/ci_pvaf.html</loc></url>
@@ -81,9 +84,6 @@
 <url><loc>https://yelleknek.github.io/DMAR/reference/common_method_marker.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/common_method_single_factor.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/compare_cov_structures.html</loc></url>
-<url><loc>https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.html</loc></url>
-<url><loc>https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.html</loc></url>
-<url><loc>https://yelleknek.github.io/DMAR/reference/conf_limits_nct.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/content_validity_index.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/contrast_adjusted.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/contrast_test.html</loc></url>
@@ -171,9 +171,9 @@
 <url><loc>https://yelleknek.github.io/DMAR/reference/mlmr.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/mlmr_mv-internals.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/mlmr_mv.html</loc></url>
+<url><loc>https://yelleknek.github.io/DMAR/reference/moments_nc_F.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/moments_nc_chisq.html</loc></url>
-<url><loc>https://yelleknek.github.io/DMAR/reference/moments_ncf.html</loc></url>
-<url><loc>https://yelleknek.github.io/DMAR/reference/moments_nct.html</loc></url>
+<url><loc>https://yelleknek.github.io/DMAR/reference/moments_nc_t.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/mr_cv.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/mr_smd.html</loc></url>
 <url><loc>https://yelleknek.github.io/DMAR/reference/nnt_from_smd.html</loc></url>

@@ -66,7 +66,9 @@ mlmr_mv(
   coefficient's percentile interval, the empirical quantiles of its
   resampled estimates; as in
   [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md), the
-  percentile interval is the only bootstrap interval offered.
+  percentile interval is the only bootstrap interval offered. The
+  examples ask for the Wald and bootstrap intervals so the help page
+  stays quick; a reported analysis leaves `ci_method` at its default.
 
 - conf_level:
 
@@ -85,7 +87,8 @@ mlmr_mv(
 
   Integer or `NULL`. Defaults to `NULL`, which leaves the user's current
   RNG state intact; supply an integer for reproducible bootstraps. When
-  set, the function saves and restores `.Random.seed` on exit.
+  set, the seed applies for the duration of the call and the caller's
+  generator state is restored on exit.
 
 - estimator:
 
@@ -265,18 +268,19 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Two outcomes on a shared predictor set. The residual covariance
 # between the outcomes is estimated as part of the model, which is
-# what separates this from two separate regressions. This fit asks
-# for the Wald interval and leaves the effect sizes off so that it
-# runs at example time. It is the only block here that runs; the
-# rest is left as commented code so a reader can see the syntax
-# without paying the run time.
+# what separates this from two separate regressions. The fit asks
+# for the Wald interval, a choice taken up below, and keeps the
+# default effect_sizes = TRUE: the per-outcome effect sizes come
+# back on the fit rather than in summary(), one row per outcome and
+# predictor, giving the semi-partial R^2 and Cohen's f^2, and they
+# are what fills the standardized coefficients in coef_table.
 fit <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
                  t5_general_information + t7_sentence,
                data = holzinger_swineford,
-               ci_method = "wald", effect_sizes = FALSE)
+               ci_method = "wald")
 coef(fit)              # matrix: rows = predictors, cols = outcomes
 #>                        t6_paragraph_comprehension t9_word_meaning
-#> (Intercept)                           -0.25416035      -6.3377552
+#> (Intercept)                           -0.25416032      -6.3377552
 #> t5_general_information                 0.07653333       0.2844663
 #> t7_sentence                            0.36460353       0.5811433
 summary(fit)
@@ -284,7 +288,7 @@ summary(fit)
 #> Call:
 #> mlmr_mv(formula = cbind(t6_paragraph_comprehension, t9_word_meaning) ~ 
 #>     t5_general_information + t7_sentence, data = holzinger_swineford, 
-#>     ci_method = "wald", effect_sizes = FALSE)
+#>     ci_method = "wald")
 #> 
 #> Missing: fiml | Estimator: ML | SE: standard
 #> Sample size used: 301   Complete cases: 301
@@ -317,75 +321,93 @@ summary(fit)
 #> Log likelihood: -3552   AIC: 7132   BIC: 7184
 fit$R2                 # per-outcome R^2
 #> t6_paragraph_comprehension            t9_word_meaning 
-#>                  0.5734131                  0.6211091 
+#>                  0.5734130                  0.6211091 
 fit$residual_cov       # residual covariance among outcomes
 #>                            t6_paragraph_comprehension t9_word_meaning
 #> t6_paragraph_comprehension                   5.185583        3.094177
-#> t9_word_meaning                              3.094177       22.211178
+#> t9_word_meaning                              3.094177       22.211177
+print(fit$effect_sizes, row.names = FALSE)
+#>                     outcome                   term        sr2         f2
+#>  t6_paragraph_comprehension t5_general_information 0.03587460 0.08409679
+#>  t6_paragraph_comprehension            t7_sentence 0.14153119 0.33177571
+#>             t9_word_meaning t5_general_information 0.10277302 0.27124699
+#>             t9_word_meaning            t7_sentence 0.07456052 0.19678625
 
 # The interval menu is profile, Wald, and bootstrap. The default,
 # ci_method = "profile", inverts the likelihood ratio test one
 # coefficient at a time, and with two outcomes there are twice as
 # many coefficients to profile; it is what a reported interval
-# deserves. The bootstrap resamples rows and takes percentile
-# limits; it is what to ask for when the multivariate normality the
-# likelihood assumes is doubtful. Each refits the model many times,
-# so neither is run here; the calls are
-#   mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
-#             t5_general_information + t7_sentence,
-#           data = holzinger_swineford)
-#   mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
-#             t5_general_information + t7_sentence,
-#           data = holzinger_swineford,
-#           ci_method = "boot", B = 1000, boot_seed = 113)
-# with boot_seed supplied because bootstrap limits otherwise move
-# from run to run.
-
-# The per-outcome effect sizes come back on the fit rather than in
-# summary(): one row per outcome and predictor, giving the
-# semi-partial R^2 and Cohen's f^2. They cost one constrained refit
-# per outcome and predictor, so they are left off above, which also
-# leaves the standardized coefficients in coef_table missing. With
-# the default effect_sizes = TRUE the table is
-#   fit_es <- mlmr_mv(cbind(t6_paragraph_comprehension,
-#                           t9_word_meaning) ~
-#                       t5_general_information + t7_sentence,
-#                     data = holzinger_swineford,
-#                     ci_method = "wald")
-#   print(fit_es$effect_sizes, row.names = FALSE)
+# deserves, and leaving ci_method at its default asks for it. The
+# fits on this page ask for the Wald or the bootstrap interval
+# because those refits take longer than a help page should. The
+# bootstrap resamples rows and takes percentile limits; it is what
+# to ask for when the multivariate normality the likelihood assumes
+# is doubtful. B = 10 keeps the example quick, since every resample
+# refits the two-outcome model; a reported interval deserves the
+# default B = 1000. boot_seed fixes the resamples, so the limits
+# are reproducible rather than moving from run to run. The effect
+# sizes cost one constrained refit per outcome and predictor, so this
+# fit and the ones after it leave them off.
+fit_boot <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
+                      t5_general_information + t7_sentence,
+                    data = holzinger_swineford,
+                    ci_method = "boot", B = 10, boot_seed = 113,
+                    effect_sizes = FALSE)
+confint(fit_boot)
+#>                      outcome                   term       2.5 %      97.5 %
+#> 1 t6_paragraph_comprehension            (Intercept) -1.00690701  0.27654636
+#> 2 t6_paragraph_comprehension t5_general_information  0.07182434  0.09680779
+#> 3 t6_paragraph_comprehension            t7_sentence  0.29716900  0.40923300
+#> 4            t9_word_meaning            (Intercept) -7.78549657 -4.94677137
+#> 5            t9_word_meaning t5_general_information  0.26989256  0.33955085
+#> 6            t9_word_meaning            t7_sentence  0.45180978  0.67755562
 
 # FIML versus listwise when one outcome has missing values. The
 # revised second-form test t26_flags was administered to only 145
 # of the 301 students, so it carries real missingness. A row with
 # t26_flags missing still informs the likelihood about the other
 # outcome, about the predictors, and, through the residual
-# covariance, about t26_flags itself, so no row is discarded. Not
-# run here because the comparison costs two more fits; the code is:
-#   fit_fiml <- mlmr_mv(cbind(t6_paragraph_comprehension,
-#                             t26_flags) ~
-#                         t7_sentence + t9_word_meaning,
-#                       data = holzinger_swineford,
-#                       ci_method = "wald", effect_sizes = FALSE)
-#   fit_lwd  <- mlmr_mv(cbind(t6_paragraph_comprehension,
-#                             t26_flags) ~
-#                         t7_sentence + t9_word_meaning,
-#                       data = holzinger_swineford,
-#                       missing = "listwise", ci_method = "wald",
-#                       effect_sizes = FALSE)
-#   c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
-#   cbind(FIML = coef(fit_fiml)[, "t6_paragraph_comprehension"],
-#         listwise = coef(fit_lwd)[, "t6_paragraph_comprehension"])
+# covariance, about t26_flags itself, so no row is discarded. Notice
+# the two sample sizes, and that the coefficients of the complete
+# outcome differ between the fits: listwise deletion drops 156 of
+# its observed rows along with the missing t26_flags values.
+fit_fiml <- mlmr_mv(cbind(t6_paragraph_comprehension,
+                          t26_flags) ~
+                      t7_sentence + t9_word_meaning,
+                    data = holzinger_swineford,
+                    ci_method = "wald", effect_sizes = FALSE)
+fit_lwd  <- mlmr_mv(cbind(t6_paragraph_comprehension,
+                          t26_flags) ~
+                      t7_sentence + t9_word_meaning,
+                    data = holzinger_swineford,
+                    missing = "listwise", ci_method = "wald",
+                    effect_sizes = FALSE)
+c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
+#>     N_fiml N_listwise 
+#>        301        145 
+cbind(FIML = coef(fit_fiml)[, "t6_paragraph_comprehension"],
+      listwise = coef(fit_lwd)[, "t6_paragraph_comprehension"])
+#>                      FIML  listwise
+#> (Intercept)     1.1169740 0.9709397
+#> t7_sentence     0.3174143 0.3134578
+#> t9_word_meaning 0.1669888 0.1777868
 
 # Auxiliary variable (saturated correlates): the complete speed test
 # t13_straight_and_curved_capitals informs the likelihood without
-# entering either regression. Continuing from the model above, and
-# again not run here:
-#   fit_aux <- mlmr_mv(cbind(t6_paragraph_comprehension,
-#                            t26_flags) ~
-#                        t7_sentence + t9_word_meaning,
-#                      data = holzinger_swineford,
-#                      ci_method = "wald",
-#                      auxiliary = "t13_straight_and_curved_capitals",
-#                      effect_sizes = FALSE)
-#   coef(fit_aux)
+# entering either regression. Continuing from the model above, the
+# coefficients of the complete outcome are unchanged to working
+# precision, while those of t26_flags move, since the auxiliary
+# carries information about the rows where t26_flags is missing.
+fit_aux <- mlmr_mv(cbind(t6_paragraph_comprehension,
+                         t26_flags) ~
+                     t7_sentence + t9_word_meaning,
+                   data = holzinger_swineford,
+                   ci_method = "wald",
+                   auxiliary = "t13_straight_and_curved_capitals",
+                   effect_sizes = FALSE)
+coef(fit_aux)
+#>                 t6_paragraph_comprehension  t26_flags
+#> (Intercept)                      1.1169740 27.0919095
+#> t7_sentence                      0.3174143  0.3408605
+#> t9_word_meaning                  0.1669888  0.1749609
 ```

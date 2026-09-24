@@ -125,7 +125,7 @@ Auto-detection rules (used only when `type = NULL`):
 
 - If raw items are integer-valued and every column has at most 10
   distinct values, `type = "omega_categorical"` (categorical omega;
-  appropriate when items are ordered-categorical and the relationship
+  appropriate when items are ordered categorical and the relationship
   between the underlying factor and the observed items is non-linear).
 
 - Otherwise, `type = "omega"` (McDonald's coefficient \\\omega\\ from a
@@ -171,7 +171,7 @@ perfectly by using the observed composite variance in the denominator
 [`reliability_omega`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md)
 help page for the properties of that choice). For well-behaved
 homogeneous measurement instruments these coefficients typically yield
-very similar values. For ordered-categorical items the relationship
+very similar values. For ordered categorical items the relationship
 between the latent factor and the observed responses is non-linear, and
 `reliability_omega_categorical` handles that case explicitly via a
 probit-link single-factor model.
@@ -262,7 +262,20 @@ reliability(data = items, type = "alpha")
 #>  J              6     
 
 # A covariance matrix and its sample size stand in for raw data, and
-# auto-detection again picks coefficient omega. The call fits the
-# single factor model a second time, so it is shown rather than run:
-#   reliability(S = cov(items), N = 200)
+# auto-detection again picks coefficient omega. The point estimate is
+# the same as from the raw data; the message explains why no interval
+# accompanies it, since the bootstrap behind robust omega resamples
+# rows that a covariance matrix does not carry.
+reliability(S = cov(items), N = 200)
+#> Auto-detected type = "omega" (McDonald's coefficient omega from a single-factor CFA).
+#> Robust omega is reported without a confidence interval: its interval is bootstrap based, which requires raw data rather than a covariance matrix.
+#>  term        value
+#>  estimate    0.781
+#>  se          <NA> 
+#>  lower_limit <NA> 
+#>  upper_limit <NA> 
+#>  conf_level  0.95 
+#>  N           200  
+#>  N_complete  200  
+#>  J           6    
 ```

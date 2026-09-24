@@ -15,7 +15,7 @@ of \(H_0\!: \kappa = 0\)."><meta property="og:image" content="https://yelleknek.
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -257,12 +257,19 @@ the intraclass correlation (<code><a href="icc.html">icc</a></code>) is more app
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># A bootstrap interval, which resamples the subjects (rows) with</span></span></span>
-<span class="r-in"><span><span class="co"># replacement and recomputes kappa on each resample. Not run here,</span></span></span>
-<span class="r-in"><span><span class="co"># because 2000 refits of kappa is more than a help page should do;</span></span></span>
-<span class="r-in"><span><span class="co"># the call is:</span></span></span>
-<span class="r-in"><span><span class="co"># fleiss_kappa(fleiss_1971, ci_method = "percentile", B = 2000,</span></span></span>
-<span class="r-in"><span><span class="co">#              seed = 113)</span></span></span>
+<span class="r-in"><span><span class="co"># A percentile bootstrap interval, which resamples the subjects (rows)</span></span></span>
+<span class="r-in"><span><span class="co"># with replacement and recomputes kappa on each resample. Compare its</span></span></span>
+<span class="r-in"><span><span class="co"># limits with the Wald interval above; z_value and p_value keep their</span></span></span>
+<span class="r-in"><span><span class="co"># asymptotic definitions. B = 2000 keeps the example quick; a reported</span></span></span>
+<span class="r-in"><span><span class="co"># interval deserves the default B = 10000.</span></span></span>
+<span class="r-in"><span><span class="fu">fleiss_kappa</span><span class="op">(</span><span class="va">fleiss_1971</span>, ci_method <span class="op">=</span> <span class="st">"percentile"</span>, B <span class="op">=</span> <span class="fl">2000</span>,</span></span>
+<span class="r-in"><span>             seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  kappa se     lower_limit upper_limit z_value p_value  n_subjects n_raters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.43  0.0542 0.316       0.532       17.7    &lt; 0.0001 30         6       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  n_categories</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

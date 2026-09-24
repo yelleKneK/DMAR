@@ -18,9 +18,7 @@ ss_aipe_smd_sensitivity(
   conf_level = 0.95,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_smd_sensitivity_result.csv",
-  ...
+  filename = NULL
 )
 ```
 
@@ -62,18 +60,15 @@ ss_aipe_smd_sensitivity(
 
   to print the current value of the iterations
 
-- save:
-
-  option to save simulation results. It can be saved with `save = TRUE`
-  outside of the printed results
-
 - filename:
 
-  the name of the file that simulation results will be saved to
-
-- ...:
-
-  for modifying parameters of functions this function calls
+  an optional path for a comma separated file recording every
+  replication (the realized standardized mean difference, the full and
+  the two one-sided interval widths, the three non-coverage indicators,
+  and the two confidence limits): nothing is written when `filename` is
+  `NULL` (the default), a new file with a header row is created
+  otherwise, an existing file at that path is appended to, and a
+  throwaway run should point it at `tempfile(fileext = ".csv")`
 
 ## Value
 

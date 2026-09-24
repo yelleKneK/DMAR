@@ -178,9 +178,19 @@ krippendorff_alpha(cbind(r1, r2), level = "interval")
 #> Confidence level: 95%
 
 # The percentile bootstrap interval for the same ratings, which
-# recomputes alpha on each of B resamples of the units. Not run
-# here, because 500 refits of alpha is more than a help page should
-# do; the call is:
-# krippendorff_alpha(cbind(r1, r2), level = "interval",
-#                    boot = TRUE, B = 500L, seed = 113)
+# recomputes alpha on each of B resamples of the units; the table
+# gains lower_limit, upper_limit, and B_used rows. B = 200 keeps the
+# example quick; a reported interval deserves the default B = 1000.
+krippendorff_alpha(cbind(r1, r2), level = "interval",
+                   boot = TRUE, B = 200L, seed = 113)
+#>  term               value 
+#>  krippendorff_alpha 0.956 
+#>  D_observed         0.0955
+#>  D_expected         2.16  
+#>  n_pairable         60    
+#>  lower_limit        0.919 
+#>  upper_limit        0.974 
+#>  B_used             200   
+#> 
+#> Confidence level: 95%
 ```

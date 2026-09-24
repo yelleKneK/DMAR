@@ -18,8 +18,7 @@ ss_aipe_rmsea_sensitivity(
   N = NULL,
   conf_level = 0.95,
   G = 200,
-  save = FALSE,
-  filename = "ss_aipe_rmsea_sensitivity_result.csv",
+  filename = NULL,
   ...
 )
 ```
@@ -59,14 +58,14 @@ ss_aipe_rmsea_sensitivity(
 
   number of replications in the Monte Carlo simulation.
 
-- save:
-
-  option to save simulation results. With `save = TRUE` the
-  per-replication results are written to `filename`.
-
 - filename:
 
-  the name of the file that simulation results are saved to.
+  an optional path for a comma separated file recording every converged
+  replication (its index, the RMSEA estimate, the two confidence limits,
+  and the interval width): nothing is written when `filename` is `NULL`
+  (the default), a new file with a header row is created otherwise, an
+  existing file at that path is appended to, and a throwaway run should
+  point it at `tempfile(fileext = ".csv")`.
 
 - ...:
 
@@ -150,11 +149,11 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-set.seed(113)
-
-# True data generating model: two correlated factors (r = 0.5), three
-# standardized indicators each (loadings 0.7). Build the implied population
-# covariance matrix Sigma = Lambda Phi Lambda' + Psi.
+# True data generating model: two correlated factors, each measured by
+# three standardized indicators. The factor correlation is 0.5 and every
+# loading is 0.7. The implied population covariance matrix is assembled
+# from the loading matrix, the factor correlation matrix, and the
+# residual variances.
 Lambda <- matrix(0, 6, 2)
 Lambda[1:3, 1] <- 0.7
 Lambda[4:6, 2] <- 0.7
@@ -165,11 +164,35 @@ dimnames(Sigma) <- list(paste0("x", 1:6), paste0("x", 1:6))
 # Proposed (misspecified) model: a single common factor.
 proposed <- "g =~ x1 + x2 + x3 + x4 + x5 + x6"
 
-# The simulation itself is not run at example time: it fits the proposed
-# model once at a very large N to recover the population RMSEA, then
-# generates and fits a fresh sample on every replication. The G below is
-# already far smaller than a study one would report; the default of 200,
-# or more, is the realistic setting. The call is:
-# ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
-#                           G = 25)
+# The proposed model is fit once at a very large N to recover the
+# population RMSEA, the sample size is planned so that the expected width
+# of the 95 percent interval is 0.05, and a fresh sample of that size is
+# drawn and fit on every replication. Notice that true_rmsea is about
+# 0.20, since a single factor is a poor description of two-factor data,
+# that the realized widths sit close to the target, and that
+# pct_ci_less_w is near one half, which is what planning for the expected
+# width delivers. G = 20 keeps the example quick; a reported sensitivity
+# study deserves the default G = 200 or more.
+set.seed(113)
+ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
+                          G = 20)
+#>  term               value   
+#>  mean_rmsea         0.197   
+#>  median_rmsea       0.199   
+#>  sd_rmsea           0.0176  
+#>  mean_ci_width      0.05    
+#>  median_ci_width    0.05    
+#>  sd_ci_width        9.53e-05
+#>  pct_ci_less_w      0.5     
+#>  pct_ci_miss_low    0       
+#>  pct_ci_miss_high   0.1     
+#>  total_type_I_error 0.1     
+#>  suc_rep            20      
+#>  total_N            695     
+#>  df                 9       
+#>  true_rmsea         0.204   
+#>  width              0.05    
+#>  conf_level         0.95    
+#> 
+#> Confidence level: 95%
 ```

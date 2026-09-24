@@ -74,12 +74,12 @@ group standard deviation), and `"upper_limit"` (the upper bound).
 
 ## Warning
 
-This function uses `conf_limits_nct`, which has as one of its arguments
-`tol` (and can be modified with `tol` of the present function). If the
-present function fails to converge (i.e., if it runs but does not report
-a solution), it is likely that the `tol` value is too restrictive and
+This function uses `ci_nc_t`, which has as one of its arguments `tol`
+(and can be modified with `tol` of the present function). If the present
+function fails to converge (i.e., if it runs but does not report a
+solution), it is likely that the `tol` value is too restrictive and
 should be increased by a factor of 10, but probably by no more than 100.
-Running the function `conf_limits_nct` directly will report the actual
+Running the function `ci_nc_t` directly will report the actual
 probability values of the limits found. This should be done if any
 modification to `tol` is necessary in order to ensure acceptable
 confidence limits for the noncentral *t* parameter have been achieved.
@@ -127,7 +127,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 [`smd_c`](https://yelleknek.github.io/DMAR/reference/smd_c.md),
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md),
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

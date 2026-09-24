@@ -142,7 +142,7 @@ study, and the omnibus \\F\\-statistic follows a noncentral *F* with
 N \rho^2 / (1 - \rho^2)\\ (Cohen, 1988); the CI on \\\rho^2\\ is
 obtained by inverting that distribution and then taking the square root
 (see
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)).
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)).
 Under random predictors the design matrix is itself a draw from a joint
 multivariate normal distribution and the unconditional sampling
 distribution of the sample \\R^2\\ is given by Lee (1971); the same Lee
@@ -224,7 +224,7 @@ Instruments, & Computers, 24*(4), 581–582.
 [`ss_aipe_R2`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2.md),
 [`convert_r_Z`](https://yelleknek.github.io/DMAR/reference/convert_r_Z.md),
 [`convert_Z_r`](https://yelleknek.github.io/DMAR/reference/convert_Z_r.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 Other confidence intervals for effect sizes:
 [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),

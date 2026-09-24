@@ -147,11 +147,15 @@ generics::glance(h)
 
 # The upper confidence bound, which is the quantity the validity
 # literature compares against 0.85 or 0.90, comes from a bootstrap
-# that recomputes every pairwise ratio on each of B resamples. It is
-# shown rather than run; the call is
-#   htmt(d, blocks = list(A = c("a1", "a2", "a3"),
-#                         B = c("b1", "b2", "b3")),
-#        B = 10000, seed = 113)
-# and a claim about discriminant validity deserves that bound rather
-# than the point estimate alone.
+# that recomputes every pairwise ratio on each of B resamples; the
+# table gains an upper_limit column. B = 1000 keeps the example
+# quick; a claim about discriminant validity deserves the bound at
+# B = 10000 rather than the point estimate alone.
+htmt(d, blocks = list(A = c("a1", "a2", "a3"),
+                      B = c("b1", "b2", "b3")),
+     B = 1000, seed = 113)
+#>  construct_1 construct_2 htmt  upper_limit
+#>  A           B           0.269 0.378      
+#> 
+#> Confidence level: 95%
 ```

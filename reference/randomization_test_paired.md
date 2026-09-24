@@ -53,7 +53,7 @@ randomization_test_paired(
 
 - seed:
 
-  Optional integer seed for reproducibility of the Monte- Carlo branch.
+  Optional integer seed for reproducibility of the Monte Carlo branch.
   Default `NULL`, which leaves the user's current RNG state intact;
   supply an integer for reproducibility.
 

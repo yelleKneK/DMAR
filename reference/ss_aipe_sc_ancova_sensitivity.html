@@ -9,7 +9,7 @@ narrow confidence intervals for standardized ANCOVA complex contrasts."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,8 +63,7 @@ narrow confidence intervals for standardized ANCOVA complex contrasts.</p>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_sc_ancova_sensitivity_result.csv"</span>,</span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -125,12 +124,13 @@ narrow confidence intervals for standardized ANCOVA complex contrasts.</p>
 <dd><p>to print the current value of the iterations</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. It can be saved with <code>save = TRUE</code> outside of the printed results</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results will be saved to</p></dd>
+<dd><p>Optional path of a CSV file to receive the per-replication
+results (the observed standardized contrast, the full and one-sided
+interval widths, the tail and overall misses, and the confidence
+limits), appended when the file already exists and created otherwise;
+the default <code>NULL</code> writes nothing, and a throwaway run that wants
+the file should point it at <code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -209,9 +209,9 @@ they can be specified as any values that are considered as reasonable by the use
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Sensitivity analysis for a standardized ANCOVA contrast across</span></span></span>
 <span class="r-in"><span><span class="co"># three groups, contrast (-1, 0, 1), a covariate-outcome correlation</span></span></span>
-<span class="r-in"><span><span class="co"># of 0.4, and a planning target width of 0.5. Sizes are kept small</span></span></span>
-<span class="r-in"><span><span class="co"># here so the Monte Carlo sweep runs quickly; raise G for a stable</span></span></span>
-<span class="r-in"><span><span class="co"># estimate in practice.</span></span></span>
+<span class="r-in"><span><span class="co"># of 0.4, and a planning target width of 0.5. G = 50 keeps the</span></span></span>
+<span class="r-in"><span><span class="co"># example quick; a reported sensitivity analysis deserves the default of</span></span></span>
+<span class="r-in"><span><span class="co"># G = 10000 replications.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_sc_ancova_sensitivity</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  true_psi <span class="op">=</span> <span class="fl">0.5</span>, estimated_psi <span class="op">=</span> <span class="fl">0.5</span>,</span></span>

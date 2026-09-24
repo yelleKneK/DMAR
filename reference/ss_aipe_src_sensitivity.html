@@ -9,7 +9,7 @@ Perspective for the standardized regression coefficient."><meta property="og:ima
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,8 +65,7 @@ Perspective for the standardized regression coefficient.</p>
 <span>  assurance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_src_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -134,12 +133,13 @@ Perspective for the standardized regression coefficient.</p>
 <dd><p>specify with a <code>TRUE/FALSE</code> statement if the iteration number should be printed as the simulation within the function runs</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. It can be saved with <code>save = TRUE</code> outside of the printed results</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results will be saved to</p></dd>
+<dd><p>Optional path for a comma separated file recording
+every replication, forwarded to
+<code><a href="ss_aipe_reg_coef_sensitivity.html">ss_aipe_reg_coef_sensitivity</a></code>, which does the writing:
+nothing is written when <code>filename</code> is <code>NULL</code> (the default),
+and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

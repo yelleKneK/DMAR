@@ -89,7 +89,7 @@ on one-way ANOVA.)
 ## See also
 
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 ## Author
 

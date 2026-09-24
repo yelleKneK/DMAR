@@ -24,8 +24,7 @@ ss_aipe_cv_sensitivity(
   conf_level = 0.95,
   G = 1000,
   print_iter = FALSE,
-  save = FALSE,
-  filename = "ss_aipe_cv_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -80,16 +79,15 @@ ss_aipe_cv_sensitivity(
   Logical. If `TRUE` the simulation prints the iteration index after
   each replication (helpful for long runs); default `FALSE`.
 
-- save:
-
-  Logical. If `TRUE` the per-replication results are appended to a CSV
-  file at `filename`; default `FALSE`.
-
 - filename:
 
-  Path used when `save = TRUE`; default
-  `"ss_aipe_cv_sensitivity_result.csv"` in the current working
-  directory.
+  An optional path for a comma separated file recording every
+  replication (the two confidence limits, the realized coefficient of
+  variation, a coverage indicator, and the interval width): nothing is
+  written when `filename` is `NULL` (the default), a new file with a
+  header row is created otherwise, an existing file at that path is
+  appended to, and a throwaway run should point it at
+  `tempfile(fileext = ".csv")`.
 
 ## Value
 
@@ -180,13 +178,7 @@ ss_aipe_cv_sensitivity(
   G                = 200,
   print_iter       = FALSE
 )
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
-#> Warning: The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.
+#> Warning: The noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 7 of the 200 replications, so those interval limits may be inaccurate; see ?ci_nc_t.
 #>  term               value 
 #>  mean_cv            0.247 
 #>  median_cv          0.247 

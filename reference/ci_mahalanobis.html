@@ -21,7 +21,7 @@ pre-computed \(D^2\) with sample sizes can be supplied."><meta property="og:imag
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -134,11 +134,11 @@ upper tail. To use them, set <code>conf_level = NULL</code> and supply both
 (an asymmetric or one-sided interval with coverage
 <code>1 - alpha_lower - alpha_upper</code>); supplying either alongside a
 non-<code>NULL</code> <code>conf_level</code> is an error, as in
-<code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>, to which they are passed.</p></dd>
+<code><a href="ci_nc_F.html">ci_nc_F</a></code>, to which they are passed.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments passed to <code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>
+<dd><p>Additional arguments passed to <code><a href="ci_nc_F.html">ci_nc_F</a></code>
 (for example <code>tol</code>).</p></dd>
 
 </dl></div>
@@ -180,13 +180,13 @@ one-sample case (see Anderson, 2003, Section 5.2).</p>
 <p><strong>Confidence interval.</strong> The CI on \(\Delta^2\) is obtained by
 inverting these distributional results (Reiser, 2001): a CI on the
 noncentrality parameter \(\lambda\) is constructed via
-<code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code> and then mapped back to \(\Delta^2\) by
+<code><a href="ci_nc_F.html">ci_nc_F</a></code> and then mapped back to \(\Delta^2\) by
 \(\Delta^2 = \lambda\,(n_1 + n_2)/(n_1 n_2)\) (two sample) or
 \(\Delta^2 = \lambda / n\) (one sample). When the observed \(F\) is
 below the lower-tail critical value of the central <em>F</em>-distribution at
 the requested confidence level, the lower CI on \(\lambda\) (and hence
 on \(\Delta^2\)) is clamped to zero, in keeping with the
-<code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code> convention.</p>
+<code><a href="ci_nc_F.html">ci_nc_F</a></code> convention.</p>
 <p><strong>Bias.</strong> The plug-in estimator \(D^2\) is upward biased for
 \(\Delta^2\); the CI from this function is exact for \(\Delta^2\)
 under multivariate normality and reflects the bias structure correctly,
@@ -215,7 +215,7 @@ but the point estimate reported is the standard plug-in \(D^2\).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>, <code><a href="ci_smd.html">ci_smd</a></code>,
+    <div class="dont-index"><p><code><a href="ci_nc_F.html">ci_nc_F</a></code>, <code><a href="ci_smd.html">ci_smd</a></code>,
   <code><a href="ci_R2.html">ci_R2</a></code></p>
 <p>Other confidence intervals for effect sizes:
 <code><a href="ci_R2.html">ci_R2()</a></code>,

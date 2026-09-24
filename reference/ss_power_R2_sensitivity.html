@@ -29,7 +29,7 @@ actually realizing the other."><meta property="og:image" content="https://yellek
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,9 +92,7 @@ actually realizing the other.</p>
 <span>  rho_xx <span class="op">=</span> <span class="fl">0.3</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_power_r2_sensitivity_result.csv"</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -150,16 +148,12 @@ actually realizing the other.</p>
 <dd><p>Whether to print the iteration number during the simulation</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>Whether to write the per-replication results to a CSV file</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>Name of the CSV file written when <code>save = TRUE</code></p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments forwarded to internal helpers</p></dd>
+<dd><p>Optional path of a CSV file to receive the per-replication
+results (the observed \(R^2\) and \(F\) statistic), overwriting any
+file already at that path; the default <code>NULL</code> writes nothing, and a
+throwaway run that wants the file should point it at
+<code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -262,8 +256,8 @@ test.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Realized power when planning under the fixed-predictor model but the</span></span></span>
-<span class="r-in"><span><span class="co"># data are actually generated with random predictors. G is small here</span></span></span>
-<span class="r-in"><span><span class="co"># for illustration; use G = 10,000 in practice.</span></span></span>
+<span class="r-in"><span><span class="co"># data are actually generated with random predictors. G = 200 keeps the</span></span></span>
+<span class="r-in"><span><span class="co"># example quick; a reported analysis deserves the default G of 10000.</span></span></span>
 <span class="r-in"><span><span class="fu">ss_power_R2_sensitivity</span><span class="op">(</span>true_R2 <span class="op">=</span> <span class="fl">0.30</span>, estimated_R2 <span class="op">=</span> <span class="fl">0.30</span>,</span></span>
 <span class="r-in"><span>                        desired_power <span class="op">=</span> <span class="fl">0.80</span>, p <span class="op">=</span> <span class="fl">5</span>,</span></span>
 <span class="r-in"><span>                        random_predictors <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
@@ -271,14 +265,14 @@ test.</p>
 <span class="r-in"><span>                        G <span class="op">=</span> <span class="fl">200</span>, print_iter <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term            value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  total_N         36   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  empirical_power 0.77 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  empirical_power 0.795</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  analytic_power  0.802</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_R2         0.396</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  median_R2       0.386</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_R2           0.122</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_F          4.41 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  median_F        3.78 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_F            2.51 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_R2         0.4  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  median_R2       0.397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_R2           0.118</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_F          4.43 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  median_F        3.95 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_F            2.25 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  F_crit          2.53 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  p               5    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  true_R2         0.3  </span>

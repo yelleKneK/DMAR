@@ -39,7 +39,7 @@ discriminant side is htmt."><meta property="og:image" content="https://yelleknek
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -164,6 +164,18 @@ exit.</p></dd>
   limits; <code>NA</code> when <code>ci_method = "none"</code>).</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The percentile bootstrap interval resamples the cases behind
+<code>fit</code> and refits the model once per replication, so its cost is
+<code>B</code> model fits. That refitting is why the examples below stop at
+the point estimates: even the smallest permitted <code>B = 100</code> runs
+for several seconds on the two-factor model there. To obtain the
+interval, pass <code>ci_method = "percentile"</code> together with a
+<code>seed</code>, as in <code>average_variance_extracted(fit, ci_method =
+"percentile", seed = 113)</code>, and keep the default <code>B = 1000</code> or
+more for a reported analysis.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Efron, B., &amp; Tibshirani, R. J. (1993). <em>An introduction to the
   bootstrap</em>. New York, NY: Chapman &amp; Hall/CRC.</p>
@@ -230,13 +242,6 @@ exit.</p></dd>
 <span class="r-in"><span><span class="co"># AVE values and the latent correlations in one table.</span></span></span>
 <span class="r-in"><span><span class="fu">lavaan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/lavInspect.html" class="external-link">lavInspect</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"cor.lv"</span><span class="op">)</span><span class="op">[</span><span class="st">"verbal"</span>, <span class="st">"deduction"</span><span class="op">]</span><span class="op">^</span><span class="fl">2</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5327517</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># An interval comes from ci_method = "percentile", which resamples the</span></span></span>
-<span class="r-in"><span><span class="co"># cases and refits the model once per replication. That refitting is</span></span></span>
-<span class="r-in"><span><span class="co"># why it is not run here; the call is</span></span></span>
-<span class="r-in"><span><span class="co">#   average_variance_extracted(fit, ci_method = "percentile",</span></span></span>
-<span class="r-in"><span><span class="co">#                              B = 1000, seed = 113)</span></span></span>
-<span class="r-in"><span><span class="co"># and a reported interval deserves the default B = 1000 or more.</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The broom verbs: one row per factor.</span></span></span>
 <span class="r-in"><span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">ave_tbl</span><span class="op">)</span></span></span>

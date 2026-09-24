@@ -17,9 +17,7 @@ ss_aipe_sc_sensitivity(
   conf_level = 0.95,
   G = 10000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_sc_sensitivity_result.csv",
-  ...
+  filename = NULL
 )
 ```
 
@@ -65,18 +63,15 @@ ss_aipe_sc_sensitivity(
 
   to print the current value of the iterations
 
-- save:
-
-  option to save simulation results. It can be saved with `save = TRUE`
-  outside of the printed results
-
 - filename:
 
-  the name of the file that simulation results will be saved to
-
-- ...:
-
-  allows one to potentially include parameter values for inner functions
+  an optional path for a comma separated file recording every
+  replication (the realized standardized contrast, the full and the two
+  one-sided interval widths, the three non-coverage indicators, and the
+  two confidence limits): nothing is written when `filename` is `NULL`
+  (the default), a new file with a header row is created otherwise, an
+  existing file at that path is appended to, and a throwaway run should
+  point it at `tempfile(fileext = ".csv")`
 
 ## Value
 
@@ -134,7 +129,7 @@ significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 [`ss_aipe_sc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc.md),
 [`ss_aipe_c`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md)
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
 for what a chosen design delivers: power, the Type S (sign) and Type M

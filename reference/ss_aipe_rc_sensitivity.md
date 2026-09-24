@@ -23,8 +23,7 @@ ss_aipe_rc_sensitivity(
   assurance = NULL,
   G = 1000,
   print_iter = TRUE,
-  save = FALSE,
-  filename = "ss_aipe_rc_sensitivity_result.csv"
+  filename = NULL
 )
 ```
 
@@ -78,7 +77,7 @@ ss_aipe_rc_sensitivity(
 - standardize:
 
   specify with a `TRUE` or `FALSE` statement whether or not the
-  regression coefficient will be standardized; default is `TRUE`
+  regression coefficient will be standardized; default is `FALSE`
 
 - conf_level:
 
@@ -101,14 +100,14 @@ ss_aipe_rc_sensitivity(
   specify with a `TRUE/FALSE` statement if the iteration number should
   be printed as the simulation within the function runs
 
-- save:
-
-  option to save simulation results. It can be saved with `save = TRUE`
-  outside of the printed results
-
 - filename:
 
-  the name of the file that simulation results will be saved to
+  Optional path for a comma separated file recording every replication,
+  forwarded to
+  [`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md),
+  which does the writing: nothing is written when `filename` is `NULL`
+  (the default), and a throwaway run should point it at
+  `tempfile(fileext = ".csv")`.
 
 ## Value
 

@@ -11,7 +11,7 @@ bar and sample size / predictor-count annotations."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -166,18 +166,22 @@ the “Unexplained” portion a neutral light gray.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Basic call.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># The default display: the observed R2 fills its share of the bar, the</span></span></span>
+<span class="r-in"><span><span class="co"># confidence interval sits beneath it, and N and p are annotated.</span></span></span>
 <span class="r-in"><span><span class="fu">plot_R2</span><span class="op">(</span>R2 <span class="op">=</span> <span class="fl">0.25</span>, N <span class="op">=</span> <span class="fl">100</span>, p <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_R2-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The variations below are not run, since the call above already shows</span></span></span>
-<span class="r-in"><span><span class="co"># the default display and each additional figure has to be drawn. With</span></span></span>
-<span class="r-in"><span><span class="co"># fixed predictors and a 90% confidence interval:</span></span></span>
-<span class="r-in"><span><span class="co"># plot_R2(R2 = 0.35, N = 200, p = 3, conf_level = 0.90,</span></span></span>
-<span class="r-in"><span><span class="co">#         random_predictors = FALSE)</span></span></span>
+<span class="r-in"><span><span class="co"># With fixed predictors and a 90% confidence interval. The interval</span></span></span>
+<span class="r-in"><span><span class="co"># beneath the bar is now the fixed predictor interval from ci_R2, and</span></span></span>
+<span class="r-in"><span><span class="co"># its label reads 90% rather than 95%.</span></span></span>
+<span class="r-in"><span><span class="fu">plot_R2</span><span class="op">(</span>R2 <span class="op">=</span> <span class="fl">0.35</span>, N <span class="op">=</span> <span class="fl">200</span>, p <span class="op">=</span> <span class="fl">3</span>, conf_level <span class="op">=</span> <span class="fl">0.90</span>,</span></span>
+<span class="r-in"><span>        random_predictors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_R2-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Without the annotations:</span></span></span>
-<span class="r-in"><span><span class="co"># plot_R2(R2 = 0.10, show_ci = FALSE, show_n = FALSE)</span></span></span>
+<span class="r-in"><span><span class="co"># Without the interval or the sample size annotation, the bar stands</span></span></span>
+<span class="r-in"><span><span class="co"># alone, which is the display to use when N and p are not known.</span></span></span>
+<span class="r-in"><span><span class="fu">plot_R2</span><span class="op">(</span>R2 <span class="op">=</span> <span class="fl">0.10</span>, show_ci <span class="op">=</span> <span class="cn">FALSE</span>, show_n <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_R2-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

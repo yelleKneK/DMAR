@@ -31,7 +31,7 @@ ss_aipe_indirect_effect.'><meta property="og:image" content="https://yelleknek.g
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,8 +94,7 @@ from the delta method standard error
 <span>  B <span class="op">=</span> <span class="fl">5000L</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_indirect_effect_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -155,12 +154,15 @@ when <code>method = "monte_carlo"</code> (default 5000).</p></dd>
 <dd><p>Logical.</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>Logical. Save per-replication CSV.</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>Path used when <code>save = TRUE</code>.</p></dd>
+<dd><p>Optional path for a comma separated file recording
+every replication (the sample indirect effect \(\hat a \hat b\), the
+two confidence limits, the interval width, and two indicators of
+whether the interval missed <code>true_a * true_b</code> below or above):
+nothing is written when <code>filename</code> is <code>NULL</code> (the default),
+a new file with a header row is created otherwise, an existing file
+at that path is appended to, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -41,7 +41,7 @@ model."><meta property="og:image" content="https://yelleknek.github.io/DMAR/logo
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -243,6 +243,18 @@ simplification for the parallel model, the same closed form behind
 <code>reliability_alpha(ci_method = "ml")</code>. The congeneric model has
 no normal theory form, so <code>type = "Normal Theory"</code> is an error
 there.</p>
+<p>The cost of the assurance search depends on the interval. The normal
+theory intervals are closed forms, so a search at the default
+<code>initial_iter = 500</code> and <code>final_iter = 5000</code> finishes in
+seconds. With the factor analytic interval a one factor model is fit
+at every Monte Carlo iteration and at every candidate sample size the
+search visits, so a congeneric plan with an assurance runs for tens of
+seconds even at <code>initial_iter = 50</code> and <code>final_iter = 200</code>
+and for many minutes at the defaults. The examples on this page
+therefore stop at the closed form for the congeneric plan; the
+assurance version is the same call with <code>assurance</code> supplied
+(for example, <code>assurance = .80</code>), and <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> before
+the call makes the search reproducible.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -308,9 +320,9 @@ behaved covariance matrix.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The assurance cases run a Monte Carlo search; the iteration counts below are</span></span></span>
-<span class="r-in"><span><span class="co"># reduced so the example runs quickly. Raise initial_iter and final_iter for a</span></span></span>
-<span class="r-in"><span><span class="co"># production plan.</span></span></span>
+<span class="r-in"><span><span class="co"># The assurance cases run a Monte Carlo search. initial_iter = 50 and</span></span></span>
+<span class="r-in"><span><span class="co"># final_iter = 200 keep the examples quick; a reported plan deserves the</span></span></span>
+<span class="r-in"><span><span class="co"># defaults of 500 and 5000, and set.seed() makes the search reproducible.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Same population, now targeting an assurance.</span></span></span>
@@ -327,20 +339,27 @@ behaved covariance matrix.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The true score (tau equivalent) model takes psi_square as a vector of</span></span></span>
-<span class="r-in"><span><span class="co"># length i (number of items) while cor_est stays a single value. Its</span></span></span>
-<span class="r-in"><span><span class="co"># assurance search is the slowest of the normal theory calls on this page,</span></span></span>
-<span class="r-in"><span><span class="co"># and the S matrix example at the end already plans for the true score</span></span></span>
-<span class="r-in"><span><span class="co"># model, so this one is shown rather than run:</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_reliability(model = "True Score", type = "Normal Theory",</span></span></span>
-<span class="r-in"><span><span class="co">#     width = .1, i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3),</span></span></span>
-<span class="r-in"><span><span class="co">#     conf_level = .95, assurance = .85, initial_iter = 50,</span></span></span>
-<span class="r-in"><span><span class="co">#     final_iter = 200)</span></span></span>
+<span class="r-in"><span><span class="co"># length i (number of items) while cor_est stays a single value.</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_reliability</span><span class="op">(</span>model <span class="op">=</span> <span class="st">"True Score"</span>, type <span class="op">=</span> <span class="st">"Normal Theory"</span>,</span></span>
+<span class="r-in"><span>  width <span class="op">=</span> <span class="fl">.1</span>, i <span class="op">=</span> <span class="fl">5</span>, cor_est <span class="op">=</span> <span class="fl">.3</span>, psi_square <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.2</span>, <span class="fl">.3</span>, <span class="fl">.3</span>, <span class="fl">.2</span>, <span class="fl">.3</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  conf_level <span class="op">=</span> <span class="fl">.95</span>, assurance <span class="op">=</span> <span class="fl">.85</span>, initial_iter <span class="op">=</span> <span class="fl">50</span>, final_iter <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term                value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N         113  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width               0.1  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  specified_assurance 0.85 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  empirical_assurance 0.85 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  final_iter          200  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Congeneric model, planned from the item loadings and error variances rather</span></span></span>
 <span class="r-in"><span><span class="co"># than from a single correlation. With assurance = NULL the necessary N comes</span></span></span>
 <span class="r-in"><span><span class="co"># from the closed form expected width evaluated at the implied population</span></span></span>
 <span class="r-in"><span><span class="co"># correlation matrix, so type does not enter the answer; type selects the</span></span></span>
-<span class="r-in"><span><span class="co"># interval that the Monte Carlo assurance search evaluates.</span></span></span>
+<span class="r-in"><span><span class="co"># interval that the Monte Carlo assurance search evaluates. Adding an</span></span></span>
+<span class="r-in"><span><span class="co"># assurance to this plan fits a one factor model at every Monte Carlo</span></span></span>
+<span class="r-in"><span><span class="co"># iteration and is the slow case, so the page stops at the closed form</span></span></span>
+<span class="r-in"><span><span class="co"># (see Details).</span></span></span>
 <span class="r-in"><span><span class="fu">ss_aipe_reliability</span><span class="op">(</span>model <span class="op">=</span> <span class="st">"Congeneric"</span>, type <span class="op">=</span> <span class="st">"Factor Analytic"</span>, width <span class="op">=</span> <span class="fl">.15</span>,</span></span>
 <span class="r-in"><span>  i <span class="op">=</span> <span class="fl">4</span>, lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.8</span>, <span class="fl">.7</span>, <span class="fl">.7</span>, <span class="fl">.8</span><span class="op">)</span>, psi_square <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.4</span>, <span class="fl">.5</span>, <span class="fl">.5</span>, <span class="fl">.4</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  conf_level <span class="op">=</span> <span class="fl">.95</span>, assurance <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
@@ -348,16 +367,6 @@ behaved covariance matrix.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N 53   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Adding an assurance to that congeneric plan is the expensive case: with the</span></span></span>
-<span class="r-in"><span><span class="co"># factor analytic interval a one factor model is fit at every Monte Carlo</span></span></span>
-<span class="r-in"><span><span class="co"># iteration and at every candidate sample size the search visits, so it runs</span></span></span>
-<span class="r-in"><span><span class="co"># for tens of seconds at the reduced counts used above and for many minutes at</span></span></span>
-<span class="r-in"><span><span class="co"># the defaults. That is why it is not run here; the call is</span></span></span>
-<span class="r-in"><span><span class="co">#   ss_aipe_reliability(model = "Congeneric", type = "Factor Analytic",</span></span></span>
-<span class="r-in"><span><span class="co">#     width = .15, i = 4, lambda = c(.8, .7, .7, .8),</span></span></span>
-<span class="r-in"><span><span class="co">#     psi_square = c(.4, .5, .5, .4), conf_level = .95, assurance = .80,</span></span></span>
-<span class="r-in"><span><span class="co">#     initial_iter = 50, final_iter = 200)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Planning from a presumed population correlation matrix among the items.</span></span></span>
 <span class="r-in"><span><span class="va">pop_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span></span>
@@ -370,10 +379,10 @@ behaved covariance matrix.</p>
 <span class="r-in"><span>  S <span class="op">=</span> <span class="va">pop_mat</span>, conf_level <span class="op">=</span> <span class="fl">.95</span>, assurance <span class="op">=</span> <span class="fl">.85</span>, initial_iter <span class="op">=</span> <span class="fl">50</span>,</span></span>
 <span class="r-in"><span>  final_iter <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N         120  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  necessary_N         116  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  width               0.15 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  specified_assurance 0.85 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  empirical_assurance 0.88 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  empirical_assurance 0.85 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  final_iter          200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>

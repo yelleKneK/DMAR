@@ -88,7 +88,7 @@ ed.). Routledge.
 [`ss_power_factorial_anova`](https://yelleknek.github.io/DMAR/reference/ss_power_factorial_anova.md),
 [`ss_power_c`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_sc`](https://yelleknek.github.io/DMAR/reference/ss_power_sc.md),
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
 for what a chosen design delivers: power, the Type S (sign) and Type M

@@ -25,7 +25,7 @@ realized widths and coverage of true_omega_squared."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,8 +83,7 @@ realized widths and coverage of <code>true_omega_squared</code>.</p>
 <span>  assurance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_omega_squared_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -135,13 +134,15 @@ sample size.</p></dd>
 <dd><p>Logical. Print iteration index per replication.</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>Logical. If <code>TRUE</code> write per-replication results to
-<code>filename</code>.</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>Path used when <code>save = TRUE</code>.</p></dd>
+<dd><p>Optional path for a comma separated file recording
+every replication (the sample \(\hat\omega^2\), the two confidence
+limits, the interval width, and two indicators of whether the
+interval missed <code>true_omega_squared</code> below or above): nothing is
+written when <code>filename</code> is <code>NULL</code> (the default), a new file
+with a header row is created otherwise, an existing file at that path
+is appended to, and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -209,7 +210,7 @@ assurance was supplied).</p>
 <span class="r-in"><span>  df_effect <span class="op">=</span> <span class="fl">2</span>, width <span class="op">=</span> <span class="fl">0.10</span>,</span></span>
 <span class="r-in"><span>  G <span class="op">=</span> <span class="fl">25</span>, print_iter <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 10 intermediate evaluations.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 10 intermediate evaluations.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term                    value </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  mean_omega_squared      0.0665</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  median_omega_squared    0.0703</span>

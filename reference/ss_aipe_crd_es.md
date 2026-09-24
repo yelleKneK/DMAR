@@ -307,6 +307,30 @@ Here are the functions' descriptions:
   cluster size) providing the lowest cost given the specified width of
   the confidence interval
 
+Every answer that targets a width, and the expected width a budget
+planner reports when `nrep` and the population values are supplied,
+rests on an a priori Monte Carlo simulation: a candidate design is
+evaluated by generating `nrep` data sets and reading the
+likelihood-based confidence interval on the standardized effect size
+from OpenMx. The planners whose answer needs one such evaluation, or a
+handful, run in about a second at a small `nrep` and are the ones shown
+in the examples. The two that search over the number of clusters,
+`ss_aipe_crd_es_n_clusters_fixed_width` at a fixed cluster size and
+`ss_aipe_crd_es_both_fixed_width`, which repeats that search across
+candidate cluster sizes and keeps the least costly combination that
+reaches the width, evaluate many candidates in turn and run for minutes
+at the default `nrep = 1000`, so they are not among the examples. A call
+such as
+`ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000, seed = 113)`
+returns the number of clusters of 20 individuals that brings the
+expected width of the interval on the individual-level standardized
+effect size to 0.3, and
+`ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5, indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000, seed = 113)`
+returns the least costly pairing of clusters and cluster size at those
+costs that reaches a width of 0.5. Both accept `diff_size` for unequal
+cluster sizes, in which case the simulated data sets carry the unequal
+sizes and the confidence interval comes from a multiple-group model.
+
 ## References
 
 Boker, S. M., Neale, M. C., Maes, H. H., Wilde, M., Spiegel, M., Brick,
@@ -368,57 +392,90 @@ ss_aipe_crd_es_n_individuals_fixed_budget(budget = 1000, n_clusters = 200,
 
 # The interval width these planners can report, and every answer that
 # targets a width, rests on an a priori Monte Carlo simulation: a candidate
-# is evaluated by generating nrep data sets and reading the
+# design is evaluated by generating nrep data sets and reading the
 # likelihood-based confidence interval on the standardized effect size from
-# OpenMx, and the planners that search over the number of clusters evaluate
-# many candidates in turn. Those calls run for seconds to minutes apiece,
-# so they are shown below but not run; the package's tests exercise them.
-# Each one describes a population standardized effect size of 0.5, with
-# es_type = 1 putting that effect size in individual-level standard
-# deviation units and a quarter of the outcome variance lying between
-# clusters.
-#
+# OpenMx. The calls below use nrep = 2 so that the page runs quickly; a
+# reported plan deserves the default nrep = 1000. Each call describes a
+# population standardized effect size of 0.5, with es_type = 1 putting that
+# effect size in individual-level standard deviation units and a quarter of
+# the outcome variance lying between clusters.
+
 # Supplying nrep and the population values to a budget planner adds the
-# expected width of the interval the affordable design buys:
-#   ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
-#     clus_cost = 0, indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25,
-#     pr_treat = 0.5, nrep = 1000, seed = 113)
-#
+# expected width of the interval the affordable design buys.
+ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
+  clus_cost = 0, indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25,
+  pr_treat = 0.5, nrep = 2, seed = 113)
+#>  term                                      value
+#>  necessary_n_clusters                      50   
+#>  exp_width_of_individual-level_effect_size 0.335
+#>  budget                                    1000 
+#> 
+#> Confidence level: 95%
+
 # Cluster size needed for a target width, given the number of clusters.
 # With 250 clusters the planner settles on the smallest cluster size it
 # will consider, two individuals per cluster, and the expected width still
 # comes in well under the target: for a contrast between conditions that
 # are assigned at the cluster level, precision is bought with clusters
 # rather than with what happens inside them.
-#   ss_aipe_crd_es_n_individuals_fixed_width(width = 0.5, n_clusters = 250,
-#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
-#     seed = 113)
-#
+ss_aipe_crd_es_n_individuals_fixed_width(width = 0.5, n_clusters = 250,
+  es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 2,
+  seed = 113)
+#>  term                                      value
+#>  cluster_size                              2    
+#>  exp_width_of_individual-level_effect_size 0.233
+#> 
+#> Confidence level: 95%
+
 # Once recruiting a cluster costs 5, the number of clusters and the cluster
 # size trade off against each other, and this planner searches the
-# combinations the budget allows for the narrowest expected interval:
-#   ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5,
-#     indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,
-#     nrep = 1000, seed = 113)
-#
-# Number of clusters needed for a target width, given the cluster size:
-#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,
-#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
-#     seed = 113)
-#
-# Both quantities under a target width, taking the least costly combination
-# that reaches it:
-#   ss_aipe_crd_es_both_fixed_width(width = 0.5, clus_cost = 5,
-#     indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,
-#     nrep = 1000, seed = 113)
-#
-# Unequal cluster sizes: diff_size gives each cluster's deviation from
-# n_individuals (additive) or its multiplicative factor.
-#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,
-#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
-#     seed = 113, diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))
-#
-#   ss_aipe_crd_es_n_clusters_fixed_width(width = 0.3, n_individuals = 20,
-#     es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5, nrep = 1000,
-#     seed = 113, diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))
+# combinations the budget allows for the narrowest expected interval.
+ss_aipe_crd_es_both_fixed_budget(budget = 1000, clus_cost = 5,
+  indiv_cost = 1, es = 0.5, es_type = 1, icc_Y = 0.25, pr_treat = 0.5,
+  nrep = 2, seed = 113)
+#>  term                                      value
+#>  necessary_n_clusters                      110  
+#>  cluster_size                              4    
+#>  exp_width_of_individual-level_effect_size 0.293
+#>  budget                                    990  
+#> 
+#> Confidence level: 95%
+
+# Unequal cluster sizes. Every planner accepts diff_size, which gives each
+# cluster's deviation from n_individuals as an integer offset or as a
+# multiplicative factor, recycled across the clusters; the planner prints
+# the resulting cluster sizes and their frequencies ahead of its table.
+# The budget planner shows both forms here.
+ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
+  clus_cost = 0, indiv_cost = 1, diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))
+#>   cluster_size freq
+#> 1           17    5
+#> 2           18    6
+#> 3           19    6
+#> 4           20   16
+#> 5           21    6
+#> 6           22    6
+#> 7           23    5
+#>  term                 value
+#>  necessary_n_clusters 50   
+#>  budget               1000 
+#> 
+#> Confidence level: 95%
+
+ss_aipe_crd_es_n_clusters_fixed_budget(budget = 1000, n_individuals = 20,
+  clus_cost = 0, indiv_cost = 1,
+  diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))
+#>   cluster_size freq
+#> 1           12    7
+#> 2           16    6
+#> 3           18    6
+#> 4           20   12
+#> 5           22    6
+#> 6           24    7
+#> 7           28    6
+#>  term                 value
+#>  necessary_n_clusters 50   
+#>  budget               996  
+#> 
+#> Confidence level: 95%
 ```

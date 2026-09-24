@@ -43,7 +43,7 @@ refitting the ladder. Requires lavaan."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -160,7 +160,7 @@ ladder in force.</p></dd>
 
 
 <dt id="arg-ordered">ordered<a class="anchor" aria-label="anchor" href="#arg-ordered"></a></dt>
-<dd><p>Ordered-categorical (including binary) items: <code>TRUE</code>
+<dd><p>Ordered categorical (including binary) items: <code>TRUE</code>
 for every indicator in the model, or a character vector naming the
 ordered ones. <code>NULL</code> (default) treats all indicators as
 continuous. Declaring ordered items switches the ladder and, unless the
@@ -406,7 +406,8 @@ ladder rather than automating modification searches.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Do the two schools measure the verbal and the reasoning construct</span></span></span>
 <span class="r-in"><span><span class="co"># in the same way? (Holzinger &amp; Swineford, bundled.) The measurement</span></span></span>
 <span class="r-in"><span><span class="co"># model is a named list of factors; for a single factor, name its</span></span></span>
-<span class="r-in"><span><span class="co"># indicators with items = instead.</span></span></span>
+<span class="r-in"><span><span class="co"># indicators with items = instead, or give lavaan syntax, as the last</span></span></span>
+<span class="r-in"><span><span class="co"># example does.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">holzinger_swineford</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">hs_factors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  verbal    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t6_paragraph_comprehension"</span>, <span class="st">"t7_sentence"</span>,</span></span>
@@ -414,84 +415,118 @@ ladder rather than automating modification searches.</p>
 <span class="r-in"><span>  deduction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t20_deduction"</span>, <span class="st">"t22_problem_reasoning"</span>,</span></span>
 <span class="r-in"><span>                <span class="st">"t23_series_completion"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The bottom two rungs. Configural invariance asks whether the same</span></span></span>
-<span class="r-in"><span><span class="co"># pattern of loadings holds at both schools; metric adds the</span></span></span>
-<span class="r-in"><span><span class="co"># constraint that the loadings are equal across schools, and it is</span></span></span>
-<span class="r-in"><span><span class="co"># the rung that has to hold before a relation involving one of these</span></span></span>
-<span class="r-in"><span><span class="co"># factors is compared across them. Naming those two in levels = stops</span></span></span>
-<span class="r-in"><span><span class="co"># the ladder there, which is what keeps this example quick.</span></span></span>
+<span class="r-in"><span><span class="co"># The whole ladder, configural through metric, scalar, and strict.</span></span></span>
+<span class="r-in"><span><span class="co"># Configural invariance asks whether the same pattern of loadings</span></span></span>
+<span class="r-in"><span><span class="co"># holds at both schools; metric adds the constraint that the loadings</span></span></span>
+<span class="r-in"><span><span class="co"># are equal across schools, and it is the rung that has to hold before</span></span></span>
+<span class="r-in"><span><span class="co"># a relation involving one of these factors is compared across them;</span></span></span>
+<span class="r-in"><span><span class="co"># scalar equates the intercepts as well, which comparing factor means</span></span></span>
+<span class="r-in"><span><span class="co"># requires; strict equates the residual variances. Each row from the</span></span></span>
+<span class="r-in"><span><span class="co"># second on tests its rung against the one below it.</span></span></span>
 <span class="r-in"><span><span class="va">mi</span> <span class="op">&lt;-</span> <span class="fu">measurement_invariance</span><span class="op">(</span><span class="va">holzinger_swineford</span>, <span class="va">hs_factors</span>,</span></span>
-<span class="r-in"><span>                             group <span class="op">=</span> <span class="st">"school"</span>,</span></span>
-<span class="r-in"><span>                             levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"configural"</span>, <span class="st">"metric"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                             group <span class="op">=</span> <span class="st">"school"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mi</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  level      chi_square df p_chi_square cfi   rmsea  delta_chi_square delta_df</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  configural 22.5       16 0.1276       0.992 0.052  &lt;NA&gt;             &lt;NA&gt;    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  metric     36.3       20 0.0140       0.979 0.0737 13.8             4       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  scalar     44.2       24 0.0072       0.974 0.0748 7.87             4       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  strict     54.3       30 0.0042       0.969 0.0734 10.1             6       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  p_value delta_cfi delta_rmsea</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.0078  -0.0127   0.0217     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0964  -0.00501  0.00112    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1195  -0.00534  -0.00139   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The fitted models travel with the table, so localizing a failed rung</span></span></span>
 <span class="r-in"><span><span class="co"># costs no refitting.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">mi</span>, <span class="st">"fits"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "configural" "metric"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "configural" "metric"     "scalar"     "strict"    </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The broom verbs: one row per rung of the ladder, and the model-level</span></span></span>
 <span class="r-in"><span><span class="co"># summary (estimator, test flavor, fit index flavor).</span></span></span>
 <span class="r-in"><span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">mi</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         term chi_square df p_chi_square       cfi      rmsea delta_chi_square</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 configural   22.50471 16   0.12762979 0.9915883 0.05197395               NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     metric   36.34593 20   0.01400184 0.9788619 0.07369221         13.84122</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   delta_df    p_value  delta_cfi delta_rmsea</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       NA         NA         NA          NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        4 0.00781944 -0.0127264  0.02171826</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 configural   22.50471 16  0.127629786 0.9915883 0.05197395               NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     metric   36.34593 20  0.014001841 0.9788619 0.07369221        13.841221</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     scalar   44.21741 24  0.007197934 0.9738554 0.07481503         7.871474</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     strict   54.34304 30  0.004209093 0.9685202 0.07342746        10.125635</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   delta_df    p_value    delta_cfi  delta_rmsea</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       NA         NA           NA           NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        4 0.00781944 -0.012726402  0.021718262</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        4 0.09640134 -0.005006486  0.001122817</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        6 0.11945997 -0.005335160 -0.001387562</span>
 <span class="r-in"><span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mi</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n_levels estimator ordered                                test fit_indices</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1        2        ML   FALSE standard chi square difference test    standard</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        4        ML   FALSE standard chi square difference test    standard</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Each of the calls below refits the ladder from the bottom, so they</span></span></span>
-<span class="r-in"><span><span class="co"># are shown here rather than run. Leaving levels = at its default</span></span></span>
-<span class="r-in"><span><span class="co"># fits the whole ladder, configural through metric, scalar, and</span></span></span>
-<span class="r-in"><span><span class="co"># strict:</span></span></span>
-<span class="r-in"><span><span class="co"># measurement_invariance(holzinger_swineford, hs_factors,</span></span></span>
-<span class="r-in"><span><span class="co">#                        group = "school")</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
 <span class="r-in"><span><span class="co"># Partial invariance frees one loading across the schools at every</span></span></span>
-<span class="r-in"><span><span class="co"># rung (Byrne, Shavelson, &amp; Muthén, 1989), so each constrained rung</span></span></span>
-<span class="r-in"><span><span class="co"># loses one degree of freedom relative to full invariance:</span></span></span>
-<span class="r-in"><span><span class="co"># measurement_invariance(holzinger_swineford, hs_factors,</span></span></span>
-<span class="r-in"><span><span class="co">#                        group = "school",</span></span></span>
-<span class="r-in"><span><span class="co">#                        group_partial = "verbal =~ t7_sentence")</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># rung (Byrne, Shavelson, &amp; Muthén, 1989), so the metric rung costs</span></span></span>
+<span class="r-in"><span><span class="co"># one degree of freedom fewer than it did above. Naming a leading</span></span></span>
+<span class="r-in"><span><span class="co"># subset of the rungs in levels = stops the ladder there, which keeps</span></span></span>
+<span class="r-in"><span><span class="co"># this and the next two examples quick; a reported analysis climbs</span></span></span>
+<span class="r-in"><span><span class="co"># the whole ladder.</span></span></span>
+<span class="r-in"><span><span class="fu">measurement_invariance</span><span class="op">(</span><span class="va">holzinger_swineford</span>, <span class="va">hs_factors</span>,</span></span>
+<span class="r-in"><span>                       group <span class="op">=</span> <span class="st">"school"</span>,</span></span>
+<span class="r-in"><span>                       group_partial <span class="op">=</span> <span class="st">"verbal =~ t7_sentence"</span>,</span></span>
+<span class="r-in"><span>                       levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"configural"</span>, <span class="st">"metric"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  level      chi_square df p_chi_square cfi   rmsea  delta_chi_square delta_df</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  configural 22.5       16 0.1276       0.992 0.052  &lt;NA&gt;             &lt;NA&gt;    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  metric     30.8       19 0.0426       0.985 0.0642 8.28             3       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  p_value delta_cfi delta_rmsea</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0405  -0.00683  0.0122     </span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># With the indicators coded as ordered categories, ordered = TRUE puts</span></span></span>
 <span class="r-in"><span><span class="co"># the thresholds rung first, because thresholds rather than intercepts</span></span></span>
 <span class="r-in"><span><span class="co"># carry the location information there, and makes the rung-to-rung</span></span></span>
-<span class="r-in"><span><span class="co"># tests the scaled difference tests:</span></span></span>
-<span class="r-in"><span><span class="co"># hs_ordered &lt;- holzinger_swineford</span></span></span>
-<span class="r-in"><span><span class="co"># for (item in unlist(hs_factors, use.names = FALSE)) {</span></span></span>
-<span class="r-in"><span><span class="co">#   hs_ordered[[item]] &lt;- as.integer(cut(</span></span></span>
-<span class="r-in"><span><span class="co">#     holzinger_swineford[[item]],</span></span></span>
-<span class="r-in"><span><span class="co">#     breaks = quantile(holzinger_swineford[[item]],</span></span></span>
-<span class="r-in"><span><span class="co">#                       c(0, .25, .5, .75, 1)),</span></span></span>
-<span class="r-in"><span><span class="co">#     include.lowest = TRUE))</span></span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
-<span class="r-in"><span><span class="co"># mi_ordered &lt;- measurement_invariance(hs_ordered, hs_factors,</span></span></span>
-<span class="r-in"><span><span class="co">#                                      group = "school",</span></span></span>
-<span class="r-in"><span><span class="co">#                                      ordered = TRUE)</span></span></span>
-<span class="r-in"><span><span class="co"># mi_ordered</span></span></span>
-<span class="r-in"><span><span class="co"># attr(mi_ordered, "test")</span></span></span>
-<span class="r-in"><span><span class="co">#</span></span></span>
+<span class="r-in"><span><span class="co"># tests the scaled difference tests; the "test" attribute names the</span></span></span>
+<span class="r-in"><span><span class="co"># test that was used. The ladder stops at the thresholds rung here;</span></span></span>
+<span class="r-in"><span><span class="co"># metric, scalar, and strict follow it.</span></span></span>
+<span class="r-in"><span><span class="va">hs_ordered</span> <span class="op">&lt;-</span> <span class="va">holzinger_swineford</span></span></span>
+<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">item</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">hs_factors</span>, use.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">hs_ordered</span><span class="op">[[</span><span class="va">item</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">holzinger_swineford</span><span class="op">[[</span><span class="va">item</span><span class="op">]</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">holzinger_swineford</span><span class="op">[[</span><span class="va">item</span><span class="op">]</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>                      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    include.lowest <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">mi_ordered</span> <span class="op">&lt;-</span> <span class="fu">measurement_invariance</span><span class="op">(</span><span class="va">hs_ordered</span>, <span class="va">hs_factors</span>,</span></span>
+<span class="r-in"><span>                                     group <span class="op">=</span> <span class="st">"school"</span>, ordered <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>                                     levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"configural"</span>,</span></span>
+<span class="r-in"><span>                                                <span class="st">"thresholds"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ordered items declared: switching to estimator = "WLSMV".</span>
+<span class="r-in"><span><span class="va">mi_ordered</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  level      chi_square df p_chi_square cfi  rmsea  delta_chi_square delta_df</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  configural 18         16 0.3232       0.98 0.0841 &lt;NA&gt;             &lt;NA&gt;    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  thresholds 27.2       22 0.2044       1    0.106  10.3             6       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  p_value delta_cfi delta_rmsea</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1114  0.0204    0.0223     </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">mi_ordered</span>, <span class="st">"test"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "scaled chi square difference test (method = \"satorra.2000\")"</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The measurement model can also be given as lavaan syntax, and</span></span></span>
 <span class="r-in"><span><span class="co"># missing = "fiml" fits the ladder by full information maximum</span></span></span>
-<span class="r-in"><span><span class="co"># likelihood when continuous items have incomplete cases:</span></span></span>
-<span class="r-in"><span><span class="co"># hs_missing &lt;- holzinger_swineford</span></span></span>
-<span class="r-in"><span><span class="co"># set.seed(113)</span></span></span>
-<span class="r-in"><span><span class="co"># hs_missing$t7_sentence[sample(nrow(hs_missing), 20)] &lt;- NA</span></span></span>
-<span class="r-in"><span><span class="co"># measurement_invariance(</span></span></span>
-<span class="r-in"><span><span class="co">#   hs_missing,</span></span></span>
-<span class="r-in"><span><span class="co">#   model = "verbal =~ t6_paragraph_comprehension + t7_sentence +</span></span></span>
-<span class="r-in"><span><span class="co">#            t9_word_meaning",</span></span></span>
-<span class="r-in"><span><span class="co">#   group = "school", missing = "fiml")</span></span></span>
+<span class="r-in"><span><span class="co"># likelihood when continuous items have incomplete cases; here twenty</span></span></span>
+<span class="r-in"><span><span class="co"># scores on one item are set to missing first. With three indicators</span></span></span>
+<span class="r-in"><span><span class="co"># the single factor is just identified in each group, so the</span></span></span>
+<span class="r-in"><span><span class="co"># configural row is saturated (zero degrees of freedom, exact fit)</span></span></span>
+<span class="r-in"><span><span class="co"># and the metric row carries the test.</span></span></span>
+<span class="r-in"><span><span class="va">hs_missing</span> <span class="op">&lt;-</span> <span class="va">holzinger_swineford</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hs_missing</span><span class="op">$</span><span class="va">t7_sentence</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">hs_missing</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
+<span class="r-in"><span><span class="fu">measurement_invariance</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">hs_missing</span>,</span></span>
+<span class="r-in"><span>  model <span class="op">=</span> <span class="st">"verbal =~ t6_paragraph_comprehension + t7_sentence +</span></span></span>
+<span class="r-in"><span><span class="st">           t9_word_meaning"</span>,</span></span>
+<span class="r-in"><span>  group <span class="op">=</span> <span class="st">"school"</span>, missing <span class="op">=</span> <span class="st">"fiml"</span>,</span></span>
+<span class="r-in"><span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"configural"</span>, <span class="st">"metric"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  level      chi_square df p_chi_square cfi   rmsea delta_chi_square delta_df</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  configural 5.15e-13   0  &lt;NA&gt;         1     0     &lt;NA&gt;             &lt;NA&gt;    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  metric     7.67       2  0.0216       0.987 0.137 7.67             2       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  p_value delta_cfi delta_rmsea</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0216  -0.0127   0.137      </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -19,7 +19,7 @@ model."><meta property="og:image" content="https://yelleknek.github.io/DMAR/logo
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,8 +71,7 @@ model.</p>
 <span>  N <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_rmsea_sensitivity_result.csv"</span>,</span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -113,13 +112,14 @@ population RMSEA is no larger than <code>width</code>.</p></dd>
 <dd><p>number of replications in the Monte Carlo simulation.</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>option to save simulation results. With <code>save = TRUE</code> the
-per-replication results are written to <code>filename</code>.</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>the name of the file that simulation results are saved to.</p></dd>
+<dd><p>an optional path for a comma separated file recording
+every converged replication (its index, the RMSEA estimate, the two
+confidence limits, and the interval width): nothing is written when
+<code>filename</code> is <code>NULL</code> (the default), a new file with a header
+row is created otherwise, an existing file at that path is appended to,
+and a throwaway run should point it at
+<code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -198,11 +198,11 @@ as <code>suc_rep</code>. Increase <code>G</code> if many replications fail to co
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># True data generating model: two correlated factors (r = 0.5), three</span></span></span>
-<span class="r-in"><span><span class="co"># standardized indicators each (loadings 0.7). Build the implied population</span></span></span>
-<span class="r-in"><span><span class="co"># covariance matrix Sigma = Lambda Phi Lambda' + Psi.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># True data generating model: two correlated factors, each measured by</span></span></span>
+<span class="r-in"><span><span class="co"># three standardized indicators. The factor correlation is 0.5 and every</span></span></span>
+<span class="r-in"><span><span class="co"># loading is 0.7. The implied population covariance matrix is assembled</span></span></span>
+<span class="r-in"><span><span class="co"># from the loading matrix, the factor correlation matrix, and the</span></span></span>
+<span class="r-in"><span><span class="co"># residual variances.</span></span></span>
 <span class="r-in"><span><span class="va">Lambda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Lambda</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0.7</span></span></span>
 <span class="r-in"><span><span class="va">Lambda</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">6</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0.7</span></span></span>
@@ -213,13 +213,37 @@ as <code>suc_rep</code>. Increase <code>G</code> if many replications fail to co
 <span class="r-in"><span><span class="co"># Proposed (misspecified) model: a single common factor.</span></span></span>
 <span class="r-in"><span><span class="va">proposed</span> <span class="op">&lt;-</span> <span class="st">"g =~ x1 + x2 + x3 + x4 + x5 + x6"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># The simulation itself is not run at example time: it fits the proposed</span></span></span>
-<span class="r-in"><span><span class="co"># model once at a very large N to recover the population RMSEA, then</span></span></span>
-<span class="r-in"><span><span class="co"># generates and fits a fresh sample on every replication. The G below is</span></span></span>
-<span class="r-in"><span><span class="co"># already far smaller than a study one would report; the default of 200,</span></span></span>
-<span class="r-in"><span><span class="co"># or more, is the realistic setting. The call is:</span></span></span>
-<span class="r-in"><span><span class="co"># ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,</span></span></span>
-<span class="r-in"><span><span class="co">#                           G = 25)</span></span></span>
+<span class="r-in"><span><span class="co"># The proposed model is fit once at a very large N to recover the</span></span></span>
+<span class="r-in"><span><span class="co"># population RMSEA, the sample size is planned so that the expected width</span></span></span>
+<span class="r-in"><span><span class="co"># of the 95 percent interval is 0.05, and a fresh sample of that size is</span></span></span>
+<span class="r-in"><span><span class="co"># drawn and fit on every replication. Notice that true_rmsea is about</span></span></span>
+<span class="r-in"><span><span class="co"># 0.20, since a single factor is a poor description of two-factor data,</span></span></span>
+<span class="r-in"><span><span class="co"># that the realized widths sit close to the target, and that</span></span></span>
+<span class="r-in"><span><span class="co"># pct_ci_less_w is near one half, which is what planning for the expected</span></span></span>
+<span class="r-in"><span><span class="co"># width delivers. G = 20 keeps the example quick; a reported sensitivity</span></span></span>
+<span class="r-in"><span><span class="co"># study deserves the default G = 200 or more.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ss_aipe_rmsea_sensitivity</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.05</span>, model <span class="op">=</span> <span class="va">proposed</span>, Sigma <span class="op">=</span> <span class="va">Sigma</span>,</span></span>
+<span class="r-in"><span>                          G <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term               value   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_rmsea         0.197   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  median_rmsea       0.199   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_rmsea           0.0176  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  mean_ci_width      0.05    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  median_ci_width    0.05    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  sd_ci_width        9.53e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pct_ci_less_w      0.5     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pct_ci_miss_low    0       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  pct_ci_miss_high   0.1     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_type_I_error 0.1     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  suc_rep            20      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  total_N            695     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  df                 9       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  true_rmsea         0.204   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  width              0.05    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  conf_level         0.95    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

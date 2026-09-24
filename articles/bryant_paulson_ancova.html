@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Simultaneous Comparison of Adjusted Means in ANCOVA With DMAR</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">2026-08-17</h4>
+            <h4 data-toc-skip class="date">2026-09-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/bryant_paulson_ancova.Rmd" class="external-link"><code>vignettes/bryant_paulson_ancova.Rmd</code></a></small>
       <div class="d-none name"><code>bryant_paulson_ancova.Rmd</code></div>
@@ -79,7 +79,7 @@
 covariate-adjusted means in the analysis of covariance (ANCOVA): fit the
 model, read off the adjusted means and the error term, and then place
 <strong>simultaneous</strong> confidence intervals on the differences
-with <code><a href="../reference/ci_c_ancova_bp.html">ci_c_ancova_bp()</a></code>, which uses the Bryant–Paulson
+with <code><a href="../reference/ci_c_ancova_bp.html">ci_c_ancova_bp()</a></code>, which uses the Bryant-Paulson
 generalized studentized range (<code><a href="../reference/bryant_paulson.html">qbryant_paulson()</a></code>). The
 simulation study maintained alongside the package shows
 <strong>why</strong> the ordinary Tukey distribution is the wrong
@@ -140,7 +140,7 @@ covariate grand mean, averaged over blocks.</p>
 <span><span class="co">#&gt; 3.595 3.619 4.102 4.515 4.618 4.876</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="simultaneous-bryantpaulson-intervals">Simultaneous Bryant–Paulson Intervals<a class="anchor" aria-label="anchor" href="#simultaneous-bryantpaulson-intervals"></a>
+<h3 id="simultaneous-bryant-paulson-intervals">Simultaneous Bryant-Paulson Intervals<a class="anchor" aria-label="anchor" href="#simultaneous-bryant-paulson-intervals"></a>
 </h3>
 <p>With six panels there are 15 pairwise comparisons. We want all of
 them to hold at a <em>familywise</em> 95% level. Because the design has
@@ -514,7 +514,7 @@ the default <code>df</code> is correct, so it need not be supplied.</p>
 <p>Confidence level: 95%</p>
 <p>The intervals that exclude zero identify the groups whose adjusted
 means differ, with familywise 95% protection and, through the
-Bryant–Paulson critical value, an accounting for the extra sampling
+Bryant-Paulson critical value, an accounting for the extra sampling
 variability the random covariate introduces.</p>
 </div>
 <div class="section level2">

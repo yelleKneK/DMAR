@@ -35,7 +35,7 @@ ss_aipe_composite_sem."><meta property="og:image" content="https://yelleknek.git
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -163,7 +163,8 @@ confidence intervals. <em>Psychological Methods, 16</em>(2), 127–148.
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Population model with all parameters fixed to their values: two factors,</span></span></span>
-<span class="r-in"><span><span class="co"># three indicators each, and a structural path f2 ~ f1 of 0.5.</span></span></span>
+<span class="r-in"><span><span class="co"># three indicators each, and a structural path of 0.5 from the first</span></span></span>
+<span class="r-in"><span><span class="co"># factor to the second.</span></span></span>
 <span class="r-in"><span><span class="va">pop_model</span> <span class="op">&lt;-</span> <span class="st">"</span></span></span>
 <span class="r-in"><span><span class="st">  f1 =~ 1*y1 + 0.8*y2 + 0.8*y3</span></span></span>
 <span class="r-in"><span><span class="st">  f2 =~ 1*y4 + 0.8*y5 + 0.8*y6</span></span></span>
@@ -184,7 +185,8 @@ confidence intervals. <em>Psychological Methods, 16</em>(2), 127–148.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A population model with a mean structure: a linear latent growth curve</span></span></span>
 <span class="r-in"><span><span class="co"># over four waves. The intercepts and latent means are fixed too, and</span></span></span>
-<span class="r-in"><span><span class="co"># mu_theta carries the model implied means (5.0, 5.3, 5.6, 5.9).</span></span></span>
+<span class="r-in"><span><span class="co"># mu_theta carries the model implied wave means, which start at 5.0 and</span></span></span>
+<span class="r-in"><span><span class="co"># rise by 0.3 per wave.</span></span></span>
 <span class="r-in"><span><span class="va">pop_lgm</span> <span class="op">&lt;-</span> <span class="st">"</span></span></span>
 <span class="r-in"><span><span class="st">  i =~ 1*t1 + 1*t2 + 1*t3 + 1*t4</span></span></span>
 <span class="r-in"><span><span class="st">  s =~ 0*t1 + 1*t2 + 2*t3 + 3*t4</span></span></span>

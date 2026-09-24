@@ -15,7 +15,7 @@ over the chi distribution of the sample standard deviation."><meta property="og:
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -183,15 +183,17 @@ the published value of \(0.8029678\) (Phillips, 1990, Table 1, 5th row,
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Phillips (1990) Table 1, 5th row, 5th column. Expected: 0.8029678.</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Table 1 of Phillips, 1990, fifth row and fifth column, where the</span></span></span>
+<span class="r-in"><span><span class="co"># published power is 0.8029678.</span></span></span>
 <span class="r-in"><span><span class="fu">power_equivalence_md</span><span class="op">(</span>alpha_level <span class="op">=</span> <span class="fl">.05</span>, logscale <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                     ltheta1 <span class="op">=</span> <span class="op">-</span><span class="fl">.2</span>, ltheta2 <span class="op">=</span> <span class="fl">.2</span>, ldiff <span class="op">=</span> <span class="fl">.05</span>,</span></span>
 <span class="r-in"><span>                     sigma <span class="op">=</span> <span class="fl">.20</span>, n <span class="op">=</span> <span class="fl">24</span>, nu <span class="op">=</span> <span class="fl">22</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term  value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  power 0.803</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Diletti (1991) Table 1, on the log scale (ratio of test to reference).</span></span></span>
-<span class="r-in"><span><span class="co"># Expected: 0.7922796.</span></span></span>
+<span class="r-in"><span><span class="co"># Table 1 of Diletti et al., 1991, on the log scale, so the limits and</span></span></span>
+<span class="r-in"><span><span class="co"># the true difference are ratios of test to reference. The published</span></span></span>
+<span class="r-in"><span><span class="co"># power is 0.7922796.</span></span></span>
 <span class="r-in"><span><span class="fu">power_equivalence_md</span><span class="op">(</span>alpha_level <span class="op">=</span> <span class="fl">.05</span>, logscale <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>                     ltheta1 <span class="op">=</span> <span class="fl">.8</span>, ltheta2 <span class="op">=</span> <span class="fl">1.25</span>, ldiff <span class="op">=</span> <span class="fl">1.05</span>,</span></span>
 <span class="r-in"><span>                     sigma <span class="op">=</span> <span class="fl">.20</span>, n <span class="op">=</span> <span class="fl">18</span>, nu <span class="op">=</span> <span class="fl">16</span><span class="op">)</span></span></span>

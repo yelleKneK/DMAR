@@ -85,7 +85,7 @@ each iteration of the search.
 
 **Tolerance behavior at small *N*.** For small candidate *N* the
 noncentral *F* lower limit is often clamped to zero (see
-[`?conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)).
+[`?ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)).
 The search ignores these clamps in the iteration and reports the final
 clamp count, if any, as an informational message; this matches the
 convention in
@@ -173,7 +173,7 @@ Ken Kelley <kkelley@nd.edu>
 ss_aipe_omega_squared(population_omega_squared = 0.10,
                       df_effect = 2,
                       width = 0.10)
-#> During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 10 intermediate evaluations.
+#> During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 10 intermediate evaluations.
 #>  term                     value 
 #>  necessary_N              473   
 #>  expected_width           0.0999
@@ -189,7 +189,7 @@ ss_aipe_omega_squared(population_omega_squared = 0.10,
                       df_effect = 2,
                       width = 0.10,
                       assurance = 0.80)
-#> During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 10 intermediate evaluations.
+#> During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 10 intermediate evaluations.
 #>  term                     value 
 #>  necessary_N              499   
 #>  expected_width           0.0973

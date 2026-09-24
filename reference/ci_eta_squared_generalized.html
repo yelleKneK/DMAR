@@ -19,7 +19,7 @@ used in substantive inference.'><meta property="og:image" content="https://yelle
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -165,7 +165,7 @@ approximations and are exposed for exploration rather than as defaults.</p>
 <p><strong><code>method = "parametric"</code>.</strong> The function first obtains a
 confidence interval for the population noncentrality parameter
 \(\lambda\) of the focal effect's <em>F</em>-test via
-<code><a href="conf_limits_ncf.html">conf_limits_ncf</a></code>. The NCP bounds are mapped through the
+<code><a href="ci_nc_F.html">ci_nc_F</a></code>. The NCP bounds are mapped through the
 partial-\(\eta^2\) transformation
 \(\eta^2_{p,\text{bound}} = \lambda_{\text{bound}}/(\lambda_{\text{bound}} + N)\)
 (matching the convention used by <code><a href="ci_pvaf.html">ci_pvaf</a></code> and
@@ -309,11 +309,19 @@ Bakeman (2005) denominator.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The third option is a residual bootstrap, which refits the model once per</span></span></span>
-<span class="r-in"><span><span class="co"># replication. It is not run here: B is required to be at least 1000, and</span></span></span>
-<span class="r-in"><span><span class="co"># even that is slower than an example should be, while a reported interval</span></span></span>
-<span class="r-in"><span><span class="co"># deserves B = 10000 or more. The call is</span></span></span>
-<span class="r-in"><span><span class="co">#   ci_eta_squared_generalized(fit, observed = "grade",</span></span></span>
-<span class="r-in"><span><span class="co">#                              method = "bootstrap", B = 10000, seed = 113)</span></span></span>
+<span class="r-in"><span><span class="co"># replication. B = 1000 is the smallest count the function accepts and is</span></span></span>
+<span class="r-in"><span><span class="co"># what keeps this page quick; a reported interval deserves B = 10000 or</span></span></span>
+<span class="r-in"><span><span class="co"># more. The seed makes the interval reproducible and leaves the random</span></span></span>
+<span class="r-in"><span><span class="co"># number stream of the surrounding session as it was.</span></span></span>
+<span class="r-in"><span><span class="fu">ci_eta_squared_generalized</span><span class="op">(</span><span class="va">fit</span>, observed <span class="op">=</span> <span class="st">"grade"</span>,</span></span>
+<span class="r-in"><span>                           method <span class="op">=</span> <span class="st">"bootstrap"</span>, B <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">113</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Bootstrap CI resamples the fitted model's residuals nonparametrically (B = 1000). Coverage has not been broadly validated for generalized eta squared; results should be treated as preliminary.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  effect          eta_squared_generalized lower_limit upper_limit method   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  treatment       0.0202                  0.00123     0.063       bootstrap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  grade           0.044                   0.0193      0.111       bootstrap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  treatment:grade 0.0187                  0.00714     0.0756      bootstrap</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Confidence level: 95%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Within-subjects ANOVA. The parametric CI uses each effect's own stratum.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">113</span><span class="op">)</span></span></span>

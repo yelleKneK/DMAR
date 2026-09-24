@@ -19,7 +19,7 @@ Delaney, and Kelley (2027, Section 3.11 on sample size planning)."><meta propert
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,8 +74,7 @@ Delaney, and Kelley (2027, Section 3.11 on sample size planning).</p>
 <span>  conf_level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  G <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  print_iter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  save <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  filename <span class="op">=</span> <span class="st">"ss_aipe_cv_sensitivity_result.csv"</span></span>
+<span>  filename <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -129,14 +128,12 @@ stable Type I error estimates.</p></dd>
 replication (helpful for long runs); default <code>FALSE</code>.</p></dd>
 
 
-<dt id="arg-save">save<a class="anchor" aria-label="anchor" href="#arg-save"></a></dt>
-<dd><p>Logical. If <code>TRUE</code> the per-replication results are appended to a CSV file at
-<code>filename</code>; default <code>FALSE</code>.</p></dd>
-
-
 <dt id="arg-filename">filename<a class="anchor" aria-label="anchor" href="#arg-filename"></a></dt>
-<dd><p>Path used when <code>save = TRUE</code>; default
-<code>"ss_aipe_cv_sensitivity_result.csv"</code> in the current working directory.</p></dd>
+<dd><p>An optional path for a comma separated file recording every replication (the two
+confidence limits, the realized coefficient of variation, a coverage indicator, and the interval
+width): nothing is written when <code>filename</code> is <code>NULL</code> (the default), a new file with a
+header row is created otherwise, an existing file at that path is appended to, and a throwaway
+run should point it at <code>tempfile(fileext = ".csv")</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -217,13 +214,7 @@ parameter estimation approach. <em>Behavior Research Methods, 39</em>(4), 755–
 <span class="r-in"><span>  G                <span class="op">=</span> <span class="fl">200</span>,</span></span>
 <span class="r-in"><span>  print_iter       <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The observed noncentrality parameter exceeds 37.62 in magnitude, which is the limit at which R's pt()/qt() can return accurate noncentral t probabilities. Results may be inaccurate; use caution.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The noncentrality parameter exceeded 37.62 in magnitude (the limit of R's noncentral t accuracy) in 7 of the 200 replications, so those interval limits may be inaccurate; see ?ci_nc_t.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  term               value </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  mean_cv            0.247 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  median_cv          0.247 </span>

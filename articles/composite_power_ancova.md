@@ -120,7 +120,10 @@ ggplot(grid_all, aes(Condition, Agent, fill = type)) +
        x = "Condition", y = "Agent")
 ```
 
-![](composite_power_ancova_files/figure-html/design-figure-1.png)
+![plot of chunk
+design-figure](composite_power_ancova-fig-design-figure-1.png)
+
+plot of chunk design-figure
 
 ### Viewing the Population
 
@@ -168,7 +171,10 @@ p_marginals <- ggplot(marg, aes(label, value, fill = kind)) +
 if (has_patchwork) p_interaction + p_marginals else p_interaction
 ```
 
-![](composite_power_ancova_files/figure-html/population-figure-1.png)
+![plot of chunk
+population-figure](composite_power_ancova-fig-population-figure-1.png)
+
+plot of chunk population-figure
 
 The substantive pattern is visible before any arithmetic. Under the
 Control protocol, humans (6.0) outperform machines (4.0). The Treatment
@@ -248,7 +254,10 @@ ggplot(pop, aes(Condition, mu, color = Agent, group = Agent)) +
   coord_cartesian(xlim = c(1, 2.5), ylim = c(2.5, 6.5))
 ```
 
-![](composite_power_ancova_files/figure-html/decomposition-figure-1.png)
+![plot of chunk
+decomposition-figure](composite_power_ancova-fig-decomposition-figure-1.png)
+
+plot of chunk decomposition-figure
 
 ### Contrast Weights
 
@@ -436,7 +445,10 @@ ggplot(den, aes(t)) +
        x = "t statistic", y = "Density")
 ```
 
-![](composite_power_ancova_files/figure-html/noncentral-figure-1.png)
+![plot of chunk
+noncentral-figure](composite_power_ancova-fig-noncentral-figure-1.png)
+
+plot of chunk noncentral-figure
 
 ### The Shared Design
 
@@ -501,7 +513,10 @@ ggplot(curve_df, aes(n, power, color = effect)) +
   ylim(0, 1)
 ```
 
-![](composite_power_ancova_files/figure-html/power-curves-1.png)
+![plot of chunk
+power-curves](composite_power_ancova-fig-power-curves-1.png)
+
+plot of chunk power-curves
 
 ## Composite Power: Detecting Every Effect in One Study
 
@@ -625,7 +640,10 @@ ggplot(bar_df, aes(quantity, power, fill = kind)) +
   theme(axis.text.x = element_text(size = 8.5))
 ```
 
-![](composite_power_ancova_files/figure-html/composite-bar-1.png)
+![plot of chunk
+composite-bar](composite_power_ancova-fig-composite-bar-1.png)
+
+plot of chunk composite-bar
 
 ### Sizing the Study for Composite Power
 
@@ -664,7 +682,10 @@ ggplot(comp_plot, aes(n, power, color = curve)) +
   theme(legend.text = element_text(size = 9))
 ```
 
-![](composite_power_ancova_files/figure-html/composite-curve-1.png)
+![plot of chunk
+composite-curve](composite_power_ancova-fig-composite-curve-1.png)
+
+plot of chunk composite-curve
 
 The gray curve is what 25 replications produce: it wanders around the
 converged curve and is not monotone, even though composite power must
@@ -825,7 +846,10 @@ ggplot(data.frame(rho = rho_grid, power = cov_pow), aes(rho, power)) +
        x = "Covariate correlation with the outcome", y = "Interaction power")
 ```
 
-![](composite_power_ancova_files/figure-html/covariate-curve-1.png)
+![plot of chunk
+covariate-curve](composite_power_ancova-fig-covariate-curve-1.png)
+
+plot of chunk covariate-curve
 
 ## The Moderator as a Three-Way Interaction
 
@@ -899,7 +923,10 @@ ggplot(grid3, aes(Condition, mu, color = Agent, group = Agent)) +
   theme(panel.spacing = unit(0.9, "lines"))
 ```
 
-![](composite_power_ancova_files/figure-html/threeway-figure-1.png)
+![plot of chunk
+threeway-figure](composite_power_ancova-fig-threeway-figure-1.png)
+
+plot of chunk threeway-figure
 
 ### Effect Sizes for the Moderated Model
 
@@ -976,7 +1003,10 @@ ggplot(data.frame(gamma = g_grid, N = N_grid), aes(gamma, N)) +
        y = "Total N required")
 ```
 
-![](composite_power_ancova_files/figure-html/gamma-curve-1.png)
+![plot of chunk
+gamma-curve](composite_power_ancova-fig-gamma-curve-1.png)
+
+plot of chunk gamma-curve
 
 ### Confirming the Plan by Simulation
 
@@ -1053,7 +1083,10 @@ ggplot(tw_plot, aes(N, power, color = reps)) +
   ylim(0.72, 0.90)
 ```
 
-![](composite_power_ancova_files/figure-html/threeway-mc-curve-1.png)
+![plot of chunk
+threeway-mc-curve](composite_power_ancova-fig-threeway-mc-curve-1.png)
+
+plot of chunk threeway-mc-curve
 
 Power of $`.80`$ is reached near $`N =`$ 420, above the fixed-predictor
 value of 395. A design required to detect both the two-way interaction
@@ -1083,7 +1116,10 @@ ggplot(ladder, aes(N, plan, fill = N)) +
   xlim(0, max(ladder$N) * 1.18)
 ```
 
-![](composite_power_ancova_files/figure-html/final-ladder-1.png)
+![plot of chunk
+final-ladder](composite_power_ancova-fig-final-ladder-1.png)
+
+plot of chunk final-ladder
 
 | Planning objective | Function | Method | Total $`N`$ |
 |----|----|----|:--:|

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Moving From MBESS to DMAR: A Migration Guide and a Tour of the New Methods</h1>
                         <h4 data-toc-skip class="author">Ken Kelley</h4>
             
-            <h4 data-toc-skip class="date">August 2026</h4>
+            <h4 data-toc-skip class="date">September 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/vignettes/mbess_to_dmar.Rmd" class="external-link"><code>vignettes/mbess_to_dmar.Rmd</code></a></small>
       <div class="d-none name"><code>mbess_to_dmar.Rmd</code></div>
@@ -216,18 +216,18 @@ inversion for RMSEA.</td>
 </tr>
 <tr class="odd">
 <td><code>MBESS::conf.limits.nct(...)</code></td>
-<td><code>DMAR::conf_limits_nct(...)</code></td>
+<td><code>DMAR::ci_nc_t(...)</code></td>
 <td>Noncentral <em>t</em>; <code>t.value -&gt; t_value</code>.</td>
 </tr>
 <tr class="even">
 <td><code>MBESS::conf.limits.ncf(...)</code></td>
-<td><code>DMAR::conf_limits_ncf(...)</code></td>
+<td><code>DMAR::ci_nc_F(...)</code></td>
 <td>Noncentral
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>F</mi><annotation encoding="application/x-tex">F</annotation></semantics></math>.</td>
 </tr>
 <tr class="odd">
 <td><code>MBESS::conf.limits.nc.chisq(...)</code></td>
-<td><code>DMAR::conf_limits_nc_chisq(...)</code></td>
+<td><code>DMAR::ci_nc_chisq(...)</code></td>
 <td>Noncentral
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>.</td>
 </tr>
@@ -434,8 +434,8 @@ distribution.</li>
 <code>data.frame</code> schema; broom-style S3 methods for many
 families; <code>set.seed(113)</code> as the package-wide reproducibility
 seed for examples and tests; <code>seed = NULL</code> as the default for
-every bootstrap and Monte Carlo function, with explicit save/restore of
-<code>.Random.seed</code> when the user supplies a seed.</li>
+every bootstrap and Monte Carlo function, with the caller’s generator
+state restored when a function given a seed returns.</li>
 </ul>
 </div>
 </div>

@@ -84,7 +84,7 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Print the current date and time.
 now()
-#> August 17, 2026 (12:51 PM)
+#> September 24, 2026 (7:55 PM)
 
 # Time how long a piece of work takes. The pattern is the same
 # whether the work is a bootstrap, a simulation, or a numeric
@@ -98,27 +98,28 @@ d <- descriptives(holzinger_swineford[, c("t1_visual_perception",
                                           "t2_cubes", "t4_lozenges")])
 end <- now()
 end - start
-#> Time difference of 0.003771305 secs
+#> Time difference of 0.002737522 secs
 
-# A deliberate wait shows the same pattern on a longer interval.
-# Not run here because the only way to demonstrate a wait is to
-# make the example wait; the calls are:
-# start <- now()
-# Sys.sleep(0.5)
-# end <- now()
-# end - start          # elapsed time, here about 0.5 seconds
+# A deliberate wait shows the same pattern on a longer interval. The
+# pause is a fifth of a second, long enough to register in the
+# difference and short enough not to slow the help page.
+start <- now()
+Sys.sleep(0.2)
+end <- now()
+end - start
+#> Time difference of 0.2015111 secs
 
 # Date only.
 now(time = FALSE)
-#> August 17, 2026
+#> September 24, 2026
 
 # Tidy data.frame form, when the components are needed
-# individually for programmatic processing (e.g., embedding in a
-# report's metadata block).
+# individually for programmatic processing, for example when the
+# stamp is embedded in a report's metadata block.
 now(tidy = TRUE)
 #>     term value
-#> 1    day    17
+#> 1    day    24
 #> 2   year  2026
-#> 3   hour    12
-#> 4 minute    51
+#> 3   hour     7
+#> 4 minute    55
 ```

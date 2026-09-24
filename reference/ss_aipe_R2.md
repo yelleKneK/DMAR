@@ -63,8 +63,7 @@ ss_aipe_R2(
 
 - tol:
 
-  The tolerance of the iterative function `conf_limits_nct` for
-  convergence
+  The tolerance of the iterative function `ci_nc_t` for convergence
 
 - ...:
 
@@ -99,11 +98,13 @@ evaluates with an internal Monte Carlo simulation (i.e., via
 "brute-force" methods) the exact sample size given the goals specified.
 When `verify_ss=TRUE`, the default number of iterations is 10,000 but
 this can be changed by specifying G=5000 (or some other value; 10000 is
-the recommended) When `verify_ss=TRUE` is specified, an internal
+the recommended). When `verify_ss=TRUE` is specified, an internal
 function `verify_ss_aipe_r2` calls upon the `ss_aipe_R2_sensitivity`
-function for purposes of the internal Monte Carlo simulation study. See
-the `verify_ss_aipe_r2` function for arguments that can be passed from
-`ss_aipe_R2` to `verify_ss_aipe_r2`.
+function for purposes of the internal Monte Carlo simulation study. Two
+of its arguments pass through `...`: `g` (default 500), the number of
+replications used for each candidate *N* in the coarse search that
+brackets the answer, and `G` (default 10000), the number used in the
+final pass that confirms the sample size near that bracket.
 
 ## Note
 
@@ -149,7 +150,7 @@ Instruments, & Computers, 24*(4), 581–582.
 ## See also
 
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
-[`conf_limits_nct`](https://yelleknek.github.io/DMAR/reference/conf_limits_nct.md),
+[`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md),
 [`ss_aipe_R2_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_R2_sensitivity.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
@@ -168,36 +169,49 @@ Ken Kelley <kkelley@nd.edu>
 #    Sample size sufficient for the expected CI width on rho^2 to be .10.
 ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
            which_width = "Full", p = 5, random_predictors = TRUE)
-#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in conf_limits_ncf() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.
 #>  term        value
 #>  necessary_N 773  
 #> 
 #> Confidence level: 95%
 
 # 2. The same target under fixed predictors (planned dosing levels,
-#    factorial covariates, and the like) needs a smaller N, and adding an
-#    assurance of .85, so that the realized width is no larger than the
-#    target in 85 percent of replications rather than only on average,
-#    needs a larger one. Each is another pass of the same iterative search
-#    over N, so the two calls are shown here rather than run:
-#
-#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-#               which_width = "Full", p = 5, random_predictors = FALSE)
-#
-#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-#               which_width = "Full", p = 5, assurance = .85,
-#               random_predictors = TRUE)
+#    factorial covariates, and the like) needs a smaller N, since fixed
+#    predictors contribute no sampling variability of their own.
+ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+           which_width = "Full", p = 5, random_predictors = FALSE)
+#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.
+#>  term        value
+#>  necessary_N 584  
+#> 
+#> Confidence level: 95%
 
-# 3. verify_ss = TRUE follows the closed form approximation with an a
+# 3. An assurance of .85, so that the realized width is no larger than the
+#    target in 85 percent of replications rather than only on average,
+#    needs a larger N than the expected width plan in (1).
+ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+           which_width = "Full", p = 5, assurance = .85,
+           random_predictors = TRUE)
+#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.
+#>  term        value
+#>  necessary_N 815  
+#> 
+#> Confidence level: 95%
+
+# 4. verify_ss = TRUE follows the closed form approximation with an a
 #    priori Monte Carlo simulation of the realized width, starting from
 #    the closed form answer and returning the sample size the simulation
-#    settles on, which is what a plan meant to be defended deserves. G is
-#    the number of replications in that simulation; 10000 is the default
-#    and the recommendation. The call runs for several minutes, so it too
-#    is shown rather than run:
-#
-#    set.seed(113)
-#    ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
-#               which_width = "Full", p = 5, random_predictors = TRUE,
-#               verify_ss = TRUE, G = 10000)
+#    settles on, which is what a plan meant to be defended deserves. The
+#    coarse search runs g replications per candidate N and the final pass
+#    runs G; the small counts here keep the example quick, and a reported
+#    plan deserves the defaults of g = 500 and G = 10000.
+set.seed(113)
+ss_aipe_R2(population_R2 = .50, conf_level = .95, width = .10,
+           which_width = "Full", p = 5, random_predictors = TRUE,
+           verify_ss = TRUE, g = 10, G = 30)
+#> Warning: During the iterative sample size search, the noncentral F lower-limit clamp in ci_nc_F() fired in 6 intermediate evaluations. The returned sample size accounts for this; see ?ci_nc_F for the meaning of the clamp.
+#>  term        value
+#>  necessary_N 766  
+#> 
+#> Confidence level: 95%
 ```

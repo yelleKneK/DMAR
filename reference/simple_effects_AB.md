@@ -145,8 +145,8 @@ F}{df\_{\text{effect}}\\ F + df\_{\text{error}}},\$\$ computed from the
 error term was chosen). The confidence interval is built by Steiger's
 (2004) transformation principle: a CI for the noncentrality parameter
 \\\lambda\\ of the *F* distribution is obtained via
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
-and then mapped through \\\eta^2_p = \lambda / (\lambda +
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) and
+then mapped through \\\eta^2_p = \lambda / (\lambda +
 N\_{\text{ref}})\\, with \\N\_{\text{ref}}\\ taken to be the total study
 *N* for the pooled error term (treating the simple effect as a contrast
 within the full factorial design) and the level-conditional sample size
@@ -204,8 +204,8 @@ for within-level pairwise or custom contrasts,
 and
 [`ci_eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md)
 for the omnibus effect size counterparts,
-[`conf_limits_ncf`](https://yelleknek.github.io/DMAR/reference/conf_limits_ncf.md)
-for the noncentrality machinery,
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) for
+the noncentrality machinery,
 [`ss_power_factorial_anova`](https://yelleknek.github.io/DMAR/reference/ss_power_factorial_anova.md)
 for power calculations on the omnibus factorial effects.
 
@@ -252,7 +252,7 @@ fit <- aov(iq_gain ~ treatment * grade, data = pyg)
 # F is 0.004, so the lower limit on partial eta squared is clamped to
 # 0 and the function notes the clamp in a warning.
 simple_effects_AB(fit)
-#> Warning: The conf_limits_ncf() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The ci_nc_F() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
 #>  effect                      focal_factor conditioning_factor
 #>  treatment | grade = 1       treatment    grade              
 #>  treatment | grade = 2       treatment    grade              
@@ -293,7 +293,7 @@ simple_effects_AB(fit, which = "B_at_A", adjust = "holm")
 # level. The Welch denominator df fall well below the pooled 157, so
 # more of the lower limits are clamped to 0.
 simple_effects_AB(fit, error_term = "welch")
-#> Warning: The conf_limits_ncf() lower-limit clamp fired in 4 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The ci_nc_F() lower-limit clamp fired in 4 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
 #>  effect                      focal_factor conditioning_factor
 #>  treatment | grade = 1       treatment    grade              
 #>  treatment | grade = 2       treatment    grade              
@@ -317,7 +317,7 @@ simple_effects_AB(fit, error_term = "welch")
 
 # Bonferroni across the full a + b = 5-test family.
 simple_effects_AB(fit, adjust = "bonferroni")
-#> Warning: The conf_limits_ncf() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?conf_limits_ncf for the meaning of the clamp.
+#> Warning: The ci_nc_F() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
 #>  effect                      focal_factor conditioning_factor
 #>  treatment | grade = 1       treatment    grade              
 #>  treatment | grade = 2       treatment    grade              

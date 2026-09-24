@@ -51,7 +51,7 @@ reference implementation in lavaan reports. Writing \\\hat\lambda =
 \chi^2 - df\\ for the estimated noncentrality, this is \\(\hat\lambda +
 df + 2q)/N\\; the confidence interval replaces \\\hat\lambda\\ by the
 lower and upper noncentrality limits from
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md),
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md),
 the same inversion used for the RMSEA interval (see
 [`ci_rmsea`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md)).
 ECVI differs from the AIC only by the constant factor \\N\\, so the two
@@ -68,7 +68,7 @@ indices for covariance structures. *Multivariate Behavioral Research,
 ## See also
 
 [`ci_rmsea`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
-[`conf_limits_nc_chisq`](https://yelleknek.github.io/DMAR/reference/conf_limits_nc_chisq.md).
+[`ci_nc_chisq`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md).
 
 Other multivariate and latent variable methods:
 [`average_variance_extracted()`](https://yelleknek.github.io/DMAR/reference/average_variance_extracted.md),
