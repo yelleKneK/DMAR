@@ -11,11 +11,9 @@ the certified one by design). The farm's first results (2026-09-22) are
 OK on every flavor, with total check times of 399 to 403 s on the Linux
 flavors and 632 to 681 s on the Intel macOS flavors; `tools/cran_status.R`
 carries those values and reports any drift. GitHub carries this release
-as tag `v1.0.0.0` with Version 1.0.0.0, which R orders as the same
-version as CRAN's 1.0.0: the same code, with the fourth component zero
-at a release; the commit whose tree matches the CRAN tarball exactly is
-bcc0624 (2026-09-07), and the version, README, and NEWS wording were
-brought up to date after publication. The next submission starts a new
+as tag `v1.0.0` at version 1.0.0; the commit whose tree matches the
+CRAN tarball exactly is bcc0624 (2026-09-07), and the README and NEWS
+wording were brought up to date after publication. The next submission starts a new
 letter; this one stays as the record of the four rounds.
 
 ## Response to the CRAN review of 2026-09-04
