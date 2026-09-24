@@ -37,6 +37,11 @@ install.packages("DMAR")
 remotes::install_github("yelleKneK/DMAR")
 ```
 
+The version on GitHub, 1.0.0.0, is the release CRAN lists as 1.0.0: the
+same code, with a fourth version component that is zero at a release and
+counts the development builds that follow it. The release is tagged
+`v1.0.0.0` on GitHub.
+
 R \>= 4.0.0 is required. Most estimation, inference, and planning
 functions return a tidy `data.frame(term, value)` that composes
 naturally with `dplyr` / `ggplot2` pipelines and with `broom::tidy()` /
