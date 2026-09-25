@@ -211,14 +211,14 @@ ss_power_R2_sensitivity(true_R2 = 0.30, estimated_R2 = 0.30,
                         G = 200, print_iter = FALSE)
 #>  term            value
 #>  total_N         36   
-#>  empirical_power 0.77 
+#>  empirical_power 0.795
 #>  analytic_power  0.802
-#>  mean_R2         0.396
-#>  median_R2       0.386
-#>  sd_R2           0.122
-#>  mean_F          4.41 
-#>  median_F        3.78 
-#>  sd_F            2.51 
+#>  mean_R2         0.4  
+#>  median_R2       0.397
+#>  sd_R2           0.118
+#>  mean_F          4.43 
+#>  median_F        3.95 
+#>  sd_F            2.25 
 #>  F_crit          2.53 
 #>  p               5    
 #>  true_R2         0.3  

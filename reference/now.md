@@ -84,7 +84,7 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Print the current date and time.
 now()
-#> September 25, 2026 (11:36 AM)
+#> September 25, 2026 (11:57 AM)
 
 # Time how long a piece of work takes. The pattern is the same
 # whether the work is a bootstrap, a simulation, or a numeric
@@ -98,7 +98,7 @@ d <- descriptives(holzinger_swineford[, c("t1_visual_perception",
                                           "t2_cubes", "t4_lozenges")])
 end <- now()
 end - start
-#> Time difference of 0.003778696 secs
+#> Time difference of 0.002445221 secs
 
 # A deliberate wait shows the same pattern on a longer interval. The
 # pause is a fifth of a second, long enough to register in the
@@ -107,7 +107,7 @@ start <- now()
 Sys.sleep(0.2)
 end <- now()
 end - start
-#> Time difference of 0.2014351 secs
+#> Time difference of 0.2010245 secs
 
 # Date only.
 now(time = FALSE)
@@ -121,5 +121,5 @@ now(tidy = TRUE)
 #> 1    day    25
 #> 2   year  2026
 #> 3   hour    11
-#> 4 minute    36
+#> 4 minute    57
 ```

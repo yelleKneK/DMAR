@@ -177,16 +177,16 @@ set.seed(113)
 ss_aipe_rmsea_sensitivity(width = 0.05, model = proposed, Sigma = Sigma,
                           G = 20)
 #>  term               value   
-#>  mean_rmsea         0.198   
-#>  median_rmsea       0.2     
+#>  mean_rmsea         0.197   
+#>  median_rmsea       0.199   
 #>  sd_rmsea           0.0176  
 #>  mean_ci_width      0.05    
 #>  median_ci_width    0.05    
-#>  sd_ci_width        9.65e-05
-#>  pct_ci_less_w      0.6     
+#>  sd_ci_width        9.53e-05
+#>  pct_ci_less_w      0.5     
 #>  pct_ci_miss_low    0       
-#>  pct_ci_miss_high   0.05    
-#>  total_type_I_error 0.05    
+#>  pct_ci_miss_high   0.1     
+#>  total_type_I_error 0.1     
 #>  suc_rep            20      
 #>  total_N            695     
 #>  df                 9       

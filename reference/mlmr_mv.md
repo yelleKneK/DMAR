@@ -280,7 +280,7 @@ fit <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
                ci_method = "wald")
 coef(fit)              # matrix: rows = predictors, cols = outcomes
 #>                        t6_paragraph_comprehension t9_word_meaning
-#> (Intercept)                           -0.25416035      -6.3377552
+#> (Intercept)                           -0.25416032      -6.3377552
 #> t5_general_information                 0.07653333       0.2844663
 #> t7_sentence                            0.36460353       0.5811433
 summary(fit)
@@ -321,17 +321,17 @@ summary(fit)
 #> Log likelihood: -3552   AIC: 7132   BIC: 7184
 fit$R2                 # per-outcome R^2
 #> t6_paragraph_comprehension            t9_word_meaning 
-#>                  0.5734131                  0.6211091 
+#>                  0.5734130                  0.6211091 
 fit$residual_cov       # residual covariance among outcomes
 #>                            t6_paragraph_comprehension t9_word_meaning
 #> t6_paragraph_comprehension                   5.185583        3.094177
-#> t9_word_meaning                              3.094177       22.211178
+#> t9_word_meaning                              3.094177       22.211177
 print(fit$effect_sizes, row.names = FALSE)
 #>                     outcome                   term        sr2         f2
-#>  t6_paragraph_comprehension t5_general_information 0.03587459 0.08409677
-#>  t6_paragraph_comprehension            t7_sentence 0.14153133 0.33177605
-#>             t9_word_meaning t5_general_information 0.10277301 0.27124695
-#>             t9_word_meaning            t7_sentence 0.07456050 0.19678618
+#>  t6_paragraph_comprehension t5_general_information 0.03587460 0.08409679
+#>  t6_paragraph_comprehension            t7_sentence 0.14153119 0.33177571
+#>             t9_word_meaning t5_general_information 0.10277302 0.27124699
+#>             t9_word_meaning            t7_sentence 0.07456052 0.19678625
 
 # The interval menu is profile, Wald, and bootstrap. The default,
 # ci_method = "profile", inverts the likelihood ratio test one
@@ -388,8 +388,8 @@ c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
 cbind(FIML = coef(fit_fiml)[, "t6_paragraph_comprehension"],
       listwise = coef(fit_lwd)[, "t6_paragraph_comprehension"])
 #>                      FIML  listwise
-#> (Intercept)     1.1169737 0.9709397
-#> t7_sentence     0.3174144 0.3134578
+#> (Intercept)     1.1169740 0.9709397
+#> t7_sentence     0.3174143 0.3134578
 #> t9_word_meaning 0.1669888 0.1777868
 
 # Auxiliary variable (saturated correlates): the complete speed test
