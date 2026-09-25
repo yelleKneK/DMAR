@@ -1,13 +1,12 @@
 # Changelog
 
-## DMAR 1.0.0.0
+## DMAR 1.0.0
+
+CRAN release: 2026-09-21
 
 First public release of DMAR (pronounced “Dee-Mar,” for “Design,
 Measurement, and Analysis in R”), a greatly expanded reimagining of the
-MBESS package. The package was published on CRAN on 2026-09-21, where
-the version is listed as 1.0.0; on GitHub the same release carries a
-fourth component, 1.0.0.0, which is zero at a release and counts the
-development builds that follow it.
+MBESS package, published on CRAN on 2026-09-21.
 
 ### Every Example Runs, and Nothing Writes or Seeds Behind the User’s Back
 

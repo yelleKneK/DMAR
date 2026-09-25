@@ -23,7 +23,7 @@ mlmr fit."><meta property="og:image" content="https://yelleknek.github.io/DMAR/l
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -343,7 +343,7 @@ outcome.</p>
 <span class="r-in"><span>               ci_method <span class="op">=</span> <span class="st">"wald"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>              <span class="co"># matrix: rows = predictors, cols = outcomes</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        t6_paragraph_comprehension t9_word_meaning</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                           -0.25416032      -6.3377552</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)                           -0.25416035      -6.3377552</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t5_general_information                 0.07653333       0.2844663</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t7_sentence                            0.36460353       0.5811433</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
@@ -384,17 +384,17 @@ outcome.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log likelihood: -3552   AIC: 7132   BIC: 7184</span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">R2</span>                 <span class="co"># per-outcome R^2</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t6_paragraph_comprehension            t9_word_meaning </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  0.5734130                  0.6211091 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  0.5734131                  0.6211091 </span>
 <span class="r-in"><span><span class="va">fit</span><span class="op">$</span><span class="va">residual_cov</span>       <span class="co"># residual covariance among outcomes</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            t6_paragraph_comprehension t9_word_meaning</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t6_paragraph_comprehension                   5.185583        3.094177</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning                              3.094177       22.211177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning                              3.094177       22.211178</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">effect_sizes</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     outcome                   term        sr2         f2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  t6_paragraph_comprehension t5_general_information 0.03587460 0.08409679</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  t6_paragraph_comprehension            t7_sentence 0.14153119 0.33177571</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             t9_word_meaning t5_general_information 0.10277302 0.27124699</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             t9_word_meaning            t7_sentence 0.07456052 0.19678625</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  t6_paragraph_comprehension t5_general_information 0.03587459 0.08409677</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  t6_paragraph_comprehension            t7_sentence 0.14153133 0.33177605</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             t9_word_meaning t5_general_information 0.10277301 0.27124695</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             t9_word_meaning            t7_sentence 0.07456050 0.19678618</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The interval menu is profile, Wald, and bootstrap. The default,</span></span></span>
 <span class="r-in"><span><span class="co"># ci_method = "profile", inverts the likelihood ratio test one</span></span></span>
@@ -451,8 +451,8 @@ outcome.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>FIML <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_fiml</span><span class="op">)</span><span class="op">[</span>, <span class="st">"t6_paragraph_comprehension"</span><span class="op">]</span>,</span></span>
 <span class="r-in"><span>      listwise <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_lwd</span><span class="op">)</span><span class="op">[</span>, <span class="st">"t6_paragraph_comprehension"</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      FIML  listwise</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     1.1169740 0.9709397</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t7_sentence     0.3174143 0.3134578</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     1.1169737 0.9709397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t7_sentence     0.3174144 0.3134578</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t9_word_meaning 0.1669888 0.1777868</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Auxiliary variable (saturated correlates): the complete speed test</span></span></span>

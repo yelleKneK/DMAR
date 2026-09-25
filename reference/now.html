@@ -17,7 +17,7 @@ the two stamps.'><meta property="og:image" content="https://yelleknek.github.io/
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +139,7 @@ correct with the other attached; only the printed form differs.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Print the current date and time.</span></span></span>
 <span class="r-in"><span><span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> September 24, 2026 (8:23 PM)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> September 25, 2026 (4:47 AM)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Time how long a piece of work takes. The pattern is the same</span></span></span>
 <span class="r-in"><span><span class="co"># whether the work is a bootstrap, a simulation, or a numeric</span></span></span>
@@ -153,7 +153,7 @@ correct with the other attached; only the printed form differs.</p>
 <span class="r-in"><span>                                          <span class="st">"t2_cubes"</span>, <span class="st">"t4_lozenges"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">end</span> <span class="op">&lt;-</span> <span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.002803087 secs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.003775597 secs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A deliberate wait shows the same pattern on a longer interval. The</span></span></span>
 <span class="r-in"><span><span class="co"># pause is a fifth of a second, long enough to register in the</span></span></span>
@@ -162,21 +162,21 @@ correct with the other attached; only the printed form differs.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html" class="external-link">Sys.sleep</a></span><span class="op">(</span><span class="fl">0.2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">end</span> <span class="op">&lt;-</span> <span class="fu">now</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.201287 secs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time difference of 0.2015586 secs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Date only.</span></span></span>
 <span class="r-in"><span><span class="fu">now</span><span class="op">(</span>time <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> September 24, 2026</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> September 25, 2026</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Tidy data.frame form, when the components are needed</span></span></span>
 <span class="r-in"><span><span class="co"># individually for programmatic processing, for example when the</span></span></span>
 <span class="r-in"><span><span class="co"># stamp is embedded in a report's metadata block.</span></span></span>
 <span class="r-in"><span><span class="fu">now</span><span class="op">(</span>tidy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     term value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    day    24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    day    25</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   year  2026</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   hour     8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 minute    23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   hour     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 minute    47</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

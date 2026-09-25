@@ -459,7 +459,7 @@ measurement_invariance(
   group = "school", missing = "fiml",
   levels = c("configural", "metric"))
 #>  level      chi_square df p_chi_square cfi   rmsea delta_chi_square delta_df
-#>  configural 5.15e-13   0  <NA>         1     0     <NA>             <NA>    
+#>  configural 0          0  <NA>         1     0     <NA>             <NA>    
 #>  metric     7.67       2  0.0216       0.987 0.137 7.67             2       
 #>  p_value delta_cfi delta_rmsea
 #>  <NA>    <NA>      <NA>       

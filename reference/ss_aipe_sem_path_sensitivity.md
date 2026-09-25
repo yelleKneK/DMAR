@@ -214,12 +214,12 @@ ss_aipe_sem_path_sensitivity(model = analysis_model, est_Sigma = est_Sigma,
                              true_Sigma = true_Sigma, which_path = "b",
                              desired_width = 0.30, G = 20)
 #>  term               value 
-#>  mean_path          0.488 
-#>  median_path        0.495 
-#>  sd_path            0.0713
-#>  mean_ci_width      0.338 
-#>  median_ci_width    0.335 
-#>  sd_ci_width        0.0372
+#>  mean_path          0.493 
+#>  median_path        0.511 
+#>  sd_path            0.0733
+#>  mean_ci_width      0.342 
+#>  median_ci_width    0.348 
+#>  sd_ci_width        0.0379
 #>  pct_ci_less_w      0.2   
 #>  pct_ci_miss_low    0     
 #>  pct_ci_miss_high   0.05  
