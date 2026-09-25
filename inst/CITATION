@@ -12,7 +12,8 @@ bibentry(
                     comment = c(ORCID = "0000-0002-4756-8360")),
   year     = sub("-.*", "", meta$Date),
   note     = sprintf("R package version %s", meta$Version),
-  url      = "https://github.com/yelleKneK/DMAR"
+  url      = "https://github.com/yelleKneK/DMAR",
+  doi      = "10.5281/zenodo.22960335"
 )
 
 bibentry(

@@ -10,6 +10,7 @@
 status](https://www.r-pkg.org/badges/version/DMAR)](https://CRAN.R-project.org/package=DMAR)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22960335.svg)](https://doi.org/10.5281/zenodo.22960335)
 <!-- badges: end -->
 
 **DMAR** (Design, Measurement, and Analysis in R, pronounced “Dee-Mar”)
@@ -383,7 +384,7 @@ most informative for a given planning question.
 If you use DMAR in published work, please cite
 
 > Kelley, K. (2026). *DMAR: Design, Measurement, and Analysis in R*. R
-> package version 1.0.0.
+> package version 1.0.0. <https://doi.org/10.5281/zenodo.22960335>
 
 and, where appropriate, the original MBESS references for the
 methodological lineage:

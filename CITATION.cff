@@ -13,6 +13,14 @@ license: GPL-3.0-or-later
 repository-code: "https://github.com/yelleKneK/DMAR"
 repository-artifact: "https://CRAN.R-project.org/package=DMAR"
 url: "https://yelleknek.github.io/DMAR/"
+doi: 10.5281/zenodo.22960335
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22960335
+    description: "The concept DOI, which resolves to the latest version"
+  - type: doi
+    value: 10.5281/zenodo.22960336
+    description: "The DOI of version 1.0.0"
 abstract: >-
   Methods for design, measurement, and analysis, with the aim of being user
   friendly yet methodologically sound. DMAR emphasizes effect size estimation
