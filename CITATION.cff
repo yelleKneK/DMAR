@@ -1,0 +1,65 @@
+cff-version: 1.2.0
+message: "If you use DMAR, please cite it as below, together with the MBESS papers listed under references."
+type: software
+title: "DMAR: Design, Measurement, and Analysis in R"
+authors:
+  - family-names: Kelley
+    given-names: Ken
+    orcid: "https://orcid.org/0000-0002-4756-8360"
+    affiliation: "University of Notre Dame"
+version: 1.0.0
+date-released: "2026-09-21"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/yelleKneK/DMAR"
+repository-artifact: "https://CRAN.R-project.org/package=DMAR"
+url: "https://yelleknek.github.io/DMAR/"
+abstract: >-
+  Methods for design, measurement, and analysis, with the aim of being user
+  friendly yet methodologically sound. DMAR emphasizes effect size estimation
+  with confidence intervals; sample size planning through accuracy in parameter
+  estimation (AIPE) and power analysis, including composite power; reliability,
+  agreement, and measurement invariance; factor analysis and structural equation
+  modeling; mediation analysis by model-based constrained optimization;
+  equivalence and noninferiority testing; meta-analysis; and repeated measures,
+  multivariate, ANOVA, and ANCOVA designs, with inference grounded in model
+  comparison throughout. It is a more modern, more general, and greatly
+  expanded reimagining of the MBESS package.
+keywords:
+  - R package
+  - effect sizes
+  - confidence intervals
+  - sample size planning
+  - accuracy in parameter estimation
+  - power analysis
+  - reliability
+  - measurement invariance
+  - structural equation modeling
+  - mediation analysis
+  - equivalence testing
+  - meta-analysis
+  - psychometrics
+references:
+  - type: article
+    authors:
+      - family-names: Kelley
+        given-names: Ken
+    title: "Methods for the behavioral, educational, and social sciences: An R package"
+    journal: "Behavior Research Methods"
+    year: 2007
+    volume: 39
+    issue: 4
+    start: 979
+    end: 984
+    doi: 10.3758/BF03192993
+  - type: article
+    authors:
+      - family-names: Kelley
+        given-names: Ken
+    title: "Confidence intervals for standardized effect sizes: Theory, application, and implementation"
+    journal: "Journal of Statistical Software"
+    year: 2007
+    volume: 20
+    issue: 8
+    start: 1
+    end: 24
+    doi: 10.18637/jss.v020.i08

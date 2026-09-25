@@ -131,6 +131,15 @@ check("DESCRIPTION Title is the granted form", title_ok, unname(desc[, "Title"])
 ver_parts <- unlist(package_version(unname(desc[, "Version"])))
 check(sprintf("DESCRIPTION Version %s has exactly three components", desc[, "Version"]),
       length(ver_parts) == 3L)
+
+# CITATION.cff (read by GitHub and by Zenodo for the release DOI) carries the
+# released version and its CRAN publication date, both set by hand at each
+# release; the version must track DESCRIPTION.
+if (file.exists("CITATION.cff")) {
+  cff <- yaml::read_yaml("CITATION.cff")
+  check(sprintf("CITATION.cff version matches DESCRIPTION (%s)", cff$version),
+        identical(as.character(cff$version), unname(desc[, "Version"])))
+} else check("CITATION.cff present at the package root", FALSE)
 desc_text <- gsub("\\s+", " ", unname(desc[, "Description"]))
 h <- grepl("\\bin R\\b", desc_text)
 check("DESCRIPTION Description does not say \"in R\"", !h,

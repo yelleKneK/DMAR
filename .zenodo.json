@@ -1,0 +1,53 @@
+{
+  "title": "DMAR: Design, Measurement, and Analysis in R",
+  "upload_type": "software",
+  "description": "<p>Methods for design, measurement, and analysis, with the aim of being user friendly yet methodologically sound. DMAR (pronounced \"Dee-Mar\") implements many advanced and nonstandard methods and makes them available for straightforward use, with interfaces, defaults, and documentation that are consistent across the package and grounded in the methodological literature. The package emphasizes effect size estimation with confidence intervals; sample size planning through accuracy in parameter estimation (AIPE) and power analysis, including composite power for designs whose conclusions require several results to hold at once, with minimum risk, sequential, and equivalence frameworks; reliability, agreement, and measurement more broadly, from coefficient omega with confidence intervals to measurement invariance; factor analysis and structural equation modeling; mediation analysis, from the simple mediation model with bootstrap intervals to likelihood ratio tests of arbitrary indirect effects by model-based constrained optimization (MBCO); equivalence and noninferiority testing; meta-analysis; repeated measures, multivariate, ANOVA, and ANCOVA designs; and inference grounded in model comparison throughout.</p><p>DMAR is a more modern, more general, and greatly expanded reimagining of the MBESS package (Kelley, 2007a, 2007b), which has been on CRAN for more than two decades. Most functions accept either raw data or the summary statistics typically reported in published articles, and the estimation, inference, and planning functions return one consistently formatted data frame per function.</p><p>The released package is on CRAN at https://CRAN.R-project.org/package=DMAR and is documented at https://yelleknek.github.io/DMAR/.</p>",
+  "creators": [
+    {
+      "name": "Kelley, Ken",
+      "affiliation": "University of Notre Dame",
+      "orcid": "0000-0002-4756-8360"
+    }
+  ],
+  "license": "gpl-3.0-or-later",
+  "access_right": "open",
+  "language": "eng",
+  "keywords": [
+    "R package",
+    "effect sizes",
+    "confidence intervals",
+    "sample size planning",
+    "accuracy in parameter estimation",
+    "power analysis",
+    "reliability",
+    "measurement invariance",
+    "structural equation modeling",
+    "mediation analysis",
+    "equivalence testing",
+    "meta-analysis",
+    "analysis of variance",
+    "psychometrics"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://CRAN.R-project.org/package=DMAR",
+      "relation": "isVariantFormOf",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://yelleknek.github.io/DMAR/",
+      "relation": "isDocumentedBy",
+      "resource_type": "publication-other"
+    },
+    {
+      "identifier": "10.18637/jss.v020.i08",
+      "relation": "references",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "10.3758/BF03192993",
+      "relation": "references",
+      "resource_type": "publication-article"
+    }
+  ]
+}
