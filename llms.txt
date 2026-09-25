@@ -475,7 +475,7 @@ most informative for a given planning question.
 If you use DMAR in published work, please cite
 
 > Kelley, K. (2026). *DMAR: Design, Measurement, and Analysis in R*. R
-> package version 1.0.0.
+> package version 1.0.0. <https://doi.org/10.5281/zenodo.22960335>
 
 and, where appropriate, the original MBESS references for the
 methodological lineage:

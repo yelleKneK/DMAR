@@ -8,10 +8,11 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/yelleKneK/DMAR/blob/v1.0.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/yelleKneK/DMAR/blob/main/inst/CITATION)
 
-Kelley K (2026). *DMAR: Design, Measurement, and Analysis in R*. R
-package version 1.0.0, <https://github.com/yelleKneK/DMAR>.
+Kelley K (2026). *DMAR: Design, Measurement, and Analysis in R*.
+[doi:10.5281/zenodo.22960335](https://doi.org/10.5281/zenodo.22960335).
+R package version 1.0.0, <https://github.com/yelleKneK/DMAR>.
 
     @Manual{,
       title = {{DMAR}: Design, Measurement, and Analysis in {R}},
@@ -19,6 +20,7 @@ package version 1.0.0, <https://github.com/yelleKneK/DMAR>.
       year = {2026},
       note = {R package version 1.0.0},
       url = {https://github.com/yelleKneK/DMAR},
+      doi = {10.5281/zenodo.22960335},
     }
 
 Kelley K (2007). “Methods for the behavioral, educational, and social
