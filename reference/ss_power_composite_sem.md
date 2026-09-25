@@ -335,11 +335,11 @@ ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
                        N = 200, G = 20, seed = 113)
 #>  term                   value
 #>  specified_N            200  
-#>  composite_power        0.6  
-#>  composite_power_mc_se  0.11 
+#>  composite_power        0.7  
+#>  composite_power_mc_se  0.102
 #>  power_a                1    
 #>  power_b                0.9  
-#>  power_c                0.7  
+#>  power_c                0.8  
 #>  population_a           0.4  
 #>  population_b           0.3  
 #>  population_c           0.25 

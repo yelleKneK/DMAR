@@ -271,7 +271,7 @@ ss_aipe_reliability(model = "True Score", type = "Normal Theory",
   width = .1, i = 5, cor_est = .3, psi_square = c(.2, .3, .3, .2, .3),
   conf_level = .95, assurance = .85, initial_iter = 50, final_iter = 200)
 #>  term                value
-#>  necessary_N         113  
+#>  necessary_N         115  
 #>  width               0.1  
 #>  specified_assurance 0.85 
 #>  empirical_assurance 0.85 
@@ -306,10 +306,10 @@ ss_aipe_reliability(model = "True Score", type = "Normal Theory", width = .15,
   S = pop_mat, conf_level = .95, assurance = .85, initial_iter = 50,
   final_iter = 200)
 #>  term                value
-#>  necessary_N         116  
+#>  necessary_N         117  
 #>  width               0.15 
 #>  specified_assurance 0.85 
-#>  empirical_assurance 0.85 
+#>  empirical_assurance 0.865
 #>  final_iter          200  
 #> 
 #> Confidence level: 95%

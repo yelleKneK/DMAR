@@ -594,7 +594,7 @@ mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
 #>  instruction -> imagery -> recall     indirect_via_imagery 2.13     0.279
 #>  ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
 #>  1.51     2.84     39.9   1  < 0.0001 37.9      34       
-#>  -0.724   0.804    0.0117 1  0.9139   -1.99     -5.9     
+#>  -0.725   0.804    0.0117 1  0.9139   -1.99     -5.9     
 #>  1.61     2.7      71.3   1  < 0.0001 69.3      65.4     
 #> 
 #> Confidence level: 95%
