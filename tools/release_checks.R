@@ -123,6 +123,14 @@ check("no `save` switch in the sensitivity family", length(h) == 0, h)
 desc <- read.dcf("DESCRIPTION")
 title_ok <- identical(unname(desc[, "Title"]), "Design, Measurement, and Analysis in R (DMAR)")
 check("DESCRIPTION Title is the granted form", title_ok, unname(desc[, "Title"]))
+
+# Versions are written x.y.z (1.0.0 styling, decided 2026-09-24). A fourth
+# component is never used: R orders x.y.z.0 as the same version as x.y.z,
+# so CRAN refuses it as an insufficient version, and a development suffix
+# is not part of this package's practice.
+ver_parts <- unlist(package_version(unname(desc[, "Version"])))
+check(sprintf("DESCRIPTION Version %s has exactly three components", desc[, "Version"]),
+      length(ver_parts) == 3L)
 desc_text <- gsub("\\s+", " ", unname(desc[, "Description"]))
 h <- grepl("\\bin R\\b", desc_text)
 check("DESCRIPTION Description does not say \"in R\"", !h,
