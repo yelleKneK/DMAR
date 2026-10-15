@@ -1371,8 +1371,9 @@
 #     reproduces boot's acceleration.
 #
 # When `a` still cannot be estimated as a finite number (fewer than two
-# jackknife replicates returned a value, or the influence values have no
-# spread), or when the bias correction cannot be (every returned
+# jackknife replicates returned a value, the floor for a skewness, or
+# the influence values have no spread), or when the bias correction
+# cannot be (every returned
 # replicate on one side of the estimate, boot's "estimated adjustment
 # 'w' is infinite"), the percentile interval is returned in its place,
 # `ci_method` says so, and the warning says why. A BCa request never
@@ -1533,7 +1534,12 @@
       L <- (n - 1) * (t0 - t_jack[fin])
       acceleration_method <- "jackknife"
     }
-    a <- sum(L^3) / (6 * sum(L^2)^1.5)
+    # The acceleration is a skewness of the influence values, so it needs
+    # at least two of them with some spread. boot centers the jackknife
+    # values on t0 rather than on their own mean, which is why a single
+    # returned value would otherwise give the finite but meaningless
+    # extreme of 1/6 in magnitude; the floor is imposed here.
+    a <- if (length(L) >= 2L) sum(L^3) / (6 * sum(L^2)^1.5) else NA_real_
     if (is.finite(a)) {
       bci <- tryCatch(
         boot::boot.ci(boot_out, conf = conf_level, type = "bca", L = L)$bca,

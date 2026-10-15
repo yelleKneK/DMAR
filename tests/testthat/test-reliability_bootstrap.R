@@ -255,6 +255,30 @@ test_that("when the acceleration cannot be estimated the percentile interval is 
   p <- DMAR:::.bootstrap_ci(items, alpha_fn, B = 50, conf_level = 0.80,
                             kind = "percentile", seed = 113)
   expect_equal(c(r$lower, r$upper), c(p$lower, p$upper), tolerance = 1e-12)
+
+  # The floor is two returned values: with exactly one (only the refit
+  # without row 1 succeeds; row 1 carries the only 1 in its column) boot's
+  # centering on t0 would give the finite extreme of 1/6 in magnitude,
+  # and the percentile interval is reported instead.
+  marked <- items
+  marked[, 1] <- 0
+  marked[1, 1] <- 1
+  fn_one <- function(d) {
+    if (nrow(d) == N - 1L && any(d[, 1] == 1)) stop("leave-one-out refit failed")
+    alpha_fn(d)
+  }
+  expect_warning(
+    r1 <- DMAR:::.bootstrap_ci(marked, fn_one, B = 50, conf_level = 0.80,
+                               kind = "bca", seed = 113),
+    regexp = "the percentile interval is reported instead"
+  )
+  expect_identical(r1$bootstrap$jackknife$returned, 1L)
+  expect_identical(r1$bootstrap$jackknife$failed, 59L)
+  expect_identical(
+    r1$ci_method,
+    "percentile (BCa acceleration could not be estimated: 59 jackknife replicates failed)"
+  )
+  expect_true(is.na(r1$bootstrap$acceleration))
 })
 
 test_that("when the bias correction cannot be estimated the percentile interval is reported and labeled", {
