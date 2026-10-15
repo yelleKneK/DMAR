@@ -1,3 +1,56 @@
+# DMAR 1.0.1
+
+A patch release for the bootstrap intervals of the reliability family,
+prompted by a report from an analysis of the Big Five Inventory
+constructs (2026-10-14), in which every BCa interval for categorical
+omega failed with "estimated adjustment 'a' is NA" and no interval said
+how many replications it rested on.
+
+## The Reliability Bootstrap Counts Its Replications
+
+* **Every bootstrap interval in the reliability family now says how
+  many replications it conditions on.** `reliability_alpha()`,
+  `reliability_kr20()`, `reliability_omega()`,
+  `reliability_omega_categorical()`, and `reliability()` through them
+  record, in a `bootstrap` attribute, how many replications were
+  attempted, how many returned a finite value, how many were set aside
+  and why (an error from the refit, or no finite value, as from a fit
+  that did not converge), and the distinct error messages with their
+  counts. The standard error is the standard deviation of the returned
+  replicates and the percentile and BCa limits are their quantiles,
+  which the help pages now state; the printed table shows the counts
+  in one line, and a single warning states them whenever a replication
+  was set aside. Through 1.0.0 a failed replication was dropped
+  silently. No existing row or attribute changes.
+
+* **The BCa interval no longer fails when a jackknife refit fails.**
+  With `B` below the number of cases, boot estimates the BCa
+  acceleration from jackknife influence values, and one leave-one-out
+  refit that returned no value made the whole vector `NA` and stopped
+  the call. The influence values are now computed in the package under
+  boot's own rule (regression on the resampling frequencies when at
+  least as many replications as cases returned a value, the jackknife
+  otherwise), the leave-one-out refits that fail are counted and set
+  aside, and the acceleration is estimated from the rest; the
+  jackknife counts and the acceleration join the `bootstrap`
+  attribute. When the acceleration or the bias correction cannot be
+  estimated at all, the percentile interval is returned in its place
+  with a warning, and the `ci_method` attribute reads
+  `"percentile (BCa acceleration could not be estimated: k jackknife
+  replicates failed)"`, so the substitution is on the record. On a run
+  where nothing fails the interval and the acceleration equal boot's
+  to machine precision, in both regimes, so no interval that 1.0.0
+  computed changes.
+
+* **`reliability_omega()` states which intervals apply to which
+  denominator.** The closed forms, the Wald intervals, and the profile
+  likelihood are derived under the model implied ratio and apply to
+  `denominator = "model_implied"` only; the bootstrap methods and
+  `"none"` apply to both. The help page now says so in one place, and
+  a request for a combination that does not apply, such as
+  `ci_method = "mlr"` with the default observed denominator, stops
+  with a message naming the denominator that does.
+
 # DMAR 1.0.0
 
 First public release of DMAR (pronounced "Dee-Mar," for "Design,
