@@ -1343,6 +1343,41 @@
 # replication was set aside. Since 1.0.1; in 1.0.0 the failed
 # replications were dropped without a count.
 #
+# The BCa acceleration. boot::boot.ci estimates the acceleration from
+# empirical influence values L through a = sum(L^3) / (6 sum(L^2)^1.5),
+# and chooses how to get L by its own rule (boot::empinf): when at least
+# n replications are available it regresses the replicates on the
+# resampling frequencies, which costs no refit, and otherwise it runs the
+# jackknife, one refit of `point_fn` per case. Under that rule a single
+# jackknife refit that fails made every influence value NA in boot's
+# own jackknife (the values are centered on the full-data estimate, but
+# boot propagates the NA through the whole vector), so `a` was NA and
+# boot.ci stopped with "estimated adjustment 'a' is NA"; the 2026-10-14
+# report from the Psychological Methods task hit this on every BFI
+# construct (n about 1,355, B = 1,000). The repair keeps boot's rule for
+# which estimate to use, so a run on which nothing fails returns
+# boot's interval to machine precision, and computes the influence
+# values here:
+#
+#   - regression (returned replications >= n): boot::empinf(type = "reg")
+#     on the replications that returned a value; if any influence value
+#     is not finite (a rank-deficient regression), the jackknife is run
+#     instead;
+#   - jackknife (otherwise): L_i = (n - 1) (t0 - t_(i)) exactly as
+#     boot's usual.jack() forms it, over the leave-one-out replicates
+#     that returned a value, with the failed ones counted. The (n - 1)
+#     scale cancels in `a`; the centering on t0 rather than on the
+#     jackknife mean is boot's convention and is kept so a clean run
+#     reproduces boot's acceleration.
+#
+# When `a` still cannot be estimated as a finite number (fewer than two
+# jackknife replicates returned a value, or the influence values have no
+# spread), or when the bias correction cannot be (every returned
+# replicate on one side of the estimate, boot's "estimated adjustment
+# 'w' is infinite"), the percentile interval is returned in its place,
+# `ci_method` says so, and the warning says why. A BCa request never
+# stops on either adjustment.
+#
 # Seed handling: if seed is not NULL, .dmar_local_seed() sets it before
 # resampling so that runs are reproducible, and the caller's RNG state is
 # restored when this function exits (the package-wide seed discipline;
@@ -1371,6 +1406,15 @@
 #                                   failed replications were set aside;
 #     error_messages              : the distinct error messages with
 #                                   their counts (empty when none);
+#     acceleration                : the BCa acceleration used (NA when
+#                                   no BCa interval was formed);
+#     acceleration_method         : "regression" or "jackknife" (NA when
+#                                   no BCa interval was formed);
+#     jackknife                   : the same attempted / returned /
+#                                   failed / reasons / error_messages for
+#                                   the leave-one-out refits behind the
+#                                   acceleration (all zero when no
+#                                   jackknife ran).
 .bootstrap_ci <- function(data, point_fn, B, conf_level, kind, seed) {
   if (!requireNamespace("boot", quietly = TRUE)) {
     stop("Bootstrap CIs require the 'boot' package. ",
@@ -1468,9 +1512,60 @@
     lower <- bci[4]
     upper <- bci[5]
   } else if (kind == "bca") {
-    bci <- boot::boot.ci(boot_out, conf = conf_level, type = "bca")$bca
-    lower <- bci[4]
-    upper <- bci[5]
+    L <- NULL
+    if (returned >= n) {
+      # boot's regression estimate of the influence values, the one
+      # boot.ci would use itself with this many finite replicates.
+      L <- tryCatch(boot::empinf(boot_out, type = "reg"),
+                    error = function(e) NULL)
+      if (!is.null(L) && !all(is.finite(L))) L <- NULL
+      if (!is.null(L)) acceleration_method <- "regression"
+    }
+    if (is.null(L)) {
+      # The jackknife, one leave-one-out refit per case, with every
+      # failed refit counted instead of poisoning the vector.
+      reset_counts()
+      idx <- seq_len(n)
+      t_jack <- vapply(idx, function(i) statistic(data, idx[-i]),
+                       numeric(1))
+      jack <- take_counts(n)
+      fin <- is.finite(t_jack)
+      L <- (n - 1) * (t0 - t_jack[fin])
+      acceleration_method <- "jackknife"
+    }
+    a <- sum(L^3) / (6 * sum(L^2)^1.5)
+    if (is.finite(a)) {
+      bci <- tryCatch(
+        boot::boot.ci(boot_out, conf = conf_level, type = "bca", L = L)$bca,
+        error = function(e) e)
+      if (inherits(bci, "error")) {
+        # The remaining way bca.ci stops: the bias correction w is
+        # infinite because every returned replicate sits on one side of
+        # the estimate.
+        fallback <- paste0("BCa bias correction could not be estimated: ",
+                           "every returned replicate fell on one side ",
+                           "of the estimate")
+        acceleration_method <- NA_character_
+      } else {
+        lower <- bci[4]
+        upper <- bci[5]
+        acceleration <- a
+      }
+    } else {
+      fallback <- if (jack$failed > 0L) {
+        sprintf("BCa acceleration could not be estimated: %d jackknife %s failed",
+                jack$failed, if (jack$failed == 1L) "replicate" else "replicates")
+      } else {
+        "BCa acceleration could not be estimated: the influence values have no spread"
+      }
+      acceleration_method <- NA_character_
+    }
+    if (!is.null(fallback)) {
+      bci <- boot::boot.ci(boot_out, conf = conf_level, type = "perc")$percent
+      lower <- bci[4]
+      upper <- bci[5]
+      method <- sprintf("percentile (%s)", fallback)
+    }
   } else {
     stop("Unknown bootstrap kind: ", kind, call. = FALSE)
   }
@@ -1479,9 +1574,9 @@
   notes <- character()
   if (counts$failed > 0L) {
     notes <- c(notes, sprintf(
-      "%d of %d bootstrap %s set aside (%s)%s",
+      "%d of %d bootstrap replications %s set aside (%s)%s",
       counts$failed, B,
-      if (counts$failed == 1L) "replications was" else "replications were",
+      if (counts$failed == 1L) "was" else "were",
       .bootstrap_reason_phrase(counts$reasons, counts$error_messages),
       if (returned >= 2L) {
         sprintf("; the interval is computed from the %d that returned a value",
@@ -1492,9 +1587,8 @@
   }
   if (jack$failed > 0L) {
     notes <- c(notes, sprintf(
-      "%d of %d jackknife %s behind the BCa acceleration failed (%s)%s",
+      "%d of %d jackknife replicates behind the BCa acceleration failed (%s)%s",
       jack$failed, jack$attempted,
-      if (jack$failed == 1L) "replicate" else "replicates",
       .bootstrap_reason_phrase(jack$reasons, jack$error_messages),
       if (is.null(fallback)) {
         sprintf("; the acceleration was estimated from the %d that returned a value",

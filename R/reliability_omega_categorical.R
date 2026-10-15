@@ -40,9 +40,12 @@
 #' The interval is not a quick one. Every replication refits the
 #' ordered-categorical factor model and the saturated polychoric model
 #' behind the denominator, a fraction of a second for a scale of
-#' moderate length, and the jackknife behind the BCa acceleration adds
-#' one such refit per case, so the recommended interval at the default
-#' \code{B = 10000} runs for tens of minutes. The example on this page
+#' moderate length, so the recommended interval at the default
+#' \code{B = 10000} runs for tens of minutes; when \code{B} is below
+#' the number of cases, the jackknife behind the BCa acceleration adds
+#' one such refit per case (at the default \code{B} the acceleration is
+#' read from the replicates themselves at no extra cost; see the
+#' \code{"bca"} entry below). The example on this page
 #' therefore stops at the point estimate; the reported analysis adds
 #' \code{ci_method = "bca"} to the same call, with \code{seed} for
 #' reproducibility.
@@ -88,7 +91,24 @@
 #'   farther into the tails than the percentile interval uses, which
 #'   is why the default \code{B = 10000} is larger than the customary
 #'   2000; reduce \code{B} for exploration, not for a reported
-#'   analysis.}
+#'   analysis. The acceleration is estimated as \pkg{boot} estimates
+#'   it: by regressing the bootstrap replicates on the resampling
+#'   frequencies when at least as many replications as cases returned
+#'   a value, at no extra cost, and otherwise by the jackknife, one
+#'   leave-one-out refit per case. A leave-one-out refit that fails
+#'   (when a case is the only respondent in one of an item's
+#'   categories, for example) is counted and set aside, and the
+#'   acceleration is estimated from the refits that returned a value;
+#'   through version 1.0.0 one such failure made the acceleration
+#'   \code{NA} and stopped the call with \dQuote{estimated adjustment
+#'   'a' is NA}. When the acceleration cannot be estimated at all
+#'   (fewer than two leave-one-out refits returned a value), or the
+#'   bias correction cannot be (every returned replicate on one side of
+#'   the estimate), the percentile interval is returned in its place
+#'   with a warning, and the \code{ci_method} attribute records the
+#'   substitution as \code{"percentile (BCa acceleration could not be
+#'   estimated: ...)"}. The counts of leave-one-out refits and the
+#'   acceleration used are in the \code{bootstrap} attribute.}
 #'   \item{\code{"percentile"}}{Percentile bootstrap: the interval
 #'   limits are the empirical quantiles of the bootstrap estimates.}
 #'   \item{\code{"bootstrap_se"}, \code{"bootstrap_se_logistic"}}{Wald
@@ -139,10 +159,16 @@
 #' quantiles), \code{failed} (the difference), \code{reasons} (a named
 #' count of why replications were set aside: \code{error} when the refit
 #' raised an error, \code{non_finite} when it returned no finite value,
-#' as a fit that did not converge does), and \code{error_messages} (the
-#' distinct error messages with their counts, empty when none). The
-#' printed table shows these counts in one line, and a warning states
-#' them whenever a replication was set aside.
+#' as a fit that did not converge does), \code{error_messages} (the
+#' distinct error messages with their counts, empty when none),
+#' \code{acceleration} and \code{acceleration_method} (the BCa
+#' acceleration used and whether it came from the regression or the
+#' jackknife; \code{NA} unless a BCa interval was formed), and
+#' \code{jackknife} (the same \code{attempted}, \code{returned},
+#' \code{failed}, \code{reasons}, and \code{error_messages} for the
+#' leave-one-out refits behind the acceleration, all zero when no
+#' jackknife ran). The printed table shows these counts in one line,
+#' and a warning states them whenever a replication was set aside.
 #'
 #' @references
 #' DiCiccio, T. J., & Efron, B. (1996). Bootstrap confidence intervals.

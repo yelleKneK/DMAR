@@ -105,10 +105,16 @@ their standard deviation and the percentile and BCa limits are their
 quantiles), \code{failed} (the difference), \code{reasons} (a named
 count of why replications were set aside: \code{error} when the refit
 raised an error, \code{non_finite} when it returned no finite value,
-as a fit that did not converge does), and \code{error_messages} (the
-distinct error messages with their counts, empty when none). The
-printed table shows these counts in one line, and a warning states
-them whenever a replication was set aside.
+as a fit that did not converge does), \code{error_messages} (the
+distinct error messages with their counts, empty when none),
+\code{acceleration} and \code{acceleration_method} (the BCa
+acceleration used and whether it came from the regression or the
+jackknife; \code{NA} unless a BCa interval was formed), and
+\code{jackknife} (the same \code{attempted}, \code{returned},
+\code{failed}, \code{reasons}, and \code{error_messages} for the
+leave-one-out refits behind the acceleration, all zero when no
+jackknife ran). The printed table shows these counts in one line,
+and a warning states them whenever a replication was set aside.
 }
 \description{
 Estimates McDonald's (1999) coefficient \eqn{\omega} for a homogeneous
@@ -267,7 +273,17 @@ Available confidence interval methods (set via \code{ci_method}):
   changes with the parameter, the acceleration, estimated by the
   jackknife; those two adjustments make it second-order accurate
   where the percentile interval is first-order accurate (DiCiccio &
-  Efron, 1996). \code{"bootstrap_se"} uses the standard deviation
+  Efron, 1996). The acceleration is estimated as \pkg{boot}
+  estimates it, by regression on the resampling frequencies when at
+  least as many replications as cases returned a value and by the
+  jackknife otherwise; a leave-one-out refit that fails is counted
+  and set aside rather than stopping the call (as one did through
+  version 1.0.0), and when the acceleration or the bias correction
+  cannot be estimated at all the percentile interval is returned in
+  its place, with a warning and the substitution recorded in the
+  \code{ci_method} attribute; see
+  \code{\link{reliability_omega_categorical}} for the full account.
+  \code{"bootstrap_se"} uses the standard deviation
   of the bootstrap estimates as a standard error in a normal-theory
   interval, built on the logit scale for the \code{_logistic}
   variant so the endpoints respect [0, 1]. Replications whose model

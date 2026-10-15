@@ -126,3 +126,65 @@ test_that("reliability_omega_categorical() rejects out-of-range conf_level", {
     regexp = "conf_level"
   )
 })
+
+
+test_that("a leave-one-out refit that fails no longer stops the BCa interval", {
+  # The 2026-10-14 report: with B below n, boot estimates the BCa
+  # acceleration by the jackknife, and one leave-one-out refit that
+  # returned NA made the acceleration NA and stopped the call with
+  # "estimated adjustment 'a' is NA". Here the first of six binary items
+  # (n = 60) is endorsed by a single respondent, so the refit without
+  # that case refuses a constant item: exactly one jackknife replicate
+  # fails, and the resamples that omit the case fail the same way. The
+  # acceleration is now estimated from the refits that returned a value,
+  # the counts are on the result, and the interval is BCa. Skipped on
+  # CRAN: n + B ordered-categorical refits.
+  skip_on_cran()
+  skip_if_not_installed("boot")
+  set.seed(113)
+  n_bad <- 60
+  j_bad <- 6
+  eta_bad <- rnorm(n_bad)
+  items_bad <- (outer(eta_bad, rep(0.7, j_bad)) +
+                  matrix(rnorm(n_bad * j_bad), n_bad, j_bad) * sqrt(1 - 0.7^2)) > 0
+  items_bad <- apply(items_bad, 2, as.integer)
+  colnames(items_bad) <- paste0("y", seq_len(j_bad))
+  items_bad[, 1] <- 0L
+  items_bad[1, 1] <- 1L
+  # lavaan prints its variable table when it refuses the constant item
+  # and may warn about an improper solution on a sparse resample; the
+  # capture and the handler keep both out of the test record, which
+  # looks only for the package's own warning.
+  w <- testthat::capture_warnings(invisible(utils::capture.output(
+    r <- withCallingHandlers(
+      reliability_omega_categorical(data = items_bad, ci_method = "bca",
+                                    B = 30, conf_level = 0.80, seed = 113),
+      warning = function(w) {
+        if (grepl("lavaan", conditionMessage(w))) invokeRestart("muffleWarning")
+      })
+  )))
+  # Two thirds of the resamples omit case 1 or hit a degenerate table and
+  # are set aside, so boot adds its own warning that extreme order
+  # statistics served as endpoints; the package warning is the one that
+  # names the jackknife count, and it is the only other one.
+  own <- grepl("1 of 60 jackknife replicates behind the BCa acceleration failed", w)
+  expect_identical(sum(own), 1L)
+  expect_match(w[own], "bootstrap replications were set aside")
+  expect_true(all(grepl("extreme order statistics used as endpoints", w[!own])))
+  expect_identical(attr(r, "ci_method"), "bca")
+  bs <- attr(r, "bootstrap")
+  expect_identical(bs$attempted, 30L)
+  expect_identical(bs$returned + bs$failed, 30L)
+  expect_identical(bs$jackknife$attempted, 60L)
+  expect_identical(bs$jackknife$returned, 59L)
+  expect_identical(bs$jackknife$failed, 1L)
+  expect_identical(bs$acceleration_method, "jackknife")
+  expect_true(is.finite(bs$acceleration))
+  est <- r$value[r$term == "estimate"]
+  ll  <- r$value[r$term == "lower_limit"]
+  ul  <- r$value[r$term == "upper_limit"]
+  expect_lte(ll, est)
+  expect_gte(ul, est)
+  expect_gte(ll, 0)
+  expect_lte(ul, 1)
+})
