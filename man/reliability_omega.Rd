@@ -46,7 +46,10 @@ with raw data (use \code{"ml"} with covariance input); for
 computed by default, because its interval is bootstrap based and a
 bootstrap is never run unless requested. Ask for
 \code{"percentile"} or \code{"bca"} to obtain the recommended
-interval.}
+interval. The closed forms, the Wald intervals, and the profile
+likelihood apply to \code{denominator = "model_implied"} only; a
+combination that does not apply stops with a message naming the
+denominator that does (see \emph{Details}).}
 
 \item{denominator}{How the total variance in the denominator of
 \eqn{\omega} is estimated: \code{"observed"} (default; robust
@@ -303,17 +306,39 @@ Available confidence interval methods (set via \code{ci_method}):
   supply \code{seed} for run-to-run reproducibility.}
   \item{\code{"none"}}{Return only the point estimate.}
 }
-With \code{denominator = "observed"}, only the bootstrap methods and
-\code{"none"} are available: the delta method standard errors and the
-alpha-derived closed forms are derived under the model implied ratio
-and do not account for sampling of the observed denominator. This
-pairing is not a limitation in practice, since the bootstrap is the
-interval Kelley and Pornprasertmanit (2016) recommend for the
-observed denominator coefficient in any case. Because no analysis in
-\pkg{DMAR} runs a bootstrap unless the user requests one, the default
-for robust omega is the point estimate with no interval, accompanied
-by a message naming the call that produces the recommended interval;
-request \code{ci_method = "percentile"} or \code{"bca"} to obtain it.
+\strong{Which intervals apply to which denominator.}
+\describe{
+  \item{\code{denominator = "model_implied"}}{Every method on the
+  menu: the Wald intervals \code{"ml"}, \code{"mlr"}, and
+  \code{"adf"} with their \code{_logistic} variants, the profile
+  \code{"likelihood"} interval, the alpha-derived closed forms
+  \code{"feldt"}, \code{"fisher"}, \code{"bonett"}, and
+  \code{"hakstian_whalen"}, the four bootstrap methods, and
+  \code{"none"}.}
+  \item{\code{denominator = "observed"} (robust omega, the
+  default)}{The four bootstrap methods (\code{"percentile"},
+  \code{"bca"}, \code{"bootstrap_se"},
+  \code{"bootstrap_se_logistic"}) and \code{"none"} only. The delta
+  method standard errors, the profile likelihood, and the
+  alpha-derived closed forms are derived under the model implied
+  ratio and do not account for sampling of the observed denominator,
+  so \code{"mlr"}, the default interval of the model implied
+  coefficient, is not an interval for robust omega.}
+}
+A request for a combination that does not apply, such as
+\code{ci_method = "mlr"} with the default denominator, stops with a
+message naming the denominator that does; nothing falls back
+silently. Covariance input (\code{S}) and \code{missing = "fiml"}
+narrow the menu further, as the \code{S} argument and the paragraph
+on missing data below describe, and each stops the same way. The
+pairing of robust omega with the bootstrap is not a limitation in
+practice, since the bootstrap is the interval Kelley and
+Pornprasertmanit (2016) recommend for the observed denominator
+coefficient in any case. Because no analysis in \pkg{DMAR} runs a
+bootstrap unless the user requests one, the default for robust omega
+is the point estimate with no interval, accompanied by a message
+naming the call that produces the recommended interval; request
+\code{ci_method = "percentile"} or \code{"bca"} to obtain it.
 
 \strong{Missing data and auxiliary variables.} By default incomplete
 rows are listwise-deleted; \code{missing = "fiml"} keeps every case
