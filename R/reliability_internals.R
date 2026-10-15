@@ -1328,7 +1328,20 @@
 #   "percentile"            : empirical 100*(1-C)/2 and 100*(1-(1-C)/2)
 #                             quantiles of the bootstrap estimates.
 #   "bca"                   : bias-corrected and accelerated bootstrap
-#                             (delegates to boot::boot.ci with type = "bca").
+#                             (boot::boot.ci with type = "bca", with the
+#                             influence values computed here; see below).
+#
+# Every replication is counted. A replication on which `point_fn` raises
+# an error, or returns anything but a single finite number (the omega
+# point functions return NA_real_ for a fit that did not converge), is
+# set aside with its reason recorded, and the interval is formed from
+# the replications that returned a value: the standard error is their
+# standard deviation and the percentile and BCa limits are their
+# quantiles. The counts travel back to the caller in `bootstrap` (see
+# Returns) so the result can say how many replications the interval
+# conditions on, and a single warning states the counts when any
+# replication was set aside. Since 1.0.1; in 1.0.0 the failed
+# replications were dropped without a count.
 #
 # Seed handling: if seed is not NULL, .dmar_local_seed() sets it before
 # resampling so that runs are reproducible, and the caller's RNG state is
@@ -1340,34 +1353,108 @@
 # Inputs:
 #   data       : data frame or matrix passed row-wise to boot::boot.
 #   point_fn   : function(d) returning a single numeric estimate from a
-#                resample. NA_real_ is allowed (it skips that replication).
+#                resample. NA_real_ is allowed (it sets that replication
+#                aside, counted as a non-finite value).
 #   B          : number of bootstrap replications.
 #   conf_level : confidence level.
 #   kind       : one of "bootstrap_se", "bootstrap_se_logistic",
 #                "percentile", "bca".
 #   seed       : integer seed or NULL.
 # Returns:
-#   A list with `se`, `lower`, `upper`.
+#   A list with `se`, `lower`, `upper`, `ci_method` (the kind requested,
+#   or the percentile fallback label when a BCa adjustment could not be
+#   estimated), and `bootstrap`, the counts that .relia_result() attaches
+#   as the `bootstrap` attribute:
+#     attempted, returned, failed : B, the replications that returned a
+#                                   finite value, and the difference;
+#     reasons                     : c(error = , non_finite = ), how the
+#                                   failed replications were set aside;
+#     error_messages              : the distinct error messages with
+#                                   their counts (empty when none);
 .bootstrap_ci <- function(data, point_fn, B, conf_level, kind, seed) {
   if (!requireNamespace("boot", quietly = TRUE)) {
     stop("Bootstrap CIs require the 'boot' package. ",
          "Install with install.packages(\"boot\").", call. = FALSE)
   }
   .dmar_local_seed(seed)
+  n <- nrow(data)
 
-  statistic <- function(d, i) {
-    val <- tryCatch(point_fn(d[i, , drop = FALSE]),
-                    error = function(e) NA_real_)
-    if (is.null(val) || length(val) != 1L) NA_real_ else as.numeric(val)
+  # The fate of every replication is recorded here. The counters live in
+  # an environment made for them so the handler below updates them with
+  # ordinary assignment (never <<-).
+  state <- new.env(parent = emptyenv())
+  reset_counts <- function() {
+    state$error <- 0L
+    state$non_finite <- 0L
+    state$messages <- character()
   }
+  take_counts <- function(attempted) {
+    failed <- state$error + state$non_finite
+    msgs <- if (length(state$messages)) {
+      tab <- table(state$messages)
+      stats::setNames(as.integer(tab), names(tab))
+    } else {
+      integer()
+    }
+    list(attempted = as.integer(attempted),
+         returned = as.integer(attempted - failed),
+         failed = as.integer(failed),
+         reasons = c(error = state$error, non_finite = state$non_finite),
+         error_messages = msgs)
+  }
+  reset_counts()
+
+  # The wrapper boot::boot calls. An error from the point function is
+  # counted as it is caught; any other return that is not a single finite
+  # number (the omega point functions' NA_real_ for a non-converged fit,
+  # a NaN from a degenerate resample) is counted as non-finite.
+  statistic <- function(d, i) {
+    # boot::boot evaluates the statistic once on the full data for t0
+    # before the B resamples; that call is not a replication and is not
+    # counted (the callers have already verified the estimate is finite).
+    counted <- !isTRUE(state$skip_next)
+    state$skip_next <- FALSE
+    state$last_was_error <- FALSE
+    val <- tryCatch(point_fn(d[i, , drop = FALSE]), error = function(e) {
+      if (counted) {
+        state$error <- state$error + 1L
+        state$messages <- c(state$messages, conditionMessage(e))
+      }
+      state$last_was_error <- TRUE
+      NA_real_
+    })
+    if (isTRUE(state$last_was_error)) return(NA_real_)
+    if (is.null(val) || length(val) != 1L || !is.numeric(val) ||
+        !is.finite(val)) {
+      if (counted) state$non_finite <- state$non_finite + 1L
+      return(NA_real_)
+    }
+    as.numeric(val)
+  }
+
+  state$skip_next <- TRUE
   boot_out <- boot::boot(data = data, statistic = statistic,
                          R = B, stype = "i")
+  counts <- take_counts(B)
+  jack <- list(attempted = 0L, returned = 0L, failed = 0L,
+               reasons = c(error = 0L, non_finite = 0L),
+               error_messages = integer())
+  t0 <- as.numeric(boot_out$t0)
+  t_boot <- as.numeric(boot_out$t)
+  returned <- counts$returned
 
   crit <- stats::qnorm(1 - (1 - conf_level) / 2)
-  se  <- stats::sd(boot_out$t, na.rm = TRUE)
-  est <- boot_out$t0
+  se  <- if (returned >= 2L) stats::sd(t_boot, na.rm = TRUE) else NA_real_
+  est <- t0
+  method <- kind
+  acceleration <- NA_real_
+  acceleration_method <- NA_character_
+  fallback <- NULL   # the reason the percentile interval replaced BCa
+  lower <- upper <- NA_real_
 
-  if (kind == "bootstrap_se") {
+  if (returned < 2L) {
+    # Nothing to form an interval from; the warning below says so.
+  } else if (kind == "bootstrap_se") {
     lower <- est - crit * se
     upper <- est + crit * se
   } else if (kind == "bootstrap_se_logistic") {
@@ -1387,7 +1474,76 @@
   } else {
     stop("Unknown bootstrap kind: ", kind, call. = FALSE)
   }
-  list(se = se, lower = lower, upper = upper)
+
+  # One warning per call, stating every count the user should know.
+  notes <- character()
+  if (counts$failed > 0L) {
+    notes <- c(notes, sprintf(
+      "%d of %d bootstrap %s set aside (%s)%s",
+      counts$failed, B,
+      if (counts$failed == 1L) "replications was" else "replications were",
+      .bootstrap_reason_phrase(counts$reasons, counts$error_messages),
+      if (returned >= 2L) {
+        sprintf("; the interval is computed from the %d that returned a value",
+                returned)
+      } else {
+        "; fewer than two returned a value, so no interval is reported"
+      }))
+  }
+  if (jack$failed > 0L) {
+    notes <- c(notes, sprintf(
+      "%d of %d jackknife %s behind the BCa acceleration failed (%s)%s",
+      jack$failed, jack$attempted,
+      if (jack$failed == 1L) "replicate" else "replicates",
+      .bootstrap_reason_phrase(jack$reasons, jack$error_messages),
+      if (is.null(fallback)) {
+        sprintf("; the acceleration was estimated from the %d that returned a value",
+                jack$returned)
+      } else {
+        ""
+      }))
+  }
+  if (!is.null(fallback)) {
+    notes <- c(notes, sprintf(
+      "The BCa interval could not be formed (%s); the percentile interval is reported instead, and the ci_method attribute says so",
+      fallback))
+  }
+  if (length(notes)) {
+    warning(paste0(paste(notes, collapse = ". "), "."), call. = FALSE)
+  }
+
+  counts$acceleration <- acceleration
+  counts$acceleration_method <- acceleration_method
+  counts$jackknife <- jack
+  list(se = se, lower = lower, upper = upper,
+       ci_method = method, bootstrap = counts)
+}
+
+
+# .bootstrap_reason_phrase(reasons, error_messages)
+#
+# The parenthetical that names why replications were set aside, shared by
+# the warning in .bootstrap_ci() and the one-line count print.dmar_tbl()
+# adds under a table carrying a `bootstrap` attribute: "3 raised an error
+# (most often: ...), 2 returned a non-finite value". The most frequent
+# error message is quoted, first line only, so the user sees the cause
+# without unpacking the attribute.
+.bootstrap_reason_phrase <- function(reasons, error_messages = integer()) {
+  parts <- character()
+  if (reasons[["error"]] > 0L) {
+    msg <- ""
+    if (length(error_messages)) {
+      top <- names(error_messages)[which.max(error_messages)]
+      top <- trimws(gsub("\\s+", " ", strsplit(top, "\n")[[1]][1]))
+      msg <- sprintf(" (most often: %s)", top)
+    }
+    parts <- c(parts, sprintf("%d raised an error%s", reasons[["error"]], msg))
+  }
+  if (reasons[["non_finite"]] > 0L) {
+    parts <- c(parts, sprintf("%d returned a non-finite value",
+                              reasons[["non_finite"]]))
+  }
+  paste(parts, collapse = ", ")
 }
 
 
@@ -1398,7 +1554,8 @@
 # .relia_result(estimate, se, lower, upper, conf_level, N, J,
 #               coefficient, ci_method, B = NA_integer_,
 #               N_complete = N, missing = "listwise", aux = NULL,
-#               se_transformed = NA_real_, se_transform_scale = NULL)
+#               se_transformed = NA_real_, se_transform_scale = NULL,
+#               bootstrap = NULL)
 #
 # Pack the point estimate, standard error, CI bounds, and bookkeeping
 # values into the package-standard data.frame(term, value).
@@ -1406,7 +1563,10 @@
 # the CI bounds before returning. Metadata that does not belong in the
 # numeric `value` column (which coefficient was computed, which CI
 # method, the missing-data treatment, the auxiliary variables, and the
-# number of bootstrap reps when applicable) travels as attributes.
+# number of bootstrap reps when applicable) travels as attributes. A
+# bootstrap call also passes `bootstrap`, the replication counts from
+# .bootstrap_ci(), which become the `bootstrap` attribute (absent for
+# every other method, so no existing attribute changes).
 #
 # The `se` row is always on the reliability (coefficient) scale. When
 # the interval was built on a transformation scale (the Fisher, Bonett,
@@ -1430,7 +1590,8 @@
                           N_complete = N, missing = "listwise",
                           aux = NULL,
                           se_transformed = NA_real_,
-                          se_transform_scale = NULL) {
+                          se_transform_scale = NULL,
+                          bootstrap = NULL) {
   if (!is.na(lower)) lower <- max(lower, 0)
   if (!is.na(upper)) upper <- min(upper, 1)
   terms  <- c("estimate", "se", "lower_limit", "upper_limit",
@@ -1449,6 +1610,7 @@
   }
   if (!is.null(aux)) attr(out, "aux") <- aux
   if (!is.na(B)) attr(out, "B") <- B
+  if (!is.null(bootstrap)) attr(out, "bootstrap") <- bootstrap
   # Tag with a leading class so the generics::tidy / generics::glance
   # S3 methods dispatch; data.frame behavior is preserved through
   # inheritance.

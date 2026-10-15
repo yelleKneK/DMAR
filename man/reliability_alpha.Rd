@@ -97,7 +97,18 @@ a glance; equal to \code{"N"} under listwise deletion and for
 covariance input), and \code{"J"} (number of items). The selected
 coefficient, CI method, and missing-data treatment travel as the
 attributes \code{coefficient}, \code{ci_method}, \code{missing}, and
-(when supplied) \code{aux}; bootstrap calls also record \code{B}.
+(when supplied) \code{aux}; bootstrap calls also record \code{B}. A bootstrap call also carries the attribute
+\code{bootstrap}, a list recording the replications the interval
+conditions on: \code{attempted} (\code{B}), \code{returned} (the
+replications that returned a finite value; the standard error is
+their standard deviation and the percentile and BCa limits are their
+quantiles), \code{failed} (the difference), \code{reasons} (a named
+count of why replications were set aside: \code{error} when the refit
+raised an error, \code{non_finite} when it returned no finite value,
+as a fit that did not converge does), and \code{error_messages} (the
+distinct error messages with their counts, empty when none). The
+printed table shows these counts in one line, and a warning states
+them whenever a replication was set aside.
 }
 \description{
 Estimates coefficient \eqn{\alpha} for a homogeneous composite score and
@@ -265,9 +276,13 @@ names the estimator to use instead:
   normal-theory interval; the \code{_logistic} variant builds that
   interval on the logit scale so the endpoints respect [0, 1].
   Replications on which the estimator cannot be computed (for
-  example, a model refit that does not converge) are dropped, and
+  example, a model refit that does not converge) are set aside, and
   the interval is computed from the replications that return a
-  value. Requires raw data and the \pkg{boot} package. The default
+  value, whose quantiles the percentile and BCa limits are; the
+  counts, and why the rest were set aside, travel in the
+  \code{bootstrap} attribute (see \emph{Value}), print under the
+  table, and are stated in a warning whenever a replication was set
+  aside. Requires raw data and the \pkg{boot} package. The default
   \code{B = 10000} is an accuracy choice: the BCa adjustment pushes
   the working quantiles farther into the tails of the bootstrap
   distribution than the percentile interval uses, and stabilizing

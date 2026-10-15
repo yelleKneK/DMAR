@@ -97,7 +97,18 @@ observed item under \code{missing = "fiml"}), \code{"N_complete"}
 for covariance input), and \code{"J"}. Attributes
 \code{coefficient} (\code{"omega"}), \code{ci_method},
 \code{denominator}, \code{missing}, and (when supplied) \code{aux}
-record the computation; bootstrap calls also record \code{B}.
+record the computation; bootstrap calls also record \code{B}. A bootstrap call also carries the attribute
+\code{bootstrap}, a list recording the replications the interval
+conditions on: \code{attempted} (\code{B}), \code{returned} (the
+replications that returned a finite value; the standard error is
+their standard deviation and the percentile and BCa limits are their
+quantiles), \code{failed} (the difference), \code{reasons} (a named
+count of why replications were set aside: \code{error} when the refit
+raised an error, \code{non_finite} when it returned no finite value,
+as a fit that did not converge does), and \code{error_messages} (the
+distinct error messages with their counts, empty when none). The
+printed table shows these counts in one line, and a warning states
+them whenever a replication was set aside.
 }
 \description{
 Estimates McDonald's (1999) coefficient \eqn{\omega} for a homogeneous
@@ -260,8 +271,12 @@ Available confidence interval methods (set via \code{ci_method}):
   of the bootstrap estimates as a standard error in a normal-theory
   interval, built on the logit scale for the \code{_logistic}
   variant so the endpoints respect [0, 1]. Replications whose model
-  refit does not converge are dropped, and the interval is computed
-  from the replications that return a value. The default
+  refit does not converge are set aside, and the interval is computed
+  from the replications that return a value, whose quantiles the
+  percentile and BCa limits are; the counts, and why the rest were
+  set aside, travel in the \code{bootstrap} attribute (see
+  \emph{Value}), print under the table, and are stated in a warning
+  whenever a replication was set aside. The default
   \code{B = 10000} is an accuracy choice: the BCa adjustment pushes
   the working quantiles farther into the tails of the bootstrap
   distribution than the percentile interval uses, and stabilizing

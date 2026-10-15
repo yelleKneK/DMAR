@@ -43,7 +43,18 @@ already on the coefficient scale; \code{NA} for
 cases; equal to \code{"N"} here, and carried so the whole
 reliability family returns one shape), and \code{"J"}. Attributes
 \code{coefficient} (\code{"omega_categorical"}), \code{ci_method}, and \code{B}
-record the computation.
+record the computation. A bootstrap call also carries the attribute
+\code{bootstrap}, a list recording the replications the interval
+conditions on: \code{attempted} (\code{B}), \code{returned} (the
+replications that returned a finite value; the standard error is
+their standard deviation and the percentile and BCa limits are their
+quantiles), \code{failed} (the difference), \code{reasons} (a named
+count of why replications were set aside: \code{error} when the refit
+raised an error, \code{non_finite} when it returned no finite value,
+as a fit that did not converge does), and \code{error_messages} (the
+distinct error messages with their counts, empty when none). The
+printed table shows these counts in one line, and a warning states
+them whenever a replication was set aside.
 }
 \description{
 Estimates categorical omega (\eqn{\omega_C}; Green & Yang, 2009;
@@ -108,10 +119,17 @@ resampled with replacement \code{B} times (10000 by default) and
 categorical omega is recomputed, with the full WLSMV model refit, on
 each replication (Efron & Tibshirani, 1993). Replications whose
 refit fails or does not converge, most common with small samples and
-sparse response categories, are dropped, and the interval is
-computed from the replications that return a value. Bootstrap
-results vary from run to run; supply \code{seed} for
-reproducibility.
+sparse response categories, are set aside, and the interval is
+computed from the replications that return a value: the standard
+error is their standard deviation, and the percentile and BCa limits
+are quantiles of the returned replicates, not of all \code{B}. How
+many were attempted, how many returned a value, and why the rest
+were set aside is recorded in the \code{bootstrap} attribute of the
+result (see \emph{Value}), printed in one line under the table, and
+stated in a warning whenever a replication was set aside, so an
+interval that conditions on a subset of the replications says so and
+by how much. Bootstrap results vary from run to run; supply
+\code{seed} for reproducibility.
 \describe{
   \item{\code{"bca"}}{The bias-corrected and accelerated bootstrap,
   the default and the specific recommendation of Kelley and

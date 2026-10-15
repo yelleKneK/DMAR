@@ -103,6 +103,12 @@ three significant figures (an AIC of 2284.830 would otherwise print as
 \code{fixed_terms} attribute, and they print to \code{digits_fixed}
 decimal places (three by default).
 
+A table that carries a \code{bootstrap} attribute (the reliability
+family's bootstrap intervals; see \code{\link{reliability_alpha}})
+prints one more line stating how many replications were attempted,
+how many returned a value, and why the rest were set aside, so the
+replications the interval conditions on are always on the page.
+
 To see more precision than the display shows, raise \code{digits}
 (for example \code{print(x, digits = 8)}) or read the columns
 directly, since the stored values are never rounded: \code{x$value}

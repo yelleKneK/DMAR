@@ -44,7 +44,12 @@
 #' small for the normal-theory derivations behind \code{"feldt"} and
 #' \code{"bonett"}. No bootstrap runs unless \code{ci_method} asks for
 #' one; when it does, the default is \code{B = 10000} replications, and
-#' supplying \code{seed} makes the interval reproducible.
+#' supplying \code{seed} makes the interval reproducible. Replications on
+#' which KR-20 cannot be computed are set aside and counted, and the
+#' interval is computed from the replications that return a value; the
+#' counts travel in the \code{bootstrap} attribute described under
+#' \code{\link{reliability_alpha}}, print under the table, and are
+#' stated in a warning whenever a replication was set aside.
 #'
 #' \strong{Comparison with other packages.} The \pkg{psych} package
 #' computes the same quantity via \code{\link[psych]{alpha}} (since
@@ -87,7 +92,9 @@
 #' to \code{"N"} here, and carried so the whole reliability family
 #' returns one shape), and \code{"J"} (number of items). Attributes
 #' \code{coefficient} (\code{"kr20"}) and \code{ci_method} record the
-#' computation; bootstrap calls also record \code{B}.
+#' computation; bootstrap calls also record \code{B} and the replication
+#' counts in the \code{bootstrap} attribute (see
+#' \code{\link{reliability_alpha}}).
 #'
 #' @references
 #' Cronbach, L. J. (1951). Coefficient alpha and the internal structure
@@ -225,7 +232,8 @@ reliability_kr20 <- function(data,
     lower = ci$lower, upper = ci$upper,
     conf_level = conf_level, N = N, J = J,
     coefficient = "kr20",
-    ci_method = ci_method,
+    ci_method = ci$ci_method %||% ci_method,
+    bootstrap = ci$bootstrap,
     B = if (ci_method %in% c("bootstrap_se", "bootstrap_se_logistic",
                              "percentile", "bca")) B else NA_integer_,
     se_transformed = ci$se_transformed,
