@@ -114,7 +114,22 @@ visible at a glance; equal to `"N"` under listwise deletion and for
 covariance input), and `"J"` (number of items). The selected
 coefficient, CI method, and missing-data treatment travel as the
 attributes `coefficient`, `ci_method`, `missing`, and (when supplied)
-`aux`; bootstrap calls also record `B`.
+`aux`; bootstrap calls also record `B`. A bootstrap call also carries
+the attribute `bootstrap`, a list recording the replications the
+interval conditions on: `attempted` (`B`), `returned` (the replications
+that returned a finite value; the standard error is their standard
+deviation and the percentile and BCa limits are their quantiles),
+`failed` (the difference), `reasons` (a named count of why replications
+were set aside: `error` when the refit raised an error, `non_finite`
+when it returned no finite value, as a fit that did not converge does),
+`error_messages` (the distinct error messages with their counts, empty
+when none), `acceleration` and `acceleration_method` (the BCa
+acceleration used and whether it came from the regression or the
+jackknife; `NA` unless a BCa interval was formed), and `jackknife` (the
+same `attempted`, `returned`, `failed`, `reasons`, and `error_messages`
+for the leave-one-out refits behind the acceleration, all zero when no
+jackknife ran). The printed table shows these counts in one line, and a
+warning states them whenever a replication was set aside.
 
 ## Details
 
@@ -290,19 +305,33 @@ names the estimator to use instead:
   positions for exactly those features, estimating the median bias from
   the bootstrap distribution and the acceleration from the jackknife,
   and is second-order accurate where the percentile interval is
-  first-order accurate (DiCiccio & Efron, 1996). `"bootstrap_se"` uses
-  the standard deviation of the bootstrap estimates as a standard error
-  in an ordinary normal-theory interval; the `_logistic` variant builds
-  that interval on the logit scale so the endpoints respect \[0, 1\].
-  Replications on which the estimator cannot be computed (for example, a
-  model refit that does not converge) are dropped, and the interval is
-  computed from the replications that return a value. Requires raw data
-  and the boot package. The default `B = 10000` is an accuracy choice:
-  the BCa adjustment pushes the working quantiles farther into the tails
-  of the bootstrap distribution than the percentile interval uses, and
-  stabilizing them takes more replications than the customary 2000;
-  reduce `B` for exploration, not for a reported analysis. Bootstrap
-  results vary from run to run; supply `seed` for reproducibility.
+  first-order accurate (DiCiccio & Efron, 1996). The acceleration is
+  estimated as boot estimates it, by regression on the resampling
+  frequencies when at least as many replications as cases returned a
+  value and by the jackknife otherwise; a leave-one-out refit that fails
+  is counted and set aside rather than stopping the call (as one did
+  through version 1.0.0), and when the acceleration or the bias
+  correction cannot be estimated at all the percentile interval is
+  returned in its place, with a warning and the substitution recorded in
+  the `ci_method` attribute; see
+  [`reliability_omega_categorical`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
+  for the full account. `"bootstrap_se"` uses the standard deviation of
+  the bootstrap estimates as a standard error in an ordinary
+  normal-theory interval; the `_logistic` variant builds that interval
+  on the logit scale so the endpoints respect \[0, 1\]. Replications on
+  which the estimator cannot be computed (for example, a model refit
+  that does not converge) are set aside, and the interval is computed
+  from the replications that return a value, whose quantiles the
+  percentile and BCa limits are; the counts, and why the rest were set
+  aside, travel in the `bootstrap` attribute (see *Value*), print under
+  the table, and are stated in a warning whenever a replication was set
+  aside. Requires raw data and the boot package. The default `B = 10000`
+  is an accuracy choice: the BCa adjustment pushes the working quantiles
+  farther into the tails of the bootstrap distribution than the
+  percentile interval uses, and stabilizing them takes more replications
+  than the customary 2000; reduce `B` for exploration, not for a
+  reported analysis. Bootstrap results vary from run to run; supply
+  `seed` for reproducibility.
 
 - `"none"`:
 
@@ -509,6 +538,8 @@ reliability_alpha(data = items, ci_method = "percentile", B = 500,
 #>  N           200  
 #>  N_complete  200  
 #>  J           6    
+#> 
+#> Bootstrap: 500 replications attempted, 500 returned a value
 
 # The bias-corrected and accelerated interval adjusts those two
 # quantile positions for median bias and for acceleration, and is the
@@ -526,6 +557,8 @@ reliability_alpha(data = items, ci_method = "bca", B = 500, seed = 113)
 #>  N           200  
 #>  N_complete  200  
 #>  J           6    
+#> 
+#> Bootstrap: 500 replications attempted, 500 returned a value
 
 # Full information maximum likelihood with an auxiliary variable.
 # Missingness on y2 depends on an auxiliary z (missing at random given

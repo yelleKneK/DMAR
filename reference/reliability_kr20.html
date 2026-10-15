@@ -11,7 +11,7 @@ confidence interval for the population coefficient."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,7 +115,9 @@ listwise deletion), <code>"N_complete"</code> (the complete cases; equal
 to <code>"N"</code> here, and carried so the whole reliability family
 returns one shape), and <code>"J"</code> (number of items). Attributes
 <code>coefficient</code> (<code>"kr20"</code>) and <code>ci_method</code> record the
-computation; bootstrap calls also record <code>B</code>.</p>
+computation; bootstrap calls also record <code>B</code> and the replication
+counts in the <code>bootstrap</code> attribute (see
+<code><a href="reliability_alpha.html">reliability_alpha</a></code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -154,7 +156,12 @@ items means highly unbalanced item difficulties or a sample size too
 small for the normal-theory derivations behind <code>"feldt"</code> and
 <code>"bonett"</code>. No bootstrap runs unless <code>ci_method</code> asks for
 one; when it does, the default is <code>B = 10000</code> replications, and
-supplying <code>seed</code> makes the interval reproducible.</p>
+supplying <code>seed</code> makes the interval reproducible. Replications on
+which KR-20 cannot be computed are set aside and counted, and the
+interval is computed from the replications that return a value; the
+counts travel in the <code>bootstrap</code> attribute described under
+<code><a href="reliability_alpha.html">reliability_alpha</a></code>, print under the table, and are
+stated in a warning whenever a replication was set aside.</p>
 <p><strong>Comparison with other packages.</strong> The <span class="pkg">psych</span> package
 computes the same quantity via <code>alpha</code> (since
 \(\alpha\) on 0/1 data <em>is</em> KR-20). <code>reliability_kr20</code>
@@ -265,6 +272,8 @@ interval drawn from the methods compared in Kelley and Pornprasertmanit
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N           300   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  300   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J           10    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: 500 replications attempted, 500 returned a value</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

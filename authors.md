@@ -12,13 +12,13 @@ Source:
 
 Kelley K (2026). *DMAR: Design, Measurement, and Analysis in R*.
 [doi:10.5281/zenodo.22960335](https://doi.org/10.5281/zenodo.22960335).
-R package version 1.0.0, <https://github.com/yelleKneK/DMAR>.
+R package version 1.0.1, <https://github.com/yelleKneK/DMAR>.
 
     @Manual{,
       title = {{DMAR}: Design, Measurement, and Analysis in {R}},
       author = {Ken Kelley},
       year = {2026},
-      note = {R package version 1.0.0},
+      note = {R package version 1.0.1},
       url = {https://github.com/yelleKneK/DMAR},
       doi = {10.5281/zenodo.22960335},
     }

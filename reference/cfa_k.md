@@ -964,22 +964,22 @@ cfa_k(likert,
 #>   scale_b: congeneric (no equality constraints)
 #> 
 #>  syntax             term                 estimate se     z_value p_value 
-#>  scale_a ~~ scale_b phi_scale_a_scale_b  0.427    0.0825 5.17    < 0.0001
+#>  scale_a ~~ scale_b phi_scale_a_scale_b  0.427    0.0838 5.09    < 0.0001
 #>                     omega_scale_a        0.688    <NA>   <NA>    <NA>    
-#>                     ave_scale_a          0.491    0.0459 10.7    < 0.0001
-#>                     H_scale_a            0.793    0.0558 14.2    < 0.0001
+#>                     ave_scale_a          0.491    0.0467 10.5    < 0.0001
+#>                     H_scale_a            0.793    0.0579 13.7    < 0.0001
 #>                     omega_scale_b        0.762    <NA>   <NA>    <NA>    
-#>                     ave_scale_b          0.576    0.0398 14.5    < 0.0001
-#>                     H_scale_b            0.843    0.0444 19      < 0.0001
+#>                     ave_scale_b          0.576    0.0401 14.4    < 0.0001
+#>                     H_scale_b            0.843    0.0449 18.8    < 0.0001
 #>  scale_a ~~ scale_b htmt_scale_a_scale_b 0.412    <NA>   <NA>    <NA>    
 #>  ci_lower ci_upper
-#>  0.265    0.588   
+#>  0.262    0.591   
 #>  <NA>     <NA>    
-#>  0.401    0.581   
-#>  0.684    0.902   
+#>  0.399    0.582   
+#>  0.68     0.906   
 #>  <NA>     <NA>    
 #>  0.497    0.654   
-#>  0.756    0.931   
+#>  0.755    0.931   
 #>  <NA>     <NA>    
 #> 
 #> Confidence level: 95%

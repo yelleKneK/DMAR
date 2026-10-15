@@ -63,7 +63,9 @@ attribute `se_transform_scale`: `"fisher_z"`, `"log(1-alpha)"`, or
 deletion), `"N_complete"` (the complete cases; equal to `"N"` here, and
 carried so the whole reliability family returns one shape), and `"J"`
 (number of items). Attributes `coefficient` (`"kr20"`) and `ci_method`
-record the computation; bootstrap calls also record `B`.
+record the computation; bootstrap calls also record `B` and the
+replication counts in the `bootstrap` attribute (see
+[`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md)).
 
 ## Details
 
@@ -105,6 +107,12 @@ item difficulties or a sample size too small for the normal-theory
 derivations behind `"feldt"` and `"bonett"`. No bootstrap runs unless
 `ci_method` asks for one; when it does, the default is `B = 10000`
 replications, and supplying `seed` makes the interval reproducible.
+Replications on which KR-20 cannot be computed are set aside and
+counted, and the interval is computed from the replications that return
+a value; the counts travel in the `bootstrap` attribute described under
+[`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
+print under the table, and are stated in a warning whenever a
+replication was set aside.
 
 **Comparison with other packages.** The psych package computes the same
 quantity via `alpha` (since \\\alpha\\ on 0/1 data *is* KR-20).
@@ -226,4 +234,6 @@ reliability_kr20(data = items, ci_method = "percentile", B = 500,
 #>  N           300   
 #>  N_complete  300   
 #>  J           10    
+#> 
+#> Bootstrap: 500 replications attempted, 500 returned a value
 ```

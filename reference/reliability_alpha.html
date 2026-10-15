@@ -11,7 +11,7 @@ of several documented methods."><meta property="og:image" content="https://yelle
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -170,7 +170,24 @@ a glance; equal to <code>"N"</code> under listwise deletion and for
 covariance input), and <code>"J"</code> (number of items). The selected
 coefficient, CI method, and missing-data treatment travel as the
 attributes <code>coefficient</code>, <code>ci_method</code>, <code>missing</code>, and
-(when supplied) <code>aux</code>; bootstrap calls also record <code>B</code>.</p>
+(when supplied) <code>aux</code>; bootstrap calls also record <code>B</code>. A bootstrap call also carries the attribute
+<code>bootstrap</code>, a list recording the replications the interval
+conditions on: <code>attempted</code> (<code>B</code>), <code>returned</code> (the
+replications that returned a finite value; the standard error is
+their standard deviation and the percentile and BCa limits are their
+quantiles), <code>failed</code> (the difference), <code>reasons</code> (a named
+count of why replications were set aside: <code>error</code> when the refit
+raised an error, <code>non_finite</code> when it returned no finite value,
+as a fit that did not converge does), <code>error_messages</code> (the
+distinct error messages with their counts, empty when none),
+<code>acceleration</code> and <code>acceleration_method</code> (the BCa
+acceleration used and whether it came from the regression or the
+jackknife; <code>NA</code> unless a BCa interval was formed), and
+<code>jackknife</code> (the same <code>attempted</code>, <code>returned</code>,
+<code>failed</code>, <code>reasons</code>, and <code>error_messages</code> for the
+leave-one-out refits behind the acceleration, all zero when no
+jackknife ran). The printed table shows these counts in one line,
+and a warning states them whenever a replication was set aside.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -341,14 +358,28 @@ names the estimator to use instead:</p><dl><dt><code>"feldt"</code></dt>
   estimating the median bias from the bootstrap distribution and
   the acceleration from the jackknife, and is second-order accurate
   where the percentile interval is first-order accurate (DiCiccio &amp;
-  Efron, 1996). <code>"bootstrap_se"</code> uses the standard deviation
+  Efron, 1996). The acceleration is estimated as <span class="pkg">boot</span>
+  estimates it, by regression on the resampling frequencies when at
+  least as many replications as cases returned a value and by the
+  jackknife otherwise; a leave-one-out refit that fails is counted
+  and set aside rather than stopping the call (as one did through
+  version 1.0.0), and when the acceleration or the bias correction
+  cannot be estimated at all the percentile interval is returned in
+  its place, with a warning and the substitution recorded in the
+  <code>ci_method</code> attribute; see
+  <code><a href="reliability_omega_categorical.html">reliability_omega_categorical</a></code> for the full account.
+  <code>"bootstrap_se"</code> uses the standard deviation
   of the bootstrap estimates as a standard error in an ordinary
   normal-theory interval; the <code>_logistic</code> variant builds that
   interval on the logit scale so the endpoints respect [0, 1].
   Replications on which the estimator cannot be computed (for
-  example, a model refit that does not converge) are dropped, and
+  example, a model refit that does not converge) are set aside, and
   the interval is computed from the replications that return a
-  value. Requires raw data and the <span class="pkg">boot</span> package. The default
+  value, whose quantiles the percentile and BCa limits are; the
+  counts, and why the rest were set aside, travel in the
+  <code>bootstrap</code> attribute (see <em>Value</em>), print under the
+  table, and are stated in a warning whenever a replication was set
+  aside. Requires raw data and the <span class="pkg">boot</span> package. The default
   <code>B = 10000</code> is an accuracy choice: the BCa adjustment pushes
   the working quantiles farther into the tails of the bootstrap
   distribution than the percentile interval uses, and stabilizing
@@ -533,6 +564,8 @@ coefficient),
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N           200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J           6    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: 500 replications attempted, 500 returned a value</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The bias-corrected and accelerated interval adjusts those two</span></span></span>
 <span class="r-in"><span><span class="co"># quantile positions for median bias and for acceleration, and is the</span></span></span>
@@ -550,6 +583,8 @@ coefficient),
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N           200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  N_complete  200  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  J           6    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Bootstrap: 500 replications attempted, 500 returned a value</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Full information maximum likelihood with an auxiliary variable.</span></span></span>
 <span class="r-in"><span><span class="co"># Missingness on y2 depends on an auxiliary z (missing at random given</span></span></span>

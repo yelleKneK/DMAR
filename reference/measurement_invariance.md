@@ -393,8 +393,8 @@ generics::tidy(mi)
 #> 3        4 0.09640134 -0.005006486  0.001122817
 #> 4        6 0.11945997 -0.005335160 -0.001387562
 generics::glance(mi)
-#>   n_levels estimator ordered                                test fit_indices
-#> 1        4        ML   FALSE standard chi square difference test    standard
+#>   n_levels estimator ordered                              test fit_indices
+#> 1        4        ML   FALSE scaled chi square difference test      robust
 
 # Partial invariance frees one loading across the schools at every
 # rung (Byrne, Shavelson, & Muthén, 1989), so the metric rung costs
@@ -435,10 +435,10 @@ mi_ordered <- measurement_invariance(hs_ordered, hs_factors,
 mi_ordered
 #>  level      chi_square df p_chi_square cfi  rmsea  delta_chi_square delta_df
 #>  configural 18         16 0.3232       0.98 0.0841 <NA>             <NA>    
-#>  thresholds 27.2       22 0.2044       1    0.106  10.3             6       
+#>  thresholds 27.2       22 0.2044       <NA> <NA>   10.3             6       
 #>  p_value delta_cfi delta_rmsea
 #>  <NA>    <NA>      <NA>       
-#>  0.1114  0.0204    0.0223     
+#>  0.1114  <NA>      <NA>       
 attr(mi_ordered, "test")
 #> [1] "scaled chi square difference test (method = \"satorra.2000\")"
 
@@ -460,8 +460,8 @@ measurement_invariance(
   levels = c("configural", "metric"))
 #>  level      chi_square df p_chi_square cfi   rmsea delta_chi_square delta_df
 #>  configural 0          0  <NA>         1     0     <NA>             <NA>    
-#>  metric     7.67       2  0.0216       0.987 0.137 7.67             2       
+#>  metric     7.67       2  0.0216       0.987 0.14  7.67             2       
 #>  p_value delta_cfi delta_rmsea
 #>  <NA>    <NA>      <NA>       
-#>  0.0216  -0.0127   0.137      
+#>  0.0216  -0.0128   0.14       
 ```

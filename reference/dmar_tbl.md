@@ -111,6 +111,13 @@ The producing function names these rows through a `fixed_terms`
 attribute, and they print to `digits_fixed` decimal places (three by
 default).
 
+A table that carries a `bootstrap` attribute (the reliability family's
+bootstrap intervals; see
+[`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md))
+prints one more line stating how many replications were attempted, how
+many returned a value, and why the rest were set aside, so the
+replications the interval conditions on are always on the page.
+
 To see more precision than the display shows, raise `digits` (for
 example `print(x, digits = 8)`) or read the columns directly, since the
 stored values are never rounded: `x$value` or `x[["p_value"]]` returns

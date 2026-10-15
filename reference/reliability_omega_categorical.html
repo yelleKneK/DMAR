@@ -11,7 +11,7 @@ ordered-categorical items and returns a bootstrap confidence interval."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,7 +106,24 @@ already on the coefficient scale; <code>NA</code> for
 cases; equal to <code>"N"</code> here, and carried so the whole
 reliability family returns one shape), and <code>"J"</code>. Attributes
 <code>coefficient</code> (<code>"omega_categorical"</code>), <code>ci_method</code>, and <code>B</code>
-record the computation.</p>
+record the computation. A bootstrap call also carries the attribute
+<code>bootstrap</code>, a list recording the replications the interval
+conditions on: <code>attempted</code> (<code>B</code>), <code>returned</code> (the
+replications that returned a finite value; the standard error is
+their standard deviation and the percentile and BCa limits are their
+quantiles), <code>failed</code> (the difference), <code>reasons</code> (a named
+count of why replications were set aside: <code>error</code> when the refit
+raised an error, <code>non_finite</code> when it returned no finite value,
+as a fit that did not converge does), <code>error_messages</code> (the
+distinct error messages with their counts, empty when none),
+<code>acceleration</code> and <code>acceleration_method</code> (the BCa
+acceleration used and whether it came from the regression or the
+jackknife; <code>NA</code> unless a BCa interval was formed), and
+<code>jackknife</code> (the same <code>attempted</code>, <code>returned</code>,
+<code>failed</code>, <code>reasons</code>, and <code>error_messages</code> for the
+leave-one-out refits behind the acceleration, all zero when no
+jackknife ran). The printed table shows these counts in one line,
+and a warning states them whenever a replication was set aside.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -143,9 +160,12 @@ recommended interval; request <code>ci_method = "bca"</code> to obtain it.
 The interval is not a quick one. Every replication refits the
 ordered-categorical factor model and the saturated polychoric model
 behind the denominator, a fraction of a second for a scale of
-moderate length, and the jackknife behind the BCa acceleration adds
-one such refit per case, so the recommended interval at the default
-<code>B = 10000</code> runs for tens of minutes. The example on this page
+moderate length, so the recommended interval at the default
+<code>B = 10000</code> runs for tens of minutes; when <code>B</code> is below
+the number of cases, the jackknife behind the BCa acceleration adds
+one such refit per case (at the default <code>B</code> the acceleration is
+read from the replicates themselves at no extra cost; see the
+<code>"bca"</code> entry below). The example on this page
 therefore stops at the point estimate; the reported analysis adds
 <code>ci_method = "bca"</code> to the same call, with <code>seed</code> for
 reproducibility.</p>
@@ -164,10 +184,17 @@ resampled with replacement <code>B</code> times (10000 by default) and
 categorical omega is recomputed, with the full WLSMV model refit, on
 each replication (Efron &amp; Tibshirani, 1993). Replications whose
 refit fails or does not converge, most common with small samples and
-sparse response categories, are dropped, and the interval is
-computed from the replications that return a value. Bootstrap
-results vary from run to run; supply <code>seed</code> for
-reproducibility.</p><dl><dt><code>"bca"</code></dt>
+sparse response categories, are set aside, and the interval is
+computed from the replications that return a value: the standard
+error is their standard deviation, and the percentile and BCa limits
+are quantiles of the returned replicates, not of all <code>B</code>. How
+many were attempted, how many returned a value, and why the rest
+were set aside is recorded in the <code>bootstrap</code> attribute of the
+result (see <em>Value</em>), printed in one line under the table, and
+stated in a warning whenever a replication was set aside, so an
+interval that conditions on a subset of the replications says so and
+by how much. Bootstrap results vary from run to run; supply
+<code>seed</code> for reproducibility.</p><dl><dt><code>"bca"</code></dt>
 <dd><p>The bias-corrected and accelerated bootstrap,
   the default and the specific recommendation of Kelley and
   Pornprasertmanit (2016). Where the percentile interval reads its
@@ -181,7 +208,24 @@ reproducibility.</p><dl><dt><code>"bca"</code></dt>
   farther into the tails than the percentile interval uses, which
   is why the default <code>B = 10000</code> is larger than the customary
   2000; reduce <code>B</code> for exploration, not for a reported
-  analysis.</p></dd>
+  analysis. The acceleration is estimated as <span class="pkg">boot</span> estimates
+  it: by regressing the bootstrap replicates on the resampling
+  frequencies when at least as many replications as cases returned
+  a value, at no extra cost, and otherwise by the jackknife, one
+  leave-one-out refit per case. A leave-one-out refit that fails
+  (when a case is the only respondent in one of an item's
+  categories, for example) is counted and set aside, and the
+  acceleration is estimated from the refits that returned a value;
+  through version 1.0.0 one such failure made the acceleration
+  <code>NA</code> and stopped the call with “estimated adjustment
+  'a' is NA”. When the acceleration cannot be estimated at all
+  (fewer than two leave-one-out refits returned a value), or the
+  bias correction cannot be (every returned replicate on one side of
+  the estimate), the percentile interval is returned in its place
+  with a warning, and the <code>ci_method</code> attribute records the
+  substitution as <code>"percentile (BCa acceleration could not be
+  estimated: ...)"</code>. The counts of leave-one-out refits and the
+  acceleration used are in the <code>bootstrap</code> attribute.</p></dd>
 
   <dt><code>"percentile"</code></dt>
 <dd><p>Percentile bootstrap: the interval

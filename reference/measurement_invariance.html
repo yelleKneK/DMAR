@@ -43,7 +43,7 @@ refitting the ladder. Requires lavaan."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -456,8 +456,8 @@ ladder rather than automating modification searches.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3        4 0.09640134 -0.005006486  0.001122817</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4        6 0.11945997 -0.005335160 -0.001387562</span>
 <span class="r-in"><span><span class="fu">generics</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance</a></span><span class="op">(</span><span class="va">mi</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   n_levels estimator ordered                                test fit_indices</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1        4        ML   FALSE standard chi square difference test    standard</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   n_levels estimator ordered                              test fit_indices</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        4        ML   FALSE scaled chi square difference test      robust</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Partial invariance frees one loading across the schools at every</span></span></span>
 <span class="r-in"><span><span class="co"># rung (Byrne, Shavelson, &amp; Muthén, 1989), so the metric rung costs</span></span></span>
@@ -498,10 +498,10 @@ ladder rather than automating modification searches.</p>
 <span class="r-in"><span><span class="va">mi_ordered</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  level      chi_square df p_chi_square cfi  rmsea  delta_chi_square delta_df</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  configural 18         16 0.3232       0.98 0.0841 &lt;NA&gt;             &lt;NA&gt;    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  thresholds 27.2       22 0.2044       1    0.106  10.3             6       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  thresholds 27.2       22 0.2044       &lt;NA&gt; &lt;NA&gt;   10.3             6       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  p_value delta_cfi delta_rmsea</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1114  0.0204    0.0223     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1114  &lt;NA&gt;      &lt;NA&gt;       </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">mi_ordered</span>, <span class="st">"test"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "scaled chi square difference test (method = \"satorra.2000\")"</span>
 <span class="r-in"><span></span></span>
@@ -523,10 +523,10 @@ ladder rather than automating modification searches.</p>
 <span class="r-in"><span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"configural"</span>, <span class="st">"metric"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  level      chi_square df p_chi_square cfi   rmsea delta_chi_square delta_df</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  configural 0          0  &lt;NA&gt;         1     0     &lt;NA&gt;             &lt;NA&gt;    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  metric     7.67       2  0.0216       0.987 0.137 7.67             2       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  metric     7.67       2  0.0216       0.987 0.14  7.67             2       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  p_value delta_cfi delta_rmsea</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0216  -0.0127   0.137      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0216  -0.0128   0.14       </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

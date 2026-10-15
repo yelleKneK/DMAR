@@ -61,7 +61,10 @@ reliability_omega(
   `denominator = "observed"` (robust omega) no interval is computed by
   default, because its interval is bootstrap based and a bootstrap is
   never run unless requested. Ask for `"percentile"` or `"bca"` to
-  obtain the recommended interval.
+  obtain the recommended interval. The closed forms, the Wald intervals,
+  and the profile likelihood apply to `denominator = "model_implied"`
+  only; a combination that does not apply stops with a message naming
+  the denominator that does (see *Details*).
 
 - denominator:
 
@@ -117,7 +120,22 @@ case with at least one observed item under `missing = "fiml"`),
 `"N_complete"` (the complete cases; equal to `"N"` under listwise
 deletion and for covariance input), and `"J"`. Attributes `coefficient`
 (`"omega"`), `ci_method`, `denominator`, `missing`, and (when supplied)
-`aux` record the computation; bootstrap calls also record `B`.
+`aux` record the computation; bootstrap calls also record `B`. A
+bootstrap call also carries the attribute `bootstrap`, a list recording
+the replications the interval conditions on: `attempted` (`B`),
+`returned` (the replications that returned a finite value; the standard
+error is their standard deviation and the percentile and BCa limits are
+their quantiles), `failed` (the difference), `reasons` (a named count of
+why replications were set aside: `error` when the refit raised an error,
+`non_finite` when it returned no finite value, as a fit that did not
+converge does), `error_messages` (the distinct error messages with their
+counts, empty when none), `acceleration` and `acceleration_method` (the
+BCa acceleration used and whether it came from the regression or the
+jackknife; `NA` unless a BCa interval was formed), and `jackknife` (the
+same `attempted`, `returned`, `failed`, `reasons`, and `error_messages`
+for the leave-one-out refits behind the acceleration, all zero when no
+jackknife ran). The printed table shows these counts in one line, and a
+warning states them whenever a replication was set aside.
 
 ## Details
 
@@ -274,35 +292,69 @@ Available confidence interval methods (set via `ci_method`):
   the estimator's variance changes with the parameter, the acceleration,
   estimated by the jackknife; those two adjustments make it second-order
   accurate where the percentile interval is first-order accurate
-  (DiCiccio & Efron, 1996). `"bootstrap_se"` uses the standard deviation
-  of the bootstrap estimates as a standard error in a normal-theory
+  (DiCiccio & Efron, 1996). The acceleration is estimated as boot
+  estimates it, by regression on the resampling frequencies when at
+  least as many replications as cases returned a value and by the
+  jackknife otherwise; a leave-one-out refit that fails is counted and
+  set aside rather than stopping the call (as one did through version
+  1.0.0), and when the acceleration or the bias correction cannot be
+  estimated at all the percentile interval is returned in its place,
+  with a warning and the substitution recorded in the `ci_method`
+  attribute; see
+  [`reliability_omega_categorical`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
+  for the full account. `"bootstrap_se"` uses the standard deviation of
+  the bootstrap estimates as a standard error in a normal-theory
   interval, built on the logit scale for the `_logistic` variant so the
   endpoints respect \[0, 1\]. Replications whose model refit does not
-  converge are dropped, and the interval is computed from the
-  replications that return a value. The default `B = 10000` is an
-  accuracy choice: the BCa adjustment pushes the working quantiles
-  farther into the tails of the bootstrap distribution than the
-  percentile interval uses, and stabilizing them takes more replications
-  than the customary 2000; reduce `B` for exploration, not for a
-  reported analysis. Recommended when assumptions of parametric methods
-  are questionable. Requires raw data and the boot package; supply
-  `seed` for run-to-run reproducibility.
+  converge are set aside, and the interval is computed from the
+  replications that return a value, whose quantiles the percentile and
+  BCa limits are; the counts, and why the rest were set aside, travel in
+  the `bootstrap` attribute (see *Value*), print under the table, and
+  are stated in a warning whenever a replication was set aside. The
+  default `B = 10000` is an accuracy choice: the BCa adjustment pushes
+  the working quantiles farther into the tails of the bootstrap
+  distribution than the percentile interval uses, and stabilizing them
+  takes more replications than the customary 2000; reduce `B` for
+  exploration, not for a reported analysis. Recommended when assumptions
+  of parametric methods are questionable. Requires raw data and the boot
+  package; supply `seed` for run-to-run reproducibility.
 
 - `"none"`:
 
   Return only the point estimate.
 
-With `denominator = "observed"`, only the bootstrap methods and `"none"`
-are available: the delta method standard errors and the alpha-derived
-closed forms are derived under the model implied ratio and do not
-account for sampling of the observed denominator. This pairing is not a
-limitation in practice, since the bootstrap is the interval Kelley and
-Pornprasertmanit (2016) recommend for the observed denominator
-coefficient in any case. Because no analysis in DMAR runs a bootstrap
-unless the user requests one, the default for robust omega is the point
-estimate with no interval, accompanied by a message naming the call that
-produces the recommended interval; request `ci_method = "percentile"` or
-`"bca"` to obtain it.
+**Which intervals apply to which denominator.**
+
+- `denominator = "model_implied"`:
+
+  Every method on the menu: the Wald intervals `"ml"`, `"mlr"`, and
+  `"adf"` with their `_logistic` variants, the profile `"likelihood"`
+  interval, the alpha-derived closed forms `"feldt"`, `"fisher"`,
+  `"bonett"`, and `"hakstian_whalen"`, the four bootstrap methods, and
+  `"none"`.
+
+- `denominator = "observed"` (robust omega, the default):
+
+  The four bootstrap methods (`"percentile"`, `"bca"`, `"bootstrap_se"`,
+  `"bootstrap_se_logistic"`) and `"none"` only. The delta method
+  standard errors, the profile likelihood, and the alpha-derived closed
+  forms are derived under the model implied ratio and do not account for
+  sampling of the observed denominator, so `"mlr"`, the default interval
+  of the model implied coefficient, is not an interval for robust omega.
+
+A request for a combination that does not apply, such as
+`ci_method = "mlr"` with the default denominator, stops with a message
+naming the denominator that does; nothing falls back silently.
+Covariance input (`S`) and `missing = "fiml"` narrow the menu further,
+as the `S` argument and the paragraph on missing data below describe,
+and each stops the same way. The pairing of robust omega with the
+bootstrap is not a limitation in practice, since the bootstrap is the
+interval Kelley and Pornprasertmanit (2016) recommend for the observed
+denominator coefficient in any case. Because no analysis in DMAR runs a
+bootstrap unless the user requests one, the default for robust omega is
+the point estimate with no interval, accompanied by a message naming the
+call that produces the recommended interval; request
+`ci_method = "percentile"` or `"bca"` to obtain it.
 
 **Missing data and auxiliary variables.** By default incomplete rows are
 listwise-deleted; `missing = "fiml"` keeps every case with at least one
@@ -526,6 +578,8 @@ reliability_omega(data = items, ci_method = "percentile", B = 40,
 #>  N           200  
 #>  N_complete  200  
 #>  J           6    
+#> 
+#> Bootstrap: 40 replications attempted, 40 returned a value
 
 # Model implied denominator with its closed-form robust ML interval.
 reliability_omega(data = items, denominator = "model_implied")

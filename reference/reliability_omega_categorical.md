@@ -55,7 +55,22 @@ replications, already on the coefficient scale; `NA` for
 \[0, 1\]), `"conf_level"`, `"N"`, `"N_complete"` (the complete cases;
 equal to `"N"` here, and carried so the whole reliability family returns
 one shape), and `"J"`. Attributes `coefficient` (`"omega_categorical"`),
-`ci_method`, and `B` record the computation.
+`ci_method`, and `B` record the computation. A bootstrap call also
+carries the attribute `bootstrap`, a list recording the replications the
+interval conditions on: `attempted` (`B`), `returned` (the replications
+that returned a finite value; the standard error is their standard
+deviation and the percentile and BCa limits are their quantiles),
+`failed` (the difference), `reasons` (a named count of why replications
+were set aside: `error` when the refit raised an error, `non_finite`
+when it returned no finite value, as a fit that did not converge does),
+`error_messages` (the distinct error messages with their counts, empty
+when none), `acceleration` and `acceleration_method` (the BCa
+acceleration used and whether it came from the regression or the
+jackknife; `NA` unless a BCa interval was formed), and `jackknife` (the
+same `attempted`, `returned`, `failed`, `reasons`, and `error_messages`
+for the leave-one-out refits behind the acceleration, all zero when no
+jackknife ran). The printed table shows these counts in one line, and a
+warning states them whenever a replication was set aside.
 
 ## Details
 
@@ -93,11 +108,14 @@ with a message naming the call that produces the recommended interval;
 request `ci_method = "bca"` to obtain it. The interval is not a quick
 one. Every replication refits the ordered-categorical factor model and
 the saturated polychoric model behind the denominator, a fraction of a
-second for a scale of moderate length, and the jackknife behind the BCa
-acceleration adds one such refit per case, so the recommended interval
-at the default `B = 10000` runs for tens of minutes. The example on this
-page therefore stops at the point estimate; the reported analysis adds
-`ci_method = "bca"` to the same call, with `seed` for reproducibility.
+second for a scale of moderate length, so the recommended interval at
+the default `B = 10000` runs for tens of minutes; when `B` is below the
+number of cases, the jackknife behind the BCa acceleration adds one such
+refit per case (at the default `B` the acceleration is read from the
+replicates themselves at no extra cost; see the `"bca"` entry below).
+The example on this page therefore stops at the point estimate; the
+reported analysis adds `ci_method = "bca"` to the same call, with `seed`
+for reproducibility.
 
 **When to use.** Use `reliability_omega_categorical` when items are
 ordered-categorical, especially when (a) the number of categories is
@@ -116,9 +134,16 @@ replacement `B` times (10000 by default) and categorical omega is
 recomputed, with the full WLSMV model refit, on each replication (Efron
 & Tibshirani, 1993). Replications whose refit fails or does not
 converge, most common with small samples and sparse response categories,
-are dropped, and the interval is computed from the replications that
-return a value. Bootstrap results vary from run to run; supply `seed`
-for reproducibility.
+are set aside, and the interval is computed from the replications that
+return a value: the standard error is their standard deviation, and the
+percentile and BCa limits are quantiles of the returned replicates, not
+of all `B`. How many were attempted, how many returned a value, and why
+the rest were set aside is recorded in the `bootstrap` attribute of the
+result (see *Value*), printed in one line under the table, and stated in
+a warning whenever a replication was set aside, so an interval that
+conditions on a subset of the replications says so and by how much.
+Bootstrap results vary from run to run; supply `seed` for
+reproducibility.
 
 - `"bca"`:
 
@@ -133,7 +158,24 @@ for reproducibility.
   accurate (DiCiccio & Efron, 1996). The adjusted quantile positions sit
   farther into the tails than the percentile interval uses, which is why
   the default `B = 10000` is larger than the customary 2000; reduce `B`
-  for exploration, not for a reported analysis.
+  for exploration, not for a reported analysis. The acceleration is
+  estimated as boot estimates it: by regressing the bootstrap replicates
+  on the resampling frequencies when at least as many replications as
+  cases returned a value, at no extra cost, and otherwise by the
+  jackknife, one leave-one-out refit per case. A leave-one-out refit
+  that fails (when a case is the only respondent in one of an item's
+  categories, for example) is counted and set aside, and the
+  acceleration is estimated from the refits that returned a value;
+  through version 1.0.0 one such failure made the acceleration `NA` and
+  stopped the call with “estimated adjustment 'a' is NA”. When the
+  acceleration cannot be estimated at all (fewer than two leave-one-out
+  refits returned a value), or the bias correction cannot be (every
+  returned replicate on one side of the estimate), the percentile
+  interval is returned in its place with a warning, and the `ci_method`
+  attribute records the substitution as
+  `"percentile (BCa acceleration could not be estimated: ...)"`. The
+  counts of leave-one-out refits and the acceleration used are in the
+  `bootstrap` attribute.
 
 - `"percentile"`:
 

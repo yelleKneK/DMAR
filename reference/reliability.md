@@ -117,7 +117,9 @@ transformation-based intervals (`"fisher"`, `"bonett"`,
 `"hakstian_whalen"`) add an `se_transformed` row carrying the
 transformation-scale standard error, with the scale named in the
 `se_transform_scale` attribute. The `coefficient` attribute identifies
-which coefficient was computed.
+which coefficient was computed, and a bootstrap call also carries the
+`bootstrap` attribute with its replication counts (see
+[`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md)).
 
 ## Details
 

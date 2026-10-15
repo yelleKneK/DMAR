@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">DMAR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,16 @@
       <small>Source: <a href="https://github.com/yelleKneK/DMAR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.1" id="dmar-101">DMAR 1.0.1<a class="anchor" aria-label="anchor" href="#dmar-101"></a></h2>
+<p>A patch release for the bootstrap intervals of the reliability family, prompted by a report from an analysis of the Big Five Inventory constructs (2026-10-14), in which every BCa interval for categorical omega failed with “estimated adjustment ‘a’ is NA” and no interval said how many replications it rested on.</p>
+<div class="section level3">
+<h3 id="the-reliability-bootstrap-counts-its-replications-1-0-1">The Reliability Bootstrap Counts Its Replications<a class="anchor" aria-label="anchor" href="#the-reliability-bootstrap-counts-its-replications-1-0-1"></a></h3>
+<ul><li><p><strong>Every bootstrap interval in the reliability family now says how many replications it conditions on.</strong> <code><a href="../reference/reliability_alpha.html">reliability_alpha()</a></code>, <code><a href="../reference/reliability_kr20.html">reliability_kr20()</a></code>, <code><a href="../reference/reliability_omega.html">reliability_omega()</a></code>, <code><a href="../reference/reliability_omega_categorical.html">reliability_omega_categorical()</a></code>, and <code><a href="../reference/reliability.html">reliability()</a></code> through them record, in a <code>bootstrap</code> attribute, how many replications were attempted, how many returned a finite value, how many were set aside and why (an error from the refit, or no finite value, as from a fit that did not converge), and the distinct error messages with their counts. The standard error is the standard deviation of the returned replicates and the percentile and BCa limits are their quantiles, which the help pages now state; the printed table shows the counts in one line, and a single warning states them whenever a replication was set aside. Through 1.0.0 a failed replication was dropped silently. No existing row or attribute changes.</p></li>
+<li><p><strong>The BCa interval no longer fails when a jackknife refit fails.</strong> With <code>B</code> below the number of cases, boot estimates the BCa acceleration from jackknife influence values, and one leave-one-out refit that returned no value made the whole vector <code>NA</code> and stopped the call. The influence values are now computed in the package under boot’s own rule (regression on the resampling frequencies when at least as many replications as cases returned a value, the jackknife otherwise), the leave-one-out refits that fail are counted and set aside, and the acceleration is estimated from the rest; the jackknife counts and the acceleration join the <code>bootstrap</code> attribute. When the acceleration or the bias correction cannot be estimated at all, the percentile interval is returned in its place with a warning, and the <code>ci_method</code> attribute reads <code>"percentile (BCa acceleration could not be estimated: k jackknife replicates failed)"</code>, so the substitution is on the record. On a run where nothing fails the interval and the acceleration equal boot’s to machine precision, in both regimes, so no interval that 1.0.0 computed changes.</p></li>
+<li><p><strong><code><a href="../reference/reliability_omega.html">reliability_omega()</a></code> states which intervals apply to which denominator.</strong> The closed forms, the Wald intervals, and the profile likelihood are derived under the model implied ratio and apply to <code>denominator = "model_implied"</code> only; the bootstrap methods and <code>"none"</code> apply to both. The help page now says so in one place, and a request for a combination that does not apply, such as <code>ci_method = "mlr"</code> with the default observed denominator, stops with a message naming the denominator that does.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="dmar-100">DMAR 1.0.0<a class="anchor" aria-label="anchor" href="#dmar-100"></a></h2><p class="text-muted">CRAN release: 2026-09-21</p>
 <p>First public release of DMAR (pronounced “Dee-Mar,” for “Design, Measurement, and Analysis in R”), a greatly expanded reimagining of the MBESS package, published on CRAN on 2026-09-21.</p>
