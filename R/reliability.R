@@ -120,7 +120,9 @@
 #' \code{se_transformed} row carrying the transformation-scale standard
 #' error, with the scale named in the \code{se_transform_scale}
 #' attribute. The \code{coefficient} attribute
-#' identifies which coefficient was computed.
+#' identifies which coefficient was computed, and a bootstrap call also
+#' carries the \code{bootstrap} attribute with its replication counts
+#' (see \code{\link{reliability_alpha}}).
 #'
 #' @references
 #' Kelley, K., & Cheng, Y. (2012). Estimation of and confidence interval

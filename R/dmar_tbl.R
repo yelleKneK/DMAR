@@ -56,6 +56,12 @@
 #' \code{fixed_terms} attribute, and they print to \code{digits_fixed}
 #' decimal places (three by default).
 #'
+#' A table that carries a \code{bootstrap} attribute (the reliability
+#' family's bootstrap intervals; see \code{\link{reliability_alpha}})
+#' prints one more line stating how many replications were attempted,
+#' how many returned a value, and why the rest were set aside, so the
+#' replications the interval conditions on are always on the page.
+#'
 #' To see more precision than the display shows, raise \code{digits}
 #' (for example \code{print(x, digits = 8)}) or read the columns
 #' directly, since the stored values are never rounded: \code{x$value}
@@ -294,5 +300,29 @@ print.dmar_tbl <- function(x, digits = getOption("dmar.digits", 3L),
   conf_level <- attr(x, "conf_level")
   if (!is.null(conf_level))
     cat(sprintf("\nConfidence level: %g%%\n", 100 * conf_level))
+  # A bootstrap interval says in one line how many replications it
+  # conditions on (the reliability family's `bootstrap` attribute; see
+  # .bootstrap_ci() in R/reliability_internals.R).
+  bs <- attr(x, "bootstrap")
+  if (is.list(bs) && !is.null(bs$attempted)) {
+    line <- sprintf("Bootstrap: %d replications attempted, %d returned a value",
+                    bs$attempted, bs$returned)
+    if (isTRUE(bs$failed > 0L)) {
+      line <- paste0(line, sprintf(" (%d set aside: %s)", bs$failed,
+                                   .bootstrap_reason_phrase(bs$reasons,
+                                                            bs$error_messages)))
+    }
+    jk <- bs$jackknife
+    if (is.list(jk) && isTRUE(jk$attempted > 0L)) {
+      line <- paste0(line, sprintf("; jackknife for the BCa acceleration: %d attempted, %d returned a value",
+                                   jk$attempted, jk$returned))
+      if (isTRUE(jk$failed > 0L)) {
+        line <- paste0(line, sprintf(" (%d set aside: %s)", jk$failed,
+                                     .bootstrap_reason_phrase(jk$reasons,
+                                                              jk$error_messages)))
+      }
+    }
+    cat("\n", line, "\n", sep = "")
+  }
   invisible(x)
 }

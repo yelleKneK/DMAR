@@ -387,3 +387,33 @@ test_that("an improper solution is diagnosed as such, not as nonconvergence", {
   # cfa_k() treat an improper but converged solution.
   expect_true(is.finite(r$value[r$term == "estimate"]))
 })
+
+
+test_that("a ci_method that does not apply to the denominator stops with a message naming the one that does", {
+  # The help page states which intervals apply to which denominator;
+  # this pins the code to that statement. Every closed form, Wald
+  # interval, and the profile likelihood is derived under the model
+  # implied ratio, so each stops under the default (observed)
+  # denominator with a message that names denominator = "model_implied".
+  model_implied_only <- c("ml", "mlr", "ml_logistic", "mlr_logistic",
+                          "likelihood", "adf", "adf_logistic",
+                          "feldt", "fisher", "bonett", "hakstian_whalen")
+  for (m in model_implied_only) {
+    expect_error(
+      reliability_omega(data = items_continuous, ci_method = m),
+      regexp = 'denominator = "model_implied"', fixed = TRUE,
+      label = paste("ci_method =", m, "under the observed denominator")
+    )
+  }
+  # "none" and the bootstrap methods apply to both denominators; the
+  # bootstrap runs are covered by the bracketing tests above, so only
+  # "none" is exercised here.
+  for (d in c("observed", "model_implied")) {
+    expect_no_error(reliability_omega(data = items_continuous,
+                                      ci_method = "none", denominator = d))
+  }
+  # The menu on the help page is the menu in the signature.
+  expect_setequal(eval(formals(reliability_omega)$ci_method),
+                  c(model_implied_only, "bootstrap_se",
+                    "bootstrap_se_logistic", "percentile", "bca", "none"))
+})

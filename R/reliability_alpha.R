@@ -161,14 +161,28 @@
 #'   estimating the median bias from the bootstrap distribution and
 #'   the acceleration from the jackknife, and is second-order accurate
 #'   where the percentile interval is first-order accurate (DiCiccio &
-#'   Efron, 1996). \code{"bootstrap_se"} uses the standard deviation
+#'   Efron, 1996). The acceleration is estimated as \pkg{boot}
+#'   estimates it, by regression on the resampling frequencies when at
+#'   least as many replications as cases returned a value and by the
+#'   jackknife otherwise; a leave-one-out refit that fails is counted
+#'   and set aside rather than stopping the call (as one did through
+#'   version 1.0.0), and when the acceleration or the bias correction
+#'   cannot be estimated at all the percentile interval is returned in
+#'   its place, with a warning and the substitution recorded in the
+#'   \code{ci_method} attribute; see
+#'   \code{\link{reliability_omega_categorical}} for the full account.
+#'   \code{"bootstrap_se"} uses the standard deviation
 #'   of the bootstrap estimates as a standard error in an ordinary
 #'   normal-theory interval; the \code{_logistic} variant builds that
 #'   interval on the logit scale so the endpoints respect [0, 1].
 #'   Replications on which the estimator cannot be computed (for
-#'   example, a model refit that does not converge) are dropped, and
+#'   example, a model refit that does not converge) are set aside, and
 #'   the interval is computed from the replications that return a
-#'   value. Requires raw data and the \pkg{boot} package. The default
+#'   value, whose quantiles the percentile and BCa limits are; the
+#'   counts, and why the rest were set aside, travel in the
+#'   \code{bootstrap} attribute (see \emph{Value}), print under the
+#'   table, and are stated in a warning whenever a replication was set
+#'   aside. Requires raw data and the \pkg{boot} package. The default
 #'   \code{B = 10000} is an accuracy choice: the BCa adjustment pushes
 #'   the working quantiles farther into the tails of the bootstrap
 #'   distribution than the percentile interval uses, and stabilizing
@@ -258,7 +272,24 @@
 #' covariance input), and \code{"J"} (number of items). The selected
 #' coefficient, CI method, and missing-data treatment travel as the
 #' attributes \code{coefficient}, \code{ci_method}, \code{missing}, and
-#' (when supplied) \code{aux}; bootstrap calls also record \code{B}.
+#' (when supplied) \code{aux}; bootstrap calls also record \code{B}. A bootstrap call also carries the attribute
+#' \code{bootstrap}, a list recording the replications the interval
+#' conditions on: \code{attempted} (\code{B}), \code{returned} (the
+#' replications that returned a finite value; the standard error is
+#' their standard deviation and the percentile and BCa limits are their
+#' quantiles), \code{failed} (the difference), \code{reasons} (a named
+#' count of why replications were set aside: \code{error} when the refit
+#' raised an error, \code{non_finite} when it returned no finite value,
+#' as a fit that did not converge does), \code{error_messages} (the
+#' distinct error messages with their counts, empty when none),
+#' \code{acceleration} and \code{acceleration_method} (the BCa
+#' acceleration used and whether it came from the regression or the
+#' jackknife; \code{NA} unless a BCa interval was formed), and
+#' \code{jackknife} (the same \code{attempted}, \code{returned},
+#' \code{failed}, \code{reasons}, and \code{error_messages} for the
+#' leave-one-out refits behind the acceleration, all zero when no
+#' jackknife ran). The printed table shows these counts in one line,
+#' and a warning states them whenever a replication was set aside.
 #'
 #' @references
 #' Bonett, D. G. (2002). Sample size requirements for testing and estimating
@@ -725,7 +756,8 @@ reliability_alpha <- function(data = NULL, S = NULL, N = NULL,
     lower = ci$lower, upper = ci$upper,
     conf_level = conf_level, N = inp$N, J = inp$J,
     coefficient = "alpha",
-    ci_method = ci_method,
+    ci_method = ci$ci_method %||% ci_method,
+    bootstrap = ci$bootstrap,
     B = if (ci_method %in% bootstrap_methods) B else NA_integer_,
     N_complete = inp$N_complete,
     missing = missing,

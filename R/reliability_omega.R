@@ -157,12 +157,26 @@
 #'   changes with the parameter, the acceleration, estimated by the
 #'   jackknife; those two adjustments make it second-order accurate
 #'   where the percentile interval is first-order accurate (DiCiccio &
-#'   Efron, 1996). \code{"bootstrap_se"} uses the standard deviation
+#'   Efron, 1996). The acceleration is estimated as \pkg{boot}
+#'   estimates it, by regression on the resampling frequencies when at
+#'   least as many replications as cases returned a value and by the
+#'   jackknife otherwise; a leave-one-out refit that fails is counted
+#'   and set aside rather than stopping the call (as one did through
+#'   version 1.0.0), and when the acceleration or the bias correction
+#'   cannot be estimated at all the percentile interval is returned in
+#'   its place, with a warning and the substitution recorded in the
+#'   \code{ci_method} attribute; see
+#'   \code{\link{reliability_omega_categorical}} for the full account.
+#'   \code{"bootstrap_se"} uses the standard deviation
 #'   of the bootstrap estimates as a standard error in a normal-theory
 #'   interval, built on the logit scale for the \code{_logistic}
 #'   variant so the endpoints respect [0, 1]. Replications whose model
-#'   refit does not converge are dropped, and the interval is computed
-#'   from the replications that return a value. The default
+#'   refit does not converge are set aside, and the interval is computed
+#'   from the replications that return a value, whose quantiles the
+#'   percentile and BCa limits are; the counts, and why the rest were
+#'   set aside, travel in the \code{bootstrap} attribute (see
+#'   \emph{Value}), print under the table, and are stated in a warning
+#'   whenever a replication was set aside. The default
 #'   \code{B = 10000} is an accuracy choice: the BCa adjustment pushes
 #'   the working quantiles farther into the tails of the bootstrap
 #'   distribution than the percentile interval uses, and stabilizing
@@ -173,17 +187,39 @@
 #'   supply \code{seed} for run-to-run reproducibility.}
 #'   \item{\code{"none"}}{Return only the point estimate.}
 #' }
-#' With \code{denominator = "observed"}, only the bootstrap methods and
-#' \code{"none"} are available: the delta method standard errors and the
-#' alpha-derived closed forms are derived under the model implied ratio
-#' and do not account for sampling of the observed denominator. This
-#' pairing is not a limitation in practice, since the bootstrap is the
-#' interval Kelley and Pornprasertmanit (2016) recommend for the
-#' observed denominator coefficient in any case. Because no analysis in
-#' \pkg{DMAR} runs a bootstrap unless the user requests one, the default
-#' for robust omega is the point estimate with no interval, accompanied
-#' by a message naming the call that produces the recommended interval;
-#' request \code{ci_method = "percentile"} or \code{"bca"} to obtain it.
+#' \strong{Which intervals apply to which denominator.}
+#' \describe{
+#'   \item{\code{denominator = "model_implied"}}{Every method on the
+#'   menu: the Wald intervals \code{"ml"}, \code{"mlr"}, and
+#'   \code{"adf"} with their \code{_logistic} variants, the profile
+#'   \code{"likelihood"} interval, the alpha-derived closed forms
+#'   \code{"feldt"}, \code{"fisher"}, \code{"bonett"}, and
+#'   \code{"hakstian_whalen"}, the four bootstrap methods, and
+#'   \code{"none"}.}
+#'   \item{\code{denominator = "observed"} (robust omega, the
+#'   default)}{The four bootstrap methods (\code{"percentile"},
+#'   \code{"bca"}, \code{"bootstrap_se"},
+#'   \code{"bootstrap_se_logistic"}) and \code{"none"} only. The delta
+#'   method standard errors, the profile likelihood, and the
+#'   alpha-derived closed forms are derived under the model implied
+#'   ratio and do not account for sampling of the observed denominator,
+#'   so \code{"mlr"}, the default interval of the model implied
+#'   coefficient, is not an interval for robust omega.}
+#' }
+#' A request for a combination that does not apply, such as
+#' \code{ci_method = "mlr"} with the default denominator, stops with a
+#' message naming the denominator that does; nothing falls back
+#' silently. Covariance input (\code{S}) and \code{missing = "fiml"}
+#' narrow the menu further, as the \code{S} argument and the paragraph
+#' on missing data below describe, and each stops the same way. The
+#' pairing of robust omega with the bootstrap is not a limitation in
+#' practice, since the bootstrap is the interval Kelley and
+#' Pornprasertmanit (2016) recommend for the observed denominator
+#' coefficient in any case. Because no analysis in \pkg{DMAR} runs a
+#' bootstrap unless the user requests one, the default for robust omega
+#' is the point estimate with no interval, accompanied by a message
+#' naming the call that produces the recommended interval; request
+#' \code{ci_method = "percentile"} or \code{"bca"} to obtain it.
 #'
 #' \strong{Missing data and auxiliary variables.} By default incomplete
 #' rows are listwise-deleted; \code{missing = "fiml"} keeps every case
@@ -251,7 +287,10 @@
 #'   computed by default, because its interval is bootstrap based and a
 #'   bootstrap is never run unless requested. Ask for
 #'   \code{"percentile"} or \code{"bca"} to obtain the recommended
-#'   interval.
+#'   interval. The closed forms, the Wald intervals, and the profile
+#'   likelihood apply to \code{denominator = "model_implied"} only; a
+#'   combination that does not apply stops with a message naming the
+#'   denominator that does (see \emph{Details}).
 #' @param denominator How the total variance in the denominator of
 #'   \eqn{\omega} is estimated: \code{"observed"} (default; robust
 #'   omega) uses the variance of the composite estimated directly from
@@ -295,7 +334,24 @@
 #' for covariance input), and \code{"J"}. Attributes
 #' \code{coefficient} (\code{"omega"}), \code{ci_method},
 #' \code{denominator}, \code{missing}, and (when supplied) \code{aux}
-#' record the computation; bootstrap calls also record \code{B}.
+#' record the computation; bootstrap calls also record \code{B}. A bootstrap call also carries the attribute
+#' \code{bootstrap}, a list recording the replications the interval
+#' conditions on: \code{attempted} (\code{B}), \code{returned} (the
+#' replications that returned a finite value; the standard error is
+#' their standard deviation and the percentile and BCa limits are their
+#' quantiles), \code{failed} (the difference), \code{reasons} (a named
+#' count of why replications were set aside: \code{error} when the refit
+#' raised an error, \code{non_finite} when it returned no finite value,
+#' as a fit that did not converge does), \code{error_messages} (the
+#' distinct error messages with their counts, empty when none),
+#' \code{acceleration} and \code{acceleration_method} (the BCa
+#' acceleration used and whether it came from the regression or the
+#' jackknife; \code{NA} unless a BCa interval was formed), and
+#' \code{jackknife} (the same \code{attempted}, \code{returned},
+#' \code{failed}, \code{reasons}, and \code{error_messages} for the
+#' leave-one-out refits behind the acceleration, all zero when no
+#' jackknife ran). The printed table shows these counts in one line,
+#' and a warning states them whenever a replication was set aside.
 #'
 #' @references
 #' Bonett, D. G. (2002). Sample size requirements for testing and estimating
@@ -660,7 +716,8 @@ reliability_omega <- function(data = NULL, S = NULL, N = NULL,
       lower = ci$lower, upper = ci$upper,
       conf_level = conf_level, N = inp$N, J = inp$J,
       coefficient = "omega",
-      ci_method = ci_method,
+      ci_method = ci$ci_method %||% ci_method,
+    bootstrap = ci$bootstrap,
       B = if (ci_method %in% bootstrap_methods) B else NA_integer_,
       N_complete = inp$N_complete,
       missing = missing,
@@ -764,7 +821,8 @@ reliability_omega <- function(data = NULL, S = NULL, N = NULL,
     lower = ci$lower, upper = ci$upper,
     conf_level = conf_level, N = inp$N, J = inp$J,
     coefficient = "omega",
-    ci_method = ci_method,
+    ci_method = ci$ci_method %||% ci_method,
+    bootstrap = ci$bootstrap,
     B = if (ci_method %in% bootstrap_methods) B else NA_integer_,
     N_complete = inp$N_complete,
     missing = missing,
