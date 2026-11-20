@@ -7,10 +7,9 @@ size point estimates, exact-noncentral distribution confidence
 intervals, asymptotic-variance utilities, design-stage expected-value
 calculators, accuracy in parameter estimation (AIPE) sample size
 planners, reliability coefficients, and agreement / multivariate
-measures. Each function is documented in isolation, but the package’s
-value is in how the functions *compose*. This vignette walks through the
-package’s architecture from the user’s perspective and shows the five
-high-traffic composition patterns.
+measures. Each function is documented in isolation; this vignette shows
+how the functions *compose*. It walks through the package’s architecture
+from the user’s perspective and shows the common composition patterns.
 
 ## The Four Building Blocks
 
@@ -35,12 +34,13 @@ operations:
                   └──────────────── transforms of each other ─────────────────────────────┘
                   (smd ↔ cles ↔ proportion_of_superiority ↔ nnt_from_smd; r ↔ partial_r)
 
-The four columns are tightly coupled: every AIPE planner is built from a
-variance utility; every CI is built from a noncentral distribution;
-every expected-value function is the design-stage analog of an
-estimator. Once you internalize the layout, asking “what is the
-recommended workflow for quantity X” reduces to asking “which row of X’s
-variance / CI / expected value / AIPE planner do I need.”
+The four columns are coupled: many AIPE planners are built from a
+variance utility, the intervals for standardized effect sizes are built
+from noncentral distributions, and each expected-value function is the
+design-stage analog of an estimator. Once you internalize the layout,
+asking “what is the recommended workflow for quantity X” reduces to
+asking “which row of X’s variance / CI / expected value / AIPE planner
+do I need.”
 
 ## 1. Variance Utility → AIPE Planner
 
@@ -62,21 +62,21 @@ model comparison treatment. Concretely:
 ``` r
 
 # SMD (Cohen's d):     var_smd        → ss_aipe_smd
-# Pearson r (J = 0):   var_r          → ss_aipe_partial_r (J = 1, simple case)
+# Pearson r:           var_r          → ss_aipe_r
 # Partial r:           var_partial_r  → ss_aipe_partial_r
-# Semipartial r:       var_semipartial_r → ss_aipe_semipartial_r
+# Semipartial r:       var_semipartial_r (under_null = FALSE) → ss_aipe_semipartial_r
 # Squared multi R:     var_R2         → ss_aipe_R2
 # Cliff's delta:       (max-variance bound) → ss_aipe_cliff_delta
 # omega²:              var_omega_squared → ss_aipe_omega_squared (noncentral F)
 # Cronbach alpha:      var_alpha      → ss_aipe_reliability
 # ICC:                 var_icc        → ss_aipe_icc
-# CV:                  var_cv         → ss_aipe_cv
+# CV:                  ci_cv          → ss_aipe_cv
 # Indirect effect ab:  var_indirect_effect → ss_aipe_indirect_effect
 ```
 
-This pairing is the package’s most common usage pattern. The variance
-utility is the design-stage primitive; the AIPE planner is the inverse,
-returning the $`n`$ that achieves a target precision.
+In this pairing the variance utility is the design-stage primitive and
+the AIPE planner is its inverse, returning the $`N`$ that achieves a
+target precision.
 
 ### Worked Example: Pearson r
 
@@ -85,43 +85,51 @@ of full width 0.20.
 
 ``` r
 
-# Step 1: ask the variance utility for the sampling variance at a candidate n.
-var_r(rho = 0.30, n = 100)
+# Step 1: ask the variance utility for the sampling variance at a candidate N.
+var_r(true_cor = 0.30, N = 100)
 ```
 
-| term         | value   |
-|:-------------|:--------|
-| var_r_normal | 0.00836 |
-| var_fisher_z | 0.0103  |
+| term         | value |
+|:-------------|:------|
+| var_r_normal | 0.008 |
+| var_fisher_z | 0.010 |
 
 ``` r
 
 
-# Step 2: the AIPE planner inverts the same family of formulas to give
-# the n needed for the target width. DMAR has no zero-order Pearson-r
-# planner; the partial-r planner at J = 1 is the simple-correlation case.
-ss_aipe_partial_r(rho = 0.30, J = 1, width = 0.20)
+# Step 2: an AIPE planner inverts the same family of formulas to give
+# the N needed for the target width. ss_aipe_r() plans the simple
+# correlation on the Fisher's Z scale; the raw-scale planner shown here is
+# the one for a partial correlation, with one variable partialed out
+# (p = 2 predictors: X and that variable).
+ss_aipe_partial_r(true_cor = 0.30, p = 2, width = 0.20)
 ```
 
 | term           | value |
 |:---------------|:------|
 | necessary_N    | 321   |
-| expected_width | 0.2   |
-| rho            | 0.3   |
-| J              | 1     |
-| width_target   | 0.2   |
-| conf_level     | 0.95  |
+| expected_width | 0.200 |
+| true_cor       | 0.300 |
+| p              | 2     |
+| width          | 0.200 |
+| conf_level     | 0.950 |
 
 Confidence level: 95%
 
-Both sides use the same normal-theory $`(1 - \rho^2)^2`$ variance family
-(Fisher, 1915; Olkin & Finn, 1995), differing only by an off-by-one in
-the denominator degrees of freedom ($`n - 1`$ for
-[`var_r()`](https://yelleknek.github.io/DMAR/reference/var_r.md),
-$`n - J - 1`$ for the planner), so the planner’s output is consistent
-with what
+Both sides use a first-order variance. The first-order variance of a
+simple correlation is $`(1 - \rho^2)^2 / N`$ (Olkin & Finn, 1995,
+Equation 3). The sample partial correlation given $`p - 1`$ variables is
+distributed as a simple correlation from $`N - (p - 1)`$ observations,
+where $`p`$ is the number of predictors in the regression of $`Y`$ on
+$`X`$ and the variables partialed out. The divisors are $`N - 1`$ for
+[`var_r()`](https://yelleknek.github.io/DMAR/reference/var_r.md) and
+$`N - p`$ for
+[`var_partial_r()`](https://yelleknek.github.io/DMAR/reference/var_partial_r.md)
+and the planner, each of which differs from the first-order form at
+order $`1/N^2`$. The planner’s output is therefore consistent, to that
+order, with what
 [`var_r()`](https://yelleknek.github.io/DMAR/reference/var_r.md) returns
-at that recommended $`n`$.
+at the recommended $`N`$.
 
 ## 2. Expected-Value Function → Design-Stage Substitution
 
@@ -142,8 +150,8 @@ The package’s expected-value functions are:
 
 | Quantity | Bias | Helper |
 |----|----|----|
-| Pearson $`r`$ | downward (small $`n`$) | [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md) |
-| Partial $`r`$ | downward (grows with $`J`$) | [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md) |
+| Pearson $`r`$ | downward (small $`N`$) | [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md) |
+| Partial $`r`$ | downward (grows with $`p`$) | [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md) |
 | Squared multi $`R^2`$ | upward (always) | [`expected_R2()`](https://yelleknek.github.io/DMAR/reference/expected_R2.md) |
 | Cohen’s $`d`$ | upward (small $`n`$) | [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md) |
 
@@ -151,15 +159,15 @@ The package’s expected-value functions are:
 
 ``` r
 
-# Population delta = 0.4, planned n = 40 per group.
-# Naive planning assumes the observed d will average 0.40; in fact
-# the sample d will average slightly larger.
-expected_smd(delta = 0.4, n_1 = 40)
+# Population standardized mean difference (true_smd) = 0.4, planned
+# n = 40 per group. Naive planning assumes the observed d will average
+# 0.40; in fact the sample d will average slightly larger.
+expected_smd(true_smd = 0.4, n_1 = 40)
 ```
 
-| delta | n_1 | n_2 | expected_smd | bias   | j_correction |
-|:------|:----|:----|:-------------|:-------|:-------------|
-| 0.4   | 40  | 40  | 0.404        | 0.0039 | 0.99         |
+| true_smd | n_1 | n_2 | expected_smd | bias  | j_correction |
+|:---------|:----|:----|:-------------|:------|:-------------|
+| 0.400    | 40  | 40  | 0.404        | 0.004 | 0.990        |
 
 The reported `j_correction` is the Hedges (1981) factor
 $`J(\mathit{df})`$ that maps Cohen’s $`d`$ to Hedges’ $`g`$. The same
@@ -185,7 +193,10 @@ Each downstream function accepts either a point estimate of $`d`$ or the
 same plus group sizes for an exact noncentral $`t`$ CI, and propagates
 the CI bounds through the monotone transform. Because the transforms are
 monotone, the coverage probability is preserved exactly (no extra
-approximation is introduced).
+approximation is introduced). For the number needed to treat this holds
+for the confidence set, which is two intervals when the interval for
+$`d`$ includes zero (see
+[`?nnt_from_smd`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md)).
 
 ### Walked Example at Three Reference d Values
 
@@ -223,11 +234,12 @@ estimators:
 
 Each returns an analytic CI;
 [`cliff_delta()`](https://yelleknek.github.io/DMAR/reference/cliff_delta.md)
-uses the Cliff (1996) U-statistic variance, and
+uses the sample version of the variance in Feng and Cliff (2004,
+Equation 2), and
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md)
-uses the Brunner-Munzel (2000) within-pair variance, all with a
-Fisher-style \$\arctanh\$ transformation so the bounds stay in
-$`[-1, 1]`$ (for $`\delta`$) or $`[0, 1]`$ (for $`P_S`$).
+the variance of a mean of within-pair scores, all with a Fisher-style
+\$\arctanh\$ transformation so the bounds stay in $`[-1, 1]`$ (for
+$`\delta`$) or $`[0, 1]`$ (for $`P_S`$).
 
 ## 5. Reliability Composition
 
@@ -244,13 +256,21 @@ with the same indicators:
 # Design-stage AIPE:   ss_aipe_reliability()
 ```
 
-$`H`$ is uniformly $`\ge \omega \ge \alpha`$ for unidimensional
-indicators; if
+$`H`$, the reliability of the optimally weighted composite (Hancock &
+Mueller, 2001), is at least the model implied $`\omega`$ of the
+unit-weighted sum from the same single-factor fit, by construction, with
+equality only when the optimal weights are all equal. Robust omega, the
+default of
+[`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md),
+divides by the observed variance of the composite and need not lie below
+$`H`$. In the population, $`\alpha \le \omega`$ for congeneric items
+with uncorrelated errors, with equality when the loadings are equal,
+since $`(\sum_j \lambda_j)^2 \le J \sum_j \lambda_j^2`$ for $`J`$ items;
+sample estimates need not keep that order. If
 [`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md)
-is far larger than
-[`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
-the equally weighted composite is wasting reliability that an optimally
-weighted composite would capture.
+is well above the model implied omega of the same fit, the unit-weighted
+composite gives up reliability that an optimally weighted composite
+would capture.
 
 ## 6. The Mediation Pipeline
 
@@ -259,9 +279,13 @@ indirect effect $`ab`$:
 
 ``` r
 
-# Asymptotic variance: var_indirect_effect(a, b, var_a, var_b, cov_ab)
+# Asymptotic variance: var_indirect_effect(reg_coef_a, reg_coef_b,
+#                                          var_reg_coef_a, var_reg_coef_b,
+#                                          cov_reg_coef_a_b)
 #   - returns Sobel, Aroian, Goodman, and second-order delta variances.
-# AIPE planning:       ss_aipe_indirect_effect(a, b, width, method)
+# AIPE planning:       ss_aipe_indirect_effect(true_std_reg_coef_a,
+#                                              true_std_reg_coef_b, width,
+#                                              method)
 #   - method = "closed_form": the delta method (Sobel, 1982) width
 #   - method = "monte_carlo": the Monte Carlo interval width, simulated
 #     at each candidate n (Tofighi & MacKinnon, 2011)
@@ -275,7 +299,7 @@ planner is solving against.
 
 ## 7. Multivariate and Agreement Utilities
 
-The package’s measurement family is small but covers the common needs:
+The agreement and multivariate utilities are:
 
 - [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md):
   Lin’s (1989) concordance correlation, with the CI built on Lin’s
@@ -286,9 +310,9 @@ The package’s measurement family is small but covers the common needs:
         as a pair (his recommended construction), with the per-limit
         noncentral *t* form as `method = "individual"`.
 - [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md):
-  Burdick-Graybill (1992) modified-large- sample CIs on variance
-  components, the standard tool in generalizability theory (Brennan,
-  2001).
+  Burdick-Graybill (1992) modified large-sample CIs on variance
+  components, the quantities on which generalizability theory is built
+  (Brennan, 2001).
 - [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md):
   log-scale CI on a sample eigenvalue under the Anderson (2003)
   asymptotic distribution.
@@ -302,51 +326,59 @@ yet, although the variance components implied by
 do compose with
 [`var_icc()`](https://yelleknek.github.io/DMAR/reference/var_icc.md) and
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
-for generalizability- theory planning.
+for planning in generalizability theory.
 
 ## Argument-Name Conventions
 
 When using multiple DMAR functions in a single pipeline, the
 argument-name conventions are worth knowing:
 
-| Quantity                       | Argument name(s)                           |
-|--------------------------------|--------------------------------------------|
-| Population correlation         | `rho` (Greek; new code)                    |
-| Sample correlation             | `r` (Roman; existing code)                 |
-| Population SMD                 | `delta`                                    |
-| Sample SMD                     | `smd`                                      |
-| Group sample sizes             | `n_1`, `n_2`                               |
-| Total sample size              | `n` (single-sample), `N` (some legacy)     |
-| Number of controls (partial r) | `J`                                        |
-| Number of items                | `p_items`                                  |
-| Number of predictors           | `p`                                        |
-| Number of raters (ICC)         | `k`                                        |
-| Effect df / error df           | `df_effect`, `df_error`                    |
-| Target CI width                | `width`                                    |
-| Which-width specifier          | `which_width` ∈ {“Full”, “Lower”, “Upper”} |
-| Confidence level               | `conf_level`                               |
-| Per-tail alphas                | `alpha_lower`, `alpha_upper`               |
-| Coverage assurance probability | `assurance` (in `(0.5, 1)`)                |
+| Quantity | Argument name(s) |
+|----|----|
+| Population correlation | `true_cor` |
+| Sample correlation | `r` |
+| Planning value of a sensitivity function | `supposed_cor`, `supposed_smd`, `supposed_cv`: the value the design is chosen under, beside the data generating `true_` value |
+| Population SMD | `true_smd` |
+| Sample SMD | `smd` |
+| Group sample sizes | `n_1`, `n_2` |
+| Total sample size | `N` (`specified_N` when a planner is given a size to evaluate) |
+| Size of each group | `n_per_group` (`specified_n_per_group` when a planner is given one) |
+| Null or reference value | `null_cor`, `null_mean` |
+| Number of items | `n_items` |
+| Number of predictors | `p` (for a partial or semipartial correlation, $`X`$ and the variables partialed out, so `p - 1` are partialed out; `p_full` and `p_restricted` for two nested models) |
+| Number of raters | `n_raters` |
+| Effect df / error df | `df_effect`, `df_error` |
+| Target CI width | `width` |
+| Which-width specifier | `which_width` ∈ {“Full”, “Lower”, “Upper”} |
+| Confidence level | `conf_level` |
+| Per-tail alphas | `alpha_lower`, `alpha_upper` |
+| Probability that the interval is no wider than `width` | `assurance` (strictly between 0 and 1; some planners require a value above .5) |
 
-Pattern: lower-case Greek letters denote population values (`rho`,
-`delta`, `alpha`); Roman letters denote sample estimators (`r`, `smd`).
-When in doubt, the function’s `@param` line in the help file is explicit
-about which is wanted.
+Pattern: a population value carries `true_` and an English name for the
+quantity (`true_cor`, `true_R2`); the planning value of a sensitivity
+function carries `supposed_`; a null or reference value carries `null_`;
+a sample statistic is named for itself (`r`, `smd`). When in doubt, the
+function’s `@param` line in the help file is explicit about which is
+wanted.
 
 ## Two Consistent Return Shapes
 
 DMAR functions return one of two tidy data-frame shapes:
 
-1.  **Long form: `data.frame(term, value)`**: used by all variance
-    utilities, AIPE planners, effect size point estimates, and CI
-    helpers. The `term` column names the quantity; `value` is the
+1.  **Long form: `data.frame(term, value)`**: used by most variance
+    utilities, AIPE planners, effect size point estimates, and interval
+    functions. The `term` column names the quantity; `value` is the
     numeric value.
-2.  **Wide form: one row, many columns**: used by
+2.  **Wide form: one row per effect, many columns**: used by
+    [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
     [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-    [`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
-    and similar effect size functions that return one row per *effect*
-    in a factorial design (with columns `effect`, `omega_squared`,
-    `F_value`, `df_effect`, `df_error`, `N`).
+    [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
+    [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
+    and similar functions that report each effect of a factorial design
+    in its own row (for
+    [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
+    the columns `effect`, `omega_squared_total`,
+    `omega_squared_partial`, `F_value`, `df_effect`, `df_error`, `N`).
 
 Pipeline code can use `dplyr::filter(term == "...")` for the long form
 or column-access for the wide form. The two shapes compose: the wide
@@ -377,26 +409,27 @@ proportion_of_superiority(smd = 0.5, n_1 = 50, n_2 = 50)  # proportion above ctr
 nnt_from_smd(smd = 0.5, n_1 = 50, n_2 = 50)    # number-needed-to-treat
 
 # 4. Variance (for meta-analytic weighting):
-var_smd(delta = 0.5, n_1 = 50, n_2 = 50)
+var_smd(true_smd = 0.5, n_1 = 50, n_2 = 50)
 ```
 
 ### B. Planning a Partial Correlation Study
 
 ``` r
 
-# Anticipated partial r = 0.30, 3 controls, target 95% CI width = 0.20.
+# Planning value of the partial r = 0.30, three variables partialed out
+# (p = 4 predictors), target 95% CI width = 0.20.
 
-# 1. AIPE planner (raw-scale Olkin-Finn variance):
-ss_aipe_partial_r(rho = 0.30, J = 3, width = 0.20)
+# 1. AIPE planner (raw scale, first-order variance):
+ss_aipe_partial_r(true_cor = 0.30, p = 4, width = 0.20)
 
-# 2. Same plan on the Fisher's Z scale (Bonett 2008):
-ss_aipe_partial_r(rho = 0.30, J = 3, width = 0.20, fisher_z = TRUE)
+# 2. Same plan on the Fisher's Z scale:
+ss_aipe_partial_r(true_cor = 0.30, p = 4, width = 0.20, fisher_z = TRUE)
 
-# 3. Variance utility: what SE would result at the recommended n?
-var_partial_r(r = 0.30, n = 80, J = 3)
+# 3. Variance utility: what SE would result at the recommended N?
+var_partial_r(r = 0.30, N = 80, p = 4)
 
 # 4. Design-stage bias estimate: what r should we expect to observe?
-expected_partial_r(rho = 0.30, n = 80, J = 3)
+expected_partial_r(true_cor = 0.30, N = 80, p = 4)
 ```
 
 ### C. Planning an Omega Squared CI
@@ -404,7 +437,7 @@ expected_partial_r(rho = 0.30, n = 80, J = 3)
 ``` r
 
 # 3-group one-way ANOVA, anticipated omega² = 0.10, target full width 0.10.
-ss_aipe_omega_squared(population_omega_squared = 0.10,
+ss_aipe_omega_squared(true_omega_squared = 0.10,
                       df_effect = 2,
                       width = 0.10)
 
@@ -413,7 +446,7 @@ N <- ss_aipe_omega_squared(0.10, df_effect = 2, width = 0.10
                           )$value[1]
 F_val <- 1 + 0.10 * N / (2 * 0.90)
 ci_omega_squared(F_value = F_val, df_effect = 2,
-                  df_error = N - 3, N = N)
+                  df_error = N - 3, N = N, estimand = "partial")
 ```
 
 ### D. Reporting an Indirect (Mediated) Effect
@@ -422,15 +455,15 @@ ci_omega_squared(F_value = F_val, df_effect = 2,
 
 # After fitting the X -> M and Y ~ X + M regressions:
 a_hat   <- 0.40; b_hat <- 0.40
-var_a   <- 0.02; var_b <- 0.02
+var_a_hat <- 0.02; var_b_hat <- 0.02
 
 # All four variance formulas in one call:
-var_indirect_effect(a = a_hat, b = b_hat,
-                    var_a = var_a, var_b = var_b)
+var_indirect_effect(reg_coef_a = a_hat, reg_coef_b = b_hat,
+                    var_reg_coef_a = var_a_hat, var_reg_coef_b = var_b_hat)
 
-# Plan an n for the next study:
-ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20,
-                         method = "closed_form")
+# Plan an N for the next study:
+ss_aipe_indirect_effect(true_std_reg_coef_a = 0.40, true_std_reg_coef_b = 0.40,
+                        width = 0.20, method = "closed_form")
 ```
 
 ### E. Two-Method Agreement Study
@@ -455,11 +488,12 @@ cles(smd = d_estimate)
 
 ## Summary
 
-DMAR’s architecture rests on four building blocks for any quantity
-$`\theta`$: a point estimator with variance, an exact-noncentral CI, an
-expected-value function for design-stage planning, and an AIPE sample-
+Four building blocks recur across the package for a quantity $`\theta`$:
+a point estimator with its variance, a confidence interval (from a
+noncentral distribution for the standardized effect sizes), an
+expected-value function for design-stage planning, and an AIPE sample
 size planner. The functions in each block compose horizontally (the same
 $`\theta`$ shows up in all four) and vertically (within a block, related
 transforms like $`d \to \mathrm{CLES} \to U_3 \to \mathrm{NNT}`$ are
-explicit). Knowing which block a given task lives in is half the battle;
-the function name and help file complete the picture.
+explicit). The block a task belongs to points to the function family,
+and each function’s help page gives the details.

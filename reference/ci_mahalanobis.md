@@ -16,7 +16,7 @@ ci_mahalanobis(
   D2 = NULL,
   group_1 = NULL,
   group_2 = NULL,
-  mu_0 = NULL,
+  null_mean = NULL,
   n_1 = NULL,
   n_2 = NULL,
   p = NULL,
@@ -43,12 +43,14 @@ ci_mahalanobis(
 
   Optional numeric matrix or data frame for the second sample (\\n_2
   \times p\\). When `NULL`, the function operates in one-sample mode
-  against `mu_0`.
+  against `null_mean`.
 
-- mu_0:
+- null_mean:
 
   Optional hypothesized population mean for the one-sample case
-  (length-\\p\\ numeric vector). Defaults to a vector of zeros.
+  (length-\\p\\ numeric vector), the mean vector of the null hypothesis
+  the sample centroid is compared with, \\\boldsymbol{\mu}\_0\\ in the
+  formulas of Details. Defaults to a vector of zeros.
 
 - n_1:
 
@@ -76,19 +78,30 @@ ci_mahalanobis(
   interval with coverage `1 - alpha_lower - alpha_upper`); supplying
   either alongside a non-`NULL` `conf_level` is an error, as in
   [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md), to
-  which they are passed.
+  which they are passed. The table records the coverage,
+  `1 - alpha_lower - alpha_upper`, as its level and, when the two tail
+  areas differ, the areas themselves, which the line beneath the printed
+  table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound.
 
 - ...:
 
-  Additional arguments passed to
+  Further control of the root search that
   [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
-  (for example `tol`).
+  runs for the limits of the noncentrality parameter, given by name:
+  `tol`, the convergence tolerance of `ci_nc_F`, and `maxiter`,
+  `check.conv`, and `trace`, which it passes to
+  [`uniroot`](https://rdrr.io/r/stats/uniroot.html). Any other name, and
+  an argument without a name, is refused with a condition of class
+  `dmar_argument_invalid` that names it, before anything is computed.
 
 ## Value
 
 A one-row `data.frame` with columns `sample_type` (`"one-sample"` or
 `"two-sample"`), `D2` (point estimate of the squared distance),
-`lower_limit` and `upper_limit` (the confidence limits on the population
+`ci_lower` and `ci_upper` (the confidence limits on the population
 squared distance \\\Delta^2\\), `F_value`, `df_1`, `df_2`, `n_1`, `n_2`
 (`NA` in one-sample mode), and `p`.
 
@@ -97,15 +110,15 @@ squared distance \\\Delta^2\\), `F_value`, `df_1`, `df_2`, `n_1`, `n_2`
 **Definition.** For a \\p\\-vector \\\mathbf{x}\\ drawn from a
 multivariate normal with mean \\\boldsymbol{\mu}\\ and covariance
 \\\boldsymbol{\Sigma}\\, Mahalanobis's (1936) squared distance from a
-reference vector \\\boldsymbol{\mu}\_0\\ is \$\$\Delta^2 =
-(\boldsymbol{\mu} - \boldsymbol{\mu}\_0)^\top \boldsymbol{\Sigma}^{-1}
-(\boldsymbol{\mu} - \boldsymbol{\mu}\_0).\$\$ In the two-sample case the
-population distance between groups is \\\Delta^2 =
-(\boldsymbol{\mu}\_1 - \boldsymbol{\mu}\_2)^\top
-\boldsymbol{\Sigma}^{-1} (\boldsymbol{\mu}\_1 - \boldsymbol{\mu}\_2)\\,
-assuming a common covariance. The corresponding sample estimates plug
-the sample means and the sample (or pooled) covariance into the same
-quadratic form.
+reference vector \\\boldsymbol{\mu}\_0\\ (the argument `null_mean` in
+the one-sample case) is \$\$\Delta^2 = (\boldsymbol{\mu} -
+\boldsymbol{\mu}\_0)^\top \boldsymbol{\Sigma}^{-1} (\boldsymbol{\mu} -
+\boldsymbol{\mu}\_0).\$\$ In the two-sample case the population distance
+between groups is \\\Delta^2 = (\boldsymbol{\mu}\_1 -
+\boldsymbol{\mu}\_2)^\top \boldsymbol{\Sigma}^{-1}
+(\boldsymbol{\mu}\_1 - \boldsymbol{\mu}\_2)\\, assuming a common
+covariance. The corresponding sample estimates plug the sample means and
+the sample (or pooled) covariance into the same quadratic form.
 
 **Link to Hotelling's \\T^2\\.** Hotelling's (1931) \\T^2\\ statistic is
 \\T^2 = n D^2\\ (one sample) or \\T^2 = \\n_1 n_2 / (n_1 + n_2)\\ D^2\\
@@ -136,8 +149,8 @@ the point estimate reported is the standard plug-in \\D^2\\.
 
 ## References
 
-Anderson, T. W. (2003). *An Introduction to Multivariate Statistical
-Analysis* (4th ed.). Wiley.
+Anderson, T. W. (2003). *An introduction to multivariate statistical
+analysis* (3rd ed.). Wiley.
 
 Hotelling, H. (1931). The generalization of Student's ratio. *The Annals
 of Mathematical Statistics, 2*(3), 360–378.
@@ -151,9 +164,9 @@ Reiser, B. (2001). Confidence intervals for the Mahalanobis distance.
 [doi:10.1081/SAC-100001856](https://doi.org/10.1081/SAC-100001856)
 
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
-estimation and the evaluation of statistical methods. In L. L. Harlow,
-S. A. Mulaik, & J. H. Steiger (Eds.), *What if there were no
-significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 Kelley, K. (2007). Confidence intervals for standardized effect sizes:
 Theory, application, and implementation. *Journal of Statistical
@@ -175,9 +188,10 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -199,8 +213,8 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Two-sample distance between the two schools of the Holzinger and
-#     Swineford (1939) study on a four-test cognitive battery.
+# Two-sample distance between the two schools of the holzinger_swineford
+#     data on a four-test cognitive battery.
 battery <- c("t1_visual_perception", "t2_cubes", "t4_lozenges",
              "t6_paragraph_comprehension")
 g1 <- as.matrix(holzinger_swineford[
@@ -208,24 +222,24 @@ g1 <- as.matrix(holzinger_swineford[
 g2 <- as.matrix(holzinger_swineford[
   holzinger_swineford$school == "Pasteur", battery])
 ci_mahalanobis(group_1 = g1, group_2 = g2)
-#>  sample_type D2    lower_limit upper_limit F_value df_1 df_2 n_1 n_2 p
-#>  two-sample  0.608 0.259       0.975       11.3    4    296  145 156 4
+#>  sample_type D2    ci_lower ci_upper F_value df_1 df_2 n_1 n_2 p
+#>  two-sample  0.608 0.259    0.975    11.314  4    296  145 156 4
 #> 
 #> Confidence level: 95%
 
 # One-sample distance: how far is the Grant-White centroid from a
 #     reference vector of (29, 24, 18, 9)?
-ci_mahalanobis(group_1 = g1, mu_0 = c(29, 24, 18, 9))
-#>  sample_type D2    lower_limit upper_limit F_value df_1 df_2 n_1 n_2  p
-#>  one-sample  0.289 0.11        0.474       10.2    4    141  145 <NA> 4
+ci_mahalanobis(group_1 = g1, null_mean = c(29, 24, 18, 9))
+#>  sample_type D2    ci_lower ci_upper F_value df_1 df_2 n_1 n_2  p
+#>  one-sample  0.289 0.110    0.474    10.248  4    141  145 <NA> 4
 #> 
 #> Confidence level: 95%
 
 # Pre-computed D^2 (no raw data needed): the two-school distance,
 #     reproduced from reported summaries.
 ci_mahalanobis(D2 = 0.608, n_1 = 145, n_2 = 156, p = 4)
-#>  sample_type D2    lower_limit upper_limit F_value df_1 df_2 n_1 n_2 p
-#>  two-sample  0.608 0.259       0.974       11.3    4    296  145 156 4
+#>  sample_type D2    ci_lower ci_upper F_value df_1 df_2 n_1 n_2 p
+#>  two-sample  0.608 0.259    0.974    11.308  4    296  145 156 4
 #> 
 #> Confidence level: 95%
 ```

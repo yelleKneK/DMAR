@@ -37,7 +37,7 @@ first moment and decelerates ever after; there is no inflection.
 # curves that mirror them. Each curve is its own population of size one, so one
 # simulator call draws the whole panel.
 panel <- simulate_longitudinal_negative_exponential(
-  n = 1, target_times = seq(0, 10, by = 0.1),
+  n_per_group = 1, target_times = seq(0, 10, by = 0.1),
   fixed_parameters = list(
     c(alpha = 1, zeta = -1, gamma = 0.9),
     c(alpha = 1, zeta = -1, gamma = 0.4),
@@ -67,7 +67,7 @@ asymptote, total change, and rate; measurements add error:
 
 set.seed(113)
 d_ne <- simulate_longitudinal_negative_exponential(
-  n = 25, target_times = 0:8,
+  n_per_group = 25, target_times = 0:8,
   fixed_parameters = c(alpha = 100, zeta = -80, gamma = 0.5),
   random_variances = c(alpha = 25, zeta = 16, gamma = 0.01),
   error_variance = 9
@@ -137,7 +137,7 @@ like this.
 ``` r
 
 panel <- simulate_longitudinal_gompertz(
-  n = 1, target_times = seq(0, 6, by = 0.05),
+  n_per_group = 1, target_times = seq(0, 6, by = 0.05),
   fixed_parameters = list(
     c(alpha = 0.75, beta = 2, gamma =  1.75, zeta = 0.25),
     c(alpha = 0.75, beta = 2, gamma =  1.00, zeta = 0.25),
@@ -222,7 +222,7 @@ ceiling 90, inflection at week 6):
 one_at_a_time <- function(which_var, label) {
   set.seed(113)
   d <- simulate_longitudinal_logistic(
-    n = 20, target_times = seq(0, 12, by = 0.5),
+    n_per_group = 20, target_times = seq(0, 12, by = 0.5),
     fixed_parameters = c(alpha = 80, beta = 6, gamma = 0.9, zeta = 10),
     random_variances = which_var, error_variance = 0
   )
@@ -260,7 +260,7 @@ line:
 
 set.seed(113)
 d_mix <- simulate_longitudinal_logistic(
-  n = 30, target_times = 0:12,
+  n_per_group = 30, target_times = 0:12,
   fixed_parameters = c(alpha = 80, beta = 6, gamma = 0.9, zeta = 10),
   random_variances = c(alpha = 36, beta = 1, gamma = 0.01, zeta = 9),
   error_variance = 16
@@ -360,7 +360,7 @@ one fitted curve per unit.
 
 set.seed(113)
 d <- simulate_longitudinal_gompertz(
-  n = 60, target_times = 0:10,
+  n_per_group = 60, target_times = 0:10,
   fixed_parameters = c(alpha = 75, beta = 3, gamma = 0.55, zeta = 10),
   random_variances = c(alpha = 25, beta = 0.4, gamma = 0.005, zeta = 4),
   error_variance = 9
@@ -369,12 +369,12 @@ analysis_of_change(d, id = "id", time = "time", outcome = "y",
                    model = "gompertz")
 ```
 
-| term  | estimate | se     | sd_units | var_units |
-|:------|:---------|:-------|:---------|:----------|
-| alpha | 76.8     | 1.02   | 7.92     | 62.7      |
-| beta  | 2.84     | 0.0939 | 0.727    | 0.529     |
-| gamma | 0.55     | 0.016  | 0.124    | 0.0154    |
-| zeta  | 9.29     | 0.735  | 5.7      | 32.4      |
+| term  | estimate | se    | sd_units | var_units |
+|:------|:---------|:------|:---------|:----------|
+| alpha | 76.767   | 1.022 | 7.916    | 62.670    |
+| beta  | 2.837    | 0.094 | 0.727    | 0.529     |
+| gamma | 0.550    | 0.016 | 0.124    | 0.015     |
+| zeta  | 9.288    | 0.735 | 5.696    | 32.439    |
 
 The `estimate` column lands near the generating values (75, 3, 0.55,
 10), and `sd_units` reports the individual differences in each landmark.
@@ -420,13 +420,13 @@ of the National Academy of Sciences, 18*(1), 1–8.
 ``` r
 
 sessionInfo()
-#> R version 4.5.2 (2025-10-31)
-#> Platform: aarch64-apple-darwin20
-#> Running under: macOS Tahoe 26.6.2
+#> R version 4.6.1 (2026-06-24)
+#> Platform: aarch64-apple-darwin23
+#> Running under: macOS Golden Gate 27.0.1
 #> 
 #> Matrix products: default
-#> BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
-#> LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+#> BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
 #> 
 #> locale:
 #> [1] en_US/en_US/en_US/C/en_US/en_US
@@ -438,22 +438,19 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggrain_0.1.2    patchwork_1.3.2 ggplot2_4.0.1   DMAR_1.0.0     
-#> [5] testthat_3.3.1 
+#> [1] DMAR_1.1.0     testthat_3.3.2
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] generics_0.1.4     lattice_0.22-7     magrittr_2.0.4     evaluate_1.0.5    
-#>  [5] grid_4.5.2         RColorBrewer_1.1-3 pkgload_1.4.1      fastmap_1.2.0     
-#>  [9] rprojroot_2.1.1    pkgbuild_1.4.8     sessioninfo_1.2.3  brio_1.1.5        
-#> [13] Formula_1.2-5      purrr_1.2.0        scales_1.4.0       abind_1.4-8       
-#> [17] cli_3.6.5          ggpp_0.6.1         rlang_1.1.6        ellipsis_0.3.2    
-#> [21] remotes_2.5.0      withr_3.0.2        cachem_1.1.0       devtools_2.4.6    
-#> [25] otel_0.2.0         tools_4.5.2        parallel_4.5.2     polynom_1.4-1     
-#> [29] memoise_2.0.1      dplyr_1.1.4        vctrs_0.6.5        R6_2.6.1          
-#> [33] lifecycle_1.0.4    fs_1.6.6           car_3.1-3          usethis_3.2.1     
-#> [37] MASS_7.3-65        pkgconfig_2.0.3    desc_1.4.3         pillar_1.11.1     
-#> [41] gtable_0.3.6       glue_1.8.0         xfun_0.55          tibble_3.3.0      
-#> [45] tidyselect_1.2.1   rstudioapi_0.17.1  knitr_1.51         farver_2.1.2      
-#> [49] nlme_3.1-168       carData_3.0-5      labeling_0.4.3     compiler_4.5.2    
-#> [53] S7_0.2.1
+#>  [1] gtable_0.3.6       dplyr_1.2.1        compiler_4.6.1     brio_1.1.5        
+#>  [5] tidyselect_1.2.1   parallel_4.6.1     scales_1.4.0       fastmap_1.2.0     
+#>  [9] ggplot2_4.0.3      R6_2.6.1           labeling_0.4.3     generics_0.1.4    
+#> [13] knitr_1.51         MASS_7.3-65        tibble_3.3.1       desc_1.4.3        
+#> [17] rprojroot_2.1.1    pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.3.0       
+#> [21] cachem_1.1.0       xfun_0.62          fs_2.1.0           S7_0.2.2          
+#> [25] pkgload_1.5.3      otel_0.2.0         memoise_2.0.1      cli_3.6.6         
+#> [29] withr_3.0.3        magrittr_2.0.5     grid_4.6.1         rstudioapi_0.19.0 
+#> [33] devtools_2.5.2     lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5    
+#> [37] glue_1.8.1         farver_2.1.2       sessioninfo_1.2.4  pkgbuild_1.4.8    
+#> [41] purrr_1.2.2        pkgconfig_2.0.3    tools_4.6.1        usethis_3.2.1     
+#> [45] ellipsis_0.3.3
 ```

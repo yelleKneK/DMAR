@@ -51,11 +51,19 @@ meta_smd(
   [`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md):
   the tau-squared estimator (`"reml"` default), the Hartung-Knapp
   small-sample adjustment (default `TRUE`), and the confidence level.
+  Under the adjustment, identical effect sizes give a zero adjusted
+  standard error and a warning of class `dmar_meta_hk_zero_se`; see
+  [`?meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md).
 
 ## Value
 
-A `data.frame` (class `dmar_tbl`) with the same rows as
-[`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md).
+A `data.frame` (class `dmar_meta`, a `dmar_tbl`) with the same rows and
+attributes as
+[`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md), the
+attributes `hartung_knapp_q` and `se_conventional` included when the
+Hartung-Knapp adjustment is applied. The test statistic is the row
+`test_statistic`, and the `test_distribution` and `test_df` attributes
+give its reference distribution.
 
 ## Details
 
@@ -113,27 +121,29 @@ data(teacher_expectancy)
 meta_smd(smd = teacher_expectancy$d,
          n_1 = teacher_expectancy$n_experimental,
          n_2 = teacher_expectancy$n_control)
-#>  term             value  
-#>  estimate         0.0544 
-#>  se               0.0352 
-#>  t                1.55   
-#>  p_value          0.1392 
-#>  lower_limit      -0.0195
-#>  upper_limit      0.128  
-#>  prediction_lower -0.0198
-#>  prediction_upper 0.129  
-#>  tau2             0      
-#>  tau2_lower       0      
-#>  tau2_upper       0.048  
-#>  tau              0      
-#>  I2               0      
-#>  I2_lower         0      
-#>  I2_upper         64.6   
-#>  H2               1      
-#>  Q                16.7   
-#>  Q_df             18     
-#>  Q_p              0.5468 
-#>  k                19     
+#>  term             value 
+#>  estimate         0.054 
+#>  se               0.035 
+#>  test_statistic   1.547 
+#>  p_value          0.1392
+#>  ci_lower         -0.019
+#>  ci_upper         0.128 
+#>  prediction_lower -0.020
+#>  prediction_upper 0.129 
+#>  tau2             0.000 
+#>  tau2_ci_lower    0.000 
+#>  tau2_ci_upper    0.048 
+#>  tau              0.000 
+#>  I2               0.000 
+#>  I2_ci_lower      0.000 
+#>  I2_ci_upper      64.619
+#>  H2               1.000 
+#>  Q                16.657
+#>  Q_df             18    
+#>  Q_p              0.5468
+#>  n_studies        19    
 #> 
 #> Confidence level: 95%
+#> 
+#> test_statistic: referred to Student's t on 18 df (Hartung-Knapp adjustment)
 ```

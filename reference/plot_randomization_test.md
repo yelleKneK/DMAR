@@ -4,13 +4,15 @@ Displays the reference distribution that
 [`randomization_test`](https://yelleknek.github.io/DMAR/reference/randomization_test.md)
 built by reassigning the observed scores to the two groups, with the
 observed statistic marked and every reassignment at least as extreme as
-the observed one shaded. The shaded proportion is the *p*-value, so the
-figure shows where that number came from instead of only reporting it.
+the observed one shaded. The shaded reassignments are the ones the test
+counted, so under exact enumeration the shaded proportion is the
+*p*-value, and the figure shows where that number came from instead of
+only reporting it.
 
 ## Usage
 
 ``` r
-plot_randomization_test(object, bins = 40L, palette = "okabe_ito", ...)
+plot_randomization_test(object, bins = 40L, palette = "okabe_ito")
 ```
 
 ## Arguments
@@ -19,6 +21,17 @@ plot_randomization_test(object, bins = 40L, palette = "okabe_ito", ...)
 
   A result of
   [`randomization_test`](https://yelleknek.github.io/DMAR/reference/randomization_test.md).
+  A reassignment whose statistic is infinite has no place on the axis;
+  the histogram shows the finite values and the subtitle states how many
+  reassignments are not drawn. Infinite values occur in the reference
+  distribution only, under `statistic = "t"`, for a reassignment that
+  leaves both groups constant at different values (with a two-valued
+  outcome, the one that puts every high score in one group). The
+  observed statistic is always finite, because
+  [`randomization_test`](https://yelleknek.github.io/DMAR/reference/randomization_test.md)
+  refuses `statistic = "t"` when the observed groups are themselves
+  constant at different values, so the line that marks it is always
+  drawn.
 
 - bins:
 
@@ -29,11 +42,6 @@ plot_randomization_test(object, bins = 40L, palette = "okabe_ito", ...)
 
   Character; the color palette. Defaults to `"okabe_ito"`, base R's
   colorblind-safe Okabe-Ito palette; `"tableau"` is also available.
-
-- ...:
-
-  Currently unused; present so the signature can grow without breaking
-  existing calls.
 
 ## Value
 
@@ -66,9 +74,9 @@ for the test itself.
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),

@@ -83,10 +83,8 @@ Bessel functions. The 1818 monograph that contains this frequency
 distribution is part of a much larger effort to produce a reference
 catalog of stellar positions, the *Fundamenta astronomiae*, derived from
 the observations of James Bradley (1693–1762), the third Astronomer
-Royal of Britain and a pioneering observational astronomer. Bradley's
-position measurements were the most accurate of his era; the
-observational errors are small (most under 0.5 seconds of arc) and
-approximately normally distributed.
+Royal of Britain. The observational errors are small (most under 0.5
+seconds of arc) and approximately normally distributed.
 
 **Why this data set matters for measurement and analysis.** Bessel's
 1818 comparison is one of the earliest empirical demonstrations that

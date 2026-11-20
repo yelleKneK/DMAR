@@ -48,8 +48,8 @@ plot_irt_information(
 - show_peak:
 
   Logical. When `TRUE` (the default) and `what = "test"`, a vertical
-  dotted line marks the value of `theta` at which test information peaks
-  on the supplied grid.
+  dotted line marks the value of `trait_value` at which test information
+  peaks on the supplied grid.
 
 - palette:
 
@@ -102,9 +102,9 @@ Pt. 2), 1–97.
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
 [`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),
@@ -122,8 +122,8 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 info <- irt_information(
-  a = c(mood_1 = 1.4, mood_2 = 0.9, mood_3 = 1.1),
-  b = c(-1.5, -0.5, 0.5, 1.5, 0.0, 0.8),
+  discrimination = c(mood_1 = 1.4, mood_2 = 0.9, mood_3 = 1.1),
+  threshold = c(-1.5, -0.5, 0.5, 1.5, 0.0, 0.8),
   item = c(rep("mood_1", 4), "mood_2", "mood_3")
 )
 

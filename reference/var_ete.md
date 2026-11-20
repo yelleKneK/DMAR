@@ -15,13 +15,13 @@ reimplementation of `var.ete()` from MBESS, contributed there by Li Li.
 
 ``` r
 var_ete(
-  sigma2,
-  sigma2_Z,
+  error_variance,
+  var_Z,
   n_1,
   n_2,
-  beta_1,
-  beta_2,
-  mu_Z = 0,
+  reg_coef_1,
+  reg_coef_2,
+  mean_Z = 0,
   fixed_value = 0,
   type = c("sample", "population"),
   covariate_value = c("sample_mean", "sd", "fixed")
@@ -30,12 +30,12 @@ var_ete(
 
 ## Arguments
 
-- sigma2:
+- error_variance:
 
   Residual error variance: the population value when
   `type = "population"`, the sample estimate when `type = "sample"`.
 
-- sigma2_Z:
+- var_Z:
 
   Variance of the random covariate: population value or sample estimate,
   matching `type`.
@@ -45,12 +45,12 @@ var_ete(
   Sample sizes of the two groups (each must exceed 3; the formulas
   involve \\n - 3\\ in denominators).
 
-- beta_1, beta_2:
+- reg_coef_1, reg_coef_2:
 
-  Slopes of the covariate in group 1 and group 2: population values or
-  sample estimates, matching `type`.
+  Regression coefficients (slopes) of the covariate in group 1 and group
+  2: population values or sample estimates, matching `type`.
 
-- mu_Z:
+- mean_Z:
 
   Mean of the covariate (population value or sample mean, matching
   `type`). Defaults to 0. Used when `covariate_value = "fixed"`.
@@ -81,19 +81,21 @@ recorded as attributes of the same names.
 
 ## Details
 
-Randomized experiments with a covariate commonly probe the simple
-treatment effect at the grand mean and one standard deviation either
-side of it when the slopes differ across groups. The variance
-expressions here treat the covariate as normally distributed rather than
-fixed, which Li, McLouth, and Delaney (2020) show can change the
-estimated standard error substantially when heterogeneity of regression
-is strong. The square root of the returned value is the standard error
-used for a confidence interval or test of the treatment effect at the
-chosen covariate value.
+When the slopes differ across groups, the treatment effect depends on
+the value of the covariate, and this function gives its variance at the
+grand mean of the covariate, one standard deviation either side of it,
+or a chosen value (`covariate_value`). The variance expressions here
+treat the covariate as normally distributed rather than fixed, which Li,
+McLouth, and Delaney (2020) show can change the estimated standard error
+substantially when heterogeneity of regression is strong. The square
+root of the returned value is the standard error used for a confidence
+interval or test of the treatment effect at the chosen covariate value.
 
 At the sample grand mean of the covariate, writing \\N = n_1 + n_2\\,
-the population variance (their Equation 10) is \$\$\mathrm{Var} =
-\sigma^2 C_0 + \frac{(\beta_1 - \beta_2)^2 \sigma^2_Z}{N}, \qquad C_0 =
+\\\sigma^2\\ for `error_variance`, \\\sigma^2_Z\\ for `var_Z`, and
+\\\beta_1\\ and \\\beta_2\\ for `reg_coef_1` and `reg_coef_2`, the
+population variance (their Equation 10) is \$\$\mathrm{Var} = \sigma^2
+C_0 + \frac{(\beta_1 - \beta_2)^2 \sigma^2_Z}{N}, \qquad C_0 =
 \frac{1}{n_1} + \frac{1}{n_2} + \frac{n_2}{N n_1 (n_1 - 3)} +
 \frac{n_1}{N n_2 (n_2 - 3)},\$\$ and with `type = "sample"` the returned
 value is their unbiased estimator (Equation C.7), which subtracts
@@ -106,11 +108,11 @@ and C.10.
 
 The two `"fixed"` estimands differ in where the deviation of
 `fixed_value` is measured from. With `type = "sample"` the deviation is
-taken from the sample grand mean (Equation C.10), so `mu_Z` should be
+taken from the sample grand mean (Equation C.10), so `mean_Z` should be
 the sample mean of the covariate. With `type = "population"` the
 deviation is taken from a known population mean (Equation 14);
 evaluating the treatment effect at that known mean itself, as in the
-paper's worked example, sets `fixed_value = mu_Z`, which zeroes the
+paper's worked example, sets `fixed_value = mean_Z`, which zeroes the
 deviation term.
 
 ## References
@@ -164,11 +166,12 @@ Ken Kelley <kkelley@nd.edu>
 data(pygmalion)
 fit <- lm(iq_8 ~ iq_pre * treatment, data = pygmalion)
 s2  <- sum(residuals(fit)^2) / fit$df.residual
-var_ete(sigma2 = s2, sigma2_Z = var(pygmalion$iq_pre),
+var_ete(error_variance = s2, var_Z = var(pygmalion$iq_pre),
         n_1 = sum(pygmalion$treatment == "Bloomer"),
         n_2 = sum(pygmalion$treatment == "Control"),
-        beta_1 = coef(fit)["iq_pre"] + coef(fit)["iq_pre:treatmentBloomer"],
-        beta_2 = coef(fit)["iq_pre"])
+        reg_coef_1 = coef(fit)["iq_pre"] +
+          coef(fit)["iq_pre:treatmentBloomer"],
+        reg_coef_2 = coef(fit)["iq_pre"])
 #>  term    value
-#>  var_ete 3.52 
+#>  var_ete 3.518
 ```

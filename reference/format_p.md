@@ -1,4 +1,4 @@
-# Format *p*-values for Display the DMAR Way
+# Format *p*-Values for Display at a Fixed Number of Decimal Places
 
 Render a vector of *p*-values as character strings at a fixed number of
 decimal places (default 4) with a floor label “\< 10^(-digits_p)” for
@@ -26,13 +26,23 @@ format_p(p, digits_p = 4L)
 - p:
 
   Numeric vector of *p*-values. `NA` values pass through as
-  `NA_character_`.
+  `NA_character_`. The function only formats: it shows each value as
+  given and does not check that it is a probability. A value below 0
+  (and `-Inf`) is below the floor and shows as the floor label, a value
+  above 1 is shown at `digits_p` decimal places (1.1 as “1.1000”), `Inf`
+  is shown as Inf (with the leading spaces
+  [`formatC`](https://rdrr.io/r/base/formatc.html) gives it), and `NaN`
+  is returned as `NA_character_`.
 
 - digits_p:
 
-  Integer number of decimal places. Default `4L`. Values strictly below
-  \\10^{-\mathrm{digits\\p}}\\ render as the floor label “\<
-  10^(-digits_p)” (for example “\< 0.0001” when `digits_p = 4`).
+  Number of decimal places, a single whole number from 1 to 324, the
+  most decimal places [`formatC`](https://rdrr.io/r/base/formatc.html)
+  writes (`3` and `3L` are accepted; `3.9` is refused with a condition
+  of class `dmar_argument_invalid`, rather than cut to 3). Default `4L`.
+  Values strictly below \\10^{-\mathrm{digits\\p}}\\ render as the floor
+  label “\< 10^(-digits_p)” (for example “\< 0.0001” when
+  `digits_p = 4`).
 
 ## Value
 

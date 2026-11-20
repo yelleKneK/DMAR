@@ -61,9 +61,13 @@ correction_for_attenuation(
 
 A `data.frame` (class `dmar_tbl`) in `term` / `value` layout with the
 observed correlation (`correlation_observed`), the corrected correlation
-(`correlation_corrected`), the corrected interval (`lower_limit`,
-`upper_limit`; present only when `N` is supplied), and the
-`reliability_x`, `reliability_y`, and `N` inputs.
+(`correlation_corrected`), the corrected interval (`ci_lower`,
+`ci_upper`; present only when `N` is supplied), and the `reliability_x`,
+`reliability_y`, and `N` inputs. With an interval the table carries the
+attributes `conf_level` and `ci_estimate`, which names
+`correlation_corrected` as the row the interval belongs to, so that
+[`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+reports the corrected correlation with it.
 
 ## Details
 
@@ -118,13 +122,11 @@ Other effect size estimates:
 [`cliff_delta()`](https://yelleknek.github.io/DMAR/reference/cliff_delta.md),
 [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
 [`eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/eta_squared_generalized.md),
-[`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
 [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md),
 [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md),
 [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md),
 [`proportion_of_superiority()`](https://yelleknek.github.io/DMAR/reference/proportion_of_superiority.md),
 [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md),
@@ -141,21 +143,21 @@ Ken Kelley <kkelley@nd.edu>
 # and .70 corresponds to a construct-level correlation of about .40.
 correction_for_attenuation(r = 0.30, reliability_x = 0.80, reliability_y = 0.70)
 #>  term                  value
-#>  correlation_observed  0.3  
+#>  correlation_observed  0.300
 #>  correlation_corrected 0.401
-#>  reliability_x         0.8  
-#>  reliability_y         0.7  
+#>  reliability_x         0.800
+#>  reliability_y         0.700
 
 # With the sample size, the corrected interval comes along.
 correction_for_attenuation(r = 0.30, reliability_x = 0.80, reliability_y = 0.70,
                     N = 120)
 #>  term                  value
-#>  correlation_observed  0.3  
+#>  correlation_observed  0.300
 #>  correlation_corrected 0.401
-#>  lower_limit           0.171
-#>  upper_limit           0.608
-#>  reliability_x         0.8  
-#>  reliability_y         0.7  
+#>  ci_lower              0.171
+#>  ci_upper              0.608
+#>  reliability_x         0.800
+#>  reliability_y         0.700
 #>  N                     120  
 #> 
 #> Confidence level: 95%
@@ -163,9 +165,9 @@ correction_for_attenuation(r = 0.30, reliability_x = 0.80, reliability_y = 0.70,
 # Correct one side only (error-free criterion).
 correction_for_attenuation(r = 0.30, reliability_x = 0.80, reliability_y = 1)
 #>  term                  value
-#>  correlation_observed  0.3  
+#>  correlation_observed  0.300
 #>  correlation_corrected 0.335
-#>  reliability_x         0.8  
+#>  reliability_x         0.800
 #>  reliability_y         1    
 
 # The two routes to the construct-level correlation, on the same data
@@ -195,9 +197,9 @@ correction_for_attenuation(r = cor(x_score, y_score),
 #>  term                  value
 #>  correlation_observed  0.307
 #>  correlation_corrected 0.413
-#>  lower_limit           0.29 
-#>  upper_limit           0.529
-#>  reliability_x         0.76 
+#>  ci_lower              0.290
+#>  ci_upper              0.529
+#>  reliability_x         0.760
 #>  reliability_y         0.725
 #>  N                     400  
 #> 

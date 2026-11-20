@@ -26,7 +26,7 @@ correlation between the outcome and that predictor.
 ## Usage
 
 ``` r
-ci_r(r, n, conf_level = 0.95, alpha_lower = NULL, alpha_upper = NULL)
+ci_r(r, N, conf_level = 0.95, alpha_lower = NULL, alpha_upper = NULL)
 
 ci_R(
   R = NULL,
@@ -51,14 +51,15 @@ ci_R(
   zero-order Pearson product-moment correlation coefficient), for
   `ci_r()`
 
-- n:
+- N:
 
-  Sample size for `ci_r()`, which must be at least 4 (see Details)
+  Total sample size. For `ci_r()` it must be at least 4 (see Details).
 
 - conf_level:
 
   Confidence interval coverage (i.e., 1 - Type I error rate); default is
-  .95
+  .95. For `ci_r()` a level above .999999998, whose tail areas are below
+  1e-9, is refused
 
 - alpha_lower:
 
@@ -66,7 +67,18 @@ ci_R(
 
 - alpha_upper:
 
-  The Type I error rate for the upper confidence interval limit
+  The Type I error rate for the upper confidence interval limit. If the
+  confidence level is omitted, supplied tail areas determine it. An
+  explicitly supplied level must agree with their implied coverage. The
+  table records the coverage, `1 - alpha_lower - alpha_upper`, as its
+  level and, when the two tail areas differ, the areas themselves, which
+  the line beneath the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound.
+  For `ci_r()` a nonzero tail area below 1e-9 is refused (see "Small
+  tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - R:
 
@@ -90,10 +102,6 @@ ci_R(
 
   Obtained *F*-value
 
-- N:
-
-  Sample size
-
 - p:
 
   Number of predictors
@@ -105,20 +113,21 @@ ci_R(
 ## Value
 
 `ci_r()` returns a 3-row `data.frame` with columns `term` and `value`.
-The `term` values are `"lower_limit"` (the lower confidence limit on the
+The `term` values are `"ci_lower"` (the lower confidence limit on the
 population correlation \\\rho\\), `"r"` (the observed sample correlation
-coefficient), and `"upper_limit"` (the upper limit on \\\rho\\).
+coefficient), and `"ci_upper"` (the upper limit on \\\rho\\).
 
 `ci_R()` returns a 3-row `data.frame` with columns `term`, `value`,
-`prob_less`, and `prob_greater`. The rows are ordered `"lower_limit"`,
+`prob_less`, and `prob_greater`. The rows are ordered `"ci_lower"`,
 `"R"` (the sample multiple correlation coefficient supplied by the user,
-the point estimate), and `"upper_limit"`, so the point estimate sits
+the point estimate), and `"ci_upper"`, so the point estimate sits
 between its confidence limits. The lower and upper limits are the
 confidence limits on the population multiple correlation coefficient
 \\\rho\\ (square roots of the corresponding limits on \\\rho^2\\). The
-`prob_less` and `prob_greater` columns report the achieved lower-tail
-and upper-tail error probabilities at each limit (they are `NA` for the
-`"R"` estimate row).
+`prob_less` and `prob_greater` columns are those of
+[`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md) for the
+same sample, and its help page says what they hold (they are `NA` for
+the `"R"` estimate row).
 
 ## Details
 
@@ -128,10 +137,10 @@ transforms \\r\\ into *Z*', forms a confidence interval for the
 population value (i.e., \\\zeta\\), and then transforms the confidence
 limits for \\\zeta\\ into the scale of the correlation coefficient. The
 interval requires a sample size of at least 4. The variance of *Z*' is
-\\1/(n - 3)\\, which is infinite at \\n = 3\\; there the interval would
+\\1/(N - 3)\\, which is infinite at \\N = 3\\; there the interval would
 be vacuous, covering \\\[-1, 1\]\\ regardless of *r*, and for smaller
-*n* the variance is undefined. The function therefore stops with an
-error when \\n \< 4\\.
+*N* the variance is undefined. The function therefore stops with an
+error when \\N \< 4\\.
 
 **Fixed vs. random predictors (`ci_R`).** The two regression models give
 *different* sampling distributions for the sample \\R^2\\, and so
@@ -145,8 +154,9 @@ obtained by inverting that distribution and then taking the square root
 [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)).
 Under random predictors the design matrix is itself a draw from a joint
 multivariate normal distribution and the unconditional sampling
-distribution of the sample \\R^2\\ is given by Lee (1971); the same Lee
-bisection that
+distribution of the sample \\R^2\\ is due to Fisher (1928); the
+bisection on the three-moment noncentral *F* approximation of Lee (1971,
+Section 5.1) that
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md) uses for
 the random-predictor CI on \\\rho^2\\ is applied here and the limits are
 mapped to \\\rho\\. Gatsonis and Sampson (1989) document the comparison;
@@ -173,6 +183,11 @@ sciences* (2nd ed.). Hillsdale, NJ: Lawrence Erlbaum.
 
 Gatsonis, C., & Sampson, A. R. (1989). Multiple correlation: Exact power
 and sample size calculations. *Psychological Bulletin, 106*(3), 516–524.
+
+Fisher, R. A. (1928). The general sampling distribution of the multiple
+correlation coefficient. *Proceedings of the Royal Society of London,
+Series A, 121*(788), 654–673.
+[doi:10.1098/rspa.1928.0224](https://doi.org/10.1098/rspa.1928.0224)
 
 Hays, W. L. (1994). *Statistics* (5th ed.). Fort Worth, TX: Harcourt
 Brace College Publishers.
@@ -234,10 +249,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -259,42 +275,48 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Pearson correlation, from Hays. Suppose n = 100 and r = .35.
-ci_r(r = .35, n = 100, conf_level = .95)
-#>  term        value
-#>  lower_limit 0.165
-#>  r           0.35 
-#>  upper_limit 0.511
+# Pearson correlation, from Hays. Suppose N = 100 and r = .35.
+ci_r(r = .35, N = 100, conf_level = .95)
+#>  term     value
+#>  ci_lower 0.165
+#>  r        0.350
+#>  ci_upper 0.511
 #> 
 #> Confidence level: 95%
 
 # Here is another way to enter the above example.
-ci_r(r = .35, n = 100, conf_level = NULL,
+ci_r(r = .35, N = 100, conf_level = NULL,
      alpha_lower = .025, alpha_upper = .025)
-#>  term        value
-#>  lower_limit 0.165
-#>  r           0.35 
-#>  upper_limit 0.511
+#>  term     value
+#>  ci_lower 0.165
+#>  r        0.350
+#>  ci_upper 0.511
+#> 
+#> Confidence level: 95%
 
 # Here are examples of one-sided confidence intervals.
-ci_r(r = .35, n = 100, conf_level = NULL, alpha_lower = 0, alpha_upper = .05)
-#>  term        value
-#>  lower_limit -1   
-#>  r           0.35 
-#>  upper_limit 0.487
-ci_r(r = .35, n = 100, conf_level = NULL, alpha_lower = .05, alpha_upper = 0)
-#>  term        value
-#>  lower_limit 0.196
-#>  r           0.35 
-#>  upper_limit 1    
+ci_r(r = .35, N = 100, conf_level = NULL, alpha_lower = 0, alpha_upper = .05)
+#>  term     value 
+#>  ci_lower -1.000
+#>  r        0.350 
+#>  ci_upper 0.487 
+#> 
+#> Confidence level: 95% (one-sided: the upper limit is the 95% upper confidence bound, with tail area 0.05 above it and none below the lower limit)
+ci_r(r = .35, N = 100, conf_level = NULL, alpha_lower = .05, alpha_upper = 0)
+#>  term     value
+#>  ci_lower 0.196
+#>  r        0.350
+#>  ci_upper 1.000
+#> 
+#> Confidence level: 95% (one-sided: the lower limit is the 95% lower confidence bound, with tail area 0.05 below it and none above the upper limit)
 
 # Multiple correlation from a five-predictor regression.
 ci_R(R = .7071, df_1 = 5, df_2 = 50, conf_level = .95,
      random_predictors = TRUE)
-#>  term        value prob_less prob_greater
-#>  lower_limit 0.489 0.025     0.975       
-#>  R           0.707 <NA>      <NA>        
-#>  upper_limit 0.799 0.975     0.025       
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.489 0.025     0.975       
+#>  R        0.707 <NA>      <NA>        
+#>  ci_upper 0.799 0.975     0.025       
 #> 
 #> Confidence level: 95%
 ```

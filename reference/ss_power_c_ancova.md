@@ -9,20 +9,20 @@ given a per-group sample size, return the realized statistical power.
 
 ``` r
 ss_power_c_ancova(
-  psi,
+  true_contrast,
   c_weights,
-  sigma,
-  rho,
+  true_sd,
+  true_cor,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n = NULL,
+  specified_n_per_group = NULL,
   directional = FALSE
 )
 ```
 
 ## Arguments
 
-- psi:
+- true_contrast:
 
   The population unstandardized contrast effect on the adjusted means,
   \\\psi = \sum c_j \mu^{(adj)}\_j\\
@@ -32,15 +32,15 @@ ss_power_c_ancova(
   Vector of contrast weights (must sum to zero); use fractional weights
   so the positive weights sum to 1
 
-- sigma:
+- true_sd:
 
   Within-group population standard deviation of the response (the same
   \\\sigma\\ as in a one-way ANOVA on the response)
 
-- rho:
+- true_cor:
 
   Within-group population correlation between the response and the
-  covariate; must lie in (-1, 1)
+  covariate, \\\rho\\ in Details; must lie in (-1, 1)
 
 - desired_power:
 
@@ -50,15 +50,15 @@ ss_power_c_ancova(
 
   Type I error rate (default 0.05)
 
-- n:
+- specified_n_per_group:
 
   Per-group sample size (assumed balanced); if specified, returns the
   realized power
 
 - directional:
 
-  Logical: `TRUE` for a one-sided test (in the same sign as `psi`),
-  `FALSE` (default) for a two-sided test
+  Logical: `TRUE` for a one-sided test (in the same sign as
+  `true_contrast`), `FALSE` (default) for a two-sided test
 
 ## Value
 
@@ -72,13 +72,14 @@ it in broom convention.
 ## Details
 
 This function uses the standard large-sample formulation in which the
-ANCOVA error variance is \\\sigma^2\_{adj} = \sigma^2 (1 - \rho^2)\\,
-the contrast *t*-statistic has degrees of freedom \\N - J - 1\\ (one
-less than the corresponding ANOVA contrast because of the covariate),
-and the noncentrality parameter is \\\lambda = \psi / (\sigma \sqrt{1 -
-\rho^2} \sqrt{\sum c_j^2 / n})\\. This assumes the covariate means are
-equal across groups (the typical assumption under random assignment);
-for designs with substantial group differences in the covariate, the
+ANCOVA error variance is \\\sigma^2\_{adj} = \sigma^2 (1 - \rho^2)\\
+(\\\sigma\\ is `true_sd` and \\\rho\\ is `true_cor`), the contrast
+*t*-statistic has degrees of freedom \\N - J - 1\\ (one less than the
+corresponding ANOVA contrast because of the covariate), and the
+noncentrality parameter is \\\lambda = \psi / (\sigma \sqrt{1 - \rho^2}
+\sqrt{\sum c_j^2 / n})\\. This assumes the covariate means are equal
+across groups (the typical assumption under random assignment); for
+designs with substantial group differences in the covariate, the
 small-sample correction \\1 + (\bar X\_{j} - \bar X\_{\cdot})^2 /
 SS^{(within)}\_X\\ would slightly inflate the standard error and reduce
 power, an effect that is negligible for moderate or large \\n\\.
@@ -110,6 +111,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_composite_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_composite_ancova.md),
@@ -144,20 +146,20 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Same population contrast as in the ANOVA example, with rho = 0.5 between
+# Same population contrast as in the ANOVA example, with true_cor = 0.5 between
 # outcome and covariate; ANCOVA is more efficient than ANOVA here.
-ss_power_c_ancova(psi = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
-                  sigma = 1, rho = 0.5, desired_power = 0.80)
+ss_power_c_ancova(true_contrast = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
+                  true_sd = 1, true_cor = 0.5, desired_power = 0.80)
 #>  term                  value
 #>  necessary_n_per_group 25   
 #>  actual_power          0.815
-#>  noncentral_t_parm     2.89 
+#>  noncentral_t_parm     2.887
 
 # Realized power for n = 30 per group
-ss_power_c_ancova(psi = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
-                  sigma = 1, rho = 0.5, n = 30)
+ss_power_c_ancova(true_contrast = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
+                  true_sd = 1, true_cor = 0.5, specified_n_per_group = 30)
 #>  term                  value
 #>  specified_n_per_group 30   
-#>  actual_power          0.88 
-#>  noncentral_t_parm     3.16 
+#>  actual_power          0.880
+#>  noncentral_t_parm     3.162
 ```

@@ -12,7 +12,7 @@ convert_R2_f(R2 = NULL, df_1 = NULL, df_2 = NULL, p = NULL, N = NULL)
 
 convert_f_R2(F_value = NULL, df_1 = NULL, df_2 = NULL)
 
-convert_lambda_R2(lambda = NULL, N = NULL)
+convert_lambda_R2(ncp = NULL, N = NULL)
 
 convert_R2_lambda(R2 = NULL, N = NULL)
 ```
@@ -44,9 +44,10 @@ convert_R2_lambda(R2 = NULL, N = NULL)
   The obtained *F* value from a test of significance for the squared
   multiple correlation coefficient
 
-- lambda:
+- ncp:
 
-  The noncentral parameter from an *F*-distribution
+  The noncentrality parameter (\\\lambda\\) of an *F*-distribution, the
+  input of `convert_lambda_R2()`
 
 ## Value
 

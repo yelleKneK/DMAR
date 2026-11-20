@@ -9,9 +9,9 @@ estimates overstate the true effect), following the design analysis of
 Gelman and Carlin (2014). The *precision lens*, in the accuracy in
 parameter estimation (AIPE) tradition: the expected half-width and full
 width of the `conf_level` confidence interval the design will produce,
-the spread of that realized width, and, when a target width `w` is
-supplied, `pct_ci_less_w`, the probability that the realized interval is
-no wider than the target, the same quantities the
+the spread of that realized width, and, when a target `width` is
+supplied, `pct_ci_less_width`, the probability that the realized
+interval is no wider than the target, the same quantities the
 `ss_aipe_*_sensitivity()` family estimates by Monte Carlo, here in
 closed form.
 
@@ -27,7 +27,7 @@ design_consequences(
   alpha_level = 0.05,
   df = NULL,
   conf_level = 0.95,
-  w = NULL
+  width = NULL
 )
 ```
 
@@ -71,22 +71,22 @@ design_consequences(
   Confidence level of the interval evaluated by the precision lens.
   Defaults to 0.95.
 
-- w:
+- width:
 
   Optional target full width for the confidence interval; when supplied,
-  `pct_ci_less_w` reports the probability that the realized interval is
-  no wider than `w`.
+  `pct_ci_less_width` reports the probability that the realized interval
+  is no wider than `width`.
 
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with the significance-lens rows
 (`power`, `type_s_error`, `exaggeration_ratio`), the precision-lens rows
 (`expected_half_width`, `mean_ci_width`, `median_ci_width`,
-`sd_ci_width`, `pct_ci_less_w`, `target_width`; the last two are `NA`
-when no `w` is supplied), and the design rows (`true_effect`, `se`,
-`df`, `alpha_level`). The confidence level is recorded in the
-`"conf_level"` attribute. The schema is constant: rows that do not apply
-are `NA`, never dropped.
+`sd_ci_width`, `pct_ci_less_width`, `width`; the last two are `NA` when
+no `width` is supplied), and the design rows (`true_effect`, `se`, `df`,
+`alpha_level`). The confidence level is recorded in the `"conf_level"`
+attribute. The schema is constant: rows that do not apply are `NA`,
+never dropped.
 
 ## Details
 
@@ -104,21 +104,23 @@ follow from the two tails of the distribution of the test statistic: the
 noncentral *t* with noncentrality \\\lambda\\ when `df` is finite (the
 exact distribution of the *t* statistic when the standard error is
 estimated from the data, the same sampling model the precision lens
-uses), and the normal when `df = Inf`. The exaggeration ratio is the
-expected absolute estimate conditional on significance over the absolute
-true effect, computed exactly: from truncated normal moments when
-`df = Inf`, and otherwise by integrating those moments over the chi
-distribution of the estimated standard error, so no simulation error
-enters. Gelman and Carlin's `retrodesign()` instead evaluates a central
-*t* shifted by \\\lambda\\ (and simulates the exaggeration ratio under
-that model), an approximation that treats the standard error as known;
-the two agree as `df` grows and coincide at `df = Inf`, but at small
-`df` they differ: in the underpowered regime the design analysis is
-aimed at (power below about 0.7), the known-se approximation understates
-power and overstates the Type S and Type M errors, so their published
-finite-`df` values differ from the exact ones reported here. When
-`true_effect = 0` the power equals `alpha_level`, the Type S error is
-0.5, and the exaggeration ratio is undefined (`NA`).
+uses), and the normal when `df = Inf`. The noncentral *t* probabilities
+are exact, including above a noncentrality of 37.62, where R's
+[`pt()`](https://rdrr.io/r/stats/TDist.html) is a normal approximation.
+The exaggeration ratio is the expected absolute estimate conditional on
+significance over the absolute true effect, computed exactly: from
+truncated normal moments when `df = Inf`, and otherwise by integrating
+those moments over the chi distribution of the estimated standard error,
+so no simulation error enters. Gelman and Carlin's `retrodesign()`
+instead evaluates a central *t* shifted by \\\lambda\\ (and simulates
+the exaggeration ratio under that model), an approximation that treats
+the standard error as known; the two agree as `df` grows and coincide at
+`df = Inf`, but at small `df` they differ: in the underpowered regime
+the design analysis is aimed at (power below about 0.7), the known-se
+approximation understates power and overstates the Type S and Type M
+errors, so their published finite-`df` values differ from the exact ones
+reported here. When `true_effect = 0` the power equals `alpha_level`,
+the Type S error is 0.5, and the exaggeration ratio is undefined (`NA`).
 
 **Precision lens.** The realized interval half-width is
 \\t\_{1-\alpha^\*/2,\\\mathit{df}} \cdot \widehat{\mathrm{se}}\\ with
@@ -127,12 +129,13 @@ finite-`df` values differ from the exact ones reported here. When
 so the width's mean, median, and standard deviation have closed
 chi-distribution forms and \$\$P(\mathrm{width} \le w) \\=\\ P\\\left(W
 \le \mathit{df}\left\[\frac{w}
-{2\\t\\\mathrm{se}}\right\]^{2}\right).\$\$ These are the population
-versions of the `mean_ci_width`, `median_ci_width`, `sd_ci_width`, and
-`pct_ci_less_w` terms that the `ss_aipe_*_sensitivity()` functions
+{2\\t\\\mathrm{se}}\right\]^{2}\right),\$\$ where \\w\\ is the target
+full width, the argument `width`. These are the population versions of
+the `mean_ci_width`, `median_ci_width`, `sd_ci_width`, and
+`pct_ci_less_width` terms that the `ss_aipe_*_sensitivity()` functions
 estimate by Monte Carlo. With `df = Inf` the standard error is treated
-as known, the width is deterministic, and `pct_ci_less_w` is a step: 1
-when the fixed width is at most `w` and 0 otherwise.
+as known, the width is deterministic, and `pct_ci_less_width` is a step:
+1 when the fixed width is at most `width` and 0 otherwise.
 
 The function complements the planners rather than replacing them:
 `ss_power_*()` chooses a sample size for detection, `ss_aipe_*()`
@@ -159,8 +162,8 @@ simply significant. *Psychological Methods, 8*(3), 305–321.
 [doi:10.1037/1082-989X.8.3.305](https://doi.org/10.1037/1082-989X.8.3.305)
 
 Kelley, K., Maxwell, S. E., & Rausch, J. R. (2003). Obtaining power or
-obtaining precision: Delineating methods of sample size planning.
-*Evaluation and the Health Professions, 26*(3), 258–287.
+obtaining precision: Delineating methods of sample-size planning.
+*Evaluation & the Health Professions, 26*(3), 258–287.
 [doi:10.1177/0163278703255242](https://doi.org/10.1177/0163278703255242)
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
@@ -205,39 +208,39 @@ Ken Kelley <kkelley@nd.edu>
 # truth seven-fold, and the 95 percent CI is about 1.2 wide, twelve
 # times the effect. Bad for detection, bad for precision.
 design_consequences(true_effect = 0.1, se = 0.3)
-#>  term                value 
-#>  power               0.0628
-#>  type_s_error        0.174 
-#>  exaggeration_ratio  7.1   
-#>  expected_half_width 0.588 
-#>  mean_ci_width       1.18  
-#>  median_ci_width     1.18  
-#>  sd_ci_width         0     
-#>  pct_ci_less_w       <NA>  
-#>  target_width        <NA>  
-#>  true_effect         0.1   
-#>  se                  0.3   
-#>  df                  Inf   
-#>  alpha_level         0.05  
+#>  term                value
+#>  power               0.063
+#>  type_s_error        0.174
+#>  exaggeration_ratio  7.100
+#>  expected_half_width 0.588
+#>  mean_ci_width       1.176
+#>  median_ci_width     1.176
+#>  sd_ci_width         0.000
+#>  pct_ci_less_width   <NA> 
+#>  width               <NA> 
+#>  true_effect         0.100
+#>  se                  0.300
+#>  df                  Inf  
+#>  alpha_level         0.050
 #> 
 #> Confidence level: 95%
 
 # ---- The same effect, precisely measured -----------------------------
 design_consequences(true_effect = 0.1, se = 0.03)
-#>  term                value   
-#>  power               0.915   
-#>  type_s_error        6.56e-08
-#>  exaggeration_ratio  1.05    
-#>  expected_half_width 0.0588  
-#>  mean_ci_width       0.118   
-#>  median_ci_width     0.118   
-#>  sd_ci_width         0       
-#>  pct_ci_less_w       <NA>    
-#>  target_width        <NA>    
-#>  true_effect         0.1     
-#>  se                  0.03    
-#>  df                  Inf     
-#>  alpha_level         0.05    
+#>  term                value
+#>  power               0.915
+#>  type_s_error        0.000
+#>  exaggeration_ratio  1.051
+#>  expected_half_width 0.059
+#>  mean_ci_width       0.118
+#>  median_ci_width     0.118
+#>  sd_ci_width         0.000
+#>  pct_ci_less_width   <NA> 
+#>  width               <NA> 
+#>  true_effect         0.100
+#>  se                  0.030
+#>  df                  Inf  
+#>  alpha_level         0.050
 #> 
 #> Confidence level: 95%
 
@@ -245,49 +248,49 @@ design_consequences(true_effect = 0.1, se = 0.03)
 # d-type effect 0.4, common sd 1, 60 per group; finite df flows through
 # both lenses.
 design_consequences(true_effect = 0.4, sd = 1, n_1 = 60, n_2 = 60)
-#>  term                value   
-#>  power               0.584   
-#>  type_s_error        3.06e-05
-#>  exaggeration_ratio  1.3     
-#>  expected_half_width 0.361   
-#>  mean_ci_width       0.722   
-#>  median_ci_width     0.721   
-#>  sd_ci_width         0.047   
-#>  pct_ci_less_w       <NA>    
-#>  target_width        <NA>    
-#>  true_effect         0.4     
-#>  se                  0.183   
-#>  df                  118     
-#>  alpha_level         0.05    
+#>  term                value
+#>  power               0.584
+#>  type_s_error        0.000
+#>  exaggeration_ratio  1.302
+#>  expected_half_width 0.361
+#>  mean_ci_width       0.722
+#>  median_ci_width     0.721
+#>  sd_ci_width         0.047
+#>  pct_ci_less_width   <NA> 
+#>  width               <NA> 
+#>  true_effect         0.400
+#>  se                  0.183
+#>  df                  118  
+#>  alpha_level         0.050
 #> 
 #> Confidence level: 95%
 
 # ---- Will the interval beat a target width? --------------------------
 # Same design, asking for the probability the realized 95 percent CI is
-# no wider than 0.7 (the closed-form pct_ci_less_w that the
+# no wider than 0.7 (the closed-form pct_ci_less_width that the
 # ss_aipe_smd_sensitivity() simulation estimates).
 design_consequences(true_effect = 0.4, sd = 1, n_1 = 60, n_2 = 60,
-                    w = 0.7)
-#>  term                value   
-#>  power               0.584   
-#>  type_s_error        3.06e-05
-#>  exaggeration_ratio  1.3     
-#>  expected_half_width 0.361   
-#>  mean_ci_width       0.722   
-#>  median_ci_width     0.721   
-#>  sd_ci_width         0.047   
-#>  pct_ci_less_w       0.326   
-#>  target_width        0.7     
-#>  true_effect         0.4     
-#>  se                  0.183   
-#>  df                  118     
-#>  alpha_level         0.05    
+                    width = 0.7)
+#>  term                value
+#>  power               0.584
+#>  type_s_error        0.000
+#>  exaggeration_ratio  1.302
+#>  expected_half_width 0.361
+#>  mean_ci_width       0.722
+#>  median_ci_width     0.721
+#>  sd_ci_width         0.047
+#>  pct_ci_less_width   0.326
+#>  width               0.700
+#>  true_effect         0.400
+#>  se                  0.183
+#>  df                  118  
+#>  alpha_level         0.050
 #> 
 #> Confidence level: 95%
 
 # ---- Precision lens alone (no effect assumption needed) --------------
 design_consequences(true_effect = NULL, sd = 1, n_1 = 60, n_2 = 60,
-                    w = 0.7)
+                    width = 0.7)
 #>  term                value
 #>  power               <NA> 
 #>  type_s_error        <NA> 
@@ -296,35 +299,35 @@ design_consequences(true_effect = NULL, sd = 1, n_1 = 60, n_2 = 60,
 #>  mean_ci_width       0.722
 #>  median_ci_width     0.721
 #>  sd_ci_width         0.047
-#>  pct_ci_less_w       0.326
-#>  target_width        0.7  
+#>  pct_ci_less_width   0.326
+#>  width               0.700
 #>  true_effect         <NA> 
 #>  se                  0.183
 #>  df                  118  
-#>  alpha_level         0.05 
+#>  alpha_level         0.050
 #> 
 #> Confidence level: 95%
 
 # ---- After an AIPE plan: check the detection side --------------------
 # Plan for a full width of 0.5 on the SMD at delta = .4, then ask what
 # that design does under the significance filter.
-n_plan <- ss_aipe_smd(delta = 0.4, width = 0.5)$value[1]
+n_plan <- ss_aipe_smd(true_smd = 0.4, width = 0.5)$value[1]
 design_consequences(true_effect = 0.4, sd = 1,
-                    n_1 = n_plan, n_2 = n_plan, w = 0.5)
-#>  term                value  
-#>  power               0.885  
-#>  type_s_error        1.7e-07
-#>  exaggeration_ratio  1.07   
-#>  expected_half_width 0.248  
-#>  mean_ci_width       0.496  
-#>  median_ci_width     0.496  
-#>  sd_ci_width         0.0222 
-#>  pct_ci_less_w       0.578  
-#>  target_width        0.5    
-#>  true_effect         0.4    
-#>  se                  0.126  
-#>  df                  250    
-#>  alpha_level         0.05   
+                    n_1 = n_plan, n_2 = n_plan, width = 0.5)
+#>  term                value
+#>  power               0.885
+#>  type_s_error        0.000
+#>  exaggeration_ratio  1.069
+#>  expected_half_width 0.248
+#>  mean_ci_width       0.496
+#>  median_ci_width     0.496
+#>  sd_ci_width         0.022
+#>  pct_ci_less_width   0.578
+#>  width               0.500
+#>  true_effect         0.400
+#>  se                  0.126
+#>  df                  250  
+#>  alpha_level         0.050
 #> 
 #> Confidence level: 95%
 ```

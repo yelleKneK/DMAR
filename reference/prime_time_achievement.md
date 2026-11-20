@@ -536,16 +536,18 @@ LA, April 1-5, 2002. ERIC document ED466679.
 
 **Study background.** Indiana's Prime Time program, phased in beginning
 1984 to 1985 (Indiana statute; House Bill 1166 of 2001 codified the
-modern funding formula), was one of the earliest state level initiatives
-in the United States to use a funding formula to reduce class size and
-pupil to teacher ratio in Kindergarten through third grade. Funds were
-distributed to school corporations to maintain a corporation average
-pupil to teacher ratio of 18:1 in K and grade 1 and 20:1 in grades 2 and
-3; corporations could meet the target by hiring additional teachers or,
-more commonly, paraprofessional instructional assistants. Along with
-Tennessee's Project STAR (Pate-Bain and Achilles, 1986; covered by
-Education Week, *Research: Sizing Up Small Classes*, February 2001),
-Prime Time was a widely cited national model.
+modern funding formula), used a state funding formula to reduce class
+size and pupil to teacher ratio in Kindergarten through third grade.
+Funds were distributed to school corporations to maintain a corporation
+average pupil to teacher ratio of 18:1 in K and grade 1 and 20:1 in
+grades 2 and 3; corporations could meet the target by hiring additional
+teachers or, more commonly, paraprofessional instructional assistants.
+Lapsley, Daytner, Kelley, and Maxwell (2002) describe Prime Time as one
+of the first statewide efforts to address large enrollments in the
+primary grades and write that, along with Tennessee's Project STAR, it
+was widely considered a national model, citing Pate-Bain and Achilles
+(1986); Project STAR was also covered by Education Week (*Research:
+Sizing Up Small Classes*, February 2001).
 
 In 1999 the Indiana Department of Education funded a three year program
 evaluation of Prime Time. The third year of the evaluation, conducted by
@@ -628,11 +630,11 @@ X^{(1)}\_{ijk} + \gamma\_{010} X^{(2)}\_{jk} + \gamma\_{001}
 X^{(3)}\_k + u\_{00k} + r\_{0jk} + r\_{1jk} X^{(1)}\_{ijk} +
 e\_{ijk},\$\$ which in lme4 translates to
 `lmer(Y ~ X1 + X2 + X3 + (1 + X1 | corp_id/school_id))`. The examples
-give concrete fits as commented code, which the help page therefore does
-not run; uncomment them to fit them.
+fit three models of this family with lme4: the three-level null model, a
+main effects model, and a model with a cross-level interaction.
 
-**Suggested benchmark uses.** The data set is intentionally rich enough
-to support a wide range of demonstrations and benchmarks, including:
+**Suggested benchmark uses.** The data set supports demonstrations and
+benchmarks including:
 
 - Two-, three-, and four-level random intercept and random slope models
   with lme4, nlme, or glmmTMB.

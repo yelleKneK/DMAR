@@ -4,15 +4,18 @@ The marker-variable technique of Lindell and Whitney (2001) estimates
 common method variance from the correlation of a *marker* variable that
 is theoretically unrelated to at least one of the substantive variables:
 any non-zero correlation it shows with that variable is attributed to
-shared method, and that amount is partialled out of the substantive
+shared method, and that amount is partialed out of the substantive
 correlations. When no a priori marker is available, the smallest
 positive correlation among the substantive items is used as a proxy, the
 common marker-free variant of the method. A correlation that remains
 statistically significant after the adjustment, by the paper's *t* test
 of the adjusted correlation with \\N - 3\\ degrees of freedom (their
 Equation 5), is evidence that the relationship is not an artifact of
-method variance; the test is applied by the user, since this function
-works from the correlation matrix alone and does not take \\N\\.
+method variance. This function works from the correlation matrix alone
+and does not take \\N\\;
+[`common_method_adjusted_r`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+takes \\N\\ and gives that test and a confidence interval for every
+adjusted correlation, over one or more marker correlations.
 
 ## Usage
 
@@ -62,6 +65,9 @@ Psychology, 86*(1), 114–121.
 
 ## See also
 
+[`common_method_adjusted_r`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+for the test and interval of each adjusted correlation over a grid of
+marker correlations;
 [`common_method_single_factor`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md)
 for the single-factor screen.
 
@@ -70,17 +76,29 @@ Other multivariate and latent variable methods:
 [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md),
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
 [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
-[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md),
+[`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md),
 [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
+[`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
 [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md),
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
 [`dmacs()`](https://yelleknek.github.io/DMAR/reference/dmacs.md),
 [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+[`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+[`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+[`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+[`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
 [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md),
 [`irt_grm()`](https://yelleknek.github.io/DMAR/reference/irt_grm.md),
 [`irt_information()`](https://yelleknek.github.io/DMAR/reference/irt_information.md),
 [`measurement_alignment()`](https://yelleknek.github.io/DMAR/reference/measurement_alignment.md),
 [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
 [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md),
+[`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
 [`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)
 
 ## Author
@@ -95,8 +113,8 @@ R <- matrix(c(1, .5, .4, .5, 1, .45, .4, .45, 1), 3, 3,
 res <- common_method_marker(R, marker_r = 0.10)
 res
 #>  term                  value
-#>  marker_correlation    0.1  
-#>  mean_abs_r_unadjusted 0.45 
+#>  marker_correlation    0.100
+#>  mean_abs_r_unadjusted 0.450
 #>  mean_abs_r_adjusted   0.389
 attr(res, "adjusted")
 #>           a         b         c

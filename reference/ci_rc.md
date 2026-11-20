@@ -11,10 +11,10 @@ which is the general engine; for the standardized coefficient use
 
 ``` r
 ci_rc(
-  b_j,
-  SE_b_j = NULL,
-  s_Y = NULL,
-  s_X = NULL,
+  reg_coef_j = NULL,
+  se_reg_coef_j = NULL,
+  sd_Y = NULL,
+  sd_X = NULL,
   N,
   p,
   R2_Y_X = NULL,
@@ -24,26 +24,29 @@ ci_rc(
   t_value = NULL,
   alpha_lower = NULL,
   alpha_upper = NULL,
-  noncentral = FALSE,
-  ...
+  noncentral = FALSE
 )
 ```
 
 ## Arguments
 
-- b_j:
+- reg_coef_j:
 
-  Value of the regression coefficient for the *j*th predictor variable
+  Value of the regression coefficient for the *j*th predictor variable,
+  or `NULL` (the default) when the other inputs determine it: `t_value`
+  with `R2_Y_X` and `R2_j_X_without_j`, or the three squared multiple
+  correlations, which fix its magnitude but not its sign (see
+  [`ci_reg_coef`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md))
 
-- SE_b_j:
+- se_reg_coef_j:
 
   Standard error for the *j*th predictor variable
 
-- s_Y:
+- sd_Y:
 
   Standard deviation of *Y*, the dependent variable
 
-- s_X:
+- sd_X:
 
   Standard deviation of *X*, the predictor variable of interest
 
@@ -69,7 +72,8 @@ ci_rc(
 - conf_level:
 
   Desired level of confidence for the computed interval (i.e., 1 - the
-  Type I error rate)
+  Type I error rate). A level above .999999998, whose tail areas are
+  below 1e-9, is refused
 
 - R2_Y_X_without_j:
 
@@ -87,30 +91,34 @@ ci_rc(
 
 - alpha_upper:
 
-  The Type I error rate for the upper confidence interval limit
+  The Type I error rate for the upper confidence interval limit. The
+  table records the coverage, `1 - alpha_lower - alpha_upper`, as its
+  level and, when the two tail areas differ, the areas themselves, which
+  the line beneath the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound. A
+  nonzero tail area below 1e-9 is refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - noncentral:
 
   `TRUE` or `FALSE` statement specifying whether or not the noncentral
   approach to confidence intervals should be used
 
-- ...:
-
-  Optional additional specifications for nested functions
-
 ## Value
 
-A 2-row `data.frame` with columns `term`, `value`, `prob_less`, and
-`prob_greater`. The `term` values are `"lower_limit"` and
-`"upper_limit"`, and `value` holds the confidence limits on the
-regression coefficient in its raw metric. The `prob_less` and
-`prob_greater` columns report the tail probabilities below and above
-each limit; when the noncentral *t* approach is used they are the
-achieved tail probabilities. Unlike
+A 3-row `data.frame` with columns `term`, `value`, `prob_less`, and
+`prob_greater`. The `term` values are `"ci_lower"`, `"reg_coef"` (the
+coefficient as given, or as the other inputs determine it), and
+`"ci_upper"`, and `value` holds the coefficient and its confidence
+limits in the raw metric. The `prob_less` and `prob_greater` columns
+report the tail probabilities below and above each limit; when the
+noncentral *t* approach is used they are the achieved tail
+probabilities; they are `NA` on the row of the estimate. The estimate
+sits between its limits, as in
 [`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md) and
-[`ci_reg_coef`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
-which place the point estimate between its limits as a third row,
-`ci_rc` returns the two limits only.
+[`ci_reg_coef`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md).
 
 ## Details
 
@@ -171,10 +179,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
 [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md),
@@ -195,10 +204,11 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-ci_rc(b_j = 0.61319, SE_b_j = 0.16098, N = 30, p = 6, conf_level = 0.95)
-#>  term        value prob_less prob_greater
-#>  lower_limit 0.28  0.025     0.975       
-#>  upper_limit 0.946 0.975     0.025       
+ci_rc(reg_coef_j = 0.61319, se_reg_coef_j = 0.16098, N = 30, p = 6, conf_level = 0.95)
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.280 0.025     0.975       
+#>  reg_coef 0.613 <NA>      <NA>        
+#>  ci_upper 0.946 0.975     0.025       
 #> 
 #> Confidence level: 95%
 ```

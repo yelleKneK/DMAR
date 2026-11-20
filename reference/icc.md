@@ -17,7 +17,12 @@ icc(x, type = "ICC(2,1)", conf_level = 0.95)
 
   An \\n \times k\\ numeric matrix or `data.frame`: each row is a
   subject (target) and each column is a rater (or repeated measurement).
-  Missing values are not supported; remove or impute first.
+  Missing values are not supported; remove or impute first. SPSS
+  user-defined missing values, which `haven::read_sav(user_na = TRUE)`
+  keeps as values of a `haven_labelled_spss` column, are missing values
+  too (as SPSS and haven's [`is.na()`](https://rdrr.io/r/base/NA.html)
+  treat them), so a column carrying them is refused in the same way
+  rather than analyzed as ratings.
 
 - type:
 
@@ -35,9 +40,9 @@ icc(x, type = "ICC(2,1)", conf_level = 0.95)
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with one row per requested ICC type
-and columns `type`, `value` (point estimate), `lower_limit`,
-`upper_limit`, `F_value`, `df_1`, `df_2`, and `p_value` (for the
-implicit null \\H_0\\: \mathrm{ICC} = 0\\).
+and columns `type`, `value` (point estimate), `ci_lower`, `ci_upper`,
+`F_value`, `df_1`, `df_2`, and `p_value` (for the implicit null \\H_0\\:
+\mathrm{ICC} = 0\\).
 
 ## Details
 
@@ -112,20 +117,20 @@ shrout_fleiss <- matrix(
 )
 
 icc(shrout_fleiss, type = "all")
-#>  type     value lower_limit upper_limit F_value df_1 df_2 p_value
-#>  ICC(1,1) 0.166 -0.133      0.723       1.79    5    18   0.1648 
-#>  ICC(2,1) 0.29  0.0188      0.761       11      5    15   0.0001 
-#>  ICC(3,1) 0.715 0.342       0.946       11      5    15   0.0001 
-#>  ICC(1,k) 0.443 -0.884      0.912       1.79    5    18   0.1648 
-#>  ICC(2,k) 0.62  0.0711      0.927       11      5    15   0.0001 
-#>  ICC(3,k) 0.909 0.676       0.986       11      5    15   0.0001 
+#>  type     value ci_lower ci_upper F_value df_1 df_2 p_value
+#>  ICC(1,1) 0.166 -0.133   0.723    1.795   5    18   0.1648 
+#>  ICC(2,1) 0.290 0.019    0.761    11.027  5    15   0.0001 
+#>  ICC(3,1) 0.715 0.342    0.946    11.027  5    15   0.0001 
+#>  ICC(1,k) 0.443 -0.884   0.912    1.795   5    18   0.1648 
+#>  ICC(2,k) 0.620 0.071    0.927    11.027  5    15   0.0001 
+#>  ICC(3,k) 0.909 0.676    0.986    11.027  5    15   0.0001 
 #> 
 #> Confidence level: 95%
 
 # Just the two-way mixed-model single-rater consistency ICC:
 icc(shrout_fleiss, type = "ICC(3,1)")
-#>  type     value lower_limit upper_limit F_value df_1 df_2 p_value
-#>  ICC(3,1) 0.715 0.342       0.946       11      5    15   0.0001 
+#>  type     value ci_lower ci_upper F_value df_1 df_2 p_value
+#>  ICC(3,1) 0.715 0.342    0.946    11.027  5    15   0.0001 
 #> 
 #> Confidence level: 95%
 ```

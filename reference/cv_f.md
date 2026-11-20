@@ -126,20 +126,20 @@ Ken Kelley <kkelley@nd.edu>
 # denominator degrees of freedom, at the .05 level.
 cv_f(alpha_level = .05, df_numerator = 3, df_denominator = 20)
 #>  term     value area_less area_greater
-#>  lower_cv 0     0         1           
-#>  upper_cv 3.1   0.95      0.05        
+#>  lower_cv 0     0.000     1.000       
+#>  upper_cv 3.098 0.950     0.050       
 
 # An omnibus test of four groups with 24 participants: a - 1 = 3 and
 # N - a = 20 degrees of freedom; simple output.
 cv_f(alpha_level = .05, df_numerator = 3, df_denominator = 20, verbose = FALSE)
 #>  term     value
 #>  lower_cv 0    
-#>  upper_cv 3.1  
+#>  upper_cv 3.098
 
 # Both tails, as an interval for a ratio of variances would need.
 cv_f(alpha_level = .05, df_numerator = 3, df_denominator = 20,
      alternative = "not_equal")
-#>  term     value  area_less area_greater
-#>  lower_cv 0.0706 0.025     0.975       
-#>  upper_cv 3.86   0.975     0.025       
+#>  term     value area_less area_greater
+#>  lower_cv 0.071 0.025     0.975       
+#>  upper_cv 3.859 0.975     0.025       
 ```

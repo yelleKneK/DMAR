@@ -110,14 +110,14 @@ set.seed(113)
 method_a <- rnorm(40, mean = 100, sd = 15)
 method_b <- method_a + rnorm(40, mean = 2, sd = 5)
 lin_ccc(method_a, method_b)
-#>  term        value 
-#>  ccc         0.928 
-#>  lower_limit 0.871 
-#>  upper_limit 0.96  
-#>  pearson_r   0.941 
-#>  C_b         0.986 
-#>  u           -0.154
-#>  v           0.933 
+#>  term      value 
+#>  ccc       0.928 
+#>  ci_lower  0.871 
+#>  ci_upper  0.960 
+#>  pearson_r 0.941 
+#>  C_b       0.986 
+#>  u         -0.154
+#>  v         0.933 
 #> 
 #> Confidence level: 95%
 

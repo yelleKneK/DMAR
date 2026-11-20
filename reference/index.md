@@ -22,14 +22,8 @@ corrections.
   : Generalized Eta Squared (Effect Size for ANOVA, Comparable Across
   Designs)
 
-- [`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md)
-  : Partial Eta Squared (Effect Size for ANOVA)
-
 - [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md)
   : Omega Squared (Effect Size for ANOVA)
-
-- [`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md)
-  : Partial Omega Squared (Effect Size for ANOVA)
 
 - [`cohen_f()`](https://yelleknek.github.io/DMAR/reference/cohen_f.md) :
 
@@ -57,9 +51,7 @@ corrections.
   : Probability of Superiority for a Paired-Samples Design
 
 - [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md)
-  :
-
-  Number Needed to Treat (NNT) From Cohen's *d*
+  : Number Needed to Treat From a Standardized Mean Difference
 
 - [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md)
   : Responder Analysis: Who Cleared the Threshold, by Group
@@ -79,7 +71,7 @@ corrections.
 
 - [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md)
   : Exact Expected Value of the Sample Pearson Correlation Given
-  \\\rho\\ and \\n\\
+  \\\rho\\ and \\N\\
 
 - [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md)
   :
@@ -110,6 +102,10 @@ Confidence intervals for effect sizes and related quantities.
 - [`ci_R2()`](https://yelleknek.github.io/DMAR/reference/ci_R2.md) :
   Confidence Interval for the Population Squared Multiple Correlation
   Coefficient
+- [`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  [`tidy(`*`<dmar_ci_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  [`glance(`*`<dmar_ci_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  : Bootstrap Confidence Intervals for the Bifactor Indices
 - [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md) :
   Confidence Interval for a Contrast in a Fixed Effects ANOVA
 - [`ci_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md)
@@ -122,10 +118,16 @@ Confidence intervals for effect sizes and related quantities.
   [`ci_R()`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
   : Confidence Intervals for the Population Correlation and Multiple
   Correlation
+- [`ci_crossed()`](https://yelleknek.github.io/DMAR/reference/ci_crossed.md)
+  : Confidence Interval for the Mean of a Crossed Design of Units and
+  Raters
 - [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md) :
   Confidence Interval for the Coefficient of Variation
 - [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md)
   : Dunnett's Simultaneous Confidence Intervals Against a Control
+- [`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md)
+  : Provides Dunnett's T3 Simultaneous Confidence Intervals for All
+  Pairwise Comparisons Without Assuming Homogeneity of Variance
 - [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md)
   : Confidence Interval on the Largest Eigenvalue of a Sample Covariance
   Matrix
@@ -133,8 +135,6 @@ Confidence intervals for effect sizes and related quantities.
   : Confidence Interval for Eta Squared (Effect Size for ANOVA)
 - [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
   : Confidence Interval for Generalized Eta Squared (Approximate)
-- [`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md)
-  : Confidence Interval for Partial Eta Squared (Effect Size for ANOVA)
 - [`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md)
   : Provides Games–Howell Simultaneous Confidence Intervals for All
   Pairwise Comparisons Without Assuming Homogeneity of Variance
@@ -144,9 +144,17 @@ Confidence intervals for effect sizes and related quantities.
   : Confidence Interval for Omega Squared (Effect Size for ANOVA)
 - [`ci_proportion()`](https://yelleknek.github.io/DMAR/reference/ci_proportion.md)
   : Confidence Interval for a Single Proportion
+- [`ci_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/ci_proportion_paired.md)
+  : Confidence Interval for the Difference Between Two Paired
+  Proportions
 - [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md) :
   Confidence Interval for the Proportion of Variance Accounted for (in
   the Dependent Variable by Knowing the Levels of the Factor)
+- [`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md)
+  : Confidence Interval for the Ratio of Two Independent Means
+- [`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md)
+  : Confidence Interval for the Ratio of Two Means From Paired
+  Observations
 - [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md) :
   Confidence Interval for an Unstandardized Regression Coefficient
 - [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md)
@@ -180,6 +188,9 @@ Confidence intervals for effect sizes and related quantities.
 - [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
   : Tukey-Kramer Simultaneous Confidence Intervals for Pairwise
   Contrasts
+- [`ci_two_phase()`](https://yelleknek.github.io/DMAR/reference/ci_two_phase.md)
+  : Confidence Interval for a Mean Under Two-Phase Sampling With a Proxy
+  Measurement
 
 ## Sample size planning, accuracy in parameter estimation (AIPE)
 
@@ -216,8 +227,8 @@ Confidence intervals for effect sizes and related quantities.
   [`ss_aipe_crd_n_individuals_fixed_budget()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd.md)
   [`ss_aipe_crd_both_fixed_budget()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd.md)
   [`ss_aipe_crd_both_fixed_width()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd.md)
-  : Find Target Sample Sizes for the Accuracy in Unstandardized
-  Conditions Means Estimation in CRD
+  : Sample Sizes for a Cluster Randomized Design: Accuracy in Parameter
+  Estimation for the Difference Between Condition Means
 - [`ss_aipe_crd_es_n_clusters_fixed_width()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd_es.md)
   [`ss_aipe_crd_es_n_individuals_fixed_width()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd_es.md)
   [`ss_aipe_crd_es_n_clusters_fixed_budget()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd_es.md)
@@ -226,6 +237,12 @@ Confidence intervals for effect sizes and related quantities.
   [`ss_aipe_crd_es_both_fixed_width()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd_es.md)
   : Find Target Sample Sizes for the Accuracy in Standardized Conditions
   Means Estimation in CRD
+- [`ss_aipe_crossed()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed.md)
+  : Sample Size Planning From the AIPE Perspective for the Mean of a
+  Crossed Design of Units and Raters
+- [`ss_aipe_crossed_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed_sensitivity.md)
+  : Sensitivity Analysis for Sample Size Planning From the AIPE
+  Perspective for the Mean of a Crossed Design of Units and Raters
 - [`ss_aipe_cv()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cv.md)
   : Sample Size Planning for the Coefficient of Variation Given the Goal
   of Accuracy in Parameter Estimation Approach to Sample Size Planning
@@ -255,6 +272,12 @@ Confidence intervals for effect sizes and related quantities.
 - [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md)
   : Sensitivity Analysis for Sample Size Planning From the AIPE
   Perspective for an Indirect Effect
+- [`ss_aipe_mean()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean.md)
+  : Sample Size Planning for a Mean From the Accuracy in Parameter
+  Estimation (AIPE) Perspective
+- [`ss_aipe_mean_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean_sensitivity.md)
+  : Sensitivity Analysis for Sample Size Planning for a Mean From the
+  Accuracy in Parameter Estimation (AIPE) Perspective
 - [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md)
   : AIPE Sample Size Planning for a Fixed Effect in a Two-Level
   Mixed-Effects Model
@@ -293,8 +316,8 @@ Confidence intervals for effect sizes and related quantities.
   : Sample Size Planning for a Single Regression Coefficient (AIPE)
 - [`ss_aipe_reg_coef_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
   : Sensitivity Analysis for Sample Size Planning From the Accuracy in
-  Parameter Estimation Perspective for the (Standardized and
-  Unstandardized) Regression Coefficient
+  Parameter Estimation Perspective for the Unstandardized Regression
+  Coefficient
 - [`ss_aipe_reliability()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability.md)
   : Sample Size Planning for Accuracy in Parameter Estimation for
   Reliability Coefficients
@@ -347,12 +370,25 @@ Confidence intervals for effect sizes and related quantities.
   : Sensitivity Analysis for Sample Size Planning From the Accuracy in
   Parameter Estimation Perspective for the Standardized Regression
   Coefficient
+- [`ss_aipe_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase.md)
+  : Sample Size Planning From the AIPE Perspective for a Mean Under
+  Two-Phase Sampling
+- [`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md)
+  : Sample Size Planning From the AIPE Perspective for the Least Costly
+  Two-Phase Design
+- [`ss_aipe_two_phase_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_sensitivity.md)
+  : Sensitivity Analysis for Sample Size Planning From the AIPE
+  Perspective for a Mean Under Two-Phase Sampling
 
 ## Sample size planning, power
 
 - [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md)
   : Plan Sample Size to Make the Test of the Squared Multiple
   Correlation Coefficient Sufficiently Powerful
+
+- [`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md)
+  : Plan Sample Size to Make the Test of a Change in the Squared
+  Multiple Correlation Coefficient Sufficiently Powerful
 
 - [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md)
   : Sensitivity Analysis for Sample Size Planning to Make the Omnibus
@@ -500,6 +536,9 @@ Confidence intervals for effect sizes and related quantities.
   : Sequential Sample Size for a Fixed-Width Contrast Interval
 - [`ss_seq_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c_sensitivity.md)
   : Monte Carlo Sensitivity of the Sequential Fixed-Width Procedure
+- [`ss_seq_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_seq_two_phase.md)
+  : Sequential Sample Size for a Fixed-Width Interval for a Mean Under
+  Two-Phase Sampling
 
 ## Equivalence testing
 
@@ -512,6 +551,10 @@ Confidence intervals for effect sizes and related quantities.
 - [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
   : Equivalence and Noninferiority Tests for a Linear Contrast via Two
   One-Sided Tests (TOST)
+- [`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md)
+  : Equivalence and Noninferiority Tests for Two Paired Proportions
+- [`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md)
+  : Equivalence Test for the Population RMSEA (Test of Not Close Fit)
 
 ## Reliability and agreement
 
@@ -522,7 +565,7 @@ Confidence intervals for effect sizes and related quantities.
 - [`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md)
   :
 
-  Maximal Reliability Coefficient *H* (Hancock & Mueller, 2001)
+  Coefficient *H* (Maximal Reliability) With a Confidence Interval
 
 - [`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md)
   : Coefficient Alpha With a Confidence Interval
@@ -702,21 +745,61 @@ Confidence intervals for effect sizes and related quantities.
 - [`anova(`*`<mlmr_mv>`*`)`](https://yelleknek.github.io/DMAR/reference/anova.mlmr_mv.md)
   : Compare Nested Multivariate FIML Regression Fits
 
+## Missing data
+
+- [`missing_patterns()`](https://yelleknek.github.io/DMAR/reference/missing_patterns.md)
+  : Missing Data Patterns
+- [`missing_coverage()`](https://yelleknek.github.io/DMAR/reference/missing_coverage.md)
+  : Covariance Coverage of Incomplete Data
+- [`cov_fiml()`](https://yelleknek.github.io/DMAR/reference/cov_fiml.md)
+  : Maximum Likelihood Covariance Matrix and Means of Incomplete Data
+- [`fraction_missing_information()`](https://yelleknek.github.io/DMAR/reference/fraction_missing_information.md)
+  : Fraction of Missing Information for Each Parameter of a FIML Fit
+- [`df_missing()`](https://yelleknek.github.io/DMAR/reference/df_missing.md)
+  : Small-Sample Degrees of Freedom for Maximum Likelihood Intervals
+  With Missing Data
+- [`df_barnard_rubin()`](https://yelleknek.github.io/DMAR/reference/df_barnard_rubin.md)
+  : Barnard and Rubin's Small-Sample Degrees of Freedom for Multiple
+  Imputation
+
 ## Multivariate and latent variable methods
 
 - [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md) : One
   Factor Confirmatory Factor Analysis Model
 - [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md) : Two
   Factor Confirmatory Factor Analysis Model
-- [`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md) :
-  Multiple-Factor Confirmatory Factor Analysis Model
+- [`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md)
+  [`cfa_k()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md)
+  : Multiple-Factor Confirmatory Factor Analysis Model
+- [`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+  [`tidy(`*`<dmar_fa_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+  [`glance(`*`<dmar_fa_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+  : Bifactor Confirmatory Factor Analysis Model
+- [`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md)
+  [`tidy(`*`<dmar_fa_second_order>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md)
+  [`glance(`*`<dmar_fa_second_order>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md)
+  : Second-Order Confirmatory Factor Analysis Model
+- [`fa_exploratory()`](https://yelleknek.github.io/DMAR/reference/fa_exploratory.md)
+  [`efa_k()`](https://yelleknek.github.io/DMAR/reference/fa_exploratory.md)
+  [`print(`*`<dmar_fa_exploratory>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_exploratory.md)
+  : Exploratory Common-Factor Analysis With Confidence Intervals
+- [`factor_count()`](https://yelleknek.github.io/DMAR/reference/factor_count.md)
+  [`print(`*`<dmar_factor_count>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_count.md)
+  : Factor Count Comparison: Model Fit, Parallel Analysis, and MAP
+- [`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md)
+  : Tucker's Congruence Coefficients Between the Factors of Two
+  Solutions
+- [`parallel_analysis()`](https://yelleknek.github.io/DMAR/reference/parallel_analysis.md)
+  : Parallel Analysis of Common-Factor Eigenvalues
+- [`sem_sam()`](https://yelleknek.github.io/DMAR/reference/sem_sam.md) :
+  Structural Relations Estimated After the Measurement Models
 - [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md)
   : Likelihood-Ratio Comparison of Covariance Structures
 - [`cov_sem()`](https://yelleknek.github.io/DMAR/reference/cov_sem.md) :
   Model Implied Covariance Matrix From a Lavaan-Specified SEM
 - [`covmat_from_cfa()`](https://yelleknek.github.io/DMAR/reference/covmat_from_cfa.md)
-  : Generate a Population Covariance Matrix From a One-Factor
-  Confirmatory Factor Model
+  : Model Implied Covariance Matrix of a One-Factor Confirmatory Factor
+  Model
 - [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md)
   : Tucker's Congruence Coefficient \\\phi\\ (Factor Similarity)
 - [`variance_components_mls()`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
@@ -729,10 +812,38 @@ Confidence intervals for effect sizes and related quantities.
   : Average Variance Extracted (AVE)
 - [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md)
   : Bifactor Model Dimensionality and Reliability Indices
+- [`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  [`tidy(`*`<dmar_ci_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  [`glance(`*`<dmar_ci_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  : Bootstrap Confidence Intervals for the Bifactor Indices
+- [`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  [`print(`*`<dmar_factor_scores>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  [`tidy(`*`<dmar_factor_scores>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  [`glance(`*`<dmar_factor_scores>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  : Factor Scores With Standard Errors, Intervals, and Determinacy
 - [`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md)
   : Marker-Variable Adjustment for Common Method Variance
+- [`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+  [`tidy(`*`<dmar_common_method_adjusted_r>`*`)`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+  [`glance(`*`<dmar_common_method_adjusted_r>`*`)`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+  : Correlations Adjusted for Common Method Variance, With Intervals and
+  Tests
 - [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md)
   : Single-Common-Factor Screen for Common Method Variance
+- [`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)
+  : Fit Measures for a Structural Equation Model
+- [`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md)
+  : Bootstrap Test of Exact Fit for a Structural Equation Model With
+  Complete or Incomplete Data
+- [`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md)
+  : The SRMR With Its Unbiased Estimate, Confidence Interval, and Tests
+  of Fit
+- [`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md)
+  : Information Criteria for Structural Equation Models
+- [`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+  [`tidy(`*`<dmar_compare_sem>`*`)`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+  [`glance(`*`<dmar_compare_sem>`*`)`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+  : Compare Structural Equation Models by an Information Criterion
 - [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md) :
   Expected Cross-Validation Index (ECVI) for a Covariance-Structure
   Model
@@ -791,7 +902,7 @@ Confidence intervals for effect sizes and related quantities.
   (the *z*-distribution, With Mean 0 and Variance 1)
 
 - [`cv()`](https://yelleknek.github.io/DMAR/reference/cv.md) :
-  Coefficient of Variation (Biased or Unbiased Estimator)
+  Coefficient of Variation (Sample Value or Nearly Unbiased Estimate)
 
 - [`pbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
   [`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
@@ -883,7 +994,8 @@ Confidence intervals for effect sizes and related quantities.
 
 - [`var_smd()`](https://yelleknek.github.io/DMAR/reference/var_smd.md) :
 
-  Variance of Cohen's *d* and Hedges' *g*
+  Variance of the Standardized Mean Difference (Cohen's *d*) and Hedges'
+  *g*
 
 - [`var_smd_trimmed()`](https://yelleknek.github.io/DMAR/reference/var_smd_trimmed.md)
   : Asymptotic Variance of the Robust Trimmed SMD
@@ -944,12 +1056,13 @@ Confidence intervals for effect sizes and related quantities.
 
 - [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md) :
   Visualize the Proportion of Variance Explained (\\R^2\\)
-- [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md)
-  : Plot the Estimates of a Multiple-Factor CFA
 - [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md) :
   Forest-Plot-Style Confidence Interval Display
 - [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md)
   : Plot Contrasts Against an Equivalence Region
+- [`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md)
+  [`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md)
+  : Plot the Estimates of a Multiple-Factor CFA
 - [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md)
   : Forest Plot of Study Effect Sizes With the Pooled Estimate
 - [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md)
@@ -974,12 +1087,21 @@ Confidence intervals for effect sizes and related quantities.
 
 - [`format(`*`<dmar_tbl>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
   [`print(`*`<dmar_tbl>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
+  [`rbind(`*`<dmar_tbl>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
   : Printing for DMAR Result Tables
+
+- [`dmar_metadata()`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)
+  : Machine-Readable Metadata of a DMAR Result, and the Classes of Its
+  Refusals
+
+- [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+  [`dmar.bootstrap_exploratory`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+  : How DMAR Counts and Requires Bootstrap Replications
 
 - [`format_p()`](https://yelleknek.github.io/DMAR/reference/format_p.md)
   :
 
-  Format *p*-values for Display the DMAR Way
+  Format *p*-Values for Display at a Fixed Number of Decimal Places
 
 - [`knit_print(`*`<dmar_tbl>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
   [`as_kable()`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
@@ -997,7 +1119,7 @@ Confidence intervals for effect sizes and related quantities.
   Print a Model Summary With DMAR *p*-value Formatting
 
 - [`now()`](https://yelleknek.github.io/DMAR/reference/now.md) : A
-  Friendly Date / Time Stamp and a Simple Stopwatch
+  Plain-Language Date / Time Stamp and a Simple Stopwatch
 
 ## Broom tidiers and model methods
 
@@ -1006,12 +1128,36 @@ tidy() and glance() views of DMAR results, and methods for mlmr fits.
 - [`anova(`*`<mlmr>`*`)`](https://yelleknek.github.io/DMAR/reference/anova.mlmr.md)
   : Likelihood Ratio Test for Nested Mlmr Fits
 
-- [`tidy(`*`<dmar_contrast_test>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+- [`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  [`tidy(`*`<dmar_ci_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  [`glance(`*`<dmar_ci_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  : Bootstrap Confidence Intervals for the Bifactor Indices
+
+- [`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+  [`tidy(`*`<dmar_common_method_adjusted_r>`*`)`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+  [`glance(`*`<dmar_common_method_adjusted_r>`*`)`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md)
+  : Correlations Adjusted for Common Method Variance, With Intervals and
+  Tests
+
+- [`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+  [`tidy(`*`<dmar_compare_sem>`*`)`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+  [`glance(`*`<dmar_compare_sem>`*`)`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+  : Compare Structural Equation Models by an Information Criterion
+
+- [`tidy(`*`<dmar_cliff_delta>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_cliff_delta>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_contrast_test>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`glance(`*`<dmar_contrast_test>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_df_barnard_rubin>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_df_barnard_rubin>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_df_missing>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_df_missing>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`tidy(`*`<dmar_ci_long>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`glance(`*`<dmar_ci_long>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`tidy(`*`<dmar_ci_anova>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`glance(`*`<dmar_ci_anova>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_anova_es>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_anova_es>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`tidy(`*`<dmar_post_hoc_ci>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`glance(`*`<dmar_post_hoc_ci>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`tidy(`*`<dmar_ss_power>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
@@ -1028,9 +1174,37 @@ tidy() and glance() views of DMAR results, and methods for mlmr fits.
   [`glance(`*`<dmar_measurement_invariance>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`tidy(`*`<dmar_measurement_alignment>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`glance(`*`<dmar_measurement_alignment>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_factor_congruence>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_factor_congruence>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`tidy(`*`<dmar_ss_power_sensitivity>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   [`glance(`*`<dmar_ss_power_sensitivity>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_factor_analysis>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_factor_analysis>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_factor_count>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_parallel_analysis>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_probability_of_superiority_paired>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_probability_of_superiority_paired>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_ci_ratio_of_means>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_ci_ratio_of_means>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`tidy(`*`<dmar_vargha_delaney_A>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
+  [`glance(`*`<dmar_vargha_delaney_A>`*`)`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)
   : Tidy and Glance Methods for DMAR Result Tables
+
+- [`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+  [`tidy(`*`<dmar_fa_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+  [`glance(`*`<dmar_fa_bifactor>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+  : Bifactor Confirmatory Factor Analysis Model
+
+- [`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md)
+  [`tidy(`*`<dmar_fa_second_order>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md)
+  [`glance(`*`<dmar_fa_second_order>`*`)`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md)
+  : Second-Order Confirmatory Factor Analysis Model
+
+- [`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  [`print(`*`<dmar_factor_scores>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  [`tidy(`*`<dmar_factor_scores>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  [`glance(`*`<dmar_factor_scores>`*`)`](https://yelleknek.github.io/DMAR/reference/factor_scores.md)
+  : Factor Scores With Standard Errors, Intervals, and Determinacy
 
 - [`tidy(`*`<dmar_summary_t_test>`*`)`](https://yelleknek.github.io/DMAR/reference/summary_t_test_broom.md)
   [`glance(`*`<dmar_summary_t_test>`*`)`](https://yelleknek.github.io/DMAR/reference/summary_t_test_broom.md)
@@ -1043,9 +1217,6 @@ tidy() and glance() views of DMAR results, and methods for mlmr fits.
   [`glance(`*`<dmar_R2_mixed_effects>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_R2_mixed_effects.md)
   : Tidy / Glance Methods for R2_mixed_effects Output
 
-- [`tidy(`*`<dmar_cfa_k>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_cfa_k.md)
-  : Tidy a Multiple-Factor CFA Fit
-
 - [`tidy(`*`<dmar_ci_R2>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_ci_R2.md)
   [`glance(`*`<dmar_ci_R2>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_ci_R2.md)
   : Tidy / Glance Methods for ci_R2 Output
@@ -1053,6 +1224,13 @@ tidy() and glance() views of DMAR results, and methods for mlmr fits.
 - [`tidy(`*`<dmar_ci_smd>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_ci_smd.md)
   [`glance(`*`<dmar_ci_smd>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_ci_smd.md)
   : Tidy / Glance Methods for ci_smd Output
+
+- [`tidy(`*`<dmar_fa_confirmatory>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_fa_confirmatory.md)
+  : Tidy a Multiple-Factor CFA Fit
+
+- [`tidy(`*`<dmar_fmi>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_fmi.md)
+  [`glance(`*`<dmar_fmi>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_fmi.md)
+  : Tidy and Glance Methods for the Fraction of Missing Information
 
 - [`tidy(`*`<dmar_mediation_mbco>`*`)`](https://yelleknek.github.io/DMAR/reference/tidy.dmar_mediation_mbco.md)
   : Tidy an MBCO Mediation Table
@@ -1074,7 +1252,7 @@ tidy() and glance() views of DMAR results, and methods for mlmr fits.
   Broom-Style Tidy / Glance Methods for
   [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md)
 
-- [`glance(`*`<dmar_cfa_k>`*`)`](https://yelleknek.github.io/DMAR/reference/glance.dmar_cfa_k.md)
+- [`glance(`*`<dmar_fa_confirmatory>`*`)`](https://yelleknek.github.io/DMAR/reference/glance.dmar_fa_confirmatory.md)
   : Glance at a Multiple-Factor CFA Fit
 
 - [`glance(`*`<dmar_mediation_mbco>`*`)`](https://yelleknek.github.io/DMAR/reference/glance.dmar_mediation_mbco.md)

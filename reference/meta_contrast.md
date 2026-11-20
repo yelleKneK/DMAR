@@ -44,16 +44,23 @@ meta_contrast(yi, vi, weights, center = TRUE)
 
 ## Value
 
-A `data.frame` (class `dmar_tbl`) with the contrast `estimate` (\\\sum
-\lambda_i y_i\\), its `se`, the `z` statistic, the two-sided `p_value`,
-and `k`.
+A `data.frame` (class `dmar_meta_contrast`, a `dmar_tbl`) with the
+contrast `estimate` (\\\sum \lambda_i y_i\\), its `se`, the
+`test_statistic` (the estimate divided by `se`, the \\z\\ above), the
+two-sided `p_value`, and `n_studies` (the number of studies). The
+reference distribution of `test_statistic` is the standard normal,
+recorded as in
+[`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md): the
+attribute `test_distribution` is `"normal"` and `test_df` is `NA`, and
+the line under the printed table says so.
 
 ## Details
 
 The two-sided *p*-value is reported; halve it for a directional
 hypothesis stated in advance (Raudenbush's \\z = 2.75\\ carried the
-one-tailed \\p = .003\\). Dividing the squared contrast \\z^2\\ by the
-total heterogeneity statistic \\Q\\ from
+one-tailed \\p = .003\\). Dividing the squared contrast statistic
+\\z^2\\ (the square of the `test_statistic` row) by the total
+heterogeneity statistic \\Q\\ from
 [`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md) gives
 the proportion of between-study heterogeneity the contrast accounts for,
 the meta-analytic analog of a contrast's share of the between-group sum
@@ -105,12 +112,15 @@ nc <- append(study$n_control, 22, after = 3)
 v  <- (ne + nc) / (ne * nc) + d^2 / (2 * (ne + nc))
 meta_contrast(d, v, weights = 1 / (wk + 2))
 #> Contrast weights mean-centered to sum to zero.
-#>  term     value 
-#>  estimate 0.432 
-#>  se       0.156 
-#>  z        2.76  
-#>  p_value  0.0057
-#>  k        18    
-# z near 2.75: the better teachers knew their pupils, the smaller the
-# expectancy effect (one-tailed p = .003 in the paper).
+#>  term           value 
+#>  estimate       0.432 
+#>  se             0.156 
+#>  test_statistic 2.763 
+#>  p_value        0.0057
+#>  n_studies      18    
+#> 
+#> test_statistic: referred to the standard normal
+# A test statistic near the paper's z of 2.75: the better teachers knew
+# their pupils, the smaller the expectancy effect (one-tailed p = .003
+# in the paper).
 ```

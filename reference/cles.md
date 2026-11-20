@@ -22,8 +22,8 @@ cles(
   n_1 = NULL,
   n_2 = NULL,
   conf_level = 0.95,
-  smd_lower = NULL,
-  smd_upper = NULL
+  smd_ci_lower = NULL,
+  smd_ci_upper = NULL
 )
 ```
 
@@ -43,16 +43,26 @@ cles(
 
   Confidence level for the CI. Default `0.95`.
 
-- smd_lower, smd_upper:
+- smd_ci_lower, smd_ci_upper:
 
   Optional pre-computed confidence limits on *d*. If supplied, these are
   used directly and the noncentral computation is skipped.
 
 ## Value
 
-A `data.frame` with rows for the point estimate (`cl`) and, when sample
-sizes are supplied, the lower and upper CI limits. The *d*-equivalent of
-each row is also reported for transparency.
+A `data.frame` with rows for the point estimate (`cles`) and, when
+sample sizes or limits on *d* are supplied, the lower and upper CI
+limits (`cles_ci_lower`, `cles_ci_upper`), the names
+[`randomization_test`](https://yelleknek.github.io/DMAR/reference/randomization_test.md)
+gives the same quantity. The *d*-equivalent of each row is also reported
+for transparency (`smd`, `smd_ci_lower`, `smd_ci_upper`). With an
+interval the table carries the attributes `conf_level` and `ci_source`,
+which names `smd` as the estimate whose interval the interval for CL is
+computed from, so that
+[`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+reports CL on the table and on its `tidy()` and `glance()` results, and
+`tidy()` gives the confidence level on the rows of the interval for CL
+alone.
 
 ## Details
 
@@ -111,9 +121,9 @@ statistic. *Psychological Bulletin, 111*(2), 361–365.
 [doi:10.1037/0033-2909.111.2.361](https://doi.org/10.1037/0033-2909.111.2.361)
 
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
-estimation and the evaluation of statistical methods. In L. L. Harlow,
-S. A. Mulaik, & J. H. Steiger (Eds.), *What if there were no
-significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 Vargha, A., & Delaney, H. D. (2000). A critique and improvement of the
 CL common language effect size statistics of McGraw and Wong. *Journal
@@ -131,13 +141,11 @@ Other effect size estimates:
 [`correction_for_attenuation()`](https://yelleknek.github.io/DMAR/reference/correction_for_attenuation.md),
 [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
 [`eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/eta_squared_generalized.md),
-[`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
 [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md),
 [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md),
 [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md),
 [`proportion_of_superiority()`](https://yelleknek.github.io/DMAR/reference/proportion_of_superiority.md),
 [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md),
@@ -153,44 +161,44 @@ Ken Kelley <kkelley@nd.edu>
 # 1. Point estimate only.
 cles(smd = 0.5)
 #>  term value
-#>  smd  0.5  
-#>  cl   0.638
+#>  smd  0.500
+#>  cles 0.638
 
 # 2. With a noncentral t CI from sample sizes (preferred):
 cles(smd = 0.5, n_1 = 50, n_2 = 50, conf_level = 0.95)
-#>  term      value
-#>  smd       0.5  
-#>  cl        0.638
-#>  smd_lower 0.101
-#>  smd_upper 0.897
-#>  cl_lower  0.528
-#>  cl_upper  0.737
+#>  term          value
+#>  smd           0.500
+#>  cles          0.638
+#>  smd_ci_lower  0.101
+#>  smd_ci_upper  0.897
+#>  cles_ci_lower 0.528
+#>  cles_ci_upper 0.737
 #> 
 #> Confidence level: 95%
 
 # 3. With a pre-computed CI on d:
-cles(smd = 0.5, smd_lower = 0.20, smd_upper = 0.80)
-#>  term      value
-#>  smd       0.5  
-#>  cl        0.638
-#>  smd_lower 0.2  
-#>  smd_upper 0.8  
-#>  cl_lower  0.556
-#>  cl_upper  0.714
+cles(smd = 0.5, smd_ci_lower = 0.20, smd_ci_upper = 0.80)
+#>  term          value
+#>  smd           0.500
+#>  cles          0.638
+#>  smd_ci_lower  0.200
+#>  smd_ci_upper  0.800
+#>  cles_ci_lower 0.556
+#>  cles_ci_upper 0.714
 #> 
 #> Confidence level: 95%
 
 # 4. CL at three reference d values:
 cles(smd = 0.2)
 #>  term value
-#>  smd  0.2  
-#>  cl   0.556
+#>  smd  0.200
+#>  cles 0.556
 cles(smd = 0.5)
 #>  term value
-#>  smd  0.5  
-#>  cl   0.638
+#>  smd  0.500
+#>  cles 0.638
 cles(smd = 0.8)
 #>  term value
-#>  smd  0.8  
-#>  cl   0.714
+#>  smd  0.800
+#>  cles 0.714
 ```

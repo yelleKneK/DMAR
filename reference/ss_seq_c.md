@@ -1,20 +1,22 @@
 # Sequential Sample Size for a Fixed-Width Contrast Interval
 
-Implements the purely sequential fixed-width confidence interval
-procedure for a linear contrast \\\psi = \sum_j c_j \mu_j\\, following
-Chattopadhyay, Bandyopadhyay, Kelley, and Padalunkal (2025). The goal is
-a 100(1 - 2\\\alpha\\)% confidence interval \\\hat\psi \pm h\\ whose
-half-width \\h\\ is fixed in advance, which is what makes a
-noninferiority or equivalence verdict reachable by design: with bounds
-\\\pm\delta\\, equivalence can never be declared unless \\h \< \delta\\,
-and targeting \\h = \delta/2\\ gives a truly equivalent contrast about a
-90% chance of being declared equivalent at \\\alpha = .05\\. Because no
-fixed sample size can guarantee a bounded-width interval when the error
-variance is unknown (Dantzig, 1940), the procedure is sequential: begin
-with a pilot, then keep sampling, re-estimating the variance, until the
-stopping criterion is met. Used with `pilot = TRUE` the function plans
-the pilot and the cost-optimal allocation; with `pilot = FALSE` it
-evaluates the stopping criterion at the data in hand, in the style of
+Implements a purely sequential fixed-width confidence interval procedure
+for a linear contrast \\\psi = \sum_j c_j \mu_j\\: the stopping rule of
+Chow and Robbins (1965) applied to a contrast, with the groups allocated
+by the cost-optimal allocation of Chattopadhyay, Bandyopadhyay, Kelley,
+and Padalunkal (2025, Theorem 1). The goal is a 100(1 - 2\\\alpha\\)%
+confidence interval \\\hat\psi \pm h\\ whose half-width \\h\\ is fixed
+in advance, which is what makes a noninferiority or equivalence verdict
+reachable by design: with bounds \\\pm\delta\\, equivalence can never be
+declared unless \\h \< \delta\\, and targeting \\h = \delta/2\\ gives a
+truly equivalent contrast about a 90% chance of being declared
+equivalent at \\\alpha = .05\\. Because no fixed sample size can
+guarantee a bounded-width interval when the error variance is unknown
+(Dantzig, 1940), the procedure is sequential: begin with a pilot, then
+keep sampling, re-estimating the variance, until the stopping criterion
+is met. Used with `pilot = TRUE` the function plans the pilot and the
+cost-optimal allocation; with `pilot = FALSE` it evaluates the stopping
+criterion at the data in hand, in the style of
 [`mr_smd`](https://yelleknek.github.io/DMAR/reference/mr_smd.md).
 
 ## Usage
@@ -24,7 +26,7 @@ ss_seq_c(
   c_weights,
   half_width,
   s = NULL,
-  n = NULL,
+  n_per_group = NULL,
   cost = NULL,
   alpha_level = 0.05,
   quantile = c("t", "normal"),
@@ -55,7 +57,7 @@ ss_seq_c(
   Required when `pilot = FALSE`; optional planning values when
   `pilot = TRUE` (used only to shape the allocation).
 
-- n:
+- n_per_group:
 
   The current per-group sample sizes, aligned with `c_weights`. Required
   when `pilot = FALSE`.
@@ -129,6 +131,23 @@ homogeneous.
 time; the asymptotic properties survive batching. Re-call the function
 after each batch.
 
+**When it applies.** The balanced procedure of Kelley, Darku, and
+Chattopadhyay (2018, Example 6), developed without distributional
+assumptions, is a second sequential procedure for a contrast, and the
+two are built for different questions. `ss_seq_c()` targets the
+half-width of a 100(1 - 2\\\alpha\\)% interval, the form a
+noninferiority or equivalence decision at stated bounds takes; it lets
+the groups grow at different rates, allocated by sampling cost and by
+the groups' standard deviations; and it offers a *t* refinement of its
+criterion. The balanced procedure targets the full width of a 100(1 -
+\\\alpha\\)% interval and adds an observation to every group at each
+stage. Use `ss_seq_c()` for an equivalence or noninferiority question or
+when sampling costs differ across groups, and the balanced procedure for
+a narrow interval for a contrast in a balanced design. For the mean of a
+costly measurement with an inexpensive proxy available on a pool of
+units, the sequential rule is
+[`ss_seq_two_phase`](https://yelleknek.github.io/DMAR/reference/ss_seq_two_phase.md).
+
 ## References
 
 Chattopadhyay, B., Bandyopadhyay, T., Kelley, K., & Padalunkal, J. J.
@@ -144,6 +163,11 @@ Dantzig, G. B. (1940). On the non-existence of tests of "Student's"
 hypothesis having power functions independent of \\\sigma\\. *The Annals
 of Mathematical Statistics, 11*(2), 186–192.
 
+Kelley, K., Darku, F. B., & Chattopadhyay, B. (2018). Accuracy in
+parameter estimation for a general class of effect sizes: A sequential
+approach. *Psychological Methods, 23*(2), 226–243.
+[doi:10.1037/met0000127](https://doi.org/10.1037/met0000127)
+
 Mukhopadhyay, N., & de Silva, B. M. (2009). *Sequential methods and
 their applications*. CRC Press.
 
@@ -156,10 +180,12 @@ and interval estimation. *The Annals of Statistics, 5*(5), 984–995.
 [`ss_aipe_c`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c.md),
 [`ss_power_equivalence_c`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md),
 [`equivalence_c`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
-[`mr_smd`](https://yelleknek.github.io/DMAR/reference/mr_smd.md)
+[`mr_smd`](https://yelleknek.github.io/DMAR/reference/mr_smd.md),
+[`ss_seq_two_phase`](https://yelleknek.github.io/DMAR/reference/ss_seq_two_phase.md)
 
 Other sequential estimation:
-[`ss_seq_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c_sensitivity.md)
+[`ss_seq_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c_sensitivity.md),
+[`ss_seq_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_seq_two_phase.md)
 
 ## Author
 
@@ -173,8 +199,8 @@ Ken Kelley <kkelley@nd.edu>
 ss_seq_c(c_weights = c(1, -1), half_width = 2.5, pilot = TRUE)
 #>  term              value
 #>  pilot_n_per_group 10   
-#>  allocation_1      0.5  
-#>  allocation_2      0.5  
+#>  allocation_1      0.500
+#>  allocation_2      0.500
 #> 
 #> Confidence level: 90%
 
@@ -182,26 +208,26 @@ ss_seq_c(c_weights = c(1, -1), half_width = 2.5, pilot = TRUE)
 #    n = 60 per group. Too imprecise to stop; the projection says
 #    roughly how much further to go.
 ss_seq_c(c_weights = c(1, -1), half_width = 2.5,
-         s = 15.4, n = c(60, 60))
+         s = 15.4, n_per_group = c(60, 60))
 #>  term               value
 #>  stop               0    
-#>  half_width_current 4.66 
-#>  half_width_target  2.5  
+#>  half_width_current 4.661
+#>  half_width_target  2.500
 #>  N_current          120  
 #>  N_projected        411  
-#>  allocation_1       0.5  
-#>  allocation_2       0.5  
+#>  allocation_1       0.500
+#>  allocation_2       0.500
 #> 
 #> Confidence level: 90%
 
 # 3. Costs differ: sampling the second group costs four times as
 #    much per observation, so its share of new observations drops.
 ss_seq_c(c_weights = c(1, -1), half_width = 2.5,
-         s = c(15.4, 15.4), n = c(60, 60), cost = c(1, 4))
+         s = c(15.4, 15.4), n_per_group = c(60, 60), cost = c(1, 4))
 #>  term               value
 #>  stop               0    
-#>  half_width_current 4.66 
-#>  half_width_target  2.5  
+#>  half_width_current 4.661
+#>  half_width_target  2.500
 #>  N_current          120  
 #>  N_projected        411  
 #>  allocation_1       0.667

@@ -23,12 +23,12 @@ sample size; the closed form is its fast first approximation.
 
 ``` r
 ss_aipe_indirect_effect(
-  a,
-  b,
+  true_std_reg_coef_a,
+  true_std_reg_coef_b,
   width,
   method = c("closed_form", "monte_carlo"),
   conf_level = 0.95,
-  n_max = 10000L,
+  max_N = 10000L,
   B = 5000L,
   G = 1000L,
   seed = NULL
@@ -37,15 +37,16 @@ ss_aipe_indirect_effect(
 
 ## Arguments
 
-- a:
+- true_std_reg_coef_a:
 
-  Anticipated population coefficient for \\X \to M\\, on the
-  standardized scale. Numeric scalar in \\(-1, 1)\\.
+  Anticipated population standardized regression coefficient of path
+  \\a\\, \\X \to M\\. Numeric scalar in \\(-1, 1)\\.
 
-- b:
+- true_std_reg_coef_b:
 
-  Anticipated population coefficient for \\M \to Y\\ controlling for
-  \\X\\, standardized. Numeric scalar in \\(-1, 1)\\.
+  Anticipated population standardized regression coefficient of path
+  \\b\\, \\M \to Y\\ controlling for \\X\\. Numeric scalar in \\(-1,
+  1)\\.
 
 - width:
 
@@ -59,16 +60,22 @@ ss_aipe_indirect_effect(
 
   Desired confidence level (default `0.95`).
 
-- n_max:
+- max_N:
 
-  Upper bound on the search; default `10000`.
+  Upper bound on the search over the total sample size; default `10000`.
 
 - B:
 
   Number of Monte Carlo draws forming the interval within each simulated
   study when `method = "monte_carlo"`; default `5000`. This is the same
   `B` the analysis-stage interval uses (see
-  [`mediation_mbco`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)).
+  [`mediation_mbco`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)),
+  and it follows the same rule: at least 10 draws beyond each limit,
+  which is 400 at the 95 percent level (see
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)).
+  A smaller value is refused unless
+  `options(dmar.bootstrap_exploratory = TRUE)` is set. Not used by
+  `method = "closed_form"`.
 
 - G:
 
@@ -81,16 +88,26 @@ ss_aipe_indirect_effect(
 
   Optional integer seed for the Monte Carlo method, used locally (the
   caller's random number generator state is restored on exit). Default
-  `NULL` leaves the random number generator state alone.
+  `NULL` draws the Monte Carlo replications from the current random
+  number stream, which advances that stream.
 
 ## Value
 
-A `data.frame` with rows for the recommended sample size, the expected
-CI width at that size, and the inputs echoed back. Under
+A `data.frame` with rows for the recommended sample size
+(`necessary_N`), the expected CI width at that size (`expected_width`),
+and the inputs echoed back: the planning values `true_std_reg_coef_a`
+and `true_std_reg_coef_b`, their product `true_std_indirect_effect` (the
+standardized indirect effect \\ab\\), `width`, and `conf_level`. Under
 `method = "closed_form"` the expected width is the delta method width
 evaluated at the returned sample size; under `method = "monte_carlo"` it
 is the mean simulated width there. The method is carried on the returned
-object as the `ci_method` attribute.
+object as the `ci_method` attribute. Under `method = "monte_carlo"` the
+result also carries the attributes `B`, `B_used`, `n_dropped`,
+`B_required`, and `bootstrap_status` of
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md);
+they record the request each simulated study ran (`B_used` equals `B`),
+and `bootstrap_status` is `"exploratory"` when `B` is below
+`B_required`.
 
 ## Details
 
@@ -100,19 +117,19 @@ a X + \varepsilon_M,\$\$ \$\$Y = \alpha_2 + c' X + b M +
 through \\M\\ equal to \\ab\\ (MacKinnon, Lockwood, Hoffman, West, &
 Sheets, 2002). Both methods plan on the standardized scale with no
 direct effect: the planning population takes \\X\\, \\M\\, and \\Y\\
-with unit variances and \\c' = 0\\, so `a` and `b` are the standardized
-paths.
+with unit variances and \\c' = 0\\, so `true_std_reg_coef_a` and
+`true_std_reg_coef_b` are the standardized paths \\a\\ and \\b\\.
 
 **The closed form.** Under the planning population the sampling variance
-of \\\hat a\\ is \\(1 - a^2)/(n - 2)\\. In the equation for \\Y\\ the
+of \\\hat a\\ is \\(1 - a^2)/(N - 2)\\. In the equation for \\Y\\ the
 mediator is regressed alongside \\X\\, with which it is correlated at
 \\a\\, so the sampling variance of \\\hat b\\ carries the variance
 inflation factor \\1/(1 - a^2)\\: \$\$\mathrm{Var}(\hat b) \\=\\
-\frac{1 - b^2}{(n - 3)(1 - a^2)}.\$\$ The estimators come from two
+\frac{1 - b^2}{(N - 3)(1 - a^2)}.\$\$ The estimators come from two
 separate equations and are uncorrelated, so the delta method (Sobel,
 1982) standard error of the product is \$\$\mathrm{SE}(\hat a \hat b)
 \\=\\ \sqrt{\\a^2 \mathrm{Var}(\hat b) + b^2 \mathrm{Var}(\hat
-a)\\},\$\$ and the closed form returns the smallest \\n\\ at which the
+a)\\},\$\$ and the closed form returns the smallest \\N\\ at which the
 Wald width \\2 z\_{1 - \alpha/2}\\ \mathrm{SE}(\hat a \hat b)\\ is at or
 below `width`. Two approximations remain. The Wald interval is symmetric
 while the sampling distribution of a product is skewed, so the Wald
@@ -125,9 +142,9 @@ form as the first approximation and to verify the final plan with
 `method = "monte_carlo"`, which measures the realized widths directly.
 
 **Planning for the Monte Carlo interval.** With
-`method = "monte_carlo"`, each candidate \\n\\ is evaluated by a priori
+`method = "monte_carlo"`, each candidate \\N\\ is evaluated by a priori
 Monte Carlo simulation (Muthén & Muthén, 2002; Schoemann, Boulton, &
-Short, 2017): `G` data sets of size \\n\\ are drawn from the planning
+Short, 2017): `G` data sets of size \\N\\ are drawn from the planning
 population, the two mediation regressions are fit to each, and the Monte
 Carlo interval is formed by drawing `B` pairs \\(\tilde a, \tilde b)\\
 from normal distributions centered at the estimates with the estimated
@@ -138,7 +155,7 @@ realize the joint normal approximation of the estimates, the same
 construction
 [`mediation_mbco`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md)
 uses for its Monte Carlo interval. The necessary sample size is the
-smallest \\n\\ whose mean simulated width is at or below `width`; the
+smallest \\N\\ whose mean simulated width is at or below `width`; the
 search starts from the closed-form answer, brackets the crossing
 geometrically, and bisects. A planning call at the default `G` and `B`
 fits the mediation model several thousand times and takes a few seconds;
@@ -150,17 +167,18 @@ raising `G` narrows it, and supplying `seed` makes a plan reproducible.
 optimization (MBCO) likelihood ratio test of Tofighi and Kelley (2020),
 implemented in
 [`mediation_mbco`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md),
-is the recommended test of a mediation effect, and the intervals that
-suit an indirect effect are the profile likelihood interval and the
-Monte Carlo interval, both of which accommodate the skewness of the
-product. This planner targets the Monte Carlo interval. Planning for the
-profile likelihood interval would require inverting a pair of
-constrained optimizations in every simulated study (two constrained
-OpenMx fits per interval, times `G`, times every candidate sample size),
-while the Monte Carlo interval costs `B` products of normal draws per
-study and is the inexpensive interval that also accommodates the
-skewness, the one Tofighi and Kelley (2020) report for their memory
-example. A study planned with `method = "monte_carlo"` and analyzed with
+is the test they advocate for a hypothesis about an indirect effect,
+alongside a confidence interval, and the intervals that suit an indirect
+effect are the profile likelihood interval and the Monte Carlo interval,
+both of which accommodate the skewness of the product. This planner
+targets the Monte Carlo interval. Planning for the profile likelihood
+interval would require inverting a pair of constrained optimizations in
+every simulated study (two constrained OpenMx fits per interval, times
+`G`, times every candidate sample size), while the Monte Carlo interval
+costs `B` products of normal draws per study and is the inexpensive
+interval that also accommodates the skewness, the one Tofighi and Kelley
+(2020) report for their memory example. A study planned with
+`method = "monte_carlo"` and analyzed with
 `mediation_mbco(ci_method = "monte_carlo")` is therefore planned and
 analyzed on the same interval.
 
@@ -187,7 +205,7 @@ the mediated effect. *Psychological Science, 18*(3), 233–239.
 [doi:10.1111/j.1467-9280.2007.01882.x](https://doi.org/10.1111/j.1467-9280.2007.01882.x)
 
 Lachowicz, M. J., Preacher, K. J., & Kelley, K. (2018). A novel measure
-of effect size for mediation analysis. *Psychological Methods, 23*,
+of effect size for mediation analysis. *Psychological Methods, 23*(2),
 244–261. [doi:10.1037/met0000165](https://doi.org/10.1037/met0000165)
 
 MacKinnon, D. P., Lockwood, C. M., Hoffman, J. M., West, S. G., &
@@ -225,7 +243,7 @@ effects in structural equation models. *Sociological Methodology, 13*,
 
 Tofighi, D., & Kelley, K. (2020). Improved inference in mediation
 analysis: Introducing the model-based constrained optimization
-procedure. *Psychological Methods, 25*, 496–515.
+procedure. *Psychological Methods, 25*(4), 496–515.
 [doi:10.1037/met0000259](https://doi.org/10.1037/met0000259)
 
 Tofighi, D., & MacKinnon, D. P. (2011). RMediation: An R package for
@@ -254,6 +272,8 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_crossed()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed.md),
+[`ss_aipe_crossed_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed_sensitivity.md),
 [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
 [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
 [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
@@ -261,6 +281,8 @@ Other AIPE sample size planning:
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md),
+[`ss_aipe_mean()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean.md),
+[`ss_aipe_mean_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean_sensitivity.md),
 [`ss_aipe_mixed_effects_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md),
 [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
@@ -271,7 +293,10 @@ Other AIPE sample size planning:
 [`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
+[`ss_aipe_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase.md),
+[`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md),
+[`ss_aipe_two_phase_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_sensitivity.md)
 
 ## Author
 
@@ -280,18 +305,19 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Plan n so the 95% CI on ab has full width <= 0.20, with
+# 1. Plan N so the 95% CI on ab has full width <= 0.20, with
 #        anticipated standardized a = 0.40 and b = 0.40. The closed
 #        form answers instantly:
-ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20)
-#>  term           value
-#>  necessary_N    116  
-#>  expected_width 0.2  
-#>  a              0.4  
-#>  b              0.4  
-#>  ab             0.16 
-#>  width_target   0.2  
-#>  conf_level     0.95 
+ss_aipe_indirect_effect(true_std_reg_coef_a = 0.40,
+                        true_std_reg_coef_b = 0.40, width = 0.20)
+#>  term                     value
+#>  necessary_N              116  
+#>  expected_width           0.200
+#>  true_std_reg_coef_a      0.400
+#>  true_std_reg_coef_b      0.400
+#>  true_std_indirect_effect 0.160
+#>  width                    0.200
+#>  conf_level               0.950
 #> 
 #> Confidence level: 95%
 
@@ -302,17 +328,18 @@ ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20)
 #        the defaults G = 1000 and B = 5000. The answer sits a little
 #        above the closed form because the interval it plans for is a
 #        little wider than the Wald interval:
-ss_aipe_indirect_effect(a = 0.40, b = 0.40, width = 0.20,
+ss_aipe_indirect_effect(true_std_reg_coef_a = 0.40,
+                        true_std_reg_coef_b = 0.40, width = 0.20,
                         method = "monte_carlo", G = 100, B = 1000,
                         seed = 113)
-#>  term           value
-#>  necessary_N    125  
-#>  expected_width 0.195
-#>  a              0.4  
-#>  b              0.4  
-#>  ab             0.16 
-#>  width_target   0.2  
-#>  conf_level     0.95 
+#>  term                     value
+#>  necessary_N              125  
+#>  expected_width           0.195
+#>  true_std_reg_coef_a      0.400
+#>  true_std_reg_coef_b      0.400
+#>  true_std_indirect_effect 0.160
+#>  width                    0.200
+#>  conf_level               0.950
 #> 
 #> Confidence level: 95%
 ```

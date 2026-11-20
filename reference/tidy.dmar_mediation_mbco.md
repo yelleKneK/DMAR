@@ -26,7 +26,8 @@ tidy(x, ...)
 ## Value
 
 A `data.frame` with columns `term`, `estimate`, `se`, `statistic`,
-`p_value`, `ci_lower`, `ci_upper`.
+`p_value`, `ci_lower`, `ci_upper`, and `conf_level`, the level of the
+intervals.
 
 ## Author
 

@@ -16,9 +16,9 @@ planning).
 
 ``` r
 ss_aipe_icc_sensitivity(
-  true_rho = NULL,
-  estimated_rho = NULL,
-  k,
+  true_icc = NULL,
+  supposed_icc = NULL,
+  n_raters,
   width,
   assurance = NULL,
   specified_N = NULL,
@@ -26,25 +26,26 @@ ss_aipe_icc_sensitivity(
   type = c("ICC(1,1)", "ICC(2,1)", "ICC(3,1)", "ICC(1,k)", "ICC(2,k)", "ICC(3,k)"),
   G = 1000,
   print_iter = FALSE,
-  filename = NULL
+  filename = NULL,
+  seed = NULL
 )
 ```
 
 ## Arguments
 
-- true_rho:
+- true_icc:
 
   Population intraclass correlation coefficient (the data generating
   value), at the level matching `type`. Must lie in \\\[0, 1)\\.
 
-- estimated_rho:
+- supposed_icc:
 
-  ICC used to plan the study (the value the researcher guessed when
-  invoking
-  [`ss_aipe_icc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)).
-  Supply this or `specified_N` but not both.
+  The supposed ICC, the planning value from which
+  [`ss_aipe_icc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
+  plans the study (a value the researcher supposes, not an estimate
+  computed from data). Supply this or `specified_N` but not both.
 
-- k:
+- n_raters:
 
   Number of raters (or repeated measurements) per subject; must be at
   least 2.
@@ -65,7 +66,7 @@ ss_aipe_icc_sensitivity(
   Pre-specified number of subjects to evaluate (use this when you want
   the sensitivity results at a fixed *n* rather than at the *n* that
   [`ss_aipe_icc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
-  would recommend); incompatible with `estimated_rho`.
+  would recommend); incompatible with `supposed_icc`.
 
 - conf_level:
 
@@ -80,7 +81,7 @@ ss_aipe_icc_sensitivity(
   consistency), or the average-of-\\k\\ versions `"ICC(1,k)"`,
   `"ICC(2,k)"`, `"ICC(3,k)"`. The simulation generates data from the
   variance- components model matching the requested type, so the
-  realized ICC on each replication is comparable to `true_rho`.
+  realized ICC on each replication is comparable to `true_icc`.
 
 - G:
 
@@ -102,6 +103,13 @@ ss_aipe_icc_sensitivity(
   appended to, and a throwaway run should point it at
   `tempfile(fileext = ".csv")`.
 
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
+
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
@@ -109,11 +117,11 @@ Carlo results across the `G` replications. The `term` entries are:
 `"mean_icc"`, `"median_icc"`, `"sd_icc"` (mean / median / SD of the *G*
 observed ICC estimates); `"mean_ci_width"`, `"median_ci_width"`,
 `"sd_ci_width"` (corresponding summaries of the realized interval
-widths); `"pct_ci_less_w"` (proportion of intervals at or below the
+widths); `"pct_ci_less_width"` (proportion of intervals at or below the
 planning width `width`); `"pct_ci_miss_low"` and `"pct_ci_miss_high"`
-(tail-specific non-coverage of `true_rho`); `"total_type_I_error"`
-(overall empirical non-coverage of `true_rho`); plus the input echoes
-`"total_N"`, `"k"`, `"true_rho"`, `"estimated_rho"`, `"width"`,
+(tail-specific non-coverage of `true_icc`); `"total_type_I_error"`
+(overall empirical non-coverage of `true_icc`); plus the input echoes
+`"total_N"`, `"n_raters"`, `"true_icc"`, `"supposed_icc"`, `"width"`,
 `"conf_level"`, and `"assurance"` (present only when an assurance was
 supplied). The ICC type is not a row; it is stored as the `"icc_type"`
 attribute on the returned object so the `value` column stays numeric.
@@ -124,14 +132,14 @@ Sample size planning for the intraclass correlation coefficient under
 the Accuracy in Parameter Estimation framework chooses *n* so that the
 expected (or, with assurance, the high-probability) confidence interval
 width is no larger than `width` (Bonett, 2002; Kelley & Maxwell, 2003).
-Because the procedure assumes the planning value `estimated_rho` matches
-the population value `true_rho`, in practice the realized width will
+Because the procedure assumes the planning value `supposed_icc` matches
+the population value `true_icc`, in practice the realized width will
 deviate from the planned width whenever the planning value is wrong.
 This sensitivity analysis quantifies the deviation by Monte Carlo
 simulation: the planned *n* is obtained from
 [`ss_aipe_icc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
-with `estimated_rho`, then samples are drawn from the *true* population
-(with population ICC `true_rho`) and the realized confidence interval
+with `supposed_icc`, then samples are drawn from the *true* population
+(with population ICC `true_icc`) and the realized confidence interval
 widths are summarized.
 
 **Data generating model.** For `type` starting with `"ICC(1,"` the
@@ -147,15 +155,64 @@ rater effect is fixed (centered constants), so the population `ICC(3,1)`
 equals \\\sigma^2\_{\mathrm{subj}} / (\sigma^2\_{\mathrm{subj}} +
 \sigma^2\_{\mathrm{err}})\\ but the two-way decomposition is used in the
 estimator. Within each cell, the total variance is unity by
-construction. For the single-rater forms `true_rho` therefore maps
+construction. For the single-rater forms `true_icc` therefore maps
 directly to the subject-variance share; for the average-of-\\k\\ forms
-`true_rho` is first mapped to the single-rater scale through the inverse
+`true_icc` is first mapped to the single-rater scale through the inverse
 Spearman-Brown relation \\\rho = \rho_k / \[k - (k - 1)\rho_k\]\\, so
-that the population ICC at the average-of-\\k\\ level equals `true_rho`.
-Coverage is checked against `true_rho` on its own scale, matching the
+that the population ICC at the average-of-\\k\\ level equals `true_icc`.
+Coverage is checked against `true_icc` on its own scale, matching the
 scale on which
 [`icc`](https://yelleknek.github.io/DMAR/reference/icc.md) reports each
 form.
+
+## The record of the simulation
+
+Every sensitivity function of the package summarizes its replications
+over one denominator: the replications that produced a confidence
+interval (for a power sensitivity function, a test). The proportion of
+intervals that met the width target (`pct_ci_less_width`), the
+proportions of intervals that missed the true value, and the summaries
+of the widths are all taken over those replications. A replication
+without an interval is in none of these rows. It is counted, and the
+returned table carries the counts in its attribute `simulation`, a list
+read with `attr(x, "simulation")`:
+
+- `attempted`:
+
+  the number of replications asked for (`G`).
+
+- `returned`:
+
+  the number that produced an interval (a test).
+
+- `failed`:
+
+  the number that did not (`attempted - returned`).
+
+- `denominator`:
+
+  the number of replications the rows named above are taken over, which
+  is `returned`.
+
+- `width_target_probability`:
+
+  the proportion of the replications with an interval whose interval met
+  the width target, the value of the `pct_ci_less_width` row; `NA` for a
+  function or a call without a width target, and when no replication
+  produced an interval.
+
+- `width_target_mc_ci`:
+
+  the exact binomial (Clopper-Pearson) limits for that proportion, at
+  the confidence level of the table. They describe the error of the
+  simulation, which shrinks as `G` grows, and nothing else.
+
+A function that records more about its run adds elements to the list,
+and its help page names them. The line "Replications" beneath the
+printed table gives `G`, and the three counts when a replication was
+without an interval. With many replications without an interval the rows
+describe only the studies in which the interval could be formed, so
+`failed` is to be reported beside them.
 
 ## References
 
@@ -197,6 +254,8 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_crossed()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed.md),
+[`ss_aipe_crossed_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed_sensitivity.md),
 [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
 [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
 [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
@@ -204,6 +263,8 @@ Other AIPE sample size planning:
 [`ss_aipe_icc()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
 [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md),
+[`ss_aipe_mean()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean.md),
+[`ss_aipe_mean_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean_sensitivity.md),
 [`ss_aipe_mixed_effects_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md),
 [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
@@ -214,7 +275,10 @@ Other AIPE sample size planning:
 [`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
+[`ss_aipe_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase.md),
+[`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md),
+[`ss_aipe_two_phase_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_sensitivity.md)
 
 ## Author
 
@@ -229,31 +293,33 @@ Ken Kelley <kkelley@nd.edu>
 # Well-specified case: plan with the true population ICC.
 set.seed(113)
 ss_aipe_icc_sensitivity(
-  true_rho      = 0.70,
-  estimated_rho = 0.70,
-  k             = 3,
+  true_icc      = 0.70,
+  supposed_icc  = 0.70,
+  n_raters      = 3,
   width         = 0.40,
   conf_level    = 0.95,
   G             = 25,
   print_iter    = FALSE
 )
-#>  term               value 
-#>  mean_icc           0.675 
-#>  median_icc         0.67  
-#>  sd_icc             0.105 
-#>  mean_ci_width      0.389 
-#>  median_ci_width    0.404 
-#>  sd_ci_width        0.0897
-#>  pct_ci_less_w      0.44  
-#>  pct_ci_miss_low    0.04  
-#>  pct_ci_miss_high   0     
-#>  total_type_I_error 0.04  
-#>  total_N            19    
-#>  k                  3     
-#>  true_rho           0.7   
-#>  estimated_rho      0.7   
-#>  width              0.4   
-#>  conf_level         0.95  
+#>  term               value
+#>  mean_icc           0.675
+#>  median_icc         0.670
+#>  sd_icc             0.105
+#>  mean_ci_width      0.389
+#>  median_ci_width    0.404
+#>  sd_ci_width        0.090
+#>  pct_ci_less_width  0.440
+#>  pct_ci_miss_low    0.040
+#>  pct_ci_miss_high   0.000
+#>  total_type_I_error 0.040
+#>  total_N            19   
+#>  n_raters           3    
+#>  true_icc           0.700
+#>  supposed_icc       0.700
+#>  width              0.400
+#>  conf_level         0.950
+#> 
+#> Replications: 25
 #> 
 #> Confidence level: 95%
 
@@ -261,61 +327,65 @@ ss_aipe_icc_sensitivity(
 # The realized interval widths will tend to be wider than the target.
 set.seed(113)
 ss_aipe_icc_sensitivity(
-  true_rho      = 0.50,
-  estimated_rho = 0.70,
-  k             = 3,
+  true_icc      = 0.50,
+  supposed_icc  = 0.70,
+  n_raters      = 3,
   width         = 0.40,
   conf_level    = 0.95,
   G             = 25,
   print_iter    = FALSE
 )
-#>  term               value 
-#>  mean_icc           0.472 
-#>  median_icc         0.445 
-#>  sd_icc             0.141 
-#>  mean_ci_width      0.509 
-#>  median_ci_width    0.537 
-#>  sd_ci_width        0.0717
-#>  pct_ci_less_w      0.12  
-#>  pct_ci_miss_low    0.04  
-#>  pct_ci_miss_high   0     
-#>  total_type_I_error 0.04  
-#>  total_N            19    
-#>  k                  3     
-#>  true_rho           0.5   
-#>  estimated_rho      0.7   
-#>  width              0.4   
-#>  conf_level         0.95  
+#>  term               value
+#>  mean_icc           0.472
+#>  median_icc         0.445
+#>  sd_icc             0.141
+#>  mean_ci_width      0.509
+#>  median_ci_width    0.537
+#>  sd_ci_width        0.072
+#>  pct_ci_less_width  0.120
+#>  pct_ci_miss_low    0.040
+#>  pct_ci_miss_high   0.000
+#>  total_type_I_error 0.040
+#>  total_N            19   
+#>  n_raters           3    
+#>  true_icc           0.500
+#>  supposed_icc       0.700
+#>  width              0.400
+#>  conf_level         0.950
+#> 
+#> Replications: 25
 #> 
 #> Confidence level: 95%
 
 # Fixed-n mode: skip the planner and evaluate at a chosen sample size.
 set.seed(113)
 ss_aipe_icc_sensitivity(
-  true_rho    = 0.50,
+  true_icc    = 0.50,
   specified_N = 40,
-  k           = 3,
+  n_raters    = 3,
   width       = 0.40,
   G           = 25,
   print_iter  = FALSE
 )
-#>  term               value 
-#>  mean_icc           0.512 
-#>  median_icc         0.502 
-#>  sd_icc             0.0824
-#>  mean_ci_width      0.348 
-#>  median_ci_width    0.356 
-#>  sd_ci_width        0.0302
-#>  pct_ci_less_w      1     
-#>  pct_ci_miss_low    0.08  
-#>  pct_ci_miss_high   0     
-#>  total_type_I_error 0.08  
-#>  total_N            40    
-#>  k                  3     
-#>  true_rho           0.5   
-#>  estimated_rho      <NA>  
-#>  width              0.4   
-#>  conf_level         0.95  
+#>  term               value
+#>  mean_icc           0.512
+#>  median_icc         0.502
+#>  sd_icc             0.082
+#>  mean_ci_width      0.348
+#>  median_ci_width    0.356
+#>  sd_ci_width        0.030
+#>  pct_ci_less_width  1.000
+#>  pct_ci_miss_low    0.080
+#>  pct_ci_miss_high   0.000
+#>  total_type_I_error 0.080
+#>  total_N            40   
+#>  n_raters           3    
+#>  true_icc           0.500
+#>  supposed_icc       <NA> 
+#>  width              0.400
+#>  conf_level         0.950
+#> 
+#> Replications: 25
 #> 
 #> Confidence level: 95%
 ```

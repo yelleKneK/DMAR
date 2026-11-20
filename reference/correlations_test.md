@@ -110,12 +110,12 @@ an exact *p*-value and falls back to a normal-approximation *p*-value;
 the associated warnings are suppressed for a cleaner table.
 
 **Confidence intervals.** All three methods use Fisher's variance-
-stabilizing transformation, \\z(r) = \mathrm{atanh}(r)\\, and
-back-transform through \\\tanh(\cdot)\\, but the standard error in the
-Fisher-*z* scale is selected to match the sampling distribution of the
+stabilizing transformation, \\Z(r) = \mathrm{atanh}(r)\\, and
+back-transform through \\\tanh(\cdot)\\, but the standard error on the
+Fisher's *Z* scale is selected to match the sampling distribution of the
 chosen correlation coefficient:
 
-- Pearson (`method = "pearson"`): \\\mathrm{SE}(z) = 1/\sqrt{n - 3}\\.
+- Pearson (`method = "pearson"`): \\\mathrm{SE}(Z) = 1/\sqrt{n - 3}\\.
   This is the classical Fisher (1921) interval. Under bivariate
   normality the coverage of this interval matches
   [`cor.test`](https://rdrr.io/r/stats/cor.test.html)'s `conf.int`
@@ -123,7 +123,7 @@ chosen correlation coefficient:
   coverage in the same way. See Kelley (2007) and Maxwell, Delaney, &
   Kelley (2027, Chapter 9) for discussion and worked examples.
 
-- Spearman (`method = "spearman"`): \\\mathrm{SE}(z) = \sqrt{(1 +
+- Spearman (`method = "spearman"`): \\\mathrm{SE}(Z) = \sqrt{(1 +
   r^{2}/2) / (n - 3)}\\. This is the Bonett and Wright (2000)
   adjustment, which uses Fisher's transformation but inflates the
   standard error to account for the heavier-than-Pearson tails of the
@@ -132,8 +132,8 @@ chosen correlation coefficient:
   error tends to produce intervals that are too narrow for Spearman
   correlations.
 
-- Kendall (`method = "kendall"`): \\\mathrm{SE}(z) = \sqrt{0.437 / (n -
-  4)}\\. This is Bonett and Wright's (2000, equation 2) Fisher-*z*
+- Kendall (`method = "kendall"`): \\\mathrm{SE}(Z) = \sqrt{0.437 / (n -
+  4)}\\. This is Bonett and Wright's (2000, equation 2) Fisher's *Z*
   interval for Kendall's \\\tau\\. The constant 0.437 is the asymptotic
   variance factor of Fieller, Hartley, and Pearson (1957), derived under
   bivariate normality and stated by Bonett and Wright as accurate for
@@ -141,10 +141,15 @@ chosen correlation coefficient:
   accurate for \\\|\rho_s\| \< .95\\). Requires \\n \ge 5\\; for smaller
   pairwise samples the interval is returned as `NA`.
 
-The Fisher-*z* machinery requires \\\|r\| \< 1\\ for the transformation
-to be finite. When \\r = \pm 1\\ (perfect correlation in the sample),
-the transformed value is infinite and the interval is reported as `NA`;
-this is the same convention used by `cor.test`.
+Fisher's *Z* transformation is finite only for \\\|r\| \< 1\\. When \\r
+= \pm 1\\ (a perfect correlation in the sample), \\Z(r)\\ is infinite,
+and DMAR reports both limits of the interval as `NA`, for every
+`method`. That is DMAR's own choice, made because the interval is built
+on the Fisher's *Z* scale, where the estimate is then infinite. It is
+not the convention of
+[`cor.test`](https://rdrr.io/r/stats/cor.test.html), which for a perfect
+Pearson correlation reports the interval \[1, 1\] (or \[-1, -1\]) as its
+`conf.int`. The correlation and its *p*-value are reported as usual.
 
 **When to use each correlation.** Pick `method = "pearson"` when both
 variables are continuous, approximately linearly related, and roughly
@@ -213,11 +218,15 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -239,8 +248,8 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Worked example using four cognitive tests from the Holzinger and
-# Swineford (1939) study (301 children in two schools). The goal of
+# Worked example using four cognitive tests from the holzinger_swineford
+# data (301 children in two schools). The goal of
 # correlations_test() is to produce a formatted correlation matrix that
 # reports, for every variable pair, the correlation, its two-sided
 # p-value, a confidence interval on the population correlation, and the

@@ -116,18 +116,18 @@ Ken Kelley <kkelley@nd.edu>
 # The critical value for a test on 3 degrees of freedom at the .05 level.
 cv_chisq(alpha_level = .05, df = 3)
 #>  term     value area_less area_greater
-#>  lower_cv 0     0         1           
-#>  upper_cv 7.81  0.95      0.05        
+#>  lower_cv 0     0.000     1.000       
+#>  upper_cv 7.815 0.950     0.050       
 
 # Simple output.
 cv_chisq(alpha_level = .05, df = 3, verbose = FALSE)
 #>  term     value
 #>  lower_cv 0    
-#>  upper_cv 7.81 
+#>  upper_cv 7.815
 
 # Both tails, as an interval for a variance would need.
 cv_chisq(alpha_level = .05, df = 10, alternative = "not_equal")
-#>  term     value area_less area_greater
-#>  lower_cv 3.25  0.025     0.975       
-#>  upper_cv 20.5  0.975     0.025       
+#>  term     value  area_less area_greater
+#>  lower_cv 3.247  0.025     0.975       
+#>  upper_cv 20.483 0.975     0.025       
 ```

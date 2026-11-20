@@ -21,7 +21,7 @@ bayes_paired_t(
   y = NULL,
   mean_diff = NULL,
   sd_diff = NULL,
-  n = NULL,
+  N = NULL,
   prior_location = 0,
   prior_scale = sqrt(2)/2,
   prior_mean = NULL,
@@ -38,7 +38,7 @@ bayes_paired_t(
   order. The analysis is of `x - y`. Omit both to supply summary
   statistics of the differences instead.
 
-- mean_diff, sd_diff, n:
+- mean_diff, sd_diff, N:
 
   Summary statistics of the paired differences: their mean, their
   standard deviation, and the number of pairs. These are the quantities
@@ -77,7 +77,7 @@ bayes_paired_t(
 A `data.frame` (class `dmar_tbl`) with the same rows as
 [`bayes_one_sample_t`](https://yelleknek.github.io/DMAR/reference/bayes_one_sample_t.md),
 where \\\delta\\ is the standardized within-pair difference and the raw
-rows are on the difference scale; `n` is the number of pairs.
+rows are on the difference scale; `N` is the number of pairs.
 
 **Specifying the prior.** The default prior on the standardized effect
 \\\delta\\ is the JZS Cauchy centered at zero. Its `prior_scale` \\r\\
@@ -151,18 +151,18 @@ bayes_paired_t(after, before)
 #>  delta_posterior_median 0.624 
 #>  delta_posterior_mean   0.626 
 #>  delta_lower            0.237 
-#>  delta_upper            1.02  
+#>  delta_upper            1.022 
 #>  p_delta_positive       0.999 
-#>  raw_posterior_median   3.85  
-#>  raw_lower              1.47  
-#>  raw_upper              6.31  
-#>  bf_10                  35.8  
-#>  bf_01                  0.0279
-#>  t                      3.69  
+#>  raw_posterior_median   3.851 
+#>  raw_lower              1.466 
+#>  raw_upper              6.309 
+#>  bf_10                  35.838
+#>  bf_01                  0.028 
+#>  t_value                3.693 
 #>  df                     29    
 #>  prior_location         0     
 #>  prior_scale            0.707 
-#>  n                      30    
+#>  N                      30    
 #> 
 #> Confidence level: 95%
 ```

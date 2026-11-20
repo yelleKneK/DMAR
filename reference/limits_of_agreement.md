@@ -112,12 +112,16 @@ confidence statement is per limit: each limit is covered with
 **Numerical accuracy.** The pair tolerance factors are computed by
 numerical integration of the Odeh (1978) chi square by normal integral,
 which reproduces Carkeet's Table 2 to all four printed decimals. The
-individual quantiles come from
-[`stats::qt`](https://rdrr.io/r/stats/TDist.html) with a noncentrality
-parameter, so at very large *n* their accuracy is bounded by R's
-noncentral *t* algorithm: near \\n = 1000\\ the tolerance coefficient
-carries an error of about \\3 \times 10^{-4}\\, far past the sample
-sizes at which the exact-versus-approximate distinction matters.
+individual quantiles are those of the noncentral *t* distribution,
+computed exactly. R's [`qt()`](https://rdrr.io/r/stats/TDist.html) with
+a noncentrality parameter is a normal approximation once \\\delta = k
+\sqrt{n}\\ passes 37.62 (from \\n = 369\\ at 95% coverage, 524 at 90%,
+and 214 at 99%), and limits from it are then too far from the mean
+difference by as much as 0.0011 standard deviations of the differences
+at 95% coverage (0.0030 at 99%), less as \\n\\ grows (0.00036 at \\n =
+1000\\). There the quantiles are computed by integrating over the
+sampling distribution of the standard deviation; below it they are
+[`qt()`](https://rdrr.io/r/stats/TDist.html)'s.
 
 **Caveats.** The LoA construction assumes (i) the differences \\d_i\\
 are approximately normally distributed, and (ii) the difference does not
@@ -172,44 +176,47 @@ set.seed(113)
 method_a <- rnorm(40, mean = 100, sd = 15)
 method_b <- method_a + rnorm(40, mean = 0, sd = 3)
 limits_of_agreement(method_a, method_b)
-#>  term                  value
-#>  mean_difference       0.259
-#>  sd_difference         3.37 
-#>  loa_lower             -6.34
-#>  loa_lower_lower_limit -8.33
-#>  loa_lower_upper_limit -5.2 
-#>  loa_upper             6.86 
-#>  loa_upper_lower_limit 5.72 
-#>  loa_upper_upper_limit 8.85 
+#>  term               value 
+#>  mean_difference    0.259 
+#>  sd_difference      3.366 
+#>  loa_lower          -6.337
+#>  loa_lower_ci_lower -8.332
+#>  loa_lower_ci_upper -5.198
+#>  loa_upper          6.856 
+#>  loa_upper_ci_lower 5.717 
+#>  loa_upper_ci_upper 8.851 
 #> 
 #> Confidence level: 95%
 
 # 2. Each limit treated individually, for when a single limit
 #    carries the substantive question:
 limits_of_agreement(method_a, method_b, method = "individual")
-#>  term                  value
-#>  mean_difference       0.259
-#>  sd_difference         3.37 
-#>  loa_lower             -6.34
-#>  loa_lower_lower_limit -8.56
-#>  loa_lower_upper_limit -4.82
-#>  loa_upper             6.86 
-#>  loa_upper_lower_limit 5.34 
-#>  loa_upper_upper_limit 9.08 
+#>  term               value 
+#>  mean_difference    0.259 
+#>  sd_difference      3.366 
+#>  loa_lower          -6.337
+#>  loa_lower_ci_lower -8.563
+#>  loa_lower_ci_upper -4.820
+#>  loa_upper          6.856 
+#>  loa_upper_ci_lower 5.339 
+#>  loa_upper_ci_upper 9.082 
 #> 
 #> Confidence level: 95%
 
-# 3. 90% LoA with 95% CIs on the limits:
-limits_of_agreement(method_a, method_b, coverage = 0.90, conf_level = 0.95)
-#>  term                  value
-#>  mean_difference       0.259
-#>  sd_difference         3.37 
-#>  loa_lower             -5.28
-#>  loa_lower_lower_limit -6.95
-#>  loa_lower_upper_limit -4.32
-#>  loa_upper             5.8  
-#>  loa_upper_lower_limit 4.84 
-#>  loa_upper_upper_limit 7.47 
+# 3. 90% LoA with 95% CIs on the limits, each limit again treated
+#    individually (coverage and conf_level work the same way under
+#    the pair method, whose tolerance factors take longer to compute):
+limits_of_agreement(method_a, method_b, method = "individual",
+                    coverage = 0.90, conf_level = 0.95)
+#>  term               value 
+#>  mean_difference    0.259 
+#>  sd_difference      3.366 
+#>  loa_lower          -5.276
+#>  loa_lower_ci_lower -7.252
+#>  loa_lower_ci_upper -3.901
+#>  loa_upper          5.795 
+#>  loa_upper_ci_lower 4.420 
+#>  loa_upper_ci_upper 7.771 
 #> 
 #> Confidence level: 95%
 ```

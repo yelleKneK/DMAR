@@ -40,8 +40,8 @@ ci_scheffe(x, group = NULL, contrasts = NULL, conf_level = 0.95)
 ## Value
 
 A `data.frame` with one row per contrast. Columns: `contrast` (a printed
-label), `contrast_value`, `se`, `F_statistic`, `lower_limit`,
-`upper_limit`, `p_adjusted`.
+label), `estimate`, `se`, `F_value`, `ci_lower`, `ci_upper`,
+`p_adjusted`.
 
 ## Details
 
@@ -76,11 +76,15 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -106,24 +110,24 @@ Ken Kelley <kkelley@nd.edu>
 #    test_market data via the default:
 fit <- lm(brand_movement ~ panel, data = test_market)
 ci_scheffe(fit)
-#>  contrast contrast_value se   F_statistic lower_limit upper_limit p_adjusted
-#>  2 - 1    0.11           0.38 0.0168      -1.3        1.52        0.9999    
-#>  3 - 1    0.685          0.38 0.65        -0.73       2.1         0.6652    
-#>  4 - 1    0.87           0.38 1.05        -0.545      2.28        0.4201    
-#>  5 - 1    1.25           0.38 2.15        -0.17       2.66        0.1061    
-#>  6 - 1    1.3            0.38 2.32        -0.12       2.71        0.0855    
-#>  3 - 2    0.575          0.38 0.458       -0.84       1.99        0.8021    
-#>  4 - 2    0.76           0.38 0.8         -0.655      2.17        0.5639    
-#>  5 - 2    1.14           0.38 1.78        -0.28       2.55        0.1668    
-#>  6 - 2    1.19           0.38 1.95        -0.23       2.6         0.1364    
-#>  4 - 3    0.185          0.38 0.0474      -1.23       1.6         0.9984    
-#>  5 - 3    0.56           0.38 0.434       -0.855      1.97        0.8186    
-#>  6 - 3    0.61           0.38 0.516       -0.805      2.02        0.7611    
-#>  5 - 4    0.375          0.38 0.195       -1.04       1.79        0.9605    
-#>  6 - 4    0.425          0.38 0.25        -0.99       1.84        0.9342    
-#>  6 - 5    0.05           0.38 0.00346     -1.36       1.46        1.0000    
+#>  contrast estimate se    F_value ci_lower ci_upper p_adjusted
+#>  2 - 1    0.110    0.380 0.017   -1.305   1.525    0.9999    
+#>  3 - 1    0.685    0.380 0.650   -0.730   2.100    0.6652    
+#>  4 - 1    0.870    0.380 1.049   -0.545   2.285    0.4201    
+#>  5 - 1    1.245    0.380 2.147   -0.170   2.660    0.1061    
+#>  6 - 1    1.295    0.380 2.323   -0.120   2.710    0.0855    
+#>  3 - 2    0.575    0.380 0.458   -0.840   1.990    0.8021    
+#>  4 - 2    0.760    0.380 0.800   -0.655   2.175    0.5639    
+#>  5 - 2    1.135    0.380 1.785   -0.280   2.550    0.1668    
+#>  6 - 2    1.185    0.380 1.945   -0.230   2.600    0.1364    
+#>  4 - 3    0.185    0.380 0.047   -1.230   1.600    0.9984    
+#>  5 - 3    0.560    0.380 0.434   -0.855   1.975    0.8186    
+#>  6 - 3    0.610    0.380 0.516   -0.805   2.025    0.7611    
+#>  5 - 4    0.375    0.380 0.195   -1.040   1.790    0.9605    
+#>  6 - 4    0.425    0.380 0.250   -0.990   1.840    0.9342    
+#>  6 - 5    0.050    0.380 0.003   -1.365   1.465    1.0000    
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95%, simultaneous interval (Scheffe)
 
 # 2. A contrast chosen after inspecting the means: the two panels with
 #    the highest brand movement (5 and 6) against the two with the
@@ -134,10 +138,8 @@ cmat <- matrix(c(-0.5, -0.5, 0, 0, 0.5, 0.5), nrow = 6,
                dimnames = list(levels(test_market$panel),
                                "panels 5,6 - panels 1,2"))
 ci_scheffe(fit, contrasts = cmat)
-#>  contrast                contrast_value se    F_statistic lower_limit
-#>  panels 5,6 - panels 1,2 1.22           0.269 4.09        0.215      
-#>  upper_limit p_adjusted
-#>  2.22        0.0117    
+#>  contrast                estimate se    F_value ci_lower ci_upper p_adjusted
+#>  panels 5,6 - panels 1,2 1.215    0.269 4.090   0.215    2.215    0.0117    
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95%, simultaneous interval (Scheffe)
 ```

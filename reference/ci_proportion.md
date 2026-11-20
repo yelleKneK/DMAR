@@ -1,16 +1,20 @@
 # Confidence Interval for a Single Proportion
 
 The Wilson (1927) score interval for a binomial proportion, the
-package's default for proportion inference: unlike the textbook Wald
-interval it cannot escape \[0, 1\], behaves sensibly at 0 and 1 counts,
-and holds close to nominal coverage at small *n* (Brown, Cai, &
-DasGupta, 2001, recommend it for general use). The Wald interval is
-available for instruction and comparison.
+package's default for proportion inference. Unlike the textbook Wald
+interval, it stays inside \[0, 1\] and has positive width when the
+number of successes is 0 or *N*. For a 95% interval, its coverage
+averaged over a uniformly distributed true proportion is .954 at *N* =
+10 and .953 at *N* = 20, against .769 and .846 for the Wald interval;
+for some true proportions near 0 or 1 the Wilson coverage falls to about
+.84. For other intervals for a binomial proportion, see Brown, Cai, and
+DasGupta (2001). The Wald interval is available for instruction and
+comparison.
 
 ## Usage
 
 ``` r
-ci_proportion(successes, n, conf_level = 0.95, method = c("wilson", "wald"))
+ci_proportion(successes, N, conf_level = 0.95, method = c("wilson", "wald"))
 ```
 
 ## Arguments
@@ -19,7 +23,7 @@ ci_proportion(successes, n, conf_level = 0.95, method = c("wilson", "wald"))
 
   Number of successes, a single non-negative integer.
 
-- n:
+- N:
 
   Number of trials, a single positive integer at least `successes`.
 
@@ -33,9 +37,9 @@ ci_proportion(successes, n, conf_level = 0.95, method = c("wilson", "wald"))
 
 ## Value
 
-A `data.frame` (class `dmar_tbl`) with rows `lower_limit`, `proportion`,
-`upper_limit`, `successes`, and `n`, so the point estimate sits between
-its confidence limits.
+A `data.frame` (class `dmar_tbl`) with rows `ci_lower`, `proportion`,
+`ci_upper`, `successes`, and `N`, so the point estimate sits between its
+confidence limits.
 
 ## References
 
@@ -52,6 +56,11 @@ statistical inference. *Journal of the American Statistical Association,
 [`responder_analysis`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md),
 which uses this interval for each group's responder proportion.
 
+Other confidence intervals:
+[`ci_crossed()`](https://yelleknek.github.io/DMAR/reference/ci_crossed.md),
+[`ci_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/ci_proportion_paired.md),
+[`ci_two_phase()`](https://yelleknek.github.io/DMAR/reference/ci_two_phase.md)
+
 ## Author
 
 Ken Kelley <kkelley@nd.edu>
@@ -59,24 +68,24 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-ci_proportion(successes = 17, n = 50)
-#>  term        value
-#>  lower_limit 0.224
-#>  proportion  0.34 
-#>  upper_limit 0.478
-#>  successes   17   
-#>  n           50   
+ci_proportion(successes = 17, N = 50)
+#>  term       value
+#>  ci_lower   0.224
+#>  proportion 0.340
+#>  ci_upper   0.478
+#>  successes  17   
+#>  N          50   
 #> 
 #> Confidence level: 95%
 
 # The Wilson interval stays inside [0, 1] even at the boundary.
-ci_proportion(successes = 0, n = 20)
-#>  term        value   
-#>  lower_limit 1.39e-17
-#>  proportion  0       
-#>  upper_limit 0.161   
-#>  successes   0       
-#>  n           20      
+ci_proportion(successes = 0, N = 20)
+#>  term       value
+#>  ci_lower   0.000
+#>  proportion 0.000
+#>  ci_upper   0.161
+#>  successes  0    
+#>  N          20   
 #> 
 #> Confidence level: 95%
 ```

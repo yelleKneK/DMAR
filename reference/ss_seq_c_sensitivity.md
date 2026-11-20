@@ -19,7 +19,7 @@ quantile rule corrects it at a small cost in sample size.
 ss_seq_c_sensitivity(
   c_weights,
   half_width,
-  true_sigma,
+  true_sd,
   true_means = NULL,
   alpha_level = 0.05,
   quantile = c("t", "normal"),
@@ -41,7 +41,7 @@ ss_seq_c_sensitivity(
   The target half-width \\h\\ of the 100(1 - 2\\\alpha\\)% interval, in
   raw units of the response.
 
-- true_sigma:
+- true_sd:
 
   The data generating error standard deviation: a single value applied
   to every group.
@@ -81,27 +81,77 @@ investigator with known \\\sigma\\ would use), `mean_N`, `median_N`,
 `sd_N` (the stopping total across replications), `ratio_mean_N_n_star`,
 `coverage` (the proportion of replications whose \\\hat\psi_N \pm h\\
 interval covered the true contrast), `se_coverage` (its simulation
-standard error), and the input echoes `half_width`, `true_psi` (the
-population contrast implied by `c_weights` and `true_means`),
-`true_sigma`, `alpha_level`, and `m0`.
+standard error), and the input echoes `half_width`, `true_contrast` (the
+population contrast implied by `c_weights` and `true_means`), `true_sd`,
+`alpha_level`, and `m0`.
 
 ## Details
 
 **Simulation design.** Each replication samples the groups with nonzero
 weights in balanced fashion (one observation per group per step) from
-normal populations with common `true_sigma`, starting at `m0` per group,
+normal populations with common `true_sd`, starting at `m0` per group,
 and stops at the first step satisfying the
 [`ss_seq_c`](https://yelleknek.github.io/DMAR/reference/ss_seq_c.md)
-criterion with the pooled variance estimate. This matches the
-equal-cost, equal-variance case of Chattopadhyay, Bandyopadhyay, Kelley,
-and Padalunkal (2025); unequal costs change the optimal allocation but
-not the logic.
+criterion with the pooled variance estimate. Equal growth is the
+cost-optimal allocation of Chattopadhyay, Bandyopadhyay, Kelley, and
+Padalunkal (2025, Theorem 1) when the costs, the standard deviations,
+and the sizes of the weights are equal; unequal costs change the optimal
+allocation but not the logic.
 
 **The oracle.** With known \\\sigma\\ and balanced allocation over the
 \\J_0\\ groups with nonzero weights, the fixed-width requirement is
 \\n^\* = z\_{1-\alpha}^2\\ \sigma^2 J_0 \sum_j c_j^2 / h^2\\ in total.
 The sequential procedure spends about \\n^\*\\ without knowing
 \\\sigma\\, which is its point.
+
+## The record of the simulation
+
+Every sensitivity function of the package summarizes its replications
+over one denominator: the replications that produced a confidence
+interval (for a power sensitivity function, a test). The proportion of
+intervals that met the width target (`pct_ci_less_width`), the
+proportions of intervals that missed the true value, and the summaries
+of the widths are all taken over those replications. A replication
+without an interval is in none of these rows. It is counted, and the
+returned table carries the counts in its attribute `simulation`, a list
+read with `attr(x, "simulation")`:
+
+- `attempted`:
+
+  the number of replications asked for (`G`).
+
+- `returned`:
+
+  the number that produced an interval (a test).
+
+- `failed`:
+
+  the number that did not (`attempted - returned`).
+
+- `denominator`:
+
+  the number of replications the rows named above are taken over, which
+  is `returned`.
+
+- `width_target_probability`:
+
+  the proportion of the replications with an interval whose interval met
+  the width target, the value of the `pct_ci_less_width` row; `NA` for a
+  function or a call without a width target, and when no replication
+  produced an interval.
+
+- `width_target_mc_ci`:
+
+  the exact binomial (Clopper-Pearson) limits for that proportion, at
+  the confidence level of the table. They describe the error of the
+  simulation, which shrinks as `G` grows, and nothing else.
+
+A function that records more about its run adds elements to the list,
+and its help page names them. The line "Replications" beneath the
+printed table gives `G`, and the three counts when a replication was
+without an interval. With many replications without an interval the rows
+describe only the studies in which the interval could be formed, so
+`failed` is to be reported beside them.
 
 ## References
 
@@ -127,7 +177,8 @@ and interval estimation. *The Annals of Statistics, 5*(5), 984–995.
 [`ss_power_equivalence_c`](https://yelleknek.github.io/DMAR/reference/ss_power_equivalence_c.md)
 
 Other sequential estimation:
-[`ss_seq_c()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c.md)
+[`ss_seq_c()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c.md),
+[`ss_seq_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_seq_two_phase.md)
 
 ## Author
 
@@ -141,20 +192,22 @@ Ken Kelley <kkelley@nd.edu>
 # coverage. (G kept small here for speed; use G = 2000 or more in
 # earnest.)
 ss_seq_c_sensitivity(c_weights = c(1, -1), half_width = 2.5,
-                     true_sigma = 15.67, G = 200, seed = 113)
-#>  term                value 
-#>  n_star              425   
-#>  mean_N              428   
-#>  median_N            430   
-#>  sd_N                31    
-#>  ratio_mean_N_n_star 1.01  
-#>  coverage            0.885 
-#>  se_coverage         0.0226
-#>  half_width          2.5   
-#>  true_psi            0     
-#>  true_sigma          15.7  
-#>  alpha_level         0.05  
-#>  m0                  10    
+                     true_sd = 15.67, G = 200, seed = 113)
+#>  term                value  
+#>  n_star              425.180
+#>  mean_N              428.160
+#>  median_N            430    
+#>  sd_N                30.954 
+#>  ratio_mean_N_n_star 1.007  
+#>  coverage            0.885  
+#>  se_coverage         0.023  
+#>  half_width          2.500  
+#>  true_contrast       0      
+#>  true_sd             15.670 
+#>  alpha_level         0.050  
+#>  m0                  10     
+#> 
+#> Replications: 200
 #> 
 #> Confidence level: 90%
 ```

@@ -4,11 +4,10 @@ Reads the variance-component decomposition off a fitted
 [`lmer`](https://rdrr.io/pkg/lme4/man/lmer.html) model and returns the
 implied intraclass correlation (ICC) for the specified grouping factor
 along with a Bonett (2002) Fisher-\\L\\-transform confidence interval,
-in tidy long form. The bridge function between DMAR's classical- ANOVA
-path
-([`variance_components_mls`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md),
-[`var_icc`](https://yelleknek.github.io/DMAR/reference/var_icc.md)) and
-the modern mixed-effects path.
+in tidy long form. It is the mixed-effects model counterpart of the
+ANOVA-based
+[`variance_components_mls`](https://yelleknek.github.io/DMAR/reference/variance_components_mls.md)
+and [`var_icc`](https://yelleknek.github.io/DMAR/reference/var_icc.md).
 
 ## Usage
 
@@ -118,15 +117,15 @@ y   <- rnorm(n_grp * n_per, 0, 1) + rep(rnorm(n_grp, 0, 0.7), each = n_per)
 d <- data.frame(y, grp)
 fit <- lme4::lmer(y ~ 1 + (1 | grp), data = d)
 icc_lmer(fit)
-#>  term                 value 
-#>  icc                  0.174 
-#>  sigma2_between       0.248 
-#>  sigma2_within        1.18  
-#>  total_variance       1.42  
-#>  lower_limit          0.0174
-#>  upper_limit          0.377 
-#>  n_clusters           20    
-#>  average_cluster_size 6     
+#>  term                 value
+#>  icc                  0.174
+#>  sigma2_between       0.248
+#>  sigma2_within        1.177
+#>  total_variance       1.425
+#>  ci_lower             0.017
+#>  ci_upper             0.377
+#>  n_clusters           20   
+#>  average_cluster_size 6    
 #> 
 #> Confidence level: 95%
 ```

@@ -119,13 +119,11 @@ Other effect size estimates:
 [`correction_for_attenuation()`](https://yelleknek.github.io/DMAR/reference/correction_for_attenuation.md),
 [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
 [`eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/eta_squared_generalized.md),
-[`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
 [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md),
 [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md),
 [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md),
 [`proportion_of_superiority()`](https://yelleknek.github.io/DMAR/reference/proportion_of_superiority.md),
 [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md)
@@ -143,8 +141,8 @@ x <- rnorm(40, 0,   1); y <- rnorm(40, 0.5, 1)
 smd_trimmed(x, y)
 #>  term                 value 
 #>  smd_trimmed          -0.405
-#>  lower_limit          -0.883
-#>  upper_limit          0.0775
+#>  ci_lower             -0.883
+#>  ci_upper             0.077 
 #>  trimmed_mean_x       0.187 
 #>  trimmed_mean_y       0.589 
 #>  winsorized_sd_x      0.636 
@@ -152,8 +150,8 @@ smd_trimmed(x, y)
 #>  winsorized_sd_pooled 0.638 
 #>  h_x                  24    
 #>  h_y                  24    
-#>  trim                 0.2   
-#>  df_yuen              46    
+#>  trim                 0.200 
+#>  df_yuen              45.997
 #> 
 #> Confidence level: 95%
 
@@ -165,8 +163,8 @@ y <- c(rnorm(38, 0.5, 1), 30, -25)
 smd_trimmed(x, y)
 #>  term                 value 
 #>  smd_trimmed          -0.349
-#>  lower_limit          -0.826
-#>  upper_limit          0.131 
+#>  ci_lower             -0.826
+#>  ci_upper             0.131 
 #>  trimmed_mean_x       0.187 
 #>  trimmed_mean_y       0.539 
 #>  winsorized_sd_x      0.636 
@@ -174,8 +172,8 @@ smd_trimmed(x, y)
 #>  winsorized_sd_pooled 0.647 
 #>  h_x                  24    
 #>  h_y                  24    
-#>  trim                 0.2   
-#>  df_yuen              45.9  
+#>  trim                 0.200 
+#>  df_yuen              45.947
 #> 
 #> Confidence level: 95%
 smd(x, y)

@@ -117,19 +117,19 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # 1. Balanced design: K = 30 clusters of size 20, ICC = 0.10.
 design_effect(cluster_sizes = rep(20, 30), icc = 0.10)
-#>  term                   value
-#>  design_effect          2.9  
-#>  deft                   1.7  
-#>  effective_n            207  
-#>  n_total                600  
-#>  n_clusters_total       30   
-#>  n_clusters_with_data   30   
-#>  n_clusters_empty       0    
-#>  n_clusters_singletons  0    
-#>  n_clusters_informative 30   
-#>  m_bar                  20   
-#>  m_kish                 20   
-#>  icc                    0.1  
+#>  term                   value  
+#>  design_effect          2.900  
+#>  deft                   1.703  
+#>  effective_n            206.897
+#>  N                      600    
+#>  n_clusters_total       30     
+#>  n_clusters_with_data   30     
+#>  n_clusters_empty       0      
+#>  n_clusters_singletons  0      
+#>  n_clusters_informative 30     
+#>  m_bar                  20     
+#>  m_kish                 20     
+#>  icc                    0.100  
 # DEFF = 1 + (20 - 1) * 0.10 = 2.9; DEFT = 1.7; effective N = 600 / 2.9 = 207.
 
 # 2. Unbalanced design with some empty and some singleton clusters.
@@ -138,35 +138,35 @@ design_effect(cluster_sizes = rep(20, 30), icc = 0.10)
 sizes <- c(0, 0, 1, 1, 1, 2, 3, 5, 8, 10, 12, 15, 18, 20, 22,
            22, 25, 26, 28, 28, 30, 30, 30, 30, 30)
 design_effect(cluster_sizes = sizes, icc = 0.10)
-#>  term                   value
-#>  design_effect          3.33 
-#>  deft                   1.82 
-#>  effective_n            119  
-#>  n_total                397  
-#>  n_clusters_total       25   
-#>  n_clusters_with_data   23   
-#>  n_clusters_empty       2    
-#>  n_clusters_singletons  3    
-#>  n_clusters_informative 20   
-#>  m_bar                  17.3 
-#>  m_kish                 24.3 
-#>  icc                    0.1  
+#>  term                   value  
+#>  design_effect          3.327  
+#>  deft                   1.824  
+#>  effective_n            119.328
+#>  N                      397    
+#>  n_clusters_total       25     
+#>  n_clusters_with_data   23     
+#>  n_clusters_empty       2      
+#>  n_clusters_singletons  3      
+#>  n_clusters_informative 20     
+#>  m_bar                  17.261 
+#>  m_kish                 24.270 
+#>  icc                    0.100  
 
 # 3. From a cluster-id vector: tabulate, then call design_effect().
 cluster_id <- rep(1:8, times = c(20, 15, 22, 1, 0, 30, 18, 25))
 design_effect(cluster_sizes = as.numeric(table(factor(cluster_id, levels = 1:8))),
      icc = 0.15)
-#>  term                   value
-#>  design_effect          4.24 
-#>  deft                   2.06 
-#>  effective_n            30.9 
-#>  n_total                131  
-#>  n_clusters_total       8    
-#>  n_clusters_with_data   7    
-#>  n_clusters_empty       1    
-#>  n_clusters_singletons  1    
-#>  n_clusters_informative 6    
-#>  m_bar                  18.7 
-#>  m_kish                 22.6 
-#>  icc                    0.15 
+#>  term                   value 
+#>  design_effect          4.238 
+#>  deft                   2.059 
+#>  effective_n            30.910
+#>  N                      131   
+#>  n_clusters_total       8     
+#>  n_clusters_with_data   7     
+#>  n_clusters_empty       1     
+#>  n_clusters_singletons  1     
+#>  n_clusters_informative 6     
+#>  m_bar                  18.714
+#>  m_kish                 22.588
+#>  icc                    0.150 
 ```

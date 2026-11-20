@@ -4,8 +4,11 @@ Tests the null hypothesis that two or more groups have equal population
 variances using O'Brien's (1981) procedure: each observation is
 transformed into a quantity whose expected value equals the group's
 variance, and a one-way analysis of variance is then run on those
-transformed values. The test is generally regarded as more robust to
-non-normality than Bartlett's test while retaining good power.
+transformed values. Bartlett's test assumes normally distributed data
+and is very sensitive to departures from normality; because O'Brien's
+test applies the ordinary ANOVA *F* test to the transformed scores, it
+is robust to violations of normality (Maxwell, Delaney, & Kelley, 2027,
+Section 3.10.3).
 
 ## Usage
 
@@ -40,7 +43,7 @@ obrien_test(x, group = NULL, data = NULL, na_action = stats::na.omit)
 
 A one-row `data.frame` with columns `statistic` (the *F*-value from the
 ANOVA on the transformed scores), `df_1`, `df_2`, `p_value`, `n_groups`,
-`n_total`, and `method`.
+`N` (the total sample size), and `method`.
 
 ## Details
 
@@ -54,10 +57,22 @@ within group \\i\\ equals \\s_i^2\\, so a one-way ANOVA on the
 group must have at least three observations for the transformation to be
 defined.
 
+When the group sizes are very unequal (the largest four or more times
+the smallest), O'Brien recommends a Welch-type ANOVA of the transformed
+scores (Maxwell, Delaney, & Kelley, 2027, Section 3.10.3); this function
+runs the ordinary one-way ANOVA.
+
 ## References
 
 Abdi, H. (2007). O'Brien's test for homogeneity of variance. In N. J.
 Salkind (Ed.), *Encyclopedia of measurement and statistics*. Sage.
+
+Hunter, I. M. L. (1964). *Memory*. London: Penguin.
+
+Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
+experiments and analyzing data: A model comparison perspective* (4th
+ed.). Routledge. (See Chapter 3 on testing the homogeneity of variance
+assumption.)
 
 O'Brien, R. G. (1981). A simple test for variance effects in
 experimental designs. *Psychological Bulletin, 89*(3), 570–574.
@@ -72,12 +87,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -128,8 +147,8 @@ hunter_1964 <- data.frame(
   )
 )
 obrien_test(recall ~ group, data = hunter_1964)
-#>  statistic df_1 df_2 p_value n_groups n_total
-#>  1.29      1    62   0.2598  2        64     
+#>  statistic df_1 df_2 p_value n_groups N 
+#>  1.294     1    62   0.2598  2        64
 #>  method                                    
 #>  O'Brien's test for homogeneity of variance
 
@@ -146,8 +165,8 @@ bartlett.test(recall ~ group, data = hunter_1964)
 # The wait list variance is about twice the SSRI variance, but with ten
 # observations per group the test does not reject equal variances.
 obrien_test(depression_bdi$bdi_post, depression_bdi$condition)
-#>  statistic df_1 df_2 p_value n_groups n_total
-#>  1.29      2    27   0.2918  3        30     
+#>  statistic df_1 df_2 p_value n_groups N 
+#>  1.290     2    27   0.2918  3        30
 #>  method                                    
 #>  O'Brien's test for homogeneity of variance
 ```

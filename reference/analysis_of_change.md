@@ -163,11 +163,12 @@ mixed method wraps
 ships self-starting curves (`SSasymp`, `SSfpl`, `SSgompertz`) in other
 parameterizations. What this function adds is the package's landmark
 parameterizations (the intercept-shifting \\\zeta\\ floor, the Richards
-\\\delta\\; `SSgompertz`'s \\a \exp(-b_2 b_3^x)\\ answers no substantive
-question directly), the exact match to the `simulate_longitudinal_*()`
-simulators so design studies close the loop, one interface across linear
-and nonlinear change, and the package's tidy summary with failed fits
-dropped under a single counted warning.
+\\\delta\\; in `SSgompertz`'s \\a \exp(-b_2 b_3^x)\\ the asymptote \\a\\
+is a landmark of the curve, but \\b_2\\ and \\b_3\\ are not), the exact
+match to the `simulate_longitudinal_*()` simulators so design studies
+close the loop, one interface across linear and nonlinear change, and
+the package's tidy summary with failed fits dropped under a single
+counted warning.
 
 **Units whose two-stage fit does not converge** are dropped with a
 single warning reporting how many, and the effective count is the
@@ -227,52 +228,52 @@ Ken Kelley <kkelley@nd.edu>
 # recover both the mean curve and the spread of its parameters.
 set.seed(113)
 d <- simulate_longitudinal_gompertz(
-  n = 40, target_times = 0:10,
+  n_per_group = 40, target_times = 0:10,
   fixed_parameters = c(alpha = 75, beta = 3, gamma = 0.55, zeta = 10),
   random_variances = c(alpha = 25, beta = 0.4, gamma = 0.005, zeta = 4),
   error_variance = 4
 )
 analysis_of_change(d, id = "id", time = "time", outcome = "y",
                    model = "gompertz")
-#>  term  estimate se     sd_units var_units
-#>  alpha 75       1.06   6.71     45       
-#>  beta  3.08     0.107  0.674    0.454    
-#>  gamma 0.557    0.0138 0.0875   0.00766  
-#>  zeta  10       0.529  3.35     11.2     
+#>  term  estimate se    sd_units var_units
+#>  alpha 75.041   1.061 6.709    45.007   
+#>  beta  3.082    0.107 0.674    0.454    
+#>  gamma 0.557    0.014 0.088    0.008    
+#>  zeta  10.037   0.529 3.349    11.215   
 
 # The same data as a straight-line (order 1) polynomial: the linear
 # model has nothing to say about floors, ceilings, or timing.
 analysis_of_change(d, id = "id", time = "time", outcome = "y",
                    model = "polynomial", order = 1)
-#>  term estimate se   sd_units var_units
-#>  b0   12.9     1.24 7.86     61.8     
-#>  b1   8.13     0.14 0.887    0.787    
+#>  term estimate se    sd_units var_units
+#>  b0   12.917   1.243 7.861    61.795   
+#>  b1   8.134    0.140 0.887    0.787    
 
 # A single unit's trajectory: N = 1 is one fit, with asymptotic
 # standard errors in place of between-unit spread.
 one <- d[d$id == levels(d$id)[1], ]
 analysis_of_change(one, id = NULL, time = "time", outcome = "y",
                    model = "gompertz")
-#>  term  estimate se     sd_units var_units
-#>  alpha 73.8     2.65   <NA>     <NA>     
-#>  beta  3.11     0.116  <NA>     <NA>     
-#>  gamma 0.72     0.0732 <NA>     <NA>     
-#>  zeta  9.82     1.85   <NA>     <NA>     
+#>  term  estimate se    sd_units var_units
+#>  alpha 73.757   2.652 <NA>     <NA>     
+#>  beta  3.111    0.116 <NA>     <NA>     
+#>  gamma 0.720    0.073 <NA>     <NA>     
+#>  zeta  9.817    1.854 <NA>     <NA>     
 
 # The proper mixed-effects model, fit simultaneously across units:
 # nlme::nlme() for a nonlinear curve, lme4::lmer() for the polynomial
 # (the latter requires lme4 to be installed).
 analysis_of_change(d, id = "id", time = "time", outcome = "y",
                    model = "gompertz", method = "mixed")
-#>  term  estimate se     sd_units var_units
-#>  alpha 75.1     1.03   5.64     31.8     
-#>  beta  3.06     0.113  0.698    0.487    
-#>  gamma 0.549    0.0131 0.0646   0.00417  
-#>  zeta  9.8      0.448  1.87     3.51     
+#>  term  estimate se    sd_units var_units
+#>  alpha 75.086   1.028 5.636    31.767   
+#>  beta  3.063    0.113 0.698    0.487    
+#>  gamma 0.549    0.013 0.065    0.004    
+#>  zeta  9.804    0.448 1.874    3.512    
 analysis_of_change(d, id = "id", time = "time", outcome = "y",
                    model = "polynomial", order = 1,
                    method = "mixed")
 #>  term estimate se    sd_units var_units
-#>  b0   12.9     1.19  5.97     35.6     
-#>  b1   8.13     0.135 0.339    0.115    
+#>  b0   12.917   1.193 5.966    35.593   
+#>  b1   8.134    0.135 0.339    0.115    
 ```

@@ -9,16 +9,16 @@ equal some specified amount.
 
 ``` r
 ss_power_sem(
-  F_ML = NULL,
+  true_F_ML = NULL,
   df = NULL,
-  RMSEA_null = NULL,
-  RMSEA_true = NULL,
-  F_full = NULL,
-  F_res = NULL,
-  RMSEA_full = NULL,
-  RMSEA_res = NULL,
+  null_rmsea = NULL,
+  true_rmsea = NULL,
+  true_F_full = NULL,
+  true_F_restricted = NULL,
+  true_rmsea_full = NULL,
+  true_rmsea_restricted = NULL,
   df_full = NULL,
-  df_res = NULL,
+  df_restricted = NULL,
   alpha_level = 0.05,
   desired_power = 0.85
 )
@@ -26,7 +26,7 @@ ss_power_sem(
 
 ## Arguments
 
-- F_ML:
+- true_F_ML:
 
   The true maximum likelihood fit function value in the population for
   the model of interest. Leave this argument NULL if you are doing
@@ -37,30 +37,32 @@ ss_power_sem(
   The degrees of freedom of the model of interest. Leave this argument
   NULL if you are doing nested model significance tests
 
-- RMSEA_null:
+- null_rmsea:
 
   The model's population RMSEA under the null hypothesis. Leave this
   argument NULL if you are doing nested model significance tests
 
-- RMSEA_true:
+- true_rmsea:
 
   The model's population RMSEA under the alternative hypothesis. This
   should be the model's true population RMSEA value. Leave this argument
   NULL if you are doing nested model significance tests
 
-- F_full:
+- true_F_full:
 
-  The maximum likelihood fit function value for the full model
+  The population maximum likelihood fit function value for the full
+  model
 
-- F_res:
+- true_F_restricted:
 
-  The maximum likelihood fit function value for the restricted model
+  The population maximum likelihood fit function value for the
+  restricted model
 
-- RMSEA_full:
+- true_rmsea_full:
 
   The population RMSEA value for the full model
 
-- RMSEA_res:
+- true_rmsea_restricted:
 
   The population RMSEA value for the restricted model
 
@@ -68,7 +70,7 @@ ss_power_sem(
 
   The degrees of freedom for the full model
 
-- df_res:
+- df_restricted:
 
   The degrees of freedom for the restricted model
 
@@ -115,6 +117,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -152,14 +155,15 @@ Ken Kelley <kkelley@nd.edu>
 # One-model test: necessary N to reject H0: RMSEA = 0 in favor of
 # a model whose population RMSEA is 0.05 at 80% power, alpha = .05,
 # with df = 20.
-ss_power_sem(RMSEA_null = 0, RMSEA_true = 0.05, df = 20,
+ss_power_sem(null_rmsea = 0, true_rmsea = 0.05, df = 20,
              alpha_level = 0.05, desired_power = 0.80)
 #>  term         value
 #>  necessary_N  421  
 #>  actual_power 0.801
 
-# Equivalent input via the population fit function: F_ML = df * RMSEA^2.
-ss_power_sem(F_ML = 20 * 0.05^2, df = 20, alpha_level = 0.05, desired_power = 0.80)
+# Equivalent input via the population fit function, which is the
+# degrees of freedom times the squared population RMSEA.
+ss_power_sem(true_F_ML = 20 * 0.05^2, df = 20, alpha_level = 0.05, desired_power = 0.80)
 #>  term         value
 #>  necessary_N  421  
 #>  actual_power 0.801
@@ -167,10 +171,10 @@ ss_power_sem(F_ML = 20 * 0.05^2, df = 20, alpha_level = 0.05, desired_power = 0.
 # Two-model nested test: necessary N to detect the difference
 # between a full model (RMSEA = 0.04, df = 18) and a restricted
 # model (RMSEA = 0.06, df = 22) at 80% power.
-ss_power_sem(RMSEA_full = 0.04, df_full = 18,
-             RMSEA_res = 0.06, df_res = 22,
+ss_power_sem(true_rmsea_full = 0.04, df_full = 18,
+             true_rmsea_restricted = 0.06, df_restricted = 22,
              alpha_level = 0.05, desired_power = 0.80)
 #>  term         value
 #>  necessary_N  238  
-#>  actual_power 0.8  
+#>  actual_power 0.800
 ```

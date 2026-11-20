@@ -17,7 +17,7 @@ summary_t_test(
   mean_2,
   sd_2,
   n_2,
-  mu = 0,
+  null_mean_diff = 0,
   var_equal = TRUE,
   alternative = c("two_sided", "less", "greater"),
   conf_level = 0.95
@@ -38,9 +38,10 @@ summary_t_test(
 
   Group sample sizes.
 
-- mu:
+- null_mean_diff:
 
-  Null value of the mean difference \\\mu_1 - \mu_2\\. Default `0`.
+  Null value of the mean difference \\\mu_1 - \mu_2\\, \\\mu_0\\ in the
+  formulas below. Default `0`.
 
 - var_equal:
 
@@ -75,10 +76,10 @@ x_1 - \bar x_2 - \mu_0) / \sqrt{s_1^2 / n_1 + s_2^2 / n_2}\\ with
 Satterthwaite degrees of freedom (see
 [`welch_t`](https://yelleknek.github.io/DMAR/reference/welch_t.md)).
 
-**Choosing pooled vs Welch.** Methodological reviews now recommend Welch
-as the default (Delacre, Lakens, & Leys, 2017; Ruxton, 2006).
-Pooled-variance *t* is preserved here primarily for reproducing analyses
-from older sources that used it.
+**Choosing pooled vs Welch.** Delacre, Lakens, and Leys (2017) and
+Ruxton (2006) recommend Welch's test as the default. Pooled-variance *t*
+is preserved here primarily for reproducing analyses from older sources
+that used it.
 
 ## References
 
@@ -113,12 +114,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -144,13 +149,13 @@ Ken Kelley <kkelley@nd.edu>
 #        Group B: M = 108, SD = 18, n = 25
 summary_t_test(mean_1 = 100, sd_1 = 15, n_1 = 30,
                mean_2 = 108, sd_2 = 18, n_2 = 25)
-#>  term            value 
-#>  mean_difference -8    
-#>  t_statistic     -1.8  
-#>  df              53    
-#>  p_value         0.0778
-#>  lower_limit     -16.9 
-#>  upper_limit     0.922 
+#>  term            value  
+#>  mean_difference -8.000 
+#>  t_value         -1.798 
+#>  df              53     
+#>  p_value         0.0778 
+#>  ci_lower        -16.922
+#>  ci_upper        0.922  
 #> 
 #> Confidence level: 95%
 
@@ -158,13 +163,13 @@ summary_t_test(mean_1 = 100, sd_1 = 15, n_1 = 30,
 summary_t_test(mean_1 = 100, sd_1 = 15, n_1 = 30,
                mean_2 = 108, sd_2 = 18, n_2 = 25,
                var_equal = FALSE)
-#>  term            value 
-#>  mean_difference -8    
-#>  t_statistic     -1.77 
-#>  df              46.8  
-#>  p_value         0.0835
-#>  lower_limit     -17.1 
-#>  upper_limit     1.1   
+#>  term            value  
+#>  mean_difference -8.000 
+#>  t_value         -1.769 
+#>  df              46.835 
+#>  p_value         0.0835 
+#>  ci_lower        -17.100
+#>  ci_upper        1.100  
 #> 
 #> Confidence level: 95%
 ```

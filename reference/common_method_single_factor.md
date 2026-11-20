@@ -1,15 +1,16 @@
 # Single-Common-Factor Screen for Common Method Variance
 
-This function implements Harman's single-factor test, the most widely
-used (and weakest) screen for common method variance: fit a one-factor
-model to all of the items by maximum likelihood and inspect how much of
-their variance the common factor accounts for. The rationale is that if
-a single method factor dominated the responses, one common factor would
-capture a large share of the variance. A factor accounting for more than
-half of the variance is the customary red flag (Podsakoff, MacKenzie,
-Lee, & Podsakoff, 2003). The screen is coarse and cannot by itself rule
-method variance in or out; the marker-variable and latent method factor
-approaches are stronger (see
+This function implements Harman's single-factor test, a screen for
+common method variance: fit a one-factor model to all of the items by
+maximum likelihood and inspect how much of their variance the common
+factor accounts for. The rationale is that if a single method factor
+dominated the responses, one common factor would capture a large share
+of the variance. A factor accounting for more than half of the variance
+is the customary red flag (Podsakoff, MacKenzie, Lee, & Podsakoff,
+2003). The screen is coarse and cannot by itself rule method variance in
+or out, since a dominant factor can reflect the constructs as well as
+the method; the marker-variable and latent method factor approaches
+estimate the method variance itself (see
 [`common_method_marker`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md)).
 
 ## Usage
@@ -97,17 +98,29 @@ Other multivariate and latent variable methods:
 [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md),
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
 [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
-[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md),
+[`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md),
 [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
+[`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
 [`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md),
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
 [`dmacs()`](https://yelleknek.github.io/DMAR/reference/dmacs.md),
 [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+[`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+[`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+[`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+[`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
 [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md),
 [`irt_grm()`](https://yelleknek.github.io/DMAR/reference/irt_grm.md),
 [`irt_information()`](https://yelleknek.github.io/DMAR/reference/irt_information.md),
 [`measurement_alignment()`](https://yelleknek.github.io/DMAR/reference/measurement_alignment.md),
 [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
 [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md),
+[`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
 [`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)
 
 ## Author

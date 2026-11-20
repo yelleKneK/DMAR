@@ -83,28 +83,28 @@ anova(fit)
 ancova(depression_bdi, outcome = "bdi_post", treatment = "condition",
        covariates = "bdi_pre")
 #> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution, so the lower confidence limit on partial eta squared is 0.
-#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution, so the lower confidence limit on omega squared is 0.
-#>  term                         value 
-#>  F_value                      3.73  
-#>  df_1                         2     
-#>  df_2                         26    
-#>  p_value                      0.0376
-#>  sum_of_squares_type          3     
-#>  eta_squared_partial          0.223 
-#>  eta_squared_partial_lower    0     
-#>  eta_squared_partial_upper    0.421 
-#>  omega_squared_partial        0.154 
-#>  omega_squared_partial_lower  0     
-#>  omega_squared_partial_upper  0.421 
-#>  adjusted_mean[ssri]          7.54  
-#>  adjusted_mean[placebo]       12    
-#>  adjusted_mean[wait_list]     14    
-#>  se_adjusted_mean[ssri]       1.71  
-#>  se_adjusted_mean[placebo]    1.71  
-#>  se_adjusted_mean[wait_list]  1.71  
-#>  F_homogeneity_of_regression  1.06  
-#>  df_homogeneity_of_regression 2     
-#>  p_homogeneity_of_regression  0.3614
+#> Warning: The observed F_value is below the alpha_lower critical value of the central F-distribution, so the lower confidence limit on partial omega squared is 0.
+#>  term                           value 
+#>  F_value                        3.732 
+#>  df_1                           2     
+#>  df_2                           26    
+#>  p_value                        0.0376
+#>  sum_of_squares_type            3     
+#>  eta_squared_partial            0.223 
+#>  eta_squared_partial_ci_lower   0.000 
+#>  eta_squared_partial_ci_upper   0.421 
+#>  omega_squared_partial          0.154 
+#>  omega_squared_partial_ci_lower 0.000 
+#>  omega_squared_partial_ci_upper 0.421 
+#>  adjusted_mean[ssri]            7.537 
+#>  adjusted_mean[placebo]         11.985
+#>  adjusted_mean[wait_list]       13.978
+#>  se_adjusted_mean[ssri]         1.707 
+#>  se_adjusted_mean[placebo]      1.707 
+#>  se_adjusted_mean[wait_list]    1.706 
+#>  F_homogeneity_of_regression    1.062 
+#>  df_homogeneity_of_regression   2     
+#>  p_homogeneity_of_regression    0.3614
 #> 
 #> Confidence level: 95%
 ```

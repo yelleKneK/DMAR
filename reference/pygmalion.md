@@ -84,11 +84,10 @@ whether the randomly labeled bloomers would out-gain their controls in
 measured IQ. Rosenthal and Jacobson reported that they did, most
 strongly in the earliest grades, and interpreted the difference as
 evidence that teacher expectations operate as a self-fulfilling
-prophecy. The study became one of the most famous and most debated
-experiments in the social sciences; subsequent critiques (e.g.,
-Thorndike, 1968) questioned the reliability of the TOGA at the extremes
-of the score range for the youngest children, which is itself part of
-why the data are instructive for teaching careful analysis.
+prophecy. The study drew critiques; Thorndike (1968), for example,
+questioned the reliability of the TOGA at the extremes of the score
+range for the youngest children, which is itself part of why the data
+are instructive for teaching careful analysis.
 
 **Why it is a benchmark for heterogeneity of regression.** A standard
 ANCOVA adjusts the group comparison for the pretest covariate under the
@@ -97,8 +96,8 @@ assumption that the regression of the outcome on the covariate has the
 that assumption is questionable: the within-group regression of `iq_8`
 on `iq_pre` is steeper for the bloomers than for the controls, so the
 estimated treatment effect depends on the covariate value at which it is
-evaluated. This makes the data an ideal teaching example for (a) testing
-the homogeneity-of-regression assumption, (b) interpreting a
+evaluated. The data can therefore be used to teach (a) testing the
+homogeneity-of-regression assumption, (b) interpreting a
 treatment-by-covariate interaction, and (c) estimating the treatment
 effect, and its sampling variance, *at chosen covariate values* rather
 than only at the grand mean.
@@ -207,25 +206,25 @@ var(pygmalion$iq_pre)
 # ---- DMAR's ANCOVA, with the homogeneity-of-regression check ----
 ancova(pygmalion, outcome = "iq_8", treatment = "treatment",
        covariates = "iq_pre")
-#>  term                         value   
-#>  F_value                      5.38    
-#>  df_1                         1       
-#>  df_2                         307     
-#>  p_value                      0.0210  
-#>  sum_of_squares_type          3       
-#>  eta_squared_partial          0.0172  
-#>  eta_squared_partial_lower    0.000201
-#>  eta_squared_partial_upper    0.056   
-#>  omega_squared_partial        0.0139  
-#>  omega_squared_partial_lower  0.000201
-#>  omega_squared_partial_upper  0.056   
-#>  adjusted_mean[Control]       107     
-#>  adjusted_mean[Bloomer]       111     
-#>  se_adjusted_mean[Control]    0.849   
-#>  se_adjusted_mean[Bloomer]    1.67    
-#>  F_homogeneity_of_regression  3.88    
-#>  df_homogeneity_of_regression 1       
-#>  p_homogeneity_of_regression  0.0498  
+#>  term                           value  
+#>  F_value                        5.383  
+#>  df_1                           1      
+#>  df_2                           307    
+#>  p_value                        0.0210 
+#>  sum_of_squares_type            3      
+#>  eta_squared_partial            0.017  
+#>  eta_squared_partial_ci_lower   0.000  
+#>  eta_squared_partial_ci_upper   0.056  
+#>  omega_squared_partial          0.014  
+#>  omega_squared_partial_ci_lower 0.000  
+#>  omega_squared_partial_ci_upper 0.056  
+#>  adjusted_mean[Control]         107.000
+#>  adjusted_mean[Bloomer]         111.343
+#>  se_adjusted_mean[Control]      0.849  
+#>  se_adjusted_mean[Bloomer]      1.667  
+#>  F_homogeneity_of_regression    3.879  
+#>  df_homogeneity_of_regression   1      
+#>  p_homogeneity_of_regression    0.0498 
 #> 
 #> Confidence level: 95%
 ```

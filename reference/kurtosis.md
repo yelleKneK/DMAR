@@ -35,24 +35,24 @@ or when the sample standard deviation is zero.
 The reported value is \$\$\hat\gamma_2^{(2)} =
 \frac{n(n+1)}{(n-1)(n-2)(n-3)}\sum\_{i=1}^{n}\left(\frac{x_i -
 \bar{x}}{s}\right)^4 - \frac{3(n-1)^2}{(n-2)(n-3)},\$\$ where \\s\\ is
-the (divisor-\\n-1\\) sample standard deviation. Subtracting the
-asymptotic correction \\3(n-1)^2/((n-2)(n-3))\\ centers the statistic at
-0 for a normal distribution; that is, *excess* kurtosis is reported
-(rather than “raw” kurtosis, which centers at 3).
+the (divisor-\\n-1\\) sample standard deviation. Subtracting
+\\3(n-1)^2/((n-2)(n-3))\\ makes the expected value of the statistic 0
+for a sample from a normal distribution; that is, *excess* kurtosis is
+reported (rather than “raw” kurtosis, whose value for a normal
+distribution is 3).
 
-**Why isn't this in base R?** See the same Details in
-[`skewness`](https://yelleknek.github.io/DMAR/reference/skewness.md): R
-Core defers higher-order moment statistics to contributed packages,
-partly because multiple formulas (biased Type 1, bias-corrected Type 2,
-Minitab Type 3) coexist. DMAR adopts Type 2, the form most common in
-psychometric reporting and used internally by
-[`descriptives`](https://yelleknek.github.io/DMAR/reference/descriptives.md).
-
-**Diagnostic interpretation.** As a rough rule of thumb,
-\\\|\mathrm{kurtosis}\| \> 7\\ is sometimes flagged as indicative of
-departures from normality large enough to threaten normal-theory
-inference (e.g., maximum likelihood estimation in factor analysis or
-structural equation modeling).
+**Three formulas.** Three measures of sample kurtosis are in use, as
+there are three of sample skewness (see *Three formulas* in
+[`skewness`](https://yelleknek.github.io/DMAR/reference/skewness.md)).
+With \\m_r = \sum\_{i=1}^{n} (x_i - \bar{x})^r / n\\, they are \\g_2 =
+m_4 / m_2^2 - 3\\ (Type 1), \\G_2 = ((n+1) g_2 + 6)(n-1) /
+((n-2)(n-3))\\ (Type 2, the value above), and \\b_2 = (g_2 + 3)(1 -
+1/n)^2 - 3\\ (Type 3). \\G_2\\ and \\b_2\\ are each \\g_2\\ multiplied
+by a factor and shifted by a constant, both of which depend only on
+\\n\\, and the three agree as \\n\\ grows. `kurtosis()` reports \\G_2\\,
+which is also the kurtosis that
+[`descriptives`](https://yelleknek.github.io/DMAR/reference/descriptives.md)
+reports.
 
 ## References
 

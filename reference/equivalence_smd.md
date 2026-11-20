@@ -20,8 +20,8 @@ equivalence_smd(
   smd = NULL,
   n_1 = NULL,
   n_2 = NULL,
-  delta_lower = NULL,
-  delta_upper = NULL,
+  smd_lower = NULL,
+  smd_upper = NULL,
   alpha_level = 0.05
 )
 ```
@@ -42,12 +42,12 @@ equivalence_smd(
 
   Group sample sizes. Required if `x` and `y` are not supplied.
 
-- delta_lower, delta_upper:
+- smd_lower, smd_upper:
 
   Equivalence bounds on the *d* scale. Both must be positive; the
-  equivalence region is \\\[-\delta_L, +\delta_U\]\\. If only
-  `delta_upper` is supplied, the bounds are symmetric: \\\[-\delta_U,
-  +\delta_U\]\\.
+  equivalence region is \\\[-\delta_L, +\delta_U\]\\, with `smd_lower`
+  as \\\delta_L\\ and `smd_upper` as \\\delta_U\\. If only `smd_upper`
+  is supplied, the bounds are symmetric: \\\[-\delta_U, +\delta_U\]\\.
 
 - alpha_level:
 
@@ -61,8 +61,13 @@ A `data.frame` with rows for the observed *d*, the two one-sided test
 statistics (`t_lower`, `t_upper`) and their degrees of freedom (`df`),
 the two one-sided *p*-values (`p_lower`, `p_upper`), the joint TOST
 *p*-value (the larger of the two), the 100(1 - 2\\\alpha\\)% CI on
-\\\delta\\, the equivalence bounds, and a binary decision flag
-(`equivalent`: 1 = equivalent, 0 = not).
+\\\delta\\, the equivalence bounds (`smd_lower`, stored signed as
+\\-\delta_L\\, and `smd_upper`), and a binary decision flag
+(`equivalent`: 1 = equivalent, 0 = not). The table names the TOST
+*p*-value, `p_tost`, in its `p_sentence` attribute, so that
+[`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+pairs the interval with the test of equivalence rather than with
+`p_lower`, the first *p*-value row.
 
 ## Details
 
@@ -77,11 +82,11 @@ inside \\\[-\delta_L, \delta_U\]\\.
 cannot reject \\\delta = 0\\. TOST inverts the testing logic so that "no
 meaningful effect" is the alternative, not the null.
 
-**Choosing \\\delta_L\\ and \\\delta_U\\.** The equivalence bounds must
-be set *before* data collection, based on what constitutes the smallest
-effect size of practical interest (Lakens, Scheel, & Isager, 2018).
-Common choices in the literature are 0.2 or 0.3, but the bound should
-reflect domain-specific meaningfulness.
+**Choosing \\\delta_L\\ and \\\delta_U\\.** The equivalence bounds
+(`smd_lower` and `smd_upper`) must be set *before* data collection,
+based on what constitutes the smallest effect size of practical interest
+(Lakens, Scheel, & Isager, 2018). Common choices in the literature are
+0.2 or 0.3, but the bound should reflect domain-specific meaningfulness.
 
 **Connection to the CI.** The TOST rejection at level \\\alpha\\ is
 equivalent to the 100(1 - 2\\\alpha\\)% Cohen's-*d* CI (i.e., 90% for
@@ -99,7 +104,23 @@ two one-sided tests applied on the standardized scale; it is accurate in
 moderate-to-large samples but is an approximation to the exact
 noncentral *t* inversion used by
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md), and
-the two can differ in small samples.
+the two can differ in small samples. The 100(1 - 2\\\alpha\\)% interval
+reported here, \\\hat d \pm t\_{1 - \alpha,\\ n_1 + n_2 - 2}\\
+\mathrm{SE}(\hat d)\\, is usually the wider of the two at the same
+\\\hat d\\, group sizes, and level. For 90% intervals from equal groups
+and \\\|\hat d\|\\ up to 3, it is wider by 18 to 30 percent with 3 per
+group and by less than 1 percent with 100 per group. At the 90, 95, and
+99 percent levels it was the wider in every case computed (\\\|\hat
+d\|\\ up to 12, 2 to 5,000 per group); at the 80 percent level it can be
+the narrower, by less than 1 percent, when \\\|\hat d\|\\ is 5 or more.
+
+**Planning.**
+[`ss_aipe_equivalence_smd`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md)
+plans the sample size for the interval reported here, and
+[`ss_aipe_equivalence_smd_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md)
+simulates it, so that the interval a study is planned for, the interval
+this function reports, and the interval the simulation scores are one
+interval, formed by the same code.
 
 ## References
 
@@ -137,12 +158,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -158,7 +183,9 @@ Other hypothesis tests:
 
 Other equivalence testing:
 [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
 [`power_density_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_density_equivalence_md.md),
 [`power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_c.md),
@@ -173,60 +200,60 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Two groups, raw data, equivalence bound delta = 0.4:
+# 1. Two groups, raw data, symmetric equivalence bounds of 0.4:
 set.seed(113)
 x <- rnorm(50, 100, 15); y <- rnorm(50, 101, 15)
-equivalence_smd(x = x, y = y, delta_upper = 0.4)
-#>  term        value 
-#>  smd         0.23  
-#>  t_lower     3.14  
-#>  t_upper     -0.845
-#>  df          98    
-#>  p_lower     0.0011
-#>  p_upper     0.2001
-#>  p_tost      0.2001
-#>  lower_limit -0.103
-#>  upper_limit 0.564 
-#>  delta_lower -0.4  
-#>  delta_upper 0.4   
-#>  equivalent  0     
+equivalence_smd(x = x, y = y, smd_upper = 0.4)
+#>  term       value 
+#>  smd        0.230 
+#>  t_lower    3.142 
+#>  t_upper    -0.845
+#>  df         98    
+#>  p_lower    0.0011
+#>  p_upper    0.2001
+#>  p_tost     0.2001
+#>  ci_lower   -0.103
+#>  ci_upper   0.564 
+#>  smd_lower  -0.400
+#>  smd_upper  0.400 
+#>  equivalent 0     
 #> 
 #> Confidence level: 90%
 
 # 2. Summary-statistic interface: published d = 0.05, n = 40 per group.
-equivalence_smd(smd = 0.05, n_1 = 40, n_2 = 40, delta_upper = 0.3)
-#>  term        value 
-#>  smd         0.05  
-#>  t_lower     1.57  
-#>  t_upper     -1.12 
-#>  df          78    
-#>  p_lower     0.0608
-#>  p_upper     0.1335
-#>  p_tost      0.1335
-#>  lower_limit -0.322
-#>  upper_limit 0.422 
-#>  delta_lower -0.3  
-#>  delta_upper 0.3   
-#>  equivalent  0     
+equivalence_smd(smd = 0.05, n_1 = 40, n_2 = 40, smd_upper = 0.3)
+#>  term       value 
+#>  smd        0.050 
+#>  t_lower    1.565 
+#>  t_upper    -1.118
+#>  df         78    
+#>  p_lower    0.0608
+#>  p_upper    0.1335
+#>  p_tost     0.1335
+#>  ci_lower   -0.322
+#>  ci_upper   0.422 
+#>  smd_lower  -0.300
+#>  smd_upper  0.300 
+#>  equivalent 0     
 #> 
 #> Confidence level: 90%
 
 # 3. Asymmetric bounds (acceptable -0.2 to +0.5):
 equivalence_smd(smd = 0.10, n_1 = 80, n_2 = 80,
-         delta_lower = 0.2, delta_upper = 0.5)
-#>  term        value 
-#>  smd         0.1   
-#>  t_lower     1.9   
-#>  t_upper     -2.53 
-#>  df          158   
-#>  p_lower     0.0299
-#>  p_upper     0.0062
-#>  p_tost      0.0299
-#>  lower_limit -0.162
-#>  upper_limit 0.362 
-#>  delta_lower -0.2  
-#>  delta_upper 0.5   
-#>  equivalent  1     
+         smd_lower = 0.2, smd_upper = 0.5)
+#>  term       value 
+#>  smd        0.100 
+#>  t_lower    1.896 
+#>  t_upper    -2.528
+#>  df         158   
+#>  p_lower    0.0299
+#>  p_upper    0.0062
+#>  p_tost     0.0299
+#>  ci_lower   -0.162
+#>  ci_upper   0.362 
+#>  smd_lower  -0.200
+#>  smd_upper  0.500 
+#>  equivalent 1     
 #> 
 #> Confidence level: 90%
 ```

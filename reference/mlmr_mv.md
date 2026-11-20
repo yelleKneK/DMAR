@@ -28,7 +28,8 @@ mlmr_mv(
   auxiliary = NULL,
   effect_sizes = TRUE,
   enforce_es_bounds = FALSE,
-  ...
+  ...,
+  wald_df = Inf
 )
 ```
 
@@ -76,8 +77,14 @@ mlmr_mv(
 
 - B:
 
-  Integer; number of bootstrap resamples when `ci_method = "boot"`.
-  Defaults to `1000`.
+  Number of bootstrap resamples when `ci_method = "boot"`, a single
+  whole number. Default `1000`, because every resample refits the model
+  for every outcome. The fewest accepted is 400 at the default
+  `conf_level` (200 at 0.90, and 2000 at 0.99, which the default does
+  not meet); a smaller `B` is refused before anything is computed (class
+  `dmar_count_invalid`). See *Bootstrap replications* under *Details*
+  and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - boot_type:
 
@@ -85,10 +92,11 @@ mlmr_mv(
 
 - boot_seed:
 
-  Integer or `NULL`. Defaults to `NULL`, which leaves the user's current
-  RNG state intact; supply an integer for reproducible bootstraps. When
-  set, the seed applies for the duration of the call and the caller's
-  generator state is restored on exit.
+  Integer or `NULL`. Defaults to `NULL`, under which the resamples are
+  drawn from, and advance, the current random number stream; supply an
+  integer for reproducible bootstraps. When set, the seed applies for
+  the duration of the call and the caller's generator state is restored
+  on exit.
 
 - estimator:
 
@@ -111,12 +119,18 @@ mlmr_mv(
   variables (saturated correlates; Graham, 2003), or `NULL` (default)
   for none. Each auxiliary is correlated with every outcome's residual,
   every predictor, and each other auxiliary, but is never entered as a
-  predictor, so the per-outcome regression coefficients keep their
-  meaning while the full information maximum likelihood draws on the
+  predictor, while the predictors keep their free covariances, so the
+  model is saturated, the per-outcome regression coefficients keep their
+  meaning, and the full information maximum likelihood draws on the
   auxiliaries' observed values (the inclusive analysis strategy;
   Collins, Schafer, & Kam, 2001). A name in `auxiliary` must be numeric,
   present in `data`, absent from `formula`, and requires
-  `fixed_x = FALSE`.
+  `fixed_x = FALSE`. Auxiliaries are refused with
+  `missing = "listwise"`, which would drop every row on which an
+  auxiliary is missing and so change the sample the coefficients
+  describe, and with `missing = "pairwise"` or `"available.cases"`,
+  which compute the moments from each pair of variables on its own, so
+  that an auxiliary would leave every estimate unchanged.
 
 - effect_sizes:
 
@@ -133,6 +147,21 @@ mlmr_mv(
   Additional arguments forwarded to
   [`lavaan`](https://rdrr.io/pkg/lavaan/man/lavaan.html).
 
+- wald_df:
+
+  The reference distribution of the Wald interval and of the *p*-values:
+  `Inf` (the default), the normal distribution; a single positive
+  number, the degrees of freedom of a *t* distribution for every
+  coefficient; or `"missing_information"`, von Hippel's (2016) degrees
+  of freedom for each coefficient from its fraction of missing
+  information (see
+  [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md)). A
+  finite value or the keyword requires `ci_method = "wald"`; the keyword
+  is an error where, with values missing, lavaan fit the complete cases
+  in place of the FIML fit asked for, as in
+  [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md). It
+  follows `...`, so it must be named in full.
+
 ## Value
 
 An object of class `"mlmr_mv"`, a list with components similar to a
@@ -148,11 +177,23 @@ fit but extended for multiple outcomes:
   A matrix with predictors (and an intercept row, when present) as rows
   and outcomes as columns, matching `coef.mlm`.
 
+- `B`, `B_used`, `n_dropped`, `B_required`, `bootstrap_status`:
+
+  Present only with `ci_method = "boot"`: the resamples requested, the
+  number the intervals rest on, their difference, the fewest resamples a
+  request may ask for, and the verdict (`"complete"`, `"dropped"`,
+  `"exploratory"`, `"insufficient_count"`, or `"insufficient_share"`;
+  under the last two the limits are `NA`). See *Bootstrap replications*
+  under Details.
+
 - `coef_table`:
 
   A long `data.frame` with one row per (outcome, term) combination;
-  columns include `outcome`, `term`, `estimate`, `se`, `z_value`,
-  `p_value`, `ci_lower`, `ci_upper`, `std_estimate`.
+  columns include `outcome`, `term`, `estimate`, `se`, `test_statistic`,
+  `p_value`, `ci_lower`, `ci_upper`, `std_estimate`, carrying the
+  confidence level in its `conf_level` attribute, so that
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+  on a row reports it.
 
 - `vcov`:
 
@@ -197,19 +238,25 @@ fit but extended for multiple outcomes:
 
   The underlying lavaan fit.
 
+The object carries the attributes `wald_df` and, under
+`wald_df = "missing_information"`, `wald_df_table`, as an
+[`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md) fit does,
+with the coefficients named `"outcome:term"` in the order of
+`coef_table`.
+
 ## Details
 
 **Why a separate function from `mlmr`.** A univariate `mlmr` fit handles
 the case of one outcome regressed on one or more predictors. `mlmr_mv`
 extends to the case of two or more outcomes regressed on the same
 predictor set, modeling the residual covariance among outcomes
-explicitly. This is the regression problem in which the FIML advantage
-over listwise deletion is largest, because rows that are missing on one
-outcome still contribute information about the other outcomes (via the
-modeled residual covariance) and about the joint distribution of the
-predictors. A user who fits separate univariate regressions for each
-outcome under listwise deletion can discard a great deal of information
-when the outcomes are correlated and missingness patterns differ.
+explicitly. Under FIML a row that is missing on one outcome still
+contributes information about the other outcomes (through the modeled
+residual covariance) and about the joint distribution of the predictors,
+where listwise deletion drops the row. A user who fits separate
+univariate regressions for each outcome under listwise deletion can
+discard a great deal of information when the outcomes are correlated and
+missingness patterns differ.
 
 **Same predictor set across outcomes.** The formula
 `cbind(y1, y2) ~ x1 + x2` regresses both `y1` and `y2` on `x1` and `x2`.
@@ -226,9 +273,13 @@ that are not part of the regression but are correlated with an outcome
 or with the missingness can be supplied through `auxiliary` and are
 entered as saturated correlates (Graham, 2003): each is correlated with
 every outcome's residual, every predictor, and each other auxiliary, but
-never as a predictor, so the per-outcome coefficients keep their meaning
-while the likelihood draws on the auxiliaries' observed values (the
-inclusive analysis strategy of Collins, Schafer, & Kam, 2001).
+never as a predictor, and the predictors keep their free means,
+variances, and covariances. The model over the outcomes, the predictors,
+and the auxiliaries is then saturated, so the per-outcome coefficients
+keep their meaning (on complete data they equal those of
+[`lm()`](https://rdrr.io/r/stats/lm.html)) while the likelihood draws on
+the auxiliaries' observed values (the inclusive analysis strategy of
+Collins, Schafer, & Kam, 2001).
 
 **The bootstrap interval.** `ci_method = "boot"` resamples the rows of
 `data` with replacement `B` times (1000 by default), refits the model on
@@ -242,6 +293,48 @@ reproducibility. The mechanics, including the Bollen-Stine variant, are
 given in the `ci_method` argument description and in
 [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md).
 
+**Bootstrap replications.** Each coefficient's limits are quantiles of
+its `B` resampled estimates, so the interval is run only when `B` puts
+at least 10 resamples beyond each limit (400 at the 95 percent level). A
+replication in which some coefficient is undefined (the refit fails or
+does not converge, or returns a coefficient that is not a finite number)
+is dropped and counted, never replaced, and the interval is computed
+from the rest. The result records `B` (requested), `B_used` (the number
+the interval rests on), `n_dropped`, and `B_required` (the fewest
+replications a request may ask for; that count is held to `B`, not to
+`B_used`) as elements of the fitted object, and
+[`print()`](https://rdrr.io/r/base/print.html) and
+[`summary()`](https://rdrr.io/r/base/summary.html) state them in one
+line, with `bootstrap_status` (`"complete"`, `"dropped"`,
+`"exploratory"`, `"insufficient_count"`, or `"insufficient_share"`). One
+warning of class `dmar_bootstrap_replications_dropped` states the counts
+when any replication was dropped, with a caution when the dropped
+replications are at least the 2.5 percent of `B` that lies beyond one
+limit at the 95 percent level, because they could then decide by
+themselves where that limit falls. When more than half were dropped, the
+limits of every coefficient are `NA`, the estimate is returned, and the
+warning has class `dmar_bootstrap_insufficient`. Such a resample is
+dropped for every coefficient, so all intervals rest on the same
+resamples. `options(dmar.bootstrap_exploratory = TRUE)` lets a smaller
+`B` (2 or more) run for a first look or a demonstration; every such call
+gives a warning of class `dmar_bootstrap_exploratory` and the result is
+not one to report. See
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+for the rule and its reasons.
+
+**A *t* reference distribution for the Wald interval.** With
+`ci_method = "wald"`, `wald_df` refers every coefficient's interval and
+*p*-value to a *t* distribution rather than the normal one, keeping the
+estimate and its standard error (von Hippel, 2016, Eq. 29), exactly as
+in [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md), whose
+help page gives the reasoning. A number applies to every coefficient of
+every outcome. Under `"missing_information"` each coefficient gets von
+Hippel's \\\max\\3, N(1 - \gamma) - k\\\\ from its own fraction of
+missing information \\\gamma\\, with \\k\\ the number of regression
+parameters of its outcome (the slopes and the intercept), so the
+coefficients of a fully observed outcome keep nearly \\N - k\\ degrees
+of freedom while those of an outcome observed for few cases get fewer.
+
 **Caveats.** Same as
 [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md): the
 function assumes that, conditional on the predictors, the joint
@@ -250,6 +343,23 @@ covariance, and that missingness is at most MAR. Factor predictors and
 interactions are expanded through
 [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html) once and
 reused for every outcome.
+
+## References
+
+Collins, L. M., Schafer, J. L., & Kam, C.-M. (2001). A comparison of
+inclusive and restrictive strategies in modern missing data procedures.
+*Psychological Methods, 6*(4), 330–351.
+[doi:10.1037/1082-989X.6.4.330](https://doi.org/10.1037/1082-989X.6.4.330)
+
+Graham, J. W. (2003). Adding missing-data-relevant variables to
+FIML-based structural equation models. *Structural Equation Modeling,
+10*(1), 80–100.
+[doi:10.1207/S15328007SEM1001_4](https://doi.org/10.1207/S15328007SEM1001_4)
+
+von Hippel, P. T. (2016). New confidence intervals and bias comparisons
+show that maximum likelihood can beat multiple imputation in small
+samples. *Structural Equation Modeling, 23*(3), 422–437.
+[doi:10.1080/10705511.2015.1047931](https://doi.org/10.1080/10705511.2015.1047931)
 
 ## See also
 
@@ -280,7 +390,7 @@ fit <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
                ci_method = "wald")
 coef(fit)              # matrix: rows = predictors, cols = outcomes
 #>                        t6_paragraph_comprehension t9_word_meaning
-#> (Intercept)                           -0.25416035      -6.3377552
+#> (Intercept)                           -0.25416032      -6.3377552
 #> t5_general_information                 0.07653333       0.2844663
 #> t7_sentence                            0.36460353       0.5811433
 summary(fit)
@@ -327,11 +437,11 @@ fit$residual_cov       # residual covariance among outcomes
 #> t6_paragraph_comprehension                   5.185583        3.094177
 #> t9_word_meaning                              3.094177       22.211178
 print(fit$effect_sizes, row.names = FALSE)
-#>                     outcome                   term        sr2         f2
-#>  t6_paragraph_comprehension t5_general_information 0.03587459 0.08409677
-#>  t6_paragraph_comprehension            t7_sentence 0.14153133 0.33177605
-#>             t9_word_meaning t5_general_information 0.10277301 0.27124695
-#>             t9_word_meaning            t7_sentence 0.07456050 0.19678618
+#>                     outcome                   term        sr2        f2
+#>  t6_paragraph_comprehension t5_general_information 0.03587460 0.0840968
+#>  t6_paragraph_comprehension            t7_sentence 0.14153107 0.3317754
+#>             t9_word_meaning t5_general_information 0.10277307 0.2712471
+#>             t9_word_meaning            t7_sentence 0.07456057 0.1967864
 
 # The interval menu is profile, Wald, and bootstrap. The default,
 # ci_method = "profile", inverts the likelihood ratio test one
@@ -342,17 +452,21 @@ print(fit$effect_sizes, row.names = FALSE)
 # because those refits take longer than a help page should. The
 # bootstrap resamples rows and takes percentile limits; it is what
 # to ask for when the multivariate normality the likelihood assumes
-# is doubtful. B = 10 keeps the example quick, since every resample
-# refits the two-outcome model; a reported interval deserves the
-# default B = 1000. boot_seed fixes the resamples, so the limits
-# are reproducible rather than moving from run to run. The effect
-# sizes cost one constrained refit per outcome and predictor, so this
-# fit and the ones after it leave them off.
+# is doubtful. Every resample refits the two-outcome model. B = 10
+# keeps the example quick and is below the 400 a reported interval
+# needs; the option lets it run and the warning says so. A reported
+# interval deserves the default B = 1000. boot_seed fixes the
+# resamples, so the limits are reproducible rather than moving from
+# run to run. The effect sizes cost one constrained refit per outcome
+# and predictor, so this fit and the ones after it leave them off.
+old <- options(dmar.bootstrap_exploratory = TRUE)
 fit_boot <- mlmr_mv(cbind(t6_paragraph_comprehension, t9_word_meaning) ~
                       t5_general_information + t7_sentence,
                     data = holzinger_swineford,
                     ci_method = "boot", B = 10, boot_seed = 113,
                     effect_sizes = FALSE)
+#> Warning: mlmr_mv(): B = 10 is below the 400 replications a 95% interval is reported from (10 beyond each limit). The limits are shown because options(dmar.bootstrap_exploratory = TRUE) is set. With 10 replications each limit rests on about 0.3 of them and will move from seed to seed; use the result to explore or to demonstrate, and report an interval only from B of at least 400. B, B_used, and B_required are recorded in the result.
+options(old)
 confint(fit_boot)
 #>                      outcome                   term       2.5 %      97.5 %
 #> 1 t6_paragraph_comprehension            (Intercept) -1.00690701  0.27654636
@@ -388,8 +502,8 @@ c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
 cbind(FIML = coef(fit_fiml)[, "t6_paragraph_comprehension"],
       listwise = coef(fit_lwd)[, "t6_paragraph_comprehension"])
 #>                      FIML  listwise
-#> (Intercept)     1.1169737 0.9709397
-#> t7_sentence     0.3174144 0.3134578
+#> (Intercept)     1.1169741 0.9709397
+#> t7_sentence     0.3174143 0.3134578
 #> t9_word_meaning 0.1669888 0.1777868
 
 # Auxiliary variable (saturated correlates): the complete speed test
@@ -407,7 +521,7 @@ fit_aux <- mlmr_mv(cbind(t6_paragraph_comprehension,
                    effect_sizes = FALSE)
 coef(fit_aux)
 #>                 t6_paragraph_comprehension  t26_flags
-#> (Intercept)                      1.1169740 27.0919095
+#> (Intercept)                      1.1169741 27.0919099
 #> t7_sentence                      0.3174143  0.3408605
 #> t9_word_meaning                  0.1669888  0.1749609
 ```

@@ -1,0 +1,1638 @@
+# SEM Fit and Model Comparison: Definitions, Uncertainty, and Use
+
+A structural equation model claims that the covariances of the observed
+variables (and, with a mean structure, their means) follow from a
+smaller set of parameters. Judging the fit of the model asks how well
+that claim holds, and the question has four parts that are easy to run
+together, each answered by different evidence.
+
+1.  **Exact fit.** Does the model reproduce the population moments
+    exactly? The chi square test answers this question, and with a large
+    sample it rejects nearly every model, because nearly every model is
+    an approximation.
+2.  **The size of the misfit.** If the model is an approximation, how
+    far is it from the population, and how precisely do the data say so?
+    The root mean square error of approximation (RMSEA) and the
+    standardized root mean square residual (SRMR) are effect sizes of
+    misfit, and each is reported here with a confidence interval and the
+    tests that interval implies.
+3.  **Improvement over a baseline.** How much of the misfit of a model
+    that explains nothing does the model remove? The incremental indices
+    (CFI, TLI, and their relatives) answer this question relative to a
+    baseline model, which the researcher should name.
+4.  **Choice among models.** Which of several candidate models do the
+    data favor, and by how much? Information criteria and the expected
+    cross-validation index rank models fitted to the same data.
+
+| Function | What it reports | Input |
+|:---|:---|:---|
+| [`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md) | The chi square test; the RMSEA with its interval and the tests of close and not close fit; CFI, TLI, NFI, IFI, and RNI; the SRMR; gamma hat and adjusted gamma hat with their intervals | A fitted lavaan model, or the statistics a paper reports |
+| [`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md) | The test that the population RMSEA is below a bound chosen in advance, with its interval and verdict | The statistics a paper reports |
+| [`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md) | The SRMR, its unbiased estimate with an interval, tests of exact and close fit, and the largest standardized residual | A fitted lavaan model |
+| [`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md) | AIC, BIC, SABIC, HBIC, IBIC, and SPBIC of one model | A fitted lavaan model, or its log likelihood and parameter count |
+| [`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md) | Models ranked by one criterion, with differences, weights, and approximate log Bayes factors | Fitted lavaan models |
+| [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md), [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md) | An interval from a reported RMSEA; the expected cross-validation index with its interval | A reported value, or a fitted model |
+
+Two conventions run through all of them. Misfit is treated as a
+population quantity to be estimated with an interval, not as a verdict
+read off a cutoff, so the intervals and the tests they imply come first.
+And each function returns one table of one shape whatever its arguments:
+a row that a setting does not compute is present and `NA`, so that code
+that reads a row by its name keeps working. The models are fitted with
+lavaan (Rosseel, 2012), which must be installed to run the code below.
+
+## The Running Example
+
+Holzinger and Swineford (1939) gave 26 ability tests to the seventh and
+eighth grade pupils of two Chicago schools, and `holzinger_swineford`
+holds the scores of all 301 pupils. Jöreskog (1969) illustrated his
+general approach to confirmatory maximum likelihood factor analysis with
+nine of the tests, which he took to measure visualization (visual
+perception, cubes, and lozenges), verbal intelligence (paragraph
+comprehension, sentence completion, and word meaning), and speed
+(addition, counting dots, and straight and curved capitals), in the 145
+pupils of the Grant-White school. The analysis here uses the same nine
+tests in both schools, and the substantive question is the one Jöreskog
+asked: do three correlated abilities account for the covariances among
+the nine tests?
+
+``` r
+
+library(DMAR)
+tests <- c("t1_visual_perception", "t2_cubes", "t4_lozenges",
+           "t6_paragraph_comprehension", "t7_sentence", "t9_word_meaning",
+           "t10_addition", "t12_counting_groups_of_dots",
+           "t13_straight_and_curved_capitals")
+d <- descriptives(holzinger_swineford[tests])$descriptives
+print(d[, c("variable", "n", "mean", "sd", "skewness", "kurtosis")],
+      digits = 3)
+#>                           variable   n   mean    sd skewness kurtosis
+#> 1             t1_visual_perception 301  29.61  7.00   -0.257    0.355
+#> 2                         t2_cubes 301  24.35  4.71    0.475    0.381
+#> 3                      t4_lozenges 301  18.00  9.05    0.387   -0.888
+#> 4       t6_paragraph_comprehension 301   9.18  3.49    0.270    0.123
+#> 5                      t7_sentence 301  17.36  5.16   -0.353   -0.525
+#> 6                  t9_word_meaning 301  15.30  7.67    0.867    0.876
+#> 7                     t10_addition 301  96.28 25.06    0.252   -0.274
+#> 8      t12_counting_groups_of_dots 301 110.54 20.25    0.531    1.240
+#> 9 t13_straight_and_curved_capitals 301 193.47 36.33    0.206    0.337
+```
+
+The tests are scored in their original units, with standard deviations
+from 3.49 to 36.33. The fit measures do not depend on the units of the
+variables, but one of the information criteria does, and the point
+returns in its section. Skewness and excess kurtosis are modest, the
+largest in absolute value being 0.87 and 1.24.
+
+The model has three correlated factors. Each is identified by fixing its
+variance at 1 (`std.lv = TRUE`), so that every loading is estimated and
+the covariances among the factors are correlations.
+
+``` r
+
+three <- "
+  visual =~ t1_visual_perception + t2_cubes + t4_lozenges
+  verbal =~ t6_paragraph_comprehension + t7_sentence + t9_word_meaning
+  speed  =~ t10_addition + t12_counting_groups_of_dots +
+            t13_straight_and_curved_capitals
+"
+fit_three <- lavaan::cfa(three, data = holzinger_swineford, std.lv = TRUE)
+
+# One or more values of a DMAR table, by the names of their rows.
+v <- function(x, term) x$value[match(term, x$term)]
+```
+
+## The Discrepancy and the Test Statistic
+
+For $`p`$ observed variables with population covariance matrix
+$`\boldsymbol\Sigma`$, the model expresses the covariances as functions
+of a parameter vector $`\boldsymbol\theta`$. For the factor model above,
+
+``` math
+\boldsymbol\Sigma(\boldsymbol\theta)=
+\boldsymbol\Lambda\boldsymbol\Phi\boldsymbol\Lambda'+\boldsymbol\Theta,
+```
+
+with $`\boldsymbol\Lambda`$ the loadings, $`\boldsymbol\Phi`$ the factor
+correlations, and $`\boldsymbol\Theta`$ the diagonal matrix of unique
+variances (Jöreskog, 1969). Maximum likelihood (ML) estimation under
+multivariate normality minimizes the discrepancy
+
+``` math
+F_{ML}\{\mathbf S,\boldsymbol\Sigma(\boldsymbol\theta)\}=
+\log|\boldsymbol\Sigma(\boldsymbol\theta)|+
+\operatorname{tr}\{\mathbf S\boldsymbol\Sigma(\boldsymbol\theta)^{-1}\}
+-\log|\mathbf S|-p,
+```
+
+which is zero only when the model implied covariance matrix equals the
+sample covariance matrix $`\mathbf S`$ (a model with a mean structure
+adds a term for the means). Write $`\hat F`$ for the minimum and $`F_0`$
+for the minimum the model would reach if it were fitted to the
+population covariance matrix, the population discrepancy. The test
+statistic is $`T=a\,\hat F`$ for a sample size multiplier $`a`$. Under
+lavaan’s default normal likelihood, $`T`$ is the likelihood ratio
+statistic of the model against the saturated model,
+$`T=2(\ell_s-\ell_M)=N\hat F`$, so that $`a=N`$. The literature on which
+the RMSEA and its interval were built forms $`T`$ with the unbiased
+covariance matrix and $`a=N-1`$ (Browne & Cudeck, 1993; MacCallum,
+Browne, & Sugawara, 1996), and with $`G`$ groups each group contributes
+its size less one, $`a=N-G`$ (Steiger, 1998). The degrees of freedom are
+the number of sample moments less the number of free parameters, here
+$`9\times 10/2=45`$ variances and covariances less 21 parameters, so
+$`df`$ = 24.
+
+When the model holds exactly, $`T`$ is approximately chi square on
+$`df`$ degrees of freedom. When the model is wrong by an amount that is
+not large relative to sampling error, $`T`$ is approximately noncentral
+chi square with noncentrality $`\lambda=a\,F_0`$ (Browne & Cudeck, 1993;
+MacCallum et al., 1996). Every measure below that rests on $`\lambda`$
+(the RMSEA, its interval, the tests of close and not close fit, gamma
+hat, and the ECVI) needs the multiplier with which $`T`$ was formed, a
+point taken up in its own section.
+
+## The Fit of the Three-Factor Model
+
+``` r
+
+fit_measures <- sem_fit_measures(fit_three)
+fit_measures
+```
+
+| term                        | value     |
+|:----------------------------|:----------|
+| chi_square                  | 85.306    |
+| df                          | 24        |
+| p_chi_square                | \< 0.0001 |
+| rmsea                       | 0.092     |
+| rmsea_ci_lower              | 0.071     |
+| rmsea_ci_upper              | 0.114     |
+| close_fit_bound             | 0.050     |
+| p_close_fit                 | 0.0007    |
+| not_close_fit_bound         | 0.050     |
+| p_not_close_fit             | 0.9993    |
+| cfi                         | 0.931     |
+| tli                         | 0.896     |
+| nfi                         | 0.907     |
+| ifi                         | 0.931     |
+| rni                         | 0.931     |
+| srmr                        | 0.065     |
+| gamma_hat                   | 0.957     |
+| gamma_hat_ci_lower          | 0.936     |
+| gamma_hat_ci_upper          | 0.974     |
+| adjusted_gamma_hat          | 0.919     |
+| adjusted_gamma_hat_ci_lower | 0.879     |
+| adjusted_gamma_hat_ci_upper | 0.950     |
+| N                           | 301       |
+| n_groups                    | 1         |
+
+Confidence level: 90%
+
+Version: standard (auto: a normal theory ML fit of complete data with no
+corrected statistic)
+
+Chi square: standard
+
+Sample size: N = 301 in 1 group; multiplier a = 301 (lavaan’s normal
+likelihood forms T with N)
+
+The lines under the table say which version of the measures was reported
+and why (the standard version, for a normal theory fit of complete data;
+see the section on versions) and with what multiplier the statistic was
+formed. Every value from `chi_square` through `srmr` equals the one
+lavaan reports for the same fit (lavaan’s default bound for not close
+fit is .08, which `not_close_fit = 0.08` reproduces). Gamma hat and its
+limits are the index lavaan calls `gfi_lrt`, which it reports only when
+asked for it by name; the `gfi` lavaan prints by default is computed
+from Browne’s residual based statistic instead, and adjusted gamma hat
+has no lavaan counterpart (the `agfi` lavaan gives when asked is the
+sample adjusted GFI of LISREL).
+
+### Exact Fit
+
+The first three rows test exact fit, $`H_0:F_0=0`$, by the upper tail of
+the central chi square distribution at $`T`$: $`\chi^2`$(24) = 85.31,
+$`p`$ \< 0.0001. Exact fit is rejected. With 301 pupils that result says
+little on its own: a test of exact fit has power against any misfit when
+the sample is large, and a small sample can fail to reject a poor model.
+A model with zero degrees of freedom reproduces the sample moments by
+construction and has no test; its $`p`$-value, RMSEA, interval, tests of
+close and not close fit, and TLI are `NA`, with a warning that says so.
+Its statistic is zero in every version, so its CFI is 1 in every version
+too, and its RNI, NFI, and IFI are their values at a statistic of zero.
+
+### The RMSEA and Its Interval
+
+The RMSEA, introduced by Steiger and Lind (1980) in a presentation whose
+handout Steiger (2016) reproduces, is the population discrepancy per
+degree of freedom on the scale of a square root (Browne & Cudeck, 1993):
+
+``` math
+\varepsilon=\sqrt{F_0/df},\qquad
+\hat\varepsilon=\sqrt{\frac{G\max(T-df,\,0)}{a\,df}}.
+```
+
+Because $`E(T)\approx df+\lambda`$, $`T-df`$ estimates $`\lambda`$, and
+a negative estimate is truncated at zero. Steiger (2000) shows that the
+truncated estimate is to be preferred to the untruncated one under what
+he calls the primacy principle, and that the tests and the interval are
+computed from $`T`$ itself, not from the truncated estimate, so the
+truncation discards nothing they use. The factor $`G`$ is the number of
+groups, 1 here.
+
+The interval inverts the noncentral chi square distribution at the
+observed $`T`$: the lower limit for $`\lambda`$ is the noncentrality
+that puts $`T`$ at the upper $`\alpha/2`$ quantile of
+$`\chi^2_{df}(\lambda)`$, the upper limit is the one that puts it at the
+lower $`\alpha/2`$ quantile, and both are mapped to the RMSEA metric in
+the same way as the estimate
+([`ci_nc_chisq()`](https://yelleknek.github.io/DMAR/reference/ci_nc_chisq.md)
+does the inversion). When $`T`$ lies at or below the upper $`\alpha/2`$
+quantile of the central distribution, no positive noncentrality reaches
+the lower limit and it is 0. When $`T`$ lies at or below the lower
+$`\alpha/2`$ quantile, no noncentrality is consistent with $`T`$ at that
+level, and the upper limit is reported as 0, as lavaan reports it and as
+Yuan, Chan, Marcoulides, and Bentler (2016) define the corresponding
+T-size RMSEA (below); the printed footer then says so.
+
+For the three-factor model $`\hat\varepsilon`$ = 0.092, 90% CI \[0.071,
+0.114\]. The interval carries what the estimate cannot: the population
+RMSEA is plausibly as small as 0.071 or as large as 0.114, and that
+width is the precision 301 cases buy for a model with 24 degrees of
+freedom.
+[`ss_aipe_rmsea()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rmsea.md)
+plans the sample size that makes the expected width of the interval as
+narrow as a study needs (Kelley & Lai, 2011).
+
+The RMSEA is conventionally reported with a 90% interval (Browne &
+Cudeck, 1993), the one lavaan prints, and the reason is that a
+$`100(1-2\alpha)\%`$ interval decides the two one-sided tests at level
+$`\alpha`$ described next (MacCallum et al., 1996, p. 136), so the two
+limits of a 90% interval are those tests at .05. That is why every RMSEA
+interval in DMAR, and the SRMR interval of
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
+defaults to 90%, where the package’s other intervals default to 95%; the
+line beneath each table states the level. `conf_level = 0.95` gives the
+95% interval, \[0.067, 0.118\] here, whose limits decide the same tests
+at .025.
+
+### Tests of Close and Not Close Fit
+
+Browne and Cudeck (1993) proposed testing close fit,
+$`H_0:\varepsilon\le\varepsilon_0`$, in place of exact fit. Its
+$`p`$-value is the upper tail $`P\{\chi^2_{df}(\lambda_0)\ge T\}`$, with
+$`\lambda_0=a\,df\,\varepsilon_0^2/G`$ the noncentrality at the bound.
+Rejecting close fit is evidence that the model does not fit closely;
+failing to reject it is not evidence that the model does. MacCallum et
+al. (1996) reversed the roles of the hypotheses. Their test of not close
+fit, $`H_0:\varepsilon\ge\varepsilon_1`$, takes the lower tail
+$`P\{\chi^2_{df}(\lambda_1)\le T\}`$ as its $`p`$-value, and rejecting
+it supports fit within $`\varepsilon_1`$. The two tests and the interval
+are one piece of evidence seen three ways: at level .05, close fit is
+rejected exactly when the lower limit of the 90% interval exceeds
+$`\varepsilon_0`$, and not close fit is rejected exactly when the upper
+limit falls below $`\varepsilon_1`$ (MacCallum et al., 1996, Table 1).
+
+Both bounds default to .05, the value MacCallum et al. (1996) used for
+both; lavaan’s default bound for not close fit is .08, which
+`not_close_fit = 0.08` reproduces. The bounds frame a test; they do not
+certify a model, and Steiger (1998) cautions that cutoff values such as
+.05 may not survive careful scrutiny as rules for adequacy. For the
+three-factor model, close fit within .05 is rejected ($`p`$ = 0.0007),
+as the lower limit 0.071 above .05 implies, and not close fit is not
+rejected ($`p`$ = 0.9993).
+
+### Fit Within a Tolerance Chosen in Advance
+
+The test of not close fit is an equivalence test (Yuan et al., 2016): it
+endorses a model whose misfit is below a tolerance, rather than merely
+failing to reject it.
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md)
+reports it with its interval and a verdict. The tolerance must be chosen
+before the data are seen and justified by the use to which the model
+will be put; there is no universal value. Suppose the investigators had
+decided in advance that a population RMSEA below .08 would make the
+three-factor model a tolerable approximation for their purpose.
+
+``` r
+
+equivalence_three <- equivalence_rmsea(chisq = v(fit_measures, "chi_square"),
+                                       df = v(fit_measures, "df"), N = 301,
+                                       rmsea_bound = 0.08,
+                                       sample_size_convention = "N")
+equivalence_three
+```
+
+| term               | value  |
+|:-------------------|:-------|
+| rmsea              | 0.092  |
+| ci_lower           | 0.071  |
+| ci_upper           | 0.114  |
+| rmsea_bound        | 0.080  |
+| null_noncentrality | 46.234 |
+| p_value            | 0.8396 |
+| equivalent         | 0      |
+| chi_square         | 85.306 |
+| df                 | 24     |
+| N                  | 301    |
+| n_groups           | 1      |
+
+Confidence level: 90%
+
+Not close fit (RMSEA \>= 0.08) is not rejected at alpha = 0.05: fit
+within the bound is not established (upper limit 0.114), which is not
+evidence of poor fit.
+
+Sample size: N = 301 in 1 group; multiplier a = 301
+(sample_size_convention = “N”)
+
+The statistic was formed by lavaan under its default likelihood, so the
+call passes `sample_size_convention = "N"`. Not close fit is not
+rejected ($`p`$ = 0.8396): fit within .08 is not established, which is a
+different conclusion from showing that the fit is poor. The upper limit,
+0.114, is the T-size RMSEA of Yuan et al. (2016, Eq. 4): the data
+endorse the model at $`\alpha=.05`$ for every bound above it, which
+makes it the number to report when no bound was fixed in advance. Yuan
+et al. form $`T`$ with $`N-1`$, the default of the function.
+
+### The Sample Size Convention
+
+A fitted model carries its own multiplier. lavaan forms $`T`$ with $`N`$
+for ML under its default normal likelihood, and with $`N-G`$ under
+`likelihood = "wishart"` and for the least squares estimators;
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)
+reads the multiplier from the fit, which is why its values match
+lavaan’s. Statistics copied from a paper carry no such record, so the
+summary statistic input of
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+and
+[`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md)
+takes `sample_size_convention`, with the default `"N-1"`. That is the
+convention of Browne and Cudeck (1993), of MacCallum et al. (1996), of
+Kelley and Lai (2011), and of DMAR’s
+[`ss_aipe_rmsea()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rmsea.md)
+and
+[`ss_power_sem()`](https://yelleknek.github.io/DMAR/reference/ss_power_sem.md).
+lavaan’s default likelihood and Mplus form $`T`$ with $`N`$, so
+statistics taken from their output take `"N"`.
+
+``` r
+
+fm <- lavaan::fitMeasures(fit_three)
+summary_input <- function(convention) {
+  sem_fit_measures(chisq = fm[["chisq"]], df = fm[["df"]], N = 301,
+                   baseline_chisq = fm[["baseline.chisq"]],
+                   baseline_df = fm[["baseline.df"]], p = 9,
+                   sample_size_convention = convention)
+}
+rows <- c("rmsea", "rmsea_ci_lower", "rmsea_ci_upper", "p_close_fit",
+          "gamma_hat")
+print(data.frame(row = rows, fitted = v(fit_measures, rows),
+                 summary_N = v(summary_input("N"), rows),
+                 summary_N_minus_1 = v(summary_input("N-1"), rows)),
+      digits = 4)
+#>              row    fitted summary_N summary_N_minus_1
+#> 1          rmsea 0.0921215 0.0921215         0.0922749
+#> 2 rmsea_ci_lower 0.0714185 0.0714185         0.0715374
+#> 3 rmsea_ci_upper 0.1136780 0.1136780         0.1138673
+#> 4    p_close_fit 0.0006612 0.0006612         0.0006479
+#> 5      gamma_hat 0.9566992 0.9566992         0.9565611
+```
+
+With `"N"` the summary input reproduces the fitted values. The default
+`"N-1"` moves them in the fourth decimal place, a difference of order
+$`1/N`$ that matters when a published value is to be reproduced and is
+the reason a report should state its convention.
+[`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md)
+starts from a reported RMSEA instead of from $`T`$; its default level is
+also 90%, and the call below names it:
+
+``` r
+
+ci_rmsea(rmsea = v(fit_measures, "rmsea"), df = 24, N = 301,
+         conf_level = 0.90, sample_size_convention = "N")
+```
+
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.071 |
+| rmsea    | 0.092 |
+| ci_upper | 0.114 |
+
+Confidence level: 90%
+
+It rebuilds $`T=a\,df\,\hat\varepsilon^2+df`$, which recovers the
+statistic unless $`\hat\varepsilon`$ was truncated at zero. Every $`T`$
+at or below $`df`$ produces an estimate of zero, so for such a model the
+interval needs the chi square statistic itself, which
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)
+and
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md)
+take.
+
+### Several Groups
+
+Holzinger and Swineford tested two schools so that the stability of
+their bifactor solution could be judged by fitting it in each. Fitting
+the three-factor model to both schools with nothing constrained to be
+equal across them (the configural model of an invariance analysis) gives
+one statistic on twice the degrees of freedom.
+
+``` r
+
+fit_schools <- lavaan::cfa(three, data = holzinger_swineford, std.lv = TRUE,
+                           group = "school")
+schools <- sem_fit_measures(fit_schools)
+schools[schools$term %in% c("chi_square", "df", "rmsea", "rmsea_ci_lower",
+                            "rmsea_ci_upper", "N", "n_groups"), ]
+```
+
+| term           | value   |
+|:---------------|:--------|
+| chi_square     | 115.851 |
+| df             | 48      |
+| rmsea          | 0.097   |
+| rmsea_ci_lower | 0.075   |
+| rmsea_ci_upper | 0.120   |
+| N              | 301     |
+| n_groups       | 2       |
+
+Confidence level: 90%
+
+Version: standard (auto: a normal theory ML fit of complete data with no
+corrected statistic)
+
+Chi square: standard
+
+Sample size: N = 301 in 2 groups; multiplier a = 301 (lavaan’s normal
+likelihood forms T with N)
+
+Steiger (1998) showed that the RMSEA of a model fitted to $`G`$
+independent samples divides the overall discrepancy by the average
+degrees of freedom per group, $`\varepsilon=\sqrt{G F_0/df}`$ (his Eq.
+23), and that putting a multiple group statistic into the single group
+formula gives values too small by the factor $`\sqrt G`$ (his Eq. 25). A
+fitted model supplies $`G`$, and summary input takes it as `n_groups`:
+
+``` r
+
+rmsea_rows <- c("rmsea", "rmsea_ci_lower", "rmsea_ci_upper")
+from_summary <- function(groups) {
+  v(sem_fit_measures(chisq = v(schools, "chi_square"),
+                     df = v(schools, "df"), N = 301, n_groups = groups,
+                     sample_size_convention = "N"),
+    rmsea_rows)
+}
+print(data.frame(row = rmsea_rows, fitted = v(schools, rmsea_rows),
+                 groups_2 = from_summary(2), groups_1 = from_summary(1)),
+      digits = 4)
+#>              row  fitted groups_2 groups_1
+#> 1          rmsea 0.09691  0.09691  0.06853
+#> 2 rmsea_ci_lower 0.07451  0.07451  0.05268
+#> 3 rmsea_ci_upper 0.11958  0.11958  0.08456
+```
+
+Left at `groups = 1`, the summary input understates the RMSEA, 0.069
+against 0.097, a ratio of 1.414, which is $`\sqrt 2`$.
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md)
+takes `n_groups` in the same way, with the same convention;
+[`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md)
+assumes a single group.
+
+## Incremental Indices
+
+The incremental indices compare the model’s statistic with that of a
+baseline model fitted to the same data, by default the independence
+model, in which the observed variables are uncorrelated. Writing $`T_b`$
+and $`df_b`$ for the baseline statistic and its degrees of freedom,
+
+``` math
+\begin{aligned}
+CFI&=1-\frac{\max(T-df,\,0)}{\max(T-df,\,T_b-df_b,\,0)},&
+RNI&=1-\frac{T-df}{T_b-df_b},\\
+TLI&=\frac{T_b/df_b-T/df}{T_b/df_b-1},&
+NFI&=\frac{T_b-T}{T_b},\qquad
+IFI=\frac{T_b-T}{T_b-df}.
+\end{aligned}
+```
+
+The comparative fit index is due to Bentler (1990), and without its
+truncation at zero it is the relative noncentrality index (Bentler,
+1990; McDonald & Marsh, 1990). The Tucker-Lewis index (Tucker & Lewis,
+1973) is also called the nonnormed fit index (Bentler & Bonett, 1980),
+who also proposed the normed fit index; the incremental fit index is due
+to Bollen (1989). Hu and Bentler (1998, Table 1) collect these
+definitions. No index is clipped to $`[0,1]`$ (RNI and TLI can exceed
+1), and an index whose denominator is zero or negative is `NA`.
+
+Here the independence model has $`T_b`$ = 918.85 on 36 degrees of
+freedom, and CFI = 0.931 and TLI = 0.896. CFI says that the model
+removes about 93% of the independence model’s estimated noncentrality.
+That is a statement relative to a model nobody believes, and the same
+model looks better against a worse baseline; van Laar and Braeken (2022)
+point out that the incremental indices are standardized effect sizes
+relative to the baseline, with the same limits on their interpretation
+and no universal rule of thumb. Brosseau-Liard and Savalei (2014) give
+the population values the sample indices estimate. None of the indices
+has a confidence interval here: the usual asymptotic theory assumes
+misfit small relative to sampling error, and the independence model is
+far from that.
+
+## Gamma Hat
+
+Gamma hat (Steiger, 1989; Hu & Bentler, 1998, Table 1) rescales the
+estimated noncentrality to a goodness of fit metric that needs no
+baseline model, and adjusted gamma hat penalizes it for the degrees of
+freedom used. They estimate the population values of the goodness of fit
+index (GFI) and the adjusted GFI that LISREL reports, which Steiger
+(1989) showed to be these functions of the population noncentrality for
+a model invariant under a constant scaling factor (a result he restates
+in Steiger, 1990, p. 178):
+
+``` math
+\hat\gamma=\frac{p}{p+2(T-df)/a},\qquad
+\hat\gamma_{adj}=1-\frac{p(p+1)}{2\,df}\,(1-\hat\gamma).
+```
+
+Both can exceed 1 when $`T<df`$. Each is a monotone function of the
+noncentrality, so the limits of the noncentrality interval behind the
+RMSEA interval give their limits, $`p/(p+2\lambda/a)`$ at each limit
+$`\lambda`$ (Steiger & Fouladi, 1997, pp. 251–252). For the three-factor
+model $`\hat\gamma`$ = 0.957, 90% CI \[0.936, 0.974\], and
+$`\hat\gamma_{adj}`$ = 0.919 \[0.879, 0.950\]. Steiger’s result is for
+covariance structures: the function computes the two indices for the
+standard version of a single group, single level ML fit of continuous
+variables without FIML or sampling weights, and for the robust version
+of such a fit by MLM, MLR, MLMV, or MLMVS, but not for a model that
+restricts the means (a growth model, say, or intercepts constrained
+equal, to a constant, or to another parameter, or held at the bound of
+an inequality constraint), whose statistic and degrees of freedom count
+mean restrictions that $`p`$ and $`p(p+1)/2`$ do not; free means change
+nothing. Whether a fitted model restricts its means is read from the
+derivatives of its moments, with the constraints that bind at the
+estimates imposed (its equality constraints, and the inequality
+constraints lavaan treats as active): the means are free when they add
+no degree of freedom. Summary input gives the two indices when `p` is
+given and `df` is at most $`p(p+1)/2`$; it carries no mean structure, so
+below that bound supplying `p` states that the model is a covariance
+structure. Elsewhere their rows are `NA`.
+
+## Standard, Scaled, and Robust Versions
+
+The chi square statistic of a normal theory ML fit has its chi square
+distribution only under multivariate normality. The robust ML estimators
+(lavaan’s MLM and MLR) keep the ML estimates and correct the statistic
+for the nonnormality of the data. A fitted model can therefore carry
+more than one statistic, and each fit measure has a version for each:
+
+- **standard**: the measures computed from the uncorrected statistic,
+  the right ones for a normal theory ML fit of complete continuous data;
+- **scaled**: the corrected statistic $`T_s`$ on its degrees of freedom
+  put in place of $`T`$ and $`df`$ in the standard formulas, for the
+  RMSEA, its interval, and the tests of close and not close fit alike,
+  the substitution EQS and Mplus report. lavaan’s default for a
+  Satorra-Bentler or Yuan-Bentler statistic instead refers the unscaled
+  $`T`$ to the noncentral chi square on $`c\cdot df`$ degrees of
+  freedom, for the scaling constant $`c`$, which gives the same point
+  estimate but another interval;
+  [`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)
+  reports the substitution, which lavaan gives under
+  `rmsea.scaled.mplus = TRUE`. Brosseau-Liard, Savalei, and Li (2012)
+  showed that the RMSEA so computed estimates a quantity that decreases
+  as nonnormality increases, not the population RMSEA, and
+  Brosseau-Liard and Savalei (2014) made the same argument for CFI and
+  TLI. The scaled version is offered to reproduce a published table;
+- **robust**: lavaan’s corrected measures, which estimate the population
+  values of the standard measures. For a robust ML fit they are the
+  correction of the RMSEA that Brosseau-Liard et al. (2012) recommend
+  and that of Brosseau-Liard and Savalei (2014) for CFI, TLI, and RNI,
+  with that of Savalei (2018) for a scaled and shifted statistic.
+  Savalei (2018) shows that these do not depend on which corrected
+  statistic accompanies them, so for the older mean and variance
+  adjusted statistic (MLMVS), for which lavaan computes none,
+  [`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)
+  computes them, and they equal lavaan’s for the same model fitted by
+  MLM. For a ULS fit of continuous data, DMAR withholds the entire
+  ML-derived robust family, including robust CFI, TLI, and RNI (Savalei,
+  2018). A common-units invariance check alone does not validate those
+  corrections outside their derivation. Eligible scaled indices remain
+  qualified diagnostics: they do not estimate the same population
+  discrepancy as ML-based indices, and ML cutoffs do not automatically
+  apply. Standard ULS indices that change with the units are withheld,
+  and so are indices at mean-restricted rungs where the fit function
+  combines squared mean and covariance residuals in different units.
+  These restrictions also apply to the invariance ladder. A fit by ULS
+  alone is tested by Browne’s residual based statistic, which has no
+  units, and its measures are kept unless the model restricts the means
+  through parameters the covariances share, as the scalar rung of an
+  invariance ladder does through the loadings; the ULS estimates, and
+  with them that statistic and its measures, then change with the units,
+  and those measures are `NA` too. For ordered categorical data fitted
+  by WLSMV they are those of Savalei (2021); and for a FIML fit they are
+  the FIML corrected indices of Zhang and Savalei (2023). NFI and IFI
+  have no robust version; the robust gamma hat is computed from the
+  robust noncentrality and the robust RMSEA interval.
+
+The default `version = "auto"` reports the robust version for a fit that
+carries a corrected statistic or uses FIML, and the standard version for
+a normal theory ML fit of complete data. Where lavaan has a corrected
+statistic but no robust measures, it reports, with a warning, the
+standard version of a continuous ML fit, whose standard measures
+estimate the population values the robust ones estimate and the scaled
+ones do not (Savalei, 2018), and the scaled version of any other fit.
+lavaan can compute Browne’s residual based statistic beside the standard
+one; it is an alternative test of exact fit, not a correction, and does
+not change the version reported. The `sem_fit` attribute and the printed
+footer name the version, the reason, and the statistic in the
+`chi_square` row.
+
+### Robust Maximum Likelihood
+
+``` r
+
+fit_three_mlr <- lavaan::cfa(three, data = holzinger_swineford,
+                             std.lv = TRUE, estimator = "MLR")
+mlr_measures <- sem_fit_measures(fit_three_mlr)
+mlr_measures
+```
+
+| term                        | value     |
+|:----------------------------|:----------|
+| chi_square                  | 87.132    |
+| df                          | 24        |
+| p_chi_square                | \< 0.0001 |
+| rmsea                       | 0.092     |
+| rmsea_ci_lower              | 0.072     |
+| rmsea_ci_upper              | 0.114     |
+| close_fit_bound             | 0.050     |
+| p_close_fit                 | 0.0005    |
+| not_close_fit_bound         | 0.050     |
+| p_not_close_fit             | 0.9995    |
+| cfi                         | 0.930     |
+| tli                         | 0.895     |
+| nfi                         | NA        |
+| ifi                         | NA        |
+| rni                         | 0.930     |
+| srmr                        | 0.065     |
+| gamma_hat                   | 0.956     |
+| gamma_hat_ci_lower          | 0.935     |
+| gamma_hat_ci_upper          | 0.973     |
+| adjusted_gamma_hat          | 0.918     |
+| adjusted_gamma_hat_ci_lower | 0.879     |
+| adjusted_gamma_hat_ci_upper | 0.949     |
+| N                           | 301       |
+| n_groups                    | 1         |
+
+Confidence level: 90%
+
+Version: robust (auto: the fit carries the corrected statistic
+yuan.bentler.mplus)
+
+Chi square: yuan.bentler.mplus (scaled); robust measures: nonnormality
+corrections of Brosseau-Liard, Savalei, and Li (2012) and Brosseau-Liard
+and Savalei (2014)
+
+Sample size: N = 301 in 1 group; multiplier a = 301 (lavaan’s normal
+likelihood forms T with N)
+
+The fit carries a corrected statistic, so the robust version is
+reported, and the `chi_square` row holds the scaled statistic, 87.13.
+The rows NFI and IFI are present and `NA`, since those measures have no
+robust version; the robust gamma hat is 0.956. The robust RMSEA is
+0.092, 90% CI \[0.072, 0.114\]; the scaled RMSEA (`version = "scaled"`)
+is 0.093 and the standard one 0.092. lavaan’s scaling factor for this
+fit is 0.98, close to 1, which is why the versions agree to two decimals
+here; with heavier tailed data they part, and only the robust one
+estimates the population RMSEA of the ML discrepancy.
+
+### Full Information Maximum Likelihood
+
+Two of the 26 tests were given only at Grant-White. One of them, flags
+(`t26_flags`), is a spatial test, and adding it as a fourth indicator of
+the visual factor makes its scores missing by design for the 156 Pasteur
+pupils. Full information maximum likelihood (FIML; `missing = "ml"`)
+uses every pupil’s observed scores.
+
+``` r
+
+four_visual <- sub("t4_lozenges", "t4_lozenges + t26_flags", three)
+fit_fiml <- lavaan::cfa(four_visual, data = holzinger_swineford,
+                        std.lv = TRUE, missing = "ml")
+fiml_measures <- sem_fit_measures(fit_fiml)
+fiml_measures
+```
+
+| term                        | value     |
+|:----------------------------|:----------|
+| chi_square                  | 92.354    |
+| df                          | 32        |
+| p_chi_square                | \< 0.0001 |
+| rmsea                       | 0.077     |
+| rmsea_ci_lower              | 0.054     |
+| rmsea_ci_upper              | 0.100     |
+| close_fit_bound             | 0.050     |
+| p_close_fit                 | 0.0299    |
+| not_close_fit_bound         | 0.050     |
+| p_not_close_fit             | 0.9701    |
+| cfi                         | 0.943     |
+| tli                         | 0.919     |
+| nfi                         | NA        |
+| ifi                         | NA        |
+| rni                         | 0.943     |
+| srmr                        | 0.066     |
+| gamma_hat                   | NA        |
+| gamma_hat_ci_lower          | NA        |
+| gamma_hat_ci_upper          | NA        |
+| adjusted_gamma_hat          | NA        |
+| adjusted_gamma_hat_ci_lower | NA        |
+| adjusted_gamma_hat_ci_upper | NA        |
+| N                           | 301       |
+| n_groups                    | 1         |
+
+Confidence level: 90%
+
+Version: robust (auto: the fit uses FIML (missing = “ml”))
+
+Chi square: standard; robust measures: FIML corrected indices of Zhang
+and Savalei (2023), version 6 (normal theory)
+
+Sample size: N = 301 in 1 group; multiplier a = 301 (lavaan’s normal
+likelihood forms T with N)
+
+The RMSEA and CFI that software has long reported after FIML are
+computed from the FIML statistic, and Zhang and Savalei (2023) review
+evidence that for a misspecified model their population values change
+with the amount of missing data, typically toward better fit as more
+data are missing. Their FIML corrected indices evaluate the complete
+data ML fit function at the FIML estimates, with the saturated FIML
+estimates of the means and covariances in place of the sample moments
+(their Eq. 11), and so approximate the RMSEA and CFI the model would
+have had with complete data. They are corrections for missing data, not
+for nonnormality, and the default reports them for every FIML fit, a
+plain ML one included; the `chi_square` row remains the FIML likelihood
+ratio statistic. Here the corrected RMSEA is 0.077 and CFI 0.943,
+against 0.079 and 0.935 for the uncorrected ones. Zhang and Savalei
+(2023) found that the correction can fail when a large share of the data
+is missing and the misspecification is severe. Whether the data are
+missing at random is a separate assumption that no fit index checks.
+Here the flags scores are missing because of the school a pupil
+attended, so FIML assumes that school carries no information about flags
+scores beyond what the other eight tests carry.
+
+### Ordered Categorical Data and Sampling Weights
+
+For ordered categorical indicators fitted by WLSMV, the standard
+statistic is not chi square distributed, so the standard $`p`$-value is
+`NA` and the default reports the corrected measures of Savalei (2021). A
+fit with sampling weights maximizes a weighted pseudo likelihood
+(Asparouhov, 2005), whose standard statistic is not chi square either,
+and the default reports lavaan’s robust measures. Requesting the
+standard version of either kind of fit, or the scaled version of an
+ordered categorical one, warns why it is not valid. Full WLS
+(`estimator = "WLS"`) is the exception among the estimators for ordered
+data: its weight matrix is the inverse of the asymptotic covariance
+matrix of the thresholds and polychoric correlations, its statistic is
+asymptotically chi square (Browne, 1984; Muthén, 1984), lavaan reports
+its $`p`$-value, and its standard measures are reported without a
+warning. The residual inference and the information criteria below are
+refused for both kinds of fit, for the reasons given in their sections.
+
+## Residual Fit
+
+### The SRMR and Its Unbiased Estimate
+
+The SRMR summarizes the covariance residuals in the metric of a
+correlation (Bentler, 1995; Hu & Bentler, 1998, Table 1). With sample
+covariances $`s_{ij}`$ and model implied covariances
+$`\hat\sigma_{ij}`$,
+
+``` math
+e_{ij}=\frac{s_{ij}-\hat\sigma_{ij}}{\sqrt{s_{ii}s_{jj}}},\qquad
+SRMR=\sqrt{\frac{1}{t}\sum_{i\le j}e_{ij}^2},\qquad t=\frac{p(p+1)}{2}.
+```
+
+A residual of .10 is a correlation the model misses by .10, which makes
+the SRMR easier to read than the RMSEA. Both
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)
+and
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md)
+report this covariance definition; lavaan’s own `srmr` also averages in
+the mean residuals when a model has a mean structure, and
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md)
+reports those separately as `srmr_mean`.
+
+The sample SRMR overestimates its population value, since sampling error
+adds to every residual. Maydeu-Olivares (2017) removed the bias on the
+squared scale. With $`\mathbf e`$ the vector of standardized residuals
+and $`\hat{\boldsymbol\Xi}`$ their asymptotic covariance matrix, the
+unbiased estimate is
+
+``` math
+\widehat{SRMR}_u=\hat k^{-1}
+\sqrt{\frac{\max(\mathbf e'\mathbf e-\operatorname{tr}\hat{\boldsymbol\Xi},\,0)}{t}},
+\qquad
+\hat k=1-\frac{\operatorname{tr}(\hat{\boldsymbol\Xi}^2)
++2\,\mathbf e'\hat{\boldsymbol\Xi}\mathbf e}{4(\mathbf e'\mathbf e)^2}
+```
+
+(Maydeu-Olivares, Shi, & Rosseel, 2018, Eq. 16). Its interval is the
+large sample normal interval $`\widehat{SRMR}_u\pm z_{1-\alpha/2}\,SE`$
+(their Eq. 20), reported as lavaan computes it, without truncation, so
+its lower limit can fall below zero, and when the estimate is truncated
+at zero the interval is centered at zero. The test of close fit,
+$`H_0:SRMR\le c`$ (their Eq. 21), rejects at level $`\alpha`$ exactly
+when the lower limit of the $`100(1-2\alpha)\%`$ interval exceeds $`c`$,
+so a 90% interval, the default of
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md)
+as it is of the RMSEA functions, pairs with a test at .05. The test of
+exact fit uses the sample SRMR and its expected value and standard error
+under exact fit; the row `srmr_se_exact_fit` is that standard error,
+which holds only under exact fit and is not the one to build an interval
+from. In the simulations of Maydeu-Olivares et al. (2018), with 10 to 60
+observed variables and normal and nonnormal data, the intervals and
+tests of close fit of the SRMR computed without assuming normality were
+generally accurate, whereas those of the RMSEA were accurate only in
+small models and, with 30 or more variables, wrongly suggested that
+models did not fit closely; the SRMR interval did worse than that of the
+RMSEA only when the misfit was very small in a model of 10 variables.
+
+The bound $`c`$ is again the researcher’s choice. Shi, Maydeu-Olivares,
+and DiStefano (2018) proposed reference values that scale with the
+average $`R^2`$ of the observed variables (their average communality):
+close fit when the SRMR is at most $`.05\bar R^2`$ and the largest
+absolute standardized residual is at most .10, and acceptable fit at
+$`.10\bar R^2`$ and .15. They are population values, and Shi et
+al. (2018) recommend applying them through an interval or a test of
+close fit rather than to the sample values. Ximénez, Maydeu-Olivares,
+Shi, and Revuelta (2022) found the bound on the SRMR, applied to the
+unbiased SRMR, to work reasonably well in finite samples, except that
+with small loadings (an average $`R^2`$ of .09) close fit called for
+samples of 500 or more, and recommend it.
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md)
+tests the first part; the second is read from the largest absolute
+residual, a sample value.
+
+``` r
+
+r2_three <- lavaan::lavInspect(fit_three, "rsquare")
+residual_three <- sem_residual_fit(fit_three,
+                                   close_fit = 0.05 * mean(r2_three))
+residual_three
+```
+
+| term                      | value     |
+|:--------------------------|:----------|
+| srmr                      | 0.065     |
+| srmr_se_exact_fit         | 0.006     |
+| p_exact_fit               | \< 0.0001 |
+| unbiased_srmr             | 0.058     |
+| unbiased_srmr_se          | 0.010     |
+| unbiased_srmr_ci_lower    | 0.042     |
+| unbiased_srmr_ci_upper    | 0.074     |
+| close_fit_bound           | 0.025     |
+| p_close_fit               | 0.0003    |
+| srmr_mean                 | NA        |
+| largest_absolute_residual | 0.189     |
+| N                         | 301       |
+
+Confidence level: 90%
+
+Residual covariance: normal theory; expected information
+
+Largest standardized residual: t2_cubes with t10_addition, -0.189
+
+The average $`R^2`$ is 0.507, so the bound is 0.025. The unbiased SRMR
+is 0.058, 90% CI \[0.042, 0.074\], below the sample value 0.065, and
+close fit is rejected ($`p`$ = 0.0003). The largest absolute residual,
+0.189, exceeds .10 as well, so by both parts of the criterion of Shi et
+al. (2018) the model does not fit closely. The residual covariance in
+the footer is normal theory, as the fit’s standard errors are. For an
+MLR or MLM fit it is asymptotically distribution free, the version to
+use with nonnormal data, for which Maydeu-Olivares et al. (2018) found
+the normal theory intervals to cover poorly.
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md)
+covers ML and robust ML fits of one group of complete continuous data
+and refuses other fits (FIML, ordered indicators, several groups,
+sampling weights, among others) with a message that says why.
+
+### Reading the Residuals
+
+An average can hide a concentrated failure, so the residuals themselves
+are worth reading. The test names are shortened to their numbers for
+display.
+
+``` r
+
+residuals_three <- attr(residual_three, "standardized_residuals")
+dimnames(residuals_three) <- lapply(dimnames(residuals_three), sub,
+                                    pattern = "_.*", replacement = "")
+round(residuals_three, 2)
+#>        t1    t2    t4    t6    t7    t9   t10   t12   t13
+#> t1   0.00                                                
+#> t2  -0.03  0.00                                          
+#> t4  -0.01  0.09  0.00                                    
+#> t6   0.07 -0.01 -0.07  0.00                              
+#> t7  -0.01 -0.03 -0.15  0.01  0.00                        
+#> t9   0.06  0.03 -0.03 -0.01  0.00  0.00                  
+#> t10 -0.14 -0.19 -0.08  0.04 -0.04 -0.01  0.00            
+#> t12 -0.04 -0.05 -0.01 -0.07 -0.04 -0.02  0.07  0.00      
+#> t13  0.15  0.07  0.15  0.05  0.07  0.06 -0.04 -0.03  0.00
+```
+
+The largest residual, -0.19 between cubes and addition, says the model
+implies more covariance between those two tests than the data show. The
+more coherent pattern is in the row of straight and curved capitals
+(t13), a speed test whose residuals with all three visual tests are
+positive (0.15, 0.07, and 0.15): the model understates what that test
+shares with visualization. Telling straight capital letters from curved
+ones at speed plausibly draws on visual perception, which suggests
+letting the test load on the visual factor as well. A modification
+suggested by the residuals of the same data is exploratory, and the fit
+of the modified model is an optimistic estimate of how it would fit new
+data.
+
+``` r
+
+cross <- paste(three, "visual =~ t13_straight_and_curved_capitals",
+               sep = "\n")
+fit_cross <- lavaan::cfa(cross, data = holzinger_swineford, std.lv = TRUE)
+cross_measures <- sem_fit_measures(fit_cross)
+residual_cross <- sem_residual_fit(
+  fit_cross,
+  close_fit = 0.05 * mean(lavaan::lavInspect(fit_cross, "rsquare")))
+equivalence_cross <- equivalence_rmsea(chisq = v(cross_measures, "chi_square"),
+                                       df = v(cross_measures, "df"), N = 301,
+                                       rmsea_bound = 0.08,
+                                       sample_size_convention = "N")
+fit_rows <- c("chi_square", "df", "rmsea", "rmsea_ci_lower",
+              "rmsea_ci_upper", "cfi", "tli", "srmr")
+residual_rows <- c("unbiased_srmr", "unbiased_srmr_ci_lower",
+                   "unbiased_srmr_ci_upper", "largest_absolute_residual")
+print(data.frame(row = c(fit_rows, residual_rows),
+                 three_factor = c(v(fit_measures, fit_rows),
+                                  v(residual_three, residual_rows)),
+                 cross_loading = c(v(cross_measures, fit_rows),
+                                   v(residual_cross, residual_rows))),
+      digits = 3)
+#>                          row three_factor cross_loading
+#> 1                 chi_square      85.3055       52.3821
+#> 2                         df      24.0000       23.0000
+#> 3                      rmsea       0.0921        0.0651
+#> 4             rmsea_ci_lower       0.0714        0.0418
+#> 5             rmsea_ci_upper       0.1137        0.0886
+#> 6                        cfi       0.9306        0.9667
+#> 7                        tli       0.8958        0.9479
+#> 8                       srmr       0.0652        0.0451
+#> 9              unbiased_srmr       0.0580        0.0346
+#> 10    unbiased_srmr_ci_lower       0.0422        0.0201
+#> 11    unbiased_srmr_ci_upper       0.0738        0.0491
+#> 12 largest_absolute_residual       0.1892        0.1558
+```
+
+Every measure moves toward better fit. The RMSEA interval of the
+cross-loading model, \[0.042, 0.089\], still reaches above .08, so the
+test of not close fit at the bound chosen earlier does not reject ($`p`$
+= 0.1577), and the T-size RMSEA is 0.089. The unbiased SRMR, 0.035, 90%
+CI \[0.020, 0.049\], lies above the bound 0.026 for close fit of Shi et
+al. (2018), although the interval is too wide for the test of close fit
+to reject ($`p`$ = 0.1721), and the largest residual, 0.156, still
+exceeds .10. Whether the cross-loading model is to be preferred to the
+three-factor model is a question of comparison, taken up next.
+
+## Comparing Models
+
+### Information Criteria
+
+An information criterion is minus twice the maximized log likelihood
+$`\ell`$ plus a penalty for the $`d`$ free parameters; smaller values
+are preferred, and only a difference between models fitted to the same
+data under the same likelihood carries meaning. Bollen, Ray, Zavisca,
+and Harden (2012) derive the Bayesian members of the family from the
+Laplace approximation to the log of a model’s marginal likelihood,
+
+``` math
+\log P(Y\mid M)=\ell+\log P(\hat{\boldsymbol\theta}\mid M)
++\frac d2\log(2\pi)-\frac d2\log N
+-\frac12\log\bigl|\bar{\mathbf I}_E(\hat{\boldsymbol\theta})\bigr|
++O(N^{-1/2})
+```
+
+(Bollen, Harden, Ray, & Zavisca, 2014, Eq. 9), where
+$`P(\hat{\boldsymbol\theta}\mid M)`$ is the prior density at the
+estimates and $`\bar{\mathbf I}_E`$ the expected information per
+observation. Multiplied by $`-2`$, the criteria keep different terms:
+
+- $`BIC=-2\ell+d\log N`$ keeps the first and fourth terms (Schwarz,
+  1978);
+- $`HBIC=-2\ell+d\log\{N/(2\pi)\}`$ keeps the third as well (Haughton,
+  1988);
+- $`IBIC=-2\ell+d\log\{N/(2\pi)\}+\log|\bar{\mathbf I}_E|`$ keeps every
+  term but the prior (Bollen et al., 2012, 2014);
+- SPBIC replaces the unit information prior of BIC with a normal prior
+  centered at a prior mean $`\boldsymbol\theta^*`$ whose variance, a
+  multiple of the inverse unit information, is chosen to maximize the
+  marginal likelihood (Bollen et al., 2012). With
+  $`Q=(\hat{\boldsymbol\theta}-\boldsymbol\theta^*)'\mathbf I_O
+  (\hat{\boldsymbol\theta}-\boldsymbol\theta^*)`$ for the whole sample
+  observed information $`\mathbf I_O`$,
+  $`SPBIC=-2\ell+d\{1+\log(Q/d)\}`$ (Bollen et al., 2014, Eq. 18). When
+  $`Q\le d`$ the maximizing prior variance is zero, the prior is a point
+  mass at $`\boldsymbol\theta^*`$, and $`SPBIC=-2\ell+Q`$; Bollen et
+  al. (2014, note 7) never met that case and caution that its behavior
+  is little known, and the function warns when it applies.
+
+Two criteria rest on other arguments. $`AIC=-2\ell+2d`$ (Akaike, 1974)
+estimates the relative expected Kullback-Leibler discrepancy between a
+model and the process that generated the data (Burnham & Anderson,
+2004). $`SABIC=-2\ell+d\log\{(N+2)/24\}`$, the sample size adjusted BIC
+(lavaan’s `bic2`), has a penalty that Sclove (1987) presents among the
+criteria descended from Rissanen’s principle of the shortest data
+description. In the simulations of Lin, Huang, and Weng (2017), which
+selected among path models, SPBIC and HBIC did best across most
+conditions, SABIC improved on BIC mainly when the misspecified
+parameters were small, AIC did better than the BIC family when they were
+small, and the criteria that include the log determinant of the
+information matrix, IBIC among them, did poorly.
+
+``` r
+
+sem_information_criteria(fit_three,
+                         measures = c("AIC", "BIC", "SABIC", "HBIC",
+                                      "IBIC", "SPBIC"))
+```
+
+| term           | value     |
+|:---------------|:----------|
+| AIC            | 19198.131 |
+| BIC            | 19275.980 |
+| SABIC          | 19209.380 |
+| HBIC           | 19237.384 |
+| IBIC           | 19116.779 |
+| SPBIC          | 19257.426 |
+| log_likelihood | -9578.065 |
+| npar           | 21        |
+| N              | 301       |
+
+Smaller is preferred; only a difference between models fitted to the
+same data under the same likelihood is meaningful.
+
+Log likelihood: the normal log likelihood of the complete data.
+
+IBIC and SPBIC depend on how the latent variables are identified (here
+variance fixed) and on the mean structure, IBIC also on the units;
+compare only models that share them.
+
+SPBIC prior: Bollen et al. (2014, p. 6): free loadings and regression
+coefficients centered at zero, other free parameters at their estimates;
+Q = 961.148, dimension 21.
+
+A fitted model supplies $`\ell`$ (lavaan’s
+[`logLik()`](https://rdrr.io/r/stats/logLik.html)), $`d`$, and $`N`$,
+and for IBIC and SPBIC lavaan’s expected and observed information
+matrices, which are per observation and are multiplied by $`N`$. They
+are the matrices the criteria are defined on under lavaan’s defaults,
+the expected information at the fitted moments
+(`h1.information = "structured"`) and the negative Hessian
+(`observed.information = "hessian"`). Fits with other settings are
+refused for these two criteria, as are robust (MLM, MLR) fits, since
+both criteria rest on the normal theory information that a robust fit
+was chosen not to trust, and fits with several groups, equality
+constraints, missing data, exploratory (rotated) blocks, or
+`fixed.x = TRUE` with exogenous observed variables. The default prior of
+SPBIC follows Bollen et al. (2014, p. 6): free loadings and regression
+coefficients are centered at zero and every other free parameter at its
+estimate, and the footer reports the resulting $`Q`$. The function
+refuses a fit whose fit function is not a log likelihood (ordered
+indicators, an estimator other than ML or its robust variants, which
+maximize the same likelihood), the Wishart likelihood, sampling weights,
+whose pseudo log likelihood lacks the justification of the penalties
+(Asparouhov, 2005), and for the BIC family a two-level model, whose
+sample size in the penalty is ambiguous; AIC remains available for it.
+
+### Units and Identification
+
+AIC, BIC, SABIC, and HBIC depend on a model only through $`\ell`$ and
+$`d`$, which do not change when an observed variable is rescaled or a
+latent variable is identified another way. IBIC and SPBIC also depend on
+the information matrix in the free parameters as they are parameterized.
+IBIC keeps $`\log|\bar{\mathbf I}_E|`$ but drops the prior density,
+which is the term whose Jacobian would cancel a change of
+parameterization. When the units of a free parameter are multiplied by
+$`c^k`$, $`\log|\bar{\mathbf I}_E|`$ changes by $`-2k\log c`$, so
+rescaling one observed variable changes the IBIC of one model relative
+to another by that amount for each free parameter the first has and the
+second lacks that carries the variable’s units.
+
+Adding the residual covariance of visual perception and lozenges to the
+three-factor model shows the consequence. The difference of each
+criterion (the model with the covariance less the model without it) is
+computed with the tests in their original units and with every test
+standardized, a choice some analysts make to put the variables on a
+common scale.
+
+``` r
+
+with_covariance <- paste(three, "t1_visual_perception ~~ t4_lozenges",
+                         sep = "\n")
+criteria <- c("BIC", "HBIC", "IBIC", "SPBIC")
+difference <- function(data) {
+  without <- lavaan::cfa(three, data = data, std.lv = TRUE)
+  with <- lavaan::cfa(with_covariance, data = data, std.lv = TRUE)
+  v(sem_information_criteria(with, measures = criteria), criteria) -
+    v(sem_information_criteria(without, measures = criteria), criteria)
+}
+standardized <- holzinger_swineford
+standardized[tests] <- scale(standardized[tests])
+units <- rbind(original_units = difference(holzinger_swineford),
+               standardized = difference(standardized))
+colnames(units) <- criteria
+units
+#>                     BIC     HBIC      IBIC    SPBIC
+#> original_units 4.679142 2.841265 -6.736539 6.058919
+#> standardized   4.679142 2.841265  1.561660 6.058968
+
+# The change in the IBIC difference, and twice the log of the product of
+# the standard deviations of the two tests the added covariance joins.
+ibic_change <- units["standardized", "IBIC"] - units["original_units", "IBIC"]
+log_units <- 2 * log(prod(d$sd[match(c("t1_visual_perception", "t4_lozenges"),
+                                     d$variable)]))
+c(ibic_change = ibic_change, log_units = log_units)
+#> ibic_change   log_units 
+#>    8.298199    8.298183
+```
+
+BIC, HBIC, and SPBIC give the same difference either way (SPBIC up to
+the convergence tolerance of the fits), and all three favor the model
+without the covariance. IBIC favors the model with it in the original
+units (-6.74) and the model without it once the tests are standardized
+(1.56). The change, 8.30, is $`2\log(s_1s_4)`$ = 8.30 (up to the
+convergence tolerance of the fits) for the standard deviations $`s_1`$
+and $`s_4`$ of the two tests, because the one parameter the second model
+adds, the residual covariance, carries the units of both; every other
+parameter is shared by the two models, and its contribution cancels.
+Neither choice of units is the correct one; an IBIC comparison is
+defined only for a stated choice, which a report should give, and IBIC
+is best read beside BIC, HBIC, and SPBIC. The $`Q`$ of SPBIC is
+unchanged by a linear rescaling when the prior mean is transformed with
+the estimates, which the default prior does. Identification matters to
+both criteria: fixing the factor variances (`std.lv = TRUE`) or a marker
+loading are related by a nonlinear map whose Jacobian differs between
+models, and under the default prior of SPBIC a free loading is centered
+at zero while a factor variance stays at its estimate. A mean structure
+adds the saturated means to $`d`$ and their information to
+$`\bar{\mathbf I}_E`$, so it matters too. The footer of
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md)
+names the identification, and
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+refuses models that differ in their mean structure or, when the
+criterion is IBIC or SPBIC under its default prior, in how they identify
+their latent variables.
+
+### Relative to the Saturated Model
+
+Bollen et al. (2014) report each criterion of a model as its difference
+from the criterion of the saturated model, so that BIC becomes
+$`T-df\log N`$ (their Eq. 12) and HBIC $`T-df\log\{N/(2\pi)\}`$ (their
+Eq. 15). Their Table 6 compares five models of family income for
+$`N=3912`$ respondents, and every row can be rebuilt from the quantities
+the table prints.
+
+``` r
+
+T_ml <- c(534.27, 412.93, 26.26, 62.44, 203.33)
+df_ml <- c(6, 10, 3, 6, 7)
+N_ml <- 3912
+logdet_model <- c(102.61, 74.26, 130.18, 102.77, 94.19)
+logdet_saturated <- 134.89
+Q_model <- c(1137006314, 180774515, 214642815, 251962808, 189536063)
+Q_saturated <- 195428707
+spbic_penalty <- function(Q, d) ifelse(Q > d, d * (1 + log(Q / d)), Q)
+table_six <- data.frame(
+  model = c("autoregressive", "latent growth curve", "ALT, rho free",
+            "ALT, rho equal", "ALT, rho zero"),
+  BIC = T_ml - df_ml * log(N_ml),
+  HBIC = T_ml - df_ml * log(N_ml / (2 * pi)),
+  IBIC = T_ml - df_ml * log(N_ml / (2 * pi)) - logdet_saturated + logdet_model,
+  SPBIC = T_ml + spbic_penalty(Q_model, c(9, 3, 10, 7, 6)) -
+    spbic_penalty(Q_saturated, 15))
+table_six
+#>                 model        BIC       HBIC       IBIC     SPBIC
+#> 1      autoregressive 484.639176 495.666438 463.386438 450.42012
+#> 2 latent growth curve 330.211960 348.590730 287.960730 208.93261
+#> 3       ALT, rho free   1.444588   6.958219   2.248219 -55.66083
+#> 4      ALT, rho equal  12.809176  23.836438  -8.283562 -69.50767
+#> 5       ALT, rho zero 145.427372 158.292511 117.592511  52.20014
+```
+
+The IBIC column follows their Eq. 17, in which the log determinants are
+of the information per observation. Their SPBIC row uses smaller
+parameter counts than the full ones, printed in parentheses (15 for the
+saturated model rather than 20), and the table states no rule for them;
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md)
+uses all the free parameters by default, and its `spbic_dimension`
+argument exists to reproduce such a table, never to tune a ranking. The
+rebuilt values match the printed ones to rounding. They also show that
+the smallest SPBIC in the table belongs to the ALT model with equal
+autoregressive parameters (-69.51), whereas the article’s text and its
+marker of the best model point to the ALT model with free parameters
+(-55.66). The rebuilt arithmetic agrees with the printed numbers, so the
+disagreement lies between the table and its reading, not in the
+computation.
+
+### Ranking Candidate Models
+
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+ranks a named list of fitted models by one criterion, BIC by default. A
+one-factor model, in which a single general ability accounts for all
+nine tests, joins the two models above.
+
+``` r
+
+one <- paste("general =~", paste(tests, collapse = " + "))
+fit_one <- lavaan::cfa(one, data = holzinger_swineford, std.lv = TRUE)
+candidates <- list(one_factor = fit_one, three_factor = fit_three,
+                   cross_loading = fit_cross)
+by_bic <- compare_sem(candidates)
+by_bic
+```
+
+| term | value | delta | relative_weight | log_evidence_best_over_model | npar |
+|:---|:---|:---|:---|:---|:---|
+| cross_loading | 19248.764 | 0.000 | 1.000 | 0.000 | 22 |
+| three_factor | 19275.980 | 27.216 | 0.000 | 13.608 | 21 |
+| one_factor | 19485.817 | 237.054 | 0.000 | 118.527 | 18 |
+
+Criterion: BIC (smaller is preferred); N = 301; 3 models.
+
+Checked: the same cases and data values, observed variables, missing
+data method (missing = “listwise”), and mean structure (meanstructure =
+FALSE); no exogenous variables conditioned on.
+
+relative_weight: approximate posterior probability of each model within
+this set under equal prior odds; log_evidence_best_over_model:
+approximate log Bayes factor of the best model over each.
+
+For model $`k`$, $`\Delta_k=C_k-\min_j C_j`$ (column `delta`), and its
+relative weight is $`\exp(-\Delta_k/2)/\sum_j\exp(-\Delta_j/2)`$. For
+BIC, HBIC, IBIC, and SPBIC, $`\exp(-\Delta_k/2)`$ approximates the Bayes
+factor of model $`k`$ against the best model, the weights approximate
+the posterior probabilities of the models when each has the same prior
+probability, and $`\Delta_k/2`$ approximates the log Bayes factor of the
+best model over model $`k`$ (Bollen et al., 2012; Burnham & Anderson,
+2004). For AIC the weights are Akaike weights, the weight of evidence
+that a model is the one in the set closest to the data generating
+process in Kullback-Leibler discrepancy (Burnham & Anderson, 2004), and
+SABIC approximates no marginal likelihood; for both the log evidence
+column is `NA`.
+
+The cross-loading model is preferred by a wide margin. Its BIC is
+smaller than that of the three-factor model by 27.22, an approximate log
+Bayes factor of 13.61, and smaller than that of the one-factor model by
+237.05. SPBIC gives differences of 27.79 and 230.32 and AIC 30.92 and
+251.88, with the same order. The two three-factor models are nested, so
+the cross-loading can also be tested by the difference of their
+statistics:
+
+``` r
+
+lrt <- v(fit_measures, "chi_square") - v(cross_measures, "chi_square")
+lrt_df <- v(fit_measures, "df") - v(cross_measures, "df")
+lrt_p <- pchisq(lrt, lrt_df, lower.tail = FALSE)
+```
+
+The test agrees, $`\chi^2`$(1) = 32.92, $`p`$ \< 0.0001.
+
+The weights are conditional on the set: adding or removing a model
+changes all of them. They say which model the data favor among those
+compared, not how well any of them fits, which the measures of the
+earlier sections address; the best model in a set can fit poorly. Nor do
+they carry the sampling variability of the criteria, so the uncertainty
+of the selection itself is not estimated.
+
+### What Is Checked Before Comparing
+
+A criterion compares models only through their log likelihoods, so
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md)
+first checks that the log likelihoods are comparable and refuses, naming
+the two models and what differs, when they are not:
+
+- the same cases and data values (or, for models fitted to summary
+  statistics, the same sample moments), the same observed variables in
+  any order, and the same groups, since a log likelihood is a density of
+  the variables and cases it models;
+- the same missing data method, since listwise deletion, FIML, and the
+  two-stage method give different likelihoods;
+- the same mean structure, since without one lavaan leaves the saturated
+  means out of the parameter count;
+- the same exogenous observed variables when `fixed.x` or
+  `conditional.x` is `TRUE`, since lavaan’s log likelihood is then
+  conditional on them, and two saturated models of the same three
+  variables that condition on different ones differ by hundreds of BIC
+  points (refit every model with `fixed.x = FALSE`);
+- a likelihood the criteria are defined on: ML or its robust variants,
+  the normal likelihood, no sampling weights, no ordered indicators;
+- for IBIC, and for SPBIC under its default prior, one identification
+  for every latent variable of every model: each by a marker indicator,
+  or each by a fixed variance (a set that uses both is refused, also
+  when every model mixes them in the same way).
+
+A model identified by marker indicators (lavaan’s default) cannot be
+ranked by IBIC against the models above, which fix the factor variances:
+
+``` r
+
+fit_three_marker <- lavaan::cfa(three, data = holzinger_swineford)
+compare_sem(list(marker = fit_three_marker, cross_loading = fit_cross),
+            criterion = "IBIC")
+#> Error:
+#> ! IBIC depends on how the latent variables are identified, so compare_sem() requires every latent variable of every model to be identified the same way, and these models use more than one identification (fits$marker: marker indicator; fits$cross_loading: variance fixed). Refit every model with one identification: std.lv = TRUE for all (each latent variance fixed at 1) or the marker indicator for all (lavaan's default).
+```
+
+The check cannot establish that the models are scientifically
+comparable, or that a prior is sensible; it establishes only that the
+criterion is defined for the comparison.
+
+### The Expected Cross-Validation Index
+
+The expected cross-validation index of Browne and Cudeck (1989)
+estimates the discrepancy a fitted model would show in an independent
+sample of the same size from the same population,
+$`\widehat{ECVI}=\hat F+2d/a=(T+2d)/a`$ (their Eq. 5), and
+[`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md) reports
+it with an interval that replaces $`T-df`$ by the noncentrality limits.
+When $`T`$ is the likelihood ratio statistic,
+$`N\cdot\widehat{ECVI}=AIC+2\ell_s`$ for the saturated log likelihood
+$`\ell_s`$, so ECVI and AIC rank models fitted to the same data
+identically; the value of the ECVI is a discrepancy per observation,
+with an interval.
+
+``` r
+
+ecvi_values <- t(sapply(candidates, function(fit)
+  v(ecvi(fit, conf_level = 0.90), c("ecvi", "ci_lower", "ci_upper"))))
+colnames(ecvi_values) <- c("ecvi", "ci_lower", "ci_upper")
+ecvi_values
+#>                    ecvi  ci_lower  ci_upper
+#> one_factor    1.1570238 0.9803526 1.3584808
+#> three_factor  0.4229419 0.3416835 0.5294137
+#> cross_loading 0.3202064 0.2627798 0.4032658
+```
+
+The order is that of AIC. The point estimate is not truncated, so for a
+model with $`T<df`$ it falls below the lower limit of its interval,
+whose noncentrality cannot be negative. A difference between two ECVIs,
+like a difference between two RMSEAs or CFIs, is not bounded by the
+limits of the separate intervals; an interval for such a difference
+needs the joint sampling distribution of the two, which Lai (2020)
+derives for differences in RMSEA and CFI between nested or nonnested
+models.
+
+## Reporting the Analysis
+
+A results paragraph assembled from the tables above might read:
+
+> The three-factor model of Jöreskog (1969) did not fit the nine tests
+> exactly, $`\chi^2`$(24) = 85.31, $`p`$ \< 0.0001, $`N`$ = 301. The
+> estimated RMSEA was 0.092, 90% CI \[0.071, 0.114\], and the unbiased
+> SRMR 0.058, 90% CI \[0.042, 0.074\]; CFI was 0.931 against the
+> independence model. The standardized residuals showed the straight and
+> curved capitals test sharing more covariance with the three visual
+> tests than the model implied. Allowing that test to load on the visual
+> factor, a modification suggested by these data, reduced the RMSEA to
+> 0.065, 90% CI \[0.042, 0.089\], and the unbiased SRMR to 0.035, 90% CI
+> \[0.020, 0.049\], and was preferred by BIC over the three-factor model
+> ($`\Delta`$BIC = 27.22) and over a one-factor model ($`\Delta`$BIC =
+> 237.05). Fit within an RMSEA of .08, the tolerance set before the
+> analysis, was not established for either model; the data endorse fit
+> within 0.089 for the modified model.
+
+## What Global Fit Does Not Settle
+
+- **Where the misfit is.** A single index averages over every moment the
+  model reproduces. The residuals, read alongside the indices, locate
+  it.
+- **The structural part.** In a model with latent regressions, the
+  substantive question is usually the fit of the structural relations,
+  and an index that lumps the measurement and structural parts together
+  does not answer it directly (Lai, 2024). Lai (2024) and Zhang and
+  Wu (2024) develop estimates, intervals, and tests for the fit of the
+  structural part; the functions here evaluate the whole model.
+- **Differences in fit between models.** A sample difference in RMSEA or
+  CFI can be smaller than, larger than, or of opposite sign to the
+  population difference (Lai, 2020), and the limits of two separate
+  intervals do not bound it.
+- **Improper solutions and multilevel models.** A fit that did not
+  converge, or whose solution lavaan’s post-estimation check flags as
+  improper (a negative variance estimate, or a covariance matrix of the
+  latent variables, of the residuals, or of the structural residuals
+  that is not positive definite), is refused, since its fit measures
+  describe estimates outside the parameter space. With auxiliary
+  variables the check is made on the model’s own parameters: lavaan’s
+  own check also tests the residual covariances of the auxiliary
+  variables, which are not positive definite once an auxiliary variable
+  is related to a factor strongly enough, however proper the model’s
+  solution. A multilevel fit is refused by
+  [`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+  since one set of indices mixes the levels; lavaan’s level specific fit
+  measures are the tool for it.
+- **Cutoffs.** No value of any index certifies a model. The intervals
+  and the tests of close and not close fit say how precisely the data
+  locate the misfit, and a tolerance chosen in advance turns that into a
+  decision.
+
+## References
+
+Akaike, H. (1974). A new look at the statistical model identification.
+*IEEE Transactions on Automatic Control, 19*, 716–723.
+<https://doi.org/10.1109/TAC.1974.1100705>
+
+Asparouhov, T. (2005). Sampling weights in latent variable modeling.
+*Structural Equation Modeling, 12*(3), 411–434.
+
+Bentler, P. M. (1990). Comparative fit indexes in structural models.
+*Psychological Bulletin, 107*(2), 238–246.
+<https://doi.org/10.1037/0033-2909.107.2.238>
+
+Bentler, P. M. (1995). *EQS structural equations program manual*.
+Multivariate Software.
+
+Bentler, P. M., & Bonett, D. G. (1980). Significance tests and goodness
+of fit in the analysis of covariance structures. *Psychological
+Bulletin, 88*, 588–606.
+
+Bollen, K. A. (1989). A new incremental fit index for general structural
+equation models. *Sociological Methods & Research, 17*(3), 303–316.
+<https://doi.org/10.1177/0049124189017003004>
+
+Bollen, K. A., Harden, J. J., Ray, S., & Zavisca, J. (2014). BIC and
+alternative Bayesian information criteria in the selection of structural
+equation models. *Structural Equation Modeling, 21*(1), 1–19.
+<https://doi.org/10.1080/10705511.2014.856691>
+
+Bollen, K. A., Ray, S., Zavisca, J., & Harden, J. J. (2012). A
+comparison of Bayes factor approximation methods including two new
+methods. *Sociological Methods & Research, 41*(2), 294–324.
+<https://doi.org/10.1177/0049124112452393>
+
+Brosseau-Liard, P. E., & Savalei, V. (2014). Adjusting incremental fit
+indices for nonnormality. *Multivariate Behavioral Research, 49*(5),
+460–470. <https://doi.org/10.1080/00273171.2014.933697>
+
+Brosseau-Liard, P. E., Savalei, V., & Li, L. (2012). An investigation of
+the sample performance of two nonnormality corrections for RMSEA.
+*Multivariate Behavioral Research, 47*(6), 904–930.
+<https://doi.org/10.1080/00273171.2012.715252>
+
+Browne, M. W. (1984). Asymptotically distribution-free methods for the
+analysis of covariance structures. *British Journal of Mathematical and
+Statistical Psychology, 37*(1), 62–83.
+
+Browne, M. W., & Cudeck, R. (1989). Single sample cross-validation
+indices for covariance structures. *Multivariate Behavioral Research,
+24*(4), 445–455.
+
+Browne, M. W., & Cudeck, R. (1993). Alternative ways of assessing model
+fit. In K. A. Bollen & J. S. Long (Eds.), *Testing structural equation
+models* (pp. 136–162). Sage.
+
+Burnham, K. P., & Anderson, D. R. (2004). Multimodel inference:
+Understanding AIC and BIC in model selection. *Sociological Methods &
+Research, 33*(2), 261–304. <https://doi.org/10.1177/0049124104268644>
+
+Haughton, D. M. A. (1988). On the choice of a model to fit data from an
+exponential family. *The Annals of Statistics, 16*, 342–355.
+
+Holzinger, K. J., & Swineford, F. (1939). *A study in factor analysis:
+The stability of a bi-factor solution* (Supplementary Educational
+Monographs, No. 48). University of Chicago Press.
+
+Hu, L., & Bentler, P. M. (1998). Fit indices in covariance structure
+modeling: Sensitivity to underparameterized model misspecification.
+*Psychological Methods, 3*(4), 424–453.
+<https://doi.org/10.1037/1082-989X.3.4.424>
+
+Jöreskog, K. G. (1969). A general approach to confirmatory maximum
+likelihood factor analysis. *Psychometrika, 34*, 183–202.
+
+Kelley, K., & Lai, K. (2011). Accuracy in parameter estimation for the
+root mean square error of approximation: Sample size planning for narrow
+confidence intervals. *Multivariate Behavioral Research, 46*(1), 1–32.
+<https://doi.org/10.1080/00273171.2011.543027>
+
+Lai, K. (2020). Confidence interval for RMSEA or CFI difference between
+nonnested models. *Structural Equation Modeling, 27*(1), 16–32.
+<https://doi.org/10.1080/10705511.2019.1631704>
+
+Lai, K. (2024). On the estimation of fit indices for the structural part
+of a model. *Structural Equation Modeling, 31*(6), 1065–1082.
+<https://doi.org/10.1080/10705511.2024.2371347>
+
+Lin, L.-C., Huang, P.-H., & Weng, L.-J. (2017). Selecting path models in
+SEM: A comparison of model selection criteria. *Structural Equation
+Modeling, 24*(6), 855–869.
+<https://doi.org/10.1080/10705511.2017.1363652>
+
+MacCallum, R. C., Browne, M. W., & Sugawara, H. M. (1996). Power
+analysis and determination of sample size for covariance structure
+modeling. *Psychological Methods, 1*(2), 130–149.
+<https://doi.org/10.1037/1082-989X.1.2.130>
+
+Maydeu-Olivares, A. (2017). Assessing the size of model misfit in
+structural equation models. *Psychometrika, 82*, 533–558.
+<https://doi.org/10.1007/s11336-016-9552-7>
+
+Maydeu-Olivares, A., Shi, D., & Rosseel, Y. (2018). Assessing fit in
+structural equation models: A Monte-Carlo evaluation of RMSEA versus
+SRMR confidence intervals and tests of close fit. *Structural Equation
+Modeling, 25*(3), 389–402.
+<https://doi.org/10.1080/10705511.2017.1389611>
+
+McDonald, R. P., & Marsh, H. W. (1990). Choosing a multivariate model:
+Noncentrality and goodness of fit. *Psychological Bulletin, 107*(2),
+247–255. <https://doi.org/10.1037/0033-2909.107.2.247>
+
+Muthén, B. (1984). A general structural equation model with dichotomous,
+ordered categorical, and continuous latent variable indicators.
+*Psychometrika, 49*(1), 115–132.
+
+Rosseel, Y. (2012). lavaan: An R package for structural equation
+modeling. *Journal of Statistical Software, 48*(2), 1–36.
+<https://doi.org/10.18637/jss.v048.i02>
+
+Savalei, V. (2018). On the computation of the RMSEA and CFI from the
+mean-and-variance corrected test statistic with nonnormal data in SEM.
+*Multivariate Behavioral Research, 53*(3), 419–429.
+<https://doi.org/10.1080/00273171.2018.1455142>
+
+Savalei, V. (2021). Improving fit indices in structural equation
+modeling with categorical data. *Multivariate Behavioral Research,
+56*(3), 390–407. <https://doi.org/10.1080/00273171.2020.1717922>
+
+Schwarz, G. (1978). Estimating the dimension of a model. *The Annals of
+Statistics, 6*, 461–464. <https://doi.org/10.1214/aos/1176344136>
+
+Sclove, S. L. (1987). Application of model-selection criteria to some
+problems in multivariate analysis. *Psychometrika, 52*(3), 333–343.
+<https://doi.org/10.1007/BF02294360>
+
+Shi, D., Maydeu-Olivares, A., & DiStefano, C. (2018). The relationship
+between the standardized root mean square residual and model
+misspecification in factor analysis models. *Multivariate Behavioral
+Research, 53*(5), 676–694.
+<https://doi.org/10.1080/00273171.2018.1476221>
+
+Steiger, J. H. (1989). *EzPATH: A supplementary module for SYSTAT and
+SYGRAPH*. SYSTAT.
+
+Steiger, J. H. (1990). Structural model evaluation and modification: An
+interval estimation approach. *Multivariate Behavioral Research, 25*(2),
+173–180.
+
+Steiger, J. H. (1998). A note on multiple sample extensions of the RMSEA
+fit index. *Structural Equation Modeling, 5*(4), 411–419.
+<https://doi.org/10.1080/10705519809540115>
+
+Steiger, J. H. (2000). Point estimation, hypothesis testing, and
+interval estimation using the RMSEA: Some comments and a reply to Hayduk
+and Glaser. *Structural Equation Modeling, 7*(2), 149–162.
+
+Steiger, J. H. (2016). Notes on the Steiger–Lind (1980) handout.
+*Structural Equation Modeling, 23*(6), 777–781.
+<https://doi.org/10.1080/10705511.2016.1217487>
+
+Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Lawrence Erlbaum.
+
+Steiger, J. H., & Lind, J. C. (1980). *Statistically-based tests for the
+number of common factors* \[Paper presentation\]. Annual meeting of the
+Psychometric Society, Iowa City, IA.
+
+Tucker, L. R., & Lewis, C. (1973). A reliability coefficient for maximum
+likelihood factor analysis. *Psychometrika, 38*(1), 1–10.
+
+van Laar, S., & Braeken, J. (2022). Caught off base: A note on the
+interpretation of incremental fit indices. *Structural Equation
+Modeling, 29*(6), 935–943.
+<https://doi.org/10.1080/10705511.2022.2050730>
+
+Ximénez, C., Maydeu-Olivares, A., Shi, D., & Revuelta, J. (2022).
+Assessing cutoff values of SEM fit indices: Advantages of the unbiased
+SRMR index and its cutoff criterion based on communality. *Structural
+Equation Modeling, 29*(3), 368–380.
+<https://doi.org/10.1080/10705511.2021.1992596>
+
+Yuan, K.-H., Chan, W., Marcoulides, G. A., & Bentler, P. M. (2016).
+Assessing structural equation models by equivalence testing with
+adjusted fit indexes. *Structural Equation Modeling, 23*(3), 319–330.
+<https://doi.org/10.1080/10705511.2015.1065414>
+
+Zhang, X., & Savalei, V. (2023). New computations for RMSEA and CFI
+following FIML and TS estimation with missing data. *Psychological
+Methods, 28*(2), 263–283. <https://doi.org/10.1037/met0000445>
+
+Zhang, X., & Wu, H. (2024). Investigating structural model fit
+evaluation. *Structural Equation Modeling, 31*(5), 863–881.
+<https://doi.org/10.1080/10705511.2024.2350023>

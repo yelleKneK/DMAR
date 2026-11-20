@@ -25,7 +25,10 @@ fleiss_kappa(
   A numeric \\N \times k\\ matrix or `data.frame`: row \\i\\ gives the
   counts of raters who assigned each of the \\k\\ categories to subject
   \\i\\. Each row must sum to the same value \\m\\ (the common number of
-  raters per subject).
+  raters per subject). Missing values are not supported, and SPSS
+  user-defined missing values (a `haven_labelled_spss` column) are
+  missing values, so a count declared missing is refused rather than
+  counted.
 
 - conf_level:
 
@@ -49,7 +52,15 @@ fleiss_kappa(
 - B:
 
   Number of bootstrap replications when `ci_method` is `"percentile"` or
-  `"bca"` (default `10000`; ignored for `"wald"`).
+  `"bca"`, a single whole number (ignored for `"wald"`). Default
+  `10000`, because kappa is cheap to recompute on a resample. The fewest
+  accepted at the default `conf_level` is 400 for the percentile
+  interval (200 at 0.90, 2000 at 0.99) and 2000 for the BCa interval
+  (1000 at 0.90, 10000 at 0.99), whose adjustment moves the working
+  quantiles into the tails; a smaller or fractional `B` is refused
+  before anything is computed (class `dmar_count_invalid`). See
+  *Bootstrap replications* under *Details* and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - seed:
 
@@ -61,9 +72,13 @@ fleiss_kappa(
 
 A one-row `data.frame` (class `dmar_tbl`) with columns `kappa`, `se`
 (asymptotic standard error of \\\hat\kappa_F\\ used for the interval),
-`lower_limit`, `upper_limit`, `z_value`, `p_value` (Wald test of
-\\H_0\\: \kappa = 0\\), `n_subjects`, `n_raters` (\\m\\), and
-`n_categories` (\\k\\).
+`ci_lower`, `ci_upper`, `z_value`, `p_value` (Wald test of \\H_0\\:
+\kappa = 0\\), `n_subjects`, `n_raters` (\\m\\), and `n_categories`
+(\\k\\). With a bootstrap interval the result carries the attributes
+`B`, `B_used`, `n_dropped`, `B_required`, and `bootstrap_status` (see
+*Bootstrap replications* under Details), which
+[`dmar_metadata`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)
+reads.
 
 ## Details
 
@@ -110,6 +125,40 @@ boundary, where the Wald interval's coverage is least dependable. The
 `se`, `z_value`, and `p_value` columns keep their asymptotic definitions
 under every `ci_method`; only the interval changes. Bootstrap results
 vary from run to run; supply `seed` for reproducibility.
+
+**Bootstrap replications.** The percentile interval reads its limits
+from the quantiles of the `B` replicated values of kappa and is run only
+when `B` puts at least 10 replications beyond each limit (400 at the 95
+percent level); the BCa interval, whose limits move farther into the
+tails, only with 50 beyond each nominal limit (2000). A replication in
+which kappa is undefined (chance agreement of 1 in the resample, as when
+every resampled rating falls in one category) is dropped and counted,
+never replaced, and the interval is computed from the rest. The result
+records `B` (requested), `B_used` (the number the interval rests on),
+`n_dropped`, and `B_required` (the fewest replications a request may ask
+for; that count is held to `B`, not to `B_used`) as attributes, with
+`bootstrap_status` (`"complete"`, `"dropped"`, `"exploratory"`,
+`"insufficient_count"`, or `"insufficient_share"`). One warning of class
+`dmar_bootstrap_replications_dropped` states the counts when any
+replication was dropped, with a caution when the dropped replications
+are at least the 2.5 percent of `B` that lies beyond one limit at the 95
+percent level, because they could then decide by themselves where that
+limit falls. When more than half were dropped, both limits are `NA`, the
+estimate is returned, and the warning has class
+`dmar_bootstrap_insufficient`. For the BCa interval the count of 10 is
+applied again where the bias correction and the acceleration place the
+limits, and when fewer than 10 replications lie beyond one of them no
+BCa interval is reported (limits `NA`, the same class, with the two
+positions as `positions` and a suggested `B` as `B_suggest`). When kappa
+is undefined with some case left out (chance agreement 1), when every
+bootstrap estimate falls on one side of the sample estimate, or when the
+acceleration is not finite, the BCa interval is refused with an error of
+class `dmar_bca_undefined`. `options(dmar.bootstrap_exploratory = TRUE)`
+lets a smaller `B` (2 or more) run for a first look or a demonstration;
+every such call gives a warning of class `dmar_bootstrap_exploratory`
+and the result is not one to report. See
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+for the rule and its reasons.
 
 Fleiss's kappa is purely nominal (no weighting). For ordinal categories
 with two raters, use
@@ -203,8 +252,8 @@ fleiss_1971 <- matrix(c(
   0, 0, 0, 0, 6
 ), nrow = 30, byrow = TRUE)
 fleiss_kappa(fleiss_1971)
-#>  kappa se     lower_limit upper_limit z_value p_value  n_subjects n_raters
-#>  0.43  0.0542 0.324       0.536       17.7    < 0.0001 30         6       
+#>  kappa se    ci_lower ci_upper z_value p_value  n_subjects n_raters
+#>  0.430 0.054 0.324    0.536    17.652  < 0.0001 30         6       
 #>  n_categories
 #>  5           
 #> 
@@ -217,10 +266,12 @@ fleiss_kappa(fleiss_1971)
 # interval deserves the default B = 10000.
 fleiss_kappa(fleiss_1971, ci_method = "percentile", B = 2000,
              seed = 113)
-#>  kappa se     lower_limit upper_limit z_value p_value  n_subjects n_raters
-#>  0.43  0.0542 0.316       0.532       17.7    < 0.0001 30         6       
+#>  kappa se    ci_lower ci_upper z_value p_value  n_subjects n_raters
+#>  0.430 0.054 0.316    0.532    17.652  < 0.0001 30         6       
 #>  n_categories
 #>  5           
 #> 
 #> Confidence level: 95%
+#> 
+#> Bootstrap: 2000 replications, 2000 used (0 dropped; at least 400 must be requested)
 ```

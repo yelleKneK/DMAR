@@ -69,12 +69,12 @@ Ken Kelley <kkelley@nd.edu>
 # d = 0.5 corresponds to an odds ratio of about 2.48.
 convert_d_or(d = 0.5)
 #>  term       value
-#>  odds_ratio 2.48 
+#>  odds_ratio 2.477
 
 # And back, exactly.
 convert_or_d(or = convert_d_or(d = 0.5)$value)
 #>  term value
-#>  smd  0.5  
+#>  smd  0.500
 
 # The null maps to the null: d = 0 is an odds ratio of 1.
 convert_d_or(d = 0)

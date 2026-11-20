@@ -38,7 +38,12 @@ cohen_kappa(
   categorical, factor or coercible to factor). Together `rater_1` and
   `rater_2` give the two raters' classifications on the same set of
   subjects; pairs in which either is `NA` are dropped before
-  computation.
+  computation. SPSS user-defined missing values, which
+  `haven::read_sav(user_na = TRUE)` keeps as values of a
+  `haven_labelled_spss` vector, are `NA` here (as SPSS and haven's
+  [`is.na()`](https://rdrr.io/r/base/NA.html) treat them), whether or
+  not haven is loaded, so a code declared missing is never counted as a
+  category.
 
 - table:
 
@@ -94,9 +99,15 @@ cohen_kappa(
 - B:
 
   Number of bootstrap replications when `ci_method` is `"percentile"` or
-  `"bca"` (default `10000`; ignored for `"wald"`). The BCa adjustment
-  pushes the working quantiles into the tails, so reduce `B` for
-  exploration, not for a reported analysis.
+  `"bca"`, a single whole number (ignored for `"wald"`). Default
+  `10000`, because kappa is cheap to recompute on a resample. The fewest
+  accepted at the default `conf_level` is 400 for the percentile
+  interval (200 at 0.90, 2000 at 0.99) and 2000 for the BCa interval
+  (1000 at 0.90, 10000 at 0.99), whose adjustment moves the working
+  quantiles into the tails; a smaller or fractional `B` is refused
+  before anything is computed (class `dmar_count_invalid`). See
+  *Bootstrap replications* under *Details* and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - seed:
 
@@ -107,9 +118,14 @@ cohen_kappa(
 ## Value
 
 A one-row `data.frame` (class `dmar_tbl`) with columns `weights` (the
-form used), `kappa`, `se` (asymptotic standard error), `lower_limit`,
-`upper_limit`, `z_value`, `p_value` (Wald test of \\H_0\\: \kappa =
-0\\), `n` (number of paired ratings), and `n_categories` (\\k\\).
+form used), `kappa`, `se` (asymptotic standard error), `ci_lower`,
+`ci_upper`, `z_value`, `p_value` (Wald test of \\H_0\\: \kappa = 0\\),
+`N` (number of paired ratings), and `n_categories` (\\k\\). With a
+bootstrap interval the result carries the attributes `B`, `B_used`,
+`n_dropped`, `B_required`, and `bootstrap_status` (see *Bootstrap
+replications* under Details), which
+[`dmar_metadata`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)
+reads.
 
 The per-cell detail behind the coefficient travels with the result as
 the `cells` attribute, in the form of Cohen's (1968) Table 1: a
@@ -185,14 +201,46 @@ quantile positions for median bias (estimated from the bootstrap
 distribution) and for acceleration (estimated from the jackknife),
 making it second-order accurate where the percentile interval is
 first-order accurate (Efron & Tibshirani, 1993). `table` input is
-expanded to the equivalent paired ratings and resampled the same way. A
-resample on which kappa is undefined (chance agreement 1) is dropped,
-and the interval is computed from the replications that return a value;
-a single warning reports how many were dropped. The `se`, `z_value`, and
-`p_value` columns keep their asymptotic definitions under every
-`ci_method`; only the interval changes. Bootstrap results vary from run
-to run; supply `seed` for reproducibility (the RNG state is set locally
-and the caller's state restored on exit).
+expanded to the equivalent paired ratings and resampled the same way.
+The `se`, `z_value`, and `p_value` columns keep their asymptotic
+definitions under every `ci_method`; only the interval changes.
+Bootstrap results vary from run to run; supply `seed` for
+reproducibility (the RNG state is set locally and the caller's state
+restored on exit).
+
+**Bootstrap replications.** The percentile interval reads its limits
+from the quantiles of the `B` replicated values of kappa and is run only
+when `B` puts at least 10 replications beyond each limit (400 at the 95
+percent level); the BCa interval, whose limits move farther into the
+tails, only with 50 beyond each nominal limit (2000). A replication in
+which kappa is undefined (chance agreement of 1 in the resample, as when
+every resampled rating falls in one category) is dropped and counted,
+never replaced, and the interval is computed from the rest. The result
+records `B` (requested), `B_used` (the number the interval rests on),
+`n_dropped`, and `B_required` (the fewest replications a request may ask
+for; that count is held to `B`, not to `B_used`) as attributes, with
+`bootstrap_status` (`"complete"`, `"dropped"`, `"exploratory"`,
+`"insufficient_count"`, or `"insufficient_share"`). One warning of class
+`dmar_bootstrap_replications_dropped` states the counts when any
+replication was dropped, with a caution when the dropped replications
+are at least the 2.5 percent of `B` that lies beyond one limit at the 95
+percent level, because they could then decide by themselves where that
+limit falls. When more than half were dropped, both limits are `NA`, the
+estimate is returned, and the warning has class
+`dmar_bootstrap_insufficient`. For the BCa interval the count of 10 is
+applied again where the bias correction and the acceleration place the
+limits, and when fewer than 10 replications lie beyond one of them no
+BCa interval is reported (limits `NA`, the same class, with the two
+positions as `positions` and a suggested `B` as `B_suggest`). When kappa
+is undefined with some case left out (chance agreement 1), when every
+bootstrap estimate falls on one side of the sample estimate, or when the
+acceleration is not finite, the BCa interval is refused with an error of
+class `dmar_bca_undefined`. `options(dmar.bootstrap_exploratory = TRUE)`
+lets a smaller `B` (2 or more) run for a first look or a demonstration;
+every such call gives a warning of class `dmar_bootstrap_exploratory`
+and the result is not one to report. See
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+for the rule and its reasons.
 
 ## References
 
@@ -206,6 +254,9 @@ Cohen, J. (1960). A coefficient of agreement for nominal scales.
 Cohen, J. (1968). Weighted kappa: Nominal scale agreement provision for
 scaled disagreement or partial credit. *Psychological Bulletin, 70*(4),
 213–220.
+
+Efron, B., & Tibshirani, R. J. (1993). *An introduction to the
+bootstrap*. New York, NY: Chapman & Hall/CRC.
 
 Fleiss, J. L., Cohen, J., & Everitt, B. S. (1969). Large sample standard
 errors of kappa and weighted kappa. *Psychological Bulletin, 72*(5),
@@ -259,10 +310,8 @@ tab
 
 # Unweighted kappa, all disagreements equal (Cohen's Formula 4): .492.
 cohen_kappa(table = tab)
-#>  weights    kappa se    lower_limit upper_limit z_value p_value  n  
-#>  unweighted 0.492 0.051 0.392       0.591       9.64    < 0.0001 200
-#>  n_categories
-#>  3           
+#>  weights    kappa se    ci_lower ci_upper z_value p_value  N   n_categories
+#>  unweighted 0.492 0.051 0.392    0.591    9.637   < 0.0001 200 3           
 #> 
 #> Confidence level: 95%
 
@@ -273,12 +322,12 @@ cohen_kappa(table = tab)
 # example quick; a reported interval deserves the default B = 10000.
 cohen_kappa(table = tab, ci_method = "percentile", B = 2000,
             seed = 113)
-#>  weights    kappa se    lower_limit upper_limit z_value p_value  n  
-#>  unweighted 0.492 0.051 0.387       0.592       9.64    < 0.0001 200
-#>  n_categories
-#>  3           
+#>  weights    kappa se    ci_lower ci_upper z_value p_value  N   n_categories
+#>  unweighted 0.492 0.051 0.387    0.592    9.637   < 0.0001 200 3           
 #> 
 #> Confidence level: 95%
+#> 
+#> Bootstrap: 2000 replications, 2000 used (0 dropped; at least 400 must be requested)
 
 # Cohen's ratio-scaled disagreement weights: a neurosis-psychosis
 # confusion (weight 6) is six times as grave as a personality
@@ -289,8 +338,8 @@ cohen_kappa(table = tab, ci_method = "percentile", B = 2000,
 res <- cohen_kappa(table = tab, weights = v,
                    weight_scaling = "disagreement")
 res
-#>  weights             kappa se     lower_limit upper_limit z_value p_value  n  
-#>  custom_disagreement 0.348 0.0755 0.2         0.496       4.61    < 0.0001 200
+#>  weights             kappa se    ci_lower ci_upper z_value p_value  N  
+#>  custom_disagreement 0.348 0.076 0.200    0.496    4.607   < 0.0001 200
 #>  n_categories
 #>  3           
 #> 
@@ -326,8 +375,8 @@ v_swap[v == 6] <- 1
 v_swap[v == 1] <- 6
 cohen_kappa(table = tab, weights = v_swap,
             weight_scaling = "disagreement")
-#>  weights             kappa se     lower_limit upper_limit z_value p_value  n  
-#>  custom_disagreement 0.574 0.0553 0.465       0.682       10.4    < 0.0001 200
+#>  weights             kappa se    ci_lower ci_upper z_value p_value  N  
+#>  custom_disagreement 0.574 0.055 0.465    0.682    10.373  < 0.0001 200
 #>  n_categories
 #>  3           
 #> 
@@ -373,8 +422,8 @@ v_validity <- matrix(
     4, 6, 0), nrow = 3, byrow = TRUE)
 cohen_kappa(table = tab, weights = v_validity,
             weight_scaling = "disagreement")
-#>  weights             kappa se     lower_limit upper_limit z_value p_value  n  
-#>  custom_disagreement 0.353 0.0627 0.231       0.476       5.64    < 0.0001 200
+#>  weights             kappa se    ci_lower ci_upper z_value p_value  N  
+#>  custom_disagreement 0.353 0.063 0.231    0.476    5.640   < 0.0001 200
 #>  n_categories
 #>  3           
 #> 
@@ -387,10 +436,8 @@ set.seed(113)
 x <- sample(1:5, 100, replace = TRUE)
 y <- pmin(pmax(x + sample(-1:1, 100, replace = TRUE), 1), 5)
 cohen_kappa(x, y, weights = "quadratic")
-#>  weights   kappa se     lower_limit upper_limit z_value p_value  n  
-#>  quadratic 0.85  0.0205 0.81        0.89        41.5    < 0.0001 100
-#>  n_categories
-#>  5           
+#>  weights   kappa se    ci_lower ci_upper z_value p_value  N   n_categories
+#>  quadratic 0.850 0.020 0.810    0.890    41.469  < 0.0001 100 5           
 #> 
 #> Confidence level: 95%
 ```

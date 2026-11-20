@@ -14,14 +14,13 @@ ci_c(
   means = NULL,
   s_anova = NULL,
   c_weights = NULL,
-  n = NULL,
+  n_per_group = NULL,
   N = NULL,
-  psi = NULL,
+  contrast = NULL,
   conf_level = 0.95,
   alpha_lower = NULL,
   alpha_upper = NULL,
-  df_error = NULL,
-  ...
+  df_error = NULL
 )
 ```
 
@@ -35,7 +34,9 @@ ci_c(
 - s_anova:
 
   The standard deviation of the errors from the ANOVA model (i.e., the
-  square root of the mean square error)
+  square root of the mean square error); required, as a single positive
+  number, since the standard error of the contrast is formed from it and
+  the means and sample sizes cannot supply it
 
 - c_weights:
 
@@ -43,7 +44,7 @@ ci_c(
   sum to 1 and the negative *c*-weights sum to -1; i.e., use fractional
   values not integers)
 
-- n:
+- n_per_group:
 
   Sample sizes *per group* or level of the particular factor (if length
   1 it is assumed that the per group/level sample sizes are equal)
@@ -52,7 +53,7 @@ ci_c(
 
   Total sample size
 
-- psi:
+- contrast:
 
   The contrast effect, obtained by multiplying the *j*th mean by the
   *j*th contrast weight.
@@ -60,32 +61,38 @@ ci_c(
 - conf_level:
 
   Confidence interval coverage (i.e., 1- Type I error rate); default is
-  .95
+  .95. A level above .999999998, whose tail areas are below 1e-9, is
+  refused
 
 - alpha_lower:
 
-  Type I error for the lower confidence limit
+  Type I error for the lower confidence limit, given together with
+  `alpha_upper`; one without the other is refused.
 
 - alpha_upper:
 
-  Type I error for the upper confidence limit
+  Type I error for the upper confidence limit. The table records the
+  coverage, `1 - alpha_lower - alpha_upper`, as its level and, when the
+  two tail areas differ, the areas themselves, which the line beneath
+  the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound. A
+  nonzero tail area below 1e-9 is refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - df_error:
 
-  The degrees of freedom for the error. In one-way designs, this is
-  simply *N*-length (means) and need not be specified; it must be
-  specified if the design has multiple factors.
-
-- ...:
-
-  Allows one to potentially include parameter values for inner functions
+  The degrees of freedom for the error. In one-way designs it is *N*
+  minus the number of groups, `N - length(means)`, and need not be
+  specified; it must be specified if the design has multiple factors.
 
 ## Value
 
 A 3-row `data.frame` with columns `term` and `value`. The `term` values
-are `"lower_limit"` (the lower confidence limit on the population
+are `"ci_lower"` (the lower confidence limit on the population
 contrast), `"contrast"` (the estimated unstandardized contrast), and
-`"upper_limit"` (the upper limit).
+`"ci_upper"` (the upper limit).
 
 ## Note
 
@@ -135,10 +142,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -166,21 +174,21 @@ Ken Kelley <kkelley@nd.edu>
 # variance). The contrast of interest here is the average of groups 1 and 4 versus the
 # average of groups 2 and 3.
 ci_c(means = c(2, 4, 9, 13), s_anova = .80, c_weights = c(.5, -.5, -.5, .5),
-n = c(3, 3, 3, 3), N = 12, conf_level = .95)
-#>  term        value  
-#>  lower_limit -0.0651
-#>  contrast    1      
-#>  upper_limit 2.07   
+n_per_group = c(3, 3, 3, 3), N = 12, conf_level = .95)
+#>  term     value 
+#>  ci_lower -0.065
+#>  contrast 1.000 
+#>  ci_upper 2.065 
 #> 
 #> Confidence level: 95%
 
 # Here is an example with two groups.
 ci_c(means = c(1.6, 0), s_anova = .80, c_weights = c(1, -1),
-n = c(10, 10), N = 20, conf_level = .95)
-#>  term        value
-#>  lower_limit 0.848
-#>  contrast    1.6  
-#>  upper_limit 2.35 
+n_per_group = c(10, 10), N = 20, conf_level = .95)
+#>  term     value
+#>  ci_lower 0.848
+#>  contrast 1.600
+#>  ci_upper 2.352
 #> 
 #> Confidence level: 95%
 
@@ -199,11 +207,11 @@ n = c(10, 10), N = 20, conf_level = .95)
 ## Mean Square Within (i.e., 'error_variance') = 67.375
 
 ci_c(means = c(94, 91, 92, 83), s_anova = sqrt(67.375), c_weights = c(1, -1, 0, 0),
-n = c(4, 6, 5, 5), N = 20, conf_level = .95)
-#>  term        value
-#>  lower_limit -8.23
-#>  contrast    3    
-#>  upper_limit 14.2 
+n_per_group = c(4, 6, 5, 5), N = 20, conf_level = .95)
+#>  term     value 
+#>  ci_lower -8.232
+#>  contrast 3.000 
+#>  ci_upper 14.232
 #> 
 #> Confidence level: 95%
 ```

@@ -19,11 +19,11 @@ and returns that result. See Details for which to use when.
 
 ``` r
 ci_c_ancova(
-  psi = NULL,
+  contrast = NULL,
   adj_means = NULL,
   s_ancova = NULL,
   c_weights,
-  n,
+  n_per_group,
   cov_means,
   SSwithin_x,
   conf_level = 0.95,
@@ -34,7 +34,7 @@ ci_c_ancova(
 
 ## Arguments
 
-- psi:
+- contrast:
 
   The unstandardized contrast of adjusted means
 
@@ -46,13 +46,16 @@ ci_c_ancova(
 - s_ancova:
 
   The standard deviation of the errors from the ANCOVA model (i.e., the
-  square root of the mean square error from ANCOVA)
+  square root of the mean square error from ANCOVA); required, as a
+  single positive number, with either procedure, since the standard
+  error of the contrast is formed from it and the adjusted means and
+  sample sizes cannot supply it
 
 - c_weights:
 
   The contrast weights
 
-- n:
+- n_per_group:
 
   Either a single number that indicates the sample size *per group* or a
   vector that contains the sample size of each group
@@ -86,19 +89,19 @@ ci_c_ancova(
   Allows one to potentially include parameter values for inner
   functions. When `procedure = "bryant_paulson"`, these are passed on to
   [`ci_c_ancova_bp`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md)
-  (for example `num_covariates`, `df`, or `contrast_type`).
+  (for example `n_covariates`, `df`, or `contrast_type`).
 
 ## Value
 
 A 3-row `data.frame` with columns `term` and `value` (numeric). The
-`term` values are `"lower_limit"` (the lower confidence limit on the
-unstandardized ANCOVA contrast), `"psi"` (the unstandardized contrast
-point estimate), and `"upper_limit"` (the upper limit).
+`term` values are `"ci_lower"` (the lower confidence limit on the
+unstandardized ANCOVA contrast), `"contrast"` (the unstandardized
+contrast point estimate), and `"ci_upper"` (the upper limit).
 
 When `procedure = "bryant_paulson"`, the return value is whatever
 [`ci_c_ancova_bp`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md)
 returns (a table with one row per contrast and columns `contrast`,
-`estimate`, `lower_limit`, and `upper_limit`).
+`estimate`, `ci_lower`, and `ci_upper`).
 
 ## Details
 
@@ -130,9 +133,9 @@ Be sure to use the standard deviation and not the error variance for
 source table (i.e., do not use the variance of the error but rather use
 the square root).
 
-If `n` receives a single number, that number is considered as the sample
-size *per group*. If `n` receives a vector, the vector is considered as
-the sample size of each group.
+If `n_per_group` receives a single number, that number is considered as
+the sample size *per group*. If `n_per_group` receives a vector, the
+vector is considered as the sample size of each group.
 
 Be sure to use fractions not the integers to specify `c_weights`. For
 example, in an ANCOVA of four groups, if the user wants to compare the
@@ -171,10 +174,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -206,12 +210,12 @@ Ken Kelley <kkelley@nd.edu>
 
 # To obtain the confidence interval for adjusted mean of group 1 versus group 2:
 ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29),
-            c_weights = c(1, -1, 0), n = 10,
+            c_weights = c(1, -1, 0), n_per_group = 10,
             cov_means = c(17, 17.7, 17.4), SSwithin_x = 752.5)
-#>  term        value
-#>  lower_limit -9.46
-#>  psi         -4.5 
-#>  upper_limit 0.458
+#>  term     value 
+#>  ci_lower -9.458
+#>  contrast -4.500
+#>  ci_upper 0.458 
 #> 
 #> Confidence level: 95%
 
@@ -222,12 +226,12 @@ ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29),
 # The simultaneous limits are wider, which is the price of the family
 # statement: group 1 against group 2 runs from -10.61 to 1.61, where the
 # single planned contrast above ran from -9.46 to 0.46.
-ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n = 10,
+ci_c_ancova(adj_means = c(7.5, 12, 14), s_ancova = sqrt(29), n_per_group = 10,
             procedure = "bryant_paulson")
-#>  contrast          estimate lower_limit upper_limit
-#>  group_1 - group_2 -4.5     -10.6       1.61       
-#>  group_1 - group_3 -6.5     -12.6       -0.393     
-#>  group_2 - group_3 -2       -8.11       4.11       
+#>  contrast          estimate ci_lower ci_upper
+#>  group_1 - group_2 -4.500   -10.607  1.607   
+#>  group_1 - group_3 -6.500   -12.607  -0.393  
+#>  group_2 - group_3 -2.000   -8.107   4.107   
 #> 
 #> Confidence level: 95%
 ```

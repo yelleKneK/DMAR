@@ -98,12 +98,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -129,11 +133,11 @@ set.seed(113)
 Y <- matrix(rnorm(20 * 4), nrow = 20)
 mauchly_test(Y)
 #>  W     statistic df p_value n_subjects n_levels method                      
-#>  0.597 9.13      5  0.1045  20         4        Mauchly's test of sphericity
+#>  0.597 9.130     5  0.1045  20         4        Mauchly's test of sphericity
 
 # Long-format example using built-in nlme::Orthodont (4 ages per subject).
 mauchly_test(nlme::Orthodont, id = "Subject", time = "age",
              outcome = "distance")
 #>  W     statistic df p_value n_subjects n_levels method                      
-#>  0.758 6.85      5  0.2326  27         4        Mauchly's test of sphericity
+#>  0.758 6.847     5  0.2326  27         4        Mauchly's test of sphericity
 ```

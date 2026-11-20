@@ -3,7 +3,7 @@
 Computes all pairwise paired-*t* comparisons among the levels of a
 within-subjects factor and returns the mean difference, paired SD,
 paired *t*-statistic, degrees of freedom, raw and adjusted *p*-values,
-and a confidence interval on the mean difference, all in tidy long form.
+and a confidence interval on the mean difference, one row per pair.
 *p*-values are adjusted across comparisons by the user-specified method
 (Bonferroni, Holm, Hochberg, Hommel, BH, BY, or none).
 
@@ -64,10 +64,20 @@ pairwise_within(
 
 ## Value
 
-A `data.frame` with one row per pair. Columns: `contrast` (the labeled
-difference, e.g. `"B - A"`), `mean_difference`, `sd_difference`,
-`t_statistic`, `df`, `p_value` (raw), `p_adjusted`, `lower_limit`,
-`upper_limit`, `n_pairs`.
+A `data.frame` (class `dmar_tbl`) with one row per pair. Columns:
+`contrast` (the labeled difference, e.g. `"B - A"`), `mean_difference`,
+`sd_difference`, `t_value`, `df`, `p_value` (raw), `p_adjusted`,
+`ci_lower`, `ci_upper`, `n_pairs`. The table records `conf_level` in its
+`conf_level` attribute, which the console prints beneath the table and
+[`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+reports. With `bonferroni_ci = TRUE` that is the simultaneous level of
+the \\m\\ intervals, the convention of
+[`contrast_test`](https://yelleknek.github.io/DMAR/reference/contrast_test.md)
+with `adjust = "bonferroni"` and of the post hoc intervals
+([`ci_tukey_kramer`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md)
+and the rest), and the line beneath the table names the Bonferroni
+adjustment and the level of each interval, \\1 - (1 -
+\mathrm{conf\\level}) / m\\.
 
 ## Details
 
@@ -109,12 +119,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -143,20 +157,22 @@ Y <- matrix(rnorm(n * k, 0, 1), n, k) +
      rnorm(n, 0, 1.5)
 colnames(Y) <- paste0("T", 1:k)
 pairwise_within(Y)
-#>   contrast mean_difference sd_difference t_statistic df    p_value p_adjusted
-#> 1  T2 - T1       0.9655205      1.156502   2.6400670  9 0.02691082  0.1146525
-#> 2  T3 - T1       1.4098513      1.432896   3.1114203  9 0.01249022  0.0749413
-#> 3  T4 - T1       1.2894819      1.489415   2.7377861  9 0.02293049  0.1146525
-#> 4  T3 - T2       0.4443308      1.669023   0.8418683  9 0.42166771  1.0000000
-#> 5  T4 - T2       0.3239614      1.820780   0.5626468  9 0.58741461  1.0000000
-#> 6  T4 - T3      -0.1203694      1.458101  -0.2610530  9 0.79992698  1.0000000
-#>   lower_limit upper_limit n_pairs
-#> 1   0.1382085   1.7928325      10
-#> 2   0.3848194   2.4348832      10
-#> 3   0.2240186   2.3549452      10
-#> 4  -0.7496162   1.6382778      10
-#> 5  -0.9785459   1.6264686      10
-#> 6  -1.1634317   0.9226928      10
+#>  contrast mean_difference sd_difference t_value df p_value p_adjusted ci_lower
+#>  T2 - T1  0.966           1.157         2.640   9  0.0269  0.1147     0.138   
+#>  T3 - T1  1.410           1.433         3.111   9  0.0125  0.0749     0.385   
+#>  T4 - T1  1.289           1.489         2.738   9  0.0229  0.1147     0.224   
+#>  T3 - T2  0.444           1.669         0.842   9  0.4217  1.0000     -0.750  
+#>  T4 - T2  0.324           1.821         0.563   9  0.5874  1.0000     -0.979  
+#>  T4 - T3  -0.120          1.458         -0.261  9  0.7999  1.0000     -1.163  
+#>  ci_upper n_pairs
+#>  1.793    10     
+#>  2.435    10     
+#>  2.355    10     
+#>  1.638    10     
+#>  1.626    10     
+#>  0.923    10     
+#> 
+#> Confidence level: 95%
 
 # 2. Long-format input:
 long <- data.frame(
@@ -165,18 +181,20 @@ long <- data.frame(
   y       = as.vector(Y)
 )
 pairwise_within(long, subject = "subject", condition = "time", outcome = "y")
-#>   contrast mean_difference sd_difference t_statistic df    p_value p_adjusted
-#> 1  T2 - T1       0.9655205      1.156502   2.6400670  9 0.02691082  0.1146525
-#> 2  T3 - T1       1.4098513      1.432896   3.1114203  9 0.01249022  0.0749413
-#> 3  T4 - T1       1.2894819      1.489415   2.7377861  9 0.02293049  0.1146525
-#> 4  T3 - T2       0.4443308      1.669023   0.8418683  9 0.42166771  1.0000000
-#> 5  T4 - T2       0.3239614      1.820780   0.5626468  9 0.58741461  1.0000000
-#> 6  T4 - T3      -0.1203694      1.458101  -0.2610530  9 0.79992698  1.0000000
-#>   lower_limit upper_limit n_pairs
-#> 1   0.1382085   1.7928325      10
-#> 2   0.3848194   2.4348832      10
-#> 3   0.2240186   2.3549452      10
-#> 4  -0.7496162   1.6382778      10
-#> 5  -0.9785459   1.6264686      10
-#> 6  -1.1634317   0.9226928      10
+#>  contrast mean_difference sd_difference t_value df p_value p_adjusted ci_lower
+#>  T2 - T1  0.966           1.157         2.640   9  0.0269  0.1147     0.138   
+#>  T3 - T1  1.410           1.433         3.111   9  0.0125  0.0749     0.385   
+#>  T4 - T1  1.289           1.489         2.738   9  0.0229  0.1147     0.224   
+#>  T3 - T2  0.444           1.669         0.842   9  0.4217  1.0000     -0.750  
+#>  T4 - T2  0.324           1.821         0.563   9  0.5874  1.0000     -0.979  
+#>  T4 - T3  -0.120          1.458         -0.261  9  0.7999  1.0000     -1.163  
+#>  ci_upper n_pairs
+#>  1.793    10     
+#>  2.435    10     
+#>  2.355    10     
+#>  1.638    10     
+#>  1.626    10     
+#>  0.923    10     
+#> 
+#> Confidence level: 95%
 ```

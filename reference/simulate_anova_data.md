@@ -9,17 +9,17 @@ unequal.
 ## Usage
 
 ``` r
-simulate_anova_data(mu, sigma, a, n, seed = NULL)
+simulate_anova_data(true_mean, true_sd, a, n_per_group, seed = NULL)
 ```
 
 ## Arguments
 
-- mu:
+- true_mean:
 
   A numeric vector of length `a` giving the population mean in each
   group.
 
-- sigma:
+- true_sd:
 
   Within-group population standard deviation. Either a single number
   (homoscedastic; common across groups) or a numeric vector of length
@@ -30,7 +30,7 @@ simulate_anova_data(mu, sigma, a, n, seed = NULL)
   The number of fixed levels of the grouping factor (per the convention
   used throughout DMAR for fixed-factor designs).
 
-- n:
+- n_per_group:
 
   A single number (equal sample size per group) or a numeric vector of
   length `a` giving the sample size in each group.
@@ -56,10 +56,10 @@ columns:
 ## Details
 
 The fixed-effects ANOVA model assumes group-specific means and a common
-within-group variance. Setting `sigma` to a vector relaxes the
+within-group variance. Setting `true_sd` to a vector relaxes the
 homoscedasticity assumption; in that case the simulated data violate the
-standard ANOVA assumption (a useful feature for studying robustness or
-the performance of Welch-style alternatives).
+standard ANOVA assumption, which allows studying the robustness of the
+ANOVA *F* test or the performance of Welch-style alternatives.
 
 ## See also
 
@@ -87,7 +87,7 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Three-group ANOVA, equal n per group.
 set.seed(113)
-d <- simulate_anova_data(mu = c(50, 55, 60), sigma = 8, a = 3, n = 30)
+d <- simulate_anova_data(true_mean = c(50, 55, 60), true_sd = 8, a = 3, n_per_group = 30)
 aggregate(y ~ group, data = d, FUN = mean)
 #>   group        y
 #> 1     1 51.43086
@@ -95,8 +95,8 @@ aggregate(y ~ group, data = d, FUN = mean)
 #> 3     3 59.40916
 
 # Same design with unequal n per group.
-simulate_anova_data(mu = c(50, 55, 60), sigma = 8, a = 3,
-                    n = c(40, 30, 20), seed = 113)
+simulate_anova_data(true_mean = c(50, 55, 60), true_sd = 8, a = 3,
+                    n_per_group = c(40, 30, 20), seed = 113)
 #>    group        y
 #> 1      1 51.06684
 #> 2      1 61.00177
@@ -190,8 +190,8 @@ simulate_anova_data(mu = c(50, 55, 60), sigma = 8, a = 3,
 #> 90     3 62.14909
 
 # Heteroscedastic case: each group has its own SD.
-simulate_anova_data(mu = c(50, 55, 60), sigma = c(5, 8, 12),
-                    a = 3, n = 30, seed = 113)
+simulate_anova_data(true_mean = c(50, 55, 60), true_sd = c(5, 8, 12),
+                    a = 3, n_per_group = 30, seed = 113)
 #>    group        y
 #> 1      1 50.66677
 #> 2      1 56.87611

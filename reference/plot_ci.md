@@ -1,7 +1,6 @@
 # Forest-Plot-Style Confidence Interval Display
 
-Creates a clean visualization of one or more effect size estimates with
-their confidence intervals.
+Plots one or more effect size estimates with their confidence intervals.
 
 ## Usage
 
@@ -54,7 +53,11 @@ plot_ci(
 
 - conf_level:
 
-  Confidence level; used only for the axis label (default `0.95`).
+  Confidence level of the limits, used only for the title (default
+  `0.95`). When `ci` records the level of its interval, as every DMAR
+  table does, that level is used, and a `conf_level` that differs from
+  it is refused, since the plot draws the limits it is given and cannot
+  change their level.
 
 - show_n:
 
@@ -103,22 +106,39 @@ The function recognizes three DMAR output formats:
   Output from
   [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md),
   which includes a row for the point estimate (e.g., `term = "smd"`) in
-  addition to `"lower_limit"` and `"upper_limit"`.
+  addition to `"ci_lower"` and `"ci_upper"`.
 
 - **Long term/value without estimate**:
 
   Output from
   [`ci_R`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
   or [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md),
-  which contains only `"lower_limit"` and `"upper_limit"`. Supply the
-  point estimate via the `estimate` argument.
+  which contains only `"ci_lower"` and `"ci_upper"`. Supply the point
+  estimate via the `estimate` argument.
 
 - **Wide per-effect format**:
 
   Output from
-  [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
-  which has one row per effect with columns for the point estimate,
-  `lower_limit`, `upper_limit`, and `N`.
+  [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
+  or
+  [`ci_eta_squared`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
+  which has one row per effect with columns for each estimate and its
+  limits (`omega_squared_partial`, `omega_squared_partial_ci_lower`,
+  `omega_squared_partial_ci_upper`, and the same for the total) and `N`,
+  or from
+  [`ci_eta_squared_generalized`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
+  with `ci_lower` and `ci_upper`. Each estimate that has limits is drawn
+  (the total of an effect of a factorial design has none), and when a
+  table has limits for two, each row is labeled with the effect and the
+  estimate.
+
+The default title names the level the limits were formed at. An interval
+formed from unequal tail areas (`alpha_lower` and `alpha_upper` of a
+`ci_*` function) is drawn with a subtitle that gives the two areas, or,
+when one of them is 0, says which limit is the one-sided confidence
+bound, as
+[`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+does.
 
 ## Note
 
@@ -135,8 +155,8 @@ Requires ggplot2 (listed in `Suggests`).
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
@@ -169,7 +189,7 @@ plot_ci(ci_result, n = 100, reference_line = 0)
 pyg <- pygmalion
 pyg$grade <- factor(pyg$grade)
 fit <- aov(iq_8 ~ treatment + grade, data = pyg)
-omega_result <- ci_omega_squared(fit)
+omega_result <- ci_omega_squared(fit, estimand = "partial")
 plot_ci(omega_result, reference_line = 0,
         xlab = expression(omega^2))
 

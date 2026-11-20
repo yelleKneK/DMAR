@@ -1,6 +1,6 @@
 # Reading DMAR Result Tables
 
-## One Kind of Result, Everywhere
+## One Kind of Result
 
 Almost every DMAR function hands back the same kind of object: a tidy
 table with a `term` column that names each quantity and a `value` column
@@ -19,11 +19,11 @@ x <- ci_smd(smd = 0.5, n_1 = 50, n_2 = 50)
 x
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 0.101 |
-| smd         | 0.5   |
-| upper_limit | 0.897 |
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.101 |
+| smd      | 0.500 |
+| ci_upper | 0.897 |
 
 Confidence level: 95%
 
@@ -34,40 +34,43 @@ looking at.
 
 ## What You See Is Rounded; What Is Stored Is Exact
 
-The printed table is a *display*. DMAR rounds numbers so the table is
-easy to read, but it never rounds the numbers it stores. Pull a value
-out and you get full precision:
+The printed table is a *display*. DMAR rounds the numbers it prints: a
+value that is not a whole number shows three decimal places, trailing
+zeros included, so every such value in a column shows the same number of
+them, and a whole number such as a sample size shows none. It never
+rounds the numbers it stores. Pull a value out and you get full
+precision:
 
 ``` r
 
 x$value[x$term == "smd"]
 #> [1] 0.5
-x$value[x$term == "upper_limit"]
+x$value[x$term == "ci_upper"]
 #> [1] 0.8969414
 ```
 
 This matters whenever you do further arithmetic. The width of the
-interval, for example, uses the stored numbers, not the three digits you
-saw on screen:
+interval, for example, uses the stored numbers, not the three decimal
+places you saw on screen:
 
 ``` r
 
-lo <- x$value[x$term == "lower_limit"]
-hi <- x$value[x$term == "upper_limit"]
+lo <- x$value[x$term == "ci_lower"]
+hi <- x$value[x$term == "ci_upper"]
 hi - lo
 #> [1] 0.7963557
 ```
 
-If you want to *see* more (or fewer) digits, ask the display for them.
-This changes only what is shown, not what is stored:
+If you want to *see* more (or fewer) decimal places, ask the display for
+them. This changes only what is shown, not what is stored:
 
 ``` r
 
 print(x, digits = 8)
-#>  term        value     
-#>  lower_limit 0.10058571
-#>  smd         0.5       
-#>  upper_limit 0.89694143
+#>  term     value     
+#>  ci_lower 0.10058571
+#>  smd      0.50000000
+#>  ci_upper 0.89694143
 #> 
 #> Confidence level: 95%
 ```
@@ -80,11 +83,11 @@ options(dmar.digits = 4)
 x
 ```
 
-| term        | value  |
-|:------------|:-------|
-| lower_limit | 0.1006 |
-| smd         | 0.5    |
-| upper_limit | 0.8969 |
+| term     | value  |
+|:---------|:-------|
+| ci_lower | 0.1006 |
+| smd      | 0.5000 |
+| ci_upper | 0.8969 |
 
 Confidence level: 95%
 
@@ -100,11 +103,11 @@ usual ways. Any of these returns the upper confidence limit:
 
 ``` r
 
-x$value[x$term == "upper_limit"]
+x$value[x$term == "ci_upper"]
 #> [1] 0.8969414
-x[x$term == "upper_limit", "value"]
+x[x$term == "ci_upper", "value"]
 #> [1] 0.8969414
-subset(x, term == "upper_limit")$value
+subset(x, term == "ci_upper")$value
 #> [1] 0.8969414
 ```
 
@@ -164,6 +167,14 @@ keeps working. When you want a different shape, you ask for it with a
 verb (`tidy()` or `glance()`); the function’s own output never changes
 shape underneath you.
 
+To compare intervals at two confidence levels, stack the `tidy()` rows,
+which carry the level in a column;
+[`rbind()`](https://rdrr.io/r/base/cbind.html) of two DMAR tables at
+different levels returns an ordinary data frame, because no one level
+describes every row.
+[`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
+does not call the method.
+
 ## Wide Tables Read the Same Way
 
 Some functions are naturally wide already: each row is one term, and
@@ -171,23 +182,54 @@ several typed columns describe it. The display rules are identical, and
 each column is formatted on its own terms. Here every effect in a
 two-factor design gets its own row, with a partial effect size, its
 confidence limits, the *F* statistic, the degrees of freedom, and the
-sample size:
+sample size (the partial value, asked for with `estimand = "partial"`;
+by default the table also reports the total value, see
+[`?eta_squared`](https://yelleknek.github.io/DMAR/reference/eta_squared.md)).
+The design is from `pygmalion`, a teacher expectancy experiment that
+ships with DMAR
+([`?pygmalion`](https://yelleknek.github.io/DMAR/reference/pygmalion.md)
+describes the study and its source): the 310 pupils are classified by
+expectancy condition (bloomer or control) and by grade (1 through 6),
+and the outcome is each pupil’s change in total IQ from the pretest to
+the end of the study.
 
 ``` r
 
-ci_eta_squared(aov(len ~ supp * factor(dose), data = ToothGrowth))
+ci_eta_squared(aov(iq_gain ~ treatment * factor(grade), data = pygmalion),
+               estimand = "partial")
+#> Warning: The observed F_value is below the alpha_lower critical value of the
+#> central F-distribution, so the lower confidence limit on partial eta squared is
+#> 0.
 ```
 
-| effect | eta_squared | lower_limit | upper_limit | F_value | df_effect | df_error | N |
+| effect | eta_squared_partial | eta_squared_partial_ci_lower | eta_squared_partial_ci_upper | F_value | df_effect | df_error | N |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| supp | 0.224 | 0.0531 | 0.377 | 15.6 | 1 | 54 | 60 |
-| factor(dose) | 0.773 | 0.638 | 0.823 | 92 | 2 | 54 | 60 |
-| supp:factor(dose) | 0.132 | 0.00132 | 0.274 | 4.11 | 2 | 54 | 60 |
+| treatment | 0.014 | 0.000 | 0.050 | 4.273 | 1 | 298 | 310 |
+| factor(grade) | 0.125 | 0.051 | 0.181 | 8.486 | 5 | 298 | 310 |
+| treatment:factor(grade) | 0.030 | 0.000 | 0.061 | 1.861 | 5 | 298 | 310 |
+
+Confidence level: 95%
 
 Notice that the degrees of freedom and the sample size print as whole
 numbers with no decimal point, while the effect sizes and the *F*
-statistics print to three significant figures. You did not have to
-configure any of that.
+statistics print to three decimal places. A confidence limit is never a
+count, so a limit that is exactly 0 prints as 0.000, beside the other
+limits of its column. The same holds for other measured values that land
+on a whole number, such as a CFI or a power of exactly 1, which prints
+as 1.000;
+[`?dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
+says how the display tells a measured value from a count. You did not
+have to configure any of that.
+
+The warning printed with the table accounts for the lower limits of
+exactly 0: when an effect’s *F* statistic is below the critical value
+that sets the lower limit, that limit is 0. The rows come from R’s
+sequential (Type I) sums of squares, each term adjusted only for the
+terms before it in the formula. Because the cells hold unequal numbers
+of pupils, Type II or III sums of squares would give different rows for
+the earlier terms;
+[`?ci_eta_squared`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md)
+describes how to supply those *F* statistics instead.
 
 ## p-Values and Information Criteria
 
@@ -198,8 +240,9 @@ the way researchers expect:
   show at that precision prints as `< 0.0001` rather than rounding to
   `0.0000`.
 - **Information criteria** (AIC, BIC) and log-likelihoods print to a
-  fixed number of decimal places rather than to significant figures, so
-  a model comparison difference of a few points is never rounded away.
+  number of decimal places of their own (three by default), which
+  `digits` does not change, so a model comparison difference of a few
+  points is never rounded away.
 
 As always, the stored values keep full precision; only the display is
 shaped to the convention. The reference page
@@ -209,9 +252,17 @@ documents every display rule and the arguments (`digits`, `digits_p`,
 
 ## In One Paragraph
 
-Every DMAR result is a tidy data frame: rows named by `term`, numbers in
-`value`, printed with sensible rounding but stored at full precision.
-Read a number by indexing the way you always have; see more digits with
+Most DMAR results are tidy data frames: rows named by `term`, numbers in
+`value`, printed rounded but stored at full precision. Read a number by
+indexing the way you always have; see more decimal places with
 `print(x, digits = )`; get a wide row with `tidy()` or a one-line
-summary with `glance()`. That uniformity is the point. Learn it once and
-it holds for the whole package.
+summary with `glance()`. The regression functions for incomplete data
+([`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md),
+[`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md))
+return a fitted model object instead, and the ANOVA effect size
+functions
+([`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
+[`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
+[`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
+and their kin) return one row per effect; `tidy()` and `glance()` apply
+to these as well.

@@ -55,18 +55,18 @@ A list with two elements, returned in a stable shape regardless of the
 
 ## Details
 
-**Skewness and kurtosis.** The reported values use the bias-corrected
-formulas commonly referred to as SAS/SPSS Type 2: \$\$\mathrm{skewness}
-= \frac{n}{(n-1)(n-2)} \sum\_{i=1}^{n} \left(\frac{x_i -
+**Skewness and kurtosis.** The reported values are those of
+[`skewness`](https://yelleknek.github.io/DMAR/reference/skewness.md) and
+[`kurtosis`](https://yelleknek.github.io/DMAR/reference/kurtosis.md),
+the bias-corrected (Type 2) formulas \$\$\mathrm{skewness} =
+\frac{n}{(n-1)(n-2)} \sum\_{i=1}^{n} \left(\frac{x_i -
 \bar{x}}{s}\right)^3,\$\$ \$\$\mathrm{kurtosis} =
 \frac{n(n+1)}{(n-1)(n-2)(n-3)} \sum\_{i=1}^{n} \left(\frac{x_i -
 \bar{x}}{s}\right)^4 - \frac{3(n-1)^2}{(n-2)(n-3)},\$\$ where \\s\\ is
-the (divisor-\\n-1\\) sample standard deviation. Kurtosis is reported as
-excess kurtosis, so a normal distribution has an expected value of 0. As
-a rough guide to deciding whether normal-theory inference (e.g., maximum
-likelihood in factor analysis or SEM) is defensible, values of
-\\\|\mathrm{skewness}\| \> 2\\ or \\\|\mathrm{kurtosis}\| \> 7\\ are
-frequently flagged as problematic.
+the (divisor-\\n-1\\) sample standard deviation; the help pages of those
+functions give the other two formulas in use. Kurtosis is reported as
+excess kurtosis, whose expected value for a sample from a normal
+distribution is 0.
 
 **Variable-type handling.** Each column is classified as `"numeric"`,
 `"integer"`, `"logical"`, `"factor"`, `"character"`, or whatever its
@@ -97,7 +97,7 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Four cognitive tests from the Holzinger and Swineford (1939) study
+# Four cognitive tests from the holzinger_swineford data
 # (301 children in two schools).
 hs_tests <- holzinger_swineford[, c("t1_visual_perception", "t2_cubes",
                                     "t4_lozenges",

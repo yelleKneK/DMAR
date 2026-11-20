@@ -1,9 +1,10 @@
 # Plot TOST Equivalence-Test Power Curves Over a Range of True Differences
 
-For each sample size in `n`, draws power as a function of the true mean
-difference (or ratio, on the log scale), evaluated at 201 equally spaced
-points across the equivalence interval. Returns a ggplot2 object; the
-underlying numerical grid is attached as `attr(<plot>, "power_grid")`.
+For each sample size in `n_per_treatment`, draws power as a function of
+the true mean difference (or ratio, on the log scale), evaluated at 201
+equally spaced points across the equivalence interval. Returns a ggplot2
+object; the underlying numerical grid is attached as
+`attr(<plot>, "power_grid")`.
 
 ## Usage
 
@@ -11,11 +12,11 @@ underlying numerical grid is attached as `attr(<plot>, "power_grid")`.
 power_equivalence_md_plot(
   alpha_level,
   logscale,
-  theta1,
-  theta2,
-  sigma,
-  n,
-  nu,
+  lower_bound,
+  upper_bound,
+  true_sd,
+  n_per_treatment,
+  df_error,
   title = NULL,
   subtitle = NULL
 )
@@ -31,25 +32,33 @@ power_equivalence_md_plot(
 
   Logical. If `TRUE`, the means are compared on the logarithmic scale.
 
-- theta1:
+- lower_bound:
 
-  Lower limit of the equivalence interval.
+  Lower limit of the equivalence interval on the original scale, as in
+  [`power_equivalence_md`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md):
+  a ratio when `logscale = TRUE`, a difference otherwise.
 
-- theta2:
+- upper_bound:
 
-  Upper limit of the equivalence interval.
+  Upper limit of the equivalence interval on the original scale: a ratio
+  when `logscale = TRUE`, a difference otherwise.
 
-- sigma:
+- true_sd:
 
   \\\sqrt{\mathrm{error\\ variance}}\\.
 
-- n:
+- n_per_treatment:
 
-  Vector of sample sizes (one curve per element).
+  Vector of sample sizes, each the number of subjects who receive each
+  treatment (the size of each group in a parallel design; every subject
+  in a crossover design), as in
+  [`power_equivalence_md`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md).
+  One curve is drawn per element.
 
-- nu:
+- df_error:
 
-  Vector of degrees of freedom for `sigma`, the same length as `n`.
+  Vector of error degrees of freedom for `true_sd`, the same length as
+  `n_per_treatment`.
 
 - title:
 
@@ -61,9 +70,11 @@ power_equivalence_md_plot(
 
 ## Value
 
-A `ggplot` object. The 201-row power grid (column 1: true difference;
-remaining columns: power for each `n`) is attached as
-`attr(<plot>, "power_grid")`.
+A `ggplot` object. The 201-row power grid (column 1, `true_effect`: the
+true effect on the original scale, a ratio when `logscale = TRUE` and a
+difference otherwise, from `lower_bound` to `upper_bound`; remaining
+columns: power for each element of `n_per_treatment`, labeled
+`n=<size>`) is attached as `attr(<plot>, "power_grid")`.
 
 ## Note
 
@@ -88,7 +99,7 @@ sciences: An R package. *Behavior Research Methods, 39*(4), 979–984.
 
 Phillips, K. F. (1990). Power of the two one-sided tests procedure in
 bioequivalence. *Journal of Pharmacokinetics and Biopharmaceutics,
-18*(2), 139–144.
+18*(2), 137–144.
 [doi:10.1007/BF01063556](https://doi.org/10.1007/BF01063556)
 
 Schuirmann, D. J. (1987). A comparison of the two one-sided tests
@@ -103,7 +114,9 @@ Biopharmaceutics, 15*(6), 657–680.
 
 Other equivalence testing:
 [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
 [`power_density_equivalence_md()`](https://yelleknek.github.io/DMAR/reference/power_density_equivalence_md.md),
@@ -113,9 +126,9 @@ Other equivalence testing:
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
@@ -136,35 +149,38 @@ Ken Kelley <kkelley@nd.edu>
 # difference. The seven sample sizes are the ones behind Figure 3 of
 # Phillips, 1990, so the figure reproduces that one; every curve
 # evaluates the power integral at 201 true differences.
-n  <- c(9, 12, 18, 24, 30, 40, 60)
-nu <- c(7, 10, 16, 22, 28, 38, 58)
+n      <- c(9, 12, 18, 24, 30, 40, 60)
+df_err <- c(7, 10, 16, 22, 28, 38, 58)
 fig <- power_equivalence_md_plot(
   alpha_level = .05, logscale = FALSE,
-  theta1 = -.2, theta2 = .2, sigma = .20,
-  n = n, nu = nu,
+  lower_bound = -.2, upper_bound = .2, true_sd = .20,
+  n_per_treatment = n, df_error = df_err,
   subtitle = "Phillips Figure 3"
 )
 fig
 
 
 # The numbers behind the curves travel with the figure, so a particular
-# power value can be read off rather than eyeballed. The first column is
-# the true difference and the remaining columns give power, one column
-# per sample size. Power is highest where the true difference is zero.
+# power value can be read off rather than eyeballed. The first column,
+# true_effect, is the true difference and the remaining columns give power,
+# one column per sample size. Power is highest where the true difference
+# is zero.
 power_grid <- attr(fig, "power_grid")
-power_grid[which.min(abs(power_grid[, 1])), ]
-#>      diff       n=9      n=12      n=18      n=24      n=30      n=40      n=60 
-#> 0.0000000 0.2774020 0.4815125 0.7793013 0.9127046 0.9670072 0.9939640 0.9998349 
+power_grid[which.min(abs(power_grid[, "true_effect"])), ]
+#> true_effect         n=9        n=12        n=18        n=24        n=30 
+#>   0.0000000   0.2774020   0.4815125   0.7793013   0.9127046   0.9670072 
+#>        n=40        n=60 
+#>   0.9939640   0.9998349 
 
 # Figure 1c of Diletti et al., 1991, is the same idea on the log scale,
 # where the equivalence limits are the 0.80 to 1.25 ratio bounds used
-# in bioequivalence work.
-n_d  <- c(8, 12, 18, 24, 30, 40, 60)
-nu_d <- c(6, 10, 16, 22, 28, 38, 58)
+# in bioequivalence work, given as ratios.
+n_d      <- c(8, 12, 18, 24, 30, 40, 60)
+df_err_d <- c(6, 10, 16, 22, 28, 38, 58)
 power_equivalence_md_plot(
   alpha_level = .05, logscale = TRUE,
-  theta1 = .8, theta2 = 1.25, sigma = .20,
-  n = n_d, nu = nu_d,
+  lower_bound = .8, upper_bound = 1.25, true_sd = .20,
+  n_per_treatment = n_d, df_error = df_err_d,
   subtitle = "Diletti, Figure 1c"
 )
 

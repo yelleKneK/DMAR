@@ -1,22 +1,22 @@
 # Sample Size or Power for a One-Way Repeated Measures ANOVA Omnibus *F* Test
 
-Determine the necessary number of subjects to achieve a desired level of
-statistical power for the omnibus *F* test of the within-subjects factor
-in a one-way repeated measures ANOVA, or, given a number of subjects,
-return the realized statistical power.
+Determine the necessary number of subjects (the total sample size \\N\\)
+to achieve a desired level of statistical power for the omnibus *F* test
+of the within-subjects factor in a one-way repeated measures ANOVA, or,
+given a number of subjects, return the realized statistical power.
 
 ## Usage
 
 ``` r
 ss_power_rm_anova(
   a,
-  f = NULL,
-  eta_squared = NULL,
-  rho = 0,
-  epsilon = 1,
+  true_f = NULL,
+  true_eta_squared = NULL,
+  true_cor = 0,
+  true_epsilon = 1,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n = NULL
+  specified_N = NULL
 )
 ```
 
@@ -26,27 +26,28 @@ ss_power_rm_anova(
 
   Number of measurement occasions (levels of the within-subjects factor)
 
-- f:
+- true_f:
 
   Cohen's *f* effect size for the within-subjects factor (the population
-  value); supply this or `eta_squared`, but not both
+  value); supply this or `true_eta_squared`, but not both
 
-- eta_squared:
+- true_eta_squared:
 
   Population eta squared (proportion of variance, on the relevant scale,
-  accounted for by the within-subjects factor); supply this or `f`
+  accounted for by the within-subjects factor); supply this or `true_f`
 
-- rho:
+- true_cor:
 
   Average correlation among the repeated measures (default 0). With
-  `rho > 0`, the within-subjects test gains efficiency relative to a
-  between-subjects analogue
+  `true_cor > 0`, the within-subjects test gains efficiency relative to
+  a between-subjects analog
 
-- epsilon:
+- true_epsilon:
 
   Greenhouse-Geisser / Huynh-Feldt sphericity adjustment in (0, 1\]
-  (default 1, sphericity assumed). When `epsilon < 1`, both numerator
-  and denominator degrees of freedom are multiplied by `epsilon`
+  (default 1, sphericity assumed). When `true_epsilon < 1`, both
+  numerator and denominator degrees of freedom are multiplied by
+  `true_epsilon`
 
 - desired_power:
 
@@ -56,15 +57,15 @@ ss_power_rm_anova(
 
   Type I error rate (default 0.05)
 
-- n:
+- specified_N:
 
-  Number of subjects (each measured at all `a` occasions); if specified,
-  returns the realized power
+  Total sample size: the number of subjects, each measured at all `a`
+  occasions; if specified, the function returns the realized power
 
 ## Value
 
-A `data.frame` with rows for `necessary_n_subjects` (or
-`specified_n_subjects`), `a`, `effect_df`, `error_df`, `noncentrality`,
+A `data.frame` with rows for `necessary_N` (or `specified_N`), the
+number of subjects, `a`, `df_effect`, `df_error`, `noncentral_f_parm`,
 and `actual_power`. The result carries the `dmar_ss_power` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
@@ -72,21 +73,21 @@ it in broom convention (the reported size is the number of subjects).
 
 ## Details
 
-Under the alternative hypothesis with sphericity (`epsilon = 1`), the
-within-subjects *F* statistic follows a noncentral *F* distribution with
-numerator df \\a - 1\\, denominator df \\(n - 1)(a - 1)\\, and
-noncentrality parameter \\\lambda = n a f^2 / (1 - \rho)\\, where \\f\\
-is Cohen's *f* for the within-subjects effect and \\\rho\\ is the
-average correlation across the repeated measures (Maxwell, Delaney, &
-Kelley, 2027). Setting `rho = 0` reduces to the between-subjects
-expression.
+Under the alternative hypothesis with sphericity (`true_epsilon = 1`),
+the within-subjects *F* statistic follows a noncentral *F* distribution
+with numerator df \\a - 1\\, denominator df \\(N - 1)(a - 1)\\, and
+noncentrality parameter \\\lambda = N a f^2 / (1 - \rho)\\, where \\N\\
+is the number of subjects, \\f\\ is Cohen's *f* (`true_f`) for the
+within-subjects effect and \\\rho\\ is the average correlation across
+the repeated measures (`true_cor`; Maxwell, Delaney, & Kelley, 2027).
+Setting `true_cor = 0` reduces to the between-subjects expression.
 
-When sphericity is violated, supplying `epsilon` (e.g., a
+When sphericity is violated, supplying `true_epsilon` (e.g., a
 Greenhouse-Geisser estimate) rescales the test using the Muller-Barton
 convention: both numerator and denominator degrees of freedom are
-multiplied by `epsilon`, and the noncentrality parameter is likewise
-multiplied by `epsilon`. Smaller `epsilon` therefore reduces power and
-increases the necessary sample size.
+multiplied by `true_epsilon`, and the noncentrality parameter is
+likewise multiplied by `true_epsilon`. Smaller `true_epsilon` therefore
+reduces power and increases the necessary sample size.
 
 ## References
 
@@ -111,6 +112,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -146,32 +148,32 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # 4 measurement occasions, f = 0.25, average within-subject correlation 0.5, power = .80
-ss_power_rm_anova(a = 4, f = 0.25, rho = 0.5, desired_power = 0.80)
-#>  term                 value
-#>  necessary_n_subjects 24   
-#>  a                    4    
-#>  effect_df            3    
-#>  error_df             69   
-#>  noncentrality        12   
-#>  actual_power         0.817
+ss_power_rm_anova(a = 4, true_f = 0.25, true_cor = 0.5, desired_power = 0.80)
+#>  term              value 
+#>  necessary_N       24    
+#>  a                 4     
+#>  df_effect         3     
+#>  df_error          69    
+#>  noncentral_f_parm 12.000
+#>  actual_power      0.817 
 
 # Same but with Greenhouse-Geisser epsilon = 0.75
-ss_power_rm_anova(a = 4, f = 0.25, rho = 0.5, epsilon = 0.75, desired_power = 0.80)
-#>  term                 value
-#>  necessary_n_subjects 29   
-#>  a                    4    
-#>  effect_df            2.25 
-#>  error_df             63   
-#>  noncentrality        10.9 
-#>  actual_power         0.814
+ss_power_rm_anova(a = 4, true_f = 0.25, true_cor = 0.5, true_epsilon = 0.75, desired_power = 0.80)
+#>  term              value 
+#>  necessary_N       29    
+#>  a                 4     
+#>  df_effect         2.250 
+#>  df_error          63    
+#>  noncentral_f_parm 10.875
+#>  actual_power      0.814 
 
-# Realized power at n = 20 subjects, a = 4
-ss_power_rm_anova(a = 4, f = 0.25, rho = 0.5, n = 20)
-#>  term                 value
-#>  specified_n_subjects 20   
-#>  a                    4    
-#>  effect_df            3    
-#>  error_df             57   
-#>  noncentrality        10   
-#>  actual_power         0.729
+# Realized power at N = 20 subjects, a = 4
+ss_power_rm_anova(a = 4, true_f = 0.25, true_cor = 0.5, specified_N = 20)
+#>  term              value 
+#>  specified_N       20    
+#>  a                 4     
+#>  df_effect         3     
+#>  df_error          57    
+#>  noncentral_f_parm 10.000
+#>  actual_power      0.729 
 ```

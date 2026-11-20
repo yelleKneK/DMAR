@@ -17,14 +17,15 @@ simulate_ancova_factorial_data(
   c = 1,
   d = 1,
   n_covariates = 1,
-  mu_y,
-  mu_x,
-  sigma_y,
-  sigma_x,
-  rho_y_x,
-  rho_x_x = NULL,
-  n,
-  randomized = TRUE
+  true_mean_Y,
+  true_mean_X,
+  true_sd_Y,
+  true_sd_X,
+  true_cor_YX,
+  true_cor_XX = NULL,
+  n_per_cell,
+  randomized = TRUE,
+  seed = NULL
 )
 ```
 
@@ -53,56 +54,63 @@ simulate_ancova_factorial_data(
 
   Integer \\\ge 1\\: the number of continuous covariates. Default `1`.
 
-- mu_y:
+- true_mean_Y:
 
   Numeric vector of length \\a \cdot b \cdot c \cdot d\\ giving the
   population cell means of \\Y\\, in the same row order as
   [`expand.grid`](https://rdrr.io/r/base/expand.grid.html)`(A, B, C, D)`
   (which varies factor `A` fastest, then `B`, then `C`, then `D`).
 
-- mu_x:
+- true_mean_X:
 
   Numeric matrix of dimension \\(a \cdot b \cdot c \cdot d) \times q\\
   giving the population cell means of each covariate (rows = cells in
-  the same order as `mu_y`; columns = covariates). When
+  the same order as `true_mean_Y`; columns = covariates). When
   `randomized = TRUE` every column must be constant across cells.
 
-- sigma_y:
+- true_sd_Y:
 
   Within-cell standard deviation of \\Y\\ (a single positive number,
   common across cells).
 
-- sigma_x:
+- true_sd_X:
 
   Within-cell standard deviations of the covariates. Either a single
   number (recycled to all `n_covariates`) or a numeric vector of length
   `n_covariates`.
 
-- rho_y_x:
+- true_cor_YX:
 
   Within-cell correlations between \\Y\\ and each covariate. Either a
   single number (recycled to all `n_covariates`) or a numeric vector of
   length `n_covariates`.
 
-- rho_x_x:
+- true_cor_XX:
 
   Within-cell correlation matrix among the covariates, \\q \times q\\.
   Default `NULL`, interpreted as the `n_covariates`-dimensional
   identity.
 
-- n:
+- n_per_cell:
 
   A single number (equal sample size per cell) or a numeric vector of
   length \\a \cdot b \cdot c \cdot d\\ giving per-cell sample sizes (in
-  the same row order as `mu_y`).
+  the same row order as `true_mean_Y`).
 
 - randomized:
 
   Logical. `TRUE` (the default) for a randomized design, each cell is
-  sampled from the same population covariate distribution, so `mu_x`
-  must be constant across cells. `FALSE` for non-randomized /
-  preexisting-groups designs in which the cells' population covariate
-  means may differ.
+  sampled from the same population covariate distribution, so
+  `true_mean_X` must be constant across cells. `FALSE` for
+  non-randomized / preexisting-groups designs in which the cells'
+  population covariate means may differ.
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
@@ -132,21 +140,21 @@ regression, the classical ANCOVA assumption); the difference between
 randomized and non-randomized designs lies entirely in whether the cell
 covariate means are constrained to be equal.
 
-**Why `mu_x` must be constant across cells when `randomized = TRUE`.**
-Random assignment forms each cell as an exchangeable random sample from
-the same joint distribution of covariates and outcome. Cell-specific
-covariate means would silently break that interpretation. The function
-checks the constraint and stops with an informative error if it is
-violated. (The same logic that powers
+**Why `true_mean_X` must be constant across cells when
+`randomized = TRUE`.** Random assignment forms each cell as an
+exchangeable random sample from the same joint distribution of
+covariates and outcome. Cell-specific covariate means would silently
+break that interpretation. The function checks the constraint and stops
+with an informative error if it is violated. (The same logic that powers
 [`simulate_ancova_data`](https://yelleknek.github.io/DMAR/reference/simulate_ancova_data.md).)
 
 **Cell ordering.** The function uses
 [`expand.grid`](https://rdrr.io/r/base/expand.grid.html)'s convention,
 factor `A` varies fastest, then `B`, then `C`, then `D`. So for a \\2
-\times 3\\ design, the six cells of `mu_y` are \\(A_1 B_1), (A_2 B_1),
-(A_1 B_2), (A_2 B_2), (A_1 B_3), (A_2 B_3)\\. If you build the cell
-specification by passing the factor levels to `expand.grid` in the same
-order, the row indexing automatically matches.
+\times 3\\ design, the six cells of `true_mean_Y` are \\(A_1 B_1), (A_2
+B_1), (A_1 B_2), (A_2 B_2), (A_1 B_3), (A_2 B_3)\\. If you build the
+cell specification by passing the factor levels to `expand.grid` in the
+same order, the row indexing automatically matches.
 
 ## See also
 
@@ -175,16 +183,16 @@ Ken Kelley <kkelley@nd.edu>
 # 1. 2 x 2 randomized design, single covariate.
 set.seed(113)
 design_2x2 <- expand.grid(A = factor(1:2), B = factor(1:2))
-design_2x2$mu_y <- c(50, 60, 55, 65)   # cell means in expand.grid order
+design_2x2$true_mean_Y <- c(50, 60, 55, 65)   # cell means in expand.grid order
 
 d1 <- simulate_ancova_factorial_data(
   a            = 2, b = 2,
-  mu_y         = design_2x2$mu_y,
-  mu_x         = matrix(10, nrow = 4, ncol = 1),  # constant covariate mean
-  sigma_y      = 8,
-  sigma_x      = 3,
-  rho_y_x      = 0.40,
-  n            = 30
+  true_mean_Y  = design_2x2$true_mean_Y,
+  true_mean_X  = matrix(10, nrow = 4, ncol = 1),  # constant covariate mean
+  true_sd_Y      = 8,
+  true_sd_X      = 3,
+  true_cor_YX  = 0.40,
+  n_per_cell   = 30
 )
 aggregate(y ~ A + B, data = d1, FUN = mean)
 #>   A B        y
@@ -200,17 +208,17 @@ n_cells <- a * b
 d2 <- simulate_ancova_factorial_data(
   a            = a, b = b,
   n_covariates = q,
-  mu_y         = c(50, 55, 60,  52, 58, 64),
-  mu_x         = matrix(c(10, 11, 12,  9, 10, 11,
+  true_mean_Y  = c(50, 55, 60,  52, 58, 64),
+  true_mean_X  = matrix(c(10, 11, 12,  9, 10, 11,
                            5,  6,  7,  4,  5,  6),
                          nrow = n_cells, ncol = q),
-  sigma_y      = 8,
-  sigma_x      = c(3, 2),
-  rho_y_x      = c(0.40, 0.25),
-  rho_x_x      = matrix(c(1,   0.3,
+  true_sd_Y      = 8,
+  true_sd_X      = c(3, 2),
+  true_cor_YX  = c(0.40, 0.25),
+  true_cor_XX  = matrix(c(1,   0.3,
                           0.3, 1),
                         nrow = 2),
-  n            = c(30, 25, 20,  35, 30, 25),
+  n_per_cell   = c(30, 25, 20,  35, 30, 25),
   randomized   = FALSE
 )
 head(d2)
@@ -226,12 +234,12 @@ head(d2)
 set.seed(113)
 d3 <- simulate_ancova_factorial_data(
   a       = 2, b = 2, c = 2,
-  mu_y    = c(50, 55, 52, 57,  53, 58, 55, 60),  # 8 cells in A-fastest order
-  mu_x    = matrix(10, nrow = 8, ncol = 1),
-  sigma_y = 8,
-  sigma_x = 3,
-  rho_y_x = 0.40,
-  n       = 25
+  true_mean_Y = c(50, 55, 52, 57,  53, 58, 55, 60),  # 8 cells in A-fastest order
+  true_mean_X = matrix(10, nrow = 8, ncol = 1),
+  true_sd_Y = 8,
+  true_sd_X = 3,
+  true_cor_YX = 0.40,
+  n_per_cell = 25
 )
 table(d3$A, d3$B, d3$C)  # 25 per cell, 200 total
 #> , ,  = 1

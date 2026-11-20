@@ -8,8 +8,8 @@ interval for the targeted model parameter is sufficiently narrow
 ``` r
 ss_aipe_sem_path(
   model,
-  Sigma,
-  desired_width,
+  true_cov_matrix,
+  width,
   which_path,
   conf_level = 0.95,
   assurance = NULL,
@@ -31,14 +31,14 @@ ss_aipe_sem_path(
   This is the model that would be fit to the data; its parameters are
   free, not fixed to population values
 
-- Sigma:
+- true_cov_matrix:
 
-  Estimated population covariance matrix of the observed variables, with
-  row and column names matching the observed variables in `model`. It is
-  typically obtained from a fully fixed population model via
+  Population covariance matrix of the observed variables planned for,
+  with row and column names matching the observed variables in `model`.
+  It is typically obtained from a fully fixed population model via
   [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md)
 
-- desired_width:
+- width:
 
   Desired confidence interval width for the model parameter of interest
 
@@ -69,8 +69,15 @@ ss_aipe_sem_path(
 
 - ...:
 
-  Allows one to potentially pass additional arguments to
-  [`sem`](https://rdrr.io/pkg/lavaan/man/sem.html)
+  Further arguments passed to
+  [`sem`](https://rdrr.io/pkg/lavaan/man/sem.html) for the fit to
+  `true_cov_matrix`, from which the plan, with or without `assurance`,
+  is read (for example `std.lv = TRUE`). Every name given here must be
+  an argument or an option of lavaan (see
+  [`lavOptions`](https://rdrr.io/pkg/lavaan/man/lavOptions.html)); any
+  other name, and any argument without a name, is refused before a model
+  is fitted, with a condition of class `dmar_argument_invalid` that
+  gives the name as it was typed
 
 ## Value
 
@@ -89,15 +96,21 @@ Lai and Kelley (2011). It requires lavaan to be installed and uses
 [`sem`](https://rdrr.io/pkg/lavaan/man/sem.html) to obtain the expected
 information, that is the asymptotic covariance matrix of the parameter
 estimates, by fitting the free analysis model to the population
-covariance matrix `Sigma` at a very large sample size. The analysis
-model is written in lavaan model syntax with the targeted path given a
-parameter label; see
+covariance matrix `true_cov_matrix` at a very large sample size. The
+analysis model is written in lavaan model syntax with the targeted path
+given a parameter label; see
 [`model.syntax`](https://rdrr.io/pkg/lavaan/man/model.syntax.html) for
 the syntax and [`sem`](https://rdrr.io/pkg/lavaan/man/sem.html) for the
-fitting machinery. The population covariance matrix `Sigma` is most
-naturally produced by
+fitting machinery. The population covariance matrix `true_cov_matrix` is
+most naturally produced by
 [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md) from
-a fully fixed population model.
+a fully fixed population model. An analysis model whose likelihood has
+no maximum at `true_cov_matrix`, an error variance running off below
+zero while the likelihood is flat or still rising (see
+[`fa_bifactor`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)),
+stops the function with an error of class `dmar_no_maximum` that prints
+the lavaan code of the fit, since the asymptotic covariance matrix would
+describe where the optimizer stopped rather than the model.
 
 When `assurance` is supplied, the assurance adjustment is based on a chi
 square approximation to the sampling variability of the confidence
@@ -158,12 +171,12 @@ analysis_model <- "
   f2 =~ y4 + y5 + y6
   f2 ~ b*f1
 "
-ss_aipe_sem_path(model = analysis_model, Sigma = Sigma,
-                 desired_width = 0.30, which_path = "b")
-#>  term        value  
-#>  necessary_N 264    
-#>  path_index  5      
-#>  var_theta_j 0.00584
+ss_aipe_sem_path(model = analysis_model, true_cov_matrix = Sigma,
+                 width = 0.30, which_path = "b")
+#>  term        value
+#>  necessary_N 264  
+#>  path_index  5    
+#>  var_theta_j 0.006
 #> 
 #> Confidence level: 95%
 
@@ -171,13 +184,13 @@ ss_aipe_sem_path(model = analysis_model, Sigma = Sigma,
 # about half of the studies it plans return a wider one. Adding assurance
 # plans for the width to be met in 90 percent of studies instead, at the
 # cost of a larger sample size.
-ss_aipe_sem_path(model = analysis_model, Sigma = Sigma,
-                 desired_width = 0.30, which_path = "b",
+ss_aipe_sem_path(model = analysis_model, true_cov_matrix = Sigma,
+                 width = 0.30, which_path = "b",
                  assurance = 0.90)
-#>  term        value  
-#>  necessary_N 293    
-#>  path_index  5      
-#>  var_theta_j 0.00526
+#>  term        value
+#>  necessary_N 293  
+#>  path_index  5    
+#>  var_theta_j 0.005
 #> 
 #> Confidence level: 95%
 ```

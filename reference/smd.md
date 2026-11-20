@@ -77,7 +77,22 @@ estimated standardized mean difference).
 ## Details
 
 When `unbiased=TRUE`, the unbiased estimate of the standardized mean
-difference is returned (Hedges, 1981).
+difference is returned (Hedges, 1981). The correction multiplies the
+estimate by \\J(\nu) = \Gamma(\nu/2) / \\\sqrt{\nu/2}\\\Gamma((\nu -
+1)/2)\\\\ with \\\nu = n_1 + n_2 - 2\\ degrees of freedom. \\J(1) = 0\\:
+on 1 degree of freedom the mean of the estimate does not exist, so no
+multiple of it is unbiased, and the corrected value would be 0 whatever
+the data. A call with `unbiased = TRUE` and \\n_1 + n_2 = 3\\ (possible
+only from summary statistics) is therefore refused, with a condition of
+class `dmar_hedges_correction_undefined` (see
+[`dmar_metadata`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)).
+With \\n_1 + n_2 = 2\\ there are no degrees of freedom, \\J(0)\\ is not
+defined, and the call is refused with the same class.
+
+From summary statistics with `s_1` and `s_2`, each of `n_1` and `n_2`
+must be at least 2, because a group of one observation has no standard
+deviation; a smaller value is refused with a condition of class
+`dmar_argument_invalid`, as raw data with a group of one are refused.
 
 ## References
 
@@ -116,9 +131,9 @@ ed.). Routledge. (See Chapter 4 on individual comparisons and Chapter 3
 on one-way ANOVA.)
 
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
-estimation and the evaluation of statistical methods. In L. L. Harlow,
-S. A. Mulaik, & J. H. Steiger (Eds.), *What if there were no
-significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 ## See also
 

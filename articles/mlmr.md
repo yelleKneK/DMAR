@@ -54,11 +54,11 @@ Following Rubin (1976) and the synthesis in Schafer and Graham (2002):
 The remainder of this vignette quantifies what FIML buys you under MCAR
 and MAR, how the implications differ from listwise deletion in terms of
 bias, standard errors, *p* values, and the effect sizes one would
-report, and where the gain is largest. The multivariate sibling
+report, and where the gain comes from. The multivariate sibling
 [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md) is
-introduced toward the end for the case in which the FIML edge over
-listwise is biggest: correlated outcomes where the missingness patterns
-differ across outcomes.
+introduced toward the end for correlated outcomes whose missingness
+patterns differ, where the observed outcomes of a case inform the
+estimates for the outcome it is missing.
 
 ## Scenario 1: Complete Data (the Baseline)
 
@@ -113,7 +113,7 @@ cbind(lm = coef(fit_lm), mlmr = coef(fit_mlmr))
 Point estimates agree to working precision. With complete data the two
 estimators are algebraically equivalent up to the
 maximum-likelihood-versus-unbiased divisor on the residual variance
-($`N`$ in ML, $`N - K - 1`$ in OLS):
+($`N`$ in ML, $`N - p - 1`$ in OLS, with $`p`$ predictors):
 
 ``` r
 
@@ -130,7 +130,7 @@ cbind(
 #> X3          0.07079629 0.07008475 0.07079629
 ```
 
-Rescaling the FIML standard errors by $`\sqrt{N / (N - K - 1)}`$
+Rescaling the FIML standard errors by $`\sqrt{N / (N - p - 1)}`$
 recovers the OLS standard errors exactly; the gap is the
 divisor-correction term, not a substantive disagreement.
 
@@ -159,11 +159,11 @@ ci_R2(R2 = summary(fit_lm)$r.squared, N = N, p = 3, conf_level = 0.95,
       random_predictors = TRUE)
 ```
 
-| term        | value | prob_less | prob_greater |
-|:------------|:------|:----------|:-------------|
-| lower_limit | 0.185 | 0.025     | 0.975        |
-| R2          | 0.298 | NA        | NA           |
-| upper_limit | 0.397 | 0.975     | 0.025        |
+| term     | value | prob_less | prob_greater |
+|:---------|:------|:----------|:-------------|
+| ci_lower | 0.185 | 0.025     | 0.975        |
+| R2       | 0.298 | NA        | NA           |
+| ci_upper | 0.397 | 0.975     | 0.025        |
 
 Confidence level: 95%
 
@@ -244,7 +244,7 @@ distribution of the predictors. The coefficients and their standard
 errors are identified entirely by the rows with observed $`Y`$, so the
 FIML and listwise coefficient standard errors coincide to working
 precision (each equals the OLS standard error after the
-$`\sqrt{N / (N - K - 1)}`$ divisor). When only the outcome is missing
+$`\sqrt{N / (N - p - 1)}`$ divisor). When only the outcome is missing
 and all predictors are observed, the rows with observed $`X`$ carry no
 information about the conditional regression of $`Y`$ on $`X`$, so FIML
 delivers no efficiency gain over listwise for the slopes. The genuine
@@ -254,7 +254,7 @@ second outcome carries information about a partly-missing first outcome
 
 The *p* values differ for the same reason as in the complete-data case
 of Scenario 1: FIML refers the Wald statistic to the normal distribution
-and divides the residual variance by $`N`$ rather than $`N - K - 1`$.
+and divides the residual variance by $`N`$ rather than $`N - p - 1`$.
 The difference is the divisor and the reference distribution, not an
 efficiency gain.
 
@@ -388,10 +388,10 @@ ci_fiml <- ci_R2(R2 = R2_fiml, N = nrow(d_mar),   p = 3,
 data.frame(
   method  = c("lm (listwise)", "mlmr (FIML)"),
   R2      = c(R2_lm,            R2_fiml),
-  ci_low  = c(ci_lm$value[ci_lm$term == "lower_limit"],
-              ci_fiml$value[ci_fiml$term == "lower_limit"]),
-  ci_high = c(ci_lm$value[ci_lm$term == "upper_limit"],
-              ci_fiml$value[ci_fiml$term == "upper_limit"])
+  ci_low  = c(ci_lm$value[ci_lm$term == "ci_lower"],
+              ci_fiml$value[ci_fiml$term == "ci_lower"]),
+  ci_high = c(ci_lm$value[ci_lm$term == "ci_upper"],
+              ci_fiml$value[ci_fiml$term == "ci_upper"])
 )
 #>          method        R2    ci_low   ci_high
 #> 1 lm (listwise) 0.3051160 0.1423347 0.4416810
@@ -524,11 +524,11 @@ ci_smd_trial <- ci_smd(ncp = ncp_t, n_1 = n_trt, n_2 = n_ctrl,
 ci_smd_trial
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 0.186 |
-| smd         | 0.444 |
-| upper_limit | 0.702 |
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.186 |
+| smd      | 0.444 |
+| ci_upper | 0.702 |
 
 Confidence level: 95%
 
@@ -797,15 +797,15 @@ results side by side. Do not rely on
 
 ## Multivariate FIML: When Outcomes Are Correlated
 
-The case in which FIML’s edge over listwise is largest is the
-multivariate case with correlated outcomes and missingness on one or
-more of them. The DMAR function for that case is
+In the multivariate case, with correlated outcomes and missingness on
+one or more of them, FIML uses information that listwise deletion
+discards. The DMAR function for that case is
 [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md),
 which fits the joint regression of two or more outcomes on a shared
 predictor set and estimates the residual covariance among outcomes as
 part of the model. Rows with observed $`Y_1`$ but missing $`Y_2`$ inform
-the slopes on $`Y_2`$ through the residual covariance with $`Y_1`$, in a
-way that no univariate route can match.
+the slopes on $`Y_2`$ through the residual covariance with $`Y_1`$,
+information that a separate regression for each outcome does not use.
 
 ``` r
 

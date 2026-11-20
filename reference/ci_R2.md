@@ -13,9 +13,9 @@ and the typical case in the behavioral, educational, and social
 sciences) or as fixed by design (planned dosing levels, factorial
 covariates, etc.). The function selects the sampling distribution via
 `random_predictors` and inverts the corresponding noncentral
-distribution; the construction is the regression analogue of a
-noncentral distribution based CI on a standardized effect size (Steiger
-& Fouladi, 1992; Kelley, 2007).
+distribution; the construction is the regression analog of a noncentral
+distribution based CI on a standardized effect size (Steiger & Fouladi,
+1992; Kelley, 2007).
 
 ## Usage
 
@@ -76,7 +76,13 @@ ci_R2(
 
 - alpha_upper:
 
-  Type I error for the upper confidence limit
+  Type I error for the upper confidence limit. The table records the
+  coverage, `1 - alpha_lower - alpha_upper`, as its level and, when the
+  two tail areas differ, the areas themselves, which the line beneath
+  the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound.
 
 - tol:
 
@@ -91,18 +97,52 @@ ci_R2(
 ## Value
 
 A 3-row `data.frame` with columns `term`, `value`, `prob_less`, and
-`prob_greater`. The rows are ordered `"lower_limit"` (lower confidence
+`prob_greater`. The rows are ordered `"ci_lower"` (lower confidence
 limit on the population \\\rho^2\\), `"R2"` (the sample squared multiple
 correlation coefficient supplied by the user, the point estimate), and
-`"upper_limit"` (upper confidence limit on the population \\\rho^2\\),
-so the point estimate sits between its confidence limits. The
-`prob_less` and `prob_greater` columns report the achieved lower-tail
-and upper-tail error probabilities at each limit (they are `NA` for the
-`"R2"` estimate row). For random-predictor mode
-(`random_predictors = TRUE`) the limits are computed via the Lee (1971)
-bisection over the multiple-correlation sampling distribution; for
-fixed-predictor mode they are computed by inversion of the noncentral
-*F* distribution.
+`"ci_upper"` (upper confidence limit on the population \\\rho^2\\), so
+the point estimate sits between its confidence limits. The `prob_less`
+and `prob_greater` columns are `NA` on the `"R2"` row. With fixed
+predictors (`random_predictors = FALSE`) they hold, on the row of each
+limit, the two tail areas at the observed *F* of the noncentral *F*
+distribution whose noncentrality parameter corresponds to that limit:
+`prob_less` is the area at or above the observed *F* and `prob_greater`
+the area at or below it (the reverse of the columns of the same names in
+[`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)), so
+`prob_less` is `alpha_lower` on the `"ci_lower"` row and `prob_greater`
+is `alpha_upper` on the `"ci_upper"` row. With a tail area of 0 no limit
+is computed on that side (the lower limit is 0, or the upper limit is
+1), and the row of that limit holds the requested area, 0, and its
+complement, 1. When `alpha_lower` is larger than 0 and the observed *F*
+is below the `alpha_lower` critical value, so that the lower limit is 0,
+the `"ci_lower"` row holds the tail areas of the central *F*
+distribution, whose area at or above the observed *F* is the *p*-value
+of the *F*-test and is larger than `alpha_lower`; those areas describe
+the central distribution and not the coverage of the interval. Both
+columns are `NA` on the `"ci_upper"` row when the upper limit is
+undefined. With random predictors (`random_predictors = TRUE`) the
+columns hold the requested tail areas in the same arrangement,
+`alpha_lower` and its complement on the `"ci_lower"` row and the
+complement of `alpha_upper` and `alpha_upper` on the `"ci_upper"` row,
+whatever the limits are, except when the upper limit is undefined.
+
+For random-predictor mode (`random_predictors = TRUE`) the limits are
+computed via the Lee (1971) bisection over the multiple-correlation
+sampling distribution; for fixed-predictor mode they are computed by
+inversion of the noncentral *F* distribution.
+
+**An undefined upper limit.** The upper limit is the population value at
+which the probability of a sample \\R^2\\ at or below the observed one
+falls to `alpha_upper`. That probability is largest at \\\rho^2 = 0\\,
+so when the observed \\R^2\\ is at or below the `alpha_upper` quantile
+of its distribution at \\\rho^2 = 0\\, no population value is consistent
+with the sample at that level, and no upper limit exists. The
+`"ci_upper"` row is then `NA` in its value and in both tail columns, the
+lower limit is 0, and a warning of class `dmar_result_qualified` says
+why; this holds for random and for fixed predictors alike. With a 95
+percent interval it happens in 2.5 percent of samples when \\\rho^2 =
+0\\ and less often for a larger \\\rho^2\\; for example, \\R^2 = .003\\
+with \\N = 50\\ and \\p = 3\\ is below the .025 quantile, .0046.
 
 ## Details
 
@@ -118,15 +158,16 @@ confidence level (see
 [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)).
 Under random predictors the design matrix is itself a draw from a joint
 multivariate normal distribution and the unconditional sampling
-distribution of the sample \\R^2\\ is given by Lee (1971); `ci_R2` uses
-the Lee (1971) bisection (the same construction Algina and Olejnik 2000
-implemented in SAS) to invert that distribution. Gatsonis and Sampson
-(1989) document the comparison and show that treating random predictors
-as fixed tends to over-state precision (and so under-state the CI
-width); the discrepancy is modest at moderate to large \\N\\ but
-non-trivial at small \\N\\ with moderate-to-large effects. In the
-behavioral, educational, and social sciences predictor variables are
-almost always random, so the default is `random_predictors = TRUE`; pass
+distribution of the sample \\R^2\\ is due to Fisher (1928); `ci_R2`
+inverts the three-moment noncentral *F* approximation of Lee (1971,
+Section 5.1) to that distribution by bisection (the same construction
+Algina and Olejnik 2000 implemented in SAS). Gatsonis and Sampson (1989)
+document the comparison and show that treating random predictors as
+fixed tends to over-state precision (and so under-state the CI width);
+the discrepancy is modest at moderate to large \\N\\ but non-trivial at
+small \\N\\ with moderate-to-large effects. In the behavioral,
+educational, and social sciences predictor variables are almost always
+random, so the default is `random_predictors = TRUE`; pass
 `random_predictors = FALSE` for designs in which the predictor variables
 are fixed by design.
 
@@ -139,6 +180,11 @@ estimation of the squared multiple correlation coefficient.
 
 Cohen, J. (1988). *Statistical power analysis for the behavioral
 sciences* (2nd ed.). Hillsdale, NJ: Lawrence Erlbaum.
+
+Fisher, R. A. (1928). The general sampling distribution of the multiple
+correlation coefficient. *Proceedings of the Royal Society of London,
+Series A, 121*(788), 654–673.
+[doi:10.1098/rspa.1928.0224](https://doi.org/10.1098/rspa.1928.0224)
 
 Gatsonis, C., & Sampson, A. R. (1989). Multiple correlation: Exact power
 and sample size calculations. *Psychological Bulletin, 106*(3), 516–524.
@@ -184,10 +230,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -211,73 +258,73 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # For random predictor variables.
 ci_R2(R2 = .25, N = 100, p = 5, conf_level = .95, random_predictors = TRUE)
-#>  term        value  prob_less prob_greater
-#>  lower_limit 0.0801 0.025     0.975       
-#>  R2          0.25   <NA>      <NA>        
-#>  upper_limit 0.372  0.975     0.025       
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.080 0.025     0.975       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 0.372 0.975     0.025       
 #> 
 #> Confidence level: 95%
 
 ci_R2(F_value = 6.266667, N = 100, p = 5, conf_level = .95, random_predictors = TRUE)
-#>  term        value  prob_less prob_greater
-#>  lower_limit 0.0801 0.025     0.975       
-#>  R2          0.25   <NA>      <NA>        
-#>  upper_limit 0.372  0.975     0.025       
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.080 0.025     0.975       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 0.372 0.975     0.025       
 #> 
 #> Confidence level: 95%
 
 # For fixed predictor variables.
 ci_R2(R2 = .25, N = 100, p = 5, conf_level = .95, random_predictors = FALSE)
-#>  term        value  prob_less prob_greater
-#>  lower_limit 0.0808 0.025     0.975       
-#>  R2          0.25   <NA>      <NA>        
-#>  upper_limit 0.354  0.975     0.025       
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.081 0.025     0.975       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 0.354 0.975     0.025       
 #> 
 #> Confidence level: 95%
 
 ci_R2(F_value = 6.266667, N = 100, p = 5, conf_level = .95, random_predictors = FALSE)
-#>  term        value  prob_less prob_greater
-#>  lower_limit 0.0808 0.025     0.975       
-#>  R2          0.25   <NA>      <NA>        
-#>  upper_limit 0.354  0.975     0.025       
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.081 0.025     0.975       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 0.354 0.975     0.025       
 #> 
 #> Confidence level: 95%
 
 # One sided confidence intervals when predictors are random.
 ci_R2(R2 = .25, N = 100, p = 5, alpha_lower = .05, alpha_upper = 0,
       conf_level = NULL, random_predictors = TRUE)
-#>  term        value  prob_less prob_greater
-#>  lower_limit 0.0992 0.05      0.95        
-#>  R2          0.25   <NA>      <NA>        
-#>  upper_limit 1      1         0           
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.099 0.050     0.950       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 1.000 1.000     0.000       
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95% (one-sided: the lower limit is the 95% lower confidence bound, with tail area 0.05 below it and none above the upper limit)
 
 ci_R2(R2 = .25, N = 100, p = 5, alpha_lower = 0, alpha_upper = .05,
       conf_level = NULL, random_predictors = TRUE)
-#>  term        value prob_less prob_greater
-#>  lower_limit 0     0         1           
-#>  R2          0.25  <NA>      <NA>        
-#>  upper_limit 0.347 0.95      0.05        
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.000 0.000     1.000       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 0.347 0.950     0.050       
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95% (one-sided: the upper limit is the 95% upper confidence bound, with tail area 0.05 above it and none below the lower limit)
 
 # One sided confidence intervals when predictors are fixed.
 ci_R2(R2 = .25, N = 100, p = 5, alpha_lower = .05, alpha_upper = 0,
       conf_level = NULL, random_predictors = FALSE)
-#>  term        value prob_less prob_greater
-#>  lower_limit 0.1   0.05      0.95        
-#>  R2          0.25  <NA>      <NA>        
-#>  upper_limit 1     1         0           
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.100 0.050     0.950       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 1.000 1.000     0.000       
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95% (one-sided: the lower limit is the 95% lower confidence bound, with tail area 0.05 below it and none above the upper limit)
 
 ci_R2(R2 = .25, N = 100, p = 5, alpha_lower = 0, alpha_upper = .05,
       conf_level = NULL, random_predictors = FALSE)
-#>  term        value prob_less prob_greater
-#>  lower_limit 0     0         1           
-#>  R2          0.25  <NA>      <NA>        
-#>  upper_limit 0.332 0.95      0.05        
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.000 0.000     1.000       
+#>  R2       0.250 <NA>      <NA>        
+#>  ci_upper 0.332 0.950     0.050       
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95% (one-sided: the upper limit is the 95% upper confidence bound, with tail area 0.05 above it and none below the lower limit)
 ```

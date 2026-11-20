@@ -105,8 +105,8 @@ The original published article is
   *Journal of Consulting and Clinical Psychology, 66*(3), 541–548.
   [doi:10.1037/0022-006X.66.3.541](https://doi.org/10.1037/0022-006X.66.3.541)
 
-and the textbook reproduction (with Section 3.10.4 of MDK 2027 devoted
-to the worked analysis) is
+and the textbook reproduction (with Section 3.10.4 of Maxwell, Delaney,
+and Kelley, 2027 devoted to the worked analysis) is
 
 - Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
   experiments and analyzing data: A model comparison perspective* (4th
@@ -234,8 +234,8 @@ smd_table <- do.call(rbind, lapply(seq_len(ncol(cmp)), function(j) {
   data.frame(
     comparison = paste(cmp[1, j], "vs", cmp[2, j]),
     d          = round(d, 3),
-    ci_lower   = round(ci$value[ci$term == "lower_limit"], 3),
-    ci_upper   = round(ci$value[ci$term == "upper_limit"], 3)
+    ci_lower   = round(ci$value[ci$term == "ci_lower"], 3),
+    ci_upper   = round(ci$value[ci$term == "ci_upper"], 3)
   )
 }))
 smd_table

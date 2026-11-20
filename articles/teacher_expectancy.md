@@ -5,13 +5,13 @@ that telling teachers certain randomly chosen children were about to
 bloom intellectually raised those children’s IQ. The single study
 (shipped in DMAR as `pygmalion`, and the running analysis of covariance
 example in Maxwell, Delaney, and Kelley’s *Designing Experiments and
-Analyzing Data*) set off fourteen years of replications with wildly
+Analyzing Data*) set off fourteen years of replications with widely
 varying results. Raudenbush (1984) synthesized 18 of those experiments
-and asked the question that resolved the controversy: not *whether*
-there is an expectancy effect, but *why the studies disagree*. His
-answer: the longer teachers had known their pupils before the expectancy
-induction, the smaller the effect. Credible deception is the Achilles’
-heel of the design.
+and asked a different question: not *whether* there is an expectancy
+effect, but *why the studies disagree*. His answer: the longer teachers
+had known their pupils before the expectancy induction, the smaller the
+effect. The title of his synthesis names the mechanism, the credibility
+of the expectancy induction.
 
 This vignette reproduces the paper’s analyses with DMAR’s synthesis
 functions, then reanalyzes the data with modern random effects
@@ -86,16 +86,16 @@ combine_p(p18, weights = df18)
 
 | term                | value  |
 |:--------------------|:-------|
-| fisher_chi_square   | 62.2   |
+| fisher_chi_square   | 62.166 |
 | fisher_df           | 36     |
 | fisher_p            | 0.0043 |
-| edgington_sum_p     | 7      |
+| edgington_sum_p     | 6.996  |
 | edgington_p         | 0.0509 |
-| stouffer_z          | 2.2    |
+| stouffer_z          | 2.199  |
 | stouffer_p          | 0.0139 |
-| stouffer_weighted_z | 0.87   |
+| stouffer_weighted_z | 0.870  |
 | stouffer_weighted_p | 0.1922 |
-| k                   | 18     |
+| n_studies           | 18     |
 
 Raudenbush’s Table 2 reports three of the four rejecting the null:
 Fisher’s chi square(36) = 62.17, Edgington’s sum of 6.84 (*p* = .04),
@@ -153,18 +153,20 @@ meta_contrast(d18, v18, weights = 1 / (wk18 + 2))
 #> Contrast weights mean-centered to sum to zero.
 ```
 
-| term     | value  |
-|:---------|:-------|
-| estimate | 0.432  |
-| se       | 0.156  |
-| z        | 2.76   |
-| p_value  | 0.0057 |
-| k        | 18     |
+| term           | value  |
+|:---------------|:-------|
+| estimate       | 0.432  |
+| se             | 0.156  |
+| test_statistic | 2.763  |
+| p_value        | 0.0057 |
+| n_studies      | 18     |
 
-The *z* of about 2.75 (one-tailed *p* = .003 in the paper) supports the
-hypothesis. Raudenbush partitioned the total heterogeneity the way an
-ANOVA partitions sums of squares: the fixed effect fit gives Cochran’s
-Q,
+test_statistic: referred to the standard normal
+
+The test statistic, 2.76 (Raudenbush’s *z*; one-tailed *p* = .003 in the
+paper), supports the hypothesis. Raudenbush partitioned the total
+heterogeneity the way an ANOVA partitions sums of squares: the fixed
+effect fit gives Cochran’s Q,
 
 ``` r
 
@@ -174,11 +176,13 @@ fe[fe$term %in% c("Q", "Q_df", "Q_p"), ]
 
 | term | value  |
 |:-----|:-------|
-| Q    | 14.9   |
+| Q    | 14.942 |
 | Q_df | 17     |
 | Q_p  | 0.5997 |
 
 Confidence level: 95%
+
+test_statistic: referred to the standard normal
 
 and the squared contrast statistic over Q is the proportion of
 heterogeneity the moderator explains (Raudenbush’s 52 percent; the
@@ -186,8 +190,9 @@ package returns 0.51 from these inputs):
 
 ``` r
 
-z_contrast <- meta_contrast(d18, v18, weights = 1 / (wk18 + 2))$value[3]
+contrast <- meta_contrast(d18, v18, weights = 1 / (wk18 + 2))
 #> Contrast weights mean-centered to sum to zero.
+z_contrast <- contrast$value[contrast$term == "test_statistic"]
 round(z_contrast^2 / fe$value[fe$term == "Q"], 2)
 #> [1] 0.51
 ```
@@ -214,16 +219,16 @@ combine_p(p18[lo],  weights = df18[lo])    # 10 low-contact studies
 
 | term                | value     |
 |:--------------------|:----------|
-| fisher_chi_square   | 54.2      |
+| fisher_chi_square   | 54.185    |
 | fisher_df           | 20        |
 | fisher_p            | \< 0.0001 |
-| edgington_sum_p     | 1.73      |
+| edgington_sum_p     | 1.734     |
 | edgington_p         | 0.0002    |
-| stouffer_z          | 4.15      |
+| stouffer_z          | 4.152     |
 | stouffer_p          | \< 0.0001 |
-| stouffer_weighted_z | 2.52      |
+| stouffer_weighted_z | 2.518     |
 | stouffer_weighted_p | 0.0059    |
-| k                   | 10        |
+| n_studies           | 10        |
 
 ``` r
 
@@ -232,16 +237,16 @@ combine_p(p18[!lo], weights = df18[!lo])   # 8 high-contact studies
 
 | term                | value  |
 |:--------------------|:-------|
-| fisher_chi_square   | 7.98   |
+| fisher_chi_square   | 7.980  |
 | fisher_df           | 16     |
 | fisher_p            | 0.9494 |
-| edgington_sum_p     | 5.26   |
+| edgington_sum_p     | 5.262  |
 | edgington_p         | 0.9389 |
-| stouffer_z          | -1.34  |
+| stouffer_z          | -1.343 |
 | stouffer_p          | 0.9104 |
 | stouffer_weighted_z | -0.786 |
 | stouffer_weighted_p | 0.7842 |
-| k                   | 8      |
+| n_studies           | 8      |
 
 Every method finds the low-contact studies jointly significant (the
 paper: adding-Zs z = 4.16, weighted 2.52); none finds anything in the
@@ -265,13 +270,15 @@ meta_contrast(d, vi, weights = ifelse(aware, 1 / sum(aware),
                                       -1 / sum(!aware)))
 ```
 
-| term     | value   |
-|:---------|:--------|
-| estimate | -0.0349 |
-| se       | 0.103   |
-| z        | -0.338  |
-| p_value  | 0.7351  |
-| k        | 19      |
+| term           | value  |
+|:---------------|:-------|
+| estimate       | -0.035 |
+| se             | 0.103  |
+| test_statistic | -0.338 |
+| p_value        | 0.7351 |
+| n_studies      | 19     |
+
+test_statistic: referred to the standard normal
 
 No main effect of tester awareness (the paper reports z = -0.36), and
 the low-contact effect held in both the aware and blind subsets: the
@@ -294,30 +301,33 @@ meta_smd(smd = teacher_expectancy$d,
          n_2 = teacher_expectancy$n_control)
 ```
 
-| term             | value   |
-|:-----------------|:--------|
-| estimate         | 0.0544  |
-| se               | 0.0352  |
-| t                | 1.55    |
-| p_value          | 0.1392  |
-| lower_limit      | -0.0195 |
-| upper_limit      | 0.128   |
-| prediction_lower | -0.0198 |
-| prediction_upper | 0.129   |
-| tau2             | 0       |
-| tau2_lower       | 0       |
-| tau2_upper       | 0.048   |
-| tau              | 0       |
-| I2               | 0       |
-| I2_lower         | 0       |
-| I2_upper         | 64.6    |
-| H2               | 1       |
-| Q                | 16.7    |
-| Q_df             | 18      |
-| Q_p              | 0.5468  |
-| k                | 19      |
+| term             | value  |
+|:-----------------|:-------|
+| estimate         | 0.054  |
+| se               | 0.035  |
+| test_statistic   | 1.547  |
+| p_value          | 0.1392 |
+| ci_lower         | -0.019 |
+| ci_upper         | 0.128  |
+| prediction_lower | -0.020 |
+| prediction_upper | 0.129  |
+| tau2             | 0.000  |
+| tau2_ci_lower    | 0.000  |
+| tau2_ci_upper    | 0.048  |
+| tau              | 0.000  |
+| I2               | 0.000  |
+| I2_ci_lower      | 0.000  |
+| I2_ci_upper      | 64.619 |
+| H2               | 1.000  |
+| Q                | 16.657 |
+| Q_df             | 18     |
+| Q_p              | 0.5468 |
+| n_studies        | 19     |
 
 Confidence level: 95%
+
+test_statistic: referred to Student’s t on 18 df (Hartung-Knapp
+adjustment)
 
 And the picture (the forest plot pools the raw *d* values, so its
 diamond sits fractionally left of the Hedges-corrected average in the

@@ -15,7 +15,7 @@ variance_components_mls(
   ms_within,
   df_between,
   df_within,
-  n,
+  n_per_group,
   conf_level = 0.95
 )
 ```
@@ -40,7 +40,7 @@ variance_components_mls(
   Degrees of freedom for the within-group MS (typically \\a (n - 1)\\
   for \\a\\ groups of size \\n\\).
 
-- n:
+- n_per_group:
 
   Number of observations per group (assumed balanced).
 
@@ -53,7 +53,9 @@ variance_components_mls(
 A `data.frame` with rows for the point estimates and MLS lower / upper
 CIs of the between-group variance component (\\\sigma^2_b\\), the
 within-group component (\\\sigma^2_w\\), and the implied intraclass
-correlation (\\\rho = \sigma^2_b / (\sigma^2_b + \sigma^2_w)\\).
+correlation (\\\rho = \sigma^2_b / (\sigma^2_b + \sigma^2_w)\\): the
+rows `sigma2_between`, `sigma2_within`, and `icc`, each followed by its
+limits, `<estimate>_ci_lower` and `<estimate>_ci_upper`.
 
 ## Details
 
@@ -116,17 +118,17 @@ Ken Kelley <kkelley@nd.edu>
 # 1. Balanced one-way random-effects ANOVA: a = 10 groups, n = 5.
 #        Hypothetical MS_b = 6.0, MS_w = 1.5.
 variance_components_mls(ms_between = 6.0, ms_within = 1.5,
-                        df_between = 9, df_within = 40, n = 5)
-#>  term           value 
-#>  sigma2_between 0.9   
-#>  sigma2_b_lower 0.236 
-#>  sigma2_b_upper 3.69  
-#>  sigma2_within  1.5   
-#>  sigma2_w_lower 1.01  
-#>  sigma2_w_upper 2.46  
-#>  icc            0.375 
-#>  icc_lower      0.0876
-#>  icc_upper      0.785 
+                        df_between = 9, df_within = 40, n_per_group = 5)
+#>  term                    value
+#>  sigma2_between          0.900
+#>  sigma2_between_ci_lower 0.236
+#>  sigma2_between_ci_upper 3.692
+#>  sigma2_within           1.500
+#>  sigma2_within_ci_lower  1.011
+#>  sigma2_within_ci_upper  2.456
+#>  icc                     0.375
+#>  icc_ci_lower            0.088
+#>  icc_ci_upper            0.785
 #> 
 #> Confidence level: 95%
 ```

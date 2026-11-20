@@ -71,6 +71,6 @@ Ken Kelley <kkelley@nd.edu>
 # From Hays (1994, pp. 649--650)
 convert_Z_r(0.3654438)
 #>  term     value
-#>  r_from_Z 0.35 
+#>  r_from_Z 0.350
 
 ```

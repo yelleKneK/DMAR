@@ -16,9 +16,9 @@ sufficiently narrow with a specified high degree of assurance (e.g.,
 
 ``` r
 ss_aipe_pcm(
-  variance_trend,
-  error_variance = NULL,
-  variance_true_minus_estimated_trend = NULL,
+  true_var_trend,
+  true_var_error = NULL,
+  true_var_trend_error = NULL,
   duration,
   frequency,
   width,
@@ -30,31 +30,38 @@ ss_aipe_pcm(
 
 ## Arguments
 
-- variance_trend:
+- true_var_trend:
 
   The variance of the individuals' true change coefficients (i.e.,
   \\\sigma^2\_{\upsilon_m}\\ in Kelley & Rausch, 2011) for the
   polynomial trend (e.g., linear, quadratic, etc.) of interest
 
-- error_variance:
+- true_var_error:
 
-  The true level one error variance (i.e., \\\sigma^2\_{\epsilon}\\ in
-  Kelley & Rausch, 2011). Either `error_variance` or
-  `variance_true_minus_estimated_trend` must be supplied; if
-  `variance_true_minus_estimated_trend` is given directly,
-  `error_variance` may be omitted.
+  The true within-subject (i.e., Level 1) error variance
+  (\\\sigma^2\_{\epsilon}\\ in Kelley & Rausch, 2011). Either
+  `true_var_error` or `true_var_trend_error` must be supplied; if
+  `true_var_trend_error` is given directly, `true_var_error` may be
+  omitted.
 
-- variance_true_minus_estimated_trend:
+- true_var_trend_error:
 
-  The variance of the difference between the \\m\\th true change
-  coefficient minus the \\m\\th estimated change coefficient (i.e.,
-  \\\sigma^2\_{\hat{\pi}\_{m} - \pi\_{m}}\\ from Equation 19 in Kelley &
-  Rausch, 2011). When derived from `error_variance` this equals
+  The sampling-error variance of one individual's estimated change
+  coefficient: the variance, across individuals, of the difference
+  between the \\m\\th estimated and the \\m\\th true change coefficient
+  of an individual, \\\sigma^2\_{\hat{\pi}\_{m} - \pi\_{m}}\\ (Kelley &
+  Rausch, 2011, Equation 19). It is the part of the variance of the
+  estimated change coefficients that measurement error contributes,
+  beside `true_var_trend`, the variance of the true ones. Kelley and
+  Rausch (2011, Equation 19) give it as \\\sigma^2\_{\epsilon} / \sum_t
+  c\_{mt}^2\\, where \\\sum_t c\_{mt}^2\\ is the sum of the squared
+  orthogonal polynomial contrast weights over the measurement occasions;
+  with the change coefficient expressed per unit of time it is
   \\\sigma^2\_{\epsilon} f^{2p} / \sum_t c\_{mt}^2\\, where \\f\\ is the
-  frequency, \\p\\ the polynomial order, and \\\sum_t c\_{mt}^2\\ the
-  sum of squared orthogonal polynomial contrast weights over the
-  measurement occasions. A user who already has this variance may supply
-  it directly and omit `error_variance`.
+  frequency and \\p\\ the polynomial order, which is how the function
+  computes it from `true_var_error` (the two agree at \\f = 1\\). A user
+  who already has this variance may supply it directly and omit
+  `true_var_error`.
 
 - duration:
 
@@ -149,8 +156,9 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # The examples reproduce the tolerance-of-antisocial-thinking illustration
 # of Kelley and Rausch (2011, Tables 1 and 2), which draws on the National
-# Youth Survey data also used by Raudenbush and Liu (2001). The level-one
-# error variance is 0.0262 and the between-subject slope variance is 0.003.
+# Youth Survey data also used by Raudenbush and Liu (2001). The
+# within-subject (i.e., Level 1) error variance is 0.0262 and the
+# between-subject slope variance is 0.003.
 # The planner finds the sample size needed for a confidence interval on the
 # group-by-time slope difference that is no wider than `width`. The returned
 # necessary_n_per_group is per group, so the total study size is twice that. Unlike
@@ -161,7 +169,7 @@ Ken Kelley <kkelley@nd.edu>
 #     (M = frequency * duration + 1 = 1 * 4 + 1) and a target width of
 #     0.025, the expected 95% confidence interval is sufficiently narrow at
 #     278 subjects per group (Kelley & Rausch, 2011, Table 1, T = 5).
-ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
+ss_aipe_pcm(true_var_trend = 0.003, true_var_error = 0.0262,
             duration = 4, frequency = 1, width = 0.025, conf_level = .95)
 #>  term                  value
 #>  necessary_n_per_group 278  
@@ -172,7 +180,7 @@ ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
 #     so that M = 10 (duration = 9, frequency = 1) cuts the expected-width
 #     requirement from 278 to 165 per group (Kelley & Rausch, 2011, Table 1,
 #     T = 10).
-ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
+ss_aipe_pcm(true_var_trend = 0.003, true_var_error = 0.0262,
             duration = 9, frequency = 1, width = 0.025, conf_level = .95)
 #>  term                  value
 #>  necessary_n_per_group 165  
@@ -182,7 +190,7 @@ ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
 # (3) A wider tolerated interval costs less. Relaxing the target width from
 #     0.025 to 0.05 at M = 5 drops the requirement from 278 to 71 per group
 #     (Kelley & Rausch, 2011, Table 1, T = 5).
-ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
+ss_aipe_pcm(true_var_trend = 0.003, true_var_error = 0.0262,
             duration = 4, frequency = 1, width = 0.05, conf_level = .95)
 #>  term                  value
 #>  necessary_n_per_group 71   
@@ -194,7 +202,7 @@ ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
 #     M = 5 requirement from 278 to 295 per group (Kelley & Rausch, 2011,
 #     Table 2, T = 5). Assurance guards against the expected-width plan being
 #     too small for the particular sample obtained.
-ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
+ss_aipe_pcm(true_var_trend = 0.003, true_var_error = 0.0262,
             duration = 4, frequency = 1, width = 0.025, conf_level = .95,
             assurance = .85)
 #>  term                  value
@@ -204,7 +212,7 @@ ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
 
 # (5) A higher assurance costs more. Demanding 99% assurance rather than 85%
 #     raises the per-group requirement further, from 295 to 316.
-ss_aipe_pcm(variance_trend = 0.003, error_variance = 0.0262,
+ss_aipe_pcm(true_var_trend = 0.003, true_var_error = 0.0262,
             duration = 4, frequency = 1, width = 0.025, conf_level = .95,
             assurance = .99)
 #>  term                  value

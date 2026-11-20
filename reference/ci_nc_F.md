@@ -12,9 +12,9 @@ the `ci_*` confidence interval functions (e.g.,
 [`ci_snr`](https://yelleknek.github.io/DMAR/reference/ci_snr.md),
 [`ci_R2`](https://yelleknek.github.io/DMAR/reference/ci_R2.md)) are
 built; most analyses reach it through those functions rather than
-calling it directly. The function was `conf_limits_ncf()` in earlier
-builds of DMAR and is `conf.limits.ncf()` in MBESS; it is named into the
-`ci_*` family because a confidence interval is what it computes.
+calling it directly. The function corresponds to `conf.limits.ncf()` in
+MBESS; its name places it in the `ci_*` family because a confidence
+interval is what it computes.
 
 ## Usage
 
@@ -82,13 +82,13 @@ A `data.frame` with one row per confidence limit and the columns:
 
 - term:
 
-  Either `"lower_limit"` or `"upper_limit"`.
+  Either `"ci_lower"` or `"ci_upper"`.
 
 - value:
 
   The noncentrality parameter at that limit. `0` when `alpha_lower = 0`
   or the lower limit is unattainable; `Inf` when `alpha_upper = 0`; `NA`
-  on the `upper_limit` row when the observed `F_value` is so small that
+  on the `ci_upper` row when the observed `F_value` is so small that
   even at \\\lambda = 0\\ the lower-tail probability is already at or
   below `alpha_upper`, leaving the upper noncentrality limit undefined
   (a warning is issued).
@@ -103,8 +103,8 @@ A `data.frame` with one row per confidence limit and the columns:
 
   (`verbose = TRUE`) The complementary probability \\P(F \ge
   \mathtt{F\\value})\\. By construction this equals `alpha_lower` on the
-  `lower_limit` row and \\1 - \mathtt{alpha\\upper}\\ on the
-  `upper_limit` row.
+  `ci_lower` row and \\1 - \mathtt{alpha\\upper}\\ on the `ci_upper`
+  row.
 
 ## Details
 
@@ -176,14 +176,14 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 ci_nc_F(F_value = 5, conf_level = .95, df_1 = 5, df_2 = 100)
-#>          term     value prob_less prob_greater
-#> 1 lower_limit  5.353713     0.975        0.025
-#> 2 upper_limit 45.276111     0.025        0.975
+#>       term     value prob_less prob_greater
+#> 1 ci_lower  5.353713     0.975        0.025
+#> 2 ci_upper 45.276111     0.025        0.975
 
 # A one-sided (upper) confidence interval.
 ci_nc_F(F_value = 5, conf_level = NULL, df_1 = 5, df_2 = 100,
                 alpha_lower = 0, alpha_upper = .05)
-#>          term    value prob_less prob_greater
-#> 1 lower_limit  0.00000      1.00         0.00
-#> 2 upper_limit 40.74672      0.05         0.95
+#>       term    value prob_less prob_greater
+#> 1 ci_lower  0.00000      1.00         0.00
+#> 2 ci_upper 40.74672      0.05         0.95
 ```

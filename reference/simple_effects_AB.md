@@ -7,10 +7,11 @@ where \\A\\ and \\B\\ are crossed fixed factors, computes the family of
 *simple main effects*: the effect of \\A\\ at each level of \\B\\ and/or
 the effect of \\B\\ at each level of \\A\\. Each row carries the simple
 effect *F* test, its (optionally adjusted) *p*-value, and the partial
-\\\eta^2\\ with a noncentrality-based confidence interval. The error
-term can be either the full-model pooled \\\mathit{MS}\_W\\ (the
-textbook default) or a Welch–Satterthwaite test refitted within each
-conditioning level (robust to within-level heteroscedasticity).
+\\\eta^2\\ with a noncentrality-based confidence interval under the
+pooled error term. The error term can be either the full-model pooled
+\\\mathit{MS}\_W\\ (the textbook default) or a Welch–Satterthwaite test
+refitted within each conditioning level (robust to within-level
+heteroscedasticity).
 
 ## Usage
 
@@ -96,10 +97,9 @@ simple_effects_AB(
 
 A `data.frame` with one row per simple effect test and columns `effect`,
 `focal_factor`, `conditioning_factor`, `conditioning_level`, `F_value`,
-`df_effect`, `df_error`, `p_value`, `p_adjusted`, `partial_eta_squared`,
-`lower_limit`, `upper_limit`, `n_at_level`. Attributes `error_term`,
-`adjust`, `conf_level`, `factor_A`, and `factor_B` record the call
-options.
+`df_effect`, `df_error`, `p_value`, `p_adjusted`, `eta_squared_partial`,
+`ci_lower`, `ci_upper`, `n_at_level`. Attributes `error_term`, `adjust`,
+`conf_level`, `factor_A`, and `factor_B` record the call options.
 
 ## Details
 
@@ -141,20 +141,26 @@ at that level only.
 **Partial \\\eta^2\\ and its CI.** The point estimate is
 \$\$\hat{\eta}^2_p = \frac{df\_{\text{effect}}\\
 F}{df\_{\text{effect}}\\ F + df\_{\text{error}}},\$\$ computed from the
-*F* and the *df* actually used in the test (so it reflects whichever
-error term was chosen). The confidence interval is built by Steiger's
+pooled-error *F* and *df*. The confidence interval is built by Steiger's
 (2004) transformation principle: a CI for the noncentrality parameter
 \\\lambda\\ of the *F* distribution is obtained via
 [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) and
 then mapped through \\\eta^2_p = \lambda / (\lambda +
 N\_{\text{ref}})\\, with \\N\_{\text{ref}}\\ taken to be the total study
 *N* for the pooled error term (treating the simple effect as a contrast
-within the full factorial design) and the level-conditional sample size
-\\n\_{\|b_j}\\ for the Welch error term (since the Welch test uses only
-those observations). When the lower limit on \\\lambda\\ is not
-identified (i.e., the observed *F* is below its one-sided critical
-value), the lower limit on \\\eta^2_p\\ is set to 0; when the upper
-limit is at infinity, the upper limit on \\\eta^2_p\\ is set to 1.
+within the full factorial design). When the lower limit on \\\lambda\\
+is not identified (i.e., the observed *F* is below its one-sided
+critical value), the lower limit on \\\eta^2_p\\ is set to 0; when the
+upper limit is at infinity, the upper limit on \\\eta^2_p\\ is set to 1.
+
+Under `error_term = "welch"`, partial eta squared and both limits are
+`NA`. The transformation of Welch's statistic and fractional degrees of
+freedom does not estimate ordinary partial eta squared, and transforming
+a noncentral-F interval with the level's sample size targets a different
+quantity under unequal variances. The Welch F reference distribution is
+itself approximate. The tests remain available; a warning, the
+`effect_size_inference` attribute, and the printed explanation identify
+the unavailable effect-size inference.
 
 **Multiplicity across the family.** With `which = "both"` the family is
 the \\a + b\\ simple effects returned in a single call; the adjustment
@@ -165,12 +171,12 @@ each family is adjusted on its own. The `"bonferroni"` adjustment is
 methods (`"holm"`, `"hochberg"`, `"BH"`, `"BY"`) are computed via
 [`p.adjust`](https://rdrr.io/r/stats/p.adjust.html).
 
-**When to perform simple effects.** It is no longer required that a
-significant omnibus interaction precede simple effect testing (Maxwell,
-Delaney, & Kelley, 2027). Simple effects are informative whenever the
-substantive question is conditional on a level of the other factor, and
-the multiplicity adjustment controls the family-wise error rate
-independently of any interaction screen.
+**When to perform simple effects.** A significant omnibus interaction
+need not precede simple effect testing (Maxwell, Delaney, & Kelley,
+2027). Simple effects are informative whenever the substantive question
+is conditional on a level of the other factor, and the multiplicity
+adjustment controls the family-wise error rate independently of any
+interaction screen.
 
 **Scope.** Only fixed-effects between-subjects designs with *exactly
 two* crossed factors are supported. Within-subjects or mixed designs
@@ -200,9 +206,9 @@ alternative approach. *Biometrika, 38*, 330–336.
 
 [`contrast_test`](https://yelleknek.github.io/DMAR/reference/contrast_test.md)
 for within-level pairwise or custom contrasts,
-[`eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md)
+[`eta_squared`](https://yelleknek.github.io/DMAR/reference/eta_squared.md)
 and
-[`ci_eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md)
+[`ci_eta_squared`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md)
 for the omnibus effect size counterparts,
 [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md) for
 the noncentrality machinery,
@@ -214,12 +220,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -252,7 +262,7 @@ fit <- aov(iq_gain ~ treatment * grade, data = pyg)
 # F is 0.004, so the lower limit on partial eta squared is clamped to
 # 0 and the function notes the clamp in a warning.
 simple_effects_AB(fit)
-#> Warning: The ci_nc_F() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
+#> Warning: The ci_nc_F() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding ci_lower on eta_squared_partial is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
 #>  effect                      focal_factor conditioning_factor
 #>  treatment | grade = 1       treatment    grade              
 #>  treatment | grade = 2       treatment    grade              
@@ -260,19 +270,21 @@ simple_effects_AB(fit)
 #>  grade | treatment = Control grade        treatment          
 #>  grade | treatment = Bloomer grade        treatment          
 #>  conditioning_level F_value df_effect df_error p_value p_adjusted
-#>  1                  7.39    1         157      0.0073  0.0073    
-#>  2                  5.26    1         157      0.0231  0.0231    
-#>  3                  0.00438 1         157      0.9473  0.9473    
-#>  Control            3.96    2         157      0.0211  0.0211    
-#>  Bloomer            6.46    2         157      0.0020  0.0020    
-#>  partial_eta_squared lower_limit upper_limit n_at_level
-#>  0.0449              0.00322     0.119       52        
-#>  0.0324              0.000173    0.1         58        
-#>  2.79e-05            0           0.00907     53        
-#>  0.048               0.000596    0.117       131       
-#>  0.076               0.0112      0.155       32        
+#>  1                  7.388   1         157      0.0073  0.0073    
+#>  2                  5.265   1         157      0.0231  0.0231    
+#>  3                  0.004   1         157      0.9473  0.9473    
+#>  Control            3.957   2         157      0.0211  0.0211    
+#>  Bloomer            6.461   2         157      0.0020  0.0020    
+#>  eta_squared_partial ci_lower ci_upper n_at_level
+#>  0.045               0.003    0.119    52        
+#>  0.032               0.000    0.100    58        
+#>  0.000               0.000    0.009    53        
+#>  0.048               0.001    0.117    131       
+#>  0.076               0.011    0.155    32        
 #> 
 #> Confidence level: 95%
+#> 
+#> Pooled-error partial eta squared with a noncentral-F interval.
 
 # Only the simple effects of grade within each treatment level, with
 # a Holm adjustment across that family of two tests.
@@ -281,19 +293,21 @@ simple_effects_AB(fit, which = "B_at_A", adjust = "holm")
 #>  grade | treatment = Control grade        treatment          
 #>  grade | treatment = Bloomer grade        treatment          
 #>  conditioning_level F_value df_effect df_error p_value p_adjusted
-#>  Control            3.96    2         157      0.0211  0.0211    
-#>  Bloomer            6.46    2         157      0.0020  0.0040    
-#>  partial_eta_squared lower_limit upper_limit n_at_level
-#>  0.048               0.000596    0.117       131       
-#>  0.076               0.0112      0.155       32        
+#>  Control            3.957   2         157      0.0211  0.0211    
+#>  Bloomer            6.461   2         157      0.0020  0.0040    
+#>  eta_squared_partial ci_lower ci_upper n_at_level
+#>  0.048               0.001    0.117    131       
+#>  0.076               0.011    0.155    32        
 #> 
 #> Confidence level: 95%
+#> 
+#> Pooled-error partial eta squared with a noncentral-F interval.
 
 # Welch error term: refits a Welch one-way at each conditioning
 # level. The Welch denominator df fall well below the pooled 157, so
 # more of the lower limits are clamped to 0.
 simple_effects_AB(fit, error_term = "welch")
-#> Warning: The ci_nc_F() lower-limit clamp fired in 4 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
+#> Warning: Partial eta squared and its interval are unavailable for the Welch test. Transforming Welch's F and fractional degrees of freedom does not establish the ordinary variance-ratio estimand or a noncentral-F interval for it under unequal variances. The Welch F, degrees of freedom, and p-values remain available.
 #>  effect                      focal_factor conditioning_factor
 #>  treatment | grade = 1       treatment    grade              
 #>  treatment | grade = 2       treatment    grade              
@@ -301,23 +315,25 @@ simple_effects_AB(fit, error_term = "welch")
 #>  grade | treatment = Control grade        treatment          
 #>  grade | treatment = Bloomer grade        treatment          
 #>  conditioning_level F_value df_effect df_error p_value p_adjusted
-#>  1                  6.87    1         9.03     0.0277  0.0277    
-#>  2                  2.97    1         12.5     0.1096  0.1096    
-#>  3                  0.00712 1         24.5     0.9335  0.9335    
-#>  Control            3.21    2         80.7     0.0455  0.0455    
-#>  Bloomer            7.48    2         14.5     0.0058  0.0058    
-#>  partial_eta_squared lower_limit upper_limit n_at_level
-#>  0.432               0           0.313       52        
-#>  0.192               0           0.196       58        
-#>  0.00029             0           0.0357      53        
-#>  0.0737              0           0.128       131       
-#>  0.508               0.0393      0.541       32        
+#>  1                  6.868   1         9.027    0.0277  0.0277    
+#>  2                  2.968   1         12.467   0.1096  0.1096    
+#>  3                  0.007   1         24.514   0.9335  0.9335    
+#>  Control            3.211   2         80.697   0.0455  0.0455    
+#>  Bloomer            7.483   2         14.520   0.0058  0.0058    
+#>  eta_squared_partial ci_lower ci_upper n_at_level
+#>  <NA>                <NA>     <NA>     52        
+#>  <NA>                <NA>     <NA>     58        
+#>  <NA>                <NA>     <NA>     53        
+#>  <NA>                <NA>     <NA>     131       
+#>  <NA>                <NA>     <NA>     32        
 #> 
 #> Confidence level: 95%
+#> 
+#> Partial eta squared and its interval are unavailable for the Welch test. Transforming Welch's F and fractional degrees of freedom does not establish the ordinary variance-ratio estimand or a noncentral-F interval for it under unequal variances. The Welch F, degrees of freedom, and p-values remain available.
 
 # Bonferroni across the full a + b = 5-test family.
 simple_effects_AB(fit, adjust = "bonferroni")
-#> Warning: The ci_nc_F() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding lower_limit on partial_eta_squared is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
+#> Warning: The ci_nc_F() lower-limit clamp fired in 1 of the simple effect rows (observed F below the alpha_lower critical value of the central F-distribution); the corresponding ci_lower on eta_squared_partial is clamped to 0. See ?ci_nc_F for the meaning of the clamp.
 #>  effect                      focal_factor conditioning_factor
 #>  treatment | grade = 1       treatment    grade              
 #>  treatment | grade = 2       treatment    grade              
@@ -325,46 +341,50 @@ simple_effects_AB(fit, adjust = "bonferroni")
 #>  grade | treatment = Control grade        treatment          
 #>  grade | treatment = Bloomer grade        treatment          
 #>  conditioning_level F_value df_effect df_error p_value p_adjusted
-#>  1                  7.39    1         157      0.0073  0.0365    
-#>  2                  5.26    1         157      0.0231  0.1154    
-#>  3                  0.00438 1         157      0.9473  1.0000    
-#>  Control            3.96    2         157      0.0211  0.1053    
-#>  Bloomer            6.46    2         157      0.0020  0.0101    
-#>  partial_eta_squared lower_limit upper_limit n_at_level
-#>  0.0449              0.00322     0.119       52        
-#>  0.0324              0.000173    0.1         58        
-#>  2.79e-05            0           0.00907     53        
-#>  0.048               0.000596    0.117       131       
-#>  0.076               0.0112      0.155       32        
+#>  1                  7.388   1         157      0.0073  0.0365    
+#>  2                  5.265   1         157      0.0231  0.1154    
+#>  3                  0.004   1         157      0.9473  1.0000    
+#>  Control            3.957   2         157      0.0211  0.1053    
+#>  Bloomer            6.461   2         157      0.0020  0.0101    
+#>  eta_squared_partial ci_lower ci_upper n_at_level
+#>  0.045               0.003    0.119    52        
+#>  0.032               0.000    0.100    58        
+#>  0.000               0.000    0.009    53        
+#>  0.048               0.001    0.117    131       
+#>  0.076               0.011    0.155    32        
 #> 
 #> Confidence level: 95%
+#> 
+#> Pooled-error partial eta squared with a noncentral-F interval.
 
 # Simulated 2 x 2 design with a known interaction pattern.
 set.seed(113)
 d <- simulate_ancova_factorial_data(
   a = 2, b = 2,
-  mu_y    = c(50, 60, 55, 50),   # crossover at B = 2
-  mu_x    = matrix(10, nrow = 4, ncol = 1),
-  sigma_y = 8, sigma_x = 3, rho_y_x = 0,
-  n       = 30
+  true_mean_Y = c(50, 60, 55, 50),   # crossover at B = 2
+  true_mean_X = matrix(10, nrow = 4, ncol = 1),
+  true_sd_Y = 8, true_sd_X = 3, true_cor_YX = 0,
+  n_per_cell = 30
 )
 fit_sim <- aov(y ~ A * B, data = d)
 simple_effects_AB(fit_sim, conf_level = 0.95)
 #>  effect    focal_factor conditioning_factor conditioning_level F_value
-#>  A | B = 1 A            B                   1                  31.6   
-#>  A | B = 2 A            B                   2                  12.2   
-#>  B | A = 1 B            A                   1                  20.4   
-#>  B | A = 2 B            A                   2                  21.1   
-#>  df_effect df_error p_value  p_adjusted partial_eta_squared lower_limit
-#>  1         116      < 0.0001 < 0.0001   0.214               0.0935     
-#>  1         116      0.0007   0.0007     0.0953              0.0179     
-#>  1         116      < 0.0001 < 0.0001   0.15                0.0482     
-#>  1         116      < 0.0001 < 0.0001   0.154               0.051      
-#>  upper_limit n_at_level
-#>  0.33        60        
-#>  0.201       60        
-#>  0.264       60        
-#>  0.268       60        
+#>  A | B = 1 A            B                   1                  31.563 
+#>  A | B = 2 A            B                   2                  12.223 
+#>  B | A = 1 B            A                   1                  20.424 
+#>  B | A = 2 B            A                   2                  21.113 
+#>  df_effect df_error p_value  p_adjusted eta_squared_partial ci_lower ci_upper
+#>  1         116      < 0.0001 < 0.0001   0.214               0.094    0.330   
+#>  1         116      0.0007   0.0007     0.095               0.018    0.201   
+#>  1         116      < 0.0001 < 0.0001   0.150               0.048    0.264   
+#>  1         116      < 0.0001 < 0.0001   0.154               0.051    0.268   
+#>  n_at_level
+#>  60        
+#>  60        
+#>  60        
+#>  60        
 #> 
 #> Confidence level: 95%
+#> 
+#> Pooled-error partial eta squared with a noncentral-F interval.
 ```

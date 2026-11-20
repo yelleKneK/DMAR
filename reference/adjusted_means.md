@@ -146,12 +146,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -180,22 +184,22 @@ pyg <- subset(pygmalion, grade <= 3)
 pyg$grade <- factor(pyg$grade)
 fit <- lm(iq_8 ~ treatment * grade, data = pyg)
 adjusted_means(fit)
-#>  treatment grade estimate se   ci_lower ci_upper
-#>  Control   1     102      2.56 97.3     107     
-#>  Bloomer   1     114      6.49 101      127     
-#>  Control   2     99.8     2.53 94.8     105     
-#>  Bloomer   2     118      4.96 109      128     
-#>  Control   3     105      2.72 100      111     
-#>  Bloomer   3     104      4.76 94.9     114     
+#>  treatment grade estimate se    ci_lower ci_upper
+#>  Control   1     102.378  2.560 97.320   107.435 
+#>  Bloomer   1     113.714  6.492 100.891  126.537 
+#>  Control   2     99.761   2.532 94.759   104.763 
+#>  Bloomer   2     118.500  4.958 108.706  128.294 
+#>  Control   3     105.475  2.716 100.111  110.839 
+#>  Bloomer   3     104.308  4.764 94.898   113.717 
 #> 
 #> Confidence level: 95%
 
 # 2. Marginal means of grade, averaging the cell means over treatment.
 adjusted_means(fit, by = "grade")
-#>  grade estimate se   ci_lower ci_upper
-#>  1     108      3.49 101      115     
-#>  2     109      2.78 104      115     
-#>  3     105      2.74 99.5     110     
+#>  grade estimate se    ci_lower ci_upper
+#>  1     108.046  3.489 101.154  114.938 
+#>  2     109.130  2.784 103.632  114.629 
+#>  3     104.891  2.742 99.476   110.307 
 #> 
 #> Confidence level: 95%
 
@@ -203,25 +207,25 @@ adjusted_means(fit, by = "grade")
 #    depression score, at its sample mean.
 fit_ancova <- lm(bdi_post ~ condition + bdi_pre, data = depression_bdi)
 adjusted_means(fit_ancova)
-#>  condition estimate se   ci_lower ci_upper
-#>  ssri      7.54     1.71 4.03     11      
-#>  placebo   12       1.71 8.48     15.5    
-#>  wait_list 14       1.71 10.5     17.5    
+#>  condition estimate se    ci_lower ci_upper
+#>  ssri      7.537    1.707 4.028    11.046  
+#>  placebo   11.985   1.707 8.476    15.493  
+#>  wait_list 13.978   1.706 10.473   17.484  
 #> 
 #> Confidence level: 95%
 
 # 4. With unbalanced cells (few bloomers in every grade) the two
 #    weightings answer different questions.
 adjusted_means(fit, by = "treatment")
-#>  treatment estimate se   ci_lower ci_upper
-#>  Control   103      1.5  99.6     106     
-#>  Bloomer   112      3.15 106      118     
+#>  treatment estimate se    ci_lower ci_upper
+#>  Control   102.538  1.504 99.568   105.508 
+#>  Bloomer   112.174  3.152 105.948  118.400 
 #> 
 #> Confidence level: 95%
 adjusted_means(fit, by = "treatment", weights = "proportional")
-#>  treatment estimate se   ci_lower ci_upper
-#>  Control   102      1.5  99.5     105     
-#>  Bloomer   112      3.13 106      119     
+#>  treatment estimate se    ci_lower ci_upper
+#>  Control   102.454  1.503 99.485   105.422 
+#>  Bloomer   112.359  3.131 106.175  118.542 
 #> 
 #> Confidence level: 95%
 ```

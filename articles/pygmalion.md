@@ -10,8 +10,8 @@ follows that treatment. The study itself is one famous experiment; the
 (1984), ships separately as `teacher_expectancy` and is analyzed in
 [`vignette("teacher_expectancy")`](https://yelleknek.github.io/DMAR/articles/teacher_expectancy.md).
 The two are kept apart on purpose: a single study and the accumulated
-evidence about its claim are importantly different things, and DMAR
-treats them as such.
+evidence about its claim are different things, and DMAR keeps them in
+separate data sets.
 
 ## The Data
 
@@ -137,26 +137,26 @@ res <- ancova(pygmalion, outcome = "iq_8", treatment = "treatment",
 as_kable(res)
 ```
 
-| term                         | value    |
-|:-----------------------------|:---------|
-| F_value                      | 5.38     |
-| df_1                         | 1        |
-| df_2                         | 307      |
-| p_value                      | 0.0210   |
-| sum_of_squares_type          | 3        |
-| eta_squared_partial          | 0.0172   |
-| eta_squared_partial_lower    | 0.000201 |
-| eta_squared_partial_upper    | 0.056    |
-| omega_squared_partial        | 0.0139   |
-| omega_squared_partial_lower  | 0.000201 |
-| omega_squared_partial_upper  | 0.056    |
-| adjusted_mean\[Control\]     | 107      |
-| adjusted_mean\[Bloomer\]     | 111      |
-| se_adjusted_mean\[Control\]  | 0.849    |
-| se_adjusted_mean\[Bloomer\]  | 1.67     |
-| F_homogeneity_of_regression  | 3.88     |
-| df_homogeneity_of_regression | 1        |
-| p_homogeneity_of_regression  | 0.0498   |
+| term                           | value   |
+|:-------------------------------|:--------|
+| F_value                        | 5.383   |
+| df_1                           | 1       |
+| df_2                           | 307     |
+| p_value                        | 0.0210  |
+| sum_of_squares_type            | 3       |
+| eta_squared_partial            | 0.017   |
+| eta_squared_partial_ci_lower   | 0.000   |
+| eta_squared_partial_ci_upper   | 0.056   |
+| omega_squared_partial          | 0.014   |
+| omega_squared_partial_ci_lower | 0.000   |
+| omega_squared_partial_ci_upper | 0.056   |
+| adjusted_mean\[Control\]       | 107.000 |
+| adjusted_mean\[Bloomer\]       | 111.343 |
+| se_adjusted_mean\[Control\]    | 0.849   |
+| se_adjusted_mean\[Bloomer\]    | 1.667   |
+| F_homogeneity_of_regression    | 3.879   |
+| df_homogeneity_of_regression   | 1       |
+| p_homogeneity_of_regression    | 0.0498  |
 
 Confidence level: 95% {.table}
 
@@ -232,16 +232,16 @@ round(c(n_bloomer = n_bloomer, n_control = n_control,
 #>  64.00000 246.00000 175.32513 348.90974   0.77799   0.96894
 
 # Variance of the estimated treatment effect at the covariate mean.
-var_ete(sigma2 = sigma2, sigma2_Z = sigmaz2,
+var_ete(error_variance = sigma2, var_Z = sigmaz2,
         n_1 = n_bloomer, n_2 = n_control,
-        beta_1 = unname(slopes["Bloomer"]),
-        beta_2 = unname(slopes["Control"]),
+        reg_coef_1 = unname(slopes["Bloomer"]),
+        reg_coef_2 = unname(slopes["Control"]),
         type = "sample", covariate_value = "sample_mean")
 ```
 
 | term    | value |
 |:--------|:------|
-| var_ete | 3.52  |
+| var_ete | 3.518 |
 
 ## One Study and Its Literature
 

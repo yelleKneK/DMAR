@@ -10,14 +10,15 @@ design.
 ## Usage
 
 ``` r
-expected_R2(population_R2, N, p)
+expected_R2(true_R2, N, p)
 ```
 
 ## Arguments
 
-- population_R2:
+- true_R2:
 
-  Population squared multiple correlation coefficient
+  Population squared multiple correlation coefficient, \\\rho^2\\, the
+  value at which the expected value is evaluated
 
 - N:
 
@@ -30,8 +31,10 @@ expected_R2(population_R2, N, p)
 ## Value
 
 A 1-row `data.frame` with columns `term` and `value`. The `term` value
-is `"expected_value_population_R2"` and `value` is the expected value of
-\\R^2\\ under random sampling.
+is `"expected_R2"` and `value` is the expected value of \\R^2\\ under
+random sampling, as
+[`var_R2`](https://yelleknek.github.io/DMAR/reference/var_R2.md) reports
+its variance in the row `var_R2`.
 
 ## Details
 
@@ -75,21 +78,21 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 expected_R2(.5, 10, 5)
-#>  term                         value
-#>  expected_value_population_R2 0.754
+#>  term        value
+#>  expected_R2 0.754
 expected_R2(.5, 25, 5)
-#>  term                         value
-#>  expected_value_population_R2 0.588
+#>  term        value
+#>  expected_R2 0.588
 expected_R2(.5, 50, 5)
-#>  term                         value
-#>  expected_value_population_R2 0.542
+#>  term        value
+#>  expected_R2 0.542
 expected_R2(.5, 100, 5)
-#>  term                         value
-#>  expected_value_population_R2 0.52 
+#>  term        value
+#>  expected_R2 0.520
 expected_R2(.5, 1000, 5)
-#>  term                         value
-#>  expected_value_population_R2 0.502
+#>  term        value
+#>  expected_R2 0.502
 expected_R2(.5, 10000, 5)
-#>  term                         value
-#>  expected_value_population_R2 0.5  
+#>  term        value
+#>  expected_R2 0.500
 ```

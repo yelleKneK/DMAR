@@ -20,7 +20,7 @@ result is the natural companion to
 
 ``` r
 var_omega_squared(
-  population_omega_squared = NULL,
+  true_omega_squared = NULL,
   df_effect = NULL,
   df_error = NULL,
   N = NULL,
@@ -30,10 +30,11 @@ var_omega_squared(
 
 ## Arguments
 
-- population_omega_squared:
+- true_omega_squared:
 
-  Population \\\omega^2\\. Numeric scalar in \\\[0, 1)\\. Ignored when
-  `object` is supplied.
+  Population \\\omega^2\\, the value at which the sampling variance is
+  evaluated. Numeric scalar in \\\[0, 1)\\. Ignored when `object` is
+  supplied.
 
 - df_effect:
 
@@ -122,7 +123,6 @@ contrast analysis. *Psychological Methods, 9*(2), 164–182.
 ## See also
 
 [`omega_squared`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ss_aipe_omega_squared`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md)
 
@@ -144,21 +144,21 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # 1. One way ANOVA: 3 groups (df_effect = 2), 60 total (df_error = 57),
 #        population omega^2 = 0.10.
-var_omega_squared(population_omega_squared = 0.10,
+var_omega_squared(true_omega_squared = 0.10,
                    df_effect = 2,
                    df_error = 57,
                    N = 60)
-#>  term              value  
-#>  var_omega_squared 0.00632
+#>  term              value
+#>  var_omega_squared 0.006
 
 # 2. Per-effect variance from a fitted lm() / aov() (pygmalion data:
 #        expectancy treatment x grade, N = 310):
 fit_factorial <- aov(iq_8 ~ treatment * factor(grade), data = pygmalion)
 var_omega_squared(object = fit_factorial)
 #>  effect                  omega_squared_partial var_omega_squared df_effect
-#>  treatment               0.0176                0.000239          1        
-#>  factor(grade)           0.0281                0.000441          5        
-#>  treatment:factor(grade) 0.00307               0.000145          5        
+#>  treatment               0.018                 0.000             1        
+#>  factor(grade)           0.028                 0.000             5        
+#>  treatment:factor(grade) 0.003                 0.000             5        
 #>  df_error N  
 #>  298      310
 #>  298      310

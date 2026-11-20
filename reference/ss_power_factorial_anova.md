@@ -12,11 +12,11 @@ higher-order factorial designs.
 ss_power_factorial_anova(
   factor_levels,
   effect_indices,
-  f = NULL,
-  partial_eta_squared = NULL,
+  true_f = NULL,
+  true_eta_squared_partial = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n_per_cell = NULL
+  specified_n_per_cell = NULL
 )
 ```
 
@@ -34,14 +34,15 @@ ss_power_factorial_anova(
   factor; `c(1, 2)` requests the AxB two-way interaction; `c(1, 2, 3)`
   requests the three-way interaction
 
-- f:
+- true_f:
 
   Cohen's *f* effect size for the chosen effect; supply this or
-  `partial_eta_squared`, but not both
+  `true_eta_squared_partial`, but not both
 
-- partial_eta_squared:
+- true_eta_squared_partial:
 
-  Partial eta squared for the chosen effect; supply this or `f`
+  Population partial eta squared for the chosen effect; supply this or
+  `true_f`
 
 - desired_power:
 
@@ -51,15 +52,15 @@ ss_power_factorial_anova(
 
   Type I error rate (default 0.05)
 
-- n_per_cell:
+- specified_n_per_cell:
 
   Per-cell sample size; if specified, returns the realized power
 
 ## Value
 
 A `data.frame` with rows for `necessary_n_per_cell` (or
-`specified_n_per_cell`), `total_N`, `effect_df`, `error_df`,
-`noncentrality`, and `actual_power`. The result carries the
+`specified_n_per_cell`), `total_N`, `df_effect`, `df_error`,
+`noncentral_f_parm`, and `actual_power`. The result carries the
 `dmar_ss_power` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
@@ -77,8 +78,8 @@ and noncentrality parameter \\\lambda = N f^2\\. Cohen's *f* relates to
 partial eta squared via \\f = \sqrt{\eta_p^2 / (1 - \eta_p^2)}\\.
 
 The function searches over per-cell sample sizes until power reaches
-`desired_power`; when `n_per_cell` is supplied it returns the realized
-power.
+`desired_power`; when `specified_n_per_cell` is supplied it returns the
+realized power.
 
 For covariates, see
 [`ss_power_factorial_ancova`](https://yelleknek.github.io/DMAR/reference/ss_power_factorial_ancova.md).
@@ -111,6 +112,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -147,45 +149,45 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # 2 x 3 design, main effect of factor B (the 3-level factor), f = 0.25, power = .80
 ss_power_factorial_anova(factor_levels = c(2, 3), effect_indices = 2,
-                         f = 0.25, desired_power = 0.80)
-#>  term                 value
-#>  necessary_n_per_cell 27   
-#>  total_N              162  
-#>  effect_df            2    
-#>  error_df             156  
-#>  noncentrality        10.1 
-#>  actual_power         0.813
+                         true_f = 0.25, desired_power = 0.80)
+#>  term                 value 
+#>  necessary_n_per_cell 27    
+#>  total_N              162   
+#>  df_effect            2     
+#>  df_error             156   
+#>  noncentral_f_parm    10.125
+#>  actual_power         0.813 
 
 # 2 x 2 design, AxB interaction, partial eta squared = 0.06, power = .80
 ss_power_factorial_anova(factor_levels = c(2, 2), effect_indices = c(1, 2),
-                         partial_eta_squared = 0.06, desired_power = 0.80)
+                         true_eta_squared_partial = 0.06, desired_power = 0.80)
 #>  term                 value
 #>  necessary_n_per_cell 32   
 #>  total_N              128  
-#>  effect_df            1    
-#>  error_df             124  
-#>  noncentrality        8.17 
-#>  actual_power         0.81 
+#>  df_effect            1    
+#>  df_error             124  
+#>  noncentral_f_parm    8.170
+#>  actual_power         0.810
 
 # 2 x 2 x 3 design, three-way interaction, f = 0.20
 ss_power_factorial_anova(factor_levels = c(2, 2, 3), effect_indices = c(1, 2, 3),
-                         f = 0.20, desired_power = 0.80)
-#>  term                 value
-#>  necessary_n_per_cell 21   
-#>  total_N              252  
-#>  effect_df            2    
-#>  error_df             240  
-#>  noncentrality        10.1 
-#>  actual_power         0.814
+                         true_f = 0.20, desired_power = 0.80)
+#>  term                 value 
+#>  necessary_n_per_cell 21    
+#>  total_N              252   
+#>  df_effect            2     
+#>  df_error             240   
+#>  noncentral_f_parm    10.080
+#>  actual_power         0.814 
 
-# Realized power for n_per_cell = 20 in a 2x3 design, AxB interaction, f = 0.25
+# Realized power for specified_n_per_cell = 20 in a 2x3 design, AxB interaction, f = 0.25
 ss_power_factorial_anova(factor_levels = c(2, 3), effect_indices = c(1, 2),
-                         f = 0.25, n_per_cell = 20)
+                         true_f = 0.25, specified_n_per_cell = 20)
 #>  term                 value
 #>  specified_n_per_cell 20   
 #>  total_N              120  
-#>  effect_df            2    
-#>  error_df             114  
-#>  noncentrality        7.5  
+#>  df_effect            2    
+#>  df_error             114  
+#>  noncentral_f_parm    7.500
 #>  actual_power         0.675
 ```

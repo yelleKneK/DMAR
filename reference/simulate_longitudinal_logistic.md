@@ -15,11 +15,11 @@ modeled quantity rather than fixed at zero.
 
 ``` r
 simulate_longitudinal_logistic(
-  n,
+  n_per_group,
   target_times = NULL,
   fixed_parameters,
   time_range = NULL,
-  occasions = NULL,
+  n_occasions = NULL,
   time_distribution = "uniform",
   random_variances = 0,
   random_correlation = NULL,
@@ -27,18 +27,20 @@ simulate_longitudinal_logistic(
   reliability = NULL,
   error_structure = c("independent", "ar1", "compound_symmetry", "toeplitz"),
   error_correlation = NULL,
-  timing_sd = 0
+  timing_sd = 0,
+  seed = NULL
 )
 ```
 
 ## Arguments
 
-- n:
+- n_per_group:
 
-  A single positive integer, the number of units (persons, animals,
-  trees, classrooms) whose trajectories are drawn, or a vector giving
-  the number of units for each population, one entry per parameter
-  vector in `fixed_parameters`.
+  The number of units in each population (group), never a total over
+  populations: a single positive integer, the number of units (persons,
+  animals, trees, classrooms) whose trajectories are drawn, or a vector
+  giving the number of units for each population, one entry per
+  parameter vector in `fixed_parameters`.
 
 - target_times:
 
@@ -82,15 +84,16 @@ simulate_longitudinal_logistic(
   Alternative to `target_times`: `c(lower, upper)` bounds from which
   each unit draws its own measurement times, so no two units share a
   schedule (e.g., age in weeks at testing rather than a fixed grade).
-  Requires `occasions`; with `time_range`, the level-one error must be a
-  single `error_variance` with the default independent structure, and
+  Requires `n_occasions`; with `time_range`, the level-one error must be
+  a single `error_variance` with the default independent structure, and
   `timing_sd` does not apply.
 
-- occasions:
+- n_occasions:
 
-  With `time_range`: a single positive integer (every unit measured the
-  same number of times) or `c(min, max)`, from which each unit's number
-  of measurement times is drawn uniformly.
+  The number of measurement occasions per unit. With `time_range`: a
+  single positive integer (every unit measured the same number of times)
+  or `c(min, max)`, from which each unit's number of measurement times
+  is drawn uniformly.
 
 - time_distribution:
 
@@ -123,6 +126,13 @@ simulate_longitudinal_logistic(
   to the mean curve); `error_structure` and `error_correlation` set the
   across-occasion error correlation; `timing_sd` jitters the actual
   assessment times.
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
@@ -193,7 +203,7 @@ Ken Kelley <kkelley@nd.edu>
 # curvature; the falling curves mirror them. Each curve is its own population
 # of size one, so a single call draws the whole panel.
 panel <- simulate_longitudinal_logistic(
-  n = 1, target_times = seq(0, 12, by = 0.1),
+  n_per_group = 1, target_times = seq(0, 12, by = 0.1),
   fixed_parameters = list(
     c(alpha = 80, beta = 6, gamma =  2.0, zeta = 10),
     c(alpha = 80, beta = 6, gamma =  0.9, zeta = 10),
@@ -213,7 +223,7 @@ plot_trajectories(panel, id = "id", time = "time",
 # growth on a different week.
 set.seed(113)
 d_beta <- simulate_longitudinal_logistic(
-  n = 25, target_times = seq(0, 12, by = 0.5),
+  n_per_group = 25, target_times = seq(0, 12, by = 0.5),
   fixed_parameters = c(alpha = 80, beta = 6, gamma = 0.9, zeta = 10),
   random_variances = c(beta = 1.2), error_variance = 0
 )
@@ -226,7 +236,7 @@ plot_trajectories(d_beta, id = "id", time = "time",
 # visits each, rather than on one shared schedule.
 set.seed(113)
 d_ages <- simulate_longitudinal_logistic(
-  n = 12, time_range = c(40, 90), occasions = c(5, 9),
+  n_per_group = 12, time_range = c(40, 90), n_occasions = c(5, 9),
   fixed_parameters = c(alpha = 80, beta = 65, gamma = 0.15, zeta = 10),
   random_variances = c(beta = 16), error_variance = 4
 )
@@ -238,7 +248,7 @@ plot_trajectories(d_ages, id = "id", time = "time", outcome = "y")
 # fastest around week 6.
 set.seed(113)
 d <- simulate_longitudinal_logistic(
-  n = 30, target_times = 0:12,
+  n_per_group = 30, target_times = 0:12,
   fixed_parameters = c(alpha = 80, beta = 6, gamma = 0.9, zeta = 10),
   random_variances = c(alpha = 36, beta = 1, gamma = 0.01, zeta = 9),
   error_variance = 16

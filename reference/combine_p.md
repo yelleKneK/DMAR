@@ -10,8 +10,9 @@ typically the studies' degrees of freedom). Combined significance tests
 answer the narrow question “is there an effect in at least some
 studies?”; they do not estimate its size. Pair them with
 [`meta_smd`](https://yelleknek.github.io/DMAR/reference/meta_smd.md) or
-[`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md) for
-estimation, which is almost always the more informative summary.
+[`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md),
+which estimate the size of the effect with a confidence interval and,
+under a random effects model, its heterogeneity across studies.
 
 ## Usage
 
@@ -46,8 +47,9 @@ combine_p(
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with, per requested method, its
-statistic row(s) and a one-tailed `<method>_p` row, plus a final `k`
-row. The *p* rows print to fixed decimals via the `p_terms` attribute.
+statistic row(s) and a one-tailed `<method>_p` row, plus a final
+`n_studies` row. The *p* rows print to fixed decimals via the `p_terms`
+attribute.
 
 ## Details
 
@@ -125,16 +127,16 @@ p18  <- append(study$p_one_tailed, .010, after = 3)
 df18 <- append(study$n_experimental + study$n_control - 2, 42, after = 3)
 combine_p(p18, weights = df18)
 #>  term                value 
-#>  fisher_chi_square   62.2  
+#>  fisher_chi_square   62.166
 #>  fisher_df           36    
 #>  fisher_p            0.0043
-#>  edgington_sum_p     7     
+#>  edgington_sum_p     6.996 
 #>  edgington_p         0.0509
-#>  stouffer_z          2.2   
+#>  stouffer_z          2.199 
 #>  stouffer_p          0.0139
-#>  stouffer_weighted_z 0.87  
+#>  stouffer_weighted_z 0.870 
 #>  stouffer_weighted_p 0.1922
-#>  k                   18    
+#>  n_studies           18    
 # Fisher chi square 62.17 on 36 df; Edgington sum near 7; Stouffer
 # z near 2.2; and the df-weighted z under 1: the large studies disagree.
 ```

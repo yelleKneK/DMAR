@@ -9,7 +9,7 @@ Also checks that each column sums to zero (the contrast property).
 ## Usage
 
 ``` r
-is_orthogonal_set(contrasts, n = NULL, tol = 1e-08)
+is_orthogonal_set(contrasts, n_per_group = NULL, tol = 1e-08)
 ```
 
 ## Arguments
@@ -19,7 +19,7 @@ is_orthogonal_set(contrasts, n = NULL, tol = 1e-08)
   A numeric \\a \times m\\ matrix or `data.frame`, where \\a\\ is the
   number of groups and \\m\\ is the number of contrasts.
 
-- n:
+- n_per_group:
 
   Optional integer vector of length \\a\\ giving the per- group sample
   sizes. If supplied, the unequal-\\n\\ convention is used; otherwise
@@ -92,7 +92,7 @@ is_orthogonal_set(cmat)
 #>  dot[c_linear . c_quad]    0    
 
 # 2. Same contrasts under unequal sample sizes:
-is_orthogonal_set(cmat, n = c(10, 8, 12, 9))
+is_orthogonal_set(cmat, n_per_group = c(10, 8, 12, 9))
 #>  term                      value
 #>  all_orthogonal            0    
 #>  all_contrasts_sum_to_zero 1    

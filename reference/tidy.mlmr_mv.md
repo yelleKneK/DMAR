@@ -25,7 +25,8 @@ glance(x, ...)
 
 - conf.int:
 
-  Logical: include `ci_lower` / `ci_upper`?
+  Logical: include `ci_lower` / `ci_upper`, with a `conf_level` column
+  holding the level of the intervals?
 
 - conf_level:
 
@@ -43,10 +44,12 @@ glance(x, ...)
 ## Value
 
 For `tidy.mlmr_mv`, a `data.frame` with columns `response`, `term`,
-`estimate`, `se`, `statistic`, `p_value`, and optionally `ci_lower`,
-`ci_upper`, `std_estimate`. For `glance.mlmr_mv`, a one-row `data.frame`
-with `R2` (mean across outcomes), `df`, `logLik`, `AIC`, `BIC`,
-`deviance`, `nobs`, and `n.responses`.
+`estimate`, `se`, `statistic`, `p_value`, `wald_df` (the degrees of
+freedom of the *t* reference of the row's statistic and *p*-value, `Inf`
+for the normal reference), and optionally `ci_lower`, `ci_upper`,
+`std_estimate`. For `glance.mlmr_mv`, a one-row `data.frame` with `R2`
+(mean across outcomes), `df`, `logLik`, `AIC`, `BIC`, `deviance`,
+`nobs`, and `n.responses`.
 
 ## See also
 

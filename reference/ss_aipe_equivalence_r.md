@@ -2,9 +2,11 @@
 
 Computes the minimum sample size needed so that the equivalence CI (the
 100(1 - 2\\\alpha\\)% CI on the Pearson correlation \\\rho\\) has
-expected full width \\\le \omega\\ (Kelley, 2007; Lakens, 2017). With
-the standard \\\alpha = 0.05\\ TOST level, the equivalence CI is the 90%
-CI. The interval is the Fisher's \\Z\\ construction that
+expected full width \\\le \omega\\ (Kelley, 2007; Lakens, 2017), where
+\\\rho\\ is `true_cor`, \\\omega\\ is `width`, and \\\alpha\\ is
+`alpha_level`. With the standard \\\alpha = 0.05\\ TOST level, the
+equivalence CI is the 90% CI. The interval is the Fisher's \\Z\\
+construction that
 [`equivalence_r`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md)
 and
 [`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
@@ -14,21 +16,26 @@ use, so the plan and the analysis invert the same interval.
 
 ``` r
 ss_aipe_equivalence_r(
-  population_r = 0,
+  true_cor = 0,
   width,
   alpha_level = 0.05,
-  assurance = NULL
+  assurance = NULL,
+  seed = NULL
 )
 ```
 
 ## Arguments
 
-- population_r:
+- true_cor:
 
-  Anticipated population correlation \\\rho\\ used to plan the width.
-  Default `0`: the confidence interval for a correlation is widest at
-  \\\rho = 0\\, so the default plans under the widest-interval case and
-  is conservative for any other value.
+  Population correlation \\\rho\\ the sample size is planned for. The
+  planner treats this value as the truth;
+  [`ss_aipe_equivalence_r_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md)
+  shows what the plan delivers when the truth (`true_cor` there) differs
+  from the value planned with (`supposed_cor` there). Default `0`: the
+  confidence interval for a correlation is widest at \\\rho = 0\\, so
+  the default plans under the widest-interval case and is conservative
+  for any other value.
 
 - width:
 
@@ -38,8 +45,8 @@ ss_aipe_equivalence_r(
 
 - alpha_level:
 
-  One-sided TOST significance level. The CI used in planning is at
-  confidence level \\1 - 2\alpha\\. Default `0.05` (90% CI).
+  One-sided TOST significance level \\\alpha\\. The CI used in planning
+  is at confidence level \\1 - 2\alpha\\. Default `0.05` (90% CI).
 
 - assurance:
 
@@ -48,11 +55,18 @@ ss_aipe_equivalence_r(
   less is at least `assurance` (Kelley, Maxwell, & Rausch, 2003).
   Default `NULL` (no assurance correction).
 
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
+
 ## Value
 
 A 4-row `data.frame` with columns `term` and `value`: the recommended
 sample size `necessary_N`, the target `width`, the planning value
-`population_r`, and the resulting `ci_width_expected` at the chosen *N*.
+`true_cor`, and the resulting `expected_width` at the chosen *N*.
 
 ## Details
 
@@ -99,8 +113,8 @@ Software, 20*(8), 1–24.
 [doi:10.18637/jss.v020.i08](https://doi.org/10.18637/jss.v020.i08)
 
 Kelley, K., Maxwell, S. E., & Rausch, J. R. (2003). Obtaining power or
-obtaining precision: Delineating methods of sample size planning.
-*Evaluation and the Health Professions, 26*(3), 258–287.
+obtaining precision: Delineating methods of sample-size planning.
+*Evaluation & the Health Professions, 26*(3), 258–287.
 [doi:10.1177/0163278703255242](https://doi.org/10.1177/0163278703255242)
 
 Lakens, D. (2017). Equivalence tests: A practical primer for *t* tests,
@@ -126,6 +140,8 @@ Other AIPE sample size planning:
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
 [`ss_aipe_composite_sem()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_composite_sem.md),
+[`ss_aipe_crossed()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed.md),
+[`ss_aipe_crossed_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed_sensitivity.md),
 [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
 [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
 [`ss_aipe_equivalence_smd_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd_sensitivity.md),
@@ -133,6 +149,8 @@ Other AIPE sample size planning:
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
 [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md),
+[`ss_aipe_mean()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean.md),
+[`ss_aipe_mean_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean_sensitivity.md),
 [`ss_aipe_mixed_effects_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md),
 [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
@@ -143,7 +161,10 @@ Other AIPE sample size planning:
 [`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
+[`ss_aipe_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase.md),
+[`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md),
+[`ss_aipe_two_phase_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_sensitivity.md)
 
 ## Author
 
@@ -153,30 +174,30 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # 1. Plan for a 90% CI on the correlation of width <= 0.20, under
-#    the widest-interval planning value rho = 0:
-ss_aipe_equivalence_r(population_r = 0, width = 0.20)
-#>  term              value
-#>  necessary_N       272  
-#>  width             0.2  
-#>  population_r      0    
-#>  ci_width_expected 0.2  
+#    the widest-interval planning value true_cor = 0:
+ss_aipe_equivalence_r(true_cor = 0, width = 0.20)
+#>  term           value
+#>  necessary_N    272  
+#>  width          0.200
+#>  true_cor       0    
+#>  expected_width 0.200
 
 # 2. The same width assuming a true correlation of 0.30 requires
 #    fewer participants, since the interval narrows away from zero:
-ss_aipe_equivalence_r(population_r = 0.30, width = 0.20)
-#>  term              value
-#>  necessary_N       226  
-#>  width             0.2  
-#>  population_r      0.3  
-#>  ci_width_expected 0.2  
+ss_aipe_equivalence_r(true_cor = 0.30, width = 0.20)
+#>  term           value
+#>  necessary_N    226  
+#>  width          0.200
+#>  true_cor       0.300
+#>  expected_width 0.200
 
-# 3. With 80% assurance (the assurance path is Monte Carlo, so seed
-#    for a reproducible result):
-set.seed(113)
-ss_aipe_equivalence_r(population_r = 0.30, width = 0.20, assurance = 0.80)
-#>  term              value
-#>  necessary_N       240  
-#>  width             0.2  
-#>  population_r      0.3  
-#>  ci_width_expected 0.194
+# 3. With 80% assurance (the assurance path is Monte Carlo, so give a
+#    seed for a reproducible result):
+ss_aipe_equivalence_r(true_cor = 0.30, width = 0.20, assurance = 0.80,
+                      seed = 113)
+#>  term           value
+#>  necessary_N    240  
+#>  width          0.200
+#>  true_cor       0.300
+#>  expected_width 0.194
 ```

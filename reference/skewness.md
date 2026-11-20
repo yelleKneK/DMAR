@@ -37,19 +37,16 @@ The reported value is \$\$\hat\gamma_1^{(2)} =
 standard deviation. This is sometimes called the “Type 2” or
 SAS/SPSS-default form; it is approximately unbiased under normality.
 
-**Why isn't this in base R?** R Core has historically deferred
-higher-order moment statistics to contributed packages, in part because
-three popular formulas exist (biased Type 1, bias-corrected Type 2, and
-Minitab Type 3) and choosing a default would be opinionated. DMAR adopts
-Type 2, which is the form most often used in psychometric reporting and
-the one already used internally by
-[`descriptives`](https://yelleknek.github.io/DMAR/reference/descriptives.md).
-
-**Diagnostic interpretation.** As a rough rule of thumb,
-\\\|\mathrm{skewness}\| \> 2\\ is sometimes flagged as indicative of
-departures from normality large enough to threaten normal-theory
-inference (e.g., maximum likelihood estimation in factor analysis or
-structural equation modeling).
+**Three formulas.** Three measures of sample skewness are in use. With
+\\m_r = \sum\_{i=1}^{n} (x_i - \bar{x})^r / n\\, they are \\g_1 = m_3 /
+m_2^{3/2}\\ (Type 1), \\G_1 = g_1 \sqrt{n(n-1)} / (n-2)\\ (Type 2, the
+value above), and \\b_1 = g_1 ((n-1)/n)^{3/2}\\ (Type 3). The three
+differ by factors that depend only on \\n\\ and approach 1 as \\n\\
+grows. `skewness()` reports \\G_1\\, which is also the skewness that
+[`descriptives`](https://yelleknek.github.io/DMAR/reference/descriptives.md)
+reports.
+[`kurtosis`](https://yelleknek.github.io/DMAR/reference/kurtosis.md)
+describes the three corresponding measures of kurtosis.
 
 ## References
 

@@ -14,11 +14,11 @@ more than one result to hold at once.
 ss_power_composite_factorial_anova(
   factor_levels,
   effects,
-  means = NULL,
-  sigma = NULL,
+  true_means = NULL,
+  true_sd = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n_per_cell = NULL
+  specified_n_per_cell = NULL
 )
 ```
 
@@ -35,33 +35,34 @@ ss_power_composite_factorial_anova(
   A non-empty list naming the effects in the composite; see
   [`ss_power_composite_factorial_ancova`](https://yelleknek.github.io/DMAR/reference/ss_power_composite_factorial_ancova.md)
   for the format. Each element gives the `factors` an effect spans and
-  its `f` or `partial_eta_squared`, unless `means` is supplied.
+  its `true_f` or `true_eta_squared_partial`, unless `true_means` is
+  supplied.
 
-- means:
+- true_means:
 
   Optional array of population cell means (dimensions `factor_levels`),
   or a numeric vector of length `prod(factor_levels)` in array order,
-  from which each effect's Cohen's *f* is read given `sigma`. When
+  from which each effect's Cohen's *f* is read given `true_sd`. When
   supplied, [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
   draws the mean pattern. See
   [`ss_power_composite_factorial_ancova`](https://yelleknek.github.io/DMAR/reference/ss_power_composite_factorial_ancova.md).
 
-- sigma:
+- true_sd:
 
   The common within-cell standard deviation of the outcome, required
-  with `means` and used only there.
+  with `true_means` and used only there.
 
 - desired_power:
 
   Desired composite statistical power (default 0.85). Used only when
-  `n_per_cell` is `NULL`.
+  `specified_n_per_cell` is `NULL`.
 
 - alpha_level:
 
   Type I error rate for each individual *F* test (default 0.05), the
   per-test rate rather than a rate for the composite event.
 
-- n_per_cell:
+- specified_n_per_cell:
 
   Per-cell sample size, assumed balanced; if supplied, the realized
   composite power is returned rather than a sample size planned.
@@ -70,8 +71,8 @@ ss_power_composite_factorial_anova(
 
 A `data.frame` with `term` and `value` columns, as
 [`ss_power_composite_factorial_ancova`](https://yelleknek.github.io/DMAR/reference/ss_power_composite_factorial_ancova.md)
-returns but with `covariate_R2` 0 and `n_covariates` 0. It carries the
-`dmar_ss_power` class for
+returns but with `true_covariate_R2` 0 and `n_covariates` 0. It carries
+the `dmar_ss_power` class for
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) /
 [`glance`](https://generics.r-lib.org/reference/glance.html) and the
 `dmar_composite_power_factorial` class for
@@ -120,6 +121,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -166,86 +168,86 @@ Ken Kelley <kkelley@nd.edu>
 # against their composite, not against either one alone.
 ss_power_composite_factorial_anova(
   factor_levels = c(2, 3),
-  effects = list(list(factors = 1, f = 0.25),
-                 list(factors = 2, f = 0.20)),
+  effects = list(list(factors = 1, true_f = 0.25),
+                 list(factors = 2, true_f = 0.20)),
   desired_power = 0.80)
-#>  term                 value
-#>  necessary_n_per_cell 43   
-#>  necessary_N          258  
-#>  composite_power      0.806
-#>  residual_df          252  
-#>  power_1              0.979
-#>  power_2              0.823
-#>  f_1                  0.25 
-#>  f_2                  0.2  
-#>  df_1                 1    
-#>  df_2                 2    
-#>  noncentral_parm_1    16.1 
-#>  noncentral_parm_2    10.3 
-#>  covariate_R2         0    
-#>  n_covariates         0    
-#>  cells                6    
-#>  alpha_level          0.05 
-#>  desired_power        0.8  
+#>  term                 value 
+#>  necessary_n_per_cell 43    
+#>  total_N              258   
+#>  composite_power      0.806 
+#>  df_error             252   
+#>  power_1              0.979 
+#>  power_2              0.823 
+#>  true_f_1             0.250 
+#>  true_f_2             0.200 
+#>  df_1                 1     
+#>  df_2                 2     
+#>  noncentral_f_parm_1  16.125
+#>  noncentral_f_parm_2  10.320
+#>  true_covariate_R2    0     
+#>  n_covariates         0     
+#>  cells                6     
+#>  alpha_level          0.050 
+#>  desired_power        0.800 
 
 # Realized composite power at 25 per cell for a main effect and the
 # three-way interaction of a 2 by 2 by 2 design.
 ss_power_composite_factorial_anova(
   factor_levels = c(2, 2, 2),
-  effects = list(list(factors = 1,          f = 0.30, label = "A"),
-                 list(factors = c(1, 2, 3), f = 0.25, label = "AxBxC")),
-  n_per_cell = 25)
-#>  term                  value
-#>  specified_n_per_cell  25   
-#>  specified_N           200  
-#>  composite_power       0.929
-#>  residual_df           192  
-#>  power_A               0.988
-#>  power_AxBxC           0.94 
-#>  f_A                   0.3  
-#>  f_AxBxC               0.25 
-#>  df_A                  1    
-#>  df_AxBxC              1    
-#>  noncentral_parm_A     18   
-#>  noncentral_parm_AxBxC 12.5 
-#>  covariate_R2          0    
-#>  n_covariates          0    
-#>  cells                 8    
-#>  alpha_level           0.05 
+  effects = list(list(factors = 1,          true_f = 0.30, label = "A"),
+                 list(factors = c(1, 2, 3), true_f = 0.25, label = "AxBxC")),
+  specified_n_per_cell = 25)
+#>  term                    value 
+#>  specified_n_per_cell    25    
+#>  total_N                 200   
+#>  composite_power         0.929 
+#>  df_error                192   
+#>  power_A                 0.988 
+#>  power_AxBxC             0.940 
+#>  true_f_A                0.300 
+#>  true_f_AxBxC            0.250 
+#>  df_A                    1     
+#>  df_AxBxC                1     
+#>  noncentral_f_parm_A     18.000
+#>  noncentral_f_parm_AxBxC 12.500
+#>  true_covariate_R2       0     
+#>  n_covariates            0     
+#>  cells                   8     
+#>  alpha_level             0.050 
 
 # Naming one effect reproduces the single-effect planner exactly.
 ss_power_composite_factorial_anova(
-  factor_levels = c(2, 3), effects = list(list(factors = 2, f = 0.25)),
-  n_per_cell = 20)
-#>  term                 value
-#>  specified_n_per_cell 20   
-#>  specified_N          120  
-#>  composite_power      0.675
-#>  residual_df          114  
-#>  power_2              0.675
-#>  f_2                  0.25 
-#>  df_2                 2    
-#>  noncentral_parm_2    7.5  
-#>  covariate_R2         0    
-#>  n_covariates         0    
-#>  cells                6    
-#>  alpha_level          0.05 
-ss_power_factorial_anova(factor_levels = c(2, 3), effect_indices = 2,
-                         f = 0.25, n_per_cell = 20)
+  factor_levels = c(2, 3), effects = list(list(factors = 2, true_f = 0.25)),
+  specified_n_per_cell = 20)
 #>  term                 value
 #>  specified_n_per_cell 20   
 #>  total_N              120  
-#>  effect_df            2    
-#>  error_df             114  
-#>  noncentrality        7.5  
+#>  composite_power      0.675
+#>  df_error             114  
+#>  power_2              0.675
+#>  true_f_2             0.250
+#>  df_2                 2    
+#>  noncentral_f_parm_2  7.500
+#>  true_covariate_R2    0    
+#>  n_covariates         0    
+#>  cells                6    
+#>  alpha_level          0.050
+ss_power_factorial_anova(factor_levels = c(2, 3), effect_indices = 2,
+                         true_f = 0.25, specified_n_per_cell = 20)
+#>  term                 value
+#>  specified_n_per_cell 20   
+#>  total_N              120  
+#>  df_effect            2    
+#>  df_error             114  
+#>  noncentral_f_parm    7.500
 #>  actual_power         0.675
 
 # The figure of the purported population effect sizes.
 plot(ss_power_composite_factorial_anova(
   factor_levels = c(2, 3),
-  effects = list(list(factors = 1, f = 0.25),
-                 list(factors = 2, f = 0.20)),
-  n_per_cell = 30))
+  effects = list(list(factors = 1, true_f = 0.25),
+                 list(factors = 2, true_f = 0.20)),
+  specified_n_per_cell = 30))
 
 
 # Stating the effects as population cell means with a common within-cell SD.
@@ -253,9 +255,9 @@ plot(ss_power_composite_factorial_anova(
 cell_means <- matrix(c(10, 12, 11,
                        13, 12, 16), nrow = 2, byrow = TRUE)
 plot(ss_power_composite_factorial_anova(
-  factor_levels = c(2, 3), means = cell_means, sigma = 4,
+  factor_levels = c(2, 3), true_means = cell_means, true_sd = 4,
   effects = list(list(factors = 1, label = "A"),
                  list(factors = 2, label = "B")),
-  n_per_cell = 30))
+  specified_n_per_cell = 30))
 
 ```

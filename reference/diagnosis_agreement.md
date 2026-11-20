@@ -60,14 +60,14 @@ scaled disagreement or partial credit. *Psychological Bulletin, 70*(4),
 
 ## Details
 
-Cohen built this table to make a point that is easy to miss: weighted
-kappa is fully chance corrected, and it can be *smaller* than unweighted
-kappa on the same data. Here the judges disagree far less than chance
-expectation in the mildly weighted personality disorder-neurosis cells
-but at about the chance level in the heavily weighted neurosis-psychosis
-cells, so \\\kappa = .492\\ while \\\kappa_W = .348\\: they disagree
-least where it matters least. Interchanging the 6 and 1 weights reverses
-the conclusion (\\\kappa_W = .574\\).
+Cohen built this table to show that weighted kappa is fully chance
+corrected and that it can be *smaller* than unweighted kappa on the same
+data. Here the judges disagree far less than chance expectation in the
+mildly weighted personality disorder-neurosis cells but at about the
+chance level in the heavily weighted neurosis-psychosis cells, so
+\\\kappa = .492\\ while \\\kappa_W = .348\\: they disagree least where
+it matters least. Interchanging the 6 and 1 weights reverses the
+conclusion (\\\kappa_W = .574\\).
 
 The reconstruction was verified against every quantity Cohen computes
 from the table: the marginals (.50/.30/.20 for Judge B, .60/.30/.10 for
@@ -126,16 +126,14 @@ tab <- xtabs(frequency ~ judge_b + judge_a, data = diagnosis_agreement)
 v   <- xtabs(disagreement_weight ~ judge_b + judge_a,
              data = diagnosis_agreement)
 cohen_kappa(table = tab)
-#>  weights    kappa se    lower_limit upper_limit z_value p_value  n  
-#>  unweighted 0.492 0.051 0.392       0.591       9.64    < 0.0001 200
-#>  n_categories
-#>  3           
+#>  weights    kappa se    ci_lower ci_upper z_value p_value  N   n_categories
+#>  unweighted 0.492 0.051 0.392    0.591    9.637   < 0.0001 200 3           
 #> 
 #> Confidence level: 95%
 cohen_kappa(table = tab, weights = unclass(v),
             weight_scaling = "disagreement")
-#>  weights             kappa se     lower_limit upper_limit z_value p_value  n  
-#>  custom_disagreement 0.348 0.0755 0.2         0.496       4.61    < 0.0001 200
+#>  weights             kappa se    ci_lower ci_upper z_value p_value  N  
+#>  custom_disagreement 0.348 0.076 0.200    0.496    4.607   < 0.0001 200
 #>  n_categories
 #>  3           
 #> 

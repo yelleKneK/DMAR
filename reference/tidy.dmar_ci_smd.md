@@ -29,10 +29,13 @@ glance(x, ...)
 A one-row `data.frame` with columns `term` (always `"smd"`), `estimate`
 (the point estimate of *d*), `ci_lower` (the lower confidence limit on
 \\\delta\\), `ci_upper` (the upper confidence limit on \\\delta\\), and
-`conf_level` (the confidence level used in construction; `NA` when
-asymmetric `alpha_lower` / `alpha_upper` were supplied instead). Column
-names follow the broom convention so the result composes with the broom
-ecosystem.
+`conf_level` (the confidence level used in construction,
+`1 - alpha_lower - alpha_upper` when the tail areas were supplied
+instead), followed, for an interval whose tail areas differ, by
+`alpha_lower` and `alpha_upper` (see
+[`dmar_tidiers`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)).
+Column names follow the broom convention so the result composes with the
+broom ecosystem.
 
 ## Author
 

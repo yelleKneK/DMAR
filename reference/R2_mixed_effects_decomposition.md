@@ -3,10 +3,11 @@
 Computes the Rights and Sterba (2019) integrative framework of R-squared
 measures for a fitted two-level linear mixed-effects (multilevel) model.
 The model implied outcome variance is fully decomposed into five
-sources: variance due to level-1 predictors via fixed slopes (\\f_1\\),
-level-2 predictors via fixed slopes (\\f_2\\), predictors via random
-slope (co)variation (\\v\\), cluster-specific outcome means via random
-intercept variation (\\m\\), and level-1 residuals (\\\sigma^2\\).
+sources: variance due to individual-level (i.e., Level 1) predictors via
+fixed slopes (\\f_1\\), cluster-level (i.e., Level 2) predictors via
+fixed slopes (\\f_2\\), predictors via random slope (co)variation
+(\\v\\), cluster-specific outcome means via random intercept variation
+(\\m\\), and individual-level (i.e., Level 1) residuals (\\\sigma^2\\).
 Proportions of the total, within-cluster, and between-cluster outcome
 variance attributable to combinations of these sources give the family
 of R-squared measures.
@@ -31,8 +32,8 @@ R2_mixed_effects_decomposition(model)
 ## Value
 
 A `data.frame` (`dmar_tbl`) with columns `term` and `value`. When the
-level-1 predictors are cluster-mean-centered, the full set of 12
-measures is returned, named `total_f1`, `total_f2`, `total_v`,
+individual-level predictors are cluster-mean-centered, the full set of
+12 measures is returned, named `total_f1`, `total_f2`, `total_v`,
 `total_m`, `total_f`, `total_fv`, `total_fvm`, `within_f1`, `within_v`,
 `within_fv`, `between_f2`, and `between_m`; otherwise the five
 total-variance measures `total_f`, `total_v`, `total_m`, `total_fv`, and
@@ -60,10 +61,10 @@ with the Nakagawa and Schielzeth conditional R-squared computed by
 (2019, Table 1) for the definitions.
 
 The measures were derived under the assumption that the fitted model
-uses cluster-mean-centering of the level-1 predictors (with the cluster
-means entered as level-2 predictors). When that centering is not
-detected, only the total-variance measures are returned, matching the
-reference implementation.
+uses cluster-mean-centering of the individual-level predictors (with the
+cluster means entered as cluster-level predictors). When that centering
+is not detected, only the total-variance measures are returned, matching
+the reference implementation.
 
 Fitting the model requires lme4 (for a `merMod` fit) or nlme (for an
 `lme` fit) to be installed.
@@ -105,10 +106,10 @@ Ken Kelley <kkelley@nd.edu>
 fit <- lme4::lmer(Reaction ~ Days + (Days | Subject),
                   data = lme4::sleepstudy)
 R2_mixed_effects_decomposition(fit)
-#>  term      value 
-#>  total_f   0.279 
-#>  total_v   0.0892
-#>  total_m   0.432 
-#>  total_fv  0.368 
-#>  total_fvm 0.799 
+#>  term      value
+#>  total_f   0.279
+#>  total_v   0.089
+#>  total_m   0.432
+#>  total_fv  0.368
+#>  total_fvm 0.799
 ```

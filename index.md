@@ -26,9 +26,9 @@ install.packages("DMAR")
 remotes::install_github("yelleKneK/DMAR")
 ```
 
-The GitHub copy of 1.0.0 is the released code, with the README and NEWS
-wording brought up to date after publication; the release is tagged
-`v1.0.0` on GitHub.
+Each CRAN release is tagged on GitHub (`v1.0.0` for the first); between
+releases the GitHub copy carries the changes of the next one, listed in
+NEWS.
 
 R \>= 4.0.0 is required. Most estimation, inference, and planning
 functions return a tidy `data.frame(term, value)` that composes
@@ -40,9 +40,9 @@ Heavier dependencies (e.g., `lavaan`, `lme4`, `OpenMx`) are in
 [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html); install
 them only when you need the functions that use them.
 
-## Function families
+## Function Families
 
-DMAR is organized into a small number of stable function families:
+DMAR is organized into these function families:
 
 - **Effect size estimates.**
   [`smd()`](https://yelleknek.github.io/DMAR/reference/smd.md),
@@ -68,16 +68,37 @@ DMAR is organized into a small number of stable function families:
   [`ci_sc_ancova()`](https://yelleknek.github.io/DMAR/reference/ci_sc_ancova.md),
   [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
   [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
-  [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md).
+  [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
+  [`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md)
+  and
+  [`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md)
+  (Fieller’s set),
+  [`ci_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/ci_proportion_paired.md)
+  (two proportions on the same units),
+  [`ci_crossed()`](https://yelleknek.github.io/DMAR/reference/ci_crossed.md)
+  (units crossed with raters), and
+  [`ci_two_phase()`](https://yelleknek.github.io/DMAR/reference/ci_two_phase.md)
+  (a costly measurement with an inexpensive proxy).
 - **Sample size planning under AIPE** (accuracy in parameter
   estimation). The `ss_aipe_*()` family covers SMD, R², ω², CV, partial
   / semipartial r, regression coefficients (standardized and
   unstandardized), ANCOVA contrasts, RMSEA, SEM paths, polynomial
-  change, mixed-effects fixed effects, ICC, reliability, and Cliff’s
-  delta. Every planner has a Monte Carlo `*_sensitivity()` sibling that
-  quantifies the impact of misspecified planning values.
+  change, mixed-effects fixed effects, ICC, reliability, Cliff’s delta,
+  a single mean
+  ([`ss_aipe_mean()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean.md)),
+  crossed designs of units and raters
+  ([`ss_aipe_crossed()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed.md)),
+  and two-phase sampling
+  ([`ss_aipe_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase.md),
+  [`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md)).
+  Most planners have a Monte Carlo `*_sensitivity()` sibling that
+  quantifies the impact of misspecified planning values;
+  [`ss_aipe_two_phase_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_sensitivity.md)
+  also evaluates the designs of
+  [`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md).
 - **Sample size planning under power.**
   [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+  [`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
   [`ss_power_smd()`](https://yelleknek.github.io/DMAR/reference/ss_power_smd.md),
   [`ss_power_r()`](https://yelleknek.github.io/DMAR/reference/ss_power_r.md),
   [`ss_power_one_way_anova()`](https://yelleknek.github.io/DMAR/reference/ss_power_one_way_anova.md),
@@ -91,23 +112,83 @@ DMAR is organized into a small number of stable function families:
   [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md).
 - **Minimum risk / sequential estimation.**
   [`mr_smd()`](https://yelleknek.github.io/DMAR/reference/mr_smd.md),
-  [`mr_cv()`](https://yelleknek.github.io/DMAR/reference/mr_cv.md).
+  [`mr_cv()`](https://yelleknek.github.io/DMAR/reference/mr_cv.md),
+  [`ss_seq_c()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c.md)
+  (with
+  [`ss_seq_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_seq_c_sensitivity.md)),
+  and
+  [`ss_seq_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_seq_two_phase.md)
+  (a mean under two-phase sampling).
 - **Equivalence testing.**
   [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
   [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+  [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md)
+  (with nonsuperiority),
+  [`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+  [`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
   [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md).
 - **Reliability.**
   [`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
   [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md),
   [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md),
-  `reliability_omega_h()`,
   [`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md),
   [`reliability_kr20()`](https://yelleknek.github.io/DMAR/reference/reliability_kr20.md),
+  [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md)
+  and
+  [`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md)
+  (omega hierarchical and its relatives),
   [`var_alpha()`](https://yelleknek.github.io/DMAR/reference/var_alpha.md),
   the umbrella
   [`reliability()`](https://yelleknek.github.io/DMAR/reference/reliability.md),
   and
   [`ss_aipe_reliability()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability.md).
+- **Factor analysis and structural equation models.**
+  [`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md)
+  (with [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md)
+  and [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md)),
+  [`fa_exploratory()`](https://yelleknek.github.io/DMAR/reference/fa_exploratory.md)
+  (including target rotation),
+  [`factor_count()`](https://yelleknek.github.io/DMAR/reference/factor_count.md),
+  [`parallel_analysis()`](https://yelleknek.github.io/DMAR/reference/parallel_analysis.md),
+  [`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+  [`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+  [`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
+  [`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+  [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
+  [`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+  [`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
+  [`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+  [`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+  [`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
+  [`sem_sam()`](https://yelleknek.github.io/DMAR/reference/sem_sam.md),
+  [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md), and
+  the common method variance procedures
+  ([`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md),
+  [`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
+  [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md)).
+- **Missing data.** Full information maximum likelihood (the default for
+  continuous items in the factor analysis functions and in
+  [`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
+  [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md),
+  and
+  [`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md))
+  and two-stage maximum likelihood (in
+  [`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+  [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
+  [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
+  [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
+  [`reliability_alpha()`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
+  and
+  [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md)),
+  with
+  [`fraction_missing_information()`](https://yelleknek.github.io/DMAR/reference/fraction_missing_information.md),
+  [`missing_patterns()`](https://yelleknek.github.io/DMAR/reference/missing_patterns.md),
+  [`missing_coverage()`](https://yelleknek.github.io/DMAR/reference/missing_coverage.md),
+  [`cov_fiml()`](https://yelleknek.github.io/DMAR/reference/cov_fiml.md),
+  [`df_missing()`](https://yelleknek.github.io/DMAR/reference/df_missing.md),
+  and
+  [`df_barnard_rubin()`](https://yelleknek.github.io/DMAR/reference/df_barnard_rubin.md)
+  for what the missing values cost.
 - **ANOVA / ANCOVA / contrasts.**
   [`welch_t()`](https://yelleknek.github.io/DMAR/reference/welch_t.md),
   [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
@@ -126,6 +207,8 @@ DMAR is organized into a small number of stable function families:
 - **Multiple-comparison procedures.**
   [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
   [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
+  [`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
+  [`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
   [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
   and their critical-value helpers
   [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md),
@@ -143,8 +226,7 @@ DMAR is organized into a small number of stable function families:
   [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md),
   [`lin_ccc()`](https://yelleknek.github.io/DMAR/reference/lin_ccc.md),
   [`limits_of_agreement()`](https://yelleknek.github.io/DMAR/reference/limits_of_agreement.md).
-- **Multilevel and multivariate / latent variable methods.**
-  [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
+- **Multilevel and multivariate methods.**
   [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md),
   [`mlmr_mv()`](https://yelleknek.github.io/DMAR/reference/mlmr_mv.md),
   [`R2_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/R2_mixed_effects.md),
@@ -172,14 +254,19 @@ DMAR is organized into a small number of stable function families:
   between equivalent metrics (`convert_r_Z` / `convert_Z_r`,
   `convert_R2_f` / `convert_f_R2`, `convert_lambda_R2` /
   `convert_R2_lambda`, `convert_delta_lambda` / `convert_lambda_delta`,
-  `convert_cor_cov`, `convert_t_smd`).
+  `convert_d_r` / `convert_r_d`, `convert_d_or` / `convert_or_d`,
+  `convert_F_chisq` / `convert_chisq_F`, `convert_cor_cov`).
 - **Plots.**
   [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
   [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
-  [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-  [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md),
-  [`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md).
-  All default to showing the CI and the sample size.
+  and
+  [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md)
+  show an effect size with its CI and, given the sample sizes, the
+  sample size;
+  [`plot_trajectories()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories.md)
+  and
+  [`plot_trajectories_fitted()`](https://yelleknek.github.io/DMAR/reference/plot_trajectories_fitted.md)
+  show observed and fitted individual trajectories.
 - **Variance utilities.**
   [`var_smd()`](https://yelleknek.github.io/DMAR/reference/var_smd.md),
   [`var_R2()`](https://yelleknek.github.io/DMAR/reference/var_R2.md),
@@ -192,9 +279,9 @@ DMAR is organized into a small number of stable function families:
   [`var_icc()`](https://yelleknek.github.io/DMAR/reference/var_icc.md),
   [`var_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/var_indirect_effect.md).
 
-## Canonical examples
+## Canonical Examples
 
-### 1. Standardized mean difference with a noncentral-*t* confidence interval
+### 1. Standardized Mean Difference With a Noncentral *t* Confidence Interval
 
 ``` r
 
@@ -206,7 +293,7 @@ smd(mean_1 = 60, mean_2 = 55, s_1 = 10, s_2 = 10, n_1 = 30, n_2 = 30)
 
 | term | value |
 |:-----|:------|
-| smd  | 0.5   |
+| smd  | 0.500 |
 
 ``` r
 
@@ -215,26 +302,26 @@ smd(mean_1 = 60, mean_2 = 55, s_1 = 10, s_2 = 10, n_1 = 30, n_2 = 30)
 ci_smd(smd = 0.5, n_1 = 30, n_2 = 30, conf_level = 0.95)
 ```
 
-| term        | value   |
-|:------------|:--------|
-| lower_limit | -0.0162 |
-| smd         | 0.5     |
-| upper_limit | 1.01    |
+| term     | value  |
+|:---------|:-------|
+| ci_lower | -0.016 |
+| smd      | 0.500  |
+| ci_upper | 1.012  |
 
 Confidence level: 95%
 
-### 2. R² with a noncentral-*F* confidence interval and AIPE sample size
+### 2. R² With a Noncentral *F* Confidence Interval and AIPE Sample Size
 
 ``` r
 
 ci_R2(R2 = 0.30, N = 100, p = 4, conf_level = 0.95)
 ```
 
-| term        | value | prob_less | prob_greater |
-|:------------|:------|:----------|:-------------|
-| lower_limit | 0.13  | 0.025     | 0.975        |
-| R2          | 0.3   | NA        | NA           |
-| upper_limit | 0.43  | 0.975     | 0.025        |
+| term     | value | prob_less | prob_greater |
+|:---------|:------|:----------|:-------------|
+| ci_lower | 0.130 | 0.025     | 0.975        |
+| R2       | 0.300 | NA        | NA           |
+| ci_upper | 0.430 | 0.975     | 0.025        |
 
 Confidence level: 95%
 
@@ -242,7 +329,7 @@ Confidence level: 95%
 
 
 # What N is needed so the 95% CI on R^2 has full width <= 0.20?
-ss_aipe_R2(population_R2 = 0.30, width = 0.20, p = 4)
+ss_aipe_R2(true_R2 = 0.30, width = 0.20, p = 4)
 ```
 
 | term        | value |
@@ -251,60 +338,62 @@ ss_aipe_R2(population_R2 = 0.30, width = 0.20, p = 4)
 
 Confidence level: 95%
 
-### 3. AIPE planning with a sensitivity check
+### 3. AIPE Planning With a Sensitivity Check
 
 ``` r
 
-# Plan N for a half-width of .10 on the SMD at delta = 0.40.
-ss_aipe_smd(delta = 0.40, width = 0.20)
+# Plan N for a half-width of .10 on the SMD at a population SMD of 0.40.
+ss_aipe_smd(true_smd = 0.40, width = 0.20)
 ```
 
 | term                  | value |
 |:----------------------|:------|
 | necessary_n_per_group | 784   |
-| supposed_smd          | 0.4   |
-| width                 | 0.2   |
+| true_smd              | 0.400 |
+| width                 | 0.200 |
 
 Confidence level: 95%
 
 ``` r
 
 
-# How does that plan hold up if the truth is actually delta = 0.25?
+# How does that plan hold up if the population SMD is actually 0.25?
 set.seed(113)
 ss_aipe_smd_sensitivity(
-  true_delta      = 0.25,
-  estimated_delta = 0.40,
-  desired_width   = 0.20,
+  true_smd      = 0.25,
+  supposed_smd  = 0.40,
+  width         = 0.20,
   G               = 200,
   print_iter      = FALSE
 )
 ```
 
-| term                | value    |
-|:--------------------|:---------|
-| mean_smd            | 0.253    |
-| median_smd          | 0.249    |
-| sd_smd              | 0.0516   |
-| mean_ci_width       | 0.199    |
-| median_ci_width     | 0.199    |
-| sd_ci_width         | 0.000324 |
-| mean_ci_width_lower | 0.0994   |
-| mean_ci_width_upper | 0.0994   |
-| pct_ci_less_w       | 1        |
-| pct_ci_miss_low     | 0.03     |
-| pct_ci_miss_high    | 0.025    |
-| total_type_I_error  | 0.055    |
-| n_per_group         | 784      |
-| total_N             | 1568     |
-| true_delta          | 0.25     |
-| estimated_delta     | 0.4      |
-| width               | 0.2      |
-| conf_level          | 0.95     |
+| term                | value |
+|:--------------------|:------|
+| mean_smd            | 0.253 |
+| median_smd          | 0.249 |
+| sd_smd              | 0.052 |
+| mean_ci_width       | 0.199 |
+| median_ci_width     | 0.199 |
+| sd_ci_width         | 0.000 |
+| mean_ci_width_lower | 0.099 |
+| mean_ci_width_upper | 0.099 |
+| pct_ci_less_width   | 1.000 |
+| pct_ci_miss_low     | 0.030 |
+| pct_ci_miss_high    | 0.025 |
+| total_type_I_error  | 0.055 |
+| n_per_group         | 784   |
+| total_N             | 1568  |
+| true_smd            | 0.250 |
+| supposed_smd        | 0.400 |
+| width               | 0.200 |
+| conf_level          | 0.950 |
+
+Replications: 200
 
 Confidence level: 95%
 
-### 4. Welch’s *t* test with a tidy return
+### 4. Welch’s *t* Test With a Tidy Return
 
 ``` r
 
@@ -314,24 +403,24 @@ y <- rnorm(20, mean = 110, sd = 25)
 welch_t(x, y, conf_level = 0.95)
 ```
 
-| term            | value  |
-|:----------------|:-------|
-| mean_difference | -16.9  |
-| t_statistic     | -2.41  |
-| df              | 28.3   |
-| p_value         | 0.0227 |
-| lower_limit     | -31.2  |
-| upper_limit     | -2.54  |
-| mean_x          | 100    |
-| mean_y          | 117    |
-| sd_x            | 14.3   |
-| sd_y            | 27.9   |
-| n_x             | 20     |
-| n_y             | 20     |
+| term            | value   |
+|:----------------|:--------|
+| mean_difference | -16.871 |
+| t_value         | -2.410  |
+| df              | 28.349  |
+| p_value         | 0.0227  |
+| ci_lower        | -31.204 |
+| ci_upper        | -2.537  |
+| mean_x          | 100.297 |
+| mean_y          | 117.168 |
+| sd_x            | 14.289  |
+| sd_y            | 27.860  |
+| n_x             | 20      |
+| n_y             | 20      |
 
 Confidence level: 95%
 
-### 5. Reliability with a confidence interval
+### 5. Reliability With a Confidence Interval
 
 ``` r
 
@@ -345,19 +434,19 @@ S <- matrix(
 reliability_alpha(S = S, N = 250, ci_method = "bonett")
 ```
 
-| term           | value  |
-|:---------------|:-------|
-| estimate       | 0.83   |
-| se             | 0.0176 |
-| se_transformed | 0.104  |
-| lower_limit    | 0.792  |
-| upper_limit    | 0.861  |
-| conf_level     | 0.95   |
-| N              | 250    |
-| N_complete     | 250    |
-| J              | 4      |
+| term           | value |
+|:---------------|:------|
+| estimate       | 0.830 |
+| se             | 0.018 |
+| se_transformed | 0.104 |
+| ci_lower       | 0.792 |
+| ci_upper       | 0.861 |
+| conf_level     | 0.950 |
+| N              | 250   |
+| N_complete     | 250   |
+| n_items        | 4     |
 
-### 6. Kish’s design effect in a clustered sample
+### 6. Kish’s Design Effect in a Clustered Sample
 
 ``` r
 
@@ -368,22 +457,22 @@ sizes <- c(0, 0, 1, 1, 1, 2, 3, 5, 8, 10, 12, 15, 18, 20, 22,
 design_effect(cluster_sizes = sizes, icc = 0.10)
 ```
 
-| term                   | value |
-|:-----------------------|:------|
-| design_effect          | 3.33  |
-| deft                   | 1.82  |
-| effective_n            | 119   |
-| n_total                | 397   |
-| n_clusters_total       | 25    |
-| n_clusters_with_data   | 23    |
-| n_clusters_empty       | 2     |
-| n_clusters_singletons  | 3     |
-| n_clusters_informative | 20    |
-| m_bar                  | 17.3  |
-| m_kish                 | 24.3  |
-| icc                    | 0.1   |
+| term                   | value   |
+|:-----------------------|:--------|
+| design_effect          | 3.327   |
+| deft                   | 1.824   |
+| effective_n            | 119.328 |
+| N                      | 397     |
+| n_clusters_total       | 25      |
+| n_clusters_with_data   | 23      |
+| n_clusters_empty       | 2       |
+| n_clusters_singletons  | 3       |
+| n_clusters_informative | 20      |
+| m_bar                  | 17.261  |
+| m_kish                 | 24.270  |
+| icc                    | 0.100   |
 
-## Numerical validation
+## Numerical Validation
 
 DMAR ships a dedicated numerical-correctness test suite
 (`tests/testthat/test-numerical-correctness.R` and companion files) that
@@ -398,23 +487,24 @@ published values, so results are reproducible and checkable:
 | [`krippendorff_alpha()`](https://yelleknek.github.io/DMAR/reference/krippendorff_alpha.md), [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md) | `irr`, `irrCAC` | machine precision (validated designs) |
 | [`R2_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/R2_mixed_effects.md) (Nakagawa & Schielzeth), [`R2_mixed_effects_decomposition()`](https://yelleknek.github.io/DMAR/reference/R2_mixed_effects_decomposition.md) (Rights & Sterba) | `r2mlm` | machine precision (validated model classes) |
 | Multiple-comparison critical values and CIs | `multcomp`, published tables | published values |
+| Dunnett’s T3; the paired-proportion score interval; Fieller’s ratio of means; bifactor and second-order omegas | `PMCMRplus`, `PropCIs`, `mratios`, `semTools` | pinned values, compared live by the maintainer’s release tooling |
 
 The machine-precision rows hold for the model and design classes the
-test suite pins, including the boundary cases the current tests add. The
+test suite pins, including the boundary cases the tests cover. The
 mixed-effects R-squared functions match `r2mlm` and the direct Johnson
 quadratic form across random-intercept, correlated random-slope, split
 (`||`) random-slope, multi-slope, and nested two-level models; on split
 random-slope models `performance`/`insight` omits the random-slope
 variance, so DMAR agrees with `r2mlm` and the Johnson form there and not
 with `performance`. The agreement procedures match `irr` and `irrCAC` on
-the ordinary rating designs and on the boundary cases the tests now
-cover: the zero-distance case of ratio-metric Krippendorff’s alpha,
-all-missing units in
+the ordinary rating designs and on the boundary cases the tests cover:
+the zero-distance case of ratio-metric Krippendorff’s alpha, all-missing
+units in
 [`gwet_ac()`](https://yelleknek.github.io/DMAR/reference/gwet_ac.md),
 and incomplete category sets in
 [`cohen_kappa()`](https://yelleknek.github.io/DMAR/reference/cohen_kappa.md).
 
-## Learn more
+## Learn More
 
 - **Package website:** <https://yelleknek.github.io/DMAR/>
 - **Start here:**
@@ -431,20 +521,20 @@ and incomplete category sets in
 
 ## Relation to MBESS
 
-DMAR is the modern, more general reimplementation and expansion of the
-**MBESS** package (Kelley, 2007a, *Journal of Statistical Software*,
-20(8), 1–24; 2007b, *Behavior Research Methods*, 39(4), 979–984), which
-has been on CRAN for about two decades. MBESS was originally framed for
-the behavioral, educational, and social sciences; its use has grown well
-beyond that scope, and DMAR reflects how the methods are now applied
-across disciplines. The notational and programming changes (uniform
-`snake_case`, tidy `data.frame(term, value)` returns, native `ggplot2`
-plotting, broader coverage of within-subjects, multivariate,
-mixed-effects, and sequential-estimation methods) were too extensive to
-ship under the MBESS name without breaking compatibility, so the work
-ships under a new name. MBESS itself remains stable on CRAN; DMAR is the
-recommended path forward for new users. See `NEWS.md` for the MBESS →
-DMAR migration mapping.
+DMAR is a more general and greatly expanded reimagining of the **MBESS**
+package (Kelley, 2007a, *Journal of Statistical Software*, 20(8), 1–24;
+2007b, *Behavior Research Methods*, 39(4), 979–984), which has been on
+CRAN for about two decades. MBESS was named for the behavioral,
+educational, and social sciences, but the methods it implements apply
+across the empirical sciences, and DMAR is framed for that broader
+range. The notational and programming changes (uniform `snake_case`,
+tidy `data.frame(term, value)` returns, native `ggplot2` plotting,
+broader coverage of within-subjects, multivariate, mixed-effects, and
+sequential-estimation methods) were too extensive to ship under the
+MBESS name without breaking compatibility, so the work ships under a new
+name. MBESS remains on CRAN, and new methods are added to DMAR. See
+[`vignette("mbess_to_dmar")`](https://yelleknek.github.io/DMAR/articles/mbess_to_dmar.md)
+for the MBESS → DMAR migration mapping.
 
 ## Relation to Maxwell, Delaney, and Kelley (MDK, 4th ed.)
 
@@ -453,29 +543,29 @@ Kelley (2027), *Designing Experiments and Analyzing Data: A Model
 Comparison Perspective* (4th ed., Routledge). Functions cite the
 specific MDK chapter in their `@references` block where the underlying
 method is discussed in detail. DMAR is broader than MDK: it covers
-methods (e.g., minimum-risk sequential estimation, equivalence testing,
+methods (e.g., minimum risk sequential estimation, equivalence testing,
 mediation effect size CIs, design effects for cluster sampling) that are
-outside the scope of an experimental- design textbook. Conversely, MDK
+outside the scope of a textbook on experimental design. Conversely, MDK
 covers conceptual material that falls outside the scope of an R package.
 The two are complementary.
 
-## Related packages
+## Related Packages
 
-`BUCSS` (Bias-Corrected Uncertainty Adjusted Sample Size; Anderson,
-Kelley, and others) provides bias and uncertainty corrected sample size
-methods for several common designs, with overlap with DMAR’s AIPE
-family. Ken Kelley is a co-author of `BUCSS`; the two packages take
-complementary approaches to the small-sample sample size planning
-problem and reading them side by side is a good way to see where the
-AIPE and BUCSS traditions agree, where they diverge, and when each is
-most informative for a given planning question.
+`BUCSS` (Bias and Uncertainty Corrected Sample Size; Kelley, Anderson,
+and Maxwell) plans the sample size of a future study for statistical
+power from the summary statistics of a prior study, correcting the prior
+study’s effect for publication bias and for uncertainty. Ken Kelley is a
+coauthor of `BUCSS`. Its planners cover many of the designs of DMAR’s
+`ss_power_*()` family; DMAR’s power planners take the planning effect as
+given, and DMAR’s `ss_aipe_*()` planners plan for the width of a
+confidence interval rather than for power.
 
 ## Citation
 
 If you use DMAR in published work, please cite
 
 > Kelley, K. (2026). *DMAR: Design, Measurement, and Analysis in R*. R
-> package version 1.0.0. <https://doi.org/10.5281/zenodo.22960335>
+> package version 1.1.0. <https://doi.org/10.5281/zenodo.22960335>
 
 and, where appropriate, the original MBESS references for the
 methodological lineage:

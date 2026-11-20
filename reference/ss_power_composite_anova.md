@@ -17,11 +17,11 @@ composite.
 ss_power_composite_anova(
   factor_levels,
   effects,
-  means = NULL,
-  sigma = NULL,
+  true_means = NULL,
+  true_sd = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n_per_cell = NULL
+  specified_n_per_cell = NULL
 )
 ```
 
@@ -38,48 +38,50 @@ ss_power_composite_anova(
   A non-empty list naming the effects in the composite. Each element is
   a list with `factors` (a vector of factor indices into
   `factor_levels`: one index for a main effect, several for an
-  interaction) and, unless `means` is supplied, exactly one of `f`
-  (Cohen's *f*) or `partial_eta_squared`. An optional `label` names the
-  effect in the output and the figure; the default label is the factor
-  indices joined by `x`. The purported effect sizes are population
-  values the researcher posits, never sample estimates.
+  interaction) and, unless `true_means` is supplied, exactly one of
+  `true_f` (Cohen's *f*) or `true_eta_squared_partial`. An optional
+  `label` names the effect in the output and the figure; the default
+  label is the factor indices joined by `x`. The purported effect sizes
+  are population values the researcher posits, never sample estimates. A
+  field under any other name is refused.
 
-- means:
+- true_means:
 
   Optional array of population cell means whose dimensions are
   `factor_levels` (a matrix for two factors), or a numeric vector of
   length `prod(factor_levels)` in array order. When supplied, each named
-  effect's Cohen's *f* is computed from the means and `sigma`, and
+  effect's Cohen's *f* is computed from the means and `true_sd`, and
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
   mean pattern.
 
-- sigma:
+- true_sd:
 
   The common within-cell population standard deviation of the outcome,
-  required with `means` and used only there.
+  required with `true_means` and used only there.
 
 - desired_power:
 
   Desired composite statistical power (default 0.85). Used only when
-  `n_per_cell` is `NULL`.
+  `specified_n_per_cell` is `NULL`.
 
 - alpha_level:
 
   Type I error rate for each individual *F* test (default 0.05), the
   per-test rate, not a rate for the composite event.
 
-- n_per_cell:
+- specified_n_per_cell:
 
   Per-cell sample size (balanced); if supplied, the realized composite
   power is returned rather than a sample size planned.
 
 ## Value
 
-A `data.frame` with `term` and `value` columns: the recommended (or
-supplied) `n_per_cell` and total `N`, the `composite_power`, the
-`residual_df`, then for each effect its marginal `power_<label>`,
-purported `f_<label>`, numerator `df_<label>`, and
-`noncentral_parm_<label>`, followed by `cells` and `alpha_level`. The
+A `data.frame` with `term` and `value` columns: the
+`necessary_n_per_cell` (or the supplied `specified_n_per_cell`) and the
+total sample size it implies, `total_N`, the `composite_power`, the
+`df_error`, then for each effect its marginal `power_<label>`, purported
+`true_f_<label>`, numerator `df_<label>`, and
+`noncentral_f_parm_<label>`, followed by `cells` and `alpha_level`. The
 result carries the `dmar_ss_power` class for
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html), and a
@@ -125,6 +127,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -171,74 +174,74 @@ Ken Kelley <kkelley@nd.edu>
 # design is planned against their composite.
 ss_power_composite_anova(
   factor_levels = c(2, 3),
-  effects = list(list(factors = 1, f = 0.25),
-                 list(factors = 2, f = 0.20)),
+  effects = list(list(factors = 1, true_f = 0.25),
+                 list(factors = 2, true_f = 0.20)),
   desired_power = 0.80)
-#>  term                 value
-#>  necessary_n_per_cell 43   
-#>  necessary_N          258  
-#>  composite_power      0.806
-#>  residual_df          252  
-#>  power_1              0.979
-#>  power_2              0.823
-#>  f_1                  0.25 
-#>  f_2                  0.2  
-#>  df_1                 1    
-#>  df_2                 2    
-#>  noncentral_parm_1    16.1 
-#>  noncentral_parm_2    10.3 
-#>  cells                6    
-#>  alpha_level          0.05 
-#>  desired_power        0.8  
+#>  term                 value 
+#>  necessary_n_per_cell 43    
+#>  total_N              258   
+#>  composite_power      0.806 
+#>  df_error             252   
+#>  power_1              0.979 
+#>  power_2              0.823 
+#>  true_f_1             0.250 
+#>  true_f_2             0.200 
+#>  df_1                 1     
+#>  df_2                 2     
+#>  noncentral_f_parm_1  16.125
+#>  noncentral_f_parm_2  10.320
+#>  cells                6     
+#>  alpha_level          0.050 
+#>  desired_power        0.800 
 
 # Realized composite power at 40 per cell for a main effect and the
 # interaction of a 2 by 2 design, sizes given as partial eta squared.
 ss_power_composite_anova(
   factor_levels = c(2, 2),
-  effects = list(list(factors = 1,       partial_eta_squared = 0.06),
-                 list(factors = c(1, 2), partial_eta_squared = 0.04)),
-  n_per_cell = 40)
-#>  term                 value
-#>  specified_n_per_cell 40   
-#>  specified_N          160  
-#>  composite_power      0.647
-#>  residual_df          156  
-#>  power_1              0.888
-#>  power_1x2            0.728
-#>  f_1                  0.253
-#>  f_1x2                0.204
-#>  df_1                 1    
-#>  df_1x2               1    
-#>  noncentral_parm_1    10.2 
-#>  noncentral_parm_1x2  6.67 
-#>  cells                4    
-#>  alpha_level          0.05 
+  effects = list(list(factors = 1,       true_eta_squared_partial = 0.06),
+                 list(factors = c(1, 2), true_eta_squared_partial = 0.04)),
+  specified_n_per_cell = 40)
+#>  term                  value 
+#>  specified_n_per_cell  40    
+#>  total_N               160   
+#>  composite_power       0.647 
+#>  df_error              156   
+#>  power_1               0.888 
+#>  power_1x2             0.728 
+#>  true_f_1              0.253 
+#>  true_f_1x2            0.204 
+#>  df_1                  1     
+#>  df_1x2                1     
+#>  noncentral_f_parm_1   10.213
+#>  noncentral_f_parm_1x2 6.667 
+#>  cells                 4     
+#>  alpha_level           0.050 
 
 # The effects can instead be a full pattern of population cell means with a
 # common within-cell SD; plot() then draws the mean pattern itself.
 cell_means <- matrix(c(10, 12, 11,
                        13, 12, 16), nrow = 2, byrow = TRUE)
 fit <- ss_power_composite_anova(
-  factor_levels = c(2, 3), means = cell_means, sigma = 4,
+  factor_levels = c(2, 3), true_means = cell_means, true_sd = 4,
   effects = list(list(factors = 1, label = "A"),
                  list(factors = 2, label = "B")),
-  n_per_cell = 30)
+  specified_n_per_cell = 30)
 fit
-#>  term                 value
-#>  specified_n_per_cell 30   
-#>  specified_N          180  
-#>  composite_power      0.712
-#>  residual_df          174  
-#>  power_A              0.994
-#>  power_B              0.717
-#>  f_A                  0.333
-#>  f_B                  0.212
-#>  df_A                 1    
-#>  df_B                 2    
-#>  noncentral_parm_A    20   
-#>  noncentral_parm_B    8.12 
-#>  cells                6    
-#>  alpha_level          0.05 
+#>  term                 value 
+#>  specified_n_per_cell 30    
+#>  total_N              180   
+#>  composite_power      0.712 
+#>  df_error             174   
+#>  power_A              0.994 
+#>  power_B              0.717 
+#>  true_f_A             0.333 
+#>  true_f_B             0.212 
+#>  df_A                 1     
+#>  df_B                 2     
+#>  noncentral_f_parm_A  20.000
+#>  noncentral_f_parm_B  8.125 
+#>  cells                6     
+#>  alpha_level          0.050 
 plot(fit)
 
 ```

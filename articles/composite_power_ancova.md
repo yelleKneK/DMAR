@@ -1,11 +1,11 @@
 # Composite Power for Factorial ANCOVA: Planning Simple Effects, an Interaction, and a Moderator
 
-> **The simulations below run 25 replications, and their answers are
-> wrong.** Twenty five replications keep the document knitting in under
-> a second, but a proportion estimated from that many carries a
-> simulation standard error of about 0.10, so the printed values scatter
-> by a tenth or more around the quantity they estimate. They are shown
-> to demonstrate the method, not to be read.
+> **The simulations below run 25 replications, too few for their
+> estimates to be used.** Twenty five replications keep the document
+> knitting in under a second, but a proportion estimated from that many
+> carries a simulation standard error of about 0.10, so the printed
+> values scatter by a tenth or more around the quantity they estimate.
+> They are shown to demonstrate the method, not to be read.
 >
 > So that a reader can see both the method and the answer, every
 > simulated quantity is reported beside the same quantity computed from
@@ -355,7 +355,7 @@ hand <- data.frame(
 hand$n_approx <- ceiling(lambda_target^2 * sigma2 * hand$sum_c2 / hand$psi^2)
 
 exact <- t(sapply(contrasts_list, function(w) {
-  r <- ss_power_contrast(w, mu = mu, sigma_squared = sigma2, desired_power = .80)
+  r <- ss_power_contrast(w, true_means = mu, true_var_error = sigma2, desired_power = .80)
   c(n_exact = r$value[1], total_N = r$value[2], f = r$value[5])
 }))
 hand <- cbind(hand, exact)
@@ -392,7 +392,7 @@ Treatment costs and the interaction.
 targets <- contrasts_list[c("Treatment cost | Human",
                             "Treatment cost | Machine", "Interaction")]
 ss_power_contrast(targets[["Treatment cost | Machine"]],
-                  mu = mu, sigma_squared = sigma2, desired_power = .80)
+                  true_means = mu, true_var_error = sigma2, desired_power = .80)
 ```
 
 | term                  | value |
@@ -400,8 +400,8 @@ ss_power_contrast(targets[["Treatment cost | Machine"]],
 | necessary_n_per_group | 27    |
 | total_N               | 108   |
 | actual_power          | 0.808 |
-| noncentral_t_parm     | 2.86  |
-| effect_size_f         | 0.275 |
+| noncentral_t_parm     | 2.858 |
+| true_f                | 0.275 |
 
 Cohen’s $`f`$ for a one-degree-of-freedom effect is
 $`\lambda / \sqrt{N}`$.
@@ -417,7 +417,7 @@ beyond the critical value.
 ``` r
 
 w_mach <- contrasts_list[["Treatment cost | Machine"]]
-n_m  <- ss_power_contrast(w_mach, mu = mu, sigma_squared = sigma2,
+n_m  <- ss_power_contrast(w_mach, true_means = mu, true_var_error = sigma2,
                           desired_power = .80)$value[1]
 N_m  <- 4 * n_m; df_m <- N_m - 4
 SE_m <- sqrt(sigma2 * sum(w_mach^2) / n_m)
@@ -459,7 +459,7 @@ largest:
 ``` r
 
 per_cell <- sapply(targets, function(w)
-  ss_power_contrast(w, mu = mu, sigma_squared = sigma2, desired_power = .80)$value[1])
+  ss_power_contrast(w, true_means = mu, true_var_error = sigma2, desired_power = .80)$value[1])
 n_design <- max(per_cell)
 c(per_cell, chosen_n = n_design, total_N = 4 * n_design)
 #>   Treatment cost | Human Treatment cost | Machine              Interaction 
@@ -475,8 +475,8 @@ power of that effect considered on its own:
 ``` r
 
 marg_pow <- sapply(targets, function(w)
-  ss_power_contrast(w, mu = mu, sigma_squared = sigma2,
-                    n_per_group = n_design)$value[3])
+  ss_power_contrast(w, true_means = mu, true_var_error = sigma2,
+                    specified_n_per_group = n_design)$value[3])
 round(marg_pow, 3)
 #>   Treatment cost | Human Treatment cost | Machine              Interaction 
 #>                    1.000                    0.808                    0.906
@@ -494,8 +494,8 @@ n_grid <- 3:45
 curve_df <- do.call(rbind, Map(function(w, nm) {
   data.frame(effect = nm, n = n_grid,
              power = sapply(n_grid, function(nn)
-               ss_power_contrast(w, mu = mu, sigma_squared = sigma2,
-                                 n_per_group = nn)$value[3]))
+               ss_power_contrast(w, true_means = mu, true_var_error = sigma2,
+                                 specified_n_per_group = nn)$value[3]))
 }, contrasts_list, names(contrasts_list)))
 curve_df$effect <- factor(curve_df$effect, levels = names(contrasts_list))
 
@@ -656,8 +656,8 @@ increase until the simulation reaches that value.
 n_seq    <- ref$n_seq
 comp_seq <- sapply(n_seq, function(nn) composite_power(nn, mu, sigma2)$composite)
 weakest  <- sapply(n_seq, function(nn)
-  ss_power_contrast(targets[["Treatment cost | Machine"]], mu = mu,
-                    sigma_squared = sigma2, n_per_group = nn)$value[3])
+  ss_power_contrast(targets[["Treatment cost | Machine"]], true_means = mu,
+                    true_var_error = sigma2, specified_n_per_group = nn)$value[3])
 n_comp80 <- ref$n_comp80
 
 comp_plot <- rbind(
@@ -763,8 +763,8 @@ covariate:
 
 rho <- 0.2
 R2  <- rho^2
-f_int <- ss_power_contrast(contrasts_list[["Interaction"]], mu = mu,
-                           sigma_squared = sigma2, desired_power = .80)$value[5]
+f_int <- ss_power_contrast(contrasts_list[["Interaction"]], true_means = mu,
+                           true_var_error = sigma2, desired_power = .80)$value[5]
 c(R2 = R2, variance_retained = 1 - R2,
   f_unadjusted = f_int, f_adjusted = f_int / sqrt(1 - R2))
 #>                R2 variance_retained      f_unadjusted        f_adjusted 
@@ -778,7 +778,7 @@ $`f`$ increases from $`0.318`$ to about $`0.325`$:
 ``` r
 
 ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
-                          f = f_int, covariate_R2 = 0, n_covariates = 0,
+                          true_f = f_int, true_covariate_R2 = 0, n_covariates = 0,
                           desired_power = .80)
 ```
 
@@ -789,17 +789,17 @@ ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
 | actual_power         | 0.802 |
 | df_effect            | 1     |
 | df_error             | 76    |
-| f                    | 0.318 |
-| f_adjusted           | 0.318 |
-| covariate_R2         | 0     |
+| true_f               | 0.318 |
+| true_f_adjusted      | 0.318 |
+| true_covariate_R2    | 0     |
 | n_covariates         | 0     |
-| noncentrality        | 8.1   |
-| alpha_level          | 0.05  |
+| noncentral_f_parm    | 8.100 |
+| alpha_level          | 0.050 |
 
 ``` r
 
 ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
-                          f = f_int, covariate_R2 = R2, n_covariates = 1,
+                          true_f = f_int, true_covariate_R2 = R2, n_covariates = 1,
                           desired_power = .80)
 ```
 
@@ -810,12 +810,12 @@ ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
 | actual_power         | 0.818 |
 | df_effect            | 1     |
 | df_error             | 75    |
-| f                    | 0.318 |
-| f_adjusted           | 0.325 |
-| covariate_R2         | 0.04  |
+| true_f               | 0.318 |
+| true_f_adjusted      | 0.325 |
+| true_covariate_R2    | 0.040 |
 | n_covariates         | 1     |
-| noncentrality        | 8.44  |
-| alpha_level          | 0.05  |
+| noncentral_f_parm    | 8.437 |
+| alpha_level          | 0.050 |
 
 Power at $`n = 20`$ per cell increases from about $`.80`$ to about
 $`.82`$. The gain is real but modest. The figure below shows why, by
@@ -830,8 +830,8 @@ improvement is negligible relative to the degree of freedom expended.
 rho_grid <- seq(0, 0.7, by = 0.025)
 cov_pow  <- sapply(rho_grid, function(rr)
   ss_power_factorial_ancova(factor_levels = c(2, 2), effect_indices = c(1, 2),
-                            f = f_int, covariate_R2 = rr^2, n_covariates = 1,
-                            n_per_cell = 20)$value[2])
+                            true_f = f_int, true_covariate_R2 = rr^2, n_covariates = 1,
+                            specified_n_per_cell = 20)$value[2])
 pow_at_02 <- cov_pow[which.min(abs(rho_grid - 0.2))]
 
 ggplot(data.frame(rho = rho_grid, power = cov_pow), aes(rho, power)) +
@@ -876,7 +876,7 @@ $`\beta_M`$. The coefficient $`\gamma`$, which governs the size of the
 three-way interaction, is a separate quantity that the cell means do not
 determine. **The value $`\rho = .2`$ carries no information about the
 magnitude of the three-way interaction.** Since the difference between
-the two simple-effect differences equals $`1.8 + \gamma M`$ as $`M`$
+the two simple effect differences equals $`1.8 + \gamma M`$ as $`M`$
 varies, $`\gamma`$ is interpretable as the change in the interaction per
 standard deviation of the moderator.
 
@@ -970,8 +970,8 @@ full model ($`A`$, $`B`$, $`M`$, $`AB`$, $`AM`$, $`BM`$, $`ABM`$):
 ``` r
 
 getN <- function(res) res$value[res$term == "necessary_N"]
-N_2way <- getN(ss_power_reg_coef(cohen_f2 = f2_2way, p = 7, desired_power = .80))
-N_3way <- getN(ss_power_reg_coef(cohen_f2 = f2_3way(gamma_small), p = 7,
+N_2way <- getN(ss_power_reg_coef(true_f2 = f2_2way, p = 7, desired_power = .80))
+N_3way <- getN(ss_power_reg_coef(true_f2 = f2_3way(gamma_small), p = 7,
                                  desired_power = .80))
 c(two_way = N_2way, three_way_small = N_3way)
 #>         two_way three_way_small 
@@ -988,7 +988,7 @@ here.
 
 g_grid <- seq(0.5, 2.0, by = 0.05)
 N_grid <- sapply(g_grid, function(g)
-  getN(ss_power_reg_coef(cohen_f2 = f2_3way(g), p = 7, desired_power = .80)))
+  getN(ss_power_reg_coef(true_f2 = f2_3way(g), p = 7, desired_power = .80)))
 
 ggplot(data.frame(gamma = g_grid, N = N_grid), aes(gamma, N)) +
   geom_line(linewidth = 1, color = agent_cols[["Machine"]]) +

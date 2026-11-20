@@ -30,7 +30,8 @@ The map for choosing the coefficient:
 | [`reliability_kr20()`](https://yelleknek.github.io/DMAR/reference/reliability_kr20.md) | sum of 0/1 items | alpha’s claim, for binary items |
 | [`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md) (robust omega, the default) | unit-weighted sum | one congeneric factor for the *numerator only*; the composite variance is estimated from the data |
 | `reliability_omega(denominator = "model_implied")` | unit-weighted sum | one congeneric factor; the fitted model reproduces the composite variance |
-| [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md) | sum of observed ordinal categories | a probit threshold model links items to one factor |
+| [`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md) | sum of observed ordinal categories | a probit threshold model links items to one factor for the *numerator only*; the total variance comes from the unrestricted polychoric correlations |
+| `reliability_omega_categorical(denominator = "model_implied")` | sum of observed ordinal categories | a probit threshold model links items to one factor; the fitted model reproduces the polychoric correlations (Green & Yang, 2009) |
 | [`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md) | *optimally weighted* composite | one congeneric factor; a different composite, not a different assumption |
 
 The vignette walks the table top to bottom on one running example, then
@@ -72,30 +73,182 @@ c(alpha = res_alpha$value[res_alpha$term == "estimate"],
 #> 0.7976157 0.8067366
 ```
 
-The gap here is modest because the loadings, though unequal, are all
-positive and of similar magnitude. The gap becomes large when the
-tau-equivalence assumption fails badly. The first five `mtcars`
-variables, used here as a five-variable example, are not positively
-keyed and several covary negatively; the negative covariances lower
-alpha but not omega, whose signed loadings recover the common variance
-regardless of keying:
+The gap here is modest because the loadings, though unequal, are of
+similar magnitude. The gap grows when the tau-equivalence assumption
+fails badly, and with real tests a common way for it to fail is in how
+the composite is scored rather than in the tests themselves. Four of the
+tests in the Holzinger and Swineford (1939) data (`holzinger_swineford`)
+measure spatial ability: visual perception, cubes, paper form board, and
+lozenges. Because the tests are scored on different scales, their
+raw-score loadings on a common factor are far from equal, and the
+unit-weighted sum of the raw scores, the composite alpha and omega
+describe here, carries that inequality.
+[`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md) fits
+the single factor with the loadings free, the congeneric model behind
+omega, and with the loadings constrained to be equal, the essentially
+tau-equivalent model behind alpha:
 
 ``` r
 
-S_cars <- cov(mtcars[, 1:5])
-a_cars <- reliability_alpha(S = S_cars, N = 32, ci_method = "none")
-o_cars <- reliability_omega(S = S_cars, N = 32,
-                            denominator = "model_implied",
-                            ci_method = "none")
-c(alpha = a_cars$value[a_cars$term == "estimate"],
-  omega = o_cars$value[o_cars$term == "estimate"])
-#>     alpha     omega 
-#> 0.4671591 0.9050374
+spatial <- holzinger_swineford[, c("t1_visual_perception", "t2_cubes",
+                                   "t3_paper_form_board", "t4_lozenges")]
+d_spatial <- descriptives(spatial)$descriptives
+print(d_spatial[, c("variable", "mean", "sd")], digits = 3)
+#>               variable mean   sd
+#> 1 t1_visual_perception 29.6 7.00
+#> 2             t2_cubes 24.4 4.71
+#> 3  t3_paper_form_board 14.2 2.83
+#> 4          t4_lozenges 18.0 9.05
+congeneric <- cfa_1(data = spatial)
+congeneric[startsWith(congeneric$term, "lambda") |
+             congeneric$term %in% c("chi_square", "df"),
+           c("syntax", "term", "estimate")]
 ```
 
-Alpha here answers under an assumption these data violate. The pattern
-generalizes: each coefficient is correct under its stated model, and the
-choice among them is a choice among models.
+| syntax                     | term        | estimate |
+|:---------------------------|:------------|:---------|
+| f1 =~ t1_visual_perception | lambda_f1_1 | 4.728    |
+| f1 =~ t2_cubes             | lambda_f1_2 | 2.240    |
+| f1 =~ t3_paper_form_board  | lambda_f1_3 | 1.427    |
+| f1 =~ t4_lozenges          | lambda_f1_4 | 5.898    |
+|                            | chi_square  | 1.855    |
+|                            | df          | 2        |
+
+``` r
+
+tau_equivalent <- cfa_1(data = spatial, equal_loading = TRUE)
+tau_equivalent[tau_equivalent$term %in% c("chi_square", "df"),
+               c("term", "estimate")]
+```
+
+| term       | estimate |
+|:-----------|:---------|
+| chi_square | 69.658   |
+| df         | 5        |
+
+``` r
+
+a_spatial <- reliability_alpha(data = spatial, ci_method = "none")
+o_spatial <- reliability_omega(data = spatial,
+                               denominator = "model_implied",
+                               ci_method = "none")
+est_spatial <- c(alpha = a_spatial$value[a_spatial$term == "estimate"],
+                 omega = o_spatial$value[o_spatial$term == "estimate"])
+est_spatial
+#>     alpha     omega 
+#> 0.6220163 0.6794339
+```
+
+The standard deviations of the four tests run from 2.83 (paper form
+board) to 9.05 (lozenges), and the raw-score loadings follow them. The
+congeneric model reproduces the covariances of the four tests closely,
+and constraining the loadings to be equal does not. For the sum of the
+raw scores, alpha falls 0.057 below omega, against 0.009 on the running
+example, so alpha here answers under an assumption this composite
+violates.
+
+Tau-equivalence is a property of the composite as scored, not of the
+tests alone. Standardizing each test before summing gives every test the
+same variance and makes a different composite, the sum of the
+*z*-scores:
+
+``` r
+
+spatial_z <- as.data.frame(scale(spatial))
+congeneric_z <- cfa_1(data = spatial_z)
+congeneric_z[startsWith(congeneric_z$term, "lambda"),
+             c("syntax", "term", "estimate")]
+```
+
+| syntax                     | term        | estimate |
+|:---------------------------|:------------|:---------|
+| f1 =~ t1_visual_perception | lambda_f1_1 | 0.675    |
+| f1 =~ t2_cubes             | lambda_f1_2 | 0.476    |
+| f1 =~ t3_paper_form_board  | lambda_f1_3 | 0.504    |
+| f1 =~ t4_lozenges          | lambda_f1_4 | 0.652    |
+
+``` r
+
+a_z <- reliability_alpha(data = spatial_z, ci_method = "none")
+o_z <- reliability_omega(data = spatial_z,
+                         denominator = "model_implied",
+                         ci_method = "none")
+est_z <- c(alpha = a_z$value[a_z$term == "estimate"],
+           omega = o_z$value[o_z$term == "estimate"])
+est_z
+#>     alpha     omega 
+#> 0.6643619 0.6695794
+```
+
+The standardized loadings run from .476 to .675, a narrower spread than
+the running example’s .4 to .8, and on this composite alpha falls only
+0.005 below omega. The sum of the raw scores and the sum of the
+standardized scores are different composites with different
+reliabilities, and a reported coefficient is a claim about the composite
+actually scored. The pattern generalizes: each coefficient is correct
+under its stated model, and the choice among them is a choice among
+models.
+
+## A Hypothetical Example: Items With Widely Unequal Loadings
+
+On the standardized spatial tests the gap all but closed, because their
+standardized loadings differ little. Items with equal variances can
+still differ widely in how strongly they reflect the factor, and then
+alpha falls well below omega. The items here are hypothetical,
+constructed to show the point: six items, each with population variance
+1, three loading .9 on the factor and three loading .1, as in a scale
+where half of the items barely track the construct. The population alpha
+and omega follow from the loadings:
+
+``` r
+
+lambda_hyp <- c(0.9, 0.9, 0.9, 0.1, 0.1, 0.1)
+k_hyp <- length(lambda_hyp)
+Sigma_hyp <- tcrossprod(lambda_hyp) + diag(1 - lambda_hyp^2)
+# Alpha from the item variances and the variance of the sum; omega as
+# the share of the variance of the sum that the factor accounts for.
+pop_hyp <- c(alpha = k_hyp / (k_hyp - 1) *
+               (1 - sum(diag(Sigma_hyp)) / sum(Sigma_hyp)),
+             omega = sum(lambda_hyp)^2 / sum(Sigma_hyp))
+pop_hyp
+#>     alpha     omega 
+#> 0.6258373 0.7177033
+```
+
+Then 300 respondents are drawn from this population, and both
+coefficients are estimated as before. The draws reuse the running
+example’s seed, so the factor scores and the normal deviates behind the
+errors are those of the running example, and only the loadings differ:
+
+``` r
+
+# withr::with_seed() restores the generator state afterward, so drawing
+# these items does not change the random numbers the later examples use.
+N_hyp <- 300
+items_hyp <- withr::with_seed(113, {
+  eta_hyp <- rnorm(N_hyp)
+  sweep(matrix(rep(eta_hyp, k_hyp), N_hyp, k_hyp), 2, lambda_hyp, `*`) +
+    matrix(rnorm(N_hyp * k_hyp), N_hyp, k_hyp) %*%
+    diag(sqrt(1 - lambda_hyp^2))
+})
+colnames(items_hyp) <- paste0("y", seq_len(k_hyp))
+a_hyp <- reliability_alpha(data = items_hyp, ci_method = "none")
+o_hyp <- reliability_omega(data = items_hyp,
+                           denominator = "model_implied",
+                           ci_method = "none")
+est_hyp <- c(alpha = a_hyp$value[a_hyp$term == "estimate"],
+             omega = o_hyp$value[o_hyp$term == "estimate"])
+est_hyp
+#>     alpha     omega 
+#> 0.6516687 0.7383066
+```
+
+In the population, alpha falls 0.092 below omega, and in the sample,
+0.087, against 0.057 for the sum of the raw spatial scores and 0.009 on
+the running example, whose six items also have variance 1. These items
+already share one variance, so standardizing them leaves the gap in
+place: alpha falls below omega because the equal loadings it assumes are
+far from the loadings that generated the items.
 
 ## The Denominator Choice in Omega
 
@@ -175,6 +328,46 @@ model (for example with
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md))
 remains part of reporting any omega.
 
+A small gap is not evidence of the reverse. A doublet or a method factor
+shared by a few same-signed items inflates their loadings while leaving
+the two denominators close, so the gap cannot certify the numerator. The
+residual correlations of the single-factor fit are the more direct
+check, and every omega carries them: the printed table names the
+denominator and the largest residual correlation, and the full matrix is
+in the `residual_cor` attribute.
+
+``` r
+
+o_ob_d
+```
+
+| term       | value |
+|:-----------|:------|
+| estimate   | 0.769 |
+| se         | NA    |
+| ci_lower   | NA    |
+| ci_upper   | NA    |
+| conf_level | 0.950 |
+| N          | 300   |
+| N_complete | 300   |
+| n_items    | 6     |
+
+Denominator: observed composite variance (robust omega)
+
+Largest residual correlation under the single-factor model: 0.228 (y1
+with y2)
+
+``` r
+
+attr(o_ob_d, "residual_cor")$items
+#> [1] "y1" "y2"
+```
+
+Here the largest residual sits on the doublet pair. The residuals detect
+local dependence more reliably than they locate it: when the shared
+variance sits on the items that dominate the factor, the single factor
+absorbs it and the misfit appears among the other items.
+
 ## Categorical Omega for Ordered Items
 
 When items are ordered categories (Likert responses, symptom counts),
@@ -182,10 +375,9 @@ the composite people score is a sum of those observed categories, and
 the category thresholds make the item-factor relationship nonlinear.
 Categorical omega (Green & Yang, 2009) fits the probit threshold model
 and returns the reliability of the categorical sum score on its own
-metric. Cutting the running example’s items into four skewed categories:
-
-The threshold configuration decides how much this matters. First the
-benign case, every item cut at the same thresholds:
+metric. The threshold configuration decides how much this matters
+relative to treating the items as continuous. First the benign case,
+every item cut at the same thresholds:
 
 ``` r
 
@@ -243,11 +435,73 @@ automatically.
 Categorical omega and robust omega share a design principle in Kelley
 and Pornprasertmanit (2016): in both, the total variance in the
 denominator is not taken from the fitted factor model. Robust omega
-estimates it from the sample covariances; categorical omega assembles it
-from the saturated polychoric correlations and the thresholds. In each
-case the fitted single factor supplies only the numerator, so the
-coefficient stays anchored to the composite that is actually scored even
-when the factor model is an approximation.
+estimates it from the sample covariances; categorical omega, as computed
+there and by default here, assembles it from the unrestricted polychoric
+correlations and the thresholds. In each case the fitted single factor
+supplies only the numerator, so the coefficient stays anchored to the
+composite that is actually scored even when the factor model is an
+approximation.
+
+Green and Yang (2009) defined their coefficient with the other
+denominator. Their appendix program takes “the reproduced (model-based)
+correlation matrix” as the input to the denominator, so the original
+categorical omega is the model implied version, and correlated errors
+enter its total variance only when they are specified in the model.
+`denominator = "model_implied"` reproduces it:
+
+``` r
+
+oc_mi <- reliability_omega_categorical(data = items_cat,
+                                       ci_method = "none",
+                                       denominator = "model_implied")
+c(unrestricted  = oc$value[oc$term == "estimate"],
+  model_implied = oc_mi$value[oc_mi$term == "estimate"])
+#>  unrestricted model_implied 
+#>     0.7190046     0.7171456
+```
+
+With a single factor generating these items the two nearly agree, as the
+continuous pair did on the running example; they part ways as the model
+misfits, and the residual polychoric correlations in the `residual_cor`
+attribute show where.
+
+The unrestricted denominator asks more of the data than the model
+implied one. Every unrestricted polychoric correlation must be
+estimable, and when two items are skewed in opposite directions their
+bivariate table can have empty cells that leave the correlation without
+a finite standard error: every respondent below the top category of one
+item sits in the bottom category of the other. In Green and Yang’s own
+mixed-skew design (two items piled into the top category, two into the
+bottom), most samples of 500 have such a pair. The default then stops
+with an error naming the pair rather than filling the correlation with
+an arbitrary value, and `denominator = "model_implied"` remains
+available, since the fitted model gives that correlation no weight and
+supplies its own value for it. It does so only while the correlations
+the data do determine identify the loadings, which takes a link from
+every item to the others, directly or through other items, and at least
+one cycle of an odd number of items (three items whose three
+correlations are all determined, for example). When every correlation
+between the two top-piled items and the two bottom-piled ones is
+undetermined, the determined ones fix only the products of the loadings
+within each pair: the relative sign of the pairs is free, and the fit
+can return loadings of opposite signs and a categorical omega near 0.05
+against a population value of 0.716. Both denominators then stop with an
+error naming the pairs and the unlinked blocks of items. A bootstrap of
+the default meets the problem more often still: the few respondents in
+the sparse cells are what determine the correlation, and a resample
+often leaves some of them out, so in Green and Yang’s design at a sample
+size of 1,000 about half the replications of a bootstrap of the default
+are set aside even when the sample itself determines every correlation.
+The printed bootstrap line and a warning count them, and the model
+implied denominator keeps all but those whose remaining correlations
+leave the loadings unidentified or whose solution is improper: 1 of 200
+in a bootstrap of the help page’s complete data, of 1,000 respondents,
+but a median of 42% in samples of 300 from the same design. When fewer
+than half of the replications return a value, no interval is reported,
+since the rest would be a minority of the resamples, chosen by whether
+they returned one; a larger sample is the remedy. The help page of
+[`reliability_omega_categorical()`](https://yelleknek.github.io/DMAR/reference/reliability_omega_categorical.md)
+works through that design.
 
 ## Coefficient H: A Different Composite
 
@@ -260,28 +514,61 @@ optimal weights exploit the stronger items:
 
 ``` r
 
-std <- cfa_1(S = cov(items), N = N, output = "standardized")
-lam <- std[std$op == "=~", ]
-reliability_H(loadings = lam$est.std, se_loadings = lam$se)
+res_H <- reliability_H(data = items)
+res_H
 ```
 
-| term          | value    |
-|:--------------|:---------|
-| reliability_H | 0.847    |
-| lower_limit   | 0.819    |
-| upper_limit   | 0.872    |
-| var_H         | 0.000182 |
+| term       | value |
+|:-----------|:------|
+| estimate   | 0.847 |
+| se         | 0.014 |
+| ci_lower   | 0.817 |
+| ci_upper   | 0.873 |
+| conf_level | 0.950 |
+| N          | 300   |
+| N_complete | 300   |
+| n_items    | 6     |
 
-Confidence level: 95%
+``` r
+
+c(omega = res_omega$value[res_omega$term == "estimate"],
+  H     = res_H$value[res_H$term == "estimate"])
+#>     omega         H 
+#> 0.8067366 0.8472086
+```
+
+From raw data,
+[`reliability_H()`](https://yelleknek.github.io/DMAR/reference/reliability_H.md)
+fits the single-factor model exactly as
+[`reliability_omega()`](https://yelleknek.github.io/DMAR/reference/reliability_omega.md)
+does, and its interval is a Wald interval on the logit scale whose
+standard error comes from the delta method over the full covariance
+matrix of that fit’s parameter estimates, robust maximum likelihood by
+default, as for omega. When the factor belongs to a larger confirmatory
+or structural model, pass the fitted model instead,
+`reliability_H(fit, factor = "...")`, and the standard error is the one
+that model was fitted with. The form
+`reliability_H(loadings = , se_loadings = )` is not used here. It builds
+the interval from the marginal standard errors of the standardized
+loadings, which leave out the covariances among the loading estimates;
+those estimates are correlated in any fitted factor model, so its
+interval can be too narrow or too wide, and every such call gives a
+warning saying so.
 
 Report omega when people will score the scale by summing; report H when
 scores will come from the factor model itself (or to see the ceiling the
 item set could reach with optimal weighting). Reporting both, with one
 sentence on which composite each describes, is often the most
-informative choice under unequal loadings. Reliability coefficients
-matter because researchers score and use composites; an analysis
-conducted entirely within the SEM framework, relating latent variables
-directly, has less need of them.
+informative choice under unequal loadings. Read H as a ceiling, too, in
+the statistical sense: the sample H overestimates the population
+coefficient, and a composite formed with weights estimated from the
+sample is less reliable than H says, both markedly in samples of about
+100 and barely beyond about 1,000 (Aguirre-Urreta, Rönkkö, & McIntosh,
+2019). A bootstrap interval for H (`ci_method = "bca"`, as for omega)
+also estimates that bias. Reliability coefficients matter because
+researchers score and use composites; an analysis conducted entirely
+within the SEM framework, relating latent variables directly, has less
+need of them.
 
 KR-20 completes the family as the binary-item special case of alpha,
 provided for the classical test theory literature that names it
@@ -297,22 +584,45 @@ Choosing the interval is an empirical question, and it is the subject of
 Kelley and Pornprasertmanit (2016): across coefficients, sample sizes,
 loading patterns, distributions, and (for categorical items) threshold
 patterns, which interval procedures cover at their nominal rate. The
-DMAR defaults are their recommendations:
+DMAR defaults are their recommendations, with one refinement for omega
+described below the table:
 
 | Coefficient | Default behavior | Recommended interval and basis |
 |----|----|----|
 | alpha | Bonett (2002) interval | well behaved among the closed forms under normality |
-| omega, model implied | Wald interval with the robust ML standard error (`"mlr"`) | the best performing closed form when item distributions deviate from normality |
+| omega, model implied | Wald interval with the robust ML standard error, its limits formed on the logit scale (`"mlr_logistic"`) | the best performing closed form when item distributions deviate from normality; the limits are formed on the logit scale on the evidence of a later study |
 | robust omega | point estimate; a message names the bootstrap call | percentile or BCa bootstrap, the pairing recommended when unidimensionality is approximate; no closed form exists for the observed denominator |
 | categorical omega | point estimate; a message names the bootstrap call | BCa bootstrap, which held coverage across threshold patterns, category counts, and sample sizes |
+
+The logit form for omega comes from a Monte Carlo study run for DMAR (in
+the package’s source repository, `methodology/reliability_limits`),
+which compared the two forms of the Wald limits from the same standard
+error: the normal theory maximum likelihood one for normal data and the
+Huber-White one of MLR for nonnormal data. With normal data the limits
+on the scale of omega missed mostly on one side, the population value
+falling below the lower limit, and covered from .910 to .952; formed on
+the logit scale and transformed back (Browne, 1982; Kelley, 2007), they
+covered from .939 to .956 in every cell. With complete data the default
+takes lavaan’s `robust.sem` standard error, which no cell used; it
+estimates the same asymptotic variance as the Huber-White one.
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md)
+forms the limits of its omega row on the logit scale too.
+`ci_method = "mlr"` forms the limits on the scale of omega. The examples
+below name the default, `ci_method = "mlr_logistic"`, where they use it;
+leaving it out gives the same interval.
+
+Coefficient H was not among the coefficients Kelley and Pornprasertmanit
+(2016) compared. Its default is omega’s: a Wald interval on the logit
+scale with the robust ML standard error, the fast choice, with the
+percentile or BCa bootstrap the safer one for a reported analysis.
 
 A bootstrap is never run unless it is requested. When one is requested,
 `B = 10000` replications is the default.
 
-Every function exposes its full menu through `ci_method` (Feldt, Fisher,
-Bonett, Hakstian-Whalen, ML, robust ML, ADF, their logistic transformed
-variants, and the bootstrap family, as applicable), so a reviewer’s
-requested method is available; the default is the one with the
+Every reliability function offers its interval methods through
+`ci_method` (Feldt, Fisher, Bonett, Hakstian-Whalen, ML, robust ML, ADF,
+their logistic transformed variants, and the bootstrap family, as
+applicable). Except for coefficient H, the default is the method with
 simulation evidence behind it. Two practical notes. The bootstrap
 methods need raw data, not a covariance matrix, and take a `seed`
 argument for reproducibility. And a bootstrap interval on the
@@ -329,16 +639,21 @@ reliability_omega(data = items)
 #> Robust omega is reported without a confidence interval by default because its interval is bootstrap based. Request it with ci_method = "percentile" (or "bca"); B = 10000 replications is the default when you do.
 ```
 
-| term        | value |
-|:------------|:------|
-| estimate    | 0.806 |
-| se          | NA    |
-| lower_limit | NA    |
-| upper_limit | NA    |
-| conf_level  | 0.95  |
-| N           | 300   |
-| N_complete  | 300   |
-| J           | 6     |
+| term       | value |
+|:-----------|:------|
+| estimate   | 0.806 |
+| se         | NA    |
+| ci_lower   | NA    |
+| ci_upper   | NA    |
+| conf_level | 0.950 |
+| N          | 300   |
+| N_complete | 300   |
+| n_items    | 6     |
+
+Denominator: observed composite variance (robust omega)
+
+Largest residual correlation under the single-factor model: -0.096 (y1
+with y3)
 
 ``` r
 
@@ -349,35 +664,50 @@ reliability_omega(data = items, ci_method = "percentile",
                   B = 500, seed = 113)
 ```
 
-| term        | value  |
-|:------------|:-------|
-| estimate    | 0.806  |
-| se          | 0.0169 |
-| lower_limit | 0.771  |
-| upper_limit | 0.838  |
-| conf_level  | 0.95   |
-| N           | 300    |
-| N_complete  | 300    |
-| J           | 6      |
+| term       | value |
+|:-----------|:------|
+| estimate   | 0.806 |
+| se         | 0.017 |
+| ci_lower   | 0.771 |
+| ci_upper   | 0.838 |
+| conf_level | 0.950 |
+| N          | 300   |
+| N_complete | 300   |
+| n_items    | 6     |
+
+Denominator: observed composite variance (robust omega)
+
+Largest residual correlation under the single-factor model: -0.096 (y1
+with y3)
+
+Bootstrap: 500 replications attempted, 500 returned a value
 
 ``` r
 
 
 # The model implied denominator has a closed form and reports its
-# robust ML Wald interval by default.
-reliability_omega(data = items, denominator = "model_implied")
+# robust ML Wald interval by default, with the limits formed on the
+# logit scale. The call names that default, ci_method = "mlr_logistic";
+# leaving it out gives the same interval.
+reliability_omega(data = items, denominator = "model_implied",
+                  ci_method = "mlr_logistic")
 ```
 
-| term        | value  |
-|:------------|:-------|
-| estimate    | 0.807  |
-| se          | 0.0165 |
-| lower_limit | 0.774  |
-| upper_limit | 0.839  |
-| conf_level  | 0.95   |
-| N           | 300    |
-| N_complete  | 300    |
-| J           | 6      |
+| term       | value |
+|:-----------|:------|
+| estimate   | 0.807 |
+| se         | 0.017 |
+| ci_lower   | 0.772 |
+| ci_upper   | 0.837 |
+| conf_level | 0.950 |
+| N          | 300   |
+| N_complete | 300   |
+| n_items    | 6     |
+
+Denominator: composite variance implied by the fitted model
+
+Largest residual correlation under the single-factor model: -0.096 (y1
+with y3)
 
 ## Missing Data: FIML and Auxiliary Variables
 
@@ -394,12 +724,25 @@ wrapper) take the same position
 [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md) does. Two
 arguments govern the treatment:
 
-- `missing = c("listwise", "fiml")`. The default remains listwise
-  deletion, so no previously computed result changes and the
-  missing-data treatment is always a visible, deliberate choice.
-  `"fiml"` keeps every case with at least one observed item and
-  estimates by full information maximum likelihood, consistent and
-  efficient under the weaker missing at random (MAR) assumption.
+- `missing = c("fiml", "listwise", "two_stage")`. The default, `"fiml"`,
+  keeps every case with at least one observed item, or with an auxiliary
+  variable observed, and estimates by full information maximum
+  likelihood, consistent and efficient under the weaker missing at
+  random (MAR) assumption; `"listwise"` analyzes the complete cases
+  alone. Data in which no value is missing are analyzed as they stand,
+  with the same estimates FIML would give and the complete data
+  intervals, so the default analysis is FIML whenever an item value is
+  missing and the complete data analysis otherwise.
+  [`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md)
+  differs: it fits complete data by FIML too. The complete data analysis
+  is used here because the closed-form intervals of alpha and omega
+  (Bonett’s among them) need it. Without auxiliary variables a row with
+  every item missing does not count as a missing value, since listwise
+  deletion and FIML both drop it. With auxiliary variables, a case whose
+  items are all missing still informs the item moments through its
+  auxiliaries, and setting it aside would make the analysis conditional
+  on having an observed item, which biases the estimates when the items
+  go missing together at random given the auxiliaries.
 - `aux`, a character vector naming *auxiliary variables*: columns of
   `data` that are not part of the composite but are correlated with the
   items or with the reasons values are missing. They enter as saturated
@@ -418,40 +761,40 @@ z <- eta + rnorm(N, sd = 0.5)
 d <- data.frame(items, z = z)
 d$y2[runif(N) < plogis(-1 + 1.5 * as.numeric(scale(z)))] <- NA
 
-# Listwise: the analysis quietly drops the incomplete rows.
-reliability_alpha(data = d[, paste0("y", 1:6)])
+# Listwise, asked for by name: the analysis drops the incomplete rows.
+reliability_alpha(data = d[, paste0("y", 1:6)], missing = "listwise")
 ```
 
-| term           | value  |
-|:---------------|:-------|
-| estimate       | 0.762  |
-| se             | 0.0252 |
-| se_transformed | 0.106  |
-| lower_limit    | 0.707  |
-| upper_limit    | 0.807  |
-| conf_level     | 0.95   |
-| N              | 215    |
-| N_complete     | 215    |
-| J              | 6      |
+| term           | value |
+|:---------------|:------|
+| estimate       | 0.762 |
+| se             | 0.025 |
+| se_transformed | 0.106 |
+| ci_lower       | 0.707 |
+| ci_upper       | 0.807 |
+| conf_level     | 0.950 |
+| N              | 215   |
+| N_complete     | 215   |
+| n_items        | 6     |
 
 ``` r
 
 
-# FIML with the auxiliary: every case with at least one observed item
-# contributes, and z informs the estimation.
+# FIML with the auxiliary: every case with an observed item or an
+# observed z contributes, and z informs the estimation.
 reliability_alpha(data = d, aux = "z")
 ```
 
-| term        | value  |
-|:------------|:-------|
-| estimate    | 0.796  |
-| se          | 0.0188 |
-| lower_limit | 0.759  |
-| upper_limit | 0.833  |
-| conf_level  | 0.95   |
-| N           | 300    |
-| N_complete  | 215    |
-| J           | 6      |
+| term       | value |
+|:-----------|:------|
+| estimate   | 0.796 |
+| se         | 0.019 |
+| ci_lower   | 0.759 |
+| ci_upper   | 0.833 |
+| conf_level | 0.950 |
+| N          | 300   |
+| N_complete | 215   |
+| n_items    | 6     |
 
 The returned table always reports both `N` (the cases used) and
 `N_complete` (the complete cases), so the cost of listwise deletion is
@@ -466,26 +809,56 @@ available. Users of MBESS may recognize the `aux` idea from
 `ci.reliability()`, whose implementation no longer runs on current
 semTools; DMAR implements the saturated correlates model directly.
 
+### Interval Availability and the Reported Denominator
+
+Bootstrap intervals require at least half of attempted replications and
+at least two defined estimates; AVE also retains a minimum of 100. A
+point estimate and counts remain available when an interval is withheld.
+These rules describe estimability and selection among resamples, not a
+guarantee of coverage. Defined improper values are retained under the
+stated policy and counted separately.
+
+For categorical omega with multiple imputation, the default is 20
+completed datasets inside each bootstrap replication. The point estimate
+has a separate adaptive rule that uses at least 20. More inner
+imputations reduce imputation noise at additional computational cost;
+the default of 20 does not rest on a calibration of coverage. A fraction
+of missing information estimated from a selected minority of
+replications is explicitly qualified and cannot certify precision merely
+by increasing the point’s number of imputations.
+
+A planning sensitivity result takes the probability of obtaining an
+interval within the target width, the mean width, and the coverage over
+one denominator, the simulated studies that returned an interval. A
+study that returns no interval is in none of them; the output states how
+many studies were attempted, how many returned an interval, and how many
+did not, and its `simulation` attribute gives Monte Carlo limits for the
+width-target probability.
+
 ## One Entry Point and the Broom Verbs
 
 [`reliability()`](https://yelleknek.github.io/DMAR/reference/reliability.md)
 dispatches on `type` (or auto-detects: ordered few-category items go to
-categorical omega, otherwise omega) and forwards `denominator`; every
+categorical omega, otherwise omega) and forwards `denominator` and
+`ci_method` (here the default of the model implied omega, named); every
 family member returns the same tidy shape with `tidy()` and `glance()`
 methods:
 
 ``` r
 
 res <- reliability(data = items, type = "omega",
-                   denominator = "model_implied")
+                   denominator = "model_implied",
+                   ci_method = "mlr_logistic")
 generics::tidy(res)
-#>    term  estimate         se  ci_lower  ci_upper
-#> 1 omega 0.8067366 0.01652757 0.7743432 0.8391301
+#>    term  estimate         se  ci_lower  ci_upper conf_level wald_df
+#> 1 omega 0.8067366 0.01652757 0.7722706 0.8370868       0.95     Inf
+#>   h1_diagnostic wald_calibration_note
+#> 1          <NA>                  <NA>
 generics::glance(res)
 #>   coefficient  estimate         se  ci_lower  ci_upper conf_level nobs n_items
-#> 1       omega 0.8067366 0.01652757 0.7743432 0.8391301       0.95  300       6
-#>   ci_method
-#> 1       mlr
+#> 1       omega 0.8067366 0.01652757 0.7722706 0.8370868       0.95  300       6
+#>      ci_method wald_df h1_diagnostic wald_calibration_note
+#> 1 mlr_logistic     Inf          <NA>                  <NA>
 ```
 
 ## Planning the Study
@@ -496,7 +869,23 @@ coefficient reported without a narrow interval is a weak claim.
 plans the sample size so the interval for alpha or omega achieves a
 target width (with an `assurance` probability if desired), which closes
 the loop between this family and DMAR’s accuracy in parameter estimation
-(AIPE) tradition.
+(AIPE) tradition. It plans for the coefficient this family estimates
+from the raw item scores, so the population is used as a covariance
+matrix (a correlation matrix plans for standardized items). Without an
+assurance the size comes from a closed form for the expected width of
+the interval `type` names: the normal theory variance of alpha (van Zyl,
+Neudecker, & Nel, 2000), evaluated on the population covariance matrix,
+for the parallel model and for the normal theory interval of the tau
+equivalent model, and the delta method variance of the model implied
+coefficient, the variance behind
+`reliability_omega(denominator = "model_implied", ci_method = "ml")` and
+`reliability_alpha(estimator = "model_implied", ci_method = "ml")`, for
+the factor analytic interval of the tau equivalent model and for the
+congeneric model. With an assurance, a Monte Carlo search that starts
+from that size finds the smallest one whose interval is no wider than
+the target with the requested probability (Terry & Kelley, 2012); a
+simulated study whose fit returns no interval counts as one whose
+interval is too wide.
 
 ## What Reliability Coefficients Cannot Do
 
@@ -534,9 +923,17 @@ what the items mean.
 
 ## References
 
+Aguirre-Urreta, M. I., Rönkkö, M., & McIntosh, C. N. (2019). A
+cautionary note on the finite sample behavior of maximal reliability.
+*Psychological Methods, 24*, 236–252.
+
 Bonett, D. G. (2002). Sample size requirements for testing and
 estimating coefficient alpha. *Journal of Educational and Behavioral
 Statistics, 27*, 335–340.
+
+Browne, M. W. (1982). Covariance structures. In D. M. Hawkins (Ed.),
+*Topics in applied multivariate analysis* (pp. 72–141). Cambridge
+University Press.
 
 Collins, L. M., Schafer, J. L., & Kam, C. M. (2001). A comparison of
 inclusive and restrictive strategies in modern missing data procedures.
@@ -555,6 +952,14 @@ reliability within latent variable systems. In R. Cudeck, S. du Toit, &
 D. Sorbom (Eds.), *Structural equation modeling: Present and future*
 (pp. 195–216). Scientific Software International.
 
+Holzinger, K. J., & Swineford, F. (1939). *A study in factor analysis:
+The stability of a bi-factor solution* (Supplementary Educational
+Monographs, No. 48). University of Chicago Press.
+
+Kelley, K. (2007). Confidence intervals for standardized effect sizes:
+Theory, application, and implementation. *Journal of Statistical
+Software, 20*(8), 1–24.
+
 Kelley, K., & Pornprasertmanit, S. (2016). Confidence intervals for
 population reliability coefficients: Evaluation of methods,
 recommendations, and software for composite measures. *Psychological
@@ -562,3 +967,12 @@ Methods, 21*, 69–92.
 
 McDonald, R. P. (1999). *Test theory: A unified treatment*. Lawrence
 Erlbaum Associates.
+
+Terry, L. J., & Kelley, K. (2012). Sample size planning for composite
+reliability coefficients: Accuracy in parameter estimation via narrow
+confidence intervals. *British Journal of Mathematical and Statistical
+Psychology, 65*, 371–401.
+
+van Zyl, J. M., Neudecker, H., & Nel, D. G. (2000). On the distribution
+of the maximum likelihood estimator of Cronbach’s alpha. *Psychometrika,
+65*, 271–280.

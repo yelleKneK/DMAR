@@ -39,7 +39,11 @@ measurement_alignment(
 - items:
 
   Character vector naming the indicator columns of `data`. Three or more
-  items are required, and each must be numeric.
+  items are required, and each must be numeric. Items that cannot be
+  read from `data` (a name that is not a column, a name given twice,
+  fewer than three) are refused with an error of class
+  `dmar_items_invalid` (see
+  [`dmar_metadata`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)).
 
 - group:
 
@@ -82,9 +86,9 @@ measurement_alignment(
 - seed:
 
   Optional integer seed for the random starts. Defaults to `NULL`, which
-  uses the caller's random number state and leaves it alone. When an
-  integer is supplied the seed is set locally and the caller's state is
-  restored on exit.
+  draws the random starts from the current random number stream and so
+  advances that stream. When an integer is supplied the seed is set
+  locally and the caller's state is restored on exit.
 
 - epsilon:
 
@@ -292,6 +296,17 @@ only one group pair to work with. Alignment earns its keep when the
 number of groups makes exact invariance implausible and the ladder
 uninformative.
 
+A configural solution whose likelihood has no maximum, flat or still
+rising as an error variance in some group falls below zero (three items
+whose correlations in one group have a negative product can do it), has
+no loadings or intercepts to align, only the point where lavaan's
+optimizer stopped. The function checks a configural fit with a negative
+error variance as
+[`fa_bifactor`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)
+describes and stops with an error of class `dmar_no_maximum` that names
+the group and the item and prints the lavaan code of the fit, where
+`bounds = "pos.var"` or a different model are the choices.
+
 ## References
 
 Asparouhov, T., & Muthén, B. (2014). Multiple-group factor analysis
@@ -330,17 +345,29 @@ Other multivariate and latent variable methods:
 [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md),
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
 [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
-[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md),
+[`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md),
 [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
+[`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
 [`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md),
 [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md),
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
 [`dmacs()`](https://yelleknek.github.io/DMAR/reference/dmacs.md),
 [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+[`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+[`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+[`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+[`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
 [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md),
 [`irt_grm()`](https://yelleknek.github.io/DMAR/reference/irt_grm.md),
 [`irt_information()`](https://yelleknek.github.io/DMAR/reference/irt_information.md),
 [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
 [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md),
+[`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
 [`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)
 
 ## Author
@@ -376,10 +403,10 @@ out <- measurement_alignment(d, items = paste0("x", 1:6),
                              group = "cohort", seed = 113)
 out                                   # recovered means and variances
 #>  group    n   factor_mean factor_variance
-#>  cohort_1 400 0           1              
-#>  cohort_2 450 0.328       1.53           
-#>  cohort_3 380 -0.54       0.581          
-#>  cohort_4 500 0.861       1.28           
+#>  cohort_1 400 0.000       1.000          
+#>  cohort_2 450 0.328       1.528          
+#>  cohort_3 380 -0.540      0.581          
+#>  cohort_4 500 0.861       1.278          
 #>  cohort_5 420 0.213       0.783          
 attr(out, "R2_loadings")              # item 3 stands out
 #>        x1        x2        x3        x4        x5        x6 
@@ -409,10 +436,10 @@ ma <- measurement_alignment(hs, items = verbal, group = "school_sex",
                             seed = 113)
 ma
 #>  group               n  factor_mean factor_variance
-#>  Pasteur, Male       74 0           1              
-#>  Pasteur, Female     82 0.0429      0.904          
+#>  Pasteur, Male       74 0.000       1.000          
+#>  Pasteur, Female     82 0.043       0.904          
 #>  Grant-White, Male   72 0.608       0.802          
-#>  Grant-White, Female 73 0.803       1.09           
+#>  Grant-White, Female 73 0.803       1.086          
 
 # The broom verbs: one row per group, and the alignment summary.
 generics::tidy(ma)

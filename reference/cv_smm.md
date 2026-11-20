@@ -58,6 +58,10 @@ simultaneous critical value. A pair-by-pair construction, applied to
 c\_{\alpha;m,df}\\\mathit{SE}\_{\hat\psi_i}\\ with \\c\_{\alpha;m,df}\\
 the SMM critical value returned here. When \\m = 1\\ it reduces to the
 ordinary two-sided *t* critical value.
+[`ci_dunnett_t3`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md)
+uses it, at each pair's Welch–Satterthwaite degrees of freedom, for all
+pairwise comparisons of means without assuming homogeneity of variance
+(Dunnett's T3).
 
 **How it is computed.** The \\m\\ statistics are independent given the
 common scale estimate \\S\\, so the joint distribution factorizes after
@@ -74,11 +78,24 @@ tolerance (there is no Monte Carlo simulation and no random seed). When
 \Phi^{-1}\\\bigl((1 + (1-\alpha)^{1/m})/2\bigr)\\ is returned; when \\m
 = 1\\ the value is exactly \\t\_{1-\alpha/2,\\df}\\.
 
+When `df` is small and the critical value large (`df` below 1 at
+conventional levels, for example below about .8 at an `alpha_level` of
+.05 and below about .6 at .10, or `df` of about 2 or less with an
+`alpha_level` of .02 or less), the integrand rises from 0 to 1 in a
+narrow band near \\s = 0\\ that an adaptive rule can miss. Every root is
+therefore checked against the upper tail computed another way, by
+conditioning on \\W = \max_i \|Z_i\|\\ instead of on \\S\\,
+\$\$P\\\left(\max_i \|Z_i\|/S \> c\right) = \int_0^\infty F_S(w/c)\\
+g_W(w)\\ dw,\$\$ where \\F_S\\ is the distribution function of \\S\\ and
+\\g_W(w) = 2m\\\[2\Phi(w) - 1\]^{m-1}\phi(w)\\ the density of \\W\\, and
+the root is found on that tail instead when the two disagree.
+
 ## References
 
 Stoline, M. R., & Ury, H. K. (1979). Tables of the Studentized maximum
 modulus distribution and an application to multiple comparisons among
 means. *Technometrics, 21*(1), 87–93.
+[doi:10.1080/00401706.1979.10489726](https://doi.org/10.1080/00401706.1979.10489726)
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
 experiments and analyzing data: A model comparison perspective* (4th
@@ -88,6 +105,9 @@ are developed; Appendix Table A.5 reports SMM critical values.)
 
 ## See also
 
+[`ci_dunnett_t3`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+which uses this critical value for all pairwise comparisons without
+assuming homogeneity of variance;
 [`cv_t`](https://yelleknek.github.io/DMAR/reference/cv_t.md),
 [`cv_tukey_hsd`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md),
 [`cv_dunnett`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md),
@@ -117,7 +137,7 @@ Ken Kelley <kkelley@nd.edu>
 # with 36 error degrees of freedom.
 cv_smm(alpha_level = .05, df = 36, n_comparisons = 5)
 #>  term     value area_less area_greater
-#>  upper_cv 2.7   0.95      0.05        
+#>  upper_cv 2.704 0.950     0.050       
 
 # When m = 1, the SMM critical value reduces to the two-sided
 # t critical value:

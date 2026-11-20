@@ -1,4 +1,4 @@
-# A Friendly Date / Time Stamp and a Simple Stopwatch
+# A Plain-Language Date / Time Stamp and a Simple Stopwatch
 
 `now()` is a small utility for two related tasks: (1) printing the
 current date and time in a form that reads naturally in a console log or
@@ -84,7 +84,7 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Print the current date and time.
 now()
-#> October 15, 2026 (3:33 PM)
+#> November 20, 2026 (2:27 PM)
 
 # Time how long a piece of work takes. The pattern is the same
 # whether the work is a bootstrap, a simulation, or a numeric
@@ -98,28 +98,28 @@ d <- descriptives(holzinger_swineford[, c("t1_visual_perception",
                                           "t2_cubes", "t4_lozenges")])
 end <- now()
 end - start
-#> Time difference of 0.003863096 secs
+#> Time difference of 0.003902912 secs
 
 # A deliberate wait shows the same pattern on a longer interval. The
-# pause is a fifth of a second, long enough to register in the
+# pause is a twentieth of a second, long enough to register in the
 # difference and short enough not to slow the help page.
 start <- now()
-Sys.sleep(0.2)
+Sys.sleep(0.05)
 end <- now()
 end - start
-#> Time difference of 0.2015162 secs
+#> Time difference of 0.05105972 secs
 
 # Date only.
 now(time = FALSE)
-#> October 15, 2026
+#> November 20, 2026
 
 # Tidy data.frame form, when the components are needed
 # individually for programmatic processing, for example when the
 # stamp is embedded in a report's metadata block.
 now(tidy = TRUE)
 #>     term value
-#> 1    day    15
+#> 1    day    20
 #> 2   year  2026
-#> 3   hour     3
-#> 4 minute    33
+#> 3   hour     2
+#> 4 minute    27
 ```

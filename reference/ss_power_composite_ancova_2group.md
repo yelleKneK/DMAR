@@ -12,15 +12,15 @@ requires more than one result to hold at once.
 
 ``` r
 ss_power_composite_ancova_2group(
-  smd = 0,
-  rho = 0,
-  sigma = 1,
-  sd_cov = 1,
+  true_smd = 0,
+  true_cor = 0,
+  true_sd = 1,
+  true_sd_X = 1,
   composite_terms = c("group", "covariate", "group_by_covariate"),
   include_interaction = TRUE,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n = NULL,
+  specified_n_per_group = NULL,
   directional = FALSE
 )
 
@@ -30,36 +30,36 @@ plot(x, ...)
 
 ## Arguments
 
-- smd:
+- true_smd:
 
   Supposed standardized mean difference (Cohen's *d*) between the two
-  groups at the mean of the covariate, standardized by `sigma`: a value
-  the researcher posits for the population, either a minimally important
-  effect or a value believed to be true, never a sample estimate.
-  Defaults to 0, which is no group effect and therefore power equal to
-  `alpha_level` for that test.
+  groups at the mean of the covariate, standardized by `true_sd`: a
+  value the researcher posits for the population, either a minimally
+  important effect or a value believed to be true, never a sample
+  estimate. Defaults to 0, which is no group effect and therefore power
+  equal to `alpha_level` for that test.
 
-- rho:
+- true_cor:
 
-  Supposed within-group population correlation between the covariate and
-  the outcome. Length 1 for the same correlation in both groups, in
-  which case the two slopes are equal and the interaction is zero, or
-  length 2 for one correlation per group, in which case the slopes
-  differ and the interaction carries the difference. Each element must
-  lie in (-1, 1). Defaults to 0.
+  Within-group population correlation between the covariate and the
+  outcome (\\\rho_g\\ in the formulas below). Length 1 for the same
+  correlation in both groups, in which case the two slopes are equal and
+  the interaction is zero, or length 2 for one correlation per group, in
+  which case the slopes differ and the interaction carries the
+  difference. Each element must lie in (-1, 1). Defaults to 0.
 
-- sigma:
+- true_sd:
 
   Within-group population standard deviation of the outcome: the same
   \\\sigma\\ as in a one-way ANOVA on the outcome, the same in both
-  groups, and the standardizer of `smd`. Defaults to 1, which puts `smd`
-  and the coefficients on a standardized scale.
+  groups, and the standardizer of `true_smd`. Defaults to 1, which puts
+  `true_smd` and the coefficients on a standardized scale.
 
-- sd_cov:
+- true_sd_X:
 
   Population standard deviation of the covariate. Defaults to 1. A
-  correlation is scale free, so `sd_cov` does not affect power; it sets
-  the units the slopes and the figure are expressed in.
+  correlation is scale free, so `true_sd_X` does not affect power; it
+  sets the units the slopes and the figure are expressed in.
 
 - composite_terms:
 
@@ -76,15 +76,15 @@ plot(x, ...)
 
 - desired_power:
 
-  Desired composite statistical power (default 0.85). Used only when `n`
-  is `NULL`.
+  Desired composite statistical power (default 0.85). Used only when
+  `specified_n_per_group` is `NULL`.
 
 - alpha_level:
 
   Type I error rate for each individual test (default 0.05). This is the
   per-test rate, not a rate for the composite event.
 
-- n:
+- specified_n_per_group:
 
   Per-group sample size (assumed balanced); if specified, the realized
   power is returned rather than a sample size planned.
@@ -119,9 +119,9 @@ When the two correlations differ in absolute value the powers are
 approximations, and the row names say so: `composite_power` is reported
 as `approximate_composite_power`, each `power_<term>` as
 `approximate_power_<term>`, and a planned size as
-`approximate_n_per_group` and `approximate_N`. The section on unequal
-residual variances explains why. An `approximate` attribute carries the
-same flag for a program to test without parsing row names.
+`approximate_n_per_group` and `approximate_total_N`. The section on
+unequal residual variances explains why. An `approximate` attribute
+carries the same flag for a program to test without parsing row names.
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) read both
 sets of names, so a relabeled table still summarizes to its sample size
@@ -132,8 +132,8 @@ equal in absolute value, which is the exact case.
 ## Details
 
 This is the two-group special case, kept under its own name for the
-simple `smd`/`rho` interface it allows. For a one-way design with more
-than two groups, or a factorial design, use the general
+simple `true_smd`/`true_cor` interface it allows. For a one-way design
+with more than two groups, or a factorial design, use the general
 [`ss_power_composite_ancova`](https://yelleknek.github.io/DMAR/reference/ss_power_composite_ancova.md).
 
 The model is \$\$Y = b_0 + b\_{group} G + b\_{cov} X + b\_{group \times
@@ -204,7 +204,7 @@ The group test is not exempt: \\b\_{group}\\ is the difference at the
 covariate mean, and the realized group covariate means are not exactly
 equal, so the group coefficient inherits their sampling variability even
 under balanced groups and a covariate independent of them. What the
-group test's noncentrality does not involve is `sd_cov`, because a
+group test's noncentrality does not involve is `true_sd_X`, because a
 correlation is scale free; that is not the same as exactness. The Type I
 error rate is unaffected, so it is specifically power that is
 overstated, not the calibration of the tests. This is the same
@@ -277,27 +277,28 @@ right mean and whose tests are conditionally independent, which is a
 near neighbor of the design described but not that design. It is an
 approximation, and the output says so: every row carrying a power is
 renamed with an `approximate_` prefix, and a planned sample size is
-reported as `approximate_n_per_group` and `approximate_N` rather than as
-`necessary_n_per_group` and `necessary_N`, because it is the smallest
-*n* at which the approximation reaches `desired_power`, not an *n* known
-to attain it. The numbers are the same numbers; only the names change,
-and only in this case.
+reported as `approximate_n_per_group` and `approximate_total_N` rather
+than as `necessary_n_per_group` and `total_N`, because it is the
+smallest *n* at which the approximation reaches `desired_power`, not an
+*n* known to attain it. The numbers are the same numbers; only the names
+change, and only in this case.
 
 The sign of the error is not guaranteed. Two fixed-covariate
 simulations, run with the covariate values held to the population
 moments so that the conditioning approximation above plays no part,
-bracket it. With `smd = 0.30`, `rho = c(0, 0.9)` and *n* = 8 per group,
-the composite of the group and covariate effects is reported as 0.0752
-against a simulated 0.0865 (Monte Carlo standard error 0.0002), so the
-report is conservative. With `smd = 2.50`, `rho = c(0, 0.95)` and *n* =
-6 per group, the group effect alone is reported as 0.9990 against a
-simulated 0.9979 (Monte Carlo standard error 0.0001), so the report is
-optimistic. Both are deliberately severe: a correlation gap of 0.9 and a
-handful of cases per group. At a gap a covariate plausibly shows,
-`smd = 0.50` with `rho = c(0.1, 0.5)` and *n* = 25 per group, the
-composite of the group effect and the interaction is reported as 0.1515
-against a simulated 0.1508 (Monte Carlo standard error 0.0006), a
-difference inside simulation error.
+bracket it. With `true_smd = 0.30`, `true_cor = c(0, 0.9)` and *n* = 8
+per group, the composite of the group and covariate effects is reported
+as 0.0752 against a simulated 0.0865 (Monte Carlo standard error
+0.0002), so the report is conservative. With `true_smd = 2.50`,
+`true_cor = c(0, 0.95)` and *n* = 6 per group, the group effect alone is
+reported as 0.9990 against a simulated 0.9979 (Monte Carlo standard
+error 0.0001), so the report is optimistic. Both are deliberately
+severe: a correlation gap of 0.9 and a handful of cases per group. At a
+gap a covariate plausibly shows, `true_smd = 0.50` with
+`true_cor = c(0.1, 0.5)` and *n* = 25 per group, the composite of the
+group effect and the interaction is reported as 0.1515 against a
+simulated 0.1508 (Monte Carlo standard error 0.0006), a difference
+inside simulation error.
 
 What to do with the number, then. Read it as an approximation whose
 accuracy degrades with the gap between the correlations and not with
@@ -306,8 +307,8 @@ group's errors with its own residual standard deviation \\\sigma
 \sqrt{1 - \rho_g^2}\\, fit the same model, and count the replications in
 which every test in the composite rejects. Equal absolute correlations
 need none of this. Two correlations of the same magnitude and opposite
-sign, `rho = c(0.5, -0.5)`, give a large interaction and still equal
-residual variances, so that design is exact and its rows keep the
+sign, `true_cor = c(0.5, -0.5)`, give a large interaction and still
+equal residual variances, so that design is exact and its rows keep the
 ordinary names.
 
 ## Planning Without the Composite
@@ -323,11 +324,12 @@ adjusted means. Naming one term here reproduces it exactly, which is the
 check the tests assert:
 
 
-    ss_power_c_ancova(psi = 0.5, c_weights = c(1, -1), sigma = 1, rho = 0.3,
-                      n = 30)
-    ss_power_composite_ancova_2group(smd = 0.5, rho = 0.3, n = 30,
-                              composite_terms = "group",
-                              include_interaction = FALSE)
+    ss_power_c_ancova(true_contrast = 0.5, c_weights = c(1, -1), true_sd = 1,
+                      true_cor = 0.3, specified_n_per_group = 30)
+    ss_power_composite_ancova_2group(true_smd = 0.5, true_cor = 0.3,
+                                     specified_n_per_group = 30,
+                                     composite_terms = "group",
+                                     include_interaction = FALSE)
 
 Both return 0.5143. The interaction is dropped in the second call
 because `ss_power_c_ancova` plans for the model without it, and carrying
@@ -338,13 +340,13 @@ applies.
 
 For the design with no covariate at all,
 [`ss_power_smd`](https://yelleknek.github.io/DMAR/reference/ss_power_smd.md)
-is the planner, and comparing the two is the cleanest way to see what a
-covariate buys:
+is the planner, and comparing the two shows the power a covariate adds:
 
 
-    ss_power_smd(smd = 0.5, n_1 = 30)                    # no covariate
-    ss_power_c_ancova(psi = 0.5, c_weights = c(1, -1),
-                      sigma = 1, rho = 0.5, n = 30)      # covariate, rho = .5
+    ss_power_smd(true_smd = 0.5, n_1 = 30)                 # no covariate
+    ss_power_c_ancova(true_contrast = 0.5, c_weights = c(1, -1),
+                      true_sd = 1, true_cor = 0.5,
+                      specified_n_per_group = 30)                    # covariate, true_cor = .5
 
 Power rises from 0.4779 to 0.5942 because the covariate removes
 \\\rho^2\\ of the error variance, at the cost of one degree of freedom.
@@ -382,6 +384,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -429,25 +432,26 @@ Ken Kelley <kkelley@nd.edu>
 # interaction to detect; nothing had to be assumed about that in advance.
 # They also differ in absolute value, so the groups' residual variances
 # differ, the powers are approximations, and the rows are named to say so.
-ss_power_composite_ancova_2group(smd = 0.20, rho = c(0.10, 0.40), n = 100)
+ss_power_composite_ancova_2group(true_smd = 0.20, true_cor = c(0.10, 0.40),
+                                 specified_n_per_group = 100)
 #> Warning: The group correlations differ in absolute value, so the groups' residual variances differ and the shared-error composite power is an approximation whose error grows with the gap between the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_group, because neither is exact; confirm a final design by simulation.
 #>  term                                 value
 #>  specified_n_per_group                100  
-#>  specified_N                          200  
-#>  approximate_composite_power          0.18 
-#>  residual_df                          196  
+#>  total_N                              200  
+#>  approximate_composite_power          0.180
+#>  df_error                             196  
 #>  approximate_power_group              0.313
 #>  approximate_power_covariate          0.957
 #>  approximate_power_group_by_covariate 0.597
-#>  noncentral_t_parm_group              1.48 
-#>  noncentral_t_parm_covariate          3.7  
-#>  noncentral_t_parm_group_by_covariate 2.22 
-#>  supposed_smd                         0.2  
-#>  supposed_rho_group_1                 0.1  
-#>  supposed_rho_group_2                 0.4  
-#>  sigma                                1    
-#>  sd_cov                               1    
-#>  alpha_level                          0.05 
+#>  noncentral_t_parm_group              1.478
+#>  noncentral_t_parm_covariate          3.696
+#>  noncentral_t_parm_group_by_covariate 2.218
+#>  true_smd                             0.200
+#>  true_cor_group_1                     0.100
+#>  true_cor_group_2                     0.400
+#>  true_sd                              1    
+#>  true_sd_X                            1    
+#>  alpha_level                          0.050
 #>  tails                                2    
 
 # The covariate is nearly certain to be detected and the interaction is
@@ -457,68 +461,70 @@ ss_power_composite_ancova_2group(smd = 0.20, rho = c(0.10, 0.40), n = 100)
 # Equal correlations mean equal slopes, so the interaction is zero and its
 # test rejects only at the Type I error rate. Asking for a composite that
 # includes it therefore asks for something that cannot happen often.
-ss_power_composite_ancova_2group(smd = 0.20, rho = 0.10, n = 100)
-#>  term                                 value  
-#>  specified_n_per_group                100    
-#>  specified_N                          200    
-#>  composite_power                      0.00459
-#>  residual_df                          196    
-#>  power_group                          0.293  
-#>  power_covariate                      0.293  
-#>  power_group_by_covariate             0.05   
-#>  noncentral_t_parm_group              1.42   
-#>  noncentral_t_parm_covariate          1.42   
-#>  noncentral_t_parm_group_by_covariate 0      
-#>  supposed_smd                         0.2    
-#>  supposed_rho_group_1                 0.1    
-#>  supposed_rho_group_2                 0.1    
-#>  sigma                                1      
-#>  sd_cov                               1      
-#>  alpha_level                          0.05   
-#>  tails                                2      
+ss_power_composite_ancova_2group(true_smd = 0.20, true_cor = 0.10,
+                                 specified_n_per_group = 100)
+#>  term                                 value
+#>  specified_n_per_group                100  
+#>  total_N                              200  
+#>  composite_power                      0.005
+#>  df_error                             196  
+#>  power_group                          0.293
+#>  power_covariate                      0.293
+#>  power_group_by_covariate             0.050
+#>  noncentral_t_parm_group              1.421
+#>  noncentral_t_parm_covariate          1.421
+#>  noncentral_t_parm_group_by_covariate 0.000
+#>  true_smd                             0.200
+#>  true_cor_group_1                     0.100
+#>  true_cor_group_2                     0.100
+#>  true_sd                              1    
+#>  true_sd_X                            1    
+#>  alpha_level                          0.050
+#>  tails                                2    
 
 # The composite of the two effects that are actually present.
-ss_power_composite_ancova_2group(smd = 0.20, rho = 0.10, n = 100,
-                          composite_terms = c("group", "covariate"))
+ss_power_composite_ancova_2group(true_smd = 0.20, true_cor = 0.10,
+                                 specified_n_per_group = 100,
+                                 composite_terms = c("group", "covariate"))
 #>  term                        value
 #>  specified_n_per_group       100  
-#>  specified_N                 200  
+#>  total_N                     200  
 #>  composite_power             0.087
-#>  residual_df                 196  
+#>  df_error                    196  
 #>  power_group                 0.293
 #>  power_covariate             0.293
-#>  noncentral_t_parm_group     1.42 
-#>  noncentral_t_parm_covariate 1.42 
-#>  supposed_smd                0.2  
-#>  supposed_rho_group_1        0.1  
-#>  supposed_rho_group_2        0.1  
-#>  sigma                       1    
-#>  sd_cov                      1    
-#>  alpha_level                 0.05 
+#>  noncentral_t_parm_group     1.421
+#>  noncentral_t_parm_covariate 1.421
+#>  true_smd                    0.200
+#>  true_cor_group_1            0.100
+#>  true_cor_group_2            0.100
+#>  true_sd                     1    
+#>  true_sd_X                   1    
+#>  alpha_level                 0.050
 #>  tails                       2    
 
 # Per-group sample size for composite power of 0.80 on the group effect and
 # the interaction together.
-ss_power_composite_ancova_2group(smd = 0.50, rho = c(0.10, 0.50),
+ss_power_composite_ancova_2group(true_smd = 0.50, true_cor = c(0.10, 0.50),
                           composite_terms = c("group", "group_by_covariate"),
                           desired_power = 0.80)
 #> Warning: The group correlations differ in absolute value, so the groups' residual variances differ and the shared-error composite power is an approximation whose error grows with the gap between the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_group, because neither is exact; confirm a final design by simulation.
 #>  term                                 value
 #>  approximate_n_per_group              95   
-#>  approximate_N                        190  
+#>  approximate_total_N                  190  
 #>  approximate_composite_power          0.801
-#>  residual_df                          186  
+#>  df_error                             186  
 #>  approximate_power_group              0.957
 #>  approximate_power_group_by_covariate 0.837
-#>  noncentral_t_parm_group              3.69 
-#>  noncentral_t_parm_group_by_covariate 2.96 
-#>  desired_power                        0.8  
-#>  supposed_smd                         0.5  
-#>  supposed_rho_group_1                 0.1  
-#>  supposed_rho_group_2                 0.5  
-#>  sigma                                1    
-#>  sd_cov                               1    
-#>  alpha_level                          0.05 
+#>  noncentral_t_parm_group              3.695
+#>  noncentral_t_parm_group_by_covariate 2.956
+#>  desired_power                        0.800
+#>  true_smd                             0.500
+#>  true_cor_group_1                     0.100
+#>  true_cor_group_2                     0.500
+#>  true_sd                              1    
+#>  true_sd_X                            1    
+#>  alpha_level                          0.050
 #>  tails                                2    
 
 # Composite power is not the product of the marginal powers. The tests share
@@ -526,9 +532,9 @@ ss_power_composite_ancova_2group(smd = 0.50, rho = c(0.10, 0.50),
 # larger than the product. Multiplying would understate the design. These
 # correlations differ in absolute value, so the rows carry the approximate_
 # prefix; see the section on unequal residual variances for what that means.
-plan <- ss_power_composite_ancova_2group(smd = 0.50, rho = c(0.10, 0.50), n = 95,
-                                  composite_terms = c("group",
-                                                      "group_by_covariate"))
+plan <- ss_power_composite_ancova_2group(
+  true_smd = 0.50, true_cor = c(0.10, 0.50), specified_n_per_group = 95,
+  composite_terms = c("group", "group_by_covariate"))
 #> Warning: The group correlations differ in absolute value, so the groups' residual variances differ and the shared-error composite power is an approximation whose error grows with the gap between the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_group, because neither is exact; confirm a final design by simulation.
 plan$value[plan$term == "approximate_composite_power"]
 #> [1] 0.8006971
@@ -539,62 +545,63 @@ prod(plan$value[plan$term %in% c("approximate_power_group",
 # Correlations of equal magnitude and opposite sign leave the residual
 # variances equal, so this design is exact and keeps the ordinary row names,
 # even though the two slopes could hardly differ more.
-exact <- ss_power_composite_ancova_2group(smd = 0.50, rho = c(0.40, -0.40),
-                                   n = 95,
-                                   composite_terms = c("group",
-                                                       "group_by_covariate"))
-#> Warning: full precision may not have been achieved in 'pnt{final}'
+exact <- ss_power_composite_ancova_2group(
+  true_smd = 0.50, true_cor = c(0.40, -0.40), specified_n_per_group = 95,
+  composite_terms = c("group", "group_by_covariate"))
 exact$value[exact$term == "composite_power"]
 #> [1] 0.9624723
 
 # Draw the population effects a result was planned on. The figure needs only
 # the effect sizes, and nothing is simulated to draw it.
-plot(ss_power_composite_ancova_2group(smd = 0.20, rho = c(0.10, 0.40), n = 100))
+plot(ss_power_composite_ancova_2group(true_smd = 0.20,
+                                      true_cor = c(0.10, 0.40),
+                                      specified_n_per_group = 100))
 #> Warning: The group correlations differ in absolute value, so the groups' residual variances differ and the shared-error composite power is an approximation whose error grows with the gap between the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_group, because neither is exact; confirm a final design by simulation.
 
 
 # Planning without the composite: one term returns that test's ordinary
 # power, and reproduces ss_power_c_ancova once the interaction is dropped.
-ss_power_composite_ancova_2group(smd = 0.50, rho = 0.30, n = 30,
-                          composite_terms = "group",
-                          include_interaction = FALSE)
+ss_power_composite_ancova_2group(true_smd = 0.50, true_cor = 0.30,
+                                 specified_n_per_group = 30,
+                                 composite_terms = "group",
+                                 include_interaction = FALSE)
 #>  term                    value
 #>  specified_n_per_group   30   
-#>  specified_N             60   
+#>  total_N                 60   
 #>  composite_power         0.514
-#>  residual_df             57   
+#>  df_error                57   
 #>  power_group             0.514
-#>  noncentral_t_parm_group 2.03 
-#>  supposed_smd            0.5  
-#>  supposed_rho_group_1    0.3  
-#>  supposed_rho_group_2    0.3  
-#>  sigma                   1    
-#>  sd_cov                  1    
-#>  alpha_level             0.05 
+#>  noncentral_t_parm_group 2.030
+#>  true_smd                0.500
+#>  true_cor_group_1        0.300
+#>  true_cor_group_2        0.300
+#>  true_sd                 1    
+#>  true_sd_X               1    
+#>  alpha_level             0.050
 #>  tails                   2    
-ss_power_c_ancova(psi = 0.50, c_weights = c(1, -1), sigma = 1,
-                  rho = 0.30, n = 30)
+ss_power_c_ancova(true_contrast = 0.50, c_weights = c(1, -1), true_sd = 1,
+                  true_cor = 0.30, specified_n_per_group = 30)
 #>  term                  value
 #>  specified_n_per_group 30   
 #>  actual_power          0.514
-#>  noncentral_t_parm     2.03 
+#>  noncentral_t_parm     2.030
 
 # What the covariate buys, against the same design with no covariate.
-ss_power_smd(smd = 0.50, n_1 = 30)
+ss_power_smd(true_smd = 0.50, n_1 = 30)
 #>  term              value
 #>  specified_n_1     30   
 #>  specified_n_2     30   
 #>  actual_power      0.478
-#>  noncentral_t_parm 1.94 
-#>  supposed_smd      0.5  
-#>  alpha_level       0.05 
+#>  noncentral_t_parm 1.936
+#>  true_smd          0.500
+#>  alpha_level       0.050
 #>  tails             2    
 
 # The broom verbs summarize the plan in one row.
-generics::tidy(ss_power_composite_ancova_2group(smd = 0.50, rho = c(0.10, 0.50),
-                                         composite_terms = c("group",
-                                                         "group_by_covariate"),
-                                         desired_power = 0.80))
+generics::tidy(ss_power_composite_ancova_2group(
+  true_smd = 0.50, true_cor = c(0.10, 0.50),
+  composite_terms = c("group", "group_by_covariate"),
+  desired_power = 0.80))
 #> Warning: The group correlations differ in absolute value, so the groups' residual variances differ and the shared-error composite power is an approximation whose error grows with the gap between the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_group, because neither is exact; confirm a final design by simulation.
 #>          term estimate     power
 #> 1 sample_size       95 0.8006971

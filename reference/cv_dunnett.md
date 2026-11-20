@@ -132,11 +132,11 @@ Ken Kelley <kkelley@nd.edu>
 # The two-sided critical value controls the family-wise error rate at .05.
 cv_dunnett(alpha_level = .05, df = 36, n_comparisons = 3)
 #>  term     value area_less area_greater
-#>  upper_cv 2.45  0.95      0.05        
+#>  upper_cv 2.452 0.950     0.050       
 
 # When the treatments are expected only to exceed the control, a one-sided
 # ("treatments greater than control") critical value is smaller.
 cv_dunnett(alpha_level = .05, df = 36, n_comparisons = 3, alternative = "greater")
 #>  term     value area_less area_greater
-#>  upper_cv 2.13  0.95      0.05        
+#>  upper_cv 2.133 0.950     0.050       
 ```

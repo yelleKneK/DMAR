@@ -86,9 +86,9 @@ agreement corrected for chance (Cohen, 1960):
 cohen_kappa(table = tab)
 ```
 
-| weights | kappa | se | lower_limit | upper_limit | z_value | p_value | n | n_categories |
-|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| unweighted | 0.492 | 0.051 | 0.392 | 0.591 | 9.64 | \< 0.0001 | 200 | 3 |
+| weights    | kappa | se    | ci_lower | ci_upper | z_value | p_value   | N   | n_categories |
+|:-----------|:------|:------|:---------|:---------|:--------|:----------|:----|:-------------|
+| unweighted | 0.492 | 0.051 | 0.392    | 0.591    | 9.637   | \< 0.0001 | 200 | 3            |
 
 Confidence level: 95%
 
@@ -124,9 +124,9 @@ res <- cohen_kappa(table = tab, weights = v,
 res
 ```
 
-| weights | kappa | se | lower_limit | upper_limit | z_value | p_value | n | n_categories |
+| weights | kappa | se | ci_lower | ci_upper | z_value | p_value | N | n_categories |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| custom_disagreement | 0.348 | 0.0755 | 0.2 | 0.496 | 4.61 | \< 0.0001 | 200 | 3 |
+| custom_disagreement | 0.348 | 0.076 | 0.200 | 0.496 | 4.607 | \< 0.0001 | 200 | 3 |
 
 Confidence level: 95%
 
@@ -148,9 +148,9 @@ cohen_kappa(table = tab, weights = v_swap,
             weight_scaling = "disagreement")
 ```
 
-| weights | kappa | se | lower_limit | upper_limit | z_value | p_value | n | n_categories |
+| weights | kappa | se | ci_lower | ci_upper | z_value | p_value | N | n_categories |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| custom_disagreement | 0.574 | 0.0553 | 0.465 | 0.682 | 10.4 | \< 0.0001 | 200 | 3 |
+| custom_disagreement | 0.574 | 0.055 | 0.465 | 0.682 | 10.373 | \< 0.0001 | 200 | 3 |
 
 Confidence level: 95%
 

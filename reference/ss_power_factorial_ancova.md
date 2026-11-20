@@ -17,13 +17,13 @@ the price of one error degree of freedom per covariate.
 ss_power_factorial_ancova(
   factor_levels,
   effect_indices,
-  f = NULL,
-  partial_eta_squared = NULL,
-  covariate_R2 = 0,
+  true_f = NULL,
+  true_eta_squared_partial = NULL,
+  true_covariate_R2 = 0,
   n_covariates = 0,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n_per_cell = NULL
+  specified_n_per_cell = NULL
 )
 ```
 
@@ -40,18 +40,19 @@ ss_power_factorial_ancova(
   interest: `1` for the first factor's main effect, `c(2, 3)` for the B
   x C interaction, and so on.
 
-- f:
+- true_f:
 
   Cohen's \\f\\ for the chosen effect *on the unadjusted (ANOVA)
   metric*, that is, with the within-cell standard deviation of the
-  outcome in its denominator. Supply this or `partial_eta_squared`, not
-  both.
+  outcome in its denominator. Supply this or `true_eta_squared_partial`,
+  not both.
 
-- partial_eta_squared:
+- true_eta_squared_partial:
 
-  Partial eta squared for the chosen effect on the unadjusted metric.
+  Population partial eta squared for the chosen effect on the unadjusted
+  metric.
 
-- covariate_R2:
+- true_covariate_R2:
 
   Joint squared multiple correlation between the covariates and the
   outcome within cells, in \\\[0, 1)\\. `0` reproduces the ANOVA
@@ -64,15 +65,15 @@ ss_power_factorial_ancova(
 
 - desired_power:
 
-  Desired power; the per-cell sample size is solved when `n_per_cell` is
-  `NULL`. Defaults to 0.85 to match
+  Desired power; the per-cell sample size is solved when
+  `specified_n_per_cell` is `NULL`. Defaults to 0.85 to match
   [`ss_power_factorial_anova`](https://yelleknek.github.io/DMAR/reference/ss_power_factorial_anova.md).
 
 - alpha_level:
 
   Type I error rate.
 
-- n_per_cell:
+- specified_n_per_cell:
 
   Per-cell sample size; when supplied, the realized power at that size
   is returned instead of solving for size.
@@ -81,10 +82,11 @@ ss_power_factorial_ancova(
 
 A `data.frame` with the per-cell and total sample sizes (or the supplied
 ones), the realized `actual_power`, the numerator and error degrees of
-freedom, the unadjusted and covariate-adjusted effect sizes (`f`,
-`f_adjusted`), `covariate_R2`, `n_covariates`, the noncentrality
-parameter, and `alpha_level`. The result carries the `dmar_ss_power`
-class, so [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
+freedom, the unadjusted and covariate-adjusted effect sizes (`true_f`,
+`true_f_adjusted`), `true_covariate_R2`, `n_covariates`, the
+noncentrality parameter (`noncentral_f_parm`), and `alpha_level`. The
+result carries the `dmar_ss_power` class, so
+[`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
 it in broom convention (the reported size is the per-cell count).
 
@@ -95,11 +97,12 @@ The test of an effect with numerator degrees of freedom
 minus one) is a noncentral *F* with noncentrality \\\lambda = N
 f\_{\mathrm{adj}}^2\\, where \\N\\ is the total sample size,
 \\f\_{\mathrm{adj}} = f / \sqrt{1 - R^2}\\, and error degrees of freedom
-\\N - (\prod \mathrm{levels}) - q\\ for \\q\\ covariates (the standard
-one-line ANCOVA adjustment; Maxwell, Delaney, & Kelley, 2027, Chapter
-9). The covariate slopes are assumed homogeneous across cells and the
-covariates measured at baseline, so that adjusting does not bias the
-treatment effects in a randomized design.
+\\N - (\prod \mathrm{levels}) - c\\, where \\c\\ is the number of
+covariates, `n_covariates` (the standard one-line ANCOVA adjustment;
+Maxwell, Delaney, & Kelley, 2027, Chapter 9). The covariate slopes are
+assumed homogeneous across cells and the covariates measured at
+baseline, so that adjusting does not bias the treatment effects in a
+randomized design.
 
 The complete worked example for this function, a 2 x 4 x 3 ANCOVA with
 two baseline covariates, planned effect by effect and then analyzed with
@@ -135,6 +138,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -173,7 +177,7 @@ Ken Kelley <kkelley@nd.edu>
 # two-level factor A. Two baseline covariates with a modest joint
 # R^2 = .25 cut the required total N by roughly a quarter:
 ss_power_factorial_ancova(factor_levels = c(2, 4, 3), effect_indices = 1,
-                          f = 0.10, covariate_R2 = 0,    n_covariates = 0,
+                          true_f = 0.10, true_covariate_R2 = 0,    n_covariates = 0,
                           desired_power = 0.80)
 #>  term                 value
 #>  necessary_n_per_cell 33   
@@ -181,14 +185,14 @@ ss_power_factorial_ancova(factor_levels = c(2, 4, 3), effect_indices = 1,
 #>  actual_power         0.803
 #>  df_effect            1    
 #>  df_error             768  
-#>  f                    0.1  
-#>  f_adjusted           0.1  
-#>  covariate_R2         0    
+#>  true_f               0.100
+#>  true_f_adjusted      0.100
+#>  true_covariate_R2    0    
 #>  n_covariates         0    
-#>  noncentrality        7.92 
-#>  alpha_level          0.05 
+#>  noncentral_f_parm    7.920
+#>  alpha_level          0.050
 ss_power_factorial_ancova(factor_levels = c(2, 4, 3), effect_indices = 1,
-                          f = 0.10, covariate_R2 = 0.25, n_covariates = 2,
+                          true_f = 0.10, true_covariate_R2 = 0.25, n_covariates = 2,
                           desired_power = 0.80)
 #>  term                 value
 #>  necessary_n_per_cell 25   
@@ -196,28 +200,28 @@ ss_power_factorial_ancova(factor_levels = c(2, 4, 3), effect_indices = 1,
 #>  actual_power         0.806
 #>  df_effect            1    
 #>  df_error             574  
-#>  f                    0.1  
-#>  f_adjusted           0.115
-#>  covariate_R2         0.25 
+#>  true_f               0.100
+#>  true_f_adjusted      0.115
+#>  true_covariate_R2    0.250
 #>  n_covariates         2    
-#>  noncentrality        8    
-#>  alpha_level          0.05 
+#>  noncentral_f_parm    8.000
+#>  alpha_level          0.050
 
 # Realized power for the three-way interaction at 6 per cell.
 ss_power_factorial_ancova(factor_levels = c(2, 4, 3),
-                          effect_indices = c(1, 2, 3), f = 0.15,
-                          covariate_R2 = 0.25, n_covariates = 2,
-                          n_per_cell = 6)
+                          effect_indices = c(1, 2, 3), true_f = 0.15,
+                          true_covariate_R2 = 0.25, n_covariates = 2,
+                          specified_n_per_cell = 6)
 #>  term                 value
 #>  specified_n_per_cell 6    
 #>  total_N              144  
 #>  actual_power         0.276
 #>  df_effect            6    
 #>  df_error             118  
-#>  f                    0.15 
-#>  f_adjusted           0.173
-#>  covariate_R2         0.25 
+#>  true_f               0.150
+#>  true_f_adjusted      0.173
+#>  true_covariate_R2    0.250
 #>  n_covariates         2    
-#>  noncentrality        4.32 
-#>  alpha_level          0.05 
+#>  noncentral_f_parm    4.320
+#>  alpha_level          0.050
 ```

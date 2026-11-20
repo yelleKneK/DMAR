@@ -6,7 +6,7 @@ Difference (HSD) Test
 ## Usage
 
 ``` r
-cv_tukey_hsd(alpha_level, df, groups, verbose = TRUE)
+cv_tukey_hsd(alpha_level, df, n_groups, verbose = TRUE)
 ```
 
 ## Arguments
@@ -20,9 +20,9 @@ cv_tukey_hsd(alpha_level, df, groups, verbose = TRUE)
 - df:
 
   The error degrees of freedom from the ANOVA (a positive number;
-  typically `N - groups`).
+  typically `N - n_groups`).
 
-- groups:
+- n_groups:
 
   The number of groups whose means are being compared (an integer of at
   least 2).
@@ -41,14 +41,12 @@ row per critical value, following the format used by
 ## Details
 
 The Tukey HSD test compares all pairs of group means using the
-Studentized range distribution
-([`qtukey`](https://rdrr.io/r/stats/Tukey.html)). Because the
-Studentized range is the absolute difference between the largest and
-smallest sample means (scaled by a standard error), it is non-negative
-and the associated distribution has support on \\\[0, \infty)\\. As a
-consequence, the Type I error rate `alpha_level` is *not* split between
-two tails in the way it is for the (symmetric) *t*- and
-*z*-distributions in
+Studentized range distribution. Because the Studentized range is the
+absolute difference between the largest and smallest sample means
+(scaled by a standard error), it is non-negative and the associated
+distribution has support on \\\[0, \infty)\\. As a consequence, the Type
+I error rate `alpha_level` is *not* split between two tails in the way
+it is for the (symmetric) *t*- and *z*-distributions in
 [`cv_t`](https://yelleknek.github.io/DMAR/reference/cv_t.md) and
 [`cv_z`](https://yelleknek.github.io/DMAR/reference/cv_z.md); rather,
 the full `alpha_level` applies to the upper tail.
@@ -60,14 +58,94 @@ significantly different when the absolute standardized difference
 between them exceeds this critical value.
 
 The Tukey HSD critical value is a quantile of the Studentized range
-distribution, which base R supplies through
-[`qtukey`](https://rdrr.io/r/stats/Tukey.html), so unlike
+distribution, so unlike
 [`cv_dunnett`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md)
 and [`cv_smm`](https://yelleknek.github.io/DMAR/reference/cv_smm.md)
 this function needs no multivariate distribution machinery and does not
 require the mvtnorm package. Maxwell, Delaney, and Kelley (2027, Chapter
 5) develop the Tukey method as the procedure for all-pairwise
 comparisons within the multiple-comparisons problem.
+
+**How the quantile is computed.** Over most of its range the critical
+value is base R's [`qtukey`](https://rdrr.io/r/stats/Tukey.html), which
+R documents as accurate to the fourth decimal place (it inverts `ptukey`
+by a secant search), and the areas are
+[`ptukey`](https://rdrr.io/r/stats/Tukey.html), which evaluates its
+integral with a 16-point Legendre formula and for which R states no
+accuracy. Compared with an independent computation, the two fall short
+in five places. (1) At small error df, increasingly so as the number of
+groups and the confidence level grow: with 20 groups and 2 error df,
+`qtukey(.99, 20, 2)` is 44.526 where the exact quantile is 37.943, so
+the critical value would be 31.485 rather than 26.830; below 2 df both
+functions return `NaN`. (2) At large error df: `qtukey(.999, 3, 18000)`
+is \\1.2 \times 10^{-5}\\ too large, and beyond 25000 df both return the
+infinite-df distribution. (3) Far in either tail:
+`qtukey(.9999, 10, 11)` is 12.008462 where the exact quantile is
+12.008580, so `cv_tukey_hsd(1e-4, df = 11, n_groups = 10)` would be
+8.491265 rather than 8.491348; at .99999 `qtukey` can be off by several
+units (with 2000 groups and 1000 error df it is 12.930 where the exact
+quantile is 9.872); in the lower tail it was more than \\10^{-5}\\ off
+at .0001 (with 75 groups) and at .00001 can be far off
+(`qtukey(.00001, 3, 150)` is 0.000092 where the exact quantile is
+0.006023) or `NaN`. (4) With more than 50 groups `ptukey` is off by more
+than \\10^{-6}\\ below its .75 point (by up to \\8.3 \times 10^{-6}\\
+with 2000 groups, and with 1500 or more groups it can return 0 where the
+probability is .001), and with thousands of groups at very large error
+df it is off just above that point as well
+(`ptukey(7.6250574, 5000, Inf)` is .7500010 where the exact probability
+is .7500000). (5) Anywhere, the secant search can stop short of the root
+of `ptukey`: `qtukey(.975, 10, 12)` is 6.003766 where the exact quantile
+is 6.003807, and `qtukey(.9975, 5, 23)` is 6.018665 where it is
+6.018546.
+
+In these places DMAR computes the distribution function exactly, as the
+probability integral of the range, \\P(W \le w) = k \int \phi(z)
+\[\Phi(z) - \Phi(z - w)\]^{k - 1} dz\\ for the range \\W\\ of \\k\\
+standard normal variates (\\k\\ the number of groups), integrated
+against the chi square distribution of the error variance by adaptive
+quadrature, and takes the critical value as the root of that function.
+It does so (a) below an error df that grows with the number of groups:
+fewer than 9 error df for up to 6 groups, fewer than 11 for up to 10, 15
+for up to 20, 21 for up to 50, 31 for up to 100, 41 for up to 250, 47
+for up to 400, 57 for up to 700, 71 for up to 1000, 81 for up to 1500,
+91 for up to 2000, 101 for up to 3000, and 111 for more; (b) above 10000
+and up to \\10^8\\ error df; (c) for every quantile at a probability
+above .999 (an `alpha_level` below .001) or below .001, at any error df;
+(d) with more than 50 groups, for every probability below .75 and every
+quantile below the .75 point (below the .80 point with more than 1000
+groups), at any error df; and (e) wherever `qtukey` fails, or its value
+is more than \\2 \times 10^{-6}\\ from the root of `ptukey` (the
+residual of `ptukey` there divided by its slope). These rules were set
+by comparison with two independent computations of the studentized
+range, as the cells in which `qtukey` was more than \\10^{-5}\\ from the
+exact quantile or `ptukey` more than \\10^{-6}\\ from the exact
+probability, with a margin of at least one measured step. R's values
+were compared with 2 to 10000 groups at error df up to 20000, with 2 to
+20000 groups at infinite df (which R uses for every df above 25000), and
+with 3 to 10000 groups at \\10^8 + 1\\, \\10^9\\, and \\10^{10}\\ df, at
+probabilities from .00001 to .99999 (52,892 cells for the second
+computation alone). Elsewhere the values are those of `qtukey` and
+`ptukey`; at the measured cells there they were within \\9.6 \times
+10^{-6}\\ of the exact quantile and \\9.1 \times 10^{-7}\\ of the exact
+probability. The largest quantile error (700 groups, 57 df, at .9965)
+came from a dense probe between the grid's cells near the df bounds in
+(a), where the errors come closest to the \\10^{-5}\\ rule; at the
+grid's own cells the largest was \\8.3 \times 10^{-6}\\. Between the
+measured cells larger errors cannot be ruled out, and beyond 10000
+groups (20000 at infinite df) the df bound in (a) and the cuts in (d)
+are extrapolated, not measured. Above \\10^8\\ error df the distribution
+is within \\2.3 \times 10^{-7}\\ in probability (\\1.4 \times 10^{-6}\\
+in the quantile) of the infinite-df one, and the values are those of
+`qtukey` and `ptukey` at infinite df, except under (c), (d), and (e),
+where the exact infinite-df distribution is used; at the three df
+measured there DMAR's values were within \\1.6 \times 10^{-6}\\ of the
+exact quantile and \\9.1 \times 10^{-7}\\ of the exact probability. The
+exact computation agrees with the independent computations to \\2 \times
+10^{-8}\\ in the quantile at probabilities from .01 to .99999, and less
+closely far in the lower tail, where the quantile is small (to \\4.6
+\times 10^{-8}\\ at .001, \\1.1 \times 10^{-7}\\ at .0001, and \\4.8
+\times 10^{-7}\\ at .00001); with two groups it reproduces the closed
+form \\q = \sqrt{2}\\ t\_{1 - \alpha/2, \mathit{df}}\\.
 
 ## References
 
@@ -108,22 +186,31 @@ Ken Kelley <kkelley@nd.edu>
 # Kelley (2027, Chapter 5): every pair of k = 3 group means is compared,
 # with 27 error degrees of freedom, holding the family-wise error rate at
 # .05.
-cv_tukey_hsd(alpha_level = .05, df = 27, groups = 3)
+cv_tukey_hsd(alpha_level = .05, df = 27, n_groups = 3)
 #>  term     value area_less area_greater
-#>  upper_cv 2.48  0.95      0.05        
+#>  upper_cv 2.479 0.950     0.050       
 
 # Using DMAR's test_market data (6 marketing panels, N = 24).
 fit <- aov(brand_movement ~ panel, data = test_market)
 cv_tukey_hsd(
   alpha_level  = .05,
   df     = df.residual(fit),
-  groups = nlevels(test_market$panel)
+  n_groups = nlevels(test_market$panel)
 )
 #>  term     value area_less area_greater
-#>  upper_cv 3.18  0.95      0.05        
+#>  upper_cv 3.178 0.950     0.050       
 
 # A more stringent alpha with a simple (non-verbose) result.
-cv_tukey_hsd(alpha_level = .01, df = 27, groups = 3, verbose = FALSE)
+cv_tukey_hsd(alpha_level = .01, df = 27, n_groups = 3, verbose = FALSE)
 #>  term     value
-#>  upper_cv 3.18 
+#>  upper_cv 3.178
+
+# With 20 groups and only 2 error degrees of freedom the critical value
+# comes from the exact distribution, 26.830. Base R's qtukey() is not
+# accurate this far out; its value would give 31.485:
+cv_tukey_hsd(alpha_level = .01, df = 2, n_groups = 20)
+#>  term     value  area_less area_greater
+#>  upper_cv 26.830 0.990     0.010       
+qtukey(.99, nmeans = 20, df = 2) / sqrt(2)
+#> [1] 31.48482
 ```

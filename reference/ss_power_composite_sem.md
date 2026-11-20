@@ -18,13 +18,13 @@ indirect effect, and any subset of them can make up the composite.
 ``` r
 ss_power_composite_sem(
   model,
-  Sigma = NULL,
-  pop_model = NULL,
-  mu = NULL,
+  true_cov_matrix = NULL,
+  true_model = NULL,
+  true_mean = NULL,
   parameters = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
-  N = NULL,
+  specified_N = NULL,
   G = 1000,
   seed = NULL,
   ...
@@ -44,34 +44,35 @@ ss_power_composite_sem(
   `"ab := a*b"` defines an indirect effect from the labeled paths `a`
   and `b`.
 
-- Sigma:
+- true_cov_matrix:
 
   Population covariance matrix of the observed variables, with row and
   column names matching the observed variables in `model`. It is
   typically obtained from a fully fixed population model via
   [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md).
-  Supply exactly one of `Sigma` or `pop_model`.
+  Supply exactly one of `true_cov_matrix` or `true_model`.
 
-- pop_model:
+- true_model:
 
   A single character string giving the population model in lavaan model
   syntax with every parameter fixed to its population value, from which
   [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md)
-  derives `Sigma` (and the population means, when the model has a mean
-  structure). This is where the purported population values of the
-  parameters of interest are chosen; they are values the researcher
-  posits (from theory, prior studies, or pilot data), never sample
-  estimates. Supply exactly one of `Sigma` or `pop_model`.
+  derives `true_cov_matrix` (and the population means, when the model
+  has a mean structure). This is where the purported population values
+  of the parameters of interest are chosen; they are values the
+  researcher posits (from theory, prior studies, or pilot data), never
+  sample estimates. Supply exactly one of `true_cov_matrix` or
+  `true_model`.
 
-- mu:
+- true_mean:
 
   Optional population means of the observed variables, used with
-  `Sigma`: a named numeric vector with one entry per observed variable,
-  or an unnamed vector in the row order of `Sigma`. The default `NULL`
-  is zero means. Means matter only when the analysis model has a mean
-  structure (an intercept term such as `s ~ 1`, as in a latent growth
-  curve model); when `pop_model` is supplied its mean structure provides
-  the means and `mu` must not also be given.
+  `true_cov_matrix`: a named numeric vector with one entry per observed
+  variable, or an unnamed vector in the row order of `true_cov_matrix`.
+  The default `NULL` is zero means. Means matter only when the analysis
+  model has a mean structure (an intercept term such as `s ~ 1`, as in a
+  latent growth curve model); when `true_model` is supplied its mean
+  structure provides the means and `true_mean` must not also be given.
 
 - parameters:
 
@@ -82,18 +83,18 @@ ss_power_composite_sem(
 
 - desired_power:
 
-  Desired composite statistical power (default 0.85). Used only when `N`
-  is `NULL`.
+  Desired composite statistical power (default 0.85). Used only when
+  `specified_N` is `NULL`.
 
 - alpha_level:
 
   Type I error rate for each individual two-sided Wald *z* test (default
   0.05), the per-test rate, not a rate for the composite event.
 
-- N:
+- specified_N:
 
-  Sample size; if supplied, the realized composite power at that *N* is
-  returned rather than a sample size planned.
+  Total sample size *N*; if supplied, the realized composite power at
+  that *N* is returned rather than a sample size planned.
 
 - G:
 
@@ -116,19 +117,23 @@ ss_power_composite_sem(
   such as `"MLM"` cannot be used here: the same arguments reach the
   setup fit, which is always from summary statistics, and lavaan refuses
   a robust estimator there. The Monte Carlo data are multivariate normal
-  by construction, so a robust estimator would buy nothing.
+  by construction, so a robust estimator would buy nothing. Every name
+  given here must be an argument or an option of lavaan (see
+  [`lavOptions`](https://rdrr.io/pkg/lavaan/man/lavOptions.html)); any
+  other name, and any argument without a name, is refused before a model
+  is fitted, with a condition of class `dmar_argument_invalid` that
+  gives the name as it was typed
 
 ## Value
 
 A `data.frame` with `term` and `value` columns: the `necessary_N` (or
 supplied `specified_N`), the `composite_power` and its simulation
 standard error `composite_power_mc_se`, then for each parameter its
-marginal `power_<label>` and purported `population_<label>` value under
-the analysis model, followed by `alpha_level`, the requested
-`replications`, the `converged_replications` the summary is based on,
-and, when a size was planned, the `desired_power`. The result carries
-the `dmar_ss_power` class, so
-[`tidy`](https://generics.r-lib.org/reference/tidy.html) and
+marginal `power_<label>` and purported `true_<label>` value under the
+analysis model, followed by `alpha_level`, the requested `replications`,
+the `converged_replications` the summary is based on, and, when a size
+was planned, the `desired_power`. The result carries the `dmar_ss_power`
+class, so [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
 the sample size and the composite power in broom convention.
 
@@ -142,10 +147,10 @@ but most studies state several hypotheses and support their conclusion
 only when all of them hold. This function plans for that case by a
 priori Monte Carlo simulation (Muthén & Muthén, 2002; Maxwell, Kelley, &
 Rausch, 2008): for a candidate *N*, `G` data sets are drawn from the
-multivariate normal population with covariance matrix `Sigma`, the
-analysis model is fit to each, and each parameter of interest is tested
-with its two-sided Wald *z* test at `alpha_level`. The proportion of
-replications in which every parameter is significant estimates the
+multivariate normal population with covariance matrix `true_cov_matrix`,
+the analysis model is fit to each, and each parameter of interest is
+tested with its two-sided Wald *z* test at `alpha_level`. The proportion
+of replications in which every parameter is significant estimates the
 composite power, and the per-parameter proportions estimate the marginal
 powers. Because the estimates share one fitted model, the tests are
 dependent; the simulation reflects that dependence exactly, at the
@@ -156,18 +161,19 @@ power is at most the smallest marginal power: the weakest parameter
 governs the design, and the marginal `power_<label>` rows show which
 parameter that is.
 
-When `N` is `NULL` the necessary sample size is searched for. The search
-starts where the product of the marginal Wald powers (an independence
-approximation computed from the asymptotic variances, spent before any
-simulation) reaches `desired_power`, brackets the crossing
+When `specified_N` is `NULL` the necessary sample size is searched for.
+The search starts where the product of the marginal Wald powers (an
+independence approximation computed from the asymptotic variances, spent
+before any simulation) reaches `desired_power`, brackets the crossing
 geometrically, and bisects to adjacent integers, each candidate
 evaluated with its own `G` replications. A planning call therefore fits
 the analysis model several thousand times at the default `G`, and even
 at the smallest admissible `G` the search runs for several seconds, so
-the example below evaluates a stated `N`, which is the cheap half of the
-method. A planning call is the same call with `N` left out and
-`desired_power` stated or left at its default, and the first row of the
-result is then `necessary_N` rather than `specified_N`. The vignette
+the example below evaluates a stated `specified_N`, which is the cheap
+half of the method. A planning call is the same call with `specified_N`
+left out and `desired_power` stated or left at its default, and the
+first row of the result is then `necessary_N` rather than `specified_N`.
+The vignette
 [`vignette("composite_sem_planning", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/composite_sem_planning.md)
 works through the planning calls for a mediation model and a latent
 growth curve model, with reference values computed at `G = 10000`.
@@ -177,12 +183,19 @@ growth curve model, with reference values computed at `G = 10000`.
 A replication whose fit does not converge, or converges without a usable
 standard error for some parameter of interest, is discarded and fresh
 data are drawn, up to `20 * G` attempts per evaluated sample size; the
-reported powers condition on convergence. When fewer than `G`
-replications converge within the cap, a single warning is issued and the
-summary is based on the converged replications (their count is the
-`converged_replications` row). Frequent nonconvergence at small *N* is
-itself design information: a sample size at which the model rarely
-converges is too small in a sense that precedes power.
+reported powers condition on convergence. A replication whose likelihood
+has no maximum (an error variance running off below zero while the
+likelihood is flat or still rising; see
+[`fa_bifactor`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)),
+which lavaan reports as converged where its optimizer stopped, is
+discarded the same way, and an analysis model with no maximum at the
+population moments stops the function with an error of class
+`dmar_no_maximum` that prints the lavaan code of that fit. When fewer
+than `G` replications converge within the cap, a single warning is
+issued and the summary is based on the converged replications (their
+count is the `converged_replications` row). Frequent nonconvergence at
+small *N* is itself design information: a sample size at which the model
+rarely converges is too small in a sense that precedes power.
 
 ## Monte Carlo Precision
 
@@ -244,7 +257,7 @@ in covariance structure analysis. *Psychometrika, 50*(1), 83–90.
 for the same set of parameters planned for accuracy in parameter
 estimation (AIPE) instead of significance;
 [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md) for
-deriving `Sigma` from a fully fixed population model;
+deriving `true_cov_matrix` from a fully fixed population model;
 [`ss_power_sem`](https://yelleknek.github.io/DMAR/reference/ss_power_sem.md)
 for overall model fit;
 [`ss_aipe_sem_path`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path.md)
@@ -257,6 +270,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -303,7 +317,7 @@ Ken Kelley <kkelley@nd.edu>
 # at once: f1 predicting f2, f2 predicting f3, and f1 predicting f3
 # directly. The population model fixes every parameter to its purported
 # population value.
-pop_model <- "
+true_model <- "
   f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
   f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
   f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
@@ -329,21 +343,21 @@ analysis_model <- "
 # Realized composite power at N = 200. The probability that all three
 # paths come out significant in the same study is lower than the marginal
 # power of any one of them: the composite event sits inside each marginal
-# event, so the weakest parameter governs the design. G = 20 keeps the
+# event, so the weakest parameter governs the design. G = 10 keeps the
 # example quick; a reported plan deserves the default G = 1000 or more.
-ss_power_composite_sem(model = analysis_model, pop_model = pop_model,
-                       N = 200, G = 20, seed = 113)
+ss_power_composite_sem(model = analysis_model, true_model = true_model,
+                       specified_N = 200, G = 10, seed = 113)
 #>  term                   value
 #>  specified_N            200  
-#>  composite_power        0.7  
-#>  composite_power_mc_se  0.102
-#>  power_a                1    
-#>  power_b                0.9  
-#>  power_c                0.8  
-#>  population_a           0.4  
-#>  population_b           0.3  
-#>  population_c           0.25 
-#>  alpha_level            0.05 
-#>  replications           20   
-#>  converged_replications 20   
+#>  composite_power        0.500
+#>  composite_power_mc_se  0.158
+#>  power_a                1.000
+#>  power_b                0.700
+#>  power_c                0.800
+#>  true_a                 0.400
+#>  true_b                 0.300
+#>  true_c                 0.250
+#>  alpha_level            0.050
+#>  replications           10   
+#>  converged_replications 10   
 ```

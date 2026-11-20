@@ -86,7 +86,7 @@ convert_d_r(d = 0.5)
 # And back, exactly.
 convert_r_d(r = convert_d_r(d = 0.5)$value)
 #>  term value
-#>  smd  0.5  
+#>  smd  0.500
 
 # Unequal groups change the conversion factor.
 convert_d_r(d = 0.5, n_1 = 20, n_2 = 80)

@@ -10,23 +10,24 @@ which has a near-normal sampling distribution.
 
 ``` r
 ss_power_r(
-  rho,
-  rho_0 = 0,
+  true_cor,
+  null_cor = 0,
   desired_power = 0.85,
   alpha_level = 0.05,
-  N = NULL,
+  specified_N = NULL,
   directional = FALSE
 )
 ```
 
 ## Arguments
 
-- rho:
+- true_cor:
 
-  The population correlation coefficient under the alternative
-  hypothesis
+  Population correlation coefficient the sample size or power is planned
+  for (the value under the alternative hypothesis), in \\(-1, 1)\\. The
+  planner treats this value as the truth.
 
-- rho_0:
+- null_cor:
 
   The null hypothesis value of the correlation (default 0)
 
@@ -38,22 +39,21 @@ ss_power_r(
 
   Type I error rate (default 0.05)
 
-- N:
+- specified_N:
 
-  Sample size (*number of pairs*); if specified, returns the realized
-  power (the ss_power\_\* family is not uniform here:
-  [`ss_power_contrast`](https://yelleknek.github.io/DMAR/reference/ss_power_contrast.md)
-  takes a *per-group* size)
+  Total sample size (the *number of pairs*); if specified, the function
+  returns the power at that sample size.
 
 - directional:
 
   Logical: `TRUE` for a one-sided test (in the same direction as the
-  difference `rho - rho_0`), `FALSE` (default) for a two-sided test
+  difference `true_cor - null_cor`), `FALSE` (default) for a two-sided
+  test
 
 ## Value
 
 A `data.frame` with rows for `necessary_N` (or `specified_N`),
-`actual_power`, `rho`, and `rho_0`.
+`actual_power`, `true_cor`, and `null_cor`.
 
 ## Details
 
@@ -64,11 +64,14 @@ this normal approximation.
 
 For sample size, a closed-form expression is used as the starting point,
 \$\$N = ((z\_{\alpha} + z\_{\beta}) / (Z\_\rho - Z\_{\rho_0}))^2 +
-3,\$\$ which is then verified iteratively to ensure power exactly meets
-or exceeds `desired_power`. The search is bounded at \\N = 10^7\\. When
-`rho` and `rho_0` are so close that `desired_power` is unreachable
-within that bound, the function stops with an error rather than
-searching indefinitely.
+3,\$\$ where \\\rho\\ is `true_cor`, \\\rho_0\\ is `null_cor`,
+\\z\_{\alpha}\\ is the standard normal critical value at `alpha_level`
+(one- or two-sided, as `directional` says), and \\z\_{\beta}\\ is the
+standard normal quantile at `desired_power`, which is then verified
+iteratively to ensure power exactly meets or exceeds `desired_power`.
+The search is bounded at \\N = 10^7\\. When `true_cor` and `null_cor`
+are so close that `desired_power` is unreachable within that bound, the
+function stops with an error rather than searching indefinitely.
 
 ## References
 
@@ -103,6 +106,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -137,35 +141,35 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Population r = 0.30, null r = 0, desired power = .80, two-sided
-ss_power_r(rho = 0.30, desired_power = 0.80)
+# true_cor = 0.30, null_cor = 0, desired power = .80, two-sided
+ss_power_r(true_cor = 0.30, desired_power = 0.80)
 #>  term         value
 #>  necessary_N  85   
-#>  actual_power 0.8  
-#>  rho          0.3  
-#>  rho_0        0    
+#>  actual_power 0.800
+#>  true_cor     0.300
+#>  null_cor     0    
 
 # Same with a directional alternative
-ss_power_r(rho = 0.30, desired_power = 0.80, directional = TRUE)
+ss_power_r(true_cor = 0.30, desired_power = 0.80, directional = TRUE)
 #>  term         value
 #>  necessary_N  68   
 #>  actual_power 0.802
-#>  rho          0.3  
-#>  rho_0        0    
+#>  true_cor     0.300
+#>  null_cor     0    
 
 # Realized power for N = 100 pairs
-ss_power_r(rho = 0.30, N = 100)
+ss_power_r(true_cor = 0.30, specified_N = 100)
 #>  term         value
 #>  specified_N  100  
 #>  actual_power 0.862
-#>  rho          0.3  
-#>  rho_0        0    
+#>  true_cor     0.300
+#>  null_cor     0    
 
-# Test against a non-zero null (rho_0 = 0.20) -- looking for evidence rho > 0.20
-ss_power_r(rho = 0.40, rho_0 = 0.20, desired_power = 0.80, directional = TRUE)
+# Test against a non-zero null (null_cor = 0.20), looking for evidence that rho > 0.20
+ss_power_r(true_cor = 0.40, null_cor = 0.20, desired_power = 0.80, directional = TRUE)
 #>  term         value
 #>  necessary_N  130  
 #>  actual_power 0.801
-#>  rho          0.4  
-#>  rho_0        0.2  
+#>  true_cor     0.400
+#>  null_cor     0.200
 ```

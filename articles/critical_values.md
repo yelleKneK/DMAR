@@ -10,8 +10,13 @@ parameter conventions that make the reproduction line up, and closes
 with a case where recomputation caught a typographical error in a
 printed table.
 
-DMAR’s critical-value functions share a common surface (`alpha`, `df`, a
-count of groups or comparisons, and a tidy one-row return):
+DMAR’s critical-value functions share a common set of arguments:
+`alpha_level`; the degrees of freedom (`df`, or `df_numerator` and
+`df_denominator` in
+[`cv_scheffe()`](https://yelleknek.github.io/DMAR/reference/cv_scheffe.md);
+[`cv_z()`](https://yelleknek.github.io/DMAR/reference/cv_z.md) has
+none); and a count of groups or comparisons where the distribution needs
+one. Each returns a tidy table with one row per critical value:
 
 | Function | Distribution | Appendix table it reproduces |
 |----|----|----|
@@ -52,16 +57,15 @@ tab
 
 The printed value at df = 1, alpha = .05 is 6.31 = 6.31; the infinite-df
 row is the normal quantile
-[`cv_z()`](https://yelleknek.github.io/DMAR/reference/cv_z.md). A
-subtlety worth noting: the fourth column’s header prints “.0083”, but
-the exact level is 1/6 of .05 = .008333…, and it is the exact fraction
-that reproduces the printed cells. A literal .0083 would move a dozen
-cells by 0.01.
+[`cv_z()`](https://yelleknek.github.io/DMAR/reference/cv_z.md). The
+fourth column’s header prints “.0083”, but the exact level is 1/6 of .05
+= .008333…, and it is the exact fraction that reproduces the printed
+cells. A literal .0083 would move a dozen cells by 0.01.
 
 ## The Studentized Range (A.4) and Maximum Modulus (A.5)
 
 Tukey’s studentized range is
-[`qtukey()`](https://rdrr.io/r/stats/Tukey.html), wrapped by
+[`qtukey()`](https://rdrr.io/r/stats/Tukey.html), used by
 [`cv_tukey_hsd()`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md):
 
 ``` r
@@ -69,6 +73,23 @@ Tukey’s studentized range is
 # Six groups, 14 error df, alpha = .05: Appendix A.4 prints 4.64.
 qtukey(0.95, nmeans = 6, df = 14)
 #> [1] 4.638538
+```
+
+At very small error df, [`qtukey()`](https://rdrr.io/r/stats/Tukey.html)
+is not accurate, increasingly so as the number of groups and the
+confidence level grow, and below 2 df it returns `NaN`. There
+[`cv_tukey_hsd()`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md)
+takes the critical value from the exact distribution instead (its help
+page gives the region and the computation). With 20 groups and 2 error
+df, [`qtukey()`](https://rdrr.io/r/stats/Tukey.html) is 17 percent too
+large:
+
+``` r
+
+qtukey(0.99, nmeans = 20, df = 2)
+#> [1] 44.52627
+sqrt(2) * cv_tukey_hsd(.01, df = 2, n_groups = 20, verbose = FALSE)$value
+#> [1] 37.94346
 ```
 
 The studentized maximum modulus
@@ -113,7 +134,7 @@ cv_dunnett(alpha_level = .05, df = 10, n_comparisons = 3, alternative = "not_equ
 
 | term     | value | area_less | area_greater |
 |:---------|:------|:----------|:-------------|
-| upper_cv | 2.76  | 0.95      | 0.05         |
+| upper_cv | 2.759 | 0.950     | 0.050        |
 
 With one treatment the many-to-one family collapses to a single
 two-sided *t* test, a useful check on the argument mapping:
@@ -131,19 +152,18 @@ Appendix A.6 and A.7 reproduce Dunnett’s own tables. Recomputed with the
 exact integral above, the printed values agree throughout except for a
 scattering of cells at the .01 level that differ by 0.01 in the last
 digit, a property of the historical tabulation rather than a
-transcription error. (Reaching for a Monte Carlo multivariate- quantile
-instead of the deterministic integral would introduce sampling error of
-its own, several hundredths at the .01 level, which is why
+transcription error. (Reaching for a Monte Carlo multivariate *t*
+quantile instead of the deterministic integral would introduce sampling
+error of its own, several hundredths at the .01 level, which is why
 [`cv_dunnett()`](https://yelleknek.github.io/DMAR/reference/cv_dunnett.md)
 integrates rather than simulates.)
 
 ## Bryant-Paulson (A.8): Where Recomputation Caught an Error
 
 The Bryant-Paulson generalized studentized range is the
-analysis-of-covariance analogue of Tukey’s range, for comparing
-covariate-**adjusted** means when the covariate is random. It is the one
-distribution here that most software, including base R, does not compute
-natively;
+analysis-of-covariance analog of Tukey’s range, for comparing
+covariate-**adjusted** means when the covariate is random. Base R does
+not compute it;
 [`cv_bryant_paulson()`](https://yelleknek.github.io/DMAR/reference/cv_bryant_paulson.md)
 and the underlying
 [`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
@@ -155,7 +175,7 @@ It reproduces the published anchor exactly:
 ``` r
 
 # Bryant & Paulson (1976) Table 1a: q_{.05; p=1, a=6, nu=14} = 4.83.
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
+cv_bryant_paulson(alpha_level = .05, df = 14, n_groups = 6, n_covariates = 1,
                   verbose = FALSE)$value
 #> [1] 4.829856
 ```
@@ -168,7 +188,7 @@ out of step:
 
 a_vals <- c(2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20)
 recomputed <- sapply(a_vals, function(k)
-  cv_bryant_paulson(.01, df = 20, groups = k, covariates = 3,
+  cv_bryant_paulson(.01, df = 20, n_groups = k, n_covariates = 3,
                     verbose = FALSE)$value)
 printed <- c(4.35, 5.03, 5.45, 5.75, 6.09, 6.19, 6.36, 6.63, 6.85, 7.19, 7.45)
 data.frame(a = a_vals, printed = printed, recomputed = round(recomputed, 2),
@@ -214,8 +234,8 @@ S   <- sqrt(rchisq(G, nu) / nu)
 delta <- rbeta(G, (nu + 1) / 2, p / 2)                 # covariate-shrinkage factor
 Q   <- R / (S * sqrt(delta))                           # Bryant-Paulson statistic
 c(simulated_99th_pctile = round(quantile(Q, 0.99, names = FALSE), 2),
-  cv_bryant_paulson     = round(cv_bryant_paulson(.01, df = 20, groups = 6,
-                                covariates = 3, verbose = FALSE)$value, 2))
+  cv_bryant_paulson     = round(cv_bryant_paulson(.01, df = 20, n_groups = 6,
+                                n_covariates = 3, verbose = FALSE)$value, 2))
 #> simulated_99th_pctile     cv_bryant_paulson 
 #>                  6.01                  5.99
 ```

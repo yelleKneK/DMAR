@@ -5,7 +5,7 @@ function (`qbryant_paulson`), and density (`dbryant_paulson`) for the
 Bryant-Paulson generalized studentized range, the sampling distribution
 of the studentized range of covariate-*adjusted* means in the analysis
 of covariance (ANCOVA) when the covariate(s) are *random*. These are the
-analysis-of-covariance analogues of
+analysis-of-covariance analogs of
 [`ptukey`](https://rdrr.io/r/stats/Tukey.html) /
 [`qtukey`](https://rdrr.io/r/stats/Tukey.html) and supply the critical
 values needed for Tukey-Kramer-type simultaneous confidence intervals on
@@ -14,11 +14,11 @@ values needed for Tukey-Kramer-type simultaneous confidence intervals on
 ## Usage
 
 ``` r
-pbryant_paulson(q, num_covariates, num_groups, df, lower_tail = TRUE, ...)
+pbryant_paulson(q, n_covariates, n_groups, df, lower_tail = TRUE)
 
-qbryant_paulson(prob, num_covariates, num_groups, df, lower_tail = TRUE, ...)
+qbryant_paulson(prob, n_covariates, n_groups, df, lower_tail = TRUE)
 
-dbryant_paulson(q, num_covariates, num_groups, df, ...)
+dbryant_paulson(q, n_covariates, n_groups, df)
 ```
 
 ## Arguments
@@ -28,15 +28,17 @@ dbryant_paulson(q, num_covariates, num_groups, df, ...)
   Vector of quantiles (values of the generalized studentized range
   statistic).
 
-- num_covariates:
+- n_covariates:
 
   The number of random covariates, \\p\\ (\\p \ge 0\\). With
-  `num_covariates = 0` the distribution is exactly the ordinary
-  studentized range and the functions reduce to
-  [`ptukey`](https://rdrr.io/r/stats/Tukey.html) /
-  [`qtukey`](https://rdrr.io/r/stats/Tukey.html).
+  `n_covariates = 0` the distribution is exactly the ordinary
+  studentized range, computed as in
+  [`cv_tukey_hsd`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md)
+  ([`ptukey`](https://rdrr.io/r/stats/Tukey.html) and
+  [`qtukey`](https://rdrr.io/r/stats/Tukey.html) where those are
+  accurate, the exact distribution where they are not).
 
-- num_groups:
+- n_groups:
 
   The number of groups (treatments) being compared, \\k\\ (\\k \ge 2\\);
   this is the “sample size” of the range.
@@ -45,16 +47,13 @@ dbryant_paulson(q, num_covariates, num_groups, df, ...)
 
   The error degrees of freedom of the ANCOVA model, \\\nu\\. In a
   one-way ANCOVA with \\N\\ total observations, \\k\\ groups, and \\p\\
-  covariates, \\\nu = N - k - p\\.
+  covariates, \\\nu = N - k - p\\. `Inf` gives the limiting distribution
+  (see Details).
 
 - lower_tail:
 
   Logical; if `TRUE` (default) probabilities are \\P(Q \le q)\\,
   otherwise \\P(Q \> q)\\.
-
-- ...:
-
-  Additional arguments (currently unused; for extensibility).
 
 - prob:
 
@@ -79,7 +78,7 @@ the studentized range of the adjusted means, \$\$Q \\=\\ \frac{\max_i
 \hat\theta_i - \min_i \hat\theta_i}{\hat\sigma\_{y\mid x}\sqrt{K_1 -
 K_2}},\$\$ where \\K_1 - K_2\\ is the design constant that scales the
 variance of a single adjusted mean (for a one-way design with \\n\\ per
-group, \\K_1 - K_2 = 1/n\\). Crucially, the studentizer uses only this
+group, \\K_1 - K_2 = 1/n\\). The studentizer uses only this
 “between-only” standard error: the extra sampling variability induced by
 having to *estimate* the covariate adjustment from random covariates is
 carried by the distribution of \\Q\\ itself, not by a per-comparison
@@ -101,7 +100,8 @@ evaluates (the reduction is exact; see the source-code comments in
 Paulson's p. 634 conditioning argument). When \\p = 0\\ the factor
 \\\delta\\ degenerates at 1 and \\Q_p\\ is exactly the ordinary
 studentized range (Bryant and Paulson, 1976, Sec. 1), so the code
-short-circuits to `ptukey`. The integral is evaluated with
+short-circuits to the studentized range distribution function. The
+integral is evaluated with
 [`integrate`](https://rdrr.io/r/stats/integrate.html) after the change
 of variables \\\delta = 1 - u^2\\, which removes the endpoint
 singularity of the Beta weight at \\\delta = 1\\ when \\p = 1\\ and
@@ -112,16 +112,47 @@ critical values remain valid when the covariates are *not* identically
 distributed across groups (their grouped-covariate model, Eq. 1.3), and
 added the Duncan multiple-range extension.
 
-**Accuracy at small df.** The error integral is carried out with
-[`ptukey`](https://rdrr.io/r/stats/Tukey.html) for \\\nu \ge 7\\, where
-it is accurate to about \\10^{-9}\\. For \\\nu \< 7\\ `ptukey`'s
-algorithm loses accuracy (at \\\nu = 3\\, \\k = 20\\ its probability
-error reaches \\\approx 3\times10^{-4}\\, enough to move the critical
-value by about 0.2, and it is larger at \\\nu = 2\\), so the
-studentized-range distribution is instead evaluated directly, without
+**Accuracy at small df.** The studentized range distribution function
+inside the integral is [`ptukey`](https://rdrr.io/r/stats/Tukey.html)
+where that is accurate and is evaluated directly elsewhere, without
 `ptukey`, by integrating the probability integral of the range against
-the \\\chi^2\_\nu\\ error density. The small-\\\nu\\ path costs a
-fraction of a second.
+the \\\chi^2\_\nu\\ error density. `ptukey` loses accuracy at small
+\\\nu\\, increasingly so as \\k\\ grows (at \\\nu = 3\\, \\k = 20\\ its
+probability error reaches \\\approx 3\times10^{-4}\\, enough to move the
+critical value by about 0.2, and it is larger at \\\nu = 2\\), and again
+above 10000 df; the direct evaluation is used for fewer than 9 error df
+with up to 6 groups, fewer than 11 with up to 10, fewer than 15 with up
+to 20, fewer than 21 with up to 50, fewer than 31 with up to 100, fewer
+than 41 with up to 250, and, with more groups, below a bound that rises
+by steps to 111 with more than 3000 groups; above 10000 and up to
+\\10^8\\ df; and, with more than 50 groups, wherever the probability is
+below .75 (.80 with more than 1000 groups;
+[`cv_tukey_hsd`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md)
+gives the whole rule and how it was measured). At probabilities above
+.999 or below .001 the quantile also comes from the exact distribution,
+with or without covariates (with covariates every node of the integral
+over the covariate-shrinkage weight then uses the exact studentized
+range: through `ptukey` the quantile at .9999 with one covariate, 10
+groups, and 11 df was 12.977072 instead of 12.977142), and with no
+covariates also wherever `qtukey` stops short of its root. The direct
+path costs a fraction of a second per probability.
+
+**Large df.** As \\\nu\\ grows, \\\delta\\ tends to 1 and \\Q_p\\ to the
+studentized range with infinite df, whatever the number of covariates;
+with `df = Inf` the functions return that limit, computed as for
+`n_covariates = 0`. At large \\\nu\\ the weight of the integral lies
+within a few multiples of \\\sqrt{p/\nu}\\ of \\u = 0\\, where \\\delta
+= 1 - u^2\\, so the integral over \\u\\ stops at the square root of the
+upper \\10^{-15}\\ quantile of the \\\mathrm{Beta}(p/2,\\ (\nu+1)/2)\\
+distribution of \\u^2\\ rather than at 1, which leaves out weight
+\\10^{-15}\\. Over the whole unit interval the quadrature missed the
+weight from about \\4 \times 10^7\\ df with one covariate (\\5.6 \times
+10^7\\ with six), and the distribution function came out near 0. The
+weight is computed on the log scale, since with many covariates its
+factors overflow and underflow separately. At \\10^8\\ df the
+distribution function is still below its infinite-df limit by about
+\\10^{-8}\\ (\\7 \times 10^{-9}\\ at 3.7 with one covariate and four
+groups).
 
 **Validation.** The implementation reproduces Bryant and Paulson's
 (1976) Table 1 exactly, to the two decimal places tabled, over the whole
@@ -179,7 +210,7 @@ Ken Kelley <kkelley@nd.edu>
 # k = 6 panels, p = 1 covariate, nu = 14 error df, alpha = .05. The quantile
 # is found by inverting the distribution function with uniroot; it is 4.83,
 # the entry in Table 1 of Bryant and Paulson (1976).
-qbryant_paulson(0.95, num_covariates = 1, num_groups = 6, df = 14)
+qbryant_paulson(0.95, n_covariates = 1, n_groups = 6, df = 14)
 #> [1] 4.829856
 
 # The ordinary Tukey value (ignoring that the covariate is random and
@@ -193,7 +224,7 @@ qtukey(0.95, nmeans = 6, df = 14)
 # the nominal .05 up to the rounding of 4.64 itself. Each additional random
 # covariate carries more estimation uncertainty, stretches the distribution
 # to the right, and pushes the rate up, to .063, .076, and .091.
-pbryant_paulson(4.64, num_covariates = 0:3, num_groups = 6, df = 14,
+pbryant_paulson(4.64, n_covariates = 0:3, n_groups = 6, df = 14,
                 lower_tail = FALSE)
 #> [1] 0.04990724 0.06273456 0.07633320 0.09054790
 

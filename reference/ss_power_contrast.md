@@ -12,14 +12,14 @@ within-group variance.
 ``` r
 ss_power_contrast(
   c_weights,
-  mu = NULL,
-  sigma_squared = NULL,
-  psi = NULL,
+  true_means = NULL,
+  true_var_error = NULL,
+  true_contrast = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
   directional = FALSE,
-  n_per_group = NULL,
-  print_progress = FALSE
+  specified_n_per_group = NULL,
+  print_iter = FALSE
 )
 ```
 
@@ -34,17 +34,18 @@ ss_power_contrast(
   and the negative coefficients sum to -1. The contrast estimate is then
   directly interpretable as a (weighted) mean difference.
 
-- mu:
+- true_means:
 
   Vector of population group means, of length `length(c_weights)`.
-  Either `mu` or `psi` must be supplied (but not both).
+  Either `true_means` or `true_contrast` must be supplied (but not
+  both).
 
-- sigma_squared:
+- true_var_error:
 
   Population within-group variance (\\\sigma^2\\); must be a positive
   number.
 
-- psi:
+- true_contrast:
 
   Optional. Directly specify the population contrast value \\\psi =
   \sum_j c_j \mu_j\\ as a single number. Use this when the means
@@ -53,7 +54,7 @@ ss_power_contrast(
 - desired_power:
 
   Target statistical power for the test of the contrast (default
-  `0.85`). Used only when `n_per_group` is `NULL`.
+  `0.85`). Used only when `specified_n_per_group` is `NULL`.
 
 - alpha_level:
 
@@ -64,7 +65,7 @@ ss_power_contrast(
   Logical. `FALSE` (default) yields a two-sided test. `TRUE` yields a
   one-sided test in the direction of the population contrast.
 
-- n_per_group:
+- specified_n_per_group:
 
   Optional per-group sample size at which to evaluate power. May be a
   scalar (the common per-group size, equal across groups) or a numeric
@@ -72,7 +73,7 @@ ss_power_contrast(
   `NULL` (default), the function instead solves for the smallest
   per-group *n* achieving `desired_power`.
 
-- print_progress:
+- print_iter:
 
   If `TRUE`, print the trial \\n\\ and the corresponding power as the
   iterative search proceeds.
@@ -81,16 +82,16 @@ ss_power_contrast(
 
 A `data.frame` with two columns, `term` and `value`:
 
-- When solving for *n* (`n_per_group = NULL`):
+- When solving for *n* (`specified_n_per_group = NULL`):
 
   Rows are `necessary_n_per_group`, `total_N`, `actual_power`,
-  `noncentral_t_parm`, and `effect_size_f` (Cohen's \\f\\ for a
+  `noncentral_t_parm`, and `true_f` (Cohen's \\f\\ for a
   one-degree-of-freedom contrast).
 
-- When evaluating power (`n_per_group` supplied):
+- When evaluating power (`specified_n_per_group` supplied):
 
   Rows are `specified_n_per_group` (or `NA` for unequal *n*), `total_N`,
-  `actual_power`, `noncentral_t_parm`, and `effect_size_f`.
+  `actual_power`, `noncentral_t_parm`, and `true_f`.
 
 The result carries the `dmar_ss_power` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
@@ -149,6 +150,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -189,57 +191,57 @@ Ken Kelley <kkelley@nd.edu>
 #
 # 1. Power achieved at n = 20 per group (total N = 80). Should be ~ .80.
 ss_power_contrast(
-  c_weights     = c(1/3, 1/3, 1/3, -1),
-  mu            = c(90, 92, 88, 81),
-  sigma_squared = 144,
-  n_per_group   = 20
+  c_weights           = c(1/3, 1/3, 1/3, -1),
+  true_means          = c(90, 92, 88, 81),
+  true_var_error      = 144,
+  specified_n_per_group         = 20
 )
 #>  term                  value
 #>  specified_n_per_group 20   
 #>  total_N               80   
 #>  actual_power          0.818
-#>  noncentral_t_parm     2.9  
-#>  effect_size_f         0.325
+#>  noncentral_t_parm     2.905
+#>  true_f                0.325
 
 # 2. Per-group sample size needed for power = .90.
 ss_power_contrast(
-  c_weights     = c(1/3, 1/3, 1/3, -1),
-  mu            = c(90, 92, 88, 81),
-  sigma_squared = 144,
-  desired_power = 0.90
+  c_weights           = c(1/3, 1/3, 1/3, -1),
+  true_means          = c(90, 92, 88, 81),
+  true_var_error      = 144,
+  desired_power       = 0.90
 )
 #>  term                  value
 #>  necessary_n_per_group 26   
 #>  total_N               104  
 #>  actual_power          0.907
-#>  noncentral_t_parm     3.31 
-#>  effect_size_f         0.325
+#>  noncentral_t_parm     3.312
+#>  true_f                0.325
 
-# 3. Same effect size specification using a directly given psi.
+# 3. Same effect size specification using a directly given true_contrast.
 ss_power_contrast(
-  c_weights     = c(1/3, 1/3, 1/3, -1),
-  psi           = 9,
-  sigma_squared = 144,
-  n_per_group   = 20
+  c_weights           = c(1/3, 1/3, 1/3, -1),
+  true_contrast       = 9,
+  true_var_error      = 144,
+  specified_n_per_group         = 20
 )
 #>  term                  value
 #>  specified_n_per_group 20   
 #>  total_N               80   
 #>  actual_power          0.818
-#>  noncentral_t_parm     2.9  
-#>  effect_size_f         0.325
+#>  noncentral_t_parm     2.905
+#>  true_f                0.325
 
 # 4. Unequal per-group sample sizes.
 ss_power_contrast(
-  c_weights     = c(0.5, 0.5, -0.5, -0.5),
-  mu            = c(90, 92, 88, 81),
-  sigma_squared = 144,
-  n_per_group   = c(15, 25, 25, 15)
+  c_weights           = c(0.5, 0.5, -0.5, -0.5),
+  true_means          = c(90, 92, 88, 81),
+  true_var_error      = 144,
+  specified_n_per_group         = c(15, 25, 25, 15)
 )
 #>  term                  value
 #>  specified_n_per_group <NA> 
 #>  total_N               80   
 #>  actual_power          0.639
-#>  noncentral_t_parm     2.35 
-#>  effect_size_f         0.262
+#>  noncentral_t_parm     2.345
+#>  true_f                0.262
 ```

@@ -142,23 +142,23 @@ adj  # 3.595 3.619 4.102 4.515 4.618 4.876
 # Bryant-Paulson simultaneous 95% intervals (s = 4 blocks => n = 4,
 # df 14), every one of them the difference plus or minus 0.278.
 ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-               n = 4, num_covariates = 1, df = 14)
-#>  contrast          estimate lower_limit upper_limit
-#>  group_1 - group_2 -0.0243  -0.302      0.254      
-#>  group_1 - group_3 -0.507   -0.785      -0.228     
-#>  group_1 - group_4 -0.92    -1.2        -0.642     
-#>  group_1 - group_5 -1.02    -1.3        -0.745     
-#>  group_1 - group_6 -1.28    -1.56       -1         
-#>  group_2 - group_3 -0.482   -0.76       -0.204     
-#>  group_2 - group_4 -0.896   -1.17       -0.618     
-#>  group_2 - group_5 -0.998   -1.28       -0.72      
-#>  group_2 - group_6 -1.26    -1.53       -0.978     
-#>  group_3 - group_4 -0.413   -0.691      -0.135     
-#>  group_3 - group_5 -0.516   -0.794      -0.238     
-#>  group_3 - group_6 -0.774   -1.05       -0.496     
-#>  group_4 - group_5 -0.103   -0.381      0.175      
-#>  group_4 - group_6 -0.361   -0.639      -0.0827    
-#>  group_5 - group_6 -0.258   -0.536      0.0201     
+               n_per_group = 4, n_covariates = 1, df = 14)
+#>  contrast          estimate ci_lower ci_upper
+#>  group_1 - group_2 -0.024   -0.302   0.254   
+#>  group_1 - group_3 -0.507   -0.785   -0.228  
+#>  group_1 - group_4 -0.920   -1.198   -0.642  
+#>  group_1 - group_5 -1.023   -1.301   -0.745  
+#>  group_1 - group_6 -1.281   -1.559   -1.003  
+#>  group_2 - group_3 -0.482   -0.760   -0.204  
+#>  group_2 - group_4 -0.896   -1.174   -0.618  
+#>  group_2 - group_5 -0.998   -1.276   -0.720  
+#>  group_2 - group_6 -1.256   -1.534   -0.978  
+#>  group_3 - group_4 -0.413   -0.691   -0.135  
+#>  group_3 - group_5 -0.516   -0.794   -0.238  
+#>  group_3 - group_6 -0.774   -1.052   -0.496  
+#>  group_4 - group_5 -0.103   -0.381   0.175   
+#>  group_4 - group_6 -0.361   -0.639   -0.083  
+#>  group_5 - group_6 -0.258   -0.536   0.020   
 #> 
 #> Confidence level: 95%
 ```

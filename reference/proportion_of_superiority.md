@@ -17,8 +17,8 @@ proportion_of_superiority(
   n_1 = NULL,
   n_2 = NULL,
   conf_level = 0.95,
-  smd_lower = NULL,
-  smd_upper = NULL
+  smd_ci_lower = NULL,
+  smd_ci_upper = NULL
 )
 ```
 
@@ -36,7 +36,7 @@ proportion_of_superiority(
 
   Confidence level for the CI. Default `0.95`.
 
-- smd_lower, smd_upper:
+- smd_ci_lower, smd_ci_upper:
 
   Optional pre-computed CI limits on *d*; when supplied directly, the
   function skips the noncentral *t* step and just transforms these
@@ -44,9 +44,18 @@ proportion_of_superiority(
 
 ## Value
 
-A `data.frame` with rows for *d*, the proportion of superiority, and
-(when a CI is constructable) the lower / upper limits on *d* and on the
-proportion of superiority.
+A `data.frame` with rows for *d* (`smd`), the proportion of superiority
+(`proportion_of_superiority`), and (when a CI is constructable) the
+confidence limits on *d* (`smd_ci_lower`, `smd_ci_upper`) and on the
+proportion of superiority (`ci_lower`, `ci_upper`). With an interval the
+table carries the attributes `conf_level`; `ci_estimate`, which names
+`proportion_of_superiority` as the row that `ci_lower` and `ci_upper`
+belong to, so that
+[`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+reports the proportion of superiority with them; and `ci_source`, which
+names `smd` as the estimate whose interval that interval is computed
+from, so that `tidy()` gives the confidence level on the rows of the
+proportion of superiority and its limits alone.
 
 ## Details
 
@@ -106,13 +115,11 @@ Other effect size estimates:
 [`correction_for_attenuation()`](https://yelleknek.github.io/DMAR/reference/correction_for_attenuation.md),
 [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
 [`eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/eta_squared_generalized.md),
-[`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
 [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md),
 [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md),
 [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md),
 [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md),
 [`smd_trimmed()`](https://yelleknek.github.io/DMAR/reference/smd_trimmed.md)
@@ -127,26 +134,26 @@ Ken Kelley <kkelley@nd.edu>
 # 1. Proportion of superiority at three reference d values:
 proportion_of_superiority(smd = 0.2)
 #>  term                      value
-#>  smd                       0.2  
+#>  smd                       0.200
 #>  proportion_of_superiority 0.579
 proportion_of_superiority(smd = 0.5)
 #>  term                      value
-#>  smd                       0.5  
+#>  smd                       0.500
 #>  proportion_of_superiority 0.691
 proportion_of_superiority(smd = 0.8)
 #>  term                      value
-#>  smd                       0.8  
+#>  smd                       0.800
 #>  proportion_of_superiority 0.788
 
 # 2. With a noncentral t CI from sample sizes:
 proportion_of_superiority(smd = 0.5, n_1 = 50, n_2 = 50, conf_level = 0.95)
 #>  term                      value
-#>  smd                       0.5  
+#>  smd                       0.500
 #>  proportion_of_superiority 0.691
-#>  smd_lower                 0.101
-#>  smd_upper                 0.897
-#>  lower_limit               0.54 
-#>  upper_limit               0.815
+#>  smd_ci_lower              0.101
+#>  smd_ci_upper              0.897
+#>  ci_lower                  0.540
+#>  ci_upper                  0.815
 #> 
 #> Confidence level: 95%
 ```

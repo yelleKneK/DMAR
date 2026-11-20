@@ -16,7 +16,7 @@ Leys, 2017).
 welch_t(
   x,
   y,
-  mu = 0,
+  null_mean_diff = 0,
   alternative = c("two_sided", "less", "greater"),
   conf_level = 0.95
 )
@@ -30,9 +30,10 @@ welch_t(
   are independent and need not be the same length; `NA`s are removed
   from each vector separately.
 
-- mu:
+- null_mean_diff:
 
-  Null value of the mean difference \\\mu_1 - \mu_2\\. Default `0`.
+  Null value of the mean difference \\\mu_1 - \mu_2\\, \\\mu_0\\ in the
+  formula below. Default `0`.
 
 - alternative:
 
@@ -62,11 +63,14 @@ n_1)^2 / (n_1 - 1) + (s_2^2 / n_2)^2 / (n_2 - 1)}.\$\$
 **Why Welch by default.** Student's pooled-variance *t* assumes
 \\\sigma_1 = \sigma_2\\; when that assumption fails it has both inflated
 and deflated Type I error rates depending on the \\n_1 : n_2\\ ratio
-(Ruxton, 2006). Welch's test maintains nominal Type I error across
-virtually all combinations of \\\sigma_1 / \sigma_2\\ and \\n_1 / n_2\\,
-with no meaningful loss of power when variances are equal. The American
-Statistical Association and multiple methodological reviews now
-recommend Welch as the default (Delacre et al., 2017; Lakens, 2015).
+(Ruxton, 2006). When the scores in each group are normally distributed,
+Welch's test keeps the Type I error rate close to the nominal level
+across combinations of \\\sigma_1 / \sigma_2\\ and \\n_1 / n_2\\, and
+when the variances are equal its power is close to that of Student's
+test, a little lower when the group sizes differ. With skewed scores and
+small groups its Type I error rate can depart from the nominal level.
+Delacre, Lakens, and Leys (2017) and Lakens (2015) recommend Welch's
+test as the default.
 
 **Relation to
 [`stats::t.test()`](https://rdrr.io/r/stats/t.test.html).** The
@@ -109,12 +113,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -140,37 +148,37 @@ set.seed(113)
 x <- rnorm(20, mean = 100, sd = 15)
 y <- rnorm(20, mean = 110, sd = 25)
 welch_t(x, y)
-#>  term            value 
-#>  mean_difference -16.9 
-#>  t_statistic     -2.41 
-#>  df              28.3  
-#>  p_value         0.0227
-#>  lower_limit     -31.2 
-#>  upper_limit     -2.54 
-#>  mean_x          100   
-#>  mean_y          117   
-#>  sd_x            14.3  
-#>  sd_y            27.9  
-#>  n_x             20    
-#>  n_y             20    
+#>  term            value  
+#>  mean_difference -16.871
+#>  t_value         -2.410 
+#>  df              28.349 
+#>  p_value         0.0227 
+#>  ci_lower        -31.204
+#>  ci_upper        -2.537 
+#>  mean_x          100.297
+#>  mean_y          117.168
+#>  sd_x            14.289 
+#>  sd_y            27.860 
+#>  n_x             20     
+#>  n_y             20     
 #> 
 #> Confidence level: 95%
 
 # 2. One-sided test:
 welch_t(x, y, alternative = "less")
-#>  term            value 
-#>  mean_difference -16.9 
-#>  t_statistic     -2.41 
-#>  df              28.3  
-#>  p_value         0.0113
-#>  lower_limit     -Inf  
-#>  upper_limit     -4.97 
-#>  mean_x          100   
-#>  mean_y          117   
-#>  sd_x            14.3  
-#>  sd_y            27.9  
-#>  n_x             20    
-#>  n_y             20    
+#>  term            value  
+#>  mean_difference -16.871
+#>  t_value         -2.410 
+#>  df              28.349 
+#>  p_value         0.0113 
+#>  ci_lower        -Inf   
+#>  ci_upper        -4.966 
+#>  mean_x          100.297
+#>  mean_y          117.168
+#>  sd_x            14.289 
+#>  sd_y            27.860 
+#>  n_x             20     
+#>  n_y             20     
 #> 
 #> Confidence level: 95%
 
@@ -188,19 +196,19 @@ b <- rnorm(20, mean = 0.5, sd = 2)
 # DMAR (data.frame):
 dmar_res <- welch_t(a, b, conf_level = 0.95)
 dmar_res
-#>  term            value  
-#>  mean_difference -1.16  
-#>  t_statistic     -2.29  
-#>  df              30.1   
-#>  p_value         0.0294 
-#>  lower_limit     -2.19  
-#>  upper_limit     -0.124 
-#>  mean_x          -0.0832
-#>  mean_y          1.07   
-#>  sd_x            1.02   
-#>  sd_y            1.93   
-#>  n_x             15     
-#>  n_y             20     
+#>  term            value 
+#>  mean_difference -1.156
+#>  t_value         -2.288
+#>  df              30.068
+#>  p_value         0.0294
+#>  ci_lower        -2.189
+#>  ci_upper        -0.124
+#>  mean_x          -0.083
+#>  mean_y          1.073 
+#>  sd_x            1.017 
+#>  sd_y            1.932 
+#>  n_x             15    
+#>  n_y             20    
 #> 
 #> Confidence level: 95%
 
@@ -223,10 +231,10 @@ base_res
 # Verify the four key statistics agree numerically:
 pick <- function(term) dmar_res$value[dmar_res$term == term]
 stopifnot(
-  all.equal(pick("t_statistic"), unname(base_res$statistic)),
+  all.equal(pick("t_value"), unname(base_res$statistic)),
   all.equal(pick("df"),          unname(base_res$parameter)),
   all.equal(pick("p_value"),     base_res$p.value),
-  all.equal(pick("lower_limit"), base_res$conf.int[1]),
-  all.equal(pick("upper_limit"), base_res$conf.int[2])
+  all.equal(pick("ci_lower"), base_res$conf.int[1]),
+  all.equal(pick("ci_upper"), base_res$conf.int[2])
 )
 ```

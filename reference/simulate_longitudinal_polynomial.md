@@ -19,11 +19,11 @@ assessment times) and study what happens.
 
 ``` r
 simulate_longitudinal_polynomial(
-  n,
+  n_per_group,
   target_times = NULL,
   fixed_coefficients,
   time_range = NULL,
-  occasions = NULL,
+  n_occasions = NULL,
   time_distribution = "uniform",
   random_variances = 0,
   random_correlation = NULL,
@@ -31,18 +31,20 @@ simulate_longitudinal_polynomial(
   reliability = NULL,
   error_structure = c("independent", "ar1", "compound_symmetry", "toeplitz"),
   error_correlation = NULL,
-  timing_sd = 0
+  timing_sd = 0,
+  seed = NULL
 )
 ```
 
 ## Arguments
 
-- n:
+- n_per_group:
 
-  A single positive integer (equal number of units in every population)
-  or a numeric vector of length `G` giving the number of subjects in
-  each of the `G` populations, where `G` is the number of mean
-  trajectories supplied through `fixed_coefficients`.
+  The number of units in each population (group), never a total over
+  populations: a single positive integer (equal number of units in every
+  population) or a numeric vector of length `G` giving the number of
+  subjects in each of the `G` populations, where `G` is the number of
+  mean trajectories supplied through `fixed_coefficients`.
 
 - target_times:
 
@@ -67,16 +69,17 @@ simulate_longitudinal_polynomial(
   Alternative to `target_times`: `c(lower, upper)` bounds from which
   each unit draws its own measurement times, so no two units share a
   schedule (e.g., age in weeks at testing rather than a fixed grade).
-  Requires `occasions`; with `time_range`, the level-one error must be a
-  single `error_variance` with the default independent structure, and
+  Requires `n_occasions`; with `time_range`, the level-one error must be
+  a single `error_variance` with the default independent structure, and
   `timing_sd` does not apply.
 
-- occasions:
+- n_occasions:
 
-  With `time_range`: a single positive integer (every unit measured the
-  same number of times) or `c(min, max)`, from which each unit's number
-  of measurement times is drawn uniformly. Every value must be at least
-  \\P + 1\\ so each unit's trajectory identifies the polynomial.
+  The number of measurement occasions per unit. With `time_range`: a
+  single positive integer (every unit measured the same number of times)
+  or `c(min, max)`, from which each unit's number of measurement times
+  is drawn uniformly. Every value must be at least \\P + 1\\ so each
+  unit's trajectory identifies the polynomial.
 
 - time_distribution:
 
@@ -154,6 +157,13 @@ simulate_longitudinal_polynomial(
   \text{timing\\sd}\_m^2)\\ and evaluates that subject's true score at
   the actual time, while the nominal target is retained in a separate
   column (see Details).
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
@@ -343,7 +353,7 @@ Ken Kelley <kkelley@nd.edu>
 #    error set directly.
 set.seed(113)
 d <- simulate_longitudinal_polynomial(
-  n                  = 50,
+  n_per_group        = 50,
   target_times       = 0:4,
   fixed_coefficients = c(10, 1.5),          # intercept 10, slope 1.5 per year
   random_variances   = c(4, 0.25),          # var(intercept) = 4, var(slope) = .25
@@ -362,7 +372,7 @@ head(d)
 #    the rate of growth). Pass a list of coefficient vectors, one per population.
 set.seed(113)
 two <- simulate_longitudinal_polynomial(
-  n                  = c(40, 40),
+  n_per_group        = c(40, 40),
   target_times       = 0:4,
   fixed_coefficients = list(control = c(10, 1.0), treatment = c(10, 1.8)),
   random_variances   = c(4, 0.25),
@@ -386,7 +396,7 @@ aggregate(y ~ population + occasion, data = two, FUN = mean)
 #    the per-occasion values differ and are returned as an attribute.
 set.seed(113)
 rel <- simulate_longitudinal_polynomial(
-  n                  = 100,
+  n_per_group        = 100,
   target_times       = 0:4,
   fixed_coefficients = c(10, 1.5),
   random_variances   = c(4, 0.25),
@@ -405,7 +415,7 @@ round(attr(rel, "reliability_by_occasion"), 3)   # not constant across waves
 #    studied.
 set.seed(113)
 jit <- simulate_longitudinal_polynomial(
-  n                  = 30,
+  n_per_group        = 30,
   target_times       = 0:4,
   fixed_coefficients = c(10, 1.5),
   random_variances   = c(4, 0.25),
@@ -427,9 +437,9 @@ head(jit[, c("id", "occasion", "target_time", "time")])
 #     "schedule" attribute records the design.
 set.seed(113)
 ages <- simulate_longitudinal_polynomial(
-  n                  = 12,
+  n_per_group        = 12,
   time_range         = c(40, 90),
-  occasions          = c(5, 9),
+  n_occasions        = c(5, 9),
   fixed_coefficients = c(10, 0.5),
   random_variances   = c(4, 0.01),
   error_variance     = 2
@@ -445,7 +455,7 @@ table(table(ages$id))   # units per occasion count
 #    measurement error. The coefficient vector has length one.
 set.seed(113)
 flat <- simulate_longitudinal_polynomial(
-  n                  = 20,
+  n_per_group        = 20,
   target_times       = 0:4,
   fixed_coefficients = 5,
   random_variances   = 2,
@@ -466,7 +476,7 @@ head(flat)
 #    independent errors would miss. The full error covariance is returned.
 set.seed(113)
 ar <- simulate_longitudinal_polynomial(
-  n                  = 40,
+  n_per_group        = 40,
   target_times       = 0:4,
   fixed_coefficients = c(10, 1.5),
   random_variances   = c(4, 0.25),

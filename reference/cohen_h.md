@@ -7,7 +7,7 @@ The arcsine transform spaces proportions so that a given *h* carries the
 same detectability wherever the proportions sit, which a raw difference
 \\p_1 - p_2\\ does not: a shift from .01 to .05 is easier to detect than
 one from .41 to .45, and *h* reflects that while the raw difference does
-not. Cohen's *h* is the proportion analogue of the standardized mean
+not. Cohen's *h* is the proportion analog of the standardized mean
 difference ([`smd`](https://yelleknek.github.io/DMAR/reference/smd.md)):
 the effect size on which power and sample size planning for a difference
 between two proportions is conventionally based.
@@ -15,15 +15,15 @@ between two proportions is conventionally based.
 ## Usage
 
 ``` r
-cohen_h(p1, p2)
+cohen_h(p_1, p_2)
 ```
 
 ## Arguments
 
-- p1, p2:
+- p_1, p_2:
 
   The two proportions, each in \\\[0, 1\]\\. `h` is \\\varphi(p_1) -
-  \varphi(p_2)\\, so it is positive when `p1` is the larger.
+  \varphi(p_2)\\, so it is positive when `p_1` is the larger.
 
 ## Value
 
@@ -35,7 +35,7 @@ A 1-row `data.frame` with columns `term` and `value`; `term` is
 *Cohen's h is a population quantity*: supplied with population
 proportions it returns the population value, supplied with sample
 proportions it returns the corresponding sample value. It is signed,
-positive when `p1` exceeds `p2`; its magnitude
+positive when `p_1` exceeds `p_2`; its magnitude
 [`abs()`](https://rdrr.io/r/base/MathFun.html) is the size of the effect
 irrespective of direction.
 
@@ -59,17 +59,17 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # A shift from .40 to .55.
-cohen_h(p1 = 0.55, p2 = 0.40)
+cohen_h(p_1 = 0.55, p_2 = 0.40)
 #>  term    value
 #>  cohen_h 0.302
 
 # The same raw difference near the floor is a larger h, since a difference is
 # easier to detect where the proportions are small.
-cohen_h(p1 = 0.20, p2 = 0.05)
+cohen_h(p_1 = 0.20, p_2 = 0.05)
 #>  term    value
 #>  cohen_h 0.476
 
 # Its magnitude is the size irrespective of direction.
-abs(cohen_h(p1 = 0.40, p2 = 0.55)$value)
+abs(cohen_h(p_1 = 0.40, p_2 = 0.55)$value)
 #> [1] 0.3015253
 ```

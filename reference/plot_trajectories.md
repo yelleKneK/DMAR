@@ -114,8 +114,10 @@ plot_trajectories(
 - seed:
 
   Optional integer random seed used when `n_random` or `pct_random` is
-  supplied. Defaults to `NULL`, which leaves the user's current RNG
-  state intact; supply an integer for reproducible subject sampling.
+  supplied. Defaults to `NULL`, under which the subjects are sampled
+  from, and advance, the current random number stream; supply an integer
+  for reproducible subject sampling, which is set for the call only, the
+  caller's random number state being restored when it returns.
 
 ## Value
 
@@ -123,8 +125,8 @@ A `ggplot` object.
 
 ## Details
 
-The function modernizes the original `vit()` (visualize individual
-trajectories) function by returning a single ggplot2 object instead of
+The function reworks the original `vit()` (visualize individual
+trajectories) function to return a single ggplot2 object instead of
 producing graphical side effects. Saving is handled by the user via
 [`ggsave`](https://ggplot2.tidyverse.org/reference/ggsave.html);
 multi-page output via faceting and
@@ -143,9 +145,9 @@ model's predictions.
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
@@ -170,12 +172,13 @@ plot_trajectories(d, id = "Subject", time = "age",
                   outcome = "distance", group = "Sex")
 
 
-# One panel per child, for twelve children drawn at random. The seed
-# makes the draw reproducible, and the session's generator state is
-# left as it was.
+# One panel per child, for six children drawn at random, few enough
+# that the figure is quick to draw; drop n_random to get a panel for
+# every child. The seed makes the draw reproducible, and the session's
+# generator state is left as it was.
 plot_trajectories(d, id = "Subject", time = "age",
                   outcome = "distance",
-                  n_random = 12, facet = TRUE, ncol = 4,
+                  n_random = 6, facet = TRUE, ncol = 3,
                   seed = 113)
 
 ```

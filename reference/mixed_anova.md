@@ -54,8 +54,24 @@ mixed_anova(
 
 ## Value
 
-A `data.frame` with one row per testable effect. Columns: `effect`,
-`ss`, `df`, `ms`, `denominator`, `F_value`, `p_value`.
+A `data.frame` (class `dmar_tbl`) with one row per testable effect.
+Columns: `effect`, `ss`, `df`, `ms`, `denominator` (the mean square the
+effect is tested against), `F_value`, `p_value`. Its numeric
+`sum_of_squares_type` attribute is 3 (see Details). The table prints
+through the
+[`dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
+display layer: whole numbers such as the degrees of freedom without a
+decimal part, other values to 3 decimal places, and *p*-values to 4
+decimal places (one below 0.0001 prints as “\< 0.0001”); the stored
+values keep full precision. `tidy()` gives one row per effect, its
+`term` joining `effect` and `denominator` and its `estimate` the `ss`,
+and `glance()` gives one row, the number of rows (`n_terms`) with
+`conf_level` and `B_used` `NA`, since no interval or bootstrap is formed
+(see
+[`dmar_tidiers`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)).
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) returns
+the table as a plain `data.frame` with the same columns, values, and
+attribute.
 
 ## Details
 
@@ -122,12 +138,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -165,8 +185,8 @@ grid$y <- with(grid, 0.8 * as.integer(A) + rep(rnorm(5, 0, 1.5), each = 1)[as.in
                       rnorm(nrow(grid), 0, 1))
 mixed_anova(grid, outcome = "y", factor_A = "A", factor_B = "B",
             A_type = "fixed", B_type = "random")
-#>   effect         ss df         ms denominator    F_value      p_value
-#> 1      A  42.287564  2 21.1437821       MS_AB 54.7505466 2.148782e-05
-#> 2      B 153.417534  4 38.3543835   MS_within 31.2357357 1.817787e-12
-#> 3    A:B   3.089472  8  0.3861839   MS_within  0.3145075 9.565106e-01
+#>  effect ss      df ms     denominator F_value p_value 
+#>  A      42.288  2  21.144 MS_AB       54.751  < 0.0001
+#>  B      153.418 4  38.354 MS_within   31.236  < 0.0001
+#>  A:B    3.089   8  0.386  MS_within   0.315   0.9565  
 ```

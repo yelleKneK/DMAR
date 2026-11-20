@@ -47,7 +47,7 @@ ci_dunnett(
 ## Value
 
 A `data.frame` with one row per non-control level. Columns: `contrast`,
-`mean_difference`, `se`, `t_statistic`, `lower_limit`, `upper_limit`,
+`mean_difference`, `se`, `t_value`, `ci_lower`, `ci_upper`,
 `p_adjusted`.
 
 ## Details
@@ -91,12 +91,16 @@ Other hypothesis tests:
 [`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -122,24 +126,18 @@ Ken Kelley <kkelley@nd.edu>
 #    against the wait list control:
 fit <- lm(bdi_post ~ condition, data = depression_bdi)
 ci_dunnett(fit, control = "wait_list")
-#>  contrast            mean_difference se   t_statistic lower_limit upper_limit
-#>  ssri - wait_list    -6.7            2.81 -2.38       -13.3       -0.132     
-#>  placebo - wait_list -1.8            2.81 -0.639      -8.37       4.77       
-#>  p_adjusted
-#>  0.0452    
-#>  0.7494    
+#>  contrast            mean_difference se    t_value ci_lower ci_upper p_adjusted
+#>  ssri - wait_list    -6.700          2.815 -2.380  -13.268  -0.132   0.0452    
+#>  placebo - wait_list -1.800          2.815 -0.639  -8.368   4.768    0.7494    
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95%, simultaneous interval (Dunnett)
 
 # 2. One-sided: a treatment that works pulls the posttest BDI down,
 #    so the directional alternative is "less":
 ci_dunnett(fit, control = "wait_list", alternative = "less")
-#>  contrast            mean_difference se   t_statistic lower_limit upper_limit
-#>  ssri - wait_list    -6.7            2.81 -2.38       -Inf        -1.08      
-#>  placebo - wait_list -1.8            2.81 -0.639      -Inf        3.82       
-#>  p_adjusted
-#>  0.0226    
-#>  0.3973    
+#>  contrast            mean_difference se    t_value ci_lower ci_upper p_adjusted
+#>  ssri - wait_list    -6.700          2.815 -2.380  -Inf     -1.077   0.0226    
+#>  placebo - wait_list -1.800          2.815 -0.639  -Inf     3.823    0.3973    
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95%, simultaneous interval (Dunnett)
 ```

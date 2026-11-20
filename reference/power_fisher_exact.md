@@ -111,6 +111,7 @@ Conference*, 1346–1355.
 Other sample size for power:
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -153,13 +154,13 @@ Ken Kelley <kkelley@nd.edu>
 power_fisher_exact(n_1 = 30, n_2 = 30, p_1 = 0.6, p_2 = 0.3)
 #>  term           value
 #>  power          0.561
-#>  odds_ratio_alt 3.5  
-#>  p_1            0.6  
-#>  p_2            0.3  
+#>  odds_ratio_alt 3.500
+#>  p_1            0.600
+#>  p_2            0.300
 #>  expected_s     27   
 #>  n_1            30   
 #>  n_2            30   
-#>  alpha_level    0.05 
+#>  alpha_level    0.050
 
 # 2. A difference of 0.10 between proportions is much harder to detect:
 #    100 per group is not close to enough. Sample size requirements grow
@@ -167,11 +168,11 @@ power_fisher_exact(n_1 = 30, n_2 = 30, p_1 = 0.6, p_2 = 0.3)
 power_fisher_exact(n_1 = 100, n_2 = 100, p_1 = 0.45, p_2 = 0.35)
 #>  term           value
 #>  power          0.258
-#>  odds_ratio_alt 1.52 
-#>  p_1            0.45 
-#>  p_2            0.35 
+#>  odds_ratio_alt 1.519
+#>  p_1            0.450
+#>  p_2            0.350
 #>  expected_s     80   
 #>  n_1            100  
 #>  n_2            100  
-#>  alpha_level    0.05 
+#>  alpha_level    0.050
 ```

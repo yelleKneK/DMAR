@@ -44,7 +44,13 @@ plot_forest(
 
   Passed to
   [`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md) for
-  the pooled row (`"reml"` and `TRUE` by default).
+  the pooled row (`"reml"` and `TRUE` by default). Under the
+  Hartung-Knapp adjustment, identical effect sizes give a pooled
+  interval of no width and the warning of class `dmar_meta_hk_zero_se`
+  that
+  [`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md)
+  gives, which states the conventional interval; see
+  [`?meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md).
 
 - conf_level:
 
@@ -78,6 +84,13 @@ plot_forest(
 
 A ggplot object; print it, or add further layers.
 
+## References
+
+Raudenbush, S. W. (1984). Magnitude of teacher expectancy effects on
+pupil IQ as a function of the credibility of expectancy induction: A
+synthesis of findings from 18 experiments. *Journal of Educational
+Psychology, 76*(1), 85–97.
+
 ## See also
 
 [`meta_es`](https://yelleknek.github.io/DMAR/reference/meta_es.md),
@@ -96,9 +109,9 @@ Other meta-analysis:
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
 [`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),

@@ -85,8 +85,10 @@ plot_trajectories_fitted(
 - seed:
 
   Optional integer random seed used when `n_random` or `pct_random` is
-  supplied. Defaults to `NULL`, which leaves the user's current RNG
-  state intact; supply an integer for reproducible subject sampling.
+  supplied. Defaults to `NULL`, under which the subjects are sampled
+  from, and advance, the current random number stream; supply an integer
+  for reproducible subject sampling, which is set for the call only, the
+  caller's random number state being restored when it returns.
 
 ## Value
 
@@ -96,20 +98,18 @@ id column, `r_squared`, `rmse`) is attached as
 
 ## Details
 
-Modernizes the original `vit_fitted()` function by:
+Reworks the original `vit_fitted()` function by:
 
 - returning a ggplot2 object instead of writing to graphics devices,
 
 - attaching per-subject quality-of-fit as an attribute rather than
-  assigning it into the global environment, a serious side effect of the
-  original,
+  assigning it into the global environment, as the original did,
 
 - drawing a smooth fitted curve from a per-subject time grid via
   `predict(..., re.form = NULL)` for lme4 fits and
   `predict(..., level = 1)` for nlme fits,
 
-- correctly identifying lme4 fits (which use class `lmerMod`, not
-  `lmer`).
+- identifying lme4 fits by their class `lmerMod` (not `lmer`).
 
 ## Note
 
@@ -122,9 +122,9 @@ Requires ggplot2 plus, depending on the model class, nlme or lme4
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),

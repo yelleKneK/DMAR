@@ -2,11 +2,11 @@
 
 Determine the necessary per-group sample size to achieve a desired level
 of statistical power for one of the three *F* tests in a mixed-effects
-ANOVA with one between-subjects factor and one within-subjects factor –
-between-subjects main effect, within-subjects main effect, or the
-between x within interaction – or, given a per-group sample size, return
-the realized statistical power. (This design is also commonly called a
-split-plot factorial.)
+ANOVA with one between-subjects factor and one within-subjects factor
+(the between-subjects main effect, the within-subjects main effect, or
+the between x within interaction), or, given a per-group sample size,
+return the realized statistical power. (This design is also commonly
+called a split-plot factorial.)
 
 ## Usage
 
@@ -15,13 +15,13 @@ ss_power_split_plot_anova(
   a,
   b,
   effect,
-  f = NULL,
-  partial_eta_squared = NULL,
-  rho,
-  epsilon = 1,
+  true_f = NULL,
+  true_eta_squared_partial = NULL,
+  true_cor,
+  true_epsilon = 1,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n = NULL
+  specified_n_per_group = NULL
 )
 ```
 
@@ -42,29 +42,31 @@ ss_power_split_plot_anova(
   Which *F* test to compute power for: `"between"`, `"within"`, or
   `"interaction"`
 
-- f:
+- true_f:
 
   Cohen's *f* effect size for the chosen effect (the population value);
-  supply this or `partial_eta_squared`, but not both
+  supply this or `true_eta_squared_partial`, but not both
 
-- partial_eta_squared:
+- true_eta_squared_partial:
 
-  Partial eta squared for the chosen effect; supply this or `f`
+  Population partial eta squared for the chosen effect; supply this or
+  `true_f`
 
-- rho:
+- true_cor:
 
   Average correlation among the repeated measures within a subject (must
-  lie in (-1, 1)). Higher `rho` reduces power for the between-subjects
-  test (because subject means contain more redundant information) and
-  increases power for the within-subjects and interaction tests
+  lie in (-1, 1)). Higher `true_cor` reduces power for the
+  between-subjects test (because subject means contain more redundant
+  information) and increases power for the within-subjects and
+  interaction tests
 
-- epsilon:
+- true_epsilon:
 
   Greenhouse-Geisser / Huynh-Feldt sphericity adjustment in (0, 1\]
   (default 1, sphericity assumed). Applied to the within-subjects and
   interaction tests but not the between-subjects test. Both numerator
-  and denominator df, and the noncentrality, are multiplied by `epsilon`
-  (Muller-Barton convention)
+  and denominator df, and the noncentrality, are multiplied by
+  `true_epsilon` (Muller-Barton convention)
 
 - desired_power:
 
@@ -74,7 +76,7 @@ ss_power_split_plot_anova(
 
   Type I error rate (default 0.05)
 
-- n:
+- specified_n_per_group:
 
   Per-group (between-subjects) sample size; if specified, returns the
   realized power
@@ -82,8 +84,8 @@ ss_power_split_plot_anova(
 ## Value
 
 A `data.frame` with rows for `necessary_n_per_group` (or
-`specified_n_per_group`), `total_N`, `effect_df`, `error_df`,
-`noncentrality`, and `actual_power`. The result carries the
+`specified_n_per_group`), `total_N`, `df_effect`, `df_error`,
+`noncentral_f_parm`, and `actual_power`. The result carries the
 `dmar_ss_power` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
@@ -96,8 +98,8 @@ with \\a\\ levels and one within-subjects factor with \\b\\ levels;
 \\n\\ subjects are randomly assigned to each between-subjects level and
 each subject is measured at all \\b\\ within-subjects levels, for \\N =
 na\\ subjects total and \\Nb\\ observations. The covariance among the
-\\b\\ within-subject observations is summarized by `rho`, the average
-pairwise correlation.
+\\b\\ within-subject observations is summarized by `true_cor`, the
+average pairwise correlation.
 
 The three *F* tests have noncentrality parameters \$\$\lambda\_{B} = N b
 f^2 / (1 + (b - 1) \rho)\$\$ for the between-subjects test (numerator df
@@ -106,13 +108,18 @@ f^2 / (1 + (b - 1) \rho)\$\$ for the between-subjects test (numerator df
 \\(b - 1)\epsilon\\, denominator df \\(N - a)(b - 1)\epsilon\\), and the
 same form as \\\lambda_W\\ for the interaction (numerator df \\(a -
 1)(b - 1)\epsilon\\, same denominator df). Cohen's *f* relates to
-partial eta squared via \\f = \sqrt{\eta_p^2 / (1 - \eta_p^2)}\\.
+partial eta squared via \\f = \sqrt{\eta_p^2 / (1 - \eta_p^2)}\\. In
+these formulas \\f\\ is `true_f` (or the value implied by
+`true_eta_squared_partial`, which is \\\eta_p^2\\), \\\rho\\ is
+`true_cor`, \\\epsilon\\ is `true_epsilon`, and \\n\\ is the per-group
+size (`specified_n_per_group`, or the size the function plans).
 
 This design is the compound-symmetry (random intercept) special case of
-the two-level linear mixed-effects model: `rho` is the intraclass
-correlation and the \\b\\ occasions are the level-1 units of a subject.
-For two between-subjects groups the between-subjects *F*(1, .) test is
-therefore the two-level treatment *t* test of
+the two-level linear mixed-effects model: `true_cor` is the intraclass
+correlation and the \\b\\ occasions are the observations within a
+subject (i.e., the Level 1 units). For two between-subjects groups the
+between-subjects *F*(1, .) test is therefore the two-level treatment *t*
+test of
 [`ss_power_mixed_effects`](https://yelleknek.github.io/DMAR/reference/ss_power_mixed_effects.md)
 squared, so the two planners agree on that shared case.
 
@@ -142,6 +149,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -188,57 +196,57 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # 2 groups, 4 occasions, between-subjects effect, f = 0.25,
 # average within-subject correlation 0.5, power = .80
-ss_power_split_plot_anova(a = 2, b = 4, effect = "between", f = 0.25,
-                    rho = 0.5, desired_power = 0.80)
+ss_power_split_plot_anova(a = 2, b = 4, effect = "between", true_f = 0.25,
+                    true_cor = 0.5, desired_power = 0.80)
 #>  term                  value
 #>  necessary_n_per_group 41   
 #>  total_N               82   
-#>  effect_df             1    
-#>  error_df              80   
-#>  noncentrality         8.2  
+#>  df_effect             1    
+#>  df_error              80   
+#>  noncentral_f_parm     8.200
 #>  actual_power          0.808
 
 # Same design, within-subjects (occasion) main effect, f = 0.25
-ss_power_split_plot_anova(a = 2, b = 4, effect = "within", f = 0.25,
-                    rho = 0.5, desired_power = 0.80)
-#>  term                  value
-#>  necessary_n_per_group 12   
-#>  total_N               24   
-#>  effect_df             3    
-#>  error_df              66   
-#>  noncentrality         12   
-#>  actual_power          0.816
+ss_power_split_plot_anova(a = 2, b = 4, effect = "within", true_f = 0.25,
+                    true_cor = 0.5, desired_power = 0.80)
+#>  term                  value 
+#>  necessary_n_per_group 12    
+#>  total_N               24    
+#>  df_effect             3     
+#>  df_error              66    
+#>  noncentral_f_parm     12.000
+#>  actual_power          0.816 
 
 # Same design, between x within interaction, f = 0.25
-ss_power_split_plot_anova(a = 2, b = 4, effect = "interaction", f = 0.25,
-                    rho = 0.5, desired_power = 0.80)
-#>  term                  value
-#>  necessary_n_per_group 12   
-#>  total_N               24   
-#>  effect_df             3    
-#>  error_df              66   
-#>  noncentrality         12   
-#>  actual_power          0.816
+ss_power_split_plot_anova(a = 2, b = 4, effect = "interaction", true_f = 0.25,
+                    true_cor = 0.5, desired_power = 0.80)
+#>  term                  value 
+#>  necessary_n_per_group 12    
+#>  total_N               24    
+#>  df_effect             3     
+#>  df_error              66    
+#>  noncentral_f_parm     12.000
+#>  actual_power          0.816 
 
 # Realized power for n = 25 per group on the interaction test, partial eta^2 = 0.06
 ss_power_split_plot_anova(a = 2, b = 4, effect = "interaction",
-                    partial_eta_squared = 0.06, rho = 0.5, n = 25)
-#>  term                  value
-#>  specified_n_per_group 25   
-#>  total_N               50   
-#>  effect_df             3    
-#>  error_df              144  
-#>  noncentrality         25.5 
-#>  actual_power          0.993
+                    true_eta_squared_partial = 0.06, true_cor = 0.5, specified_n_per_group = 25)
+#>  term                  value 
+#>  specified_n_per_group 25    
+#>  total_N               50    
+#>  df_effect             3     
+#>  df_error              144   
+#>  noncentral_f_parm     25.532
+#>  actual_power          0.993 
 
 # Greenhouse-Geisser correction with epsilon = 0.7 on the within-subjects test
-ss_power_split_plot_anova(a = 2, b = 4, effect = "within", f = 0.25,
-                    rho = 0.5, epsilon = 0.7, desired_power = 0.80)
-#>  term                  value
-#>  necessary_n_per_group 15   
-#>  total_N               30   
-#>  effect_df             2.1  
-#>  error_df              58.8 
-#>  noncentrality         10.5 
-#>  actual_power          0.808
+ss_power_split_plot_anova(a = 2, b = 4, effect = "within", true_f = 0.25,
+                    true_cor = 0.5, true_epsilon = 0.7, desired_power = 0.80)
+#>  term                  value 
+#>  necessary_n_per_group 15    
+#>  total_N               30    
+#>  df_effect             2.100 
+#>  df_error              58.800
+#>  noncentral_f_parm     10.500
+#>  actual_power          0.808 
 ```

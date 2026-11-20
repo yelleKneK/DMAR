@@ -2,29 +2,31 @@
 
 Computes \\\mathrm{E}\[\hat d \mid \delta, n_1, n_2\]\\, the exact
 expected value of the sample standardized mean difference (Cohen's *d*,
-with pooled variance) under bivariate normality and the noncentral *t*
-sampling distribution (Hedges, 1981). The sample *d* is upward-biased as
-an estimator of the population \\\delta\\: \\\mathrm{E}\[\hat d\] =
-\delta / J(\mathit{df})\\, where \$\$J(\mathit{df}) \\=\\
-\frac{\Gamma(\mathit{df}/2)} {\sqrt{\mathit{df}/2}\\
-\Gamma((\mathit{df}-1)/2)}\$\$ is Hedges' (1981) bias-correction factor
-(\\\< 1\\ for finite \\\mathit{df}\\, tending to 1 as \\n \to \infty\\).
-Hedges' *g*, the unbiased estimator of \\\delta\\, is then \\g = J \cdot
-\hat d\\. The same \\J(\mathit{df})\\ is the workhorse of
+with pooled variance) under normality within each group with a common
+variance, from the noncentral *t* sampling distribution (Hedges, 1981).
+The sample *d* is upward-biased as an estimator of the population
+\\\delta\\: \\\mathrm{E}\[\hat d\] = \delta / J(\mathit{df})\\, where
+\$\$J(\mathit{df}) \\=\\ \frac{\Gamma(\mathit{df}/2)}
+{\sqrt{\mathit{df}/2}\\ \Gamma((\mathit{df}-1)/2)}\$\$ is Hedges' (1981)
+bias-correction factor (\\\< 1\\ for finite \\\mathit{df}\\, tending to
+1 as \\n \to \infty\\). Hedges' *g*, the unbiased estimator of
+\\\delta\\, is then \\g = J \cdot \hat d\\. The same \\J(\mathit{df})\\
+is the workhorse of
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md) when
 `unbiased = TRUE`.
 
 ## Usage
 
 ``` r
-expected_smd(delta, n_1, n_2 = NULL)
+expected_smd(true_smd, n_1, n_2 = NULL)
 ```
 
 ## Arguments
 
-- delta:
+- true_smd:
 
-  Population standardized mean difference. A numeric scalar or vector.
+  Population standardized mean difference, \\\delta\\ in the formulas. A
+  numeric scalar or vector.
 
 - n_1:
 
@@ -37,10 +39,10 @@ expected_smd(delta, n_1, n_2 = NULL)
 
 ## Value
 
-A `data.frame` with one row per (`delta`, `n_1`, `n_2`) input and the
+A `data.frame` with one row per (`true_smd`, `n_1`, `n_2`) input and the
 columns
 
-- `delta`, the population SMD,
+- `true_smd`, the population SMD,
 
 - `n_1`, `n_2`, group sample sizes,
 
@@ -63,16 +65,16 @@ value* than \\\delta\\, plugging \\\delta\\ directly into
 sampling-distribution machinery (precision of \\\hat d\\, width of a
 confidence interval, power of a test of \\H_0\\: \delta = 0\\)
 over-promises on the realized precision when the precision is expressed
-on the \\\hat d\\ scale. Substituting `expected_smd(delta, n_1, n_2)`
+on the \\\hat d\\ scale. Substituting `expected_smd(true_smd, n_1, n_2)`
 for the bare \\\delta\\ corrects this leading-order bias.
 
-**Derivation.** Under bivariate normality with equal variances, the
-observed *t*-statistic \\t = \hat d \sqrt{n_1 n_2 / (n_1 + n_2)}\\
-follows a noncentral *t* distribution with \\\mathit{df} = n_1 + n_2 -
-2\\ degrees of freedom and noncentrality parameter \\\lambda = \delta
-\sqrt{n_1 n_2 / (n_1 + n_2)}\\. The expected value of a noncentral *t*
-variate equals \\\lambda / J(\mathit{df})\\ (Johnson, Kotz, &
-Balakrishnan, 1995, Section 31.3), so \\\mathrm{E}\[\hat d\] =
+**Derivation.** When the scores are normal within each group with a
+common variance, the observed *t*-statistic \\t = \hat d \sqrt{n_1 n_2 /
+(n_1 + n_2)}\\ follows a noncentral *t* distribution with \\\mathit{df}
+= n_1 + n_2 - 2\\ degrees of freedom and noncentrality parameter
+\\\lambda = \delta \sqrt{n_1 n_2 / (n_1 + n_2)}\\. The expected value of
+a noncentral *t* variate equals \\\lambda / J(\mathit{df})\\ (Johnson,
+Kotz, & Balakrishnan, 1995, Section 31.3), so \\\mathrm{E}\[\hat d\] =
 \mathrm{E}\[t\] / \sqrt{n_1 n_2 / (n_1 + n_2)} = \delta /
 J(\mathit{df})\\. The bias \\\mathrm{E}\[\hat d\] - \delta =
 \delta\\(1 - J)/J\\ is positive when \\\delta \> 0\\.
@@ -123,12 +125,10 @@ Other effect size estimates:
 [`correction_for_attenuation()`](https://yelleknek.github.io/DMAR/reference/correction_for_attenuation.md),
 [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
 [`eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/eta_squared_generalized.md),
-[`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
 [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md),
 [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md),
 [`proportion_of_superiority()`](https://yelleknek.github.io/DMAR/reference/proportion_of_superiority.md),
 [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md),
@@ -141,29 +141,29 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Balanced design: delta = 0.5, n = 10 per group.
-expected_smd(delta = 0.5, n_1 = 10)
-#>  delta n_1 n_2 expected_smd bias   j_correction
-#>  0.5   10  10  0.522        0.0221 0.958       
+# 1. Balanced design: true_smd = 0.5, n = 10 per group.
+expected_smd(true_smd = 0.5, n_1 = 10)
+#>  true_smd n_1 n_2 expected_smd bias  j_correction
+#>  0.500    10  10  0.522        0.022 0.958       
 
-# 2. Bias as a function of n at fixed delta.
-expected_smd(delta = 0.5, n_1 = c(5, 10, 20, 50, 100, 500))
-#>  delta n_1 n_2 expected_smd bias     j_correction
-#>  0.5   5   5   0.554        0.0539   0.903       
-#>  0.5   10  10  0.522        0.0221   0.958       
-#>  0.5   20  20  0.51         0.0101   0.98        
-#>  0.5   50  50  0.504        0.00387  0.992       
-#>  0.5   100 100 0.502        0.0019   0.996       
-#>  0.5   500 500 0.5          0.000376 0.999       
+# 2. Bias as a function of n at a fixed true_smd.
+expected_smd(true_smd = 0.5, n_1 = c(5, 10, 20, 50, 100, 500))
+#>  true_smd n_1 n_2 expected_smd bias  j_correction
+#>  0.500    5   5   0.554        0.054 0.903       
+#>  0.500    10  10  0.522        0.022 0.958       
+#>  0.500    20  20  0.510        0.010 0.980       
+#>  0.500    50  50  0.504        0.004 0.992       
+#>  0.500    100 100 0.502        0.002 0.996       
+#>  0.500    500 500 0.500        0.000 0.999       
 
 # 3. Unbalanced design.
-expected_smd(delta = 0.5, n_1 = 30, n_2 = 60)
-#>  delta n_1 n_2 expected_smd bias    j_correction
-#>  0.5   30  60  0.504        0.00431 0.991       
+expected_smd(true_smd = 0.5, n_1 = 30, n_2 = 60)
+#>  true_smd n_1 n_2 expected_smd bias  j_correction
+#>  0.500    30  60  0.504        0.004 0.991       
 
-# 4. Design-stage use: an a-priori delta of 0.4, planned n of 40/group.
+# 4. Design-stage use: an a-priori true_smd of 0.4, planned n of 40/group.
 #        The d we should expect to observe on average is slightly larger.
-expected_smd(delta = 0.4, n_1 = 40)
-#>  delta n_1 n_2 expected_smd bias   j_correction
-#>  0.4   40  40  0.404        0.0039 0.99        
+expected_smd(true_smd = 0.4, n_1 = 40)
+#>  true_smd n_1 n_2 expected_smd bias  j_correction
+#>  0.400    40  40  0.404        0.004 0.990       
 ```

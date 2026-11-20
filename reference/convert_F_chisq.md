@@ -8,7 +8,7 @@ Two conversions are available, selected by `df_denominator`.
 
 - **Scaling (the default).** With `df_denominator = Inf`,
   `convert_F_chisq()` returns `df_numerator * F_value` and
-  `convert_chisq_F()` returns `chi_square / df`. This is the standard
+  `convert_chisq_F()` returns `chisq / df`. This is the standard
   conversion between the two test statistics and needs no denominator
   degrees of freedom.
 
@@ -23,7 +23,7 @@ Two conversions are available, selected by `df_denominator`.
 ``` r
 convert_F_chisq(F_value, df_numerator, df_denominator = Inf)
 
-convert_chisq_F(chi_square, df, df_denominator = Inf)
+convert_chisq_F(chisq, df, df_denominator = Inf)
 ```
 
 ## Arguments
@@ -45,7 +45,7 @@ convert_chisq_F(chi_square, df, df_denominator = Inf)
   \nu_1 F\\); a finite value gives the probability-matching conversion.
   See *Details*.
 
-- chi_square:
+- chisq:
 
   Observed chi square value. Must be nonnegative.
 
@@ -161,18 +161,18 @@ Ken Kelley <kkelley@nd.edu>
 # Scaling (the default): chi square = df_numerator * F.
 convert_F_chisq(2.75, df_numerator = 3)
 #>  term              value
-#>  chi_square_from_F 8.25 
+#>  chi_square_from_F 8.250
 
 # The inverse: F = chi square / df.
 convert_chisq_F(8.25, df = 3)
 #>  term              value
-#>  F_from_chi_square 2.75 
+#>  F_from_chi_square 2.750
 
 # Probability matching at 3 and 50 degrees of freedom: the chi square
 # with the same p-value as the F.
 convert_F_chisq(2.75, df_numerator = 3, df_denominator = 50)
 #>  term              value
-#>  chi_square_from_F 7.71 
+#>  chi_square_from_F 7.711
 
 # The p-value is preserved, which is what probability matching means.
 f <- 2.75

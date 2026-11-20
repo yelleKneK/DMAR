@@ -46,7 +46,8 @@ ci_smd_c(
 
 - conf_level:
 
-  The confidence level (1-Type I error rate)
+  The confidence level (1-Type I error rate). A level above .999999998,
+  whose tail areas are below 1e-9, is refused
 
 - alpha_lower:
 
@@ -54,7 +55,15 @@ ci_smd_c(
 
 - alpha_upper:
 
-  The Type I error rate for the upper tail
+  The Type I error rate for the upper tail. The table records the
+  coverage, `1 - alpha_lower - alpha_upper`, as its level and, when the
+  two tail areas differ, the areas themselves, which the line beneath
+  the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound. A
+  nonzero tail area below 1e-9 is refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - tol:
 
@@ -68,9 +77,9 @@ ci_smd_c(
 ## Value
 
 A 3-row `data.frame` with columns `term` and `value`. The `term` values
-are `"lower_limit"` (the lower bound of the confidence interval),
-`"smd_c"` (the standardized mean difference standardized by the control
-group standard deviation), and `"upper_limit"` (the upper bound).
+are `"ci_lower"` (the lower bound of the confidence interval), `"smd_c"`
+(the standardized mean difference standardized by the control group
+standard deviation), and `"ci_upper"` (the upper bound).
 
 ## Warning
 
@@ -118,9 +127,9 @@ ed.). Routledge. (See Chapter 4 on individual comparisons and Chapter 3
 on one-way ANOVA.)
 
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
-estimation and the evaluation of statistical methods. In L. L. Harlow,
-S. A. Mulaik, & J. H. Steiger (Eds.), *What if there were no
-significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 ## See also
 
@@ -138,10 +147,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -163,10 +173,10 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 ci_smd_c(smd_c = .5, n_C = 100, n_E = 100, conf_level = .95)
-#>  term        value
-#>  lower_limit 0.213
-#>  smd_c       0.5  
-#>  upper_limit 0.785
+#>  term     value
+#>  ci_lower 0.213
+#>  smd_c    0.500
+#>  ci_upper 0.785
 #> 
 #> Confidence level: 95%
 ```

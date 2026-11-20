@@ -4,9 +4,9 @@ The complete data set from Holzinger and Swineford's (1939) *A study in
 factor analysis: The stability of a bi-factor solution*. Scores on 26
 ability tests for 301 seventh and eighth grade pupils at two Chicago
 elementary schools, Pasteur (*n* = 156) and Grant-White (*n* = 145). The
-data have been used over the subsequent decades as one of the most-cited
-benchmarks in factor analysis, confirmatory factor analysis, structural
-equation modeling, and reliability research.
+data have been used over the subsequent decades as a benchmark in factor
+analysis, confirmatory factor analysis, structural equation modeling,
+and reliability research (see Details).
 
 ## Usage
 
@@ -180,10 +180,12 @@ Spearman's two-factor theory of intelligence, and later developed the
 *bi-factor model* as an extension of that theory. The bi-factor model
 posits a single general intelligence factor that runs through all tests,
 plus several group factors that capture residual correlation among
-substantively related subgroups of tests. It is widely regarded as a
-precursor of modern hierarchical and orthogonal-bifactor models in
-psychometrics. Frances Swineford was Holzinger's research collaborator
-at the University of Chicago and a coauthor on much of his applied work.
+substantively related subgroups of tests, uncorrelated with the general
+factor. The bifactor model of later psychometric work (see
+[`fa_bifactor`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md))
+has this structure. Frances Swineford was Holzinger's research
+collaborator at the University of Chicago and a coauthor on much of his
+applied work.
 
 The 1939 monograph reports a study of pupils in seventh and eighth grade
 classrooms at two Chicago elementary schools, Pasteur and Grant-White.
@@ -217,13 +219,15 @@ interpretation of a general factor together with group factors.
 
 The data have far outlived their original purpose. Jöreskog (1969) used
 a 9-test subset drawn from the Grant-White sample (*n* = 145) to
-introduce confirmatory maximum likelihood factor analysis; that 9-test
-subset is the version most modern confirmatory factor analysis tutorials
-use and is shipped in per-item-rescaled form as `HolzingerSwineford1939`
-in the lavaan package. The complete 26-test data shipped here support a
-wider range of analyses, including comparisons of the spatial, verbal,
-speed, memory, and reasoning ability blocks and multiple group analyses
-across the Pasteur and Grant-White schools.
+introduce confirmatory maximum likelihood factor analysis; the same nine
+tests, for both schools and in per-item-rescaled form, are shipped as
+`HolzingerSwineford1939` in the lavaan package, whose confirmatory
+factor analysis example
+([`?lavaan::cfa`](https://rdrr.io/pkg/lavaan/man/cfa.html)) uses them.
+The complete 26-test data shipped here support a wider range of
+analyses, including comparisons of the spatial, verbal, speed, memory,
+and reasoning ability blocks and multiple group analyses across the
+Pasteur and Grant-White schools.
 
 The values in `holzinger_swineford` are the corrected version of the
 data, identical on all 26 test cells to `MBESS::HS` from MBESS version
@@ -300,9 +304,8 @@ table(holzinger_swineford$school, holzinger_swineford$grade)
 #>   Grant-White 79 66
 #>   Pasteur     78 78
 
-# Jöreskog (1969) drew nine tests from the Grant-White sample, and
-# that subset became the modern confirmatory factor analysis
-# benchmark.
+# Jöreskog (1969) drew nine tests from the Grant-White sample; lavaan
+# ships the same nine tests, for both schools, as HolzingerSwineford1939.
 joreskog_subset <- subset(
   holzinger_swineford,
   school == "Grant-White",

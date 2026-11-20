@@ -55,7 +55,19 @@ plot_mediation_mbco(
 
 - B:
 
-  Number of Monte Carlo draws behind the band. Defaults to 10000.
+  Number of Monte Carlo draws behind the band, a single whole number.
+  Defaults to 10000, because a draw costs one evaluation of each effect
+  and no refit. The limits of the band are quantiles of the draws, so
+  the fewest accepted is 400 at a 95 percent level (200 at 0.90, 2000 at
+  0.99), 10 draws beyond each limit; a smaller `B` is refused (class
+  `dmar_count_invalid`). A draw whose conditional effect is not a finite
+  number at a value of the moderator is dropped there and counted; one
+  warning (class `dmar_bootstrap_replications_dropped`) says so, and
+  where more than half were dropped the band is not drawn (class
+  `dmar_bootstrap_insufficient`).
+  `options(dmar.bootstrap_exploratory = TRUE)` lets a smaller `B` run,
+  with a warning of class `dmar_bootstrap_exploratory`. See
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - from, to:
 
@@ -94,14 +106,16 @@ plot_mediation_mbco(
 
   Optional integer seed for the Monte Carlo band, used locally (the
   caller's random number generator state is restored on exit). Default
-  `NULL` leaves the random number generator state alone.
+  `NULL` draws the band from the current random number stream, which
+  advances that stream.
 
 ## Value
 
 A `ggplot2` object. Its data contains one row per effect and grid value
 with columns `effect_label`, `w_value`, `estimate`, `band_lower`, and
 `band_upper`, so the numbers behind the picture are recoverable from the
-object itself.
+object itself. The band limits are `NA` at a value of the moderator
+where no interval is formed (see `B`).
 
 ## Details
 
@@ -181,9 +195,9 @@ for the analogous display for mixed-effects model interactions.
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_randomization_test()`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md),

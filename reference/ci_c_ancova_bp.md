@@ -12,9 +12,17 @@ family of comparisons and, through the Bryant–Paulson critical value,
 correctly account for the extra sampling uncertainty that comes from
 estimating the covariate adjustment from random covariates. Naively
 applying Tukey's method to adjusted means ignores that uncertainty and
-produces intervals that are too narrow (below-nominal coverage); a
-simulation study of that undercoverage is maintained alongside the
-package.
+produces intervals that are too narrow (below-nominal coverage). The
+Bryant–Paulson critical value exceeds the studentized range critical
+value for the same \\\alpha\\, number of means, and error degrees of
+freedom, so these intervals are wider than Tukey's (Maxwell, Delaney, &
+Kelley, 2027, Chapter 9). Over the range of Bryant and Paulson's (1976)
+Table 1, the excess is under 5% for every number of means and both
+tabled \\\alpha\\ levels (.05 and .01) when the error degrees of freedom
+\\\nu\\ are at least 14 with one covariate, 30 with two, or 40 with
+three. It grows as \\\nu\\ falls and as the numbers of covariates and
+means rise; at \\\nu = 2\\ and \\\alpha = .05\\ it reaches 34% with one
+covariate and 84% with three (92% at \\\alpha = .01\\).
 
 ## Usage
 
@@ -23,12 +31,11 @@ ci_c_ancova_bp(
   adj_means,
   s_ancova,
   c_weights = NULL,
-  n,
-  num_covariates = 1,
+  n_per_group,
+  n_covariates = 1,
   df = NULL,
   conf_level = 0.95,
-  contrast_type = c("pairwise", "allowance"),
-  ...
+  contrast_type = c("pairwise", "allowance")
 )
 ```
 
@@ -53,14 +60,14 @@ ci_c_ancova_bp(
   \\k(k-1)/2\\ pairwise comparisons are returned. For each contrast the
   weights should sum to zero.
 
-- n:
+- n_per_group:
 
   Either a single number giving the common per-group sample size or a
   numeric vector of per-group sample sizes. The Bryant–Paulson
   distribution is exact for balanced designs; for unequal \\n\\ a
   Tukey–Kramer harmonic adjustment is used (see Details).
 
-- num_covariates:
+- n_covariates:
 
   The number of random covariates, \\p\\. Default `1`.
 
@@ -85,18 +92,14 @@ ci_c_ancova_bp(
   each choice applies is given in Details. The two coincide for pairwise
   comparisons.
 
-- ...:
-
-  Additional arguments (currently unused).
-
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with one row per contrast and columns
 `contrast` (a label), `estimate` (the contrast of adjusted means
-\\\hat\psi\\), `lower_limit`, and `upper_limit`. The Bryant–Paulson
-critical value used is stored in the `"critical_value"` attribute and
-the confidence level in the `"conf_level"` attribute (printed beneath
-the table).
+\\\hat\psi\\), `ci_lower`, and `ci_upper`. The Bryant–Paulson critical
+value used is stored in the `"critical_value"` attribute and the
+confidence level in the `"conf_level"` attribute (printed beneath the
+table).
 
 ## Details
 
@@ -160,10 +163,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -187,30 +191,30 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Bryant and Bruvold (1980) worked example: 6 panels, 1 covariate, nu = 14,
 # ANCOVA error MS = 0.01326. Here the design is a randomized block with
-# s = 4 blocks, so the per-group "n" for the adjusted-mean SE is 4 and the
+# s = 4 blocks, so the per-group size for the adjusted-mean SE is 4 and the
 # error df (14) must be supplied directly. The multiplier for these
 # intervals is a Bryant-Paulson quantile, which has no closed form; it is
 # obtained by inverting the distribution function with a root search.
 adj <- c(3.595, 3.619, 4.102, 4.515, 4.618, 4.876)
 bp <- ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
-                     n = 4, num_covariates = 1, df = 14)
+                     n_per_group = 4, n_covariates = 1, df = 14)
 bp
-#>  contrast          estimate lower_limit upper_limit
-#>  group_1 - group_2 -0.024   -0.302      0.254      
-#>  group_1 - group_3 -0.507   -0.785      -0.229     
-#>  group_1 - group_4 -0.92    -1.2        -0.642     
-#>  group_1 - group_5 -1.02    -1.3        -0.745     
-#>  group_1 - group_6 -1.28    -1.56       -1         
-#>  group_2 - group_3 -0.483   -0.761      -0.205     
-#>  group_2 - group_4 -0.896   -1.17       -0.618     
-#>  group_2 - group_5 -0.999   -1.28       -0.721     
-#>  group_2 - group_6 -1.26    -1.54       -0.979     
-#>  group_3 - group_4 -0.413   -0.691      -0.135     
-#>  group_3 - group_5 -0.516   -0.794      -0.238     
-#>  group_3 - group_6 -0.774   -1.05       -0.496     
-#>  group_4 - group_5 -0.103   -0.381      0.175      
-#>  group_4 - group_6 -0.361   -0.639      -0.0829    
-#>  group_5 - group_6 -0.258   -0.536      0.0201     
+#>  contrast          estimate ci_lower ci_upper
+#>  group_1 - group_2 -0.024   -0.302   0.254   
+#>  group_1 - group_3 -0.507   -0.785   -0.229  
+#>  group_1 - group_4 -0.920   -1.198   -0.642  
+#>  group_1 - group_5 -1.023   -1.301   -0.745  
+#>  group_1 - group_6 -1.281   -1.559   -1.003  
+#>  group_2 - group_3 -0.483   -0.761   -0.205  
+#>  group_2 - group_4 -0.896   -1.174   -0.618  
+#>  group_2 - group_5 -0.999   -1.277   -0.721  
+#>  group_2 - group_6 -1.257   -1.535   -0.979  
+#>  group_3 - group_4 -0.413   -0.691   -0.135  
+#>  group_3 - group_5 -0.516   -0.794   -0.238  
+#>  group_3 - group_6 -0.774   -1.052   -0.496  
+#>  group_4 - group_5 -0.103   -0.381   0.175   
+#>  group_4 - group_6 -0.361   -0.639   -0.083  
+#>  group_5 - group_6 -0.258   -0.536   0.020   
 #> 
 #> Confidence level: 95%
 # The multiplier is 4.83 and every pairwise critical difference is 0.278,
@@ -229,10 +233,10 @@ attr(bp, "critical_value") * sqrt(0.01326) * sqrt(1 / 4)
 # simultaneous limits of -1.199 and -0.643.
 ci_c_ancova_bp(adj_means = adj, s_ancova = sqrt(0.01326),
                c_weights = c(0.5, 0.5, -0.25, -0.25, -0.25, -0.25),
-               n = 4, num_covariates = 1, df = 14,
+               n_per_group = 4, n_covariates = 1, df = 14,
                contrast_type = "allowance")
-#>  contrast   estimate lower_limit upper_limit
-#>  contrast_1 -0.921   -1.2        -0.643     
+#>  contrast   estimate ci_lower ci_upper
+#>  contrast_1 -0.921   -1.199   -0.643  
 #> 
 #> Confidence level: 95%
 ```

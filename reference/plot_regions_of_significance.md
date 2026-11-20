@@ -6,8 +6,8 @@ significance is read from, a reference line at zero, and vertical lines
 at the boundaries of the region. Wherever the band clears zero the
 groups differ significantly, so the boundaries are exactly the covariate
 values at which the band touches the zero line: the plot *is* the
-decision rule, which is what makes it the natural report of the
-analysis.
+decision rule, so the region of significance can be read from it
+directly.
 
 ## Usage
 
@@ -111,9 +111,9 @@ extensions thereof. *Psychometrika, 29*(3), 241–256.
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),

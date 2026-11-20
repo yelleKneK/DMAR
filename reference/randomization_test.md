@@ -58,8 +58,13 @@ randomization_test(
   One of `"mean"` (default) or `"t"`. `"mean"` uses the difference in
   group means. `"t"` uses the studentized (Welch) statistic, which
   divides that difference by its separate-variances standard error and
-  is the better choice when the groups may differ in variance (see
-  Details).
+  is the better choice when the groups differ in size and may differ in
+  variance (see Details). The statistic is refused when both observed
+  groups are constant at different values (exactly, or to within the
+  tolerance of the comparison), where its standard error is 0 (see *When
+  the studentized statistic is undefined*); a reassignment with that
+  property in the reference set of other data is ordered as `Inf` or
+  `-Inf`, and when every score is equal the statistic is 0.
 
 - alternative:
 
@@ -77,15 +82,16 @@ randomization_test(
 
 - n_resamples:
 
-  Number of randomly drawn reassignments when enumeration is not used.
-  Default `10000L`.
+  A single whole number of at least 1: the number of randomly drawn
+  reassignments when enumeration is not used. Default `10000L`.
 
 - seed:
 
   Optional integer seed for the Monte Carlo branch. Default `NULL`,
-  which leaves the user's current RNG state intact; supply an integer
-  for reproducibility. When a seed is supplied the RNG state in place
-  before the call is restored on exit.
+  under which the reassignments are drawn from, and advance, the current
+  random number stream; supply an integer for reproducibility. When a
+  seed is supplied the RNG state in place before the call is restored on
+  exit.
 
 - conf_level:
 
@@ -105,22 +111,28 @@ A `data.frame` with a `term` column and a numeric `value` column, in
 three blocks.
 
 The test: `mean_difference` (first group minus second), `statistic` (the
-statistic actually referred to the reference distribution), `p_value`,
-and `p_value_se` (the Monte Carlo standard error of the *p*-value, `NA`
-under exact enumeration, which has no Monte Carlo error).
+statistic actually referred to the reference distribution, always
+finite), `p_value`, and `p_value_se` (the Monte Carlo standard error of
+the *p*-value, `NA` under exact enumeration, which has no Monte Carlo
+error).
 
-The intervals and effect sizes: `shift_lower_limit` and
-`shift_upper_limit` (the randomization interval for the shift, obtained
-by inverting the test); `normal_theory_lower_limit` and
-`normal_theory_upper_limit` (Welch's *t* interval on the same mean
-difference, reported for contrast); `smd` with `smd_lower_limit` and
-`smd_upper_limit` from
+The intervals and effect sizes: `shift_ci_lower` and `shift_ci_upper`
+(the randomization interval for the shift, obtained by inverting the
+test); `normal_theory_ci_lower` and `normal_theory_ci_upper` (Welch's
+*t* interval on the same mean difference, reported for contrast); `smd`
+with `smd_ci_lower` and `smd_ci_upper` from
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md); `cles`
-with `cles_lower_limit` and `cles_upper_limit` from
+with `cles_ci_lower` and `cles_ci_upper` from
 [`cles`](https://yelleknek.github.io/DMAR/reference/cles.md); and
-`cliff_delta` with `cliff_delta_lower_limit` and
-`cliff_delta_upper_limit` from
+`cliff_delta` with `cliff_delta_ci_lower` and `cliff_delta_ci_upper`
+from
 [`cliff_delta`](https://yelleknek.github.io/DMAR/reference/cliff_delta.md).
+When the pooled within-group variance is zero (each group constant) the
+standardized mean difference is undefined: the six rows `smd`,
+`smd_ci_lower`, `smd_ci_upper`, `cles`, `cles_ci_lower`, and
+`cles_ci_upper` are `NA`, a warning of class `dmar_smd_undefined` says
+so, and the test, the shift interval, and Cliff's delta are reported as
+usual.
 
 The design: `n_1`, `n_2`, `N`, `n_evaluated` (how many reassignments
 were actually used), and `exact` (1 if every reassignment was
@@ -132,7 +144,16 @@ Carlo”), `alternative`, `group_labels`, `response_name`, `group_name`,
 `seed`, `observed_statistic`, and `reference_distribution`, the vector
 of statistics over the reassignments that
 [`plot_randomization_test`](https://yelleknek.github.io/DMAR/reference/plot_randomization_test.md)
-draws.
+draws, which can hold `Inf` and `-Inf` under `statistic = "t"` (see
+`statistic`). `reference_extreme` is a logical vector of the same length
+that marks the reassignments the *p*-value counted as at least as
+extreme as the observed one.
+
+No table is returned when `statistic = "t"` is refused; the condition,
+of class `dmar_studentized_statistic_undefined`, carries `reason`
+(`"constant_groups"`), `alternative`, `n_1`, `n_2`, and `p_value_mean`,
+the exact *p*-value `statistic = "mean"` gives for the same data and
+alternative.
 
 ## Details
 
@@ -168,21 +189,69 @@ population is a separate argument that rests on how the units were
 recruited. That is why this function reports effect sizes with intervals
 rather than a *p*-value alone.
 
-**Why the studentized statistic.** With \\n_1 = n_2\\ and equal
-population variances the two statistics give the same *p*-value to
-within the discreteness of the reference distribution, because the
-denominator of the studentized statistic is then nearly constant across
-reassignments. When the variances differ and the groups are unbalanced
-they part company. Reassigning scores between groups of unequal size
-mixes the two variances in proportions that the observed assignment does
-not have, so the reference distribution for the raw mean difference is
-built under a null that is false in a second way, and the test's actual
-Type I error rate drifts away from the nominal level. The studentized
-statistic rescales each reassignment by its own separate-variances
-standard error, which removes most of that drift and remains
-asymptotically valid under heteroscedasticity (Janssen, 1997; Neuhaus,
-1993). Use `statistic = "t"` whenever unequal variances are plausible,
-which for unbalanced designs is nearly always.
+**Why the studentized statistic.** With \\n_1 = n_2\\ the
+separate-variances standard error equals the pooled one, and the pooled
+*t* is an increasing function of the mean difference over the
+reassignments, so the two statistics give the same *p*-value in every
+balanced design. They differ only when the groups are unequal in size.
+Reassigning scores between groups of unequal size mixes the two
+variances in proportions that the observed assignment does not have, so
+the reference distribution for the raw mean difference is built under a
+null that is false in a second way, and the test's actual Type I error
+rate drifts away from the nominal level. The studentized statistic
+rescales each reassignment by its own separate-variances standard error,
+which removes most of that drift and remains asymptotically valid under
+heteroscedasticity (Janssen, 1997; Neuhaus, 1993). Use `statistic = "t"`
+when the group sizes differ and unequal variances are plausible.
+
+**When the studentized statistic is undefined.** The studentized
+statistic is a ratio, the difference in means over its standard error,
+and it has a value only when that standard error is positive. If each
+group is constant and the two constants differ (exactly, or to within
+the tolerance of the comparison), the standard error of the observed
+data is 0 and `statistic = "t"` is refused with a condition of class
+`dmar_studentized_statistic_undefined`. The observed data are then at
+the boundary of the reference set: among the reassignments only the
+observed one and, with equal group sizes, the one that exchanges the
+groups have a zero standard error. The refusal concerns the statistic
+and not the evidence. `statistic = "mean"` is defined for every
+arrangement and gives the smallest *p*-value the design allows in the
+direction of the data, \\1/\binom{N}{n_1}\\ one-sided, and two-sided
+\\2/\binom{N}{n_1}\\ with equal group sizes and \\1/\binom{N}{n_1}\\
+otherwise; the message states the value, and the condition carries it as
+`p_value_mean`. The refusal is made before any reassignment is
+enumerated or drawn, so a refused Monte Carlo call leaves the random
+number stream where it was. With `statistic = "mean"` the same data
+return the table, with the warning of class `dmar_smd_undefined`
+described under Value.
+
+When the observed statistic is defined, some arrangements in the
+reference set can still have a zero standard error: with a two-valued
+outcome, the reassignment that puts every high score in one group. Those
+arrangements are kept and ordered as the limit of the statistic, `Inf`
+or `-Inf` with the sign of their mean difference, so they count as the
+most extreme arrangements, which is where the mean difference also
+places them. Refusing them would refuse ordinary binary and coarsely
+measured data. For `group_1 = c(1, 1, 1, 0)` against
+`group_2 = c(0, 0, 0, 1)` the reference distribution of the studentized
+statistic holds one `-Inf` and one `Inf` among its 70 values, and the
+*p*-value, 34/70, is the one the difference in means gives. When every
+score is equal, every arrangement is the same data set; the statistic is
+reported as 0 and the *p*-value is 1.
+
+**Ties.** A reassignment whose statistic equals the observed one counts
+as at least as extreme. Two statistics that are equal in exact
+arithmetic can differ in their last binary digits as computed, so the
+comparison allows for the rounding of the arithmetic, with a bound
+proportional to the size of the scores. Where the bound cannot separate
+two statistics they are counted as tied, so the *p*-value can be above
+the exact one and is not below it. For the difference in means that
+happens only when two mean differences agree to within about 1e-14 of
+the largest absolute score, as when scores agree to about fourteen
+significant digits or one score is about 1e14 times the rest. For the
+studentized statistic it can also happen when one score is about ten
+million times the spread of the rest, or when every score lies within
+about a millionth of one of two values.
 
 **Exact or Monte Carlo.** When `choose(N, n_1)` is at most 50,000 every
 reassignment is enumerated and the *p*-value is exact: it is a count
@@ -207,32 +276,35 @@ then leave scores that are exchangeable across groups, so the
 randomization test applied to the subtracted data is a test of \\H_0\\:
 \mathrm{shift} = \delta\\. The set of \\\delta\\ for which that test
 does not reject at level \\1 - \\ `conf_level` is a confidence interval
-for the shift, and it is reported as `shift_lower_limit` and
-`shift_upper_limit`. Inverting a test this way is the general recipe
+for the shift, and it is reported as `shift_ci_lower` and
+`shift_ci_upper`. Inverting a test this way is the general recipe
 (Ernst, 2004); the endpoints are located by bisection on the *p*-value,
 using the same reassignments throughout so the interval and the test
 agree.
 
-The contrast with `normal_theory_lower_limit` and
-`normal_theory_upper_limit`, which are Welch's *t* limits on the same
-mean difference, is worth reading whenever both are printed. The
-randomization interval is exactly the set of shifts the test being run
-does not reject, so the test and the interval can never disagree. The
-normal theory interval instead assumes the sampling distribution of the
-mean difference has a known shape; it is smooth, symmetric about the
-point estimate, and can extend past the range the data can support. The
-randomization interval is discrete, need not be symmetric, and in a very
-small design is unbounded, a correct statement of how little information
-the design carries rather than a defect: with three observations per
-group the smallest attainable two-sided *p*-value is 2/20 = 0.10, so no
-shift can be rejected at the 5% level and the 95% interval is the whole
-real line. The randomization interval also inherits the shift model, so
-it answers a narrower question than the test does: the test needs only
+The contrast with `normal_theory_ci_lower` and `normal_theory_ci_upper`,
+which are Welch's *t* limits on the same mean difference, is worth
+reading whenever both are printed. The randomization interval is exactly
+the set of shifts the test being run does not reject, so the test and
+the interval can never disagree. The normal theory interval instead
+assumes the sampling distribution of the mean difference has a known
+shape; it is smooth, symmetric about the point estimate, and can extend
+past the range the data can support. The randomization interval is
+discrete, need not be symmetric, and in a very small design is
+unbounded, a correct statement of how little information the design
+carries rather than a defect: with three observations per group the
+smallest attainable two-sided *p*-value is 2/20 = 0.10, so no shift can
+be rejected at the 5% level and the 95% interval is the whole real line.
+The randomization interval also inherits the shift model, so it answers
+a narrower question than the test does: the test needs only
 exchangeability, while the interval needs the treatment to move every
 score by the same amount.
 
 **Effect sizes.** Every effect size reported here comes from the package
-function that owns it, so the numbers match a direct call.
+function that owns it, so the numbers match a direct call. The one
+exception is a pooled within-group variance of zero, where the
+standardized mean difference and the common language effect size are
+reported as `NA` (see Value).
 [`smd`](https://yelleknek.github.io/DMAR/reference/smd.md) and
 [`ci_smd`](https://yelleknek.github.io/DMAR/reference/ci_smd.md) supply
 the standardized mean difference and its noncentral *t* interval;
@@ -312,12 +384,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -343,59 +419,60 @@ Ken Kelley <kkelley@nd.edu>
 treatment <- c(80, 84, 79, 88, 83)
 control   <- c(72, 75, 68, 81, 74)
 randomization_test(group_1 = treatment, group_2 = control)
-#>  term                      value 
-#>  mean_difference           8.8   
-#>  statistic                 8.8   
-#>  p_value                   0.0238
-#>  p_value_se                <NA>  
-#>  shift_lower_limit         3     
-#>  shift_upper_limit         15    
-#>  normal_theory_lower_limit 2.6   
-#>  normal_theory_upper_limit 15    
-#>  smd                       2.1   
-#>  smd_lower_limit           0.461 
-#>  smd_upper_limit           3.66  
-#>  cles                      0.931 
-#>  cles_lower_limit          0.628 
-#>  cles_upper_limit          0.995 
-#>  cliff_delta               0.84  
-#>  cliff_delta_lower_limit   -0.117
-#>  cliff_delta_upper_limit   0.988 
-#>  n_1                       5     
-#>  n_2                       5     
-#>  N                         10    
-#>  n_evaluated               252   
-#>  exact                     1     
+#>  term                   value 
+#>  mean_difference        8.800 
+#>  statistic              8.800 
+#>  p_value                0.0238
+#>  p_value_se             <NA>  
+#>  shift_ci_lower         3.000 
+#>  shift_ci_upper         15.000
+#>  normal_theory_ci_lower 2.598 
+#>  normal_theory_ci_upper 15.002
+#>  smd                    2.098 
+#>  smd_ci_lower           0.461 
+#>  smd_ci_upper           3.659 
+#>  cles                   0.931 
+#>  cles_ci_lower          0.628 
+#>  cles_ci_upper          0.995 
+#>  cliff_delta            0.840 
+#>  cliff_delta_ci_lower   -0.117
+#>  cliff_delta_ci_upper   0.988 
+#>  n_1                    5     
+#>  n_2                    5     
+#>  N                      10    
+#>  n_evaluated            252   
+#>  exact                  1     
 #> 
 #> Confidence level: 95%
 
-# 2. The studentized statistic, preferable when the groups may differ
-#    in variance.
+# 2. The studentized statistic. The groups are the same size here, so it
+#    gives the same p-value as the difference in means; the two differ
+#    when the groups are unequal in size.
 randomization_test(group_1 = treatment, group_2 = control,
                    statistic = "t")
-#>  term                      value 
-#>  mean_difference           8.8   
-#>  statistic                 3.32  
-#>  p_value                   0.0238
-#>  p_value_se                <NA>  
-#>  shift_lower_limit         3     
-#>  shift_upper_limit         15    
-#>  normal_theory_lower_limit 2.6   
-#>  normal_theory_upper_limit 15    
-#>  smd                       2.1   
-#>  smd_lower_limit           0.461 
-#>  smd_upper_limit           3.66  
-#>  cles                      0.931 
-#>  cles_lower_limit          0.628 
-#>  cles_upper_limit          0.995 
-#>  cliff_delta               0.84  
-#>  cliff_delta_lower_limit   -0.117
-#>  cliff_delta_upper_limit   0.988 
-#>  n_1                       5     
-#>  n_2                       5     
-#>  N                         10    
-#>  n_evaluated               252   
-#>  exact                     1     
+#>  term                   value 
+#>  mean_difference        8.800 
+#>  statistic              3.317 
+#>  p_value                0.0238
+#>  p_value_se             <NA>  
+#>  shift_ci_lower         3.000 
+#>  shift_ci_upper         15.000
+#>  normal_theory_ci_lower 2.598 
+#>  normal_theory_ci_upper 15.002
+#>  smd                    2.098 
+#>  smd_ci_lower           0.461 
+#>  smd_ci_upper           3.659 
+#>  cles                   0.931 
+#>  cles_ci_lower          0.628 
+#>  cles_ci_upper          0.995 
+#>  cliff_delta            0.840 
+#>  cliff_delta_ci_lower   -0.117
+#>  cliff_delta_ci_upper   0.988 
+#>  n_1                    5     
+#>  n_2                    5     
+#>  N                      10    
+#>  n_evaluated            252   
+#>  exact                  1     
 #> 
 #> Confidence level: 95%
 
@@ -403,63 +480,65 @@ randomization_test(group_1 = treatment, group_2 = control,
 #    the drinks_trial data, a right-skewed outcome, which is exactly
 #    where a distribution-free test earns its keep. With 37 and 32
 #    participants there are far too many reassignments to enumerate, so
-#    10,000 are drawn and the p-value carries a Monte Carlo standard
-#    error.
+#    they are drawn at random and the p-value carries a Monte Carlo
+#    standard error. n_resamples = 2000 keeps the example quick; a
+#    reported p-value deserves the default of 10,000.
 cra <- droplevels(subset(drinks_trial, treatment != "CRA + Disulfiram"))
 set.seed(113)
-randomization_test(drinks_per_week ~ treatment, data = cra, seed = 113)
-#>  term                      value  
-#>  mean_difference           24.5   
-#>  statistic                 24.5   
-#>  p_value                   0.2784 
-#>  p_value_se                0.00448
-#>  shift_lower_limit         -13    
-#>  shift_upper_limit         63.1   
-#>  normal_theory_lower_limit -15.8  
-#>  normal_theory_upper_limit 64.7   
-#>  smd                       0.282  
-#>  smd_lower_limit           -0.195 
-#>  smd_upper_limit           0.756  
-#>  cles                      0.579  
-#>  cles_lower_limit          0.445  
-#>  cles_upper_limit          0.704  
-#>  cliff_delta               0.3    
-#>  cliff_delta_lower_limit   0.0213 
-#>  cliff_delta_upper_limit   0.535  
-#>  n_1                       37     
-#>  n_2                       32     
-#>  N                         69     
-#>  n_evaluated               10000  
-#>  exact                     0      
+randomization_test(drinks_per_week ~ treatment, data = cra,
+                   n_resamples = 2000, seed = 113)
+#>  term                   value  
+#>  mean_difference        24.474 
+#>  statistic              24.474 
+#>  p_value                0.2804 
+#>  p_value_se             0.010  
+#>  shift_ci_lower         -13.102
+#>  shift_ci_upper         63.998 
+#>  normal_theory_ci_lower -15.802
+#>  normal_theory_ci_upper 64.749 
+#>  smd                    0.282  
+#>  smd_ci_lower           -0.195 
+#>  smd_ci_upper           0.756  
+#>  cles                   0.579  
+#>  cles_ci_lower          0.445  
+#>  cles_ci_upper          0.704  
+#>  cliff_delta            0.300  
+#>  cliff_delta_ci_lower   0.021  
+#>  cliff_delta_ci_upper   0.535  
+#>  n_1                    37     
+#>  n_2                    32     
+#>  N                      69     
+#>  n_evaluated            2000   
+#>  exact                  0      
 #> 
 #> Confidence level: 95%
 
 # 4. A one-sided test, and the one-sided interval that goes with it.
 randomization_test(group_1 = treatment, group_2 = control,
                    alternative = "greater")
-#>  term                      value 
-#>  mean_difference           8.8   
-#>  statistic                 8.8   
-#>  p_value                   0.0119
-#>  p_value_se                <NA>  
-#>  shift_lower_limit         4     
-#>  shift_upper_limit         Inf   
-#>  normal_theory_lower_limit 3.82  
-#>  normal_theory_upper_limit Inf   
-#>  smd                       2.1   
-#>  smd_lower_limit           0.461 
-#>  smd_upper_limit           3.66  
-#>  cles                      0.931 
-#>  cles_lower_limit          0.628 
-#>  cles_upper_limit          0.995 
-#>  cliff_delta               0.84  
-#>  cliff_delta_lower_limit   -0.117
-#>  cliff_delta_upper_limit   0.988 
-#>  n_1                       5     
-#>  n_2                       5     
-#>  N                         10    
-#>  n_evaluated               252   
-#>  exact                     1     
+#>  term                   value 
+#>  mean_difference        8.800 
+#>  statistic              8.800 
+#>  p_value                0.0119
+#>  p_value_se             <NA>  
+#>  shift_ci_lower         4.000 
+#>  shift_ci_upper         Inf   
+#>  normal_theory_ci_lower 3.816 
+#>  normal_theory_ci_upper Inf   
+#>  smd                    2.098 
+#>  smd_ci_lower           0.461 
+#>  smd_ci_upper           3.659 
+#>  cles                   0.931 
+#>  cles_ci_lower          0.628 
+#>  cles_ci_upper          0.995 
+#>  cliff_delta            0.840 
+#>  cliff_delta_ci_lower   -0.117
+#>  cliff_delta_ci_upper   0.988 
+#>  n_1                    5     
+#>  n_2                    5     
+#>  N                      10    
+#>  n_evaluated            252   
+#>  exact                  1     
 #> 
 #> Confidence level: 95%
 
@@ -471,4 +550,40 @@ res$value[res$term == "p_value"]
 #> [1] 0.03174603
 wilcox.test(treatment, control, exact = TRUE)$p.value
 #> [1] 0.03174603
+
+# 6. Both observed groups are constant, at different values. The
+#    difference in means is defined, and gives the smallest p-value
+#    groups of 4 and 4 allow. The warnings say that the standardized
+#    mean difference is undefined and that the groups do not overlap.
+#    With statistic = "t" the same call is refused, with a message that
+#    says why: the standard error is 0, so the studentized statistic is
+#    undefined.
+randomization_test(group_1 = rep(5, 4), group_2 = rep(3, 4))
+#> Warning: The standardized mean difference and the common language effect size are undefined because the pooled within-group variance is zero; the randomization test and Cliff's delta are reported.
+#> Warning: randomization_test(): for the Cliff's delta rows (computed by cliff_delta()), the groups are completely separated (|delta| = 1), so the estimated variance is 0. Both confidence limits are reported equal to the estimate (1, 1). They are not a confidence interval with the stated coverage: the variance estimate is built from how much the comparisons differ from one observation to the next, and in a sample with no overlap they do not differ at all. That describes this sample, not the population. A population with some overlap often produces a sample with none when the samples are small (here 4 and 4 observations), so the limits must not be read as showing that the population value is 1. For this case Feng and Cliff (2004, Equation 8) give the limit (n_b - z^2) / (n_b + z^2) for delta, with n_b the smaller group size and z the normal quantile of the level: 0.020 here at the 95% level, with the other limit 1. Report the estimate with the sample sizes and say that the groups did not overlap; the randomization test (randomization_test()) gives a p-value that remains valid here.
+#>  term                   value 
+#>  mean_difference        2.000 
+#>  statistic              2.000 
+#>  p_value                0.0286
+#>  p_value_se             <NA>  
+#>  shift_ci_lower         2.000 
+#>  shift_ci_upper         2.000 
+#>  normal_theory_ci_lower <NA>  
+#>  normal_theory_ci_upper <NA>  
+#>  smd                    <NA>  
+#>  smd_ci_lower           <NA>  
+#>  smd_ci_upper           <NA>  
+#>  cles                   <NA>  
+#>  cles_ci_lower          <NA>  
+#>  cles_ci_upper          <NA>  
+#>  cliff_delta            1.000 
+#>  cliff_delta_ci_lower   1.000 
+#>  cliff_delta_ci_upper   1.000 
+#>  n_1                    4     
+#>  n_2                    4     
+#>  N                      8     
+#>  n_evaluated            70    
+#>  exact                  1     
+#> 
+#> Confidence level: 95%
 ```

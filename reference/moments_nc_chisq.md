@@ -75,25 +75,25 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # A noncentral chi square with 5 df and noncentrality 3.
 moments_nc_chisq(df = 5, ncp = 3)
-#>  term            value
-#>  mean            8    
-#>  variance        22   
-#>  sd              4.69 
-#>  skewness        1.09 
-#>  excess_kurtosis 1.69 
-#>  df              5    
-#>  ncp             3    
+#>  term            value 
+#>  mean            8.000 
+#>  variance        22.000
+#>  sd              4.690 
+#>  skewness        1.085 
+#>  excess_kurtosis 1.686 
+#>  df              5     
+#>  ncp             3.000 
 
 # ncp = 0 is the central chi square: mean df, variance 2 * df.
 moments_nc_chisq(df = 5)
-#>  term            value
-#>  mean            5    
-#>  variance        10   
-#>  sd              3.16 
-#>  skewness        1.26 
-#>  excess_kurtosis 2.4  
-#>  df              5    
-#>  ncp             0    
+#>  term            value 
+#>  mean            5.000 
+#>  variance        10.000
+#>  sd              3.162 
+#>  skewness        1.265 
+#>  excess_kurtosis 2.400 
+#>  df              5     
+#>  ncp             0.000 
 
 # Every moment exists for any positive df, so nothing is ever NA.
 anyNA(moments_nc_chisq(df = 1, ncp = 10)$value)

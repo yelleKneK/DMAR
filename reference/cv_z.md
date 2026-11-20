@@ -64,25 +64,25 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # A basic call for finding critical values with equal area in the two tails.
 cv_z(alpha_level = .05)
-#>  term     value area_less area_greater
-#>  lower_cv -1.96 0.025     0.975       
-#>  upper_cv 1.96  0.975     0.025       
+#>  term     value  area_less area_greater
+#>  lower_cv -1.960 0.025     0.975       
+#>  upper_cv 1.960  0.975     0.025       
 
 # A basic call for a single-sided confidence interval (for "a greater than" alternative hypothesis)
 cv_z(alpha_level = .05, alternative = "greater")
 #>  term     value area_less area_greater
-#>  lower_cv -Inf  0         1           
-#>  upper_cv 1.64  0.95      0.05        
+#>  lower_cv -Inf  0.000     1.000       
+#>  upper_cv 1.645 0.950     0.050       
 
 # A single-sided confidence interval (for "a greater than" alternative hypothesis); simple output.
 cv_z(alpha_lower = 0, alpha_upper = .05, verbose = FALSE)
 #>  term     value
 #>  lower_cv -Inf 
-#>  upper_cv 1.64 
+#>  upper_cv 1.645
 
 # For a nonsymmetric 95% confidence interval.
 cv_z(alpha_lower = .01, alpha_upper = .04)
-#>  term     value area_less area_greater
-#>  lower_cv -2.33 0.01      0.99        
-#>  upper_cv 1.75  0.96      0.04        
+#>  term     value  area_less area_greater
+#>  lower_cv -2.326 0.010     0.990       
+#>  upper_cv 1.751  0.960     0.040       
 ```

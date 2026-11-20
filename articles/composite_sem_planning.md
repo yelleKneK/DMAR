@@ -19,13 +19,13 @@ ref <- list(
   med_aipe_80 = c(necessary_N = 268, composite_assurance = 0.8082,
                   mean_width_a = 0.2196, mean_width_b = 0.2355,
                   mean_width_ab = 0.1224),
-  lgm_at_150  = c(composite_power = 0.6700, power_mu_s = 1.0000,
-                  power_cov_is = 0.6700),
-  lgm_plan    = c(necessary_N = 201, composite_power = 0.8008,
+  lgm_at_150  = c(composite_power = 0.6673, power_mu_s = 1.0000,
+                  power_cov_is = 0.6673),
+  lgm_plan    = c(necessary_N = 202, composite_power = 0.8008,
                   power_mu_s = 1.0000, power_cov_is = 0.8008),
-  lgm_aipe    = c(necessary_N = 220, composite_assurance = 0.8197,
-                  width_within_desired_mu_s = 0.8197,
-                  width_within_desired_cov_is = 0.9956)
+  lgm_aipe    = c(necessary_N = 219, composite_assurance = 0.8011,
+                  pct_ci_less_width_mu_s = 0.8011,
+                  pct_ci_less_width_cov_is = 0.9958)
 )
 ```
 
@@ -74,7 +74,7 @@ Carlo simulation (Muthén & Muthén, 2002; Maxwell, Kelley, & Rausch,
 This vignette works through the same workflow twice: first for a simple
 model with observed variables, then for a latent growth curve model,
 where the parameters of interest include a latent mean. Both functions
-require to be installed.
+require lavaan to be installed.
 
 ## The Workflow
 
@@ -158,26 +158,26 @@ is worth `G = 1000` or more.
 ``` r
 
 med_at_100 <- ss_power_composite_sem(
-  model = med_model, pop_model = pop_med,
+  model = med_model, true_model = pop_med,
   parameters = c("a", "b", "ab"),
-  N = 100, G = 25, seed = 113)
+  specified_N = 100, G = 25, seed = 113)
 med_at_100
 ```
 
-| term                   | value  |
-|:-----------------------|:-------|
-| specified_N            | 100    |
-| composite_power        | 0.84   |
-| composite_power_mc_se  | 0.0733 |
-| power_a                | 0.96   |
-| power_b                | 0.96   |
-| power_ab               | 0.84   |
-| population_a           | 0.4    |
-| population_b           | 0.35   |
-| population_ab          | 0.14   |
-| alpha_level            | 0.05   |
-| replications           | 25     |
-| converged_replications | 25     |
+| term                   | value |
+|:-----------------------|:------|
+| specified_N            | 100   |
+| composite_power        | 0.840 |
+| composite_power_mc_se  | 0.073 |
+| power_a                | 0.960 |
+| power_b                | 0.960 |
+| power_ab               | 0.840 |
+| true_a                 | 0.400 |
+| true_b                 | 0.350 |
+| true_ab                | 0.140 |
+| alpha_level            | 0.050 |
+| replications           | 25    |
+| converged_replications | 25    |
 
 ``` r
 
@@ -203,12 +203,12 @@ assumption.
 
 ### The Necessary Sample Size
 
-Planning replaces `N` with `desired_power`:
+Planning replaces `specified_N` with `desired_power`:
 
 ``` r
 
 med_plan <- ss_power_composite_sem(
-  model = med_model, pop_model = pop_med,
+  model = med_model, true_model = pop_med,
   parameters = c("a", "b", "ab"),
   desired_power = 0.80, G = 25, seed = 113)
 med_plan
@@ -217,18 +217,18 @@ med_plan
 | term                   | value |
 |:-----------------------|:------|
 | necessary_N            | 76    |
-| composite_power        | 0.8   |
-| composite_power_mc_se  | 0.08  |
-| power_a                | 1     |
-| power_b                | 0.96  |
-| power_ab               | 0.8   |
-| population_a           | 0.4   |
-| population_b           | 0.35  |
-| population_ab          | 0.14  |
-| alpha_level            | 0.05  |
+| composite_power        | 0.800 |
+| composite_power_mc_se  | 0.080 |
+| power_a                | 1.000 |
+| power_b                | 0.960 |
+| power_ab               | 0.800 |
+| true_a                 | 0.400 |
+| true_b                 | 0.350 |
+| true_ab                | 0.140 |
+| alpha_level            | 0.050 |
 | replications           | 25    |
 | converged_replications | 25    |
-| desired_power          | 0.8   |
+| desired_power          | 0.800 |
 
 ``` r
 
@@ -263,29 +263,29 @@ decision, not a formality:
 ``` r
 
 med_plan_cp <- ss_power_composite_sem(
-  model = med_model, pop_model = pop_med,
+  model = med_model, true_model = pop_med,
   parameters = c("a", "b", "cp", "ab"),
   desired_power = 0.80, G = 25, seed = 113)
 med_plan_cp
 ```
 
-| term                   | value  |
-|:-----------------------|:-------|
-| necessary_N            | 353    |
-| composite_power        | 0.84   |
-| composite_power_mc_se  | 0.0733 |
-| power_a                | 1      |
-| power_b                | 1      |
-| power_cp               | 0.84   |
-| power_ab               | 1      |
-| population_a           | 0.4    |
-| population_b           | 0.35   |
-| population_cp          | 0.15   |
-| population_ab          | 0.14   |
-| alpha_level            | 0.05   |
-| replications           | 25     |
-| converged_replications | 25     |
-| desired_power          | 0.8    |
+| term                   | value |
+|:-----------------------|:------|
+| necessary_N            | 353   |
+| composite_power        | 0.840 |
+| composite_power_mc_se  | 0.073 |
+| power_a                | 1.000 |
+| power_b                | 1.000 |
+| power_cp               | 0.840 |
+| power_ab               | 1.000 |
+| true_a                 | 0.400 |
+| true_b                 | 0.350 |
+| true_cp                | 0.150 |
+| true_ab                | 0.140 |
+| alpha_level            | 0.050 |
+| replications           | 25    |
+| converged_replications | 25    |
+| desired_power          | 0.800 |
 
 ``` r
 
@@ -308,40 +308,39 @@ design commitment with a visible price.
 
 When the research questions concern magnitudes, the goal is a
 sufficiently narrow confidence interval for every parameter of interest.
-`desired_width` states the full width per parameter, as a named vector
-so a width can never silently attach to the wrong parameter; the
-indirect effect, on its smaller scale, is held to a narrower interval
-here.
+`width` states the full width per parameter, as a named vector so a
+width can never silently attach to the wrong parameter; the indirect
+effect, on its smaller scale, is held to a narrower interval here.
 
 ``` r
 
 med_aipe <- ss_aipe_composite_sem(
-  model = med_model, pop_model = pop_med,
+  model = med_model, true_model = pop_med,
   parameters = c("a", "b", "ab"),
-  desired_width = c(a = 0.25, b = 0.25, ab = 0.15),
+  width = c(a = 0.25, b = 0.25, ab = 0.15),
   G = 25, seed = 113)
 med_aipe
 ```
 
-| term                    | value |
-|:------------------------|:------|
-| necessary_N             | 245   |
-| composite_assurance     | 0.52  |
-| mean_width_a            | 0.227 |
-| mean_width_b            | 0.249 |
-| mean_width_ab           | 0.125 |
-| width_within_desired_a  | 0.92  |
-| width_within_desired_b  | 0.56  |
-| width_within_desired_ab | 0.96  |
-| desired_width_a         | 0.25  |
-| desired_width_b         | 0.25  |
-| desired_width_ab        | 0.15  |
-| population_a            | 0.4   |
-| population_b            | 0.35  |
-| population_ab           | 0.14  |
-| conf_level              | 0.95  |
-| replications            | 25    |
-| converged_replications  | 25    |
+| term                   | value |
+|:-----------------------|:------|
+| necessary_N            | 245   |
+| composite_assurance    | 0.520 |
+| mean_width_a           | 0.227 |
+| mean_width_b           | 0.249 |
+| mean_width_ab          | 0.125 |
+| pct_ci_less_width_a    | 0.920 |
+| pct_ci_less_width_b    | 0.560 |
+| pct_ci_less_width_ab   | 0.960 |
+| width_a                | 0.250 |
+| width_b                | 0.250 |
+| width_ab               | 0.150 |
+| true_a                 | 0.400 |
+| true_b                 | 0.350 |
+| true_ab                | 0.140 |
+| conf_level             | 0.950 |
+| replications           | 25    |
+| converged_replications | 25    |
 
 Confidence level: 95%
 
@@ -369,33 +368,33 @@ row). Supplying an assurance plans against that joint event directly:
 ``` r
 
 med_aipe_80 <- ss_aipe_composite_sem(
-  model = med_model, pop_model = pop_med,
+  model = med_model, true_model = pop_med,
   parameters = c("a", "b", "ab"),
-  desired_width = c(a = 0.25, b = 0.25, ab = 0.15),
+  width = c(a = 0.25, b = 0.25, ab = 0.15),
   assurance = 0.80, G = 25, seed = 113)
 med_aipe_80
 ```
 
-| term                    | value |
-|:------------------------|:------|
-| necessary_N             | 262   |
-| composite_assurance     | 0.92  |
-| mean_width_a            | 0.222 |
-| mean_width_b            | 0.229 |
-| mean_width_ab           | 0.118 |
-| width_within_desired_a  | 1     |
-| width_within_desired_b  | 0.92  |
-| width_within_desired_ab | 1     |
-| desired_width_a         | 0.25  |
-| desired_width_b         | 0.25  |
-| desired_width_ab        | 0.15  |
-| population_a            | 0.4   |
-| population_b            | 0.35  |
-| population_ab           | 0.14  |
-| conf_level              | 0.95  |
-| replications            | 25    |
-| converged_replications  | 25    |
-| assurance               | 0.8   |
+| term                   | value |
+|:-----------------------|:------|
+| necessary_N            | 262   |
+| composite_assurance    | 0.920 |
+| mean_width_a           | 0.222 |
+| mean_width_b           | 0.229 |
+| mean_width_ab          | 0.118 |
+| pct_ci_less_width_a    | 1.000 |
+| pct_ci_less_width_b    | 0.920 |
+| pct_ci_less_width_ab   | 1.000 |
+| width_a                | 0.250 |
+| width_b                | 0.250 |
+| width_ab               | 0.150 |
+| true_a                 | 0.400 |
+| true_b                 | 0.350 |
+| true_ab                | 0.140 |
+| conf_level             | 0.950 |
+| replications           | 25    |
+| converged_replications | 25    |
+| assurance              | 0.800 |
 
 Confidence level: 95%
 
@@ -532,24 +531,24 @@ First, what does a candidate $`N = 150`$ deliver?
 ``` r
 
 lgm_at_150 <- ss_power_composite_sem(
-  model = lgm_model, pop_model = pop_lgm,
+  model = lgm_model, true_model = pop_lgm,
   parameters = c("mu_s", "cov_is"),
-  N = 150, G = 25, seed = 113)
+  specified_N = 150, G = 25, seed = 113)
 lgm_at_150
 ```
 
-| term                   | value |
-|:-----------------------|:------|
-| specified_N            | 150   |
-| composite_power        | 0.64  |
-| composite_power_mc_se  | 0.096 |
-| power_mu_s             | 1     |
-| power_cov_is           | 0.64  |
-| population_mu_s        | 0.3   |
-| population_cov_is      | -0.15 |
-| alpha_level            | 0.05  |
-| replications           | 25    |
-| converged_replications | 25    |
+| term                   | value  |
+|:-----------------------|:-------|
+| specified_N            | 150    |
+| composite_power        | 0.680  |
+| composite_power_mc_se  | 0.093  |
+| power_mu_s             | 1.000  |
+| power_cov_is           | 0.680  |
+| true_mu_s              | 0.300  |
+| true_cov_is            | -0.150 |
+| alpha_level            | 0.050  |
+| replications           | 25     |
+| converged_replications | 25     |
 
 ``` r
 
@@ -557,38 +556,38 @@ lgm_at_150
 compare(lgm_at_150, ref$lgm_at_150,
         c("composite_power", "power_mu_s", "power_cov_is"))
 #>                 G = 25 G = 10000
-#> composite_power   0.64      0.67
-#> power_mu_s        1.00      1.00
-#> power_cov_is      0.64      0.67
+#> composite_power   0.68    0.6673
+#> power_mu_s        1.00    1.0000
+#> power_cov_is      0.68    0.6673
 ```
 
-The average growth of 0.3 per year is easy to detect (`power_mu_s` is
-1), and the composite is governed almost entirely by the covariance
-question: `power_cov_is` is 0.64, and the composite power is 0.64.
-Planning for the pair:
+The test of the average growth of 0.3 per year has power near 1
+(`power_mu_s` is 1), and the composite is governed almost entirely by
+the covariance question: `power_cov_is` is 0.68, and the composite power
+is 0.68. Planning for the pair:
 
 ``` r
 
 lgm_plan <- ss_power_composite_sem(
-  model = lgm_model, pop_model = pop_lgm,
+  model = lgm_model, true_model = pop_lgm,
   parameters = c("mu_s", "cov_is"),
   desired_power = 0.80, G = 25, seed = 113)
 lgm_plan
 ```
 
-| term                   | value |
-|:-----------------------|:------|
-| necessary_N            | 216   |
-| composite_power        | 0.88  |
-| composite_power_mc_se  | 0.065 |
-| power_mu_s             | 1     |
-| power_cov_is           | 0.88  |
-| population_mu_s        | 0.3   |
-| population_cov_is      | -0.15 |
-| alpha_level            | 0.05  |
-| replications           | 25    |
-| converged_replications | 25    |
-| desired_power          | 0.8   |
+| term                   | value  |
+|:-----------------------|:-------|
+| necessary_N            | 154    |
+| composite_power        | 0.840  |
+| composite_power_mc_se  | 0.073  |
+| power_mu_s             | 1.000  |
+| power_cov_is           | 0.840  |
+| true_mu_s              | 0.300  |
+| true_cov_is            | -0.150 |
+| alpha_level            | 0.050  |
+| replications           | 25     |
+| converged_replications | 25     |
+| desired_power          | 0.800  |
 
 ``` r
 
@@ -596,12 +595,12 @@ lgm_plan
 compare(lgm_plan, ref$lgm_plan,
         c("necessary_N", "composite_power", "power_cov_is"))
 #>                 G = 25 G = 10000
-#> necessary_N     216.00  201.0000
-#> composite_power   0.88    0.8008
-#> power_cov_is      0.88    0.8008
+#> necessary_N     154.00  202.0000
+#> composite_power   0.84    0.8008
+#> power_cov_is      0.84    0.8008
 ```
 
-About $`N = 201`$ participants are needed for both growth questions to
+About $`N = 202`$ participants are needed for both growth questions to
 be answered affirmatively in the same study with probability 0.80, under
 the stated population. A researcher who planned only for the slope mean,
 the headline effect, would have chosen a far smaller study and then
@@ -618,29 +617,29 @@ in 80 percent of studies:
 ``` r
 
 lgm_aipe <- ss_aipe_composite_sem(
-  model = lgm_model, pop_model = pop_lgm,
+  model = lgm_model, true_model = pop_lgm,
   parameters = c("mu_s", "cov_is"),
-  desired_width = c(mu_s = 0.15, cov_is = 0.25),
+  width = c(mu_s = 0.15, cov_is = 0.25),
   assurance = 0.80, G = 25, seed = 113)
 lgm_aipe
 ```
 
-| term                        | value |
-|:----------------------------|:------|
-| necessary_N                 | 220   |
-| composite_assurance         | 0.92  |
-| mean_width_mu_s             | 0.142 |
-| mean_width_cov_is           | 0.205 |
-| width_within_desired_mu_s   | 0.92  |
-| width_within_desired_cov_is | 1     |
-| desired_width_mu_s          | 0.15  |
-| desired_width_cov_is        | 0.25  |
-| population_mu_s             | 0.3   |
-| population_cov_is           | -0.15 |
-| conf_level                  | 0.95  |
-| replications                | 25    |
-| converged_replications      | 25    |
-| assurance                   | 0.8   |
+| term                     | value  |
+|:-------------------------|:-------|
+| necessary_N              | 217    |
+| composite_assurance      | 0.800  |
+| mean_width_mu_s          | 0.145  |
+| mean_width_cov_is        | 0.204  |
+| pct_ci_less_width_mu_s   | 0.800  |
+| pct_ci_less_width_cov_is | 1.000  |
+| width_mu_s               | 0.150  |
+| width_cov_is             | 0.250  |
+| true_mu_s                | 0.300  |
+| true_cov_is              | -0.150 |
+| conf_level               | 0.950  |
+| replications             | 25     |
+| converged_replications   | 25     |
+| assurance                | 0.800  |
 
 Confidence level: 95%
 
@@ -649,19 +648,19 @@ Confidence level: 95%
 
 compare(lgm_aipe, ref$lgm_aipe,
         c("necessary_N", "composite_assurance",
-          "width_within_desired_mu_s", "width_within_desired_cov_is"))
-#>                             G = 25 G = 10000
-#> necessary_N                 220.00  220.0000
-#> composite_assurance           0.92    0.8197
-#> width_within_desired_mu_s     0.92    0.8197
-#> width_within_desired_cov_is   1.00    0.9956
+          "pct_ci_less_width_mu_s", "pct_ci_less_width_cov_is"))
+#>                          G = 25 G = 10000
+#> necessary_N               217.0  219.0000
+#> composite_assurance         0.8    0.8011
+#> pct_ci_less_width_mu_s      0.8    0.8011
+#> pct_ci_less_width_cov_is    1.0    0.9958
 ```
 
-The accuracy goal needs $`N = 220`$, and the `width_within_desired_*`
-rows show which target binds: the slope mean’s interval is the harder
-one to keep narrow at this $`N`$. When both existence and magnitude
-matter, the defensible design uses the larger of the power and AIPE
-sample sizes, here $`N = 220`$.
+The accuracy goal needs $`N = 219`$, and the `pct_ci_less_width_*` rows
+show which target binds: the slope mean’s interval is the harder one to
+keep narrow at this $`N`$. When both existence and magnitude matter, the
+defensible design uses the larger of the power and AIPE sample sizes,
+here $`N = 219`$.
 
 ## Practical Notes
 

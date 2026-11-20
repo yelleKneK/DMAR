@@ -1,78 +1,66 @@
 # Asymptotic Variance of the Pearson Correlation Coefficient
 
-Computes the asymptotic (large-sample) variance of the sample Pearson
-product-moment correlation \\r\\ under bivariate normality (Fisher,
-1915) and, optionally, the Bonett-Wright (2000) kurtosis-corrected
-variance for non-normal margins. Stand-alone variance utility:
-surprisingly absent from CRAN despite being a building block for AIPE
-planning, meta-analytic weighting, and Wald-style inference on \\r\\.
+Computes the large-sample variance of the sample Pearson correlation
+under bivariate normality and the variance of its Fisher *Z* transform.
+This standalone function is useful for AIPE planning, meta-analytic
+weighting, and Wald-style inference on *r*.
 
 ## Usage
 
 ``` r
-var_r(rho, n, kurtosis_x = NULL, kurtosis_y = NULL)
+var_r(true_cor, N)
 ```
 
 ## Arguments
 
-- rho:
+- true_cor:
 
-  Population correlation coefficient. Numeric scalar or vector in \\(-1,
-  1)\\.
+  Population correlation coefficient \\\rho\\. Numeric scalar or vector
+  in \\(-1, 1)\\.
 
-- n:
+- N:
 
   Total sample size on which the Pearson \\r\\ would be computed. Scalar
   or vector.
-
-- kurtosis_x:
-
-  Optional excess kurtosis of the marginal distribution of \\X\\. When
-  `kurtosis_x` and `kurtosis_y` are both supplied (along with
-  `rho_xy_2x2y` if available), the Bonett-Wright (2000) corrected
-  variance is returned in addition to the normal-theory variance.
-
-- kurtosis_y:
-
-  Optional excess kurtosis of \\Y\\; see `kurtosis_x`.
 
 ## Value
 
 A `data.frame` with the rows
 
 - `var_r_normal`, the normal-theory asymptotic variance \\(1 - \rho^2)^2
-  / (n - 1)\\ (Hotelling, 1953, Section 7),
+  / (N - 1)\\ (Hotelling, 1953, Section 7),
 
-- `var_r_bonett_wright` (when kurtoses are supplied) the Bonett &
-  Wright (2000) kurtosis-corrected variance,
-
-- `var_fisher_z`, the variance of the Fisher \\Z\\ transform, \\1/(n -
+- `var_fisher_z`, the variance of the Fisher \\Z\\ transform, \\1/(N -
   3)\\.
 
 ## Details
 
+The variance of *r* is evaluated at the population correlation
+`true_cor` and the sample size `N`. Substituting a sample correlation
+for `true_cor` gives a plug-in estimate of that variance, which carries
+the sampling error of the correlation it was computed from. The variance
+of the Fisher *Z* transform, \\1/(N - 3)\\, depends on `N` alone.
+
 **Normal-theory variance (default).** Under bivariate normality the
 large-sample variance is \$\$\mathrm{Var}(\hat r) \\\approx\\ (1 -
-\rho^2)^2 / (n - 1),\$\$ the leading term of the exact moment expansion
+\rho^2)^2 / (N - 1),\$\$ the leading term of the exact moment expansion
 (Hotelling, 1953, Section 7; the exact density of \\r\\ is Fisher's,
-1915). This is the workhorse variance and is exact in the limit; it is
-also what Fisher's \\Z\\ CI
+1915). As \\N\\ grows, \\N\\ times this variance approaches \\(1 -
+\rho^2)^2\\, the variance of the limiting distribution of
+\\\sqrt{N}(\hat r - \rho)\\. Carried to the Fisher \\Z\\ scale by the
+delta method it becomes \\1/(N - 1)\\; the interval of
 [`ci_r`](https://yelleknek.github.io/DMAR/reference/ci_correlation.md)
-uses on the transformed scale.
+uses Fisher's \\1/(N - 3)\\ on that scale instead (see below).
 
-**Bonett-Wright kurtosis correction.** When the marginals are *not*
-normal, the asymptotic variance picks up a kurtosis- dependent
-correction (Bonett & Wright, 2000): \$\$\mathrm{Var}(\hat r) \\\approx\\
-(1 - \rho^2)^2 / (n - 1) \cdot \bigl(1 + \rho^2 (\gamma_2^{(X)} +
-\gamma_2^{(Y)}) / 4\bigr),\$\$ where \\\gamma_2^{(X)}\\,
-\\\gamma_2^{(Y)}\\ are the excess kurtoses of the two marginals. The
-correction is exact when the joint distribution is elliptical; for
-non-elliptical joints it is a first-order approximation. When the
-kurtosis arguments are `NULL`, only the normal-theory variance is
-returned.
+**Non-normal margins.** The normal-theory variance does not hold when
+the margins are not normal: marginal kurtosis can change the
+large-sample variance of \\r\\ considerably when \\\rho \ne 0\\ (Bonett
+& Wright, 2000, p. 24), and in general the variance depends on every
+fourth-order cumulant of the joint distribution (Duncan & Layard, 1973,
+Equation 1.1).
 
 **Connection to Fisher's Z transform.** On the variance- stabilized
-scale \\Z = \tanh^{-1}(r)\\ the asymptotic variance is \\1/(n-3)\\
+scale \\Z = \tanh^{-1}(r)\\ the asymptotic variance is \\1/(N-3)\\
 regardless of \\\rho\\ (Fisher, 1921). This is reported alongside the
 raw-scale variance because it is the natural working scale for CI
 construction
@@ -84,6 +72,11 @@ Bonett, D. G., & Wright, T. A. (2000). Sample size requirements for
 estimating Pearson, Kendall and Spearman correlations. *Psychometrika,
 65*(1), 23–28.
 [doi:10.1007/BF02294183](https://doi.org/10.1007/BF02294183)
+
+Duncan, G. T., & Layard, M. W. J. (1973). A Monte-Carlo study of
+asymptotically robust tests for correlation coefficients. *Biometrika,
+60*(3), 551–558.
+[doi:10.1093/biomet/60.3.551](https://doi.org/10.1093/biomet/60.3.551)
 
 Fisher, R. A. (1915). Frequency distribution of the values of the
 correlation coefficient in samples from an indefinitely large
@@ -133,16 +126,8 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # 1. Normal-theory variance:
-var_r(rho = 0.30, n = 50)
-#>  term         value 
-#>  var_r_normal 0.0169
-#>  var_fisher_z 0.0213
-
-# 2. With Bonett-Wright correction for leptokurtic margins
-#        (excess kurtosis = 3 for each variable):
-var_r(rho = 0.30, n = 50, kurtosis_x = 3, kurtosis_y = 3)
-#>  term                value 
-#>  var_r_normal        0.0169
-#>  var_fisher_z        0.0213
-#>  var_r_bonett_wright 0.0192
+var_r(true_cor = 0.30, N = 50)
+#>  term         value
+#>  var_r_normal 0.017
+#>  var_fisher_z 0.021
 ```

@@ -35,8 +35,7 @@ rather than for the question, and Carlson and Timm (1974) and Herr and
 Gaebelein (1978) carried the argument further. Nelder (1977) framed the
 issue in terms of the principle of marginality, the reasoning behind
 Type II. Maxwell, Delaney, and Kelley (2027, Chapter 7) synthesize this
-literature from the model comparison perspective, which is the cleanest
-way to see what the types are, and the framing used here.
+literature from the model comparison perspective, the framing used here.
 
 ## A Sum of Squares Is a Model Comparison
 
@@ -50,7 +49,7 @@ restricted one,
 
 where $`E`$ is the error (residual) sum of squares of a model. The
 effect is the set of parameters that the full model has and the
-restricted model does not. A “type” is simply a rule for which full and
+restricted model does not. A “type” is a rule for which full and
 restricted pair to compare for each effect. Once the two models are
 written down, there is nothing mysterious left; the disagreement among
 the types is a disagreement about which models answer the question.
@@ -71,16 +70,19 @@ of $`X`$ adjusted for the terms in $`Z`$:
   contain it, honoring the principle of marginality:
   $`\mathrm{SS}(A \mid B)`$, $`\mathrm{SS}(B \mid A)`$,
   $`\mathrm{SS}(A{:}B \mid A, B)`$. Main effects are not adjusted for
-  the interaction. Type II is the most powerful option when the
-  interaction is absent, and it does not depend on how the factors are
-  coded.
+  the interaction. When the interaction is zero in the population, Type
+  II tests of the main effects are more powerful than Type III tests
+  (Maxwell, Delaney, & Kelley, 2027, Chapter 7), and they do not depend
+  on how the factors are coded.
 - **Type III.** Each term is adjusted for all other terms, including the
   higher-order terms that contain it: $`\mathrm{SS}(A \mid B, A{:}B)`$,
-  $`\mathrm{SS}(B \mid A, A{:}B)`$. This is the SAS GLM default and the
-  default of . The main-effect tests concern the unweighted marginal
-  means, which is why they require sum-to-zero contrasts () to test the
-  intended hypothesis; with R’s default treatment contrasts a naive Type
-  III main-effect test is not that hypothesis.
+  $`\mathrm{SS}(B \mid A, A{:}B)`$. This is the SAS GLM default and what
+  `car::Anova(type = 3)` computes (the
+  [`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html) default is
+  Type II). The main-effect tests concern the unweighted marginal means,
+  which is why they require sum-to-zero contrasts (`contr.sum`) to test
+  the intended hypothesis; with R’s default treatment contrasts a naive
+  Type III main-effect test is not that hypothesis.
 
 ## A Worked Unbalanced Factorial
 
@@ -109,8 +111,8 @@ DMAR’s
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
 computes all three types by model comparison in base R, choosing the
 type through an argument. It reports each effect’s sum of squares, its
-test, and partial and partial with confidence intervals, and it notes
-the type beneath the table.
+*F* test, and partial $`\eta^2`$ and partial $`\omega^2`$ with
+confidence intervals, and it notes the type beneath the table.
 
 ``` r
 
@@ -120,14 +122,16 @@ factorial_anova(y ~ A * B, data = d, ss_type = 1)   # sequential
 #> See ?ci_nc_F for the meaning of the clamp.
 ```
 
-| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
+| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_ci_lower | eta_squared_partial_ci_upper | omega_squared_partial | omega_squared_partial_ci_lower | omega_squared_partial_ci_upper |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| A | 8.74 | 1 | 7.55 | 0.0090 | 0.159 | 0.00971 | 0.332 | 0.125 | 0.00971 | 0.332 |
-| B | 14.2 | 2 | 6.11 | 0.0048 | 0.234 | 0.0259 | 0.394 | 0.182 | 0.0259 | 0.394 |
-| A:B | 1.47 | 2 | 0.636 | 0.5345 | 0.0308 | 0 | 0.146 | 0 | 0 | 0.146 |
-| Residuals | 46.3 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
+| A | 8.743 | 1 | 7.547 | 0.0090 | 0.159 | 0.010 | 0.332 | 0.125 | 0.010 | 0.332 |
+| B | 14.160 | 2 | 6.111 | 0.0048 | 0.234 | 0.026 | 0.394 | 0.182 | 0.026 | 0.394 |
+| A:B | 1.474 | 2 | 0.636 | 0.5345 | 0.031 | 0.000 | 0.146 | 0.000 | 0.000 | 0.146 |
+| Residuals | 46.342 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
 
-Sum of squares: Type I Confidence level: 95%
+Sum of squares: Type I
+
+Confidence level: 95%
 
 ``` r
 
@@ -137,14 +141,16 @@ factorial_anova(y ~ A * B, data = d, ss_type = 2)
 #> See ?ci_nc_F for the meaning of the clamp.
 ```
 
-| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
+| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_ci_lower | eta_squared_partial_ci_upper | omega_squared_partial | omega_squared_partial_ci_lower | omega_squared_partial_ci_upper |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| A | 7.4 | 1 | 6.39 | 0.0155 | 0.138 | 0.0041 | 0.31 | 0.105 | 0.0041 | 0.31 |
-| B | 14.2 | 2 | 6.11 | 0.0048 | 0.234 | 0.0259 | 0.394 | 0.182 | 0.0259 | 0.394 |
-| A:B | 1.47 | 2 | 0.636 | 0.5345 | 0.0308 | 0 | 0.146 | 0 | 0 | 0.146 |
-| Residuals | 46.3 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
+| A | 7.403 | 1 | 6.390 | 0.0155 | 0.138 | 0.004 | 0.310 | 0.105 | 0.004 | 0.310 |
+| B | 14.160 | 2 | 6.111 | 0.0048 | 0.234 | 0.026 | 0.394 | 0.182 | 0.026 | 0.394 |
+| A:B | 1.474 | 2 | 0.636 | 0.5345 | 0.031 | 0.000 | 0.146 | 0.000 | 0.000 | 0.146 |
+| Residuals | 46.342 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
 
-Sum of squares: Type II Confidence level: 95%
+Sum of squares: Type II
+
+Confidence level: 95%
 
 ``` r
 
@@ -154,14 +160,16 @@ factorial_anova(y ~ A * B, data = d, ss_type = 3)
 #> See ?ci_nc_F for the meaning of the clamp.
 ```
 
-| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_lower | eta_squared_partial_upper | omega_squared_partial | omega_squared_partial_lower | omega_squared_partial_upper |
+| effect | SS | df | F_value | p_value | eta_squared_partial | eta_squared_partial_ci_lower | eta_squared_partial_ci_upper | omega_squared_partial | omega_squared_partial_ci_lower | omega_squared_partial_ci_upper |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| A | 7.64 | 1 | 6.6 | 0.0141 | 0.142 | 0.00504 | 0.314 | 0.108 | 0.00504 | 0.314 |
-| B | 14.7 | 2 | 6.34 | 0.0041 | 0.241 | 0.0292 | 0.4 | 0.188 | 0.0292 | 0.4 |
-| A:B | 1.47 | 2 | 0.636 | 0.5345 | 0.0308 | 0 | 0.146 | 0 | 0 | 0.146 |
-| Residuals | 46.3 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
+| A | 7.642 | 1 | 6.596 | 0.0141 | 0.142 | 0.005 | 0.314 | 0.108 | 0.005 | 0.314 |
+| B | 14.693 | 2 | 6.341 | 0.0041 | 0.241 | 0.029 | 0.400 | 0.188 | 0.029 | 0.400 |
+| A:B | 1.474 | 2 | 0.636 | 0.5345 | 0.031 | 0.000 | 0.146 | 0.000 | 0.000 | 0.146 |
+| Residuals | 46.342 | 40 | NA | NA | NA | NA | NA | NA | NA | NA |
 
-Sum of squares: Type III Confidence level: 95%
+Sum of squares: Type III
+
+Confidence level: 95%
 
 Type I is sequential, so listing the factors in the other order changes
 it, while Type II and Type III do not depend on the order:
@@ -321,7 +329,7 @@ res[res$term %in% c("F_value", "df_1", "df_2", "p_value",
 
 | term                | value  |
 |:--------------------|:-------|
-| F_value             | 5.38   |
+| F_value             | 5.383  |
 | df_1                | 1      |
 | df_2                | 307    |
 | p_value             | 0.0210 |
@@ -329,7 +337,7 @@ res[res$term %in% c("F_value", "df_1", "df_2", "p_value",
 
 Confidence level: 95%
 
-The adjusted matches what
+The adjusted *F* matches what
 [`car::Anova()`](https://rdrr.io/pkg/car/man/Anova.html) returns at Type
 III (and Type II, which coincides here because there is a single
 factor).
@@ -362,8 +370,10 @@ comparison forms $`\mathbf{H}`$ for each effect. The omnibus test is
 then a function of the eigenvalues of $`\mathbf{H}\mathbf{E}^{-1}`$,
 reported as Wilks’ lambda, Pillai’s trace, the Hotelling-Lawley trace,
 or Roy’s largest root. They agree when the effect is one-dimensional and
-diverge as it spreads across dimensions; Pillai’s trace is the most
-robust to assumption violations.
+diverge as it spreads across dimensions. There is some evidence,
+reviewed by Maxwell, Delaney, and Kelley (2027, Chapter 14), that
+Pillai’s trace is the most robust of the four to unequal covariance
+matrices.
 
 DMAR’s
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md)
@@ -376,13 +386,14 @@ covariates; the same type considerations apply.
 
 ## Recommendations
 
-The model comparison perspective dissolves most of the controversy:
-state the full and restricted models you intend to compare, and the sum
-of squares follows. With that in hand:
+From the model comparison perspective, the choice of a type is a choice
+of models: state the full and restricted models you intend to compare,
+and the sum of squares follows. With that in hand:
 
 - For a **balanced** design, the types coincide; report any of them.
-- When there is **no interaction**, Type II is the most powerful test of
-  the main effects and does not depend on the coding of the factors.
+- When there is **no interaction** in the population, Type II tests of
+  the main effects are more powerful than Type III tests and do not
+  depend on the coding of the factors.
 - **Type III** is the common reporting default and corresponds to
   hypotheses about unweighted marginal means, but it requires
   sum-to-zero contrasts and is an awkward hypothesis for a main effect
@@ -395,7 +406,7 @@ In DMAR,
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md)
 carries this out for a between-subjects design: it computes the chosen
 type by model comparison in base R and reports each effect with its
-partial and partial confidence intervals.
+partial $`\eta^2`$ and partial $`\omega^2`$ confidence intervals.
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md) and
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md)
 cover the covariate-adjusted and multivariate cases.

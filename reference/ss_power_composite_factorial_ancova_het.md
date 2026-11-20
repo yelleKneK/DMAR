@@ -17,13 +17,13 @@ two-level case here.
 ss_power_composite_factorial_ancova_het(
   factor_levels,
   effects,
-  means = NULL,
-  correlations = NULL,
-  sigma = NULL,
-  sd_cov = 1,
+  true_means = NULL,
+  true_cor = NULL,
+  true_sd = NULL,
+  true_sd_X = 1,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n_per_cell = NULL
+  specified_n_per_cell = NULL
 )
 
 # S3 method for class 'dmar_composite_power_factorial_het'
@@ -45,48 +45,53 @@ plot(x, ...)
   slope), or `"slope"` (a factor-by-covariate slope heterogeneity). A
   `"mean"` or `"slope"` effect also gives `factors`, the factor indices
   it spans; a `"covariate"` effect spans none. Each element carries its
-  effect size, `f` or `partial_eta_squared`, unless the population
-  values (`means` and `correlations`) are supplied, in which case the
-  sizes come from them. An optional `label` names the effect; defaults
-  are the factor indices joined by `x` for a mean effect, `"covariate"`,
-  and `"cov_x_<factors>"` for a slope effect.
+  effect size, `true_f` or `true_eta_squared_partial`, unless the
+  population values (`true_means` and `true_cor`) are supplied, in which
+  case the sizes come from them. An optional `label` names the effect;
+  defaults are the factor indices joined by `x` for a mean effect,
+  `"covariate"`, and `"cov_x_<factors>"` for a slope effect. A field
+  under any other name is refused with an error of class
+  `dmar_argument_invalid`.
 
-- means:
+- true_means:
 
   Optional array of population cell means (dimensions `factor_levels`),
   needed when a `"mean"` effect is in the composite. Supplies the mean
   effects' sizes.
 
-- correlations:
+- true_cor:
 
   Optional array of the population covariate-outcome correlation within
-  each cell (dimensions `factor_levels`, each in \\(-1, 1)\\). The cell
-  slopes it implies supply the covariate and slope effects' sizes, and
-  its spread across cells sets the slope heterogeneity. Required with
-  the population-values interface, since the pooled error depends on
-  every cell's correlation.
+  each cell (dimensions `factor_levels`, each in \\(-1, 1)\\); the
+  correlation in cell *c* is \\\rho_c\\ in the formulas below, and
+  \\\bar{\rho^2}\\ is the mean of their squares. The cell slopes it
+  implies supply the covariate and slope effects' sizes, and its spread
+  across cells sets the slope heterogeneity. Required with the
+  population-values interface, since the pooled error depends on every
+  cell's correlation.
 
-- sigma:
+- true_sd:
 
   The common within-cell population standard deviation of the outcome
-  (before adjustment), required with the population-values interface.
+  (before adjustment), \\\sigma\\ in the formulas below; required with
+  the population-values interface.
 
-- sd_cov:
+- true_sd_X:
 
   Population standard deviation of the covariate. Default 1. A
-  correlation is scale free, so `sd_cov` does not change any power; it
-  sets the units the slopes and the figure are drawn in.
+  correlation is scale free, so `true_sd_X` does not change any power;
+  it sets the units the slopes and the figure are drawn in.
 
 - desired_power:
 
   Desired composite statistical power (default 0.85). Used only when
-  `n_per_cell` is `NULL`.
+  `specified_n_per_cell` is `NULL`.
 
 - alpha_level:
 
   Type I error rate for each individual test (default 0.05).
 
-- n_per_cell:
+- specified_n_per_cell:
 
   Per-cell sample size (balanced); if supplied, the realized composite
   power is returned rather than a sample size planned.
@@ -103,11 +108,12 @@ plot(x, ...)
 
 ## Value
 
-A `data.frame` with `term` and `value` columns: the recommended (or
-supplied) `n_per_cell` and total `N`, the `composite_power`, the
-`residual_df`, then for each effect its marginal `power_<label>`,
-purported `f_<label>`, numerator `df_<label>`, and
-`noncentral_parm_<label>`, followed by `cells` and `alpha_level`.
+A `data.frame` with `term` and `value` columns: the
+`necessary_n_per_cell` (or the supplied `specified_n_per_cell`) and the
+total sample size it implies, `total_N`, the `composite_power`, the
+`df_error`, then for each effect its marginal `power_<label>`, purported
+`true_f_<label>`, numerator `df_<label>`, and
+`noncentral_f_parm_<label>`, followed by `cells` and `alpha_level`.
 Carries the `dmar_ss_power` class for
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) /
 [`glance`](https://generics.r-lib.org/reference/glance.html) and a
@@ -182,12 +188,12 @@ Every power the function reports is then an approximation, and the
 output says so. `composite_power` is reported as
 `approximate_composite_power`, each `power_<label>` as
 `approximate_power_<label>`, and a planned sample size as
-`approximate_n_per_cell` and `approximate_N`, because that size is the
-smallest one at which the approximation reaches `desired_power` rather
-than a size known to attain it. The numbers do not change; the names do,
-and only in this case. Equal absolute cell correlations, including cells
-whose correlations share a magnitude and differ in sign, are the exact
-case and keep the ordinary names.
+`approximate_n_per_cell` and `approximate_total_N`, because that size is
+the smallest one at which the approximation reaches `desired_power`
+rather than a size known to attain it. The numbers do not change; the
+names do, and only in this case. Equal absolute cell correlations,
+including cells whose correlations share a magnitude and differ in sign,
+are the exact case and keep the ordinary names.
 
 The error has no guaranteed sign, and it grows with the spread of the
 cell correlations rather than shrinking with *N*. Treat the number as an
@@ -198,14 +204,14 @@ replications in which every effect in the composite is significant. The
 two-group help page reports the size of the departure over a range of
 correlation gaps.
 
-The effect size interface is a special case worth naming. Supplying `f`
-or `partial_eta_squared` for each effect states the effects directly and
-says nothing about the cell correlations, so the function has nothing to
-detect unequal residual variances from and labels the table exact. If
-the design those effect sizes came from has cell correlations that
-differ in absolute value, the same approximation applies and the labels
-will not tell you; supply `correlations` instead when you want the
-function to keep track of it.
+The effect size interface is a special case worth naming. Supplying
+`true_f` or `true_eta_squared_partial` for each effect states the
+effects directly and says nothing about the cell correlations, so the
+function has nothing to detect unequal residual variances from and
+labels the table exact. If the design those effect sizes came from has
+cell correlations that differ in absolute value, the same approximation
+applies and the labels will not tell you; supply `true_cor` instead when
+you want the function to keep track of it.
 
 ## The figure
 
@@ -237,6 +243,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -285,30 +292,30 @@ Ken Kelley <kkelley@nd.edu>
 # factor 1 by covariate slope heterogeneity.
 ss_power_composite_factorial_ancova_het(
   factor_levels = c(2, 2),
-  effects = list(list(type = "mean",      factors = 1,  f = 0.25),
-                 list(type = "covariate",               f = 0.40),
-                 list(type = "slope",      factors = 1,  f = 0.20)),
+  effects = list(list(type = "mean",      factors = 1,  true_f = 0.25),
+                 list(type = "covariate",               true_f = 0.40),
+                 list(type = "slope",      factors = 1,  true_f = 0.20)),
   desired_power = 0.80)
-#>  term                      value
-#>  necessary_n_per_cell      55   
-#>  necessary_N               220  
-#>  composite_power           0.805
-#>  residual_df               212  
-#>  power_1                   0.958
-#>  power_covariate           1    
-#>  power_cov_x_1             0.84 
-#>  f_1                       0.25 
-#>  f_covariate               0.4  
-#>  f_cov_x_1                 0.2  
-#>  df_1                      1    
-#>  df_covariate              1    
-#>  df_cov_x_1                1    
-#>  noncentral_parm_1         13.8 
-#>  noncentral_parm_covariate 35.2 
-#>  noncentral_parm_cov_x_1   8.8  
-#>  cells                     4    
-#>  alpha_level               0.05 
-#>  desired_power             0.8  
+#>  term                        value 
+#>  necessary_n_per_cell        55    
+#>  total_N                     220   
+#>  composite_power             0.805 
+#>  df_error                    212   
+#>  power_1                     0.958 
+#>  power_covariate             1.000 
+#>  power_cov_x_1               0.840 
+#>  true_f_1                    0.250 
+#>  true_f_covariate            0.400 
+#>  true_f_cov_x_1              0.200 
+#>  df_1                        1     
+#>  df_covariate                1     
+#>  df_cov_x_1                  1     
+#>  noncentral_f_parm_1         13.750
+#>  noncentral_f_parm_covariate 35.200
+#>  noncentral_f_parm_cov_x_1   8.800 
+#>  cells                       4     
+#>  alpha_level                 0.050 
+#>  desired_power               0.800 
 
 # The same design from population values: cell means, a covariate-outcome
 # correlation per cell (they differ across factor 1, so the slopes do), and a
@@ -318,57 +325,57 @@ cell_means <- matrix(c(10, 12,
 cell_rho   <- matrix(c(0.55, 0.55,
                        0.15, 0.20), nrow = 2, byrow = TRUE)
 fit <- ss_power_composite_factorial_ancova_het(
-  factor_levels = c(2, 2), means = cell_means, correlations = cell_rho,
-  sigma = 4, sd_cov = 2,
+  factor_levels = c(2, 2), true_means = cell_means, true_cor = cell_rho,
+  true_sd = 4, true_sd_X = 2,
   effects = list(list(type = "mean",      factors = 1),
                  list(type = "covariate"),
                  list(type = "slope",      factors = 1)),
-  n_per_cell = 40)
+  specified_n_per_cell = 40)
 #> Warning: The cell correlations differ in absolute value, so the cells' residual variances differ and the shared-error composite power is an approximation whose error grows with the spread of the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_cell, because neither is exact; confirm a final design by simulation.
 fit
-#>  term                        value
-#>  specified_n_per_cell        40   
-#>  specified_N                 160  
-#>  approximate_composite_power 0.299
-#>  residual_df                 152  
-#>  approximate_power_1         0.406
-#>  approximate_power_covariate 0.999
-#>  approximate_power_cov_x_1   0.733
-#>  f_1                         0.137
-#>  f_covariate                 0.397
-#>  f_cov_x_1                   0.205
-#>  df_1                        1    
-#>  df_covariate                1    
-#>  df_cov_x_1                  1    
-#>  noncentral_parm_1           3    
-#>  noncentral_parm_covariate   25.2 
-#>  noncentral_parm_cov_x_1     6.75 
-#>  cells                       4    
-#>  alpha_level                 0.05 
+#>  term                        value 
+#>  specified_n_per_cell        40    
+#>  total_N                     160   
+#>  approximate_composite_power 0.299 
+#>  df_error                    152   
+#>  approximate_power_1         0.406 
+#>  approximate_power_covariate 0.999 
+#>  approximate_power_cov_x_1   0.733 
+#>  true_f_1                    0.137 
+#>  true_f_covariate            0.397 
+#>  true_f_cov_x_1              0.205 
+#>  df_1                        1     
+#>  df_covariate                1     
+#>  df_cov_x_1                  1     
+#>  noncentral_f_parm_1         3.001 
+#>  noncentral_f_parm_covariate 25.236
+#>  noncentral_f_parm_cov_x_1   6.752 
+#>  cells                       4     
+#>  alpha_level                 0.050 
 plot(fit)
 
 
 # The one-factor, two-level case is the two-group composite ANCOVA.
 ss_power_composite_factorial_ancova_het(
   factor_levels = 2,
-  means = c(-0.25, 0.25), correlations = c(0.1, 0.5), sigma = 1,
+  true_means = c(-0.25, 0.25), true_cor = c(0.1, 0.5), true_sd = 1,
   effects = list(list(type = "mean", factors = 1),
                  list(type = "slope", factors = 1)),
-  n_per_cell = 100)
+  specified_n_per_cell = 100)
 #> Warning: The cell correlations differ in absolute value, so the cells' residual variances differ and the shared-error composite power is an approximation whose error grows with the spread of the correlations. The powers are reported as approximate_* rows, and a planned sample size as approximate_n_per_cell, because neither is exact; confirm a final design by simulation.
-#>  term                        value
-#>  specified_n_per_cell        100  
-#>  specified_N                 200  
-#>  approximate_composite_power 0.825
-#>  residual_df                 196  
-#>  approximate_power_1         0.965
-#>  approximate_power_cov_x_1   0.855
-#>  f_1                         0.268
-#>  f_cov_x_1                   0.214
-#>  df_1                        1    
-#>  df_cov_x_1                  1    
-#>  noncentral_parm_1           14.4 
-#>  noncentral_parm_cov_x_1     9.2  
-#>  cells                       2    
-#>  alpha_level                 0.05 
+#>  term                        value 
+#>  specified_n_per_cell        100   
+#>  total_N                     200   
+#>  approximate_composite_power 0.825 
+#>  df_error                    196   
+#>  approximate_power_1         0.965 
+#>  approximate_power_cov_x_1   0.855 
+#>  true_f_1                    0.268 
+#>  true_f_cov_x_1              0.214 
+#>  df_1                        1     
+#>  df_cov_x_1                  1     
+#>  noncentral_f_parm_1         14.368
+#>  noncentral_f_parm_cov_x_1   9.195 
+#>  cells                       2     
+#>  alpha_level                 0.050 
 ```

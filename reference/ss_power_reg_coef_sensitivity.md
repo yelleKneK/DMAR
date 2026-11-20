@@ -2,13 +2,13 @@
 
 Monte Carlo sensitivity analysis for the statistical power of the
 *t*-test of a targeted regression coefficient. Given a planned
-(`estimated_*`) covariance structure and a true (`true_*`) covariance
+(`supposed_*`) covariance structure and a true (`true_*`) covariance
 structure, the function draws `G` replications, fits the multiple
 regression, and reports the empirical proportion of replications on
 which the *t*-test of the targeted coefficient rejects, together with
-the realized distribution of \\\hat b_j\\, its standard error, and the
-test statistic. `ss_power_reg_coef_sensitivity()` is the power-oriented
-sibling of
+the realized distribution of the estimated unstandardized coefficient
+\\\hat b_j\\, its standard error, and the test statistic.
+`ss_power_reg_coef_sensitivity()` is the power-oriented sibling of
 [`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
 (which is CI-width oriented).
 
@@ -19,18 +19,18 @@ ss_power_reg_coef_sensitivity(
   true_var_Y = NULL,
   true_cov_YX = NULL,
   true_cov_XX = NULL,
-  estimated_var_Y = NULL,
-  estimated_cov_YX = NULL,
-  estimated_cov_XX = NULL,
+  supposed_var_Y = NULL,
+  supposed_cov_YX = NULL,
+  supposed_cov_XX = NULL,
   specified_N = NULL,
   which_predictor = 1,
   desired_power = 0.85,
   alpha_level = 0.05,
   directional = FALSE,
-  standardize = FALSE,
   G = 1000,
   print_iter = TRUE,
-  filename = NULL
+  filename = NULL,
+  seed = NULL
 )
 ```
 
@@ -49,21 +49,21 @@ ss_power_reg_coef_sensitivity(
 
   Population covariance matrix of the `p` predictor variables
 
-- estimated_var_Y:
+- supposed_var_Y:
 
-  Estimated variance of the dependent variable (*Y*) used in sample size
-  planning. Defaults to `true_var_Y`.
+  Supposed variance of the dependent variable (*Y*), the planning value
+  used in sample size planning. Defaults to `true_var_Y`.
 
-- estimated_cov_YX:
+- supposed_cov_YX:
 
-  Estimated covariance vector between the predictor variables and the
-  dependent variable used in sample size planning. Defaults to
-  `true_cov_YX`.
+  Supposed covariance vector between the predictor variables and the
+  dependent variable, the planning values used in sample size planning.
+  Defaults to `true_cov_YX`.
 
-- estimated_cov_XX:
+- supposed_cov_XX:
 
-  Estimated covariance matrix of the predictor variables used in sample
-  size planning. Defaults to `true_cov_XX`.
+  Supposed covariance matrix of the predictor variables, the planning
+  values used in sample size planning. Defaults to `true_cov_XX`.
 
 - specified_N:
 
@@ -87,11 +87,6 @@ ss_power_reg_coef_sensitivity(
 
   Whether a one-sided or two-sided test is used
 
-- standardize:
-
-  Whether each replication's data should be standardized prior to
-  fitting (giving a standardized regression coefficient)
-
 - G:
 
   Number of Monte Carlo replications
@@ -103,10 +98,18 @@ ss_power_reg_coef_sensitivity(
 - filename:
 
   Optional path of a CSV file to receive the per-replication results
-  (the coefficient estimate, its standard error, the *t* statistic, and
-  the observed \\R^2\\), overwriting any file already at that path; the
-  default `NULL` writes nothing, and a throwaway run that wants the file
-  should point it at `tempfile(fileext = ".csv")`.
+  (the coefficient estimate `reg_coef_j`, its standard error
+  `se_reg_coef_j`, the *t* statistic `t_value`, and the observed \\R^2\\
+  `R2`), overwriting any file already at that path; the default `NULL`
+  writes nothing, and a throwaway run that wants the file should point
+  it at `tempfile(fileext = ".csv")`.
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
@@ -115,14 +118,15 @@ Carlo sensitivity analysis. The `term` entries are: `total_N` (the
 sample size evaluated), `empirical_power`, `analytic_power` (computed
 from
 [`ss_power_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef.md)),
-the mean / median / SD of the realized \\\hat b_j\\ (`mean_b_j`,
-`median_b_j`, `sd_b_j`), of its standard error (`mean_se_b_j`,
-`median_se_b_j`, `sd_se_b_j`), of the test statistic (`mean_t`,
-`median_t`, `sd_t`), and of the squared multiple correlation coefficient
-(`mean_R2`, `median_R2`, `sd_R2`), `t_crit` (the critical value), and
-the input echoes `p`, `which_predictor`, `true_b_j` and `estimated_b_j`
-(the population and planning values of the targeted coefficient implied
-by the supplied covariance structures), `desired_power` (NA when
+the mean / median / SD of the realized \\\hat b_j\\ (`mean_reg_coef_j`,
+`median_reg_coef_j`, `sd_reg_coef_j`), of its standard error
+(`mean_se_reg_coef_j`, `median_se_reg_coef_j`, `sd_se_reg_coef_j`), of
+the test statistic (`mean_t_value`, `median_t_value`, `sd_t_value`), and
+of the squared multiple correlation coefficient (`mean_R2`, `median_R2`,
+`sd_R2`), `t_crit` (the critical value), and the input echoes `p`,
+`which_predictor`, `true_reg_coef_j` and `supposed_reg_coef_j` (the
+population and planning values of the targeted coefficient implied by
+the supplied covariance structures), `desired_power` (NA when
 `specified_N` was supplied instead), and `alpha_level`. The result
 carries the `dmar_ss_power_sensitivity` class, so
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) reports the
@@ -132,14 +136,74 @@ simulated estimator distribution beside the echoed inputs.
 
 ## Details
 
-When the estimated and true covariance structures are identical, the
+When the supposed and true covariance structures are identical, the
 function performs a Monte Carlo evaluation of the planning procedure (no
 misspecification); when they differ, it performs a sensitivity analysis
 on the consequences of misspecifying the population covariance structure
 for the targeted coefficient's power. The planning step calls
 [`ss_power_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef.md)
-with the estimated covariance structure; the simulation step generates
+with the supposed covariance structure; the simulation step generates
 data from the true covariance structure.
+
+The coefficient is the unstandardized one, \\b_j\\, the *j*th element of
+\\\Sigma\_{XX}^{-1}\sigma\_{XY}\\, from `true_cov_XX` and `true_cov_YX`
+for the true value and from their supposed counterparts for the supposed
+value, and every replication is fit in the units of the data. The *t*
+statistic of a coefficient is the same whether or not the data are
+standardized, so the power is that of the test of the standardized
+coefficient as well; the standardized coefficient itself, \\b_j
+\sigma\_{X_j}/\sigma_Y\\ (Kelley & Maxwell, 2003, p. 316), and its
+precision are the subject of
+[`ss_aipe_src_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src_sensitivity.md).
+
+## The record of the simulation
+
+Every sensitivity function of the package summarizes its replications
+over one denominator: the replications that produced a confidence
+interval (for a power sensitivity function, a test). The proportion of
+intervals that met the width target (`pct_ci_less_width`), the
+proportions of intervals that missed the true value, and the summaries
+of the widths are all taken over those replications. A replication
+without an interval is in none of these rows. It is counted, and the
+returned table carries the counts in its attribute `simulation`, a list
+read with `attr(x, "simulation")`:
+
+- `attempted`:
+
+  the number of replications asked for (`G`).
+
+- `returned`:
+
+  the number that produced an interval (a test).
+
+- `failed`:
+
+  the number that did not (`attempted - returned`).
+
+- `denominator`:
+
+  the number of replications the rows named above are taken over, which
+  is `returned`.
+
+- `width_target_probability`:
+
+  the proportion of the replications with an interval whose interval met
+  the width target, the value of the `pct_ci_less_width` row; `NA` for a
+  function or a call without a width target, and when no replication
+  produced an interval.
+
+- `width_target_mc_ci`:
+
+  the exact binomial (Clopper-Pearson) limits for that proportion, at
+  the confidence level of the table. They describe the error of the
+  simulation, which shrinks as `G` grows, and nothing else.
+
+A function that records more about its run adds elements to the list,
+and its help page names them. The line "Replications" beneath the
+printed table gives `G`, and the three counts when a replication was
+without an interval. With many replications without an interval the rows
+describe only the studies in which the interval could be formed, so
+`failed` is to be reported beside them.
 
 ## References
 
@@ -179,6 +243,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -217,34 +282,36 @@ Ken Kelley <kkelley@nd.edu>
 # default G = 1000 replications is used in practice; G is reduced here
 # so the example runs quickly.
 set.seed(113)
-Sigma_X <- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+cov_XX  <- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
 cov_YX  <- c(0.4, 0.3)
 ss_power_reg_coef_sensitivity(
-  true_var_Y = 1, true_cov_YX = cov_YX, true_cov_XX = Sigma_X,
+  true_var_Y = 1, true_cov_YX = cov_YX, true_cov_XX = cov_XX,
   which_predictor = 1, desired_power = 0.80,
   G = 100, print_iter = FALSE
 )
-#>  term            value 
-#>  total_N         62    
-#>  empirical_power 0.8   
-#>  analytic_power  0.801 
-#>  mean_b_j        0.351 
-#>  median_b_j      0.347 
-#>  sd_b_j          0.12  
-#>  mean_se_b_j     0.12  
-#>  median_se_b_j   0.119 
-#>  sd_se_b_j       0.0155
-#>  mean_t          2.94  
-#>  median_t        3     
-#>  sd_t            1.02  
-#>  mean_R2         0.222 
-#>  median_R2       0.21  
-#>  sd_R2           0.0849
-#>  t_crit          2     
-#>  p               2     
-#>  which_predictor 1     
-#>  true_b_j        0.341 
-#>  estimated_b_j   0.341 
-#>  desired_power   0.8   
-#>  alpha_level     0.05  
+#>  term                 value
+#>  total_N              62   
+#>  empirical_power      0.800
+#>  analytic_power       0.801
+#>  mean_reg_coef_j      0.351
+#>  median_reg_coef_j    0.347
+#>  sd_reg_coef_j        0.120
+#>  mean_se_reg_coef_j   0.120
+#>  median_se_reg_coef_j 0.119
+#>  sd_se_reg_coef_j     0.016
+#>  mean_t_value         2.939
+#>  median_t_value       3.001
+#>  sd_t_value           1.019
+#>  mean_R2              0.222
+#>  median_R2            0.210
+#>  sd_R2                0.085
+#>  t_crit               2.001
+#>  p                    2    
+#>  which_predictor      1    
+#>  true_reg_coef_j      0.341
+#>  supposed_reg_coef_j  0.341
+#>  desired_power        0.800
+#>  alpha_level          0.050
+#> 
+#> Replications: 100
 ```

@@ -198,11 +198,11 @@ colnames(ratings) <- paste0("expert_", 1:6)
 cvi <- content_validity_index(ratings)
 cvi
 #>  item   n_experts n_relevant i_cvi ci_lower ci_upper kappa cvr   
-#>  item_1 6         6          1     0.541    1        1     1     
+#>  item_1 6         6          1.000 0.541    1.000    1.000 1.000 
 #>  item_2 6         5          0.833 0.359    0.996    0.816 0.667 
-#>  item_3 6         2          0.333 0.0433   0.777    0.129 -0.333
-#>  item_4 6         6          1     0.541    1        1     1     
-#>  item_5 5         5          1     0.478    1        1     1     
+#>  item_3 6         2          0.333 0.043    0.777    0.129 -0.333
+#>  item_4 6         6          1.000 0.541    1.000    1.000 1.000 
+#>  item_5 5         5          1.000 0.478    1.000    1.000 1.000 
 #> 
 #> Confidence level: 95%
 
@@ -224,26 +224,26 @@ content_validity_index(matrix(c(4, 4, 3, 4, 3, 1), nrow = 1))
 # A wide interval is the point: with 5 experts an I-CVI of 0.80 is
 # compatible with a population proportion anywhere from about 0.28 to 0.99.
 content_validity_index(matrix(c(4, 4, 3, 4, 1), nrow = 1))
-#>  item   n_experts n_relevant i_cvi ci_lower ci_upper kappa cvr
-#>  item_1 5         4          0.8   0.284    0.995    0.763 0.6
+#>  item   n_experts n_relevant i_cvi ci_lower ci_upper kappa cvr  
+#>  item_1 5         4          0.800 0.284    0.995    0.763 0.600
 #> 
 #> Confidence level: 95%
 
 # The broom verbs on the earlier result: one row per item, and the
 # scale-level summary.
 generics::tidy(cvi)
-#>     term  estimate   ci_lower  ci_upper     kappa        cvr n_experts
-#> 1 item_1 1.0000000 0.54074187 1.0000000 1.0000000  1.0000000         6
-#> 2 item_2 0.8333333 0.35876542 0.9957893 0.8160920  0.6666667         6
-#> 3 item_3 0.3333333 0.04327187 0.7772219 0.1292517 -0.3333333         6
-#> 4 item_4 1.0000000 0.54074187 1.0000000 1.0000000  1.0000000         6
-#> 5 item_5 1.0000000 0.47817625 1.0000000 1.0000000  1.0000000         5
-#>   n_relevant
-#> 1          6
-#> 2          5
-#> 3          2
-#> 4          6
-#> 5          5
+#>     term  estimate estimand   ci_lower  ci_upper     kappa        cvr n_experts
+#> 1 item_1 1.0000000    i_cvi 0.54074187 1.0000000 1.0000000  1.0000000         6
+#> 2 item_2 0.8333333    i_cvi 0.35876542 0.9957893 0.8160920  0.6666667         6
+#> 3 item_3 0.3333333    i_cvi 0.04327187 0.7772219 0.1292517 -0.3333333         6
+#> 4 item_4 1.0000000    i_cvi 0.54074187 1.0000000 1.0000000  1.0000000         6
+#> 5 item_5 1.0000000    i_cvi 0.47817625 1.0000000 1.0000000  1.0000000         5
+#>   n_relevant conf_level
+#> 1          6       0.95
+#> 2          5       0.95
+#> 3          2       0.95
+#> 4          6       0.95
+#> 5          5       0.95
 generics::glance(cvi)
 #>   s_cvi_ave s_cvi_ua n_items n_experts conf_level
 #> 1 0.8333333      0.6       5         6       0.95

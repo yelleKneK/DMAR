@@ -1,9 +1,9 @@
 # Visualize a Standardized Mean Difference With Overlapping Distributions
 
-Creates a publication-quality plot showing two normal distributions
-separated by the standardized mean difference (*d*). The plot includes a
-confidence interval for the population effect size and sample size
-annotations, both shown by default.
+Plots two normal distributions separated by the standardized mean
+difference (*d*). The plot includes a confidence interval for the
+population effect size and sample size annotations, both shown by
+default.
 
 ## Usage
 
@@ -127,9 +127,9 @@ Software, 20*(8), 1–24.
 
 Other plotting:
 [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
-[`plot_cfa_k()`](https://yelleknek.github.io/DMAR/reference/plot_cfa_k.md),
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
+[`plot_fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/plot_fa_confirmatory.md),
 [`plot_forest()`](https://yelleknek.github.io/DMAR/reference/plot_forest.md),
 [`plot_irt_information()`](https://yelleknek.github.io/DMAR/reference/plot_irt_information.md),
 [`plot_mediation_mbco()`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md),
@@ -148,10 +148,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -179,22 +180,19 @@ plot_smd(smd = 0.50, n_1 = 50, n_2 = 50)
 
 
 # From raw data, where the standardized mean difference and both
-# sample sizes are taken from the data. The d annotation now reports
-# the sample value rather than a supplied one.
+# sample sizes are taken from the data. The d annotation here reports
+# the sample value rather than a supplied one, and the group labels
+# and the title are the reader's own.
 set.seed(113)
 g1 <- rnorm(40, mean = 0.6, sd = 1)
 g2 <- rnorm(40, mean = 0.0, sd = 1)
-plot_smd(group_1 = g1, group_2 = g2)
+plot_smd(group_1 = g1, group_2 = g2,
+         group_labels = c("Treatment", "Control"),
+         title = "Treatment Effect on Reading Scores")
 
 
 # Without the confidence interval or the sample size annotations, the
 # figure is the two curves alone.
 plot_smd(smd = 0.80, show_ci = FALSE, show_n = FALSE)
-
-
-# Group labels and a title of the reader's own.
-plot_smd(smd = 0.45, n_1 = 75, n_2 = 75,
-         group_labels = c("Treatment", "Control"),
-         title = "Treatment Effect on Reading Scores")
 
 ```

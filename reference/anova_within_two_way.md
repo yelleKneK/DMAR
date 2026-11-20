@@ -38,16 +38,28 @@ anova_within_two_way(data, outcome, factor_A, factor_B, subject)
 
 ## Value
 
-A `data.frame` with rows for each of the three effects (`A`, `B`, `A:B`)
-crossed with each sphericity adjustment (`none`, `Greenhouse-Geisser`,
-`Huynh-Feldt`, `lower_bound`). Columns: `effect`, `adjustment`,
-`F_value`, `df_1`, `df_2`, `p_value`, `epsilon`, `partial_eta_squared`.
-When an effect has too few subjects for its epsilon to be estimable
-(\\n - 1\\ smaller than the effect's numerator degrees of freedom; see
-Details), the Greenhouse-Geisser and Huynh-Feldt rows for that effect
-carry `NA` in `epsilon`, `df_1`, `df_2`, and `p_value`, and a single
-warning names the condition; the unadjusted and lower-bound rows are
-unaffected.
+A `data.frame` (class `dmar_tbl`) with rows for each of the three
+effects (`A`, `B`, `A:B`) crossed with each sphericity adjustment
+(`none`, `Greenhouse-Geisser`, `Huynh-Feldt`, `lower_bound`). Columns:
+`effect`, `adjustment`, `F_value`, `df_1`, `df_2`, `p_value`, `epsilon`,
+`eta_squared_partial`. When an effect has too few subjects for its
+epsilon to be estimable (\\n - 1\\ smaller than the effect's numerator
+degrees of freedom; see Details), the Greenhouse-Geisser and Huynh-Feldt
+rows for that effect carry `NA` in `epsilon`, `df_1`, `df_2`, and
+`p_value`, and a single warning names the condition; the unadjusted and
+lower-bound rows are unaffected. The table prints through the
+[`dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
+display layer: whole numbers such as the unadjusted degrees of freedom
+without a decimal part, other values to 3 decimal places, and *p*-values
+to 4 decimal places (one below 0.0001 prints as “\< 0.0001”); the stored
+values keep full precision. `tidy()` gives one row per row of the table,
+its `term` joining `effect` and `adjustment` and its `estimate` the
+`F_value`, and `glance()` gives one row, the number of rows (`n_terms`)
+with `conf_level` and `B_used` `NA`, since no interval or bootstrap is
+formed (see
+[`dmar_tidiers`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)).
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) returns
+the table as a plain `data.frame` with the same columns and values.
 
 ## Details
 
@@ -157,30 +169,30 @@ grid$y <- with(grid,
   rep(rnorm(n_sub, 0, 1.5), times = 6))
 anova_within_two_way(grid, outcome = "y", factor_A = "A",
                      factor_B = "B", subject = "subject")
-#>    effect         adjustment    F_value     df_1     df_2      p_value
-#> 1       A               none 60.2728298 2.000000 22.00000 1.183465e-09
-#> 2       A Greenhouse-Geisser 60.2728298 1.830122 20.13135 5.323032e-09
-#> 3       A        Huynh-Feldt 60.2728298 2.000000 22.00000 1.183465e-09
-#> 4       A        lower_bound 60.2728298 1.000000 11.00000 8.678406e-06
-#> 5       B               none 85.6959259 1.000000 11.00000 1.589730e-06
-#> 6       B Greenhouse-Geisser 85.6959259 1.000000 11.00000 1.589730e-06
-#> 7       B        Huynh-Feldt 85.6959259 1.000000 11.00000 1.589730e-06
-#> 8       B        lower_bound 85.6959259 1.000000 11.00000 1.589730e-06
-#> 9     A:B               none  0.9731229 2.000000 22.00000 3.935843e-01
-#> 10    A:B Greenhouse-Geisser  0.9731229 1.848186 20.33005 3.885934e-01
-#> 11    A:B        Huynh-Feldt  0.9731229 2.000000 22.00000 3.935843e-01
-#> 12    A:B        lower_bound  0.9731229 1.000000 11.00000 3.451042e-01
-#>      epsilon partial_eta_squared
-#> 1         NA          0.84566349
-#> 2  0.9150612          0.84566349
-#> 3  1.0000000          0.84566349
-#> 4  0.5000000          0.84566349
-#> 5         NA          0.88624133
-#> 6  1.0000000          0.88624133
-#> 7  1.0000000          0.88624133
-#> 8  1.0000000          0.88624133
-#> 9         NA          0.08127561
-#> 10 0.9240930          0.08127561
-#> 11 1.0000000          0.08127561
-#> 12 0.5000000          0.08127561
+#>  effect adjustment         F_value df_1  df_2   p_value  epsilon
+#>  A      none               60.273  2     22     < 0.0001 <NA>   
+#>  A      Greenhouse-Geisser 60.273  1.830 20.131 < 0.0001 0.915  
+#>  A      Huynh-Feldt        60.273  2     22     < 0.0001 1.000  
+#>  A      lower_bound        60.273  1     11     < 0.0001 0.500  
+#>  B      none               85.696  1     11     < 0.0001 <NA>   
+#>  B      Greenhouse-Geisser 85.696  1     11     < 0.0001 1.000  
+#>  B      Huynh-Feldt        85.696  1     11     < 0.0001 1.000  
+#>  B      lower_bound        85.696  1     11     < 0.0001 1.000  
+#>  A:B    none               0.973   2     22     0.3936   <NA>   
+#>  A:B    Greenhouse-Geisser 0.973   1.848 20.330 0.3886   0.924  
+#>  A:B    Huynh-Feldt        0.973   2     22     0.3936   1.000  
+#>  A:B    lower_bound        0.973   1     11     0.3451   0.500  
+#>  eta_squared_partial
+#>  0.846              
+#>  0.846              
+#>  0.846              
+#>  0.846              
+#>  0.886              
+#>  0.886              
+#>  0.886              
+#>  0.886              
+#>  0.081              
+#>  0.081              
+#>  0.081              
+#>  0.081              
 ```

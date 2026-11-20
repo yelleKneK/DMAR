@@ -136,7 +136,18 @@ mediation_mbco(
   expressions; a multi-expression element is tested jointly (all
   constrained to zero at once, with as many degrees of freedom as
   expressions), and its row reports the test alone, with no scalar
-  estimate.
+  estimate. Each expression of a joint test must restrict the parameters
+  beyond what the others do. An expression given twice, a multiple of
+  another (`"a"` and `"2*a"`), a combination of others (`"a"`, `"b"`,
+  and `"a + b"`; `"a - b"` and `"b - a"`), or an expression that is zero
+  wherever the others are (`"a*b"` with `"b"`; `"a*cp"` with `"a"`;
+  `"a*b*cp"` with `"a*b"`) would be counted as a degree of freedom while
+  restricting nothing, so such a set is refused before any model is fit,
+  with a condition of class `dmar_argument_invalid` that names the
+  redundant expressions (as `redundant`). Equivalent sets of expressions
+  that each restrict, such as `c("a", "b")` and `c("a + b", "a - b")`,
+  give the same test. See *Constraints that add no restriction* under
+  Details.
 
 - ci_method:
 
@@ -154,8 +165,14 @@ mediation_mbco(
 
 - B:
 
-  Number of Monte Carlo replications when `ci_method = "monte_carlo"`.
-  Defaults to 10000.
+  Number of Monte Carlo draws when `ci_method = "monte_carlo"`, a single
+  whole number (not read, and not checked, for the other intervals).
+  Defaults to 10000, because a draw costs one evaluation of each effect
+  and no refit. The fewest accepted is 400 at the default `conf_level`
+  (200 at 0.90, 2000 at 0.99); a smaller `B` is refused before the model
+  is fit (class `dmar_count_invalid`). See *Monte Carlo draws* under
+  *Details* and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - optimizer:
 
@@ -168,7 +185,8 @@ mediation_mbco(
 
   Optional integer seed for the Monte Carlo interval, used locally (the
   caller's random number generator state is restored on exit). Default
-  `NULL` leaves the random number generator state alone.
+  `NULL` draws the Monte Carlo replications from the current random
+  number stream, which advances that stream.
 
 ## Value
 
@@ -178,20 +196,29 @@ expression), `term`, `estimate`, `se` (delta method), `ci_lower`,
 `ci_upper`, `lrt` (the MBCO likelihood ratio statistic), `df`,
 `p_value`, `delta_aic`, and `delta_bic`. A joint test row (a
 several-constraint moderation or hypothesis test) reports the test
-columns with `df` equal to the number of constraints; its `estimate`,
-`se`, and interval are `NA` because no single number summarizes several
-constraints. Attributes: `"conf_level"`, `"ci_method"`, `"optimizer"`,
-`"x"`, `"y"`, `"N"`, `"deviance"`, `"aic"`, `"bic"`, `"n_par"` (full
-model fit information), `"groups"` (the group labels, reference first;
-multiple-group fits only), `"R2"` (named vector, endogenous variables
-under the full model, per group when grouped), `"delta_R2"` (matrix of
-full minus null \\R^2\\, variables by tested effects), `"moderation"`
-(for a moderated analysis: the moderator name, the probe values, and
-each moderated effect's moderator polynomial, which is what
+columns with `df` equal to the number of constraints, none of which is
+redundant (see `hypotheses`); its `estimate`, `se`, and interval are
+`NA` because no single number summarizes several constraints.
+Attributes: `"conf_level"`, `"ci_method"`, with the Monte Carlo interval
+`"B"`, `"B_used"`, `"n_dropped"`, `"B_required"`, and
+`"bootstrap_status"` (see *Monte Carlo draws* under Details),
+`"optimizer"`, `"x"`, `"y"`, `"N"`, `"deviance"`, `"aic"`, `"bic"`,
+`"n_par"` (full model fit information), `"groups"` (the group labels,
+reference first; multiple-group fits only), `"R2"` (named vector,
+endogenous variables under the full model, per group when grouped),
+`"delta_R2"` (matrix of full minus null \\R^2\\, variables by tested
+effects), `"moderation"` (for a moderated analysis: the moderator name,
+the probe values, and each moderated effect's moderator polynomial,
+which is what
 [`plot_mediation_mbco`](https://yelleknek.github.io/DMAR/reference/plot_mediation_mbco.md)
-draws), and `"mx_model"` (the fitted OpenMx full model, an escape hatch
-for further OpenMx work). Use `tidy()` and `glance()` for broom-style
-views.
+draws), `"rescale"` (only when badly scaled variables were rescaled for
+the fits, see *Badly scaled variables* under Details: `divisors`, the
+power of 2 each observed variable was divided by, and `multipliers`, the
+factor that turns each parameter of the rescaled fit into the parameter
+of the original metric), and `"mx_model"` (the fitted OpenMx full model,
+in the rescaled metric when there is a `"rescale"` attribute, an escape
+hatch for further OpenMx work). Use `tidy()` and `glance()` for
+broom-style views.
 
 ## Details
 
@@ -203,15 +230,27 @@ for example \\H_0\\: \beta_1 \beta_2 = 0\\ for the indirect effect of
 \\X\\ on \\Y\\ through one mediator. Writing \\D =
 -2\\\mathrm{log\\likelihood}\\ for the deviance of each fitted model,
 the test statistic is \$\$\mathrm{LRT}\_{\mathrm{MBCO}} =
-D\_{\mathrm{null}} - D\_{\mathrm{full}},\$\$ which has a large sample
-chi square distribution with degrees of freedom equal to the number of
-constraints (here 1) when the null hypothesis is true (Wilks, 1938). The
-resulting *p*-value is a continuous measure of the compatibility of the
-data with the null model, not merely a reject or fail-to-reject
-decision, and in the simulations of Tofighi and Kelley (2020) the test
-controls the Type I error rate more robustly than the tests based on
-confidence intervals in common use, especially when the indirect effect
-is truly zero.
+D\_{\mathrm{null}} - D\_{\mathrm{full}},\$\$ and the *p*-value refers it
+to the chi square distribution with degrees of freedom equal to the
+number of constraints (here 1). That distribution is the large sample
+distribution of the statistic when the null hypothesis is true (Wilks,
+1938) and regular: the constraints are smooth and functionally
+independent, and the population parameter is identified, lies in the
+interior of the parameter space, and is a point near which the null set
+is a smooth surface with one dimension fewer per constraint than the
+full model. The null hypothesis of no indirect effect is regular at
+every point of its null set except those where both of its coefficients
+are zero (whatever the values of the other parameters), where the chi
+square reference does not hold (see *The reference distribution where
+the branches cross* below). The *p*-value is a continuous measure of the
+compatibility of the data with the null model, not merely a reject or
+fail-to-reject decision. In the simulations of Tofighi and Kelley (2020,
+p. 508), with one coefficient of the indirect effect zero, the Type I
+error rate of the test stayed close to the nominal .05 for every sample
+size (50 to 200) and size of the other coefficient, whereas the
+percentile bootstrap, Monte Carlo, and profile likelihood intervals and
+the joint significance test rejected too rarely when the other
+coefficient was small (0.14) and the sample size was 100 or less.
 
 **Why the constraint is nonlinear.** Null hypotheses about single
 parameters are linear constraints: fixing \\\beta_3 = 0\\ restricts the
@@ -234,8 +273,78 @@ specified in lavaan syntax. The same geometry explains why Wald-type
 (delta method) tests of a product behave badly near the null: at
 \\\beta_1 = \beta_2 = 0\\ the two hyperplanes intersect, the gradient of
 \\\beta_1 \beta_2\\ vanishes, and the usual normal approximation for the
-product breaks down. The MBCO procedure sidesteps that approximation by
-comparing maximized likelihoods directly.
+product breaks down. The MBCO procedure does not use that approximation,
+since it compares maximized likelihoods directly; the chi square
+reference of its statistic is itself a large sample approximation,
+though, and it too fails at that point, as the next paragraph explains.
+
+**The reference distribution where the branches cross.** Where exactly
+one of \\\beta_1\\ and \\\beta_2\\ is zero, the null set near the
+population values is the single hyperplane of that coefficient, the null
+hypothesis is regular there, and the chi square distribution on 1 degree
+of freedom is the large sample distribution of the statistic. At
+\\\beta_1 = \beta_2 = 0\\ the two hyperplanes cross and the null
+hypothesis is not regular. The best-fitting null model lies on one
+branch or the other, so the statistic is the smaller of the two branch
+statistics, each the likelihood ratio statistic for fixing one
+coefficient at zero. When the estimates of the two coefficients are
+independent, as in the single mediator model with observed variables,
+the branch statistics are asymptotically the squares \\Z_1^2\\ and
+\\Z_2^2\\ of two independent standard normal variables, and the
+statistic is asymptotically \\\min(Z_1^2, Z_2^2)\\ rather than a chi
+square variable on 1 degree of freedom. It exceeds the .95 quantile of
+that chi square distribution with probability \\.05^2 = .0025\\. At
+\\\beta_1 = \beta_2 = 0\\, then, the test at the .05 level rejects with
+probability near .0025 in large samples, not .05. When the two estimates
+are correlated, as they can be in models with latent variables and in
+some multiple-group or moderated designs, \\Z_1\\ and \\Z_2\\ are
+correlated standard normal variables, and the probability lies between
+.0025 and .05, nearer .05 the stronger the correlation (.0049, .0125,
+and .0296 for correlations of .3, .6, and .9). The test is conservative
+at the crossing in every case: its *p*-value is larger than one computed
+from the distribution that holds there, and its power against an
+indirect effect whose coefficients are both near zero is lower
+accordingly. For a chain of three or more coefficients the same holds
+wherever two or more of them are zero, and the test is more conservative
+still where more of them are zero (with independent estimates, \\.05^3\\
+when three are zero). The function reports the chi square *p*-value
+throughout and does not adjust it, because which point of the null set
+holds is not known, and a critical value taken from the distribution at
+the crossing would make the test reject too often where only one
+coefficient is zero. The same qualification applies to every test of a
+product of coefficients the function reports (specific indirect effects,
+conditional effects at a probe value, and moderation coefficients that
+are products), and to a joint test whose constraints are satisfied
+together at a point where their gradients are linearly dependent, such
+as the crossing of two branches.
+
+**The rate at the crossing in the simulations of Tofighi and Kelley
+(2020).** Their simulations report a different rate at \\\beta_1 =
+\beta_2 = 0\\. For the single mediator model with \\X\\ binary
+(probability .5) and standard normal residuals, 5,000 replications at
+each of *N* = 50, 75, 100, and 200, the .05 level, and their test fitted
+by the NPSOL optimizer of OpenMx 2.9.6 (p. 507 and its footnote 4), the
+empirical Type I error rate of \\\mathrm{LRT}\_{\mathrm{MBCO}}\\ with
+both coefficients zero fell within the interval from .025 to .075 that
+they took as close enough to .05 for practical purposes, at every sample
+size (p. 508; about .03 to .04 in their Figure 3, p. 509), and the other
+five methods they studied rejected at rates below .01. The two numbers
+describe different things. The .0025 above is a limit: the rate that the
+statistic defined by the best-fitting null model approaches as *N* grows
+at that point. The published rates are estimates from a simulation of
+one design at four sample sizes. Neither is the rate at every sample
+size. For the statistic this function computes, the rate in that design
+is already close to the limit at these sample sizes: in 400,000
+simulated data sets at each *N*, the smaller of the two branch
+statistics (the statistic `mediation_mbco()` returns for this model, to
+within \\10^{-4}\\ on 630 further data sets of the design at *N* = 50 to
+200) exceeded the .95 chi square quantile at rates of .0032, .0029,
+.0030, and .0028 for *N* = 50, 75, 100, and 200 (Monte Carlo standard
+error .00009), so sample size in this range does not account for the
+difference. The statistic of the worse-fitting branch, the one a search
+reports when it stops on that branch (see *Local solutions and the
+search strategy* below), rejected at .100 to .111 in the same
+simulations, and the published rates lie between the two.
 
 **Local solutions and the search strategy.** Because the null set is a
 union of surfaces, the constrained deviance surface generally has one
@@ -262,6 +371,51 @@ summary statistics of their Table 1 rather than the full-precision
 moments (which give 72.54 and 175.77 for the two branches). Either way
 the null model is overwhelmingly incompatible with the data, so the
 substantive conclusion is the same.
+
+The null model of a product is fit branch by branch: a product is zero
+exactly where one of its factors is, so for each way of choosing one
+factor of each constraint, a factor that is a coefficient is fixed at
+zero and a factor that is a sum (the conditional coefficient \\a_0 + a_1
+w\\ of a moderated path at a probe value \\w\\, for example) is kept as
+the constraint of that fit. A label common to every term of a sum is
+taken out as a factor (\\a_0 b + a_1 b w = b (a_0 + a_1 w)\\). The null
+set is the union of the branches, so when every branch fit is a valid
+solution the smallest of them is the constrained minimum, and the
+constrained searches from the starting configurations are run only when
+a branch fit is not, or when a constraint has no branches (a total
+effect, a difference between groups). Such a constraint is also searched
+from the full-model estimates moved onto its null set by Gauss-Newton
+steps.
+
+**Badly scaled variables.** When the observed variables differ in scale
+by orders of magnitude (the ratio of the largest standard deviation to
+the smallest is at least 1000, or the largest is at least 1000, or the
+smallest at most 0.001, the rule lavaan uses for its `rescale_data`
+option), the free parameters do too, and the OpenMx optimizers can stop
+far from the maximum. The OpenMx models are then fit to the variables
+each divided by a power of 2 near its standard deviation
+(\\2^{\mathrm{round}(\log_2 s)}\\ for standard deviation \\s\\, over all
+groups), with every parameter in the matching metric (a latent variable
+takes the metric of the indicator whose loading is fixed), and every
+effect, constraint, and Monte Carlo draw is written in the parameters of
+the original metric, so the estimates, standard errors, intervals, and
+likelihood ratio statistics are those of the variables as given, and the
+deviance, AIC, and BIC are returned to the original metric as well. A
+likelihood ratio statistic does not depend on the units of the
+variables, and the rescaling changes it only within the precision of the
+optimizer. A profile likelihood interval is profiled for the effect in
+the metric of the fit and its limits returned to the original metric.
+The constraints of a joint test are then handed to the optimizer as
+linear combinations whose gradients are orthonormal in the metric of the
+fit at the full-model estimates, which leaves their null set unchanged.
+Nothing is rescaled when a label shared by parameters in different
+metrics (an equality constraint across them) would need two multipliers.
+The divisors and the multipliers are returned in the `"rescale"`
+attribute. Scales that differ by less than that rule can still slow the
+optimizers; the branch fits and the start on the null set described
+above are the remedy there, and a variable can be put on a scale near
+that of the others before the call (the statistics do not depend on its
+units, and the estimates change by the factor applied).
 
 **Effects estimated and tested.** With `x` and `y` resolved, the
 function enumerates every directed pathway from `x` to `y` along
@@ -324,9 +478,44 @@ empirical \\(\alpha/2, 1 - \alpha/2)\\ quantiles of those `B` values
 (MacKinnon, Lockwood, & Williams, 2004). Ask for it when the profile
 searches are slow, when a profile bound fails to converge, or when
 comparing with a published analysis that reports one, as Tofighi and
-Kelley (2020) do for the memory data in the examples. The Wald interval
-is the symmetric delta method interval and is reported only for
-comparison.
+Kelley (2020) do for the memory data in the examples.
+
+**Monte Carlo draws.** The limits of each effect are quantiles of its
+`B` drawn values, so the Monte Carlo interval is run only when `B` puts
+at least 10 draws beyond each limit (400 at the 95 percent level). A
+draw in which an effect is undefined (a division by a draw near zero, or
+a function outside its domain) is dropped and counted, never replaced,
+and the interval is computed from the rest. The result records `B`
+(requested), `B_used` (the number the interval rests on), `n_dropped`,
+and `B_required` (the fewest replications a request may ask for; that
+count is held to `B`, not to `B_used`) as attributes, and the line under
+the table states them, with `bootstrap_status` (`"complete"`,
+`"dropped"`, `"exploratory"`, `"insufficient_count"`, or
+`"insufficient_share"`). A call gives at most one such warning, whatever
+the number of effects. A warning of class
+`dmar_bootstrap_replications_dropped` states the counts when any
+replication was dropped, with a caution when the dropped replications
+are at least the 2.5 percent of `B` that lies beyond one limit at the 95
+percent level, because they could then decide by themselves where that
+limit falls. When more than half were dropped, the limits of that effect
+are `NA`, the estimate is returned, and the warning has class
+`dmar_bootstrap_insufficient`. The draws are counted effect by effect:
+an effect whose interval is withheld does not withhold the others,
+`B_used` is the fewest draws any effect's limits rest on, and
+`bootstrap_status` is the least favorable status among the effects. When
+several effects are affected the one warning lists them (draws dropped,
+draws used, and whether the interval is reported), gives in full the
+account of the effect with the fewest usable draws, has the least
+favorable class among them, and carries the list as the data frame
+`effects`. `options(dmar.bootstrap_exploratory = TRUE)` lets a smaller
+`B` (2 or more) run for a first look or a demonstration; every such call
+gives a warning of class `dmar_bootstrap_exploratory` and the result is
+not one to report. See
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+for the rule and its reasons.
+
+The Wald interval is the symmetric delta method interval and is reported
+only for comparison.
 
 **Multiple groups (moderated mediation across groups).** With `group`
 (or list-form `S`, `M`, `N`), the model is fit as a multiple-group SEM:
@@ -412,7 +601,13 @@ moderation rows above. For a categorical moderator, use `group`.
 computed number would be mislabeled: a nonrecursive (feedback)
 regression structure, categorical-endogenous syntax (thresholds),
 explicit `==` constraints, a model with no indirect pathway between `x`
-and `y`. It warns where the data make trouble detectable: an endogenous
+and `y`. It stops as well, with an error of class `dmar_no_maximum`,
+when the lavaan fit that the OpenMx fits start from has no maximum, an
+error variance running off below zero while the likelihood is flat or
+still rising (see
+[`fa_bifactor`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)),
+printing the lavaan code of that fit, or none for a fit given as
+`model`. It warns where the data make trouble detectable: an endogenous
 variable with only two distinct values (a binary mediator or outcome,
 where the product of coefficients is not the causal indirect effect), an
 interaction term among the predictors that no declared `moderator`
@@ -430,11 +625,62 @@ model; positive values favor the full model (the effect improves fit by
 more than the parsimony penalty). A scalar equality constraint reduces
 the effective number of free parameters by one, so the differences equal
 \\\mathrm{LRT}\_{\mathrm{MBCO}} - 2\\ for the AIC and
-\\\mathrm{LRT}\_{\mathrm{MBCO}} - \log N\\ for the BIC. (The OpenMx
-summary counts the same number of estimated parameters in both models,
-so its printed AIC difference equals the likelihood ratio statistic;
-DMAR counts the constraint against the null model, consistent with the
-degrees of freedom of the test.)
+\\\mathrm{LRT}\_{\mathrm{MBCO}} - \log N\\ for the BIC; for a joint test
+the 2 and the \\\log N\\ are multiplied by its degrees of freedom. (The
+OpenMx summary counts the same number of estimated parameters in both
+models, so its printed AIC difference equals the likelihood ratio
+statistic; DMAR counts the constraint against the null model, consistent
+with the degrees of freedom of the test.)
+
+**Constraints that add no restriction.** The degrees of freedom of a
+test are the number of its constraints, which is the number of
+restrictions only when each constraint restricts the parameters beyond
+what the others do. Before any OpenMx model is fit, the constraints of
+every test, written in the parameter labels, are checked twice. First,
+the function forms the Jacobian of the constraints (the matrix of their
+derivatives with respect to the free parameters) at the unrestricted
+estimates of the lavaan fit, which lie off the null set, and reads its
+rank after scaling every column by its largest entry and every row to
+unit length, so that the rank does not depend on the units of the
+parameters or the scale of the constraints. A singular value below
+\\10^{-7}\\ times the largest counts as zero (the same number as the
+default `tol` of [`qr`](https://rdrr.io/r/base/qr.html)). The rank is
+read again at a fixed point near the estimates, so that an estimate of
+exactly zero cannot make independent constraints look dependent, and the
+larger rank is used. A test whose constraints have a rank below their
+number (a constraint that is a function of the others) is refused (see
+`hypotheses`); so is a single constraint whose gradient is zero, which
+restricts nothing. The rank is not read on the null set: at the crossing
+of the branches of a product constraint its gradient vanishes, and a
+rank read there would call every set that contains it dependent.
+
+Second, constraints whose Jacobian has full rank can still restrict the
+parameters in fewer directions than their number, when one of them is
+zero wherever the others are: `c("a*b", "b")` has the null set \\b =
+0\\, `c("a", "a*cp")` the null set \\a = 0\\, and `c("a*b", "a*b*cp")`
+the null set \\ab = 0\\, one restriction each. For every constraint of a
+joint test the function finds points of the null set of the others, by
+Gauss-Newton steps from fixed starting points that cover both signs and
+a range of magnitudes of the parameters (in coordinates scaled by the
+estimates, and again in coordinates scaled by the derivatives of the
+constraints, so that neither the units of the parameters nor the
+starting points of one scaling decide the result), and refuses the test
+when the constraint is zero at all of them, to within \\10^{-6}\\ of its
+typical size, under both scalings. No random numbers are drawn. A set
+such as `c("a*b", "a*cp")`, whose null set is the union of \\a = 0\\
+(one restriction) and \\b = cp = 0\\ (two), is accepted with 2 degrees
+of freedom: the chi square reference on 2 degrees of freedom is right
+where the second branch holds, and the test is conservative where only
+\\a = 0\\ holds, since the statistic there is asymptotically chi square
+on 1 degree of freedom, which exceeds the .95 quantile of the chi square
+distribution on 2 degrees of freedom with probability .0144. The checks
+do not detect a set none of whose constraints is zero wherever the
+others are but whose null set still imposes fewer restrictions than
+there are constraints, such as `c("a*b", "a*cp", "b*cp")` (any two of
+the three coefficients zero, two restrictions); its test is
+conservative. Neither check establishes that the null hypothesis is
+regular (see *The reference distribution where the branches cross*
+above).
 
 **Change in explained variance.** Following the reporting recommendation
 of Tofighi and Kelley (2020), the function computes \\R^2\\ for every
@@ -589,15 +835,17 @@ mediation_mbco(single, S = S_tk, M = M_tk, N = 369,
 #>   rest on the no omitted confounder assumption.
 #> 
 #>  pathway                              term                 estimate se   
-#>  instruction -> recall (all pathways) total_effect         2.18     0.335
+#>  instruction -> recall (all pathways) total_effect         2.176    0.335
 #>  instruction -> recall                direct_effect        0.042    0.388
-#>  instruction -> imagery -> recall     indirect_via_imagery 2.13     0.279
+#>  instruction -> imagery -> recall     indirect_via_imagery 2.134    0.279
 #>  ci_lower ci_upper lrt    df p_value  delta_aic delta_bic
-#>  1.51     2.84     39.9   1  < 0.0001 37.9      34       
-#>  -0.725   0.804    0.0117 1  0.9139   -1.99     -5.9     
-#>  1.61     2.7      71.3   1  < 0.0001 69.3      65.4     
+#>  1.522    2.829    39.863 1  < 0.0001 37.863    33.952   
+#>  -0.703   0.812    0.012  1  0.9139   -1.988    -5.899   
+#>  1.594    2.701    71.306 1  < 0.0001 69.306    65.395   
 #> 
 #> Confidence level: 95%
+#> 
+#> Monte Carlo interval: 10000 replications, 10000 used (0 dropped; at least 400 must be requested)
 
 # The parallel two-mediator model of the same paper, with the contrast
 # of its two specific indirect effects, is described under Details;

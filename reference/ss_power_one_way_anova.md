@@ -10,11 +10,11 @@ statistical power.
 ``` r
 ss_power_one_way_anova(
   a,
-  f = NULL,
-  eta_squared = NULL,
+  true_f = NULL,
+  true_eta_squared = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
-  N = NULL
+  specified_N = NULL
 )
 ```
 
@@ -24,15 +24,15 @@ ss_power_one_way_anova(
 
   Number of groups (levels of the between-subjects factor)
 
-- f:
+- true_f:
 
   Cohen's *f* effect size (the population value); supply this or
-  `eta_squared`, but not both
+  `true_eta_squared`, but not both
 
-- eta_squared:
+- true_eta_squared:
 
   Population eta squared (proportion of total variance accounted for by
-  group membership); supply this or `f`
+  group membership); supply this or `true_f`
 
 - desired_power:
 
@@ -42,7 +42,7 @@ ss_power_one_way_anova(
 
   Type I error rate (default 0.05)
 
-- N:
+- specified_N:
 
   Total sample size; if specified, the function returns the realized
   power (the ss_power\_\* family is not uniform here:
@@ -51,17 +51,18 @@ ss_power_one_way_anova(
 
 ## Value
 
-A `data.frame`. When a sample size is being planned (`N` not supplied)
-the rows are `necessary_N`, `n_per_group`, `a`, `noncentrality`, and
-`actual_power`; the search constructs the total as a balanced design, so
-`n_per_group` is a whole-number per-group count. When `N` is supplied,
-power is evaluated at that total `N` directly and the rows are
-`specified_N`, `a`, `noncentrality`, and `actual_power` (no
-`n_per_group` row, since balance is not assumed). The result carries the
-`dmar_ss_power` class, so
-[`tidy`](https://generics.r-lib.org/reference/tidy.html) and
+A `data.frame`. When a sample size is being planned (`specified_N` not
+supplied) the rows are `necessary_N`, `n_per_group`, `a`,
+`noncentral_f_parm`, and `actual_power`; the search constructs the total
+as a balanced design, so `n_per_group` is a whole-number per-group
+count. When `specified_N` is supplied, power is evaluated at that total
+sample size directly and the rows are `specified_N`, `a`,
+`noncentral_f_parm`, and `actual_power` (no `n_per_group` row, since
+balance is not assumed). The result carries the `dmar_ss_power` class,
+so [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
-it in broom convention; the summarized sample size is the total `N`.
+it in broom convention; the summarized sample size is the total sample
+size \\N\\.
 
 ## Details
 
@@ -71,8 +72,9 @@ noncentral *F* distribution with numerator df \\a - 1\\, denominator df
 relates to eta squared via \\f = \sqrt{\eta^2 / (1 - \eta^2)}\\.
 
 The function searches over total sample sizes \\N\\ (treating per-group
-\\N/a\\ as balanced) until power first reaches `desired_power`. When `N`
-is supplied it instead reports the realized power at that `N`.
+\\N/a\\ as balanced) until power first reaches `desired_power`. When
+`specified_N` is supplied it instead reports the realized power at that
+total sample size.
 
 ## References
 
@@ -99,6 +101,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -134,28 +137,28 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # Three groups, f = 0.25, power = .80
-ss_power_one_way_anova(a = 3, f = 0.25, desired_power = 0.80)
-#>  term          value
-#>  necessary_N   159  
-#>  n_per_group   53   
-#>  a             3    
-#>  noncentrality 9.94 
-#>  actual_power  0.805
+ss_power_one_way_anova(a = 3, true_f = 0.25, desired_power = 0.80)
+#>  term              value
+#>  necessary_N       159  
+#>  n_per_group       53   
+#>  a                 3    
+#>  noncentral_f_parm 9.938
+#>  actual_power      0.805
 
 # Same effect specified via eta squared
-ss_power_one_way_anova(a = 3, eta_squared = 0.0588, desired_power = 0.80)
-#>  term          value
-#>  necessary_N   159  
-#>  n_per_group   53   
-#>  a             3    
-#>  noncentrality 9.93 
-#>  actual_power  0.805
+ss_power_one_way_anova(a = 3, true_eta_squared = 0.0588, desired_power = 0.80)
+#>  term              value
+#>  necessary_N       159  
+#>  n_per_group       53   
+#>  a                 3    
+#>  noncentral_f_parm 9.933
+#>  actual_power      0.805
 
 # Realized power at N = 60 across 3 groups
-ss_power_one_way_anova(a = 3, f = 0.25, N = 60)
-#>  term          value
-#>  specified_N   60   
-#>  a             3    
-#>  noncentrality 3.75 
-#>  actual_power  0.374
+ss_power_one_way_anova(a = 3, true_f = 0.25, specified_N = 60)
+#>  term              value
+#>  specified_N       60   
+#>  a                 3    
+#>  noncentral_f_parm 3.750
+#>  actual_power      0.374
 ```

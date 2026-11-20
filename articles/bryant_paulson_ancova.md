@@ -7,9 +7,12 @@ model, read off the adjusted means and the error term, and then place
 [`ci_c_ancova_bp()`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova_bp.md),
 which uses the Bryant-Paulson generalized studentized range
 ([`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)).
-The simulation study maintained alongside the package shows **why** the
-ordinary Tukey distribution is the wrong reference when the covariate is
-random. Here we focus on **how** to do the analysis.
+Bryant and Paulson (1976) derived that distribution for an analysis of
+covariance in which the outcome and the covariates are jointly normal,
+so that the covariates are random rather than fixed by design; the
+ordinary studentized range of Tukey’s procedure does not allow for the
+sampling variability that a random covariate adds to the adjustment.
+Here we focus on how to do the analysis.
 
 ## 1. The Worked Example From Bryant & Bruvold (1980)
 
@@ -84,27 +87,27 @@ blocks, the standard error of a single adjusted mean is built from
 ``` r
 
 bp <- ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova,
-                     n = 4, num_covariates = 1, df = nu)
+                     n_per_group = 4, n_covariates = 1, df = nu)
 bp
 ```
 
-| contrast          | estimate | lower_limit | upper_limit |
-|:------------------|:---------|:------------|:------------|
-| group_1 - group_2 | -0.0243  | -0.302      | 0.254       |
-| group_1 - group_3 | -0.507   | -0.785      | -0.228      |
-| group_1 - group_4 | -0.92    | -1.2        | -0.642      |
-| group_1 - group_5 | -1.02    | -1.3        | -0.745      |
-| group_1 - group_6 | -1.28    | -1.56       | -1          |
-| group_2 - group_3 | -0.482   | -0.76       | -0.204      |
-| group_2 - group_4 | -0.896   | -1.17       | -0.618      |
-| group_2 - group_5 | -0.998   | -1.28       | -0.72       |
-| group_2 - group_6 | -1.26    | -1.53       | -0.978      |
-| group_3 - group_4 | -0.413   | -0.691      | -0.135      |
-| group_3 - group_5 | -0.516   | -0.794      | -0.238      |
-| group_3 - group_6 | -0.774   | -1.05       | -0.496      |
-| group_4 - group_5 | -0.103   | -0.381      | 0.175       |
-| group_4 - group_6 | -0.361   | -0.639      | -0.0827     |
-| group_5 - group_6 | -0.258   | -0.536      | 0.02        |
+| contrast          | estimate | ci_lower | ci_upper |
+|:------------------|:---------|:---------|:---------|
+| group_1 - group_2 | -0.024   | -0.302   | 0.254    |
+| group_1 - group_3 | -0.507   | -0.785   | -0.228   |
+| group_1 - group_4 | -0.920   | -1.198   | -0.642   |
+| group_1 - group_5 | -1.023   | -1.301   | -0.745   |
+| group_1 - group_6 | -1.281   | -1.559   | -1.003   |
+| group_2 - group_3 | -0.482   | -0.760   | -0.204   |
+| group_2 - group_4 | -0.896   | -1.174   | -0.618   |
+| group_2 - group_5 | -0.998   | -1.276   | -0.720   |
+| group_2 - group_6 | -1.256   | -1.534   | -0.978   |
+| group_3 - group_4 | -0.413   | -0.691   | -0.135   |
+| group_3 - group_5 | -0.516   | -0.794   | -0.238   |
+| group_3 - group_6 | -0.774   | -1.052   | -0.496   |
+| group_4 - group_5 | -0.103   | -0.381   | 0.175    |
+| group_4 - group_6 | -0.361   | -0.639   | -0.083   |
+| group_5 - group_6 | -0.258   | -0.536   | 0.020    |
 
 Confidence level: 95%
 
@@ -115,7 +118,7 @@ difference is exactly the 0.278 reported in the paper:
 
 attr(bp, "critical_value")                      # q_.05;1,6,14 = 4.83
 #> [1] 4.829856
-unique(round((bp$upper_limit - bp$lower_limit) / 2, 3))   # 0.278
+unique(round((bp$ci_upper - bp$ci_lower) / 2, 3))   # 0.278
 #> [1] 0.278
 ```
 
@@ -148,16 +151,16 @@ SSwx <- sum((test_market$category_movement -
 
 per_comparison <- ci_c_ancova(
   adj_means = adj_means, s_ancova = s_ancova,
-  c_weights = c(1, 0, 0, -1, 0, 0), n = 4,
+  c_weights = c(1, 0, 0, -1, 0, 0), n_per_group = 4,
   cov_means = cov_means, SSwithin_x = SSwx)
 per_comparison
 ```
 
-| term        | value  |
-|:------------|:-------|
-| lower_limit | -1.09  |
-| psi         | -0.92  |
-| upper_limit | -0.748 |
+| term     | value  |
+|:---------|:-------|
+| ci_lower | -1.092 |
+| contrast | -0.920 |
+| ci_upper | -0.748 |
 
 Confidence level: 95%
 
@@ -165,14 +168,14 @@ Confidence level: 95%
 
 
 # The same contrast, but as one member of the simultaneous family:
-ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova, n = 4,
-               num_covariates = 1, df = nu,
+ci_c_ancova_bp(adj_means = adj_means, s_ancova = s_ancova, n_per_group = 4,
+               n_covariates = 1, df = nu,
                c_weights = c(1, 0, 0, -1, 0, 0))
 ```
 
-| contrast   | estimate | lower_limit | upper_limit |
-|:-----------|:---------|:------------|:------------|
-| contrast_1 | -0.92    | -1.2        | -0.642      |
+| contrast   | estimate | ci_lower | ci_upper |
+|:-----------|:---------|:---------|:---------|
+| contrast_1 | -0.920   | -1.198   | -0.642   |
 
 Confidence level: 95%
 
@@ -204,30 +207,30 @@ fit_tidy <- ancova(dat, outcome = "y", treatment = "group", covariates = "x")
 fit_tidy
 ```
 
-| term                         | value     |
-|:-----------------------------|:----------|
-| F_value                      | 9.74      |
-| df_1                         | 3         |
-| df_2                         | 95        |
-| p_value                      | \< 0.0001 |
-| sum_of_squares_type          | 3         |
-| eta_squared_partial          | 0.235     |
-| eta_squared_partial_lower    | 0.0843    |
-| eta_squared_partial_upper    | 0.35      |
-| omega_squared_partial        | 0.208     |
-| omega_squared_partial_lower  | 0.0843    |
-| omega_squared_partial_upper  | 0.35      |
-| adjusted_mean\[control\]     | -0.695    |
-| adjusted_mean\[low\]         | -0.521    |
-| adjusted_mean\[medium\]      | 3.52      |
-| adjusted_mean\[high\]        | 4.52      |
-| se_adjusted_mean\[control\]  | 0.86      |
-| se_adjusted_mean\[low\]      | 0.862     |
-| se_adjusted_mean\[medium\]   | 0.863     |
-| se_adjusted_mean\[high\]     | 0.859     |
-| F_homogeneity_of_regression  | 0.621     |
-| df_homogeneity_of_regression | 3         |
-| p_homogeneity_of_regression  | 0.6030    |
+| term                           | value     |
+|:-------------------------------|:----------|
+| F_value                        | 9.736     |
+| df_1                           | 3         |
+| df_2                           | 95        |
+| p_value                        | \< 0.0001 |
+| sum_of_squares_type            | 3         |
+| eta_squared_partial            | 0.235     |
+| eta_squared_partial_ci_lower   | 0.084     |
+| eta_squared_partial_ci_upper   | 0.350     |
+| omega_squared_partial          | 0.208     |
+| omega_squared_partial_ci_lower | 0.084     |
+| omega_squared_partial_ci_upper | 0.350     |
+| adjusted_mean\[control\]       | -0.695    |
+| adjusted_mean\[low\]           | -0.521    |
+| adjusted_mean\[medium\]        | 3.524     |
+| adjusted_mean\[high\]          | 4.517     |
+| se_adjusted_mean\[control\]    | 0.860     |
+| se_adjusted_mean\[low\]        | 0.862     |
+| se_adjusted_mean\[medium\]     | 0.863     |
+| se_adjusted_mean\[high\]       | 0.859     |
+| F_homogeneity_of_regression    | 0.621     |
+| df_homogeneity_of_regression   | 3         |
+| p_homogeneity_of_regression    | 0.6030    |
 
 Confidence level: 95%
 
@@ -245,17 +248,17 @@ names(adj) <- levels(group)
 # ANCOVA error SD from the fitted model.
 s_yx <- summary(lm(y ~ group + x, data = dat))$sigma
 
-ci_c_ancova_bp(adj_means = adj, s_ancova = s_yx, n = n, num_covariates = 1)
+ci_c_ancova_bp(adj_means = adj, s_ancova = s_yx, n_per_group = n, n_covariates = 1)
 ```
 
-| contrast          | estimate | lower_limit | upper_limit |
-|:------------------|:---------|:------------|:------------|
-| group_1 - group_2 | -0.174   | -3.37       | 3.02        |
-| group_1 - group_3 | -4.22    | -7.41       | -1.03       |
-| group_1 - group_4 | -5.21    | -8.4        | -2.02       |
-| group_2 - group_3 | -4.05    | -7.24       | -0.854      |
-| group_2 - group_4 | -5.04    | -8.23       | -1.85       |
-| group_3 - group_4 | -0.993   | -4.18       | 2.2         |
+| contrast          | estimate | ci_lower | ci_upper |
+|:------------------|:---------|:---------|:---------|
+| group_1 - group_2 | -0.174   | -3.365   | 3.018    |
+| group_1 - group_3 | -4.220   | -7.411   | -1.028   |
+| group_1 - group_4 | -5.212   | -8.403   | -2.021   |
+| group_2 - group_3 | -4.046   | -7.237   | -0.854   |
+| group_2 - group_4 | -5.038   | -8.230   | -1.847   |
+| group_3 - group_4 | -0.993   | -4.184   | 2.199    |
 
 Confidence level: 95%
 
@@ -269,13 +272,13 @@ random covariate introduces.
 If you only need the critical value (for a table, a power calculation,
 or a hand computation), call
 [`qbryant_paulson()`](https://yelleknek.github.io/DMAR/reference/bryant_paulson.md)
-directly. It is the ANCOVA analogue of
+directly. It is the ANCOVA analog of
 [`qtukey()`](https://rdrr.io/r/stats/Tukey.html).
 
 ``` r
 
 # 95% critical value for k = 5 groups, p = 2 covariates, nu = 40 error df:
-qbryant_paulson(0.95, num_covariates = 2, num_groups = 5, df = 40)
+qbryant_paulson(0.95, n_covariates = 2, n_groups = 5, df = 40)
 #> [1] 4.145129
 
 # How much larger than the (incorrect) Tukey value?

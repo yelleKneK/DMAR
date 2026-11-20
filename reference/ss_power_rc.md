@@ -8,34 +8,34 @@ size.
 
 ``` r
 ss_power_rc(
-  rho2_Y_X = NULL,
-  rho2_Y_X_without_j = NULL,
+  true_R2_Y_X = NULL,
+  true_R2_Y_X_without_j = NULL,
   p = NULL,
   desired_power = 0.85,
   alpha_level = 0.05,
   directional = FALSE,
-  beta_j = NULL,
-  sigma_X = NULL,
-  sigma_Y = NULL,
-  Rho2_j_X_without_j = NULL,
-  rho_XX = NULL,
-  rho_YX = NULL,
+  true_reg_coef_j = NULL,
+  true_sd_X = NULL,
+  true_sd_Y = NULL,
+  true_R2_j_X_without_j = NULL,
+  true_cor_XX = NULL,
+  true_cor_YX = NULL,
   which_predictor = NULL,
-  cohen_f2 = NULL,
+  true_f2 = NULL,
   specified_N = NULL,
-  print_progress = FALSE
+  print_iter = FALSE
 )
 ```
 
 ## Arguments
 
-- rho2_Y_X:
+- true_R2_Y_X:
 
   Population squared multiple correlation coefficient predicting the
   dependent variable (i.e., *Y*) from the *p* predictor variables (i.e.,
   the *X* variables)
 
-- rho2_Y_X_without_j:
+- true_R2_Y_X_without_j:
 
   Population squared multiple correlation coefficient predicting the
   dependent variable (i.e., *Y*) from the `p`-1 predictor variables,
@@ -43,7 +43,10 @@ ss_power_rc(
 
 - p:
 
-  Number of predictor variables
+  Number of predictor variables in the full model, a single whole number
+  of at least 1. It is required when the effect is given through
+  `true_R2_Y_X`, `true_reg_coef_j`, or `true_f2`, and is not given with
+  `true_cor_XX` and `true_cor_YX`, whose dimension sets it
 
 - desired_power:
 
@@ -59,50 +62,57 @@ ss_power_rc(
   Whether or not a direction or a nondirectional test is to be used
   (usually `directional=FALSE`)
 
-- beta_j:
+- true_reg_coef_j:
 
   Population value of the regression coefficient for the predictor of
-  interest
+  interest, the name it has in
+  [`ss_aipe_rc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc.md)
+  and
+  [`ss_aipe_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef.md).
+  It is on the scale that `true_sd_X` and `true_sd_Y` describe: with
+  both standard deviations 1 it is the standardized coefficient
 
-- sigma_X:
+- true_sd_X:
 
   Population standard deviation for the predictor variable of interest
 
-- sigma_Y:
+- true_sd_Y:
 
   Population standard deviation for the outcome variable
 
-- Rho2_j_X_without_j:
+- true_R2_j_X_without_j:
 
   Population squared multiple correlation coefficient predicting the
   predictor variable of interest from the remaining `p`-1 predictor
   variables
 
-- rho_XX:
+- true_cor_XX:
 
   Population correlation matrix for the *p* predictor variables
 
-- rho_YX:
+- true_cor_YX:
 
   Population vector of correlation coefficient between the `p` predictor
   variables and the criterion variable
 
 - which_predictor:
 
-  Identifies the predictor of interest when `rho_XX` and `rho_YX` are
-  specified
+  Identifies the predictor of interest when `true_cor_XX` and
+  `true_cor_YX` are specified: a single whole number from 1 to `p`, its
+  position in `true_cor_XX`
 
-- cohen_f2:
+- true_f2:
 
   Cohen's (1988) definition for an effect size for a targeted regression
-  coefficient: `(rho2_Y_X - rho2_Y_X_without_j) / (1 - rho2_Y_X)`
+  coefficient:
+  `(true_R2_Y_X - true_R2_Y_X_without_j) / (1 - true_R2_Y_X)`
 
 - specified_N:
 
   Sample size for which power should be evaluated. This is the *total*
   sample size.
 
-- print_progress:
+- print_iter:
 
   If the progress of the iterative procedure is printed to the screen as
   the iterations are occurring
@@ -115,9 +125,10 @@ forwarded unchanged from
 rows for `necessary_N` (the necessary total sample size) or
 `specified_N` (when `specified_N` is supplied), `actual_power`,
 `noncentral_t_parm` (the noncentrality of the *t* distribution), and
-`effect_size` (the square root of `cohen_f2`, since `cohen_f2` is the
-effect size on the *F* scale). The result carries the `dmar_ss_power`
-class, so [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
+`true_f` (Cohen's *f* at the planning values, the square root of
+`true_f2`, since `true_f2` is the effect size on the *F* scale). The
+result carries the `dmar_ss_power` class, so
+[`tidy`](https://generics.r-lib.org/reference/tidy.html) and
 [`glance`](https://generics.r-lib.org/reference/glance.html) summarize
 it in broom convention.
 
@@ -128,8 +139,19 @@ statistical power. Alternatively, determines the statistical power for a
 given a specified sample size. There are a number of ways that the
 specification regarding the size of the regression coefficient can be
 entered. The most basic, and often the simplest, is to specify
-`rho2_Y_X` and `rho2_Y_X_without_j`. See the examples section for
+`true_R2_Y_X` and `true_R2_Y_X_without_j`. See the examples section for
 several options.
+
+The test is the case of
+[`ss_power_R2_change`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md)
+with one predictor added and fixed predictors; that function also plans
+the test with random predictors and the test of a set of added
+predictors.
+
+The arguments are checked, and the result computed, by
+[`ss_power_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_power_reg_coef.md),
+whose Details say how a single predictor given through `true_cor_XX` and
+an effect of exactly 0 are handled.
 
 ## References
 
@@ -170,6 +192,7 @@ Review of Psychology, 59*, 537–563.
 
 [`ss_aipe_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef.md),
 [`ss_power_R2`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ci_nc_F`](https://yelleknek.github.io/DMAR/reference/ci_nc_F.md)
 
 [`design_consequences`](https://yelleknek.github.io/DMAR/reference/design_consequences.md)
@@ -181,6 +204,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -223,64 +247,66 @@ Cor.Mat <- rbind(
   c(0.46, 0.14, 0.29, 0.30, 1.00, 0.30),
   c(0.66, 0.43, 0.50, 0.26, 0.30, 1.00))
 
-rho_XX <- Cor.Mat[2:6, 2:6]
-rho_YX <- Cor.Mat[1, 2:6]
+true_cor_XX <- Cor.Mat[2:6, 2:6]
+true_cor_YX <- Cor.Mat[1, 2:6]
 
 # Method 1
-ss_power_rc(rho2_Y_X = 0.7826786, rho2_Y_X_without_j = 0.7363697, p = 5,
+ss_power_rc(true_R2_Y_X = 0.7826786, true_R2_Y_X_without_j = 0.7363697, p = 5,
             alpha_level = .05, directional = FALSE, desired_power = .80)
 #>  term              value
 #>  necessary_N       40   
-#>  actual_power      0.81 
-#>  noncentral_t_parm 2.92 
-#>  effect_size       0.462
+#>  actual_power      0.810
+#>  noncentral_t_parm 2.920
+#>  true_f            0.462
 
 # Method 2
-ss_power_rc(alpha_level = .05, rho_XX = rho_XX, rho_YX = rho_YX, which_predictor = 5,
+ss_power_rc(alpha_level = .05, true_cor_XX = true_cor_XX, true_cor_YX = true_cor_YX,
+            which_predictor = 5,
             directional = FALSE, desired_power = .80)
 #>  term              value
 #>  necessary_N       40   
-#>  actual_power      0.81 
-#>  noncentral_t_parm 2.92 
-#>  effect_size       0.462
+#>  actual_power      0.810
+#>  noncentral_t_parm 2.920
+#>  true_f            0.462
 
 # Method 3
-# Here, beta_j is the standardized regression coefficient. Had beta_j
-# been the unstandardized regression coefficient, sigma_X and sigma_Y
+# Here, true_reg_coef_j is the standardized regression coefficient. Had true_reg_coef_j
+# been the unstandardized regression coefficient, true_sd_X and true_sd_Y
 # would have been the standard deviation for the X variable of interest
 # and Y, respectively.
-ss_power_rc(rho2_Y_X = 0.7826786, Rho2_j_X_without_j = 0.3652136, beta_j = 0.2700964, p = 5,
-            alpha_level = .05, sigma_X = 1, sigma_Y = 1,
+ss_power_rc(true_R2_Y_X = 0.7826786, true_R2_j_X_without_j = 0.3652136,
+            true_reg_coef_j = 0.2700964, p = 5,
+            alpha_level = .05, true_sd_X = 1, true_sd_Y = 1,
             directional = FALSE, desired_power = .80)
 #>  term              value
 #>  necessary_N       40   
-#>  actual_power      0.81 
-#>  noncentral_t_parm 2.92 
-#>  effect_size       0.462
+#>  actual_power      0.810
+#>  noncentral_t_parm 2.920
+#>  true_f            0.462
 # Method 4
-ss_power_rc(alpha_level = .05, cohen_f2 = 0.2130898, p = 5,
+ss_power_rc(alpha_level = .05, true_f2 = 0.2130898, p = 5,
             directional = FALSE, desired_power = .80)
 #>  term              value
 #>  necessary_N       40   
-#>  actual_power      0.81 
-#>  noncentral_t_parm 2.92 
-#>  effect_size       0.462
+#>  actual_power      0.810
+#>  noncentral_t_parm 2.920
+#>  true_f            0.462
 # Power given a specified N and squared multiple correlation coefficients.
-ss_power_rc(rho2_Y_X = 0.7826786, rho2_Y_X_without_j = 0.7363697, specified_N = 25, p = 5,
+ss_power_rc(true_R2_Y_X = 0.7826786, true_R2_Y_X_without_j = 0.7363697, specified_N = 25, p = 5,
             alpha_level = .05, directional = FALSE)
 #>  term              value
 #>  specified_N       25   
 #>  actual_power      0.591
-#>  noncentral_t_parm 2.31 
-#>  effect_size       0.462
+#>  noncentral_t_parm 2.308
+#>  true_f            0.462
 
 # Power given a specified N and effect size.
-ss_power_rc(alpha_level = .05, cohen_f2 = 0.2130898, p = 5, specified_N = 25, directional = FALSE)
+ss_power_rc(alpha_level = .05, true_f2 = 0.2130898, p = 5, specified_N = 25, directional = FALSE)
 #>  term              value
 #>  specified_N       25   
 #>  actual_power      0.591
-#>  noncentral_t_parm 2.31 
-#>  effect_size       0.462
+#>  noncentral_t_parm 2.308
+#>  true_f            0.462
 
 # Reproducing Maxwell's (2000, p. 445) Example
 Cor.Mat.Maxwell <- rbind(
@@ -305,11 +331,11 @@ R2.Maxwell.no.1 <- Rho.YX.Maxwell.no.1 %*% solve(RHO.XX.Maxwell.no.1) %*% Rho.YX
 # This seems to be the case becuase of rounding error in calculations
 # and tables (Cohen, 1988) used. The present procedure is correct and
 # contains no rounding error in the application of the method.
-ss_power_rc(rho2_Y_X = R2.Maxwell, rho2_Y_X_without_j = R2.Maxwell.no.1, p = 5,
+ss_power_rc(true_R2_Y_X = R2.Maxwell, true_R2_Y_X_without_j = R2.Maxwell.no.1, p = 5,
             alpha_level = .05, directional = FALSE, desired_power = .80)
 #>  term              value
 #>  necessary_N       111  
 #>  actual_power      0.801
-#>  noncentral_t_parm 2.83 
-#>  effect_size       0.269
+#>  noncentral_t_parm 2.833
+#>  true_f            0.269
 ```

@@ -2,13 +2,13 @@
 
 ## Introduction
 
-DMAR (*Design, Measurement, and Analysis in R*) is a modern and greatly
-expanded reimagining of the widely used MBESS package (Kelley, 2007a,
+DMAR (*Design, Measurement, and Analysis in R*) is a more general and
+greatly expanded reimagining of the MBESS package (Kelley, 2007a,
 2007b). Both packages share the same statistical foundations (confidence
 intervals for standardized effect sizes, sample size planning from the
 accuracy in parameter estimation (AIPE) perspective, and measurement),
-but DMAR adopts a tidy, data-frame-first output style that plays well
-with modern R workflows.
+but DMAR returns its results as data frames that pass directly to other
+R functions for tables and plots.
 
 Although the worked example below draws from educational psychology, the
 same tools apply equally to organizational behavior research (comparing
@@ -20,11 +20,10 @@ evaluations on attitudinal scales), and any other discipline where the
 inferential question is “how large is the effect, and how precisely have
 we estimated it?”
 
-MBESS (Kelley, 2007a, 2007b) continues to be available on CRAN and
-remains a reliable choice, especially for users with existing scripts.
-DMAR is designed for new projects and teaching, where a consistent, tidy
-interface makes it easier to integrate effect size estimation with data
-visualization and reporting.
+MBESS (Kelley, 2007a, 2007b) remains available on CRAN for users with
+existing scripts. DMAR is designed for new projects and teaching, and
+the functions below take its effect size results directly as input to
+plots and reports.
 
 This vignette shows how to:
 
@@ -39,15 +38,31 @@ This vignette shows how to:
     and
     [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md).
 
-Every plot produced by DMAR includes a confidence interval and the
-sample size on which the estimate is based, two details that are
-essential for transparent reporting (Cumming, 2012; Kelley & Preacher,
-2012). Both annotations are on by default and can be turned off with
-`show_ci = FALSE` and `show_n = FALSE`.
+The effect size plots used here
+([`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
+[`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md),
+and
+[`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md))
+show the confidence interval and the sample size on which the estimate
+is based (Cumming, 2012; Kelley & Preacher, 2012).
+[`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md)
+and [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md)
+compute the interval from the sample sizes (`n_1` and `n_2`, or `N` and
+`p`), so they show the interval and the sample size when those are
+supplied
+([`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md)
+also counts them from the two groups’ data).
+[`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md)
+takes the limits as given and shows the sample size when `n` is supplied
+or can be read from a DMAR table. `show_n = FALSE` turns off the sample
+size in all three, and `show_ci = FALSE` turns off the interval in
+[`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md)
+and
+[`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md).
 
-The implicit standard DMAR enforces is that an effect size, on its own,
-is not enough information to interpret. Without an interval, the reader
-cannot judge how precisely the effect has been estimated. The default
+The defaults rest on the view that an effect size, on its own, is not
+enough information to interpret. Without an interval, the reader cannot
+judge how precisely the effect has been estimated. The default
 annotations make these three pieces of information travel together. When
 you do choose to suppress them (typically for a slide or a teaching
 figure that needs to be visually minimal), the suppression is a
@@ -175,8 +190,7 @@ difference from the pretest.
 Raincloud plots (Allen et al., 2019) combine a half-violin, jittered raw
 data points, and a boxplot into a single display. They show the full
 distributional shape, individual observations, and summary statistics at
-once. The **ggrain** package (Patil, 2023) makes them easy to produce
-with a single
+once. The **ggrain** package (Patil, 2023) draws them with a single
 [`geom_rain()`](https://rdrr.io/pkg/ggrain/man/geom_rain.html) call.
 
 ``` r
@@ -276,11 +290,11 @@ d_ci  <- ci_smd(smd = d_hat, n_1 = length(bloom), n_2 = length(ctrl))
 d_ci
 ```
 
-| term        | value    |
-|:------------|:---------|
-| lower_limit | -0.00388 |
-| smd         | 0.272    |
-| upper_limit | 0.548    |
+| term     | value  |
+|:---------|:-------|
+| ci_lower | -0.004 |
+| smd      | 0.272  |
+| ci_upper | 0.548  |
 
 Confidence level: 95%
 
@@ -290,12 +304,12 @@ Confidence level: 95%
 # The results-section sentence, written by the package so the numbers
 # can never drift from the table they came from.
 results_sentence(d_ci, label = "the standardized mean difference")
-#> [1] "the standardized mean difference = 0.27, 95% CI [-0.00, 0.55]"
+#> [1] "the standardized mean difference = 0.27, 95% CI [0.00, 0.55]"
 ```
 
 Reported as one would in a results section, pupils in the bloomer arm
 gained more total IQ than controls, but not by an amount this study pins
-down: the standardized mean difference = 0.27, 95% CI \[-0.00, 0.55\].
+down: the standardized mean difference = 0.27, 95% CI \[0.00, 0.55\].
 The interval includes zero, so the data are consistent with no effect,
 which matches the omnibus test below ($`p = 0.0533`$). The point
 estimate alone would overstate what the study established; the interval
@@ -313,11 +327,11 @@ ci_smd(smd = d_pre, n_1 = sum(pygmalion$treatment == "Bloomer"),
        n_2 = sum(pygmalion$treatment == "Control"))
 ```
 
-| term        | value   |
-|:------------|:--------|
-| lower_limit | -0.0916 |
-| smd         | 0.184   |
-| upper_limit | 0.459   |
+| term     | value  |
+|:---------|:-------|
+| ci_lower | -0.092 |
+| smd      | 0.184  |
+| ci_upper | 0.459  |
 
 Confidence level: 95%
 
@@ -331,8 +345,9 @@ differences have to be read.
 [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md)
 draws two unit-variance normal distributions separated by $`d`$. The
 overlap makes the practical meaning of the effect size immediately
-visible. A confidence interval and the per-group sample sizes are
-displayed by default.
+visible. Given the two groups’ data, as here, or their sample sizes, it
+displays a confidence interval and the per-group sample sizes by
+default.
 
 ``` r
 
@@ -385,12 +400,12 @@ Numeric reference values for $`d`$ such as $`0.20`$, $`0.50`$, and
 $`0.80`$ are sometimes treated as defaults when no field-specific
 calibration is available, but they are not a substitute for substantive
 interpretation. A $`d`$ of $`0.50`$ in a randomized educational
-intervention may be remarkable; the same $`d`$ in a basic perception
-experiment may be uninteresting. Pairing the plot with a confidence
-interval prevents the second mistake that often accompanies the first,
-that is, reporting a point estimate as if it were known with certainty.
-Pairing it with the per-group sample sizes makes the precision visible
-at a glance.
+intervention may be substantively important; the same $`d`$ in a basic
+perception experiment may be of little interest. Pairing the plot with a
+confidence interval prevents the second mistake that often accompanies
+the first, that is, reporting a point estimate as if it were known with
+certainty. Pairing it with the per-group sample sizes makes the
+precision visible at a glance.
 
 ## ANOVA Effect Sizes
 
@@ -401,7 +416,10 @@ accounted for by the fixed effect, correcting for the upward bias of
 $`\eta^2`$ (Olejnik & Algina, 2003). DMAR’s
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
 accepts either raw ANOVA summary values or a fitted
-[`aov()`](https://rdrr.io/r/stats/aov.html) object.
+[`aov()`](https://rdrr.io/r/stats/aov.html) object, and reports the
+total and the partial $`\omega^2`$; here `estimand = "partial"` asks for
+the partial value, the effect’s share of the variance due to the effect
+and error alone.
 
 ``` r
 
@@ -414,15 +432,18 @@ print_anova(summary(fit)[[1]])
 
 ``` r
 
-omega_result <- ci_omega_squared(fit)
+omega_result <- ci_omega_squared(fit, estimand = "partial")
 #> Warning: The observed F_value is below the alpha_lower critical value of the
-#> central F-distribution, so the lower confidence limit on omega squared is 0.
+#> central F-distribution, so the lower confidence limit on partial omega squared
+#> is 0.
 omega_result
 ```
 
-| effect    | omega_squared | lower_limit | upper_limit | F_value | df_effect | df_error | N   |
-|:----------|:--------------|:------------|:------------|:--------|:----------|:---------|:----|
-| treatment | 0.00883       | 0           | 0.0469      | 3.76    | 1         | 308      | 310 |
+| effect | omega_squared_partial | omega_squared_partial_ci_lower | omega_squared_partial_ci_upper | F_value | df_effect | df_error | N |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| treatment | 0.009 | 0.000 | 0.047 | 3.763 | 1 | 308 | 310 |
+
+Confidence level: 95%
 
 ### Visualizing With `plot_ci()`
 
@@ -455,23 +476,32 @@ in variance-explained units rather than standard-deviation units.
 
 For factorial designs,
 [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md)
-produces a multi-row forest plot with one row per effect:
+produces a multi-row forest plot with one row per effect. The pupils in
+`pygmalion` were in grades 1 through 6, so crossing the expectancy
+condition with grade gives a 2 by 6 factorial. Rosenthal and Jacobson
+(1968) reported the bloomers’ advantage most strongly in the earliest
+grades, which is a statement about the condition by grade interaction:
 
 ``` r
 
-# Using the built-in warpbreaks data (2 by 3 factorial).
-fit_factorial <- aov(breaks ~ wool * tension, data = warpbreaks)
-omega_factorial <- ci_omega_squared(fit_factorial)
+# Expectancy condition crossed with grade (2 by 6 factorial). Grade is
+# stored as a number, so it is made a factor for the analysis.
+pygmalion_grades <- transform(pygmalion, grade = factor(grade))
+fit_factorial <- aov(iq_gain ~ treatment * grade, data = pygmalion_grades)
+omega_factorial <- ci_omega_squared(fit_factorial, estimand = "partial")
 #> Warning: The observed F_value is below the alpha_lower critical value of the
-#> central F-distribution, so the lower confidence limit on omega squared is 0.
+#> central F-distribution, so the lower confidence limit on partial omega squared
+#> is 0.
 omega_factorial
 ```
 
-| effect | omega_squared | lower_limit | upper_limit | F_value | df_effect | df_error | N |
+| effect | omega_squared_partial | omega_squared_partial_ci_lower | omega_squared_partial_ci_upper | F_value | df_effect | df_error | N |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| wool | 0.0487 | 0 | 0.222 | 3.77 | 1 | 48 | 54 |
-| tension | 0.217 | 0.0558 | 0.411 | 8.5 | 2 | 48 | 54 |
-| wool:tension | 0.106 | 0.00191 | 0.298 | 4.19 | 2 | 48 | 54 |
+| treatment | 0.010 | 0.000 | 0.050 | 4.273 | 1 | 298 | 310 |
+| grade | 0.108 | 0.051 | 0.181 | 8.486 | 5 | 298 | 310 |
+| treatment:grade | 0.014 | 0.000 | 0.061 | 1.861 | 5 | 298 | 310 |
+
+Confidence level: 95%
 
 ``` r
 
@@ -479,18 +509,19 @@ omega_factorial
 plot_ci(omega_factorial,
         reference_line = 0,
         xlab  = expression(omega^2),
-        title = expression(paste("Warpbreaks: Partial ", omega^2, " per Effect")))
+        title = expression(paste("IQ Change by Condition and Grade: Partial ", omega^2, " per Effect")))
 ```
 
-![Multi-row forest plot of partial \\\omega^2\\ for each effect in a 2
-by 3 factorial ANOVA on the warpbreaks data. Reading down the rows is
-the recommended diagnostic for ANOVA model summaries (Maxwell, Delaney,
-& Kelley, 2027).](effect-size-visualization-fig-plot-ci-factorial-1.png)
+![Multi-row forest plot of partial \\\omega^2\\ for each effect in the 2
+by 6 factorial ANOVA of IQ change on expectancy condition and grade in
+the pygmalion data. Reading down the rows is the recommended diagnostic
+for ANOVA model summaries (Maxwell, Delaney, & Kelley,
+2027).](effect-size-visualization-fig-plot-ci-factorial-1.png)
 
-Multi-row forest plot of partial $`\omega^2`$ for each effect in a 2 by
-3 factorial ANOVA on the warpbreaks data. Reading down the rows is the
-recommended diagnostic for ANOVA model summaries (Maxwell, Delaney, &
-Kelley, 2027).
+Multi-row forest plot of partial $`\omega^2`$ for each effect in the 2
+by 6 factorial ANOVA of IQ change on expectancy condition and grade in
+the pygmalion data. Reading down the rows is the recommended diagnostic
+for ANOVA model summaries (Maxwell, Delaney, & Kelley, 2027).
 
 A multi-row forest plot of this kind is read row by row. Each row gives
 the partial $`\omega^2`$ for one effect, with the horizontal bar
@@ -499,8 +530,51 @@ The `reference_line = 0` argument draws a vertical guide at zero
 variance explained: any interval that crosses that line is consistent
 with no effect of that term. Reading down the rows lets you compare the
 relative magnitudes of the effects at a glance, and the per-row
-confidence intervals communicate which of those comparisons are reliable
-and which are not.
+confidence intervals show how precisely each effect is estimated.
+
+Here the interaction row bears on the earliest-grades report. Its
+partial $`\omega^2`$ is 0.014, and its interval runs from 0 to 0.061, so
+the omnibus interaction is consistent with a bloomer advantage that is
+the same in every grade as well as with one that differs across grades.
+That omnibus test spreads whatever pattern there is over 5 degrees of
+freedom, however, and the differences grade by grade show where the
+pattern sits:
+
+``` r
+
+# Mean IQ change of the bloomers minus that of the controls in each
+# grade, and the number of pupils in each cell.
+gain_means <- with(pygmalion, tapply(iq_gain, list(treatment, grade), mean))
+bloomer_advantage <- gain_means["Bloomer", ] - gain_means["Control", ]
+round(bloomer_advantage, 2)
+#>     1     2     3     4     5     6 
+#> 14.78  9.96  0.28  2.46 -0.56 -0.77
+cell_n <- table(pygmalion$treatment, pygmalion$grade)
+cell_n
+#>          
+#>            1  2  3  4  5  6
+#>   Control 45 46 40 47 25 43
+#>   Bloomer  7 12 13 12  9 11
+```
+
+The bloomers gained 14.8 and 10.0 IQ points more than the controls in
+grades 1 and 2, and between -0.8 and 2.5 points in grades 3 through 6,
+with only 7 to 13 bloomers in any one grade. The sample differences
+follow the pattern Rosenthal and Jacobson (1968) reported, concentrated
+in two of the six grades, which the omnibus interaction spreads across
+all six. A 1-df contrast of grades 1 and 2 against grades 3 through 6
+would aim the test where the pattern sits, but because that contrast is
+taken from the published report of these same data, its result would be
+descriptive, not confirmatory.
+
+The rows of the forest plot come from R’s sequential (Type I) sums of
+squares, each term adjusted only for the terms before it in the formula.
+Because the cells hold unequal numbers of pupils, the type matters for
+the earlier terms: `treatment`, entered first, is not adjusted for
+grade, and its *F* of 4.27 becomes 4.82 when it is entered after grade.
+The interaction, entered last, is the same under any of the usual types.
+[`?ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
+describes how to supply Type II or III *F* statistics instead.
 
 ## Proportion of Variance Explained: $`R^2`$
 
@@ -544,11 +618,11 @@ R2_ci <- ci_R2(R2 = R2_obs, N = N, p = p, random_predictors = TRUE)
 R2_ci
 ```
 
-| term        | value | prob_less | prob_greater |
-|:------------|:------|:----------|:-------------|
-| lower_limit | 0.494 | 0.025     | 0.975        |
-| R2          | 0.573 | NA        | NA           |
-| upper_limit | 0.639 | 0.975     | 0.025        |
+| term     | value | prob_less | prob_greater |
+|:---------|:------|:----------|:-------------|
+| ci_lower | 0.494 | 0.025     | 0.975        |
+| R2       | 0.573 | NA        | NA           |
+| ci_upper | 0.639 | 0.975     | 0.025        |
 
 Confidence level: 95%
 
@@ -591,11 +665,11 @@ r_ci  <- ci_R(R = R_obs, N = N, p = p)
 r_ci
 ```
 
-| term        | value | prob_less | prob_greater |
-|:------------|:------|:----------|:-------------|
-| lower_limit | 0.703 | 0.025     | 0.975        |
-| R           | 0.757 | NA        | NA           |
-| upper_limit | 0.799 | 0.975     | 0.025        |
+| term     | value | prob_less | prob_greater |
+|:---------|:------|:----------|:-------------|
+| ci_lower | 0.703 | 0.025     | 0.975        |
+| R        | 0.757 | NA        | NA           |
+| ci_upper | 0.799 | 0.975     | 0.025        |
 
 Confidence level: 95%
 
@@ -680,10 +754,11 @@ place here precisely because it puts that comparison in one picture.
 
 ## Turning Off Annotations
 
-Every DMAR plot function shows the confidence interval and sample size
-by default, because these are essential for transparent scientific
-reporting. However, for presentations or simplified displays, both can
-be suppressed:
+[`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md)
+and [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md)
+show the confidence interval and the sample size by default when the
+sample sizes are supplied. For presentations or simplified displays,
+both can be suppressed:
 
 ``` r
 
@@ -745,31 +820,32 @@ figures with packages like `patchwork` or `cowplot`.
 
 ## A Note on MBESS
 
-DMAR is a more modern, more general, and greatly expanded reimagining of
-the MBESS package (Kelley, 2007a, 2007b), which remains available on
-CRAN. MBESS provides the same core capabilities (confidence intervals
-for standardized effect sizes, sample size planning, and measurement)
-implemented in a conventional S3 style. DMAR reimagines that work with:
+DMAR is a more general and greatly expanded reimagining of the MBESS
+package (Kelley, 2007a, 2007b), which remains available on CRAN. The two
+share their core methods (confidence intervals for standardized effect
+sizes, sample size planning, and measurement). DMAR differs in three
+ways that bear on this vignette:
 
-- **Tidy output**: all functions return data frames with `term` and
-  `value` columns (or similarly structured output), making results easy
-  to pipe into downstream analysis and visualization.
-- **Integrated visualization**:
+- **Output**: most functions return a data frame, either a `term` column
+  beside a numeric `value` column or one row per term with typed
+  columns, which passes directly to further analysis and to plotting.
+- **Visualization**:
   [`plot_smd()`](https://yelleknek.github.io/DMAR/reference/plot_smd.md),
   [`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md),
   and
   [`plot_R2()`](https://yelleknek.github.io/DMAR/reference/plot_R2.md)
-  produce publication-quality `ggplot2` graphics with confidence
-  intervals and sample sizes shown by default.
-- **Modern R conventions**: `TRUE`/`FALSE` (never `T`/`F`),
+  return `ggplot2` graphics that show the confidence interval and the
+  sample size, given the sample sizes
+  ([`plot_ci()`](https://yelleknek.github.io/DMAR/reference/plot_ci.md)
+  shows a supplied interval without them).
+- **Conventions**: `TRUE`/`FALSE` (never `T`/`F`),
   [`warning()`](https://rdrr.io/r/base/warning.html) instead of
   [`print()`](https://rdrr.io/r/base/print.html) for diagnostics, and
   [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html) for
   optional dependencies.
 
-For existing scripts and reproducibility, MBESS continues to work
-exactly as it always has. For new projects and teaching, DMAR offers a
-cleaner, more consistent interface.
+Scripts written for MBESS continue to run under MBESS, which remains on
+CRAN.
 
 ## References
 

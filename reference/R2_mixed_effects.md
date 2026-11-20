@@ -21,8 +21,7 @@ R2_mixed_effects(
   conf_level = 0.95,
   ci_method = c("none", "boot"),
   B = 1000,
-  seed = NULL,
-  ...
+  seed = NULL
 )
 ```
 
@@ -50,26 +49,32 @@ R2_mixed_effects(
 
 - B:
 
-  Number of bootstrap replications when `ci_method = "boot"`. Default
-  `1000`.
+  Number of bootstrap replications when `ci_method = "boot"`, a single
+  whole number. Default `1000`, because every replication simulates a
+  response and refits the model. The fewest accepted is 400 at the
+  default `conf_level` (200 at 0.90, and 2000 at 0.99, which the default
+  does not meet); a smaller `B` is refused before anything is computed
+  (class `dmar_count_invalid`). See *Bootstrap replications* under
+  *Details* and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - seed:
 
-  Optional integer seed for the bootstrap. Default `NULL`, meaning the
-  caller's current RNG state is used and left unchanged. When supplied,
-  the seed is set inside the function and the caller's RNG state is
-  restored on exit.
-
-- ...:
-
-  Currently unused.
+  Optional integer seed for the bootstrap. Default `NULL`, under which
+  the bootstrap draws from, and advances, the caller's current random
+  number stream. When supplied, the seed is set inside the function and
+  the caller's RNG state is restored on exit.
 
 ## Value
 
 A `data.frame` with rows `"R2_marginal"` and `"R2_conditional"` in the
 `value` column. When `ci_method = "boot"`, lower- and upper-limit rows
-for each quantity are appended and the confidence level is carried on
-the object.
+for each quantity are appended (`R2_marginal_ci_lower`,
+`R2_marginal_ci_upper`, `R2_conditional_ci_lower`,
+`R2_conditional_ci_upper`), the confidence level is carried on the
+object, and the attributes `B`, `B_used`, `n_dropped`, `B_required`, and
+`bootstrap_status` record the replications (see *Bootstrap replications*
+under Details).
 
 ## Details
 
@@ -119,12 +124,35 @@ values. The unit of resampling is therefore a whole simulated data set
 drawn from the estimated model, not a resampled set of cases. Only the
 percentile interval is offered: the limits are the empirical quantiles
 of the `B` bootstrap values (Efron & Tibshirani, 1993); there is no BCa
-or bootstrap standard error variant. Replicates whose refit fails are
-dropped, and the interval is computed from the replications that return
-a value. The default `B = 1000` is adequate for the central quantiles a
-percentile interval uses; raising it tightens the Monte Carlo error of
-the reported limits. Bootstrap results vary from run to run; supply
-`seed` for reproducibility.
+or bootstrap standard error variant. Raising `B` tightens the Monte
+Carlo error of the reported limits. Bootstrap results vary from run to
+run; supply `seed` for reproducibility.
+
+**Bootstrap replications.** The limits of each interval are quantiles of
+the `B` replicated values, so the interval is run only when `B` puts at
+least 10 replicates beyond each limit (400 at the 95 percent level). A
+replication in which either \\R^2\\ is undefined (a refit that fails, or
+one whose variance components cannot be computed) is dropped and
+counted, never replaced, and the interval is computed from the rest. The
+result records `B` (requested), `B_used` (the number the interval rests
+on), `n_dropped`, and `B_required` (the fewest replications a request
+may ask for; that count is held to `B`, not to `B_used`) as attributes,
+with `bootstrap_status` (`"complete"`, `"dropped"`, `"exploratory"`,
+`"insufficient_count"`, or `"insufficient_share"`). One warning of class
+`dmar_bootstrap_replications_dropped` states the counts when any
+replication was dropped, with a caution when the dropped replications
+are at least the 2.5 percent of `B` that lies beyond one limit at the 95
+percent level, because they could then decide by themselves where that
+limit falls. When more than half were dropped, the four limit rows are
+`NA`, the estimate is returned, and the warning has class
+`dmar_bootstrap_insufficient`. Such a replicate is dropped for both
+quantities, so the two intervals rest on the same replicates.
+`options(dmar.bootstrap_exploratory = TRUE)` lets a smaller `B` (2 or
+more) run for a first look or a demonstration; every such call gives a
+warning of class `dmar_bootstrap_exploratory` and the result is not one
+to report. See
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+for the rule and its reasons.
 
 ## References
 
@@ -188,19 +216,24 @@ R2_mixed_effects(fit)
 #> Confidence level: 95%
 
 # A parametric bootstrap percentile interval for both quantities. Each
-# replication refits the model, so B = 20 keeps the example quick; a
-# reported interval deserves the default B = 1000, and raising B
-# further tightens the Monte Carlo error of the limits. The seed makes
-# the limits reproducible and leaves the caller's generator state as
-# it was.
+# replication refits the model. B = 20 keeps the example quick and is
+# below the 400 a reported interval needs; the option lets it run and
+# the warning says so. A reported interval deserves the default
+# B = 1000. The seed makes the limits reproducible and leaves the
+# caller's generator state as it was.
+old <- options(dmar.bootstrap_exploratory = TRUE)
 R2_mixed_effects(fit, ci_method = "boot", B = 20, seed = 113)
-#>  term                 value
-#>  R2_marginal          0.279
-#>  R2_marginal_lower    0.151
-#>  R2_marginal_upper    0.47 
-#>  R2_conditional       0.799
-#>  R2_conditional_lower 0.71 
-#>  R2_conditional_upper 0.855
+#> Warning: R2_mixed_effects(): B = 20 is below the 400 replications a 95% interval is reported from (10 beyond each limit). The limits are shown because options(dmar.bootstrap_exploratory = TRUE) is set. With 20 replications each limit rests on about 0.5 of them and will move from seed to seed; use the result to explore or to demonstrate, and report an interval only from B of at least 400. B, B_used, and B_required are recorded in the result.
+#>  term                    value
+#>  R2_marginal             0.279
+#>  R2_marginal_ci_lower    0.151
+#>  R2_marginal_ci_upper    0.470
+#>  R2_conditional          0.799
+#>  R2_conditional_ci_lower 0.710
+#>  R2_conditional_ci_upper 0.855
 #> 
 #> Confidence level: 95%
+#> 
+#> Bootstrap: 20 replications, 20 used (0 dropped; at least 400 must be requested). Exploratory: below the number required for a reported interval.
+options(old)
 ```

@@ -1,18 +1,22 @@
 # Teacher Expectancy Meta-Analysis Data (Raudenbush, 1984)
 
 The 19 effect sizes from Raudenbush's (1984) synthesis of 18 experiments
-testing the effect of teacher expectancy on pupil IQ, the meta-analysis
-that resolved the controversy started by *Pygmalion in the Classroom*
-(Rosenthal & Jacobson, 1968; the single famous study is shipped
-separately as
+testing the effect of teacher expectancy on pupil IQ, the question
+*Pygmalion in the Classroom* raised (Rosenthal & Jacobson, 1968; the
+data of that study are shipped separately as
 [`pygmalion`](https://yelleknek.github.io/DMAR/reference/pygmalion.md)).
 In each experiment, teachers were told that randomly selected children
 were likely to bloom intellectually; the synthesis asks how large the
 resulting IQ advantage was and, centrally, why it varied across studies.
-Raudenbush's hypothesis, strongly supported, was that the longer
-teachers had known their pupils before the expectancy induction, the
-smaller the effect: credible deception is the Achilles' heel of the
-design.
+Raudenbush's hypothesis was that the longer teachers had known their
+pupils before the expectancy induction, the less credible the induction
+and the smaller the effect (the credibility of expectancy induction in
+the paper's title). In these data the effect sizes fall as the weeks of
+prior contact rise (\\r = -.55\\ over the 18 studies; see Details), and
+a contrast of the 18 effect sizes with weights \\1/(\mathrm{weeks} +
+2)\\, centered to sum to zero, gives \\z = 2.76\\, one-tailed \\p =
+.003\\; the teacher expectancy vignette shows the calculation, and the
+examples plot the effect sizes against the weeks of prior contact.
 
 ## Usage
 
@@ -101,9 +105,14 @@ reproduces the paper's analyses with
 [`meta_contrast`](https://yelleknek.github.io/DMAR/reference/meta_contrast.md),
 and
 [`meta_smd`](https://yelleknek.github.io/DMAR/reference/meta_smd.md),
-and then reanalyzes the data with modern random effects machinery.
+and then reanalyzes the data with a random effects meta-analysis.
 
 ## References
+
+Pellegrini, R. J., & Hicks, R. A. (1972). Prophecy effects and tutorial
+instruction for the disadvantaged child. *American Educational Research
+Journal, 9*(3), 413–419.
+[doi:10.3102/00028312009003413](https://doi.org/10.3102/00028312009003413)
 
 Raudenbush, S. W. (1984). Magnitude of teacher expectancy effects on
 pupil IQ as a function of the credibility of expectancy induction: A

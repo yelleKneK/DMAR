@@ -19,11 +19,12 @@ sd_unbiased(s = NULL, N = NULL, X = NULL)
 - s:
 
   The usual estimate of the standard deviation (the square root of the
-  unbiased variance \\s^2\\).
+  unbiased variance \\s^2\\). Must not be negative.
 
 - N:
 
-  The sample size on which `s` is based.
+  The sample size on which `s` is based. Must exceed 1; it need not be a
+  whole number.
 
 - X:
 
@@ -51,9 +52,18 @@ is small enough to ignore, but it matters when \\s\\ feeds into
 downstream quantities (variance components, standardizers, planning
 calculations) at small \\N\\.
 
-Implementation note: the factor \\c_N\\ is computed via `lgamma` to
-avoid the overflow of `gamma` above \\N \approx 340\\, so the function
-is numerically stable for arbitrarily large \\N\\.
+Implementation note: \\c_N\\ is computed as the reciprocal of \\c_4(N) =
+E\[s\]/\sigma\\, and \\c_4(N)\\ as the exponential of its logarithm. For
+\\N \ge 101\\ that logarithm is its asymptotic expansion, \\-1/\[4(N -
+1)\] + 1/\[24(N - 1)^3\] - \cdots\\; for a smaller \\N\\ it is the
+expansion at the first of \\N + 2, N + 4, \ldots\\ that reaches 101,
+carried back down by the exact recurrence \\\log c_4(N) = \log c_4(N +
+2) - \log(1 + 1/\[(N - 1)(N + 1)\])/2\\, whose terms all have one sign.
+Nothing cancels at any \\N\\, so the computation avoids both the
+overflow of `gamma` above \\N \approx 340\\ and the loss of digits in a
+difference of two `lgamma` values, which grows with \\N\\. \\c_N\\ is
+accurate to two units in the last place at any \\N\\, and it is never
+below 1.
 
 ## References
 
@@ -85,11 +95,11 @@ var(X)^.5
 
 # Holtzman (1950) bias-corrected estimate, supplying s and N.
 sd_unbiased(s = var(X)^.5, N = length(X))
-#>  term value
-#>  sd   14.7 
+#>  term value 
+#>  sd   14.717
 
 # Equivalent call from the raw vector.
 sd_unbiased(X = X)
-#>  term value
-#>  sd   14.7 
+#>  term value 
+#>  sd   14.717
 ```

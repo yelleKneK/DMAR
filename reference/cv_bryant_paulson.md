@@ -14,8 +14,8 @@ multiple-range procedure.
 cv_bryant_paulson(
   alpha_level,
   df,
-  groups,
-  covariates = 1,
+  n_groups,
+  n_covariates = 1,
   procedure = c("tukey", "duncan"),
   verbose = TRUE
 )
@@ -34,18 +34,18 @@ cv_bryant_paulson(
 - df:
 
   The ANCOVA error degrees of freedom (a positive number; in a one-way
-  ANCOVA, `df = N - groups - covariates`).
+  ANCOVA, `df = N - n_groups - n_covariates`).
 
-- groups:
+- n_groups:
 
   The number of groups whose adjusted means are being compared (an
   integer of at least 2).
 
-- covariates:
+- n_covariates:
 
   The number of *random* covariates in the ANCOVA, the parameter \\p\\
   of the Bryant–Paulson distribution (a non-negative integer). With
-  `covariates = 0` the critical value reduces to the ordinary
+  `n_covariates = 0` the critical value reduces to the ordinary
   studentized range and the result equals \\\sqrt2\\ times
   [`cv_tukey_hsd`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md)
   (see Details).
@@ -116,7 +116,7 @@ x}\sqrt{1/n}\\. This differs from
 [`cv_tukey_hsd`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md),
 which divides its value by \\\sqrt2\\ to report on the pairwise
 mean-difference scale; divide the value here by \\\sqrt2\\ to obtain
-that scale. With `covariates = 0`, `cv_bryant_paulson` returns exactly
+that scale. With `n_covariates = 0`, `cv_bryant_paulson` returns exactly
 \\\sqrt2 \times\\ `cv_tukey_hsd`.
 
 **Duncan multiple-range.** For `procedure = "duncan"` the value is the
@@ -182,33 +182,33 @@ Ken Kelley <kkelley@nd.edu>
 # distribution function is integrated numerically and then inverted. The
 # value is 4.83, the entry in Table 1 of Bryant and Paulson (1976) and the
 # multiplier behind the simultaneous intervals of the 1980 worked example.
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1)
+cv_bryant_paulson(alpha_level = .05, df = 14, n_groups = 6, n_covariates = 1)
 #>  term     value area_less area_greater
-#>  upper_cv 4.83  0.95      0.05        
+#>  upper_cv 4.830 0.950     0.050       
 
 # With no covariates the reference distribution is the ordinary studentized
 # range, which base R supplies directly. The critical value is then sqrt(2)
 # times the Tukey HSD critical value.
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 0)$value
+cv_bryant_paulson(alpha_level = .05, df = 14, n_groups = 6, n_covariates = 0)$value
 #> [1] 4.638538
-sqrt(2) * cv_tukey_hsd(alpha_level = .05, df = 14, groups = 6)$value
+sqrt(2) * cv_tukey_hsd(alpha_level = .05, df = 14, n_groups = 6)$value
 #> [1] 4.638538
 
 # The stepwise Duncan multiple-range significant range comes from
-# procedure = "duncan". With covariates = 0 it reduces to Duncan's (1955)
+# procedure = "duncan". With n_covariates = 0 it reduces to Duncan's (1955)
 # own significant studentized range, 3.37 for a stretch of 6 groups on 14
 # error degrees of freedom.
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 0,
+cv_bryant_paulson(alpha_level = .05, df = 14, n_groups = 6, n_covariates = 0,
                   procedure = "duncan")
 #>  term     value area_less area_greater
-#>  upper_cv 3.37  <NA>      <NA>        
+#>  upper_cv 3.371 <NA>      <NA>        
 # One random covariate raises that range to 3.50, the entry in Table 2 of
 # Bryant and Bruvold (1980). Being stepwise, the value is a running maximum
 # of Bryant-Paulson quantiles, one inverted for every stretch from 2 to 6
 # groups at that stretch's own protection level; the package tests check
 # the full sequence against the paper's Section 4 example.
-cv_bryant_paulson(alpha_level = .05, df = 14, groups = 6, covariates = 1,
+cv_bryant_paulson(alpha_level = .05, df = 14, n_groups = 6, n_covariates = 1,
                   procedure = "duncan")
 #>  term     value area_less area_greater
-#>  upper_cv 3.5   <NA>      <NA>        
+#>  upper_cv 3.496 <NA>      <NA>        
 ```

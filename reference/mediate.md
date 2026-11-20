@@ -40,12 +40,22 @@ mediate(
 - x, m, y:
 
   Names (single character strings) of the predictor, the mediator, and
-  the outcome columns in `data`.
+  the outcome columns in `data`. Each column must be numeric (a Date,
+  date-time, or time difference column is read as its number, and a
+  one-column matrix, such as
+  [`scale()`](https://rdrr.io/r/base/scale.html) returns, as its
+  column); a predictor with two categories is supplied coded 0 and 1.
+  Any column name is accepted as it is.
 
 - covariates:
 
   Optional character vector of covariate column names, entered in both
-  the mediator and the outcome models.
+  the mediator and the outcome models. Numeric, logical, factor, and
+  character columns are accepted; a factor or character covariate is
+  coded once, on the complete cases, with R's contrasts for the session.
+  A covariate with a single value in the complete cases adds nothing to
+  either model and is left out with a message. A column may fill one
+  role only.
 
 - ci_method:
 
@@ -59,9 +69,17 @@ mediate(
 
 - B:
 
-  Number of bootstrap or Monte Carlo replications. Defaults to 2000;
-  published analyses often use 5000 or more, and the BCa interval in
-  particular rewards a large `B` (see *Details*).
+  Number of bootstrap or Monte Carlo replications, a single whole
+  number. Defaults to 2000, because each bootstrap replication refits
+  both regressions. The fewest accepted depends on the interval and the
+  level: 400 for the percentile and Monte Carlo intervals at the default
+  `conf_level` (200 at 0.90, 2000 at 0.99), and 2000 for the BCa
+  interval (1000 at 0.90, 10000 at 0.99, which the default does not
+  meet). A smaller `B` is refused before anything is computed (class
+  `dmar_count_invalid`); see *Bootstrap replications* under *Details*
+  and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
+  Not used, and not checked, for `ci_method = "sobel"`.
 
 - conf_level:
 
@@ -71,19 +89,35 @@ mediate(
 
   Optional integer seed for the resampling, used locally (the caller's
   random number generator state is restored on exit). Default `NULL`
-  leaves the random number generator state alone.
+  draws the resamples from the current random number stream, which
+  advances that stream.
 
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with rows `indirect_effect` (with its
 `ci_method` interval), `direct_effect`, `total_effect`, the paths `a`
 and `b`, their standard errors (`se_indirect` per Sobel, `se_a`,
-`se_b`), the interval limits (`indirect_lower` / `indirect_upper`,
-`direct_lower` / `direct_upper`, `total_lower` / `total_upper`),
-`proportion_mediated` (\\ab/c\\; `NA` when the total effect is near
-zero, where the ratio is unstable), `N`, and `B`. The interval method is
-recorded in the `"ci_method"` attribute and the confidence level in
-`"conf_level"`.
+`se_b`), the interval limits (`indirect_effect_ci_lower` /
+`indirect_effect_ci_upper`, `direct_effect_ci_lower` /
+`direct_effect_ci_upper`, `total_effect_ci_lower` /
+`total_effect_ci_upper`), `proportion_mediated` (\\ab/c\\; `NA` when the
+total effect is near zero, where the ratio is unstable), `N`, `B`, and
+`B_used`, the number of replications the interval of the indirect effect
+rests on (equal to `B` for the Monte Carlo interval and `NA`, as `B` is,
+for the Sobel interval). The interval method is recorded in the
+`"ci_method"` attribute and the confidence level in `"conf_level"`. For
+the bootstrap and Monte Carlo intervals the attributes `"B"`
+(requested), `"B_used"` (the number the interval rests on),
+`"n_dropped"` (their difference), and `"B_required"` (the fewest
+replications a request may ask for; that count is held to `B`, not to
+`B_used`) hold the counts as integers, which is where
+[`dmar_metadata`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)
+reads them, and `"bootstrap_status"` is one of `"complete"`,
+`"dropped"`, `"exploratory"`, `"insufficient_count"`, or
+`"insufficient_share"` (the last two mean that the limits of the
+indirect effect are `NA`). For the two bootstrap intervals
+`"n_covariate_redundant"` is the number of resamples kept in which a
+covariate column was redundant (see *Details*).
 
 ## Details
 
@@ -109,14 +143,60 @@ adjustments make it second-order accurate where the percentile interval
 is first-order accurate (DiCiccio & Efron, 1996). Because the adjusted
 quantile positions sit farther into the tails of the bootstrap
 distribution, the BCa interval benefits more than the percentile
-interval does from a `B` well above the default. Each resample refits
-the two regressions by least squares, a closed-form fit with no
-iterative estimation, so in ordinary data all `B` replications enter the
-interval. A degenerate resample (one whose refit is rank deficient,
-possible with a near-constant predictor) returns no indirect effect;
-such replications are dropped with a warning stating how many, and the
-interval is computed from the replications that returned a value. The
-Sobel standard error is computed by
+interval does from a `B` well above the default.
+
+**Bootstrap replications.** Each resample refits the two regressions by
+least squares on the rows drawn, with the covariates coded as they are
+in the data, and the interval is read from the quantiles of the `B`
+values of \\a b\\. A limit read from a quantile is located by the
+replications that lie beyond it, so the percentile and Monte Carlo
+intervals are run only when `B` puts at least 10 replications beyond
+each limit (400 at the 95 percent level), and the BCa interval, whose
+limits move farther into the tails, only with 50 beyond each nominal
+limit (2000 at the 95 percent level). A resample that leaves a covariate
+column redundant (a category with no case in the resample) still gives
+unique values of \\a\\ and \\b\\ and is kept; the
+`"n_covariate_redundant"` attribute counts these. A resample in which
+\\a\\ or \\b\\ is not estimable (the predictor constant, or the
+predictor or the mediator a linear combination of the other predictors
+there) has no indirect effect. Such a replication is dropped and
+counted, never replaced, and the interval is computed from the rest. The
+result records `B`, `B_used`, `n_dropped`, and `B_required` as
+attributes and `B` and `B_used` as rows. One warning of class
+`dmar_bootstrap_replications_dropped` states the counts when any
+replication was dropped, with a caution when the dropped replications
+are at least the share of `B` beyond one limit (2.5 percent at the 95
+percent level), because they could then decide by themselves where that
+limit falls. When more than half were dropped, no interval is reported:
+the two limits of the indirect effect are `NA`, every other row is as it
+would have been, and the warning has class
+`dmar_bootstrap_insufficient`. An interval from the replications that
+remain describes resamples in which the effect is defined. Dropping
+these replications is the rule DMAR applies to a replication that
+returns no value; it is a convention of the package, not a result that
+gives the interval its nominal coverage. Many dropped replications mean
+the data carry little information about a path (a predictor that varies
+in few cases), a design in which the case bootstrap is itself not
+reliable.
+
+The BCa interval needs the indirect effect with each case left out; when
+one of those is not estimable, or the bias correction or the
+acceleration is not finite, the BCa interval is refused (class
+`dmar_bca_undefined`) and the percentile interval remains available.
+After the replications are run, the count of 10 is applied again at the
+two positions where the bias correction and the acceleration place the
+limits. When fewer than 10 replications lie beyond one of them, no BCa
+interval is reported (limits `NA`, warning of class
+`dmar_bootstrap_insufficient`, which carries the two positions as
+`positions` and a suggested `B` as `B_suggest`).
+
+`options(dmar.bootstrap_exploratory = TRUE)` lets a smaller `B` (2 or
+more) run for a first look or a demonstration. Every such call gives a
+warning of class `dmar_bootstrap_exploratory`, and the attribute
+`"bootstrap_status"` is `"exploratory"`; the interval is not one to
+report.
+
+The Sobel standard error is computed by
 [`var_indirect_effect`](https://yelleknek.github.io/DMAR/reference/var_indirect_effect.md).
 The proportion mediated is one of the effect size measures for mediation
 models surveyed by Preacher and Kelley (2011); its instability when the
@@ -124,7 +204,10 @@ total effect is small is why it is reported as `NA` near a zero total
 effect. Listwise deletion is applied to the analysis variables; for full
 information maximum likelihood under missingness, fit the model in
 lavaan (see [`mlmr`](https://yelleknek.github.io/DMAR/reference/mlmr.md)
-for the package's FIML front end philosophy).
+for the package's FIML front end philosophy). The model has one mediator
+and no interaction, the cases are treated as independent, and incomplete
+cases are removed; for several mediators or missing data see
+[`mediation_mbco`](https://yelleknek.github.io/DMAR/reference/mediation_mbco.md).
 
 Mediation language implies causal structure: with observational data the
 estimates are conditional associations, and the causal reading requires
@@ -188,80 +271,88 @@ y <- 0.2 * x + 0.4 * m + rnorm(n, 0, 0.8)
 d <- data.frame(x = x, m = m, y = y)
 
 # The percentile bootstrap is the default and is what a reported
-# analysis would use. Each resample refits both regressions, so
-# B = 200 keeps the example quick; a reported interval deserves the
-# default B = 2000 or more.
-mediate(d, x = "x", m = "m", y = "y", B = 200, seed = 113)
-#>  term                value 
-#>  indirect_effect     0.182 
-#>  indirect_lower      0.116 
-#>  indirect_upper      0.268 
-#>  direct_effect       0.194 
-#>  direct_lower        0.0634
-#>  direct_upper        0.324 
-#>  total_effect        0.375 
-#>  total_lower         0.25  
-#>  total_upper         0.501 
-#>  a                   0.449 
-#>  b                   0.404 
-#>  se_a                0.0615
-#>  se_b                0.0678
-#>  se_indirect         0.0393
-#>  proportion_mediated 0.484 
-#>  N                   200   
-#>  B                   200   
+# analysis would use. Each resample refits both regressions.
+# B = 400 is the fewest replications a 95 percent percentile interval
+# is reported from and keeps the example quick; a reported interval
+# deserves the default B = 2000 or more.
+mediate(d, x = "x", m = "m", y = "y", B = 400, seed = 113)
+#>  term                     value
+#>  indirect_effect          0.182
+#>  indirect_effect_ci_lower 0.116
+#>  indirect_effect_ci_upper 0.259
+#>  direct_effect            0.194
+#>  direct_effect_ci_lower   0.063
+#>  direct_effect_ci_upper   0.324
+#>  total_effect             0.375
+#>  total_effect_ci_lower    0.250
+#>  total_effect_ci_upper    0.501
+#>  a                        0.449
+#>  b                        0.404
+#>  se_a                     0.062
+#>  se_b                     0.068
+#>  se_indirect              0.039
+#>  proportion_mediated      0.484
+#>  N                        200  
+#>  B                        400  
+#>  B_used                   400  
 #> 
 #> Confidence level: 95%
+#> 
+#> Bootstrap: 400 replications, 400 used (0 dropped; at least 400 must be requested)
 
 # The Monte Carlo interval draws a and b from their joint normal
 # approximation instead of refitting, so it stays quick even at a
 # large B. Its limits sit close to the bootstrap limits here.
 mediate(d, x = "x", m = "m", y = "y", ci_method = "monte_carlo",
         B = 10000, seed = 113)
-#>  term                value 
-#>  indirect_effect     0.182 
-#>  indirect_lower      0.109 
-#>  indirect_upper      0.266 
-#>  direct_effect       0.194 
-#>  direct_lower        0.0634
-#>  direct_upper        0.324 
-#>  total_effect        0.375 
-#>  total_lower         0.25  
-#>  total_upper         0.501 
-#>  a                   0.449 
-#>  b                   0.404 
-#>  se_a                0.0615
-#>  se_b                0.0678
-#>  se_indirect         0.0393
-#>  proportion_mediated 0.484 
-#>  N                   200   
-#>  B                   10000 
+#>  term                     value
+#>  indirect_effect          0.182
+#>  indirect_effect_ci_lower 0.109
+#>  indirect_effect_ci_upper 0.266
+#>  direct_effect            0.194
+#>  direct_effect_ci_lower   0.063
+#>  direct_effect_ci_upper   0.324
+#>  total_effect             0.375
+#>  total_effect_ci_lower    0.250
+#>  total_effect_ci_upper    0.501
+#>  a                        0.449
+#>  b                        0.404
+#>  se_a                     0.062
+#>  se_b                     0.068
+#>  se_indirect              0.039
+#>  proportion_mediated      0.484
+#>  N                        200  
+#>  B                        10000
+#>  B_used                   10000
 #> 
 #> Confidence level: 95%
+#> 
+#> Bootstrap: 10000 replications, 10000 used (0 dropped; at least 400 must be requested)
 
 # The Sobel interval is closed form. It assumes the product ab is
 # normally distributed, which is why it is reported for comparison
-# rather than used for inference; its B row is NA because no
-# replications are drawn.
+# rather than used for inference; its B and B_used rows are NA
+# because no replications are drawn.
 mediate(d, x = "x", m = "m", y = "y", ci_method = "sobel")
-#>  term                value 
-#>  indirect_effect     0.182 
-#>  indirect_lower      0.105 
-#>  indirect_upper      0.259 
-#>  direct_effect       0.194 
-#>  direct_lower        0.0634
-#>  direct_upper        0.324 
-#>  total_effect        0.375 
-#>  total_lower         0.25  
-#>  total_upper         0.501 
-#>  a                   0.449 
-#>  b                   0.404 
-#>  se_a                0.0615
-#>  se_b                0.0678
-#>  se_indirect         0.0393
-#>  proportion_mediated 0.484 
-#>  N                   200   
-#>  B                   <NA>  
+#>  term                     value
+#>  indirect_effect          0.182
+#>  indirect_effect_ci_lower 0.105
+#>  indirect_effect_ci_upper 0.259
+#>  direct_effect            0.194
+#>  direct_effect_ci_lower   0.063
+#>  direct_effect_ci_upper   0.324
+#>  total_effect             0.375
+#>  total_effect_ci_lower    0.250
+#>  total_effect_ci_upper    0.501
+#>  a                        0.449
+#>  b                        0.404
+#>  se_a                     0.062
+#>  se_b                     0.068
+#>  se_indirect              0.039
+#>  proportion_mediated      0.484
+#>  N                        200  
+#>  B                        <NA> 
+#>  B_used                   <NA> 
 #> 
 #> Confidence level: 95%
 ```

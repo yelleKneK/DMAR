@@ -119,7 +119,9 @@ The likelihood of the pooled-variance *t* statistic given \\\delta\\ is
 noncentral *t* with \\\mathit{df} = n_1 + n_2 - 2\\ and noncentrality
 \\\delta \sqrt{n_1 n_2 / (n_1 + n_2)}\\; equal variances are assumed, as
 in the standard JZS development. The raw-scale rows transform the
-\\\delta\\ summaries through the pooled standard deviation.
+\\\delta\\ summaries through the pooled standard deviation. The
+noncentral *t* density is computed exactly, as described in
+[`bayes_one_sample_t`](https://yelleknek.github.io/DMAR/reference/bayes_one_sample_t.md).
 
 ## References
 
@@ -171,12 +173,12 @@ bayes_independent_t(g1, g2)
 #>  delta_lower            -0.189
 #>  delta_upper            0.693 
 #>  p_delta_positive       0.864 
-#>  raw_posterior_median   4.01  
-#>  raw_lower              -3.11 
-#>  raw_upper              11.4  
+#>  raw_posterior_median   4.009 
+#>  raw_lower              -3.106
+#>  raw_upper              11.405
 #>  bf_10                  0.454 
-#>  bf_01                  2.2   
-#>  t                      1.2   
+#>  bf_01                  2.201 
+#>  t_value                1.199 
 #>  df                     68    
 #>  prior_location         0     
 #>  prior_scale            0.707 

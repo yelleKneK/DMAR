@@ -111,12 +111,12 @@ Ken Kelley <kkelley@nd.edu>
 # after looking at the data.
 cv_scheffe(alpha_level = .05, df_numerator = 3, df_denominator = 36)
 #>  term     value area_less area_greater
-#>  upper_cv 2.93  0.95      0.05        
+#>  upper_cv 2.932 0.950     0.050       
 
 # The price of that protection is a larger multiplier than the unadjusted
 # t critical value at the same error degrees of freedom:
 cv_t(alpha_level = .05, df = 36)
-#>  term     value area_less area_greater
-#>  lower_cv -2.03 0.025     0.975       
-#>  upper_cv 2.03  0.975     0.025       
+#>  term     value  area_less area_greater
+#>  lower_cv -2.028 0.025     0.975       
+#>  upper_cv 2.028  0.975     0.025       
 ```

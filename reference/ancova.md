@@ -44,15 +44,17 @@ ancova(data, outcome, treatment, covariates, conf_level = 0.95)
 A `data.frame` (class `dmar_tbl`) with rows for the omnibus test
 (`F_value`, `df_1`, `df_2`, `p_value`), the sum-of-squares type used
 (`sum_of_squares_type`; 3 for Type III), the point estimates and
-confidence intervals of partial \\\eta^2\\ and partial \\\omega^2\\, the
-adjusted group means and their standard errors (one row per level of
-`treatment`), and the homogeneity-of-regression *F*-test. The result
-carries the `dmar_tbl` class, so it prints to 3 significant figures with
-whole numbers (such as the degrees of freedom) shown without a decimal
-part and *p*-values to 4 decimal places (a *p*-value below 0.0001 prints
-as “\< 0.0001”); the stored values keep full precision. Control the
-display with `print(x, digits = )` or globally with
-`options(dmar.digits = )` (see
+confidence intervals of partial \\\eta^2\\ and partial \\\omega^2\\
+(`eta_squared_partial`, `eta_squared_partial_ci_lower`,
+`eta_squared_partial_ci_upper`, and the same three rows for
+`omega_squared_partial`), the adjusted group means and their standard
+errors (one row per level of `treatment`), and the
+homogeneity-of-regression *F*-test. The result carries the `dmar_tbl`
+class, so it prints to 3 decimal places with whole numbers (such as the
+degrees of freedom) shown without a decimal part and *p*-values to 4
+decimal places (a *p*-value below 0.0001 prints as “\< 0.0001”); the
+stored values keep full precision. Control the display with
+`print(x, digits = )` or globally with `options(dmar.digits = )` (see
 [`dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)).
 
 ## Details
@@ -92,8 +94,10 @@ in the `F_homogeneity_of_regression` rows.
 
 **Effect size CIs.** Partial \\\eta^2\\ and partial \\\omega^2\\ use the
 noncentral *F* framework
-([`ci_eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
-[`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)).
+([`ci_eta_squared`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md)
+and
+[`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
+with `estimand = "partial"`).
 
 ## References
 
@@ -110,18 +114,22 @@ on higher-order designs.)
 [`ci_c_ancova`](https://yelleknek.github.io/DMAR/reference/ci_c_ancova.md),
 [`ci_sc_ancova`](https://yelleknek.github.io/DMAR/reference/ci_sc_ancova.md),
 [`ss_aipe_sc_ancova`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sc_ancova.md),
-[`omega_squared_partial`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md)
+[`omega_squared`](https://yelleknek.github.io/DMAR/reference/omega_squared.md)
 
 Other hypothesis tests:
 [`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -147,25 +155,25 @@ Ken Kelley <kkelley@nd.edu>
 #    adjusting for pre-test IQ.
 ancova(outcome = "iq_8", treatment = "treatment",
        covariates = "iq_pre", data = pygmalion)
-#>  term                         value   
-#>  F_value                      5.38    
-#>  df_1                         1       
-#>  df_2                         307     
-#>  p_value                      0.0210  
-#>  sum_of_squares_type          3       
-#>  eta_squared_partial          0.0172  
-#>  eta_squared_partial_lower    0.000201
-#>  eta_squared_partial_upper    0.056   
-#>  omega_squared_partial        0.0139  
-#>  omega_squared_partial_lower  0.000201
-#>  omega_squared_partial_upper  0.056   
-#>  adjusted_mean[Control]       107     
-#>  adjusted_mean[Bloomer]       111     
-#>  se_adjusted_mean[Control]    0.849   
-#>  se_adjusted_mean[Bloomer]    1.67    
-#>  F_homogeneity_of_regression  3.88    
-#>  df_homogeneity_of_regression 1       
-#>  p_homogeneity_of_regression  0.0498  
+#>  term                           value  
+#>  F_value                        5.383  
+#>  df_1                           1      
+#>  df_2                           307    
+#>  p_value                        0.0210 
+#>  sum_of_squares_type            3      
+#>  eta_squared_partial            0.017  
+#>  eta_squared_partial_ci_lower   0.000  
+#>  eta_squared_partial_ci_upper   0.056  
+#>  omega_squared_partial          0.014  
+#>  omega_squared_partial_ci_lower 0.000  
+#>  omega_squared_partial_ci_upper 0.056  
+#>  adjusted_mean[Control]         107.000
+#>  adjusted_mean[Bloomer]         111.343
+#>  se_adjusted_mean[Control]      0.849  
+#>  se_adjusted_mean[Bloomer]      1.667  
+#>  F_homogeneity_of_regression    3.879  
+#>  df_homogeneity_of_regression   1      
+#>  p_homogeneity_of_regression    0.0498 
 #> 
 #> Confidence level: 95%
 
@@ -173,25 +181,25 @@ ancova(outcome = "iq_8", treatment = "treatment",
 #    grade).
 ancova(outcome = "iq_8", treatment = "treatment",
        covariates = c("iq_pre", "grade"), data = pygmalion)
-#>  term                         value   
-#>  F_value                      5.27    
-#>  df_1                         1       
-#>  df_2                         306     
-#>  p_value                      0.0224  
-#>  sum_of_squares_type          3       
-#>  eta_squared_partial          0.0169  
-#>  eta_squared_partial_lower    0.000127
-#>  eta_squared_partial_upper    0.0554  
-#>  omega_squared_partial        0.0136  
-#>  omega_squared_partial_lower  0.000127
-#>  omega_squared_partial_upper  0.0554  
-#>  adjusted_mean[Control]       107     
-#>  adjusted_mean[Bloomer]       111     
-#>  se_adjusted_mean[Control]    0.85    
-#>  se_adjusted_mean[Bloomer]    1.67    
-#>  F_homogeneity_of_regression  4.83    
-#>  df_homogeneity_of_regression 2       
-#>  p_homogeneity_of_regression  0.0086  
+#>  term                           value  
+#>  F_value                        5.271  
+#>  df_1                           1      
+#>  df_2                           306    
+#>  p_value                        0.0224 
+#>  sum_of_squares_type            3      
+#>  eta_squared_partial            0.017  
+#>  eta_squared_partial_ci_lower   0.000  
+#>  eta_squared_partial_ci_upper   0.055  
+#>  omega_squared_partial          0.014  
+#>  omega_squared_partial_ci_lower 0.000  
+#>  omega_squared_partial_ci_upper 0.055  
+#>  adjusted_mean[Control]         107.008
+#>  adjusted_mean[Bloomer]         111.313
+#>  se_adjusted_mean[Control]      0.850  
+#>  se_adjusted_mean[Bloomer]      1.669  
+#>  F_homogeneity_of_regression    4.834  
+#>  df_homogeneity_of_regression   2      
+#>  p_homogeneity_of_regression    0.0086 
 #> 
 #> Confidence level: 95%
 ```

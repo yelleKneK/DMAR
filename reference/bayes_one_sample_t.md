@@ -2,22 +2,22 @@
 
 The Bayesian counterpart of the one-sample *t* test. It reports the
 posterior distribution of the standardized effect \\\delta = (\mu -
-\mu_0)/\sigma\\ under the default Jeffreys-Zellner-Siow (JZS) prior, a
-Cauchy prior on \\\delta\\ with Jeffreys priors on the nuisance
-parameters (the variance), summarized by its median, mean, a credible
-interval, and the direct probability statement \\P(\delta \> 0 \mid
-\mathrm{data})\\. The JZS default Bayes factor (Rouder, Speckman, Sun,
-Morey, & Iverson, 2009) is also reported.
+\mu_0)/\sigma\\, where \\\mu_0\\ is `null_mean`, under the default
+Jeffreys-Zellner-Siow (JZS) prior, a Cauchy prior on \\\delta\\ with
+Jeffreys priors on the nuisance parameters (the variance), summarized by
+its median, mean, a credible interval, and the direct probability
+statement \\P(\delta \> 0 \mid \mathrm{data})\\. The JZS default Bayes
+factor (Rouder, Speckman, Sun, Morey, & Iverson, 2009) is also reported.
 
 ## Usage
 
 ``` r
 bayes_one_sample_t(
   x = NULL,
-  mu_0 = 0,
+  null_mean = 0,
   mean = NULL,
   sd = NULL,
-  n = NULL,
+  N = NULL,
   prior_location = 0,
   prior_scale = sqrt(2)/2,
   prior_mean = NULL,
@@ -33,18 +33,21 @@ bayes_one_sample_t(
   Numeric vector of observations. Omit to supply summary statistics
   instead.
 
-- mu_0:
+- null_mean:
 
-  The comparison value for the mean under the point null (and the
-  centering value for \\\delta\\). Defaults to 0.
+  The comparison value for the mean under the point null, \\\mu_0\\ in
+  the formulas (and the centering value for \\\delta\\). Defaults to 0.
 
-- mean, sd, n:
+- mean, sd, N:
 
-  Summary statistics: the sample mean, standard deviation, and sample
-  size. The Bayes factor depends on the data only through the *t*
-  statistic and \\n\\, so the summary form is exact, not an
+  Summary statistics: the sample mean, standard deviation, and total
+  sample size. The Bayes factor depends on the data only through the *t*
+  statistic and \\N\\, so the summary form is exact, not an
   approximation. Supply either `x` or all three summary values, never
-  both.
+  both. An argument `n` is refused by name, with a condition of class
+  `dmar_argument_invalid`, since R would otherwise match it to
+  `null_mean` by its leading character and take it as the comparison
+  value.
 
 - prior_location:
 
@@ -81,7 +84,7 @@ A `data.frame` (class `dmar_tbl`) with the posterior summaries of
 `delta_lower`, `delta_upper`, `p_delta_positive`), the same summaries
 mapped to the raw mean difference scale (`raw_*`), the Bayes factors
 (`bf_10`, `bf_01`), the observed `t` and `df`, the `prior_scale`, and
-`n`.
+`N`.
 
 **Specifying the prior.** The default prior on the standardized effect
 \\\delta\\ is the JZS Cauchy centered at zero. Its `prior_scale` \\r\\
@@ -107,7 +110,7 @@ attribute as a data frame of `delta` and `density`, so any posterior
 probability, not only the reported ones, can be computed from it.
 
 A standardized effect size enters through the summary form directly: an
-observed *d* relative to `mu_0 = 0` is `mean = d, sd = 1`.
+observed *d* relative to `null_mean = 0` is `mean = d, sd = 1`.
 
 ## Details
 
@@ -125,12 +128,17 @@ the frequentist complements.
 With a Jeffreys prior on \\(\mu_0, \sigma^2)\\ and \\\delta \sim
 \mathrm{Cauchy}(0, r)\\, all inference flows through the observed *t*
 statistic, whose likelihood given \\\delta\\ is noncentral *t* with
-noncentrality \\\delta \sqrt{n}\\. The posterior of \\\delta\\ is
+noncentrality \\\delta \sqrt{N}\\. The posterior of \\\delta\\ is
 computed by quadrature (no Monte Carlo error) and the Bayes factor by
 the one-dimensional integral of that likelihood against the Cauchy
-prior, the exact JZS form. The raw-scale rows transform the \\\delta\\
-summaries through the sample standard deviation (a plug-in, as is
-conventional for reporting).
+prior, the exact JZS form. The noncentral *t* density is exact: R's
+[`dt()`](https://rdrr.io/r/stats/TDist.html) is used where it is
+accurate, and elsewhere (a noncentrality above 37.62, where it rests on
+a normal approximation, more than 1,000 degrees of freedom, or \\\|t\|
+\< .1\\, where it loses accuracy to cancellation) the density is
+integrated over the sampling distribution of the standard deviation. The
+raw-scale rows transform the \\\delta\\ summaries through the sample
+standard deviation (a plug-in, as is conventional for reporting).
 
 ## References
 
@@ -174,27 +182,27 @@ Ken Kelley <kkelley@nd.edu>
 set.seed(113)
 x <- rnorm(40, mean = 0.4, sd = 1)
 bayes_one_sample_t(x)
-#>  term                   value
-#>  delta_posterior_median 0.503
-#>  delta_posterior_mean   0.503
-#>  delta_lower            0.179
-#>  delta_upper            0.832
-#>  p_delta_positive       0.999
-#>  raw_posterior_median   0.519
-#>  raw_lower              0.185
-#>  raw_upper              0.859
-#>  bf_10                  20   
-#>  bf_01                  0.05 
-#>  t                      3.39 
-#>  df                     39   
-#>  prior_location         0    
-#>  prior_scale            0.707
-#>  n                      40   
+#>  term                   value 
+#>  delta_posterior_median 0.503 
+#>  delta_posterior_mean   0.503 
+#>  delta_lower            0.179 
+#>  delta_upper            0.832 
+#>  p_delta_positive       0.999 
+#>  raw_posterior_median   0.519 
+#>  raw_lower              0.185 
+#>  raw_upper              0.859 
+#>  bf_10                  19.998
+#>  bf_01                  0.050 
+#>  t_value                3.390 
+#>  df                     39    
+#>  prior_location         0     
+#>  prior_scale            0.707 
+#>  N                      40    
 #> 
 #> Confidence level: 95%
 
 # Against a nonzero comparison value, with a wider prior.
-bayes_one_sample_t(x, mu_0 = 0.1, prior_scale = 1)
+bayes_one_sample_t(x, null_mean = 0.1, prior_scale = 1)
 #>  term                   value
 #>  delta_posterior_median 0.422
 #>  delta_posterior_mean   0.423
@@ -204,13 +212,13 @@ bayes_one_sample_t(x, mu_0 = 0.1, prior_scale = 1)
 #>  raw_posterior_median   0.436
 #>  raw_lower              0.108
 #>  raw_upper              0.768
-#>  bf_10                  3.87 
+#>  bf_10                  3.867
 #>  bf_01                  0.259
-#>  t                      2.78 
+#>  t_value                2.777
 #>  df                     39   
 #>  prior_location         0    
 #>  prior_scale            1    
-#>  n                      40   
+#>  N                      40   
 #> 
 #> Confidence level: 95%
 ```

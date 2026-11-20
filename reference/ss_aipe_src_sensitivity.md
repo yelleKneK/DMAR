@@ -3,6 +3,10 @@
 Performs a sensitivity analysis when planning sample size from the
 Accuracy in Parameter Estimation Perspective for the standardized
 regression coefficient.
+[`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
+and
+[`ss_aipe_rc_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc_sensitivity.md)
+are the counterparts for the unstandardized coefficient.
 
 ## Usage
 
@@ -11,19 +15,20 @@ ss_aipe_src_sensitivity(
   true_var_Y = NULL,
   true_cov_YX = NULL,
   true_cov_XX = NULL,
-  estimated_var_Y = NULL,
-  estimated_cov_YX = NULL,
-  estimated_cov_XX = NULL,
+  supposed_var_Y = NULL,
+  supposed_cov_YX = NULL,
+  supposed_cov_XX = NULL,
   specified_N = NULL,
   which_predictor = 1,
-  w = NULL,
+  width = NULL,
   noncentral = TRUE,
-  standardize = TRUE,
   conf_level = 0.95,
   assurance = NULL,
   G = 1000,
   print_iter = TRUE,
-  filename = NULL
+  filename = NULL,
+  assurance_method = c("analytic", "simulation"),
+  seed = NULL
 )
 ```
 
@@ -42,42 +47,45 @@ ss_aipe_src_sensitivity(
 
   Population covariance matrix of the *p* predictor variables
 
-- estimated_var_Y:
+- supposed_var_Y:
 
-  Estimated variance of the dependent variable (*Y*)
+  Supposed variance of the dependent variable (*Y*), the planning value
+  from which the sample size is planned
 
-- estimated_cov_YX:
+- supposed_cov_YX:
 
-  Estimated covariances vector between the *p* predictor variables and
-  the dependent variable (*Y*)
+  Supposed covariances vector (planning values) between the *p*
+  predictor variables and the dependent variable (*Y*)
 
-- estimated_cov_XX:
+- supposed_cov_XX:
 
-  Estimated Population covariance matrix of the *p* predictor variables
+  Supposed covariance matrix (planning values) of the *p* predictor
+  variables
 
 - specified_N:
 
   Directly specified sample size (instead of planning one from the
-  estimated covariance structure)
+  supposed covariance structure)
 
 - which_predictor:
 
   identifies which of the *p* predictors is of interest
 
-- w:
+- width:
 
-  desired confidence interval width for the regression coefficient of
-  interest
+  Desired confidence interval width for the standardized regression
+  coefficient of interest
 
 - noncentral:
 
-  specify with a `TRUE` or `FALSE` statement whether or not the
-  noncentral approach to sample size planning should be used
-
-- standardize:
-
-  specify with a `TRUE` or `FALSE` statement whether or not the
-  regression coefficient will be standardized; default is `TRUE`
+  `TRUE` (the default) for the noncentral *t* interval for the
+  standardized coefficient (that of
+  [`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md)),
+  `FALSE` for the central *t* interval of Kelley and Maxwell (2003,
+  Equation 1). The interval of each replication is that interval, and a
+  sample size planned from the supposed values is planned for it by
+  [`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md)
+  with the same `noncentral`.
 
 - conf_level:
 
@@ -101,29 +109,55 @@ ss_aipe_src_sensitivity(
 
 - filename:
 
-  Optional path for a comma separated file recording every replication,
-  forwarded to
-  [`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md),
-  which does the writing: nothing is written when `filename` is `NULL`
-  (the default), and a throwaway run should point it at
-  `tempfile(fileext = ".csv")`.
+  Optional path of a CSV file to receive the per-replication results
+  (the standardized coefficient estimate `std_reg_coef_j`, its
+  confidence limits `ci_lower` and `ci_upper`, the observed \\R^2\\
+  `R2`, the standard error `se_std_reg_coef_j`, and the *t* statistic
+  `t_value`), appended when the file already exists and created
+  otherwise; the default `NULL` writes nothing, and a throwaway run that
+  wants the file should point it at `tempfile(fileext = ".csv")`.
+
+- assurance_method:
+
+  Passed to
+  [`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md),
+  which plans the sample size from the supposed values with `assurance`:
+  `"analytic"` (the default) for the published approximation, which does
+  not compute the probability of an interval no wider than `width` (for
+  the noncentral interval that of MBESS, and for the central one the chi
+  square approximation of Kelley and Maxwell, 2003, Equation 3), at unit
+  standard deviations; `"simulation"` for the smallest sample size at
+  which a simulated estimate of that probability, made by the planner
+  from its default `G` of 20000 samples with the random number stream
+  that `seed` sets, is at least `assurance`. Not used with `specified_N`
+  or without `assurance`.
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
-Carlo sensitivity analysis. This function delegates to
-[`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
-and inherits its return structure: mean / median / SD summaries of the
-realized standardized regression coefficient, the realized interval
-widths, and the realized squared multiple correlation coefficient; the
-proportion of intervals at or below the planning target
-(`pct_ci_less_w`); the tail-specific and overall empirical non-coverage
-rates (`pct_ci_miss_low`, `pct_ci_miss_high`, `total_type_I_error`), all
+Carlo sensitivity analysis: mean / median / SD summaries of the realized
+standardized regression coefficient (`mean_std_reg_coef_j`,
+`median_std_reg_coef_j`, `sd_std_reg_coef_j`), the realized interval
+widths (`mean_ci_width`, `median_ci_width`, `sd_ci_width`), and the
+realized squared multiple correlation coefficient (`mean_R2`,
+`median_R2`, `sd_R2`); the proportion of intervals at or below the
+planning target (`pct_ci_less_width`); the tail-specific and overall
+empirical non-coverage of the population standardized coefficient
+(`pct_ci_miss_low`, `pct_ci_miss_high`, `total_type_I_error`), all
 proportions on the 0 to 1 scale; and the input echoes (`total_N`, `p`,
-`which_predictor`, `true_b_j`, `estimated_b_j`, `width`, `conf_level`,
-and, when one was supplied, `assurance`). See
-[`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md)
-for the full row list.
+`which_predictor`, `true_std_reg_coef_j` and `supposed_std_reg_coef_j`,
+the population and planning values of the standardized coefficient
+implied by the covariance structures, `width`, `conf_level`, and, when
+one was supplied, `assurance`). The per-replication file written with
+`filename` has the columns `std_reg_coef_j`, `ci_lower`, `ci_upper`,
+`R2`, `se_std_reg_coef_j`, and `t_value`.
 
 ## Details
 
@@ -132,15 +166,110 @@ even if one is interested in a single regression coefficient, so that
 the covariance/correlation structure can be specified when the
 simulation study within the function runs.
 
+**The coefficient.** The data of every replication are standardized with
+their own sample standard deviations before the regression is fit, so
+each estimate and each interval is for the standardized coefficient, the
+quantity `true_std_reg_coef_j` of
+[`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md)
+stands for. The true value the intervals are judged against is the
+population standardized coefficient \$\$\beta_j = b_j \sigma\_{X_j} /
+\sigma_Y,\$\$ the unstandardized coefficient \\b_j\\ (the *j*th element
+of \\\Sigma\_{XX}^{-1}\sigma\_{XY}\\, from `true_cov_XX` and
+`true_cov_YX`) multiplied by the ratio of the population standard
+deviations (Kelley & Maxwell, 2003, p. 316), where \\\sigma_Y\\ is the
+square root of `true_var_Y` and \\\sigma\_{X_j}\\ the square root of the
+*j*th diagonal element of `true_cov_XX`. The supposed coefficient is put
+on the same scale with the supposed standard deviations
+(`supposed_var_Y` and the diagonal of `supposed_cov_XX`), and a sample
+size planned from the supposed values is planned by
+[`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md)
+for a coefficient on that scale, with the supposed correlations and the
+same `noncentral`, so that `width` is a width in the units of the
+intervals simulated and the plan is for the interval simulated.
+
+**The plan with assurance.** With `noncentral = FALSE` and `assurance`,
+the plan is that of
+[`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md)
+for the central interval for the standardized coefficient: by default
+the chi square approximation of Kelley and Maxwell (2003, Equation 3),
+and with `assurance_method = "simulation"` the smallest sample size at
+which that interval is no wider than `width` with at least that
+probability. For two predictors correlated .3 with correlations of .4
+and .3 with *Y*, a width of .3, and an assurance of .90, the
+approximation is 181, at which .986 of the standardized intervals are no
+wider than .3, and the simulated plan is 171 (another seed can give one
+a case away; see
+[`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md)).
+
+The interval of each replication is that of
+[`ci_reg_coef`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md)
+with the standard error of the regression fitted to the standardized
+data. That standard error treats the sample standard deviations as
+constants, so it is approximate, and the predictors simulated here are
+random, so those of the predictors vary along with that of *Y* (Kelley &
+Maxwell, 2003, pp. 315–316; see
+[`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md)); the
+coverage rows show how good the approximation is for the structure
+given.
+
 ## Note
 
-Note that when the true and estimated covariance structures agree
-(`true_cov_YX` equals `estimated_cov_YX` and `true_cov_XX` equals
-`estimated_cov_XX`), the results are not literally from a sensitivity
+Note that when the true and supposed covariance structures agree
+(`true_cov_YX` equals `supposed_cov_YX` and `true_cov_XX` equals
+`supposed_cov_XX`), the results are not literally from a sensitivity
 analysis, rather the function performs a standard simulation study. A
 simulation study can be helpful in order to determine if the sample size
 procedure under or overestimates necessary sample size. See
 `ss_aipe_reg_coef_sensitivity` in DMAR for more details.
+
+## The record of the simulation
+
+Every sensitivity function of the package summarizes its replications
+over one denominator: the replications that produced a confidence
+interval (for a power sensitivity function, a test). The proportion of
+intervals that met the width target (`pct_ci_less_width`), the
+proportions of intervals that missed the true value, and the summaries
+of the widths are all taken over those replications. A replication
+without an interval is in none of these rows. It is counted, and the
+returned table carries the counts in its attribute `simulation`, a list
+read with `attr(x, "simulation")`:
+
+- `attempted`:
+
+  the number of replications asked for (`G`).
+
+- `returned`:
+
+  the number that produced an interval (a test).
+
+- `failed`:
+
+  the number that did not (`attempted - returned`).
+
+- `denominator`:
+
+  the number of replications the rows named above are taken over, which
+  is `returned`.
+
+- `width_target_probability`:
+
+  the proportion of the replications with an interval whose interval met
+  the width target, the value of the `pct_ci_less_width` row; `NA` for a
+  function or a call without a width target, and when no replication
+  produced an interval.
+
+- `width_target_mc_ci`:
+
+  the exact binomial (Clopper-Pearson) limits for that proportion, at
+  the confidence level of the table. They describe the error of the
+  simulation, which shrinks as `G` grows, and nothing else.
+
+A function that records more about its run adds elements to the list,
+and its help page names them. The line "Replications" beneath the
+printed table gives `G`, and the three counts when a replication was
+without an interval. With many replications without an interval the rows
+describe only the studies in which the interval could be formed, so
+`failed` is to be reported beside them.
 
 ## References
 
@@ -156,6 +285,7 @@ Chapter 6 on trend analysis.)
 
 ## See also
 
+[`ss_aipe_src`](https://yelleknek.github.io/DMAR/reference/ss_aipe_src.md),
 [`ss_aipe_reg_coef_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef_sensitivity.md),
 [`ss_aipe_rc_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_rc_sensitivity.md),
 [`ss_aipe_reg_coef`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reg_coef.md),
@@ -178,35 +308,37 @@ Ken Kelley <kkelley@nd.edu>
 # generations (G = 1000 is typical); G is reduced here so the
 # example runs quickly.
 set.seed(113)
-Sigma_X <- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
+cov_XX  <- matrix(c(1, 0.3, 0.3, 1), nrow = 2)
 cov_YX  <- c(0.4, 0.3)
 ss_aipe_src_sensitivity(
-  true_var_Y = 1, true_cov_YX = cov_YX, true_cov_XX = Sigma_X,
-  estimated_var_Y = 1, estimated_cov_YX = cov_YX, estimated_cov_XX = Sigma_X,
-  which_predictor = 1, w = 0.20, conf_level = 0.95,
+  true_var_Y = 1, true_cov_YX = cov_YX, true_cov_XX = cov_XX,
+  supposed_var_Y = 1, supposed_cov_YX = cov_YX, supposed_cov_XX = cov_XX,
+  which_predictor = 1, width = 0.20, conf_level = 0.95,
   G = 50, print_iter = FALSE
 )
-#>  term               value  
-#>  mean_b_j           0.349  
-#>  median_b_j         0.357  
-#>  sd_b_j             0.043  
-#>  mean_ci_width      0.2    
-#>  median_ci_width    0.2    
-#>  sd_ci_width        0.00376
-#>  pct_ci_less_w      0.56   
-#>  pct_ci_miss_low    0      
-#>  pct_ci_miss_high   0      
-#>  total_type_I_error 0      
-#>  mean_R2            0.201  
-#>  median_R2          0.198  
-#>  sd_R2              0.0366 
-#>  total_N            366    
-#>  p                  2      
-#>  which_predictor    1      
-#>  true_b_j           0.341  
-#>  estimated_b_j      0.341  
-#>  width              0.2    
-#>  conf_level         0.95   
+#>  term                    value
+#>  mean_std_reg_coef_j     0.339
+#>  median_std_reg_coef_j   0.342
+#>  sd_std_reg_coef_j       0.045
+#>  mean_ci_width           0.200
+#>  median_ci_width         0.200
+#>  sd_ci_width             0.004
+#>  pct_ci_less_width       0.560
+#>  pct_ci_miss_low         0.000
+#>  pct_ci_miss_high        0.020
+#>  total_type_I_error      0.020
+#>  mean_R2                 0.197
+#>  median_R2               0.198
+#>  sd_R2                   0.033
+#>  total_N                 365  
+#>  p                       2    
+#>  which_predictor         1    
+#>  true_std_reg_coef_j     0.341
+#>  supposed_std_reg_coef_j 0.341
+#>  width                   0.200
+#>  conf_level              0.950
+#> 
+#> Replications: 50
 #> 
 #> Confidence level: 95%
 ```

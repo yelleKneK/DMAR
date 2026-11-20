@@ -132,7 +132,7 @@ signal_to_noise_R2(R2 = .5, N = 50,   p = 2)
 signal_to_noise_R2(R2 = .5, N = 100,  p = 2)
 #>  term          value
 #>  phi2_hat      1    
-#>  phi2_adj_hat  0.96 
+#>  phi2_adj_hat  0.960
 #>  phi2_umvue    0.939
 #>  phi2_umvue_l  0.901
 #>  phi2_umvue_nl <NA> 
@@ -141,7 +141,7 @@ signal_to_noise_R2(R2 = .5, N = 500,  p = 2)
 #>  phi2_hat      1    
 #>  phi2_adj_hat  0.992
 #>  phi2_umvue    0.988
-#>  phi2_umvue_l  0.98 
+#>  phi2_umvue_l  0.980
 #>  phi2_umvue_nl <NA> 
 
 # 2. With p = 5 the nonlinear estimator is available; it differs
@@ -156,7 +156,7 @@ signal_to_noise_R2(R2 = .5, N = 50,  p = 5)
 signal_to_noise_R2(R2 = .5, N = 500, p = 5)
 #>  term          value
 #>  phi2_hat      1    
-#>  phi2_adj_hat  0.98 
+#>  phi2_adj_hat  0.980
 #>  phi2_umvue    0.976
 #>  phi2_umvue_l  0.968
 #>  phi2_umvue_nl 0.968

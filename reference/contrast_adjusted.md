@@ -42,10 +42,10 @@ contrast_adjusted(model, contrast, conf_level = 0.95)
 
 A five-row `dmar_tbl` (a `data.frame` with columns `term` and `value`).
 The `term` values are `"contrast"` (the point estimate \\\hat{\psi}\\ of
-the contrast of adjusted cell means), `"lower_limit"` and
-`"upper_limit"` (the confidence limits), `"t"` (the *t* statistic), and
-`"p"` (the two-sided *p*-value). The stored `value` column is numeric at
-full precision.
+the contrast of adjusted cell means), `"ci_lower"` and `"ci_upper"` (the
+confidence limits), `"t_value"` (the *t* statistic), and `"p_value"`
+(the two-sided *p*-value). The stored `value` column is numeric at full
+precision.
 
 ## Details
 
@@ -109,10 +109,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -147,12 +148,12 @@ fit <- lm(y ~ A * B + x, data = d)
 # Cells in reference-grid order: (a1,b1), (a2,b1), (a1,b2), (a2,b2).
 # Main effect of A, averaged over B: mean(a2 cells) - mean(a1 cells).
 contrast_adjusted(fit, contrast = c(-0.5, 0.5, -0.5, 0.5))
-#>  term        value   
-#>  contrast    1.9     
-#>  lower_limit 1.49    
-#>  upper_limit 2.31    
-#>  t           9.18    
-#>  p           < 0.0001
+#>  term     value   
+#>  contrast 1.902   
+#>  ci_lower 1.489   
+#>  ci_upper 2.314   
+#>  t_value  9.181   
+#>  p_value  < 0.0001
 #> 
 #> Confidence level: 95%
 ```

@@ -10,7 +10,7 @@ per-group sample size, return the realized statistical power.
 
 ``` r
 ss_power_smd(
-  smd,
+  true_smd,
   desired_power = 0.85,
   alpha_level = 0.05,
   n_1 = NULL,
@@ -21,13 +21,13 @@ ss_power_smd(
 
 ## Arguments
 
-- smd:
+- true_smd:
 
   Supposed standardized mean difference (Cohen's *d*) the design is
   planned against: a value the researcher posits for the population,
   either a minimally important effect or a value believed to be true in
   the population, never a sample estimate. Echoed in the returned table
-  as the `supposed_smd` row.
+  as the `true_smd` row.
 
 - desired_power:
 
@@ -48,7 +48,7 @@ ss_power_smd(
 
 - directional:
 
-  Logical: `TRUE` for a one-sided test (in the same sign as `smd`),
+  Logical: `TRUE` for a one-sided test (in the same sign as `true_smd`),
   `FALSE` (default) for a two-sided test
 
 ## Value
@@ -56,22 +56,21 @@ ss_power_smd(
 A `data.frame` with `term` and `value` columns. The design result comes
 first, followed by rows that echo the user-supplied planning inputs, so
 the assumptions the power was evaluated under travel with the result.
-The `supposed_smd` row is the supposed effect the plan is built on: a
-value the researcher posits, either a minimally important effect or a
-value believed to be true in the population, never a sample estimate.
-The `tails` row is 2 for a nondirectional test and 1 for a directional
-test.
+The `true_smd` row is the supposed effect the plan is built on: a value
+the researcher posits, either a minimally important effect or a value
+believed to be true in the population, never a sample estimate. The
+`tails` row is 2 for a nondirectional test and 1 for a directional test.
 
 - When `n_1` is `NULL`:
 
   Result rows `necessary_n_per_group`, `actual_power`, and
-  `noncentral_t_parm`, then the planning inputs `supposed_smd`,
+  `noncentral_t_parm`, then the planning inputs `true_smd`,
   `desired_power`, `alpha_level`, and `tails`.
 
 - When `n_1` is specified:
 
   Result rows `specified_n_1`, `specified_n_2`, `actual_power`, and
-  `noncentral_t_parm`, then the planning inputs `supposed_smd`,
+  `noncentral_t_parm`, then the planning inputs `true_smd`,
   `alpha_level`, and `tails` (the supplied group sizes are the
   `specified_n_1` / `specified_n_2` rows).
 
@@ -100,8 +99,8 @@ Cohen, J. (1988). *Statistical power analysis for the behavioral
 sciences* (2nd ed.). Hillsdale, NJ: Lawrence Erlbaum.
 
 Kelley, K., Maxwell, S. E., & Rausch, J. R. (2003). Obtaining power or
-obtaining precision: Delineating methods of sample size planning.
-*Evaluation and the Health Professions, 26*(3), 258–287.
+obtaining precision: Delineating methods of sample-size planning.
+*Evaluation & the Health Professions, 26*(3), 258–287.
 [doi:10.1177/0163278703255242](https://doi.org/10.1177/0163278703255242)
 
 Kelley, K., & Rausch, J. R. (2006). Sample size planning for the
@@ -134,6 +133,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -169,46 +169,46 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # Per-group sample size for d = 0.5, alpha = .05, power = .80, two-sided
-ss_power_smd(smd = 0.5, desired_power = 0.80)
+ss_power_smd(true_smd = 0.5, desired_power = 0.80)
 #>  term                  value
 #>  necessary_n_per_group 64   
 #>  actual_power          0.801
-#>  noncentral_t_parm     2.83 
-#>  supposed_smd          0.5  
-#>  desired_power         0.8  
-#>  alpha_level           0.05 
+#>  noncentral_t_parm     2.828
+#>  true_smd              0.500
+#>  desired_power         0.800
+#>  alpha_level           0.050
 #>  tails                 2    
 
 # Same with a directional (one-sided) test
-ss_power_smd(smd = 0.5, desired_power = 0.80, directional = TRUE)
+ss_power_smd(true_smd = 0.5, desired_power = 0.80, directional = TRUE)
 #>  term                  value
 #>  necessary_n_per_group 51   
 #>  actual_power          0.806
-#>  noncentral_t_parm     2.52 
-#>  supposed_smd          0.5  
-#>  desired_power         0.8  
-#>  alpha_level           0.05 
+#>  noncentral_t_parm     2.525
+#>  true_smd              0.500
+#>  desired_power         0.800
+#>  alpha_level           0.050
 #>  tails                 1    
 
 # Realized power given balanced n = 30 per group
-ss_power_smd(smd = 0.5, n_1 = 30)
+ss_power_smd(true_smd = 0.5, n_1 = 30)
 #>  term              value
 #>  specified_n_1     30   
 #>  specified_n_2     30   
 #>  actual_power      0.478
-#>  noncentral_t_parm 1.94 
-#>  supposed_smd      0.5  
-#>  alpha_level       0.05 
+#>  noncentral_t_parm 1.936
+#>  true_smd          0.500
+#>  alpha_level       0.050
 #>  tails             2    
 
 # Realized power for unbalanced (n_1 = 30, n_2 = 50)
-ss_power_smd(smd = 0.5, n_1 = 30, n_2 = 50)
+ss_power_smd(true_smd = 0.5, n_1 = 30, n_2 = 50)
 #>  term              value
 #>  specified_n_1     30   
 #>  specified_n_2     50   
 #>  actual_power      0.571
-#>  noncentral_t_parm 2.17 
-#>  supposed_smd      0.5  
-#>  alpha_level       0.05 
+#>  noncentral_t_parm 2.165
+#>  true_smd          0.500
+#>  alpha_level       0.050
 #>  tails             2    
 ```

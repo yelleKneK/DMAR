@@ -11,7 +11,7 @@ samples or with different methods), together with a permutation-based
 ## Usage
 
 ``` r
-procrustes_phi(loadings_1, loadings_2, n_perm = 10000L)
+procrustes_phi(loadings_1, loadings_2, n_resamples = 10000L, seed = NULL)
 ```
 
 ## Arguments
@@ -22,17 +22,24 @@ procrustes_phi(loadings_1, loadings_2, n_perm = 10000L)
   length. Either standardized or raw loadings work; the coefficient is
   scale-invariant.
 
-- n_perm:
+- n_resamples:
 
-  Number of permutations for the significance test. Default `10000`. Set
-  to 0 to skip the test.
+  A single whole number of at least 0: the number of permutations for
+  the significance test. Default `10000`. Set to 0 to skip the test.
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
 A `data.frame` (class `dmar_tbl`) in `term` / `value` layout with the
-row `tucker_phi`, the point estimate of \\\phi\\. When `n_perm > 0` the
-table also carries `p_value_perm`, the two-sided permutation *p*-value,
-and `n_perm`, the number of permutations requested.
+row `tucker_phi`, the point estimate of \\\phi\\. When `n_resamples > 0`
+the table also carries `p_value_perm`, the two-sided permutation
+*p*-value, and `n_resamples`, the number of permutations requested.
 
 ## Details
 
@@ -46,21 +53,27 @@ two loading vectors and ranges over \\\[-1, 1\]\\; values near \\\pm 1\\
 indicate high (anti-)congruence, values near 0 indicate orthogonality.
 
 **Permutation test.** Under the null hypothesis that the two loading
-patterns are unrelated, randomly permuting one of the loading vectors
-and recomputing \\\phi\\ produces a sampling distribution against which
-the observed \\\phi\\ can be evaluated. The two-sided *p*-value is
-\\(r + 1) / (m + 1)\\, where *r* counts the permuted \\\|\phi\|\\ values
-at least as large as the observed \\\|\phi\|\\ and *m* is `n_perm`.
-Adding one to each part counts the observed arrangement, which is itself
-a legitimate permutation; without it a *p*-value of exactly zero could
-be reported, a value a sampled permutation test cannot support (Phipson
-& Smyth, 2010). The smallest reportable *p*-value is therefore \\1 /
-(m + 1)\\.
+patterns are unrelated, in the sense that the pairing of the items'
+loadings across the two vectors is arbitrary, permuting one vector and
+recomputing \\\phi\\ gives a permutation distribution against which the
+observed \\\phi\\ can be evaluated. The test takes the two sets of
+loadings as given: it does not reflect the sampling variability of
+loadings estimated from data, and the function reports no standard error
+or interval for \\\phi\\. The two-sided *p*-value is \\(r + 1) / (m +
+1)\\, where *r* counts the permuted \\\|\phi\|\\ values at least as
+large as the observed \\\|\phi\|\\ and *m* is `n_resamples`. A
+permutation whose coefficient equals the observed one counts as at least
+as extreme, as when it exchanges two items with the same loading; the
+comparison allows for the rounding of the arithmetic. Adding one to each
+part counts the observed arrangement, which is itself a legitimate
+permutation; without it a *p*-value of exactly zero could be reported, a
+value a sampled permutation test cannot support (Phipson & Smyth, 2010).
+The smallest reportable *p*-value is therefore \\1 / (m + 1)\\.
 
 **Interpretation.** Benchmark values for \\\phi\\ have been proposed in
 the literature (Lorenzo-Seva & ten Berge, 2006), but context always
-matters; this package reports the coefficient with its uncertainty and
-leaves interpretation to the context of the application.
+matters; this package reports the coefficient and the permutation
+*p*-value and leaves interpretation to the context of the application.
 
 ## References
 
@@ -81,7 +94,9 @@ Army.
 
 ## See also
 
-[`cor`](https://rdrr.io/r/stats/cor.html),
+[`factor_congruence`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md)
+for the coefficients between the factors of two whole solutions, matched
+one to one and reflected, [`cor`](https://rdrr.io/r/stats/cor.html),
 [`reliability_H`](https://yelleknek.github.io/DMAR/reference/reliability_H.md)
 
 Other multivariate and latent variable methods:
@@ -89,17 +104,29 @@ Other multivariate and latent variable methods:
 [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md),
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
 [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
-[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md),
+[`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md),
 [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
+[`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
 [`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md),
 [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md),
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
 [`dmacs()`](https://yelleknek.github.io/DMAR/reference/dmacs.md),
 [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+[`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+[`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+[`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+[`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
 [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md),
 [`irt_grm()`](https://yelleknek.github.io/DMAR/reference/irt_grm.md),
 [`irt_information()`](https://yelleknek.github.io/DMAR/reference/irt_information.md),
 [`measurement_alignment()`](https://yelleknek.github.io/DMAR/reference/measurement_alignment.md),
 [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
+[`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
 [`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)
 
 ## Author
@@ -117,13 +144,13 @@ procrustes_phi(l1, l2)
 #>  term         value 
 #>  tucker_phi   0.999 
 #>  p_value_perm 0.0080
-#>  n_perm       10000 
+#>  n_resamples  10000 
 
 # 2. Loadings on different factors should show low congruence:
 l3 <- c(0.10, 0.05, 0.20, 0.85, 0.78)
-procrustes_phi(l1, l3, n_perm = 5000)
+procrustes_phi(l1, l3, n_resamples = 5000)
 #>  term         value 
 #>  tucker_phi   0.702 
 #>  p_value_perm 0.8244
-#>  n_perm       5000  
+#>  n_resamples  5000  
 ```

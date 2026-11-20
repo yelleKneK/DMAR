@@ -13,9 +13,9 @@ ci_sc(
   means = NULL,
   s_anova = NULL,
   c_weights = NULL,
-  n = NULL,
+  n_per_group = NULL,
   N = NULL,
-  psi = NULL,
+  contrast = NULL,
   ncp = NULL,
   conf_level = 0.95,
   alpha_lower = NULL,
@@ -35,15 +35,18 @@ ci_sc(
 - s_anova:
 
   The standard deviation of the errors from the ANOVA model (i.e., the
-  square root of the mean square error)
+  square root of the mean square error); required, as a single positive
+  number, on every path
 
 - c_weights:
 
-  The contrast weights (chose weights so that the positive *c*-weights
+  The contrast weights (choose weights so that the positive *c*-weights
   sum to 1 and the negative *c*-weights sum to -1; i.e., use fractional
-  values not integers).
+  values such as `c(.5, .5, -1)`, not `c(1, 1, -2)`). The rule is
+  applied to the values, so weights stored as integers, such as `-1:1`,
+  are accepted.
 
-- n:
+- n_per_group:
 
   Sample sizes *per group* or sample sizes for the level of the
   particular factor (if length 1 it is assumed that the sample size *per
@@ -53,7 +56,7 @@ ci_sc(
 
   Total sample size
 
-- psi:
+- contrast:
 
   The (unstandardized) contrast effect, obtained by multiplying the
   *j*th mean by the *j*th contrast weight (this is the unstandardized
@@ -66,7 +69,8 @@ ci_sc(
 - conf_level:
 
   Desired level of confidence for the computed interval (i.e., 1 - the
-  Type I error rate)
+  Type I error rate). A level above .999999998, whose tail areas are
+  below 1e-9, is refused
 
 - alpha_lower:
 
@@ -74,13 +78,21 @@ ci_sc(
 
 - alpha_upper:
 
-  The Type I error rate for the upper confidence interval limit
+  The Type I error rate for the upper confidence interval limit. The
+  table records the coverage, `1 - alpha_lower - alpha_upper`, as its
+  level and, when the two tail areas differ, the areas themselves, which
+  the line beneath the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound. A
+  nonzero tail area below 1e-9 is refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - df_error:
 
-  The degrees of freedom for the error. In one-way designs, this is
-  simply *N*-length (means) and need not be specified; it must be
-  specified if the design has multiple factors.
+  The degrees of freedom for the error. In one-way designs it is *N*
+  minus the number of groups, `N - length(means)`, and need not be
+  specified; it must be specified if the design has multiple factors.
 
 - ...:
 
@@ -89,9 +101,9 @@ ci_sc(
 ## Value
 
 A 3-row `data.frame` with columns `term` and `value`. The `term` values
-are `"lower_limit"` (the lower confidence limit on the standardized
+are `"ci_lower"` (the lower confidence limit on the standardized
 contrast), `"std_contrast"` (the standardized contrast), and
-`"upper_limit"` (the upper limit).
+`"ci_upper"` (the upper limit).
 
 ## Note
 
@@ -101,11 +113,11 @@ come from the source table (i.e., do not use the variance of the error
 but rather use its square root, the standard deviation).
 
 Be sure to use fractional *c*-weights when doing complex contrasts (not
-integers) to specify `c_weights`. For example, in an ANCOVA of four
-groups, if the user wants to compare the mean of group 1 and 2 with the
-mean of group 3 and 4, `c_weights` should be specified as c(0.5, 0.5,
--0.5, -0.5) rather than c(1, 1, -1, -1). Make sure the sum of the
-contrast weights are zero.
+integer values such as `c(1, 1, -2)`) to specify `c_weights`. For
+example, in an ANOVA of four groups, if the user wants to compare the
+mean of group 1 and 2 with the mean of group 3 and 4, `c_weights` should
+be specified as c(0.5, 0.5, -0.5, -0.5) rather than c(1, 1, -1, -1).
+Make sure the sum of the contrast weights are zero.
 
 ## References
 
@@ -144,10 +156,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -175,21 +188,21 @@ Ken Kelley <kkelley@nd.edu>
 # versus the average of groups 2 and 3.
 
 ci_sc(means = c(2, 4, 9, 13), s_anova = .80, c_weights = c(.5, -.5, -.5, .5),
-      n = c(3, 3, 3, 3), N = 12, conf_level = .95)
-#>  term         value  
-#>  lower_limit  -0.0615
-#>  std_contrast 1.25   
-#>  upper_limit  2.5    
+      n_per_group = c(3, 3, 3, 3), N = 12, conf_level = .95)
+#>  term         value 
+#>  ci_lower     -0.062
+#>  std_contrast 1.250 
+#>  ci_upper     2.502 
 #> 
 #> Confidence level: 95%
 
 # Here is an example with two groups.
 ci_sc(means = c(1.6, 0), s_anova = .80, c_weights = c(1, -1),
-      n = c(10, 10), N = 20, conf_level = .95)
+      n_per_group = c(10, 10), N = 20, conf_level = .95)
 #>  term         value
-#>  lower_limit  0.892
-#>  std_contrast 2    
-#>  upper_limit  3.07 
+#>  ci_lower     0.892
+#>  std_contrast 2.000
+#>  ci_upper     3.072
 #> 
 #> Confidence level: 95%
 ```

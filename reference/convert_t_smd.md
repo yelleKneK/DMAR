@@ -6,16 +6,17 @@ noncentrality parameter, and vice versa.
 ## Usage
 
 ``` r
-convert_delta_lambda(delta, n_1, n_2)
+convert_delta_lambda(smd, n_1, n_2)
 
-convert_lambda_delta(lambda, n_1, n_2)
+convert_lambda_delta(ncp, n_1, n_2)
 ```
 
 ## Arguments
 
-- delta:
+- smd:
 
-  Population value of the standardized mean difference
+  standardized mean difference (\\\delta\\), a population value or the
+  observed standardized mean difference as its estimate
 
 - n_1:
 
@@ -25,9 +26,10 @@ convert_lambda_delta(lambda, n_1, n_2)
 
   Sample size in group 2
 
-- lambda:
+- ncp:
 
-  noncentral value from a *t*-distribution
+  noncentrality parameter of a *t*-distribution (\\\lambda\\), or the
+  observed *t*-value as its estimate
 
 ## Value
 
@@ -38,13 +40,13 @@ are exact inverses given the *per-group* sample sizes `n_1` and `n_2`.
 
 ## Details
 
-Although `lambda` is the population noncentral value, an estimate of it
-is the observed value of a *t*-statistic. Likewise, delta can be
-estimated as the observed standardized mean difference. Thus, the
-observed standardized mean difference can be converted to the observed
-*t*-value. These functions are especially helpful in the context of
-forming confidence intervals for the population standardized mean
-difference.
+Although `ncp` is the population noncentral value, an estimate of it is
+the observed value of a *t*-statistic. Likewise, the population
+standardized mean difference can be estimated by the observed
+standardized mean difference, given as `smd`. Thus, the observed
+standardized mean difference can be converted to the observed *t*-value.
+These functions are especially helpful in the context of forming
+confidence intervals for the population standardized mean difference.
 
 ## References
 
@@ -76,10 +78,10 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-convert_lambda_delta(lambda = 2, n_1 = 113, n_2 = 113)
+convert_lambda_delta(ncp = 2, n_1 = 113, n_2 = 113)
 #>  term         value
 #>  lambda_delta 0.266
-convert_delta_lambda(delta = .266076, n_1 = 113, n_2 = 113)
+convert_delta_lambda(smd = .266076, n_1 = 113, n_2 = 113)
 #>  term         value
-#>  delta_lambda 2    
+#>  delta_lambda 2.000
 ```

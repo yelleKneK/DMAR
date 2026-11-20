@@ -81,7 +81,7 @@ and
 are untenable and a rank-based analysis is preferred to a
 transformation; the design is between subjects; and a significant
 Kruskal–Wallis test leaves the question of which groups differ. It is
-the rank analogue of Tukey's HSD, in the sense of covering all
+the rank analog of Tukey's HSD, in the sense of covering all
 \\a(a-1)/2\\ pairs.
 
 **What it does not tell you.** The test compares mean *ranks*, not
@@ -155,10 +155,10 @@ kruskal.test(drinks_per_week ~ treatment, data = drinks_trial)
 
 # Then which pairs, on the same pooled ranking the omnibus test used.
 dunn_test(drinks_trial$drinks_per_week, drinks_trial$treatment)
-#>  contrast                    mean_rank_difference se   z_statistic p_value
-#>  CRA - Standard              -13                  5.99 -2.18       0.0294 
-#>  CRA + Disulfiram - Standard -16.2                7    -2.32       0.0205 
-#>  CRA + Disulfiram - CRA      -3.18                7.18 -0.442      0.6583 
+#>  contrast                    mean_rank_difference se    z_statistic p_value
+#>  CRA - Standard              -13.040              5.987 -2.178      0.0294 
+#>  CRA + Disulfiram - Standard -16.217              7.000 -2.317      0.0205 
+#>  CRA + Disulfiram - CRA      -3.177               7.183 -0.442      0.6583 
 #>  p_adjusted
 #>  0.0615    
 #>  0.0615    
@@ -167,10 +167,10 @@ dunn_test(drinks_trial$drinks_per_week, drinks_trial$treatment)
 # Without a multiplicity adjustment (rarely what you want).
 dunn_test(drinks_trial$drinks_per_week, drinks_trial$treatment,
           method = "none")
-#>  contrast                    mean_rank_difference se   z_statistic p_value
-#>  CRA - Standard              -13                  5.99 -2.18       0.0294 
-#>  CRA + Disulfiram - Standard -16.2                7    -2.32       0.0205 
-#>  CRA + Disulfiram - CRA      -3.18                7.18 -0.442      0.6583 
+#>  contrast                    mean_rank_difference se    z_statistic p_value
+#>  CRA - Standard              -13.040              5.987 -2.178      0.0294 
+#>  CRA + Disulfiram - Standard -16.217              7.000 -2.317      0.0205 
+#>  CRA + Disulfiram - CRA      -3.177               7.183 -0.442      0.6583 
 #>  p_adjusted
 #>  0.0294    
 #>  0.0205    

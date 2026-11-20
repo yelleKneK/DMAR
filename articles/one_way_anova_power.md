@@ -118,7 +118,7 @@ whether to divide by *a* or by $`a - 1`$:
 
 ``` r
 
-cohen_f(mu = mu_j, sigma_squared = sigma_squared)
+cohen_f(means = mu_j, var_within = sigma_squared)
 ```
 
 | term    | value |
@@ -127,7 +127,7 @@ cohen_f(mu = mu_j, sigma_squared = sigma_squared)
 
 ``` r
 
-f <- cohen_f(mu = mu_j, sigma_squared = sigma_squared)$value
+f <- cohen_f(means = mu_j, var_within = sigma_squared)$value
 ```
 
 The same effect, expressed as the population proportional reduction in
@@ -143,7 +143,7 @@ PRE <- f^2 / (1 + f^2)
 PRE
 #> [1] 0.1066305
 
-convert_lambda_R2(lambda = lambda, N = N)   # lambda to population PRE (= R^2)
+convert_lambda_R2(ncp = lambda, N = N)      # lambda to population PRE (= R^2)
 ```
 
 | term      | value |
@@ -157,7 +157,7 @@ convert_R2_lambda(R2 = PRE,    N = N)       # and back to the noncentrality
 
 | term      | value |
 |:----------|:------|
-| r2_lambda | 9.55  |
+| r2_lambda | 9.549 |
 
 Off-the-shelf benchmarks for *f* are a last resort for when nothing is
 known about the design; a set of hypothesized means, as used here, is
@@ -191,15 +191,15 @@ central critical value exactly as above:
 
 ``` r
 
-ss_power_one_way_anova(a = a, f = f, N = N, alpha_level = .05)
+ss_power_one_way_anova(a = a, true_f = f, specified_N = N, alpha_level = .05)
 ```
 
-| term          | value |
-|:--------------|:------|
-| specified_N   | 80    |
-| a             | 4     |
-| noncentrality | 9.55  |
-| actual_power  | 0.715 |
+| term              | value |
+|:------------------|:------|
+| specified_N       | 80    |
+| a                 | 4     |
+| noncentral_f_parm | 9.549 |
+| actual_power      | 0.715 |
 
 ## Planning the Sample Size
 
@@ -209,16 +209,16 @@ reporting the necessary total sample size and the per-group *n*:
 
 ``` r
 
-ss_power_one_way_anova(a = a, f = f, desired_power = .80, alpha_level = .05)
+ss_power_one_way_anova(a = a, true_f = f, desired_power = .80, alpha_level = .05)
 ```
 
-| term          | value |
-|:--------------|:------|
-| necessary_N   | 96    |
-| n_per_group   | 24    |
-| a             | 4     |
-| noncentrality | 11.5  |
-| actual_power  | 0.803 |
+| term              | value  |
+|:------------------|:-------|
+| necessary_N       | 96     |
+| n_per_group       | 24     |
+| a                 | 4      |
+| noncentral_f_parm | 11.458 |
+| actual_power      | 0.803  |
 
 ## The Model Comparison, Made Literal
 
@@ -229,12 +229,12 @@ with
 fit the restricted and full models by maximum likelihood with
 [`mlmr()`](https://yelleknek.github.io/DMAR/reference/mlmr.md), and
 compare them with the likelihood ratio test. The likelihood ratio test
-is the sample analogue of $`E_R - E_F`$: it asks whether freeing the
-group means improves the fit by more than sampling noise would explain.
+is the sample analog of $`E_R - E_F`$: it asks whether freeing the group
+means improves the fit by more than sampling noise would explain.
 
 ``` r
 
-d <- simulate_anova_data(mu = mu_j, sigma = sigma, a = a, n = n_j)
+d <- simulate_anova_data(true_mean = mu_j, true_sd = sigma, a = a, n_per_group = n_j)
 head(d)
 #>   group         y
 #> 1     1  91.60025
@@ -298,27 +298,38 @@ does), then transforms those noncentrality endpoints into the metric
 requested: a proportion of variance, a signal to noise ratio, or its
 square root.
 
-The canonical illustration in the literature is Bargman’s (1970)
-five-group analysis with 11 per group and an observed *F* of 11.221
-(also used by Steiger, 2004). The point estimate of omega squared, a
-less biased estimator of the population proportion of variance than eta
-squared, travels with its interval:
+The canonical illustration in the literature is Bargmann’s (1970)
+five-group analysis, used in turn by Venables (1975), Fleishman (1980),
+and Steiger (2004), with 11 per group and an observed *F* of 11.221 (as
+Steiger reports it). The point estimate of omega squared, a less biased
+estimator of the population proportion of variance than eta squared,
+travels with its interval. From an *F* statistic the functions determine
+the partial value, which in a one-way design is also the total, so the
+calls ask for it with `estimand = "partial"`:
 
 ``` r
 
 os_est <- omega_squared(F_value = 11.221, df_effect = 4, df_error = 50,
-                        N = 55)
+                        N = 55, estimand = "partial")
 os_est
-#>    effect omega_squared F_value df_effect df_error  N
-#> 1 overall     0.4263902  11.221         4       50 55
+```
+
+| effect  | omega_squared_partial | F_value | df_effect | df_error | N   |
+|:--------|:----------------------|:--------|:----------|:---------|:----|
+| overall | 0.426                 | 11.221  | 4         | 50       | 55  |
+
+``` r
+
 os_ci <- ci_omega_squared(F_value = 11.221, df_effect = 4, df_error = 50,
-                          N = 55)
+                          N = 55, estimand = "partial")
 os_ci
 ```
 
-| effect  | omega_squared | lower_limit | upper_limit | F_value | df_effect | df_error | N   |
-|:--------|:--------------|:------------|:------------|:--------|:----------|:---------|:----|
-| overall | 0.426         | 0.226       | 0.587       | 11.2    | 4         | 50       | 55  |
+| effect | omega_squared_partial | omega_squared_partial_ci_lower | omega_squared_partial_ci_upper | F_value | df_effect | df_error | N |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| overall | 0.426 | 0.226 | 0.587 | 11.221 | 4 | 50 | 55 |
+
+Confidence level: 95%
 
 The population proportion of variance accounted for is estimated at
 omega squared = 0.43, with a 95% confidence interval of \[0.23, 0.59\]:
@@ -337,10 +348,10 @@ ci_pvaf(F_value  = 11.221, df_1 = 4, df_2 = 50, N = 55)
 
 | term            | value | prob_less | prob_greater |
 |:----------------|:------|:----------|:-------------|
-| lower_limit     | 0.226 | 0.025     | 0.975        |
+| ci_lower        | 0.226 | 0.025     | 0.975        |
 | pvaf            | 0.473 | NA        | NA           |
-| upper_limit     | 0.587 | 0.975     | 0.025        |
-| actual_coverage | 0.95  | NA        | NA           |
+| ci_upper        | 0.587 | 0.975     | 0.025        |
+| actual_coverage | 0.950 | NA        | NA           |
 
 Confidence level: 95%
 
@@ -349,10 +360,10 @@ Confidence level: 95%
 ci_snr(F_value   = 11.221, df_1 = 4, df_2 = 50, N = 55)
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 0.293 |
-| upper_limit | 1.42  |
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.293 |
+| ci_upper | 1.423 |
 
 Confidence level: 95%
 
@@ -361,40 +372,56 @@ Confidence level: 95%
 ci_srsnr(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55)
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 0.541 |
-| upper_limit | 1.19  |
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.541 |
+| ci_upper | 1.193 |
 
 Confidence level: 95%
 
 [`ci_srsnr()`](https://yelleknek.github.io/DMAR/reference/ci_srsnr.md)
-also accepts a design-stage specification. Given the planning means, the
-within-group variance, and the per-group sample size, it derives the
-implied *F* internally and returns the interval on Cohen’s *f* that the
-planned design would produce. For the four-group running example:
+also accepts the group means, the pooled within-group mean square, and
+the group sizes in place of *F*. With the observed summaries of a study
+it computes the observed *F* and returns the interval the *F* route
+gives. With the planning means and the population within-group variance
+of the four-group running example, the result is hypothetical: the
+interval a study of 20 per group would report if its sample means and
+pooled variance equaled the planning values. It is not the interval the
+planned study can expect, because the limits vary from sample to sample:
 
 ``` r
 
-ci_srsnr(means = mu_j, sigma_squared = sigma_squared, n_per_group = n_j)
+ci_srsnr(means = mu_j, var_within = sigma_squared, n_per_group = n_j)
 #> Warning: The observed F_value is below the alpha_lower critical value of the
 #> central F-distribution, so the lower confidence limit on the square root of the
 #> signal-to-noise ratio is 0.
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 0     |
-| upper_limit | 0.542 |
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.000 |
+| ci_upper | 0.542 |
 
 Confidence level: 95%
+
+``` r
+
+# The F that these summaries imply
+F_implied <- (sum(n_j * (mu_j - mean(mu_j))^2) / (a - 1)) / sigma_squared
+F_implied
+#> [1] 3.18287
+```
+
+The implied *F* is 3.18, below 3.29, the .975 quantile of the central
+*F* distribution on 3 and 76 degrees of freedom, so the lower limit is 0
+and the function says so in a warning.
 
 ## Carrying Uncertainty Into the Next Study
 
 A pilot estimate is uncertain, and planning the next study around a
 point estimate quietly assumes that uncertainty away. A more defensible
 habit is to plan around a conservative bound of the effect. Take a
-one-sided 80 percent lower limit for *f* from the Bargman analysis by
+one-sided 80 percent lower limit for *f* from the Bargmann analysis by
 putting all of the Type I error in the lower tail, then plan the next
 five-group study to that bound:
 
@@ -405,27 +432,29 @@ lower_f <- ci_srsnr(F_value = 11.221, df_1 = 4, df_2 = 50, N = 55,
 lower_f
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 0.727 |
-| upper_limit | Inf   |
+| term     | value |
+|:---------|:------|
+| ci_lower | 0.727 |
+| ci_upper | Inf   |
 
-Confidence level: 80%
+Confidence level: 80% (one-sided: the lower limit is the 80% lower
+confidence bound, with tail area 0.2 below it and none above the upper
+limit)
 
 ``` r
 
 
-f_lower <- lower_f$value[lower_f$term == "lower_limit"]
-ss_power_one_way_anova(a = 5, f = f_lower, desired_power = .80)
+f_lower <- lower_f$value[lower_f$term == "ci_lower"]
+ss_power_one_way_anova(a = 5, true_f = f_lower, desired_power = .80)
 ```
 
-| term          | value |
-|:--------------|:------|
-| necessary_N   | 30    |
-| n_per_group   | 6     |
-| a             | 5     |
-| noncentrality | 15.9  |
-| actual_power  | 0.842 |
+| term              | value  |
+|:------------------|:-------|
+| necessary_N       | 30     |
+| n_per_group       | 6      |
+| a                 | 5      |
+| noncentral_f_parm | 15.876 |
+| actual_power      | 0.842  |
 
 ## A Second Example: Three Groups
 
@@ -449,22 +478,22 @@ lambda_2
 #> [1] 5
 
 # Effect size and realized power at the planned design, from DMAR
-f_2 <- cohen_f(mu = mu_j_2, sigma_squared = sigma_squared_2)$value
-ss_power_one_way_anova(a = a_2, f = f_2, N = N_2, alpha_level = .05)
+f_2 <- cohen_f(means = mu_j_2, var_within = sigma_squared_2)$value
+ss_power_one_way_anova(a = a_2, true_f = f_2, specified_N = N_2, alpha_level = .05)
 ```
 
-| term          | value |
-|:--------------|:------|
-| specified_N   | 30    |
-| a             | 3     |
-| noncentrality | 5     |
-| actual_power  | 0.458 |
+| term              | value |
+|:------------------|:------|
+| specified_N       | 30    |
+| a                 | 3     |
+| noncentral_f_parm | 5.000 |
+| actual_power      | 0.458 |
 
 ``` r
 
 
 # Sample size needed for power .80
-plan2 <- ss_power_one_way_anova(a = a_2, f = f_2, desired_power = .80, alpha_level = .05)
+plan2 <- ss_power_one_way_anova(a = a_2, true_f = f_2, desired_power = .80, alpha_level = .05)
 ```
 
 The realized power at 10 per group is modest. The sample size needed for
@@ -475,13 +504,13 @@ power .80 is about 21 per group, the value the textbook reaches:
 plan2
 ```
 
-| term          | value |
-|:--------------|:------|
-| necessary_N   | 63    |
-| n_per_group   | 21    |
-| a             | 3     |
-| noncentrality | 10.5  |
-| actual_power  | 0.815 |
+| term              | value  |
+|:------------------|:-------|
+| necessary_N       | 63     |
+| n_per_group       | 21     |
+| a                 | 3      |
+| noncentral_f_parm | 10.500 |
+| actual_power      | 0.815  |
 
 ## A Planned Contrast as a Model Comparison
 
@@ -539,7 +568,7 @@ returns the same power and will also solve for the sample size. One
 point deserves attention, because the sample size argument is not
 uniform across the planning family:
 [`ss_power_one_way_anova()`](https://yelleknek.github.io/DMAR/reference/ss_power_one_way_anova.md)
-takes the *total* sample size, whereas
+takes the *total* sample size in `specified_N`, whereas
 [`ss_power_contrast()`](https://yelleknek.github.io/DMAR/reference/ss_power_contrast.md)
 takes the *per-group* size in `n_per_group`. Here 20 per group
 corresponds to a total of 80:
@@ -547,8 +576,8 @@ corresponds to a total of 80:
 ``` r
 
 # Realized power at 20 per group
-ss_power_contrast(c_weights = c_weights, mu = mu_j,
-                  sigma_squared = sigma_squared, n_per_group = n_j)
+ss_power_contrast(c_weights = c_weights, true_means = mu_j,
+                  true_var_error = sigma_squared, specified_n_per_group = n_j)
 ```
 
 | term                  | value |
@@ -556,15 +585,15 @@ ss_power_contrast(c_weights = c_weights, mu = mu_j,
 | specified_n_per_group | 20    |
 | total_N               | 80    |
 | actual_power          | 0.818 |
-| noncentral_t_parm     | 2.9   |
-| effect_size_f         | 0.325 |
+| noncentral_t_parm     | 2.905 |
+| true_f                | 0.325 |
 
 ``` r
 
 
 # Per-group sample size needed for power .90
-ss_power_contrast(c_weights = c_weights, mu = mu_j,
-                  sigma_squared = sigma_squared, desired_power = .90)
+ss_power_contrast(c_weights = c_weights, true_means = mu_j,
+                  true_var_error = sigma_squared, desired_power = .90)
 ```
 
 | term                  | value |
@@ -572,8 +601,8 @@ ss_power_contrast(c_weights = c_weights, mu = mu_j,
 | necessary_n_per_group | 26    |
 | total_N               | 104   |
 | actual_power          | 0.907 |
-| noncentral_t_parm     | 3.31  |
-| effect_size_f         | 0.325 |
+| noncentral_t_parm     | 3.312 |
+| true_f                | 0.325 |
 
 The analysis-stage counterpart estimates the contrast with a confidence
 interval. [`ci_c()`](https://yelleknek.github.io/DMAR/reference/ci_c.md)
@@ -584,14 +613,14 @@ mean square error (the ANOVA standard deviation, not the variance):
 ``` r
 
 ci_c(means = mu_j, s_anova = sigma, c_weights = c_weights,
-     n = n_j, N = N, conf_level = .95)
+     n_per_group = n_j, N = N, conf_level = .95)
 ```
 
-| term        | value |
-|:------------|:------|
-| lower_limit | 2.83  |
-| contrast    | 9     |
-| upper_limit | 15.2  |
+| term     | value  |
+|:---------|:-------|
+| ci_lower | 2.829  |
+| contrast | 9.000  |
+| ci_upper | 15.171 |
 
 Confidence level: 95%
 
@@ -607,9 +636,9 @@ contrast_test(fit_aov,
               contrasts = list("avg of 1, 2, 3 vs 4" = c(1/3, 1/3, 1/3, -1)))
 ```
 
-| contrast            | estimate | se   | t    | df  | p_value | p_adjusted | ci_lower | ci_upper |
-|:--------------------|:---------|:-----|:-----|:----|:--------|:-----------|:---------|:---------|
-| avg of 1, 2, 3 vs 4 | 12.2     | 3.35 | 3.64 | 76  | 0.0005  | 0.0005     | 5.52     | 18.9     |
+| contrast | estimate | se | t_value | df | p_value | p_adjusted | ci_lower | ci_upper |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| avg of 1, 2, 3 vs 4 | 12.191 | 3.350 | 3.640 | 76 | 0.0005 | 0.0005 | 5.520 | 18.862 |
 
 Confidence level: 95%
 
@@ -630,21 +659,21 @@ se_psi <- sqrt(sigma_squared * sum(c_weights^2 / n_j))
 design_consequences(true_effect = psi, se = se_psi, df = N - a, alpha_level = .05)
 ```
 
-| term                | value   |
-|:--------------------|:--------|
-| power               | 0.818   |
-| type_s_error        | 8.4e-07 |
-| exaggeration_ratio  | 1.11    |
-| expected_half_width | 6.15    |
-| mean_ci_width       | 12.3    |
-| median_ci_width     | 12.3    |
-| sd_ci_width         | 0.999   |
-| pct_ci_less_w       | NA      |
-| target_width        | NA      |
-| true_effect         | 9       |
-| se                  | 3.1     |
-| df                  | 76      |
-| alpha_level         | 0.05    |
+| term                | value  |
+|:--------------------|:-------|
+| power               | 0.818  |
+| type_s_error        | 0.000  |
+| exaggeration_ratio  | 1.110  |
+| expected_half_width | 6.151  |
+| mean_ci_width       | 12.301 |
+| median_ci_width     | 12.288 |
+| sd_ci_width         | 0.999  |
+| pct_ci_less_width   | NA     |
+| width               | NA     |
+| true_effect         | 9      |
+| se                  | 3.098  |
+| df                  | 76     |
+| alpha_level         | 0.050  |
 
 Confidence level: 95%
 
@@ -664,7 +693,7 @@ the goal is an expected 95 percent interval no wider than 6 points, with
 
 ``` r
 
-ss_aipe_c(error_variance = sigma_squared, c_weights = c_weights,
+ss_aipe_c(true_var_error = sigma_squared, c_weights = c_weights,
           width = 6, conf_level = .95, assurance = .90)
 ```
 
@@ -696,7 +725,7 @@ var(mu_j)                    # sample version (divisor a - 1)
 var(mu_j) / sigma_squared_m  # the ratio is a / (a - 1)
 #> [1] 1.333333
 
-cohen_f(mu = mu_j, sigma_squared = sigma_squared)$value
+cohen_f(means = mu_j, var_within = sigma_squared)$value
 #> [1] 0.3454817
 sqrt(sigma_squared_m / sigma_squared)   # identical, computed by hand
 #> [1] 0.3454817
@@ -710,12 +739,17 @@ never reaches for the base function.
 
 ## References
 
-Bargman, R. E. (1970). Interpretation and use of a generalized
-discriminant function. In R. C. Bose et al. (Eds.), *Essays in
-probability and statistics*. University of North Carolina Press.
+Bargmann, R. E. (1970). Interpretation and use of a generalized
+discriminant function. In R. C. Bose, I. M. Chakravarti, P. C.
+Mahalanobis, C. R. Rao, & K. J. C. Smith (Eds.), *Essays in probability
+and statistics* (pp. 35–60). University of North Carolina Press.
 
 Cohen, J. (1988). *Statistical power analysis for the behavioral
 sciences* (2nd ed.). Erlbaum.
+
+Fleishman, A. I. (1980). Confidence intervals for correlation ratios.
+*Educational and Psychological Measurement, 40*(3), 659–670.
+<https://doi.org/10.1177/001316448004000309>
 
 Gelman, A., & Carlin, J. (2014). Beyond power calculations: Assessing
 Type S (sign) and Type M (magnitude) errors. *Perspectives on
@@ -734,3 +768,8 @@ comparisons.
 Steiger, J. H. (2004). Beyond the *F* test: Effect size confidence
 intervals and tests of close fit in the analysis of variance and
 contrast analysis. *Psychological Methods, 9*(2), 164–182.
+
+Venables, W. (1975). Calculation of confidence intervals for
+noncentrality parameters. *Journal of the Royal Statistical Society,
+Series B, 37*(3), 406–412.
+<https://doi.org/10.1111/j.2517-6161.1975.tb01554.x>

@@ -44,7 +44,7 @@ factor used; `NA` for the unadjusted row). `attr(<output>, "mauchly")`
 contains the row from
 [`mauchly_test`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
 and the partial \\\eta^2\\ is attached as
-`attr(<output>, "partial_eta_squared")`.
+`attr(<output>, "eta_squared_partial")`.
 
 ## Details
 
@@ -83,12 +83,16 @@ Other hypothesis tests:
 [`adjusted_means()`](https://yelleknek.github.io/DMAR/reference/adjusted_means.md),
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -114,24 +118,24 @@ Ken Kelley <kkelley@nd.edu>
 set.seed(113)
 Y <- matrix(rnorm(20 * 4), nrow = 20)
 anova_within(Y)
-#>  adjustment         F_value df_1 df_2 p_value epsilon
-#>  none               0.618   3    57   0.6062  <NA>   
-#>  Greenhouse-Geisser 0.618   2.36 44.9 0.5696  0.787  
-#>  Huynh-Feldt        0.618   2.72 51.7 0.5911  0.906  
-#>  lower_bound        0.618   1    19   0.4415  0.333  
+#>  adjustment         F_value df_1  df_2   p_value epsilon
+#>  none               0.618   3     57     0.6062  <NA>   
+#>  Greenhouse-Geisser 0.618   2.362 44.878 0.5696  0.787  
+#>  Huynh-Feldt        0.618   2.719 51.662 0.5911  0.906  
+#>  lower_bound        0.618   1     19     0.4415  0.333  
 
 # Built-in within-subjects example: nlme::Orthodont (distance ~ age).
 res <- anova_within(nlme::Orthodont,
                     id = "Subject", time = "age", outcome = "distance")
 res
-#>  adjustment         F_value df_1 df_2 p_value  epsilon
-#>  none               38      3    78   < 0.0001 <NA>   
-#>  Greenhouse-Geisser 38      2.63 68.4 < 0.0001 0.877  
-#>  Huynh-Feldt        38      2.95 76.8 < 0.0001 0.984  
-#>  lower_bound        38      1    26   < 0.0001 0.333  
+#>  adjustment         F_value df_1  df_2   p_value  epsilon
+#>  none               38.040  3     78     < 0.0001 <NA>   
+#>  Greenhouse-Geisser 38.040  2.630 68.385 < 0.0001 0.877  
+#>  Huynh-Feldt        38.040  2.953 76.783 < 0.0001 0.984  
+#>  lower_bound        38.040  1     26     < 0.0001 0.333  
 attr(res, "mauchly")
 #>  W     statistic df p_value n_subjects n_levels method                      
-#>  0.758 6.85      5  0.2326  27         4        Mauchly's test of sphericity
-attr(res, "partial_eta_squared")
+#>  0.758 6.847     5  0.2326  27         4        Mauchly's test of sphericity
+attr(res, "eta_squared_partial")
 #> [1] 0.5940013
 ```

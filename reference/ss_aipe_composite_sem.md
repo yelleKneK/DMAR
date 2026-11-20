@@ -20,14 +20,14 @@ of them can make up the set.
 ``` r
 ss_aipe_composite_sem(
   model,
-  Sigma = NULL,
-  pop_model = NULL,
-  mu = NULL,
+  true_cov_matrix = NULL,
+  true_model = NULL,
+  true_mean = NULL,
   parameters = NULL,
-  desired_width,
+  width,
   conf_level = 0.95,
   assurance = NULL,
-  N = NULL,
+  specified_N = NULL,
   G = 1000,
   seed = NULL,
   ...
@@ -47,33 +47,33 @@ ss_aipe_composite_sem(
   `"ab := a*b"` defines an indirect effect from the labeled paths `a`
   and `b`.
 
-- Sigma:
+- true_cov_matrix:
 
   Population covariance matrix of the observed variables, with row and
   column names matching the observed variables in `model`. It is
   typically obtained from a fully fixed population model via
   [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md).
-  Supply exactly one of `Sigma` or `pop_model`.
+  Supply exactly one of `true_cov_matrix` or `true_model`.
 
-- pop_model:
+- true_model:
 
   A single character string giving the population model in lavaan model
   syntax with every parameter fixed to its population value, from which
   [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md)
-  derives `Sigma` (and the population means, when the model has a mean
-  structure). The fixed values are values the researcher posits (from
-  theory, prior studies, or pilot data), never sample estimates. Supply
-  exactly one of `Sigma` or `pop_model`.
+  derives `true_cov_matrix` (and the population means, when the model
+  has a mean structure). The fixed values are values the researcher
+  posits (from theory, prior studies, or pilot data), never sample
+  estimates. Supply exactly one of `true_cov_matrix` or `true_model`.
 
-- mu:
+- true_mean:
 
   Optional population means of the observed variables, used with
-  `Sigma`: a named numeric vector with one entry per observed variable,
-  or an unnamed vector in the row order of `Sigma`. The default `NULL`
-  is zero means. Means matter only when the analysis model has a mean
-  structure (an intercept term such as `s ~ 1`, as in a latent growth
-  curve model); when `pop_model` is supplied its mean structure provides
-  the means and `mu` must not also be given.
+  `true_cov_matrix`: a named numeric vector with one entry per observed
+  variable, or an unnamed vector in the row order of `true_cov_matrix`.
+  The default `NULL` is zero means. Means matter only when the analysis
+  model has a mean structure (an intercept term such as `s ~ 1`, as in a
+  latent growth curve model); when `true_model` is supplied its mean
+  structure provides the means and `true_mean` must not also be given.
 
 - parameters:
 
@@ -82,7 +82,7 @@ ss_aipe_composite_sem(
   of appearance, so labeling exactly the parameters of interest is the
   simplest way to state the set.
 
-- desired_width:
+- width:
 
   The desired full confidence interval width for each parameter of
   interest: a single value applied to every parameter, or a named
@@ -101,10 +101,10 @@ ss_aipe_composite_sem(
   simultaneously (a value in \[0.5, 1)), or `NULL` (the default) to plan
   against the expected widths instead; see Details.
 
-- N:
+- specified_N:
 
-  Sample size; if supplied, the realized interval widths at that *N* are
-  summarized rather than a sample size planned.
+  Total sample size *N*; if supplied, the realized interval widths at
+  that *N* are summarized rather than a sample size planned.
 
 - G:
 
@@ -127,7 +127,12 @@ ss_aipe_composite_sem(
   such as `"MLM"` cannot be used here: the same arguments reach the
   setup fit, which is always from summary statistics, and lavaan refuses
   a robust estimator there. The Monte Carlo data are multivariate normal
-  by construction, so a robust estimator would buy nothing.
+  by construction, so a robust estimator would buy nothing. Every name
+  given here must be an argument or an option of lavaan (see
+  [`lavOptions`](https://rdrr.io/pkg/lavaan/man/lavOptions.html)); any
+  other name, and any argument without a name, is refused before a model
+  is fitted, with a condition of class `dmar_argument_invalid` that
+  gives the name as it was typed
 
 ## Value
 
@@ -136,11 +141,10 @@ A `data.frame` (a `dmar_tbl`) with `term` and `value` columns: the
 (the proportion of replications in which every interval was
 simultaneously within its desired width, reported under both criteria),
 then for each parameter its `mean_width_<label>`, its marginal
-`width_within_desired_<label>` proportion, its `desired_width_<label>`,
-and its purported `population_<label>` value under the analysis model,
-followed by `conf_level`, the requested `replications`, the
-`converged_replications` the summary is based on, and, when supplied,
-the `assurance`.
+`pct_ci_less_width_<label>` proportion, its `width_<label>`, and its
+purported `true_<label>` value under the analysis model, followed by
+`conf_level`, the requested `replications`, the `converged_replications`
+the summary is based on, and, when supplied, the `assurance`.
 
 ## Details
 
@@ -152,11 +156,12 @@ design is only as informative as its widest interval of interest. This
 function plans for the set by a priori Monte Carlo simulation (Muthén &
 Muthén, 2002; Maxwell, Kelley, & Rausch, 2008): for a candidate *N*, `G`
 data sets are drawn from the multivariate normal population with
-covariance matrix `Sigma`, the analysis model is fit to each, and each
-parameter's Wald confidence interval width, twice \\z\_{1 - \alpha/2}\\
-times its standard error, is recorded. Because the estimates share one
-fitted model, the widths are dependent; the simulation reflects that
-dependence exactly, at the stated *N*, with no asymptotic shortcut.
+covariance matrix `true_cov_matrix`, the analysis model is fit to each,
+and each parameter's Wald confidence interval width, twice \\z\_{1 -
+\alpha/2}\\ times its standard error, is recorded. Because the estimates
+share one fitted model, the widths are dependent; the simulation
+reflects that dependence exactly, at the stated *N*, with no asymptotic
+shortcut.
 
 Two planning criteria are available. With `assurance = NULL` the
 necessary sample size is the smallest *N* at which the mean simulated
@@ -175,23 +180,22 @@ which the proportion of replications where every interval is
 simultaneously within its desired width reaches the assurance. The joint
 event is contained in each marginal event, so its probability is at most
 the smallest per-parameter proportion, and the
-`width_within_desired_<label>` rows show which parameter binds the
-design.
+`pct_ci_less_width_<label>` rows show which parameter binds the design.
 
-When `N` is `NULL` the search starts at the largest of the per-parameter
-closed-form sample sizes (the no-assurance approximation
+When `specified_N` is `NULL` the search starts at the largest of the
+per-parameter closed-form sample sizes (the no-assurance approximation
 [`ss_aipe_sem_path`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path.md)
 uses, computed from the asymptotic variances before any simulation),
 brackets the crossing geometrically, and bisects to adjacent integers,
 each candidate evaluated with its own `G` replications. A planning call
 therefore fits the analysis model several thousand times at the default
 `G`, and even at the smallest admissible `G` the search runs for several
-seconds, so the example below evaluates a stated `N`, which is the cheap
-half of the method. A planning call is the same call with `N` left out:
-supplying `assurance` plans against the joint event, and leaving
-`assurance` out as well plans against the expected widths; either way
-the first row of the result is `necessary_N` rather than `specified_N`.
-The vignette
+seconds, so the example below evaluates a stated `specified_N`, which is
+the cheap half of the method. A planning call is the same call with
+`specified_N` left out: supplying `assurance` plans against the joint
+event, and leaving `assurance` out as well plans against the expected
+widths; either way the first row of the result is `necessary_N` rather
+than `specified_N`. The vignette
 [`vignette("composite_sem_planning", package = "DMAR")`](https://yelleknek.github.io/DMAR/articles/composite_sem_planning.md)
 works through both planning calls for a mediation model and a latent
 growth curve model, with reference values computed at `G = 10000`.
@@ -206,15 +210,22 @@ reproducible.
 A replication whose fit does not converge, or converges without a usable
 standard error for some parameter of interest, is discarded and fresh
 data are drawn, up to `20 * G` attempts per evaluated sample size; the
-reported summaries condition on convergence. When fewer than `G`
-replications converge within the cap, a single warning is issued and the
-summary is based on the converged replications (their count is the
-`converged_replications` row).
+reported summaries condition on convergence. A replication whose
+likelihood has no maximum (an error variance running off below zero
+while the likelihood is flat or still rising; see
+[`fa_bifactor`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md)),
+which lavaan reports as converged where its optimizer stopped, is
+discarded the same way, and an analysis model with no maximum at the
+population moments stops the function with an error of class
+`dmar_no_maximum` that prints the lavaan code of that fit. When fewer
+than `G` replications converge within the cap, a single warning is
+issued and the summary is based on the converged replications (their
+count is the `converged_replications` row).
 
 Because the planner itself is a Monte Carlo study, it has no separate
 `_sensitivity` sibling; to study misspecification of the population
-values, rerun the planner with the alternative `Sigma` or `pop_model`
-values under consideration and compare the plans.
+values, rerun the planner with the alternative `true_cov_matrix` or
+`true_model` values under consideration and compare the plans.
 
 ## References
 
@@ -247,7 +258,7 @@ modeling. *Journal of Statistical Software, 48*(2), 1–36.
 for the same set of parameters planned for joint statistical
 significance;
 [`cov_sem`](https://yelleknek.github.io/DMAR/reference/cov_sem.md) for
-deriving `Sigma` from a fully fixed population model;
+deriving `true_cov_matrix` from a fully fixed population model;
 [`ss_aipe_sem_path`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path.md)
 and
 [`ss_aipe_sem_path_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_sem_path_sensitivity.md)
@@ -257,6 +268,8 @@ Other AIPE sample size planning:
 [`ss_aipe_c_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_sensitivity.md),
 [`ss_aipe_cliff_delta()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta.md),
 [`ss_aipe_cliff_delta_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_cliff_delta_sensitivity.md),
+[`ss_aipe_crossed()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed.md),
+[`ss_aipe_crossed_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crossed_sensitivity.md),
 [`ss_aipe_equivalence_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r.md),
 [`ss_aipe_equivalence_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_r_sensitivity.md),
 [`ss_aipe_equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_equivalence_smd.md),
@@ -265,6 +278,8 @@ Other AIPE sample size planning:
 [`ss_aipe_icc_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc_sensitivity.md),
 [`ss_aipe_indirect_effect()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect.md),
 [`ss_aipe_indirect_effect_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_indirect_effect_sensitivity.md),
+[`ss_aipe_mean()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean.md),
+[`ss_aipe_mean_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mean_sensitivity.md),
 [`ss_aipe_mixed_effects_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md),
 [`ss_aipe_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared.md),
 [`ss_aipe_omega_squared_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_omega_squared_sensitivity.md),
@@ -275,7 +290,10 @@ Other AIPE sample size planning:
 [`ss_aipe_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_r_sensitivity.md),
 [`ss_aipe_reliability_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability_sensitivity.md),
 [`ss_aipe_semipartial_r()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r.md),
-[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md)
+[`ss_aipe_semipartial_r_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_semipartial_r_sensitivity.md),
+[`ss_aipe_two_phase()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase.md),
+[`ss_aipe_two_phase_cost()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_cost.md),
+[`ss_aipe_two_phase_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_two_phase_sensitivity.md)
 
 ## Author
 
@@ -287,7 +305,7 @@ Ken Kelley <kkelley@nd.edu>
 # A mediation model whose research questions concern the magnitudes of
 # both individual paths and the indirect effect. The population model
 # fixes every parameter to its purported population value.
-pop_model <- "
+true_model <- "
   f1 =~ 1*y1 + 0.8*y2 + 0.8*y3
   f2 =~ 1*y4 + 0.8*y5 + 0.8*y6
   f3 =~ 1*y7 + 0.8*y8 + 0.8*y9
@@ -317,30 +335,30 @@ analysis_model <- "
 # interval lands within its desired width in most of the replications, yet
 # all three do so together in far fewer of them: that joint proportion,
 # reported as composite_assurance, is what a design of this kind has to be
-# planned against. G = 20 keeps the example quick; a reported plan
+# planned against. G = 10 keeps the example quick; a reported plan
 # deserves the default G = 1000 or more.
-ss_aipe_composite_sem(model = analysis_model, pop_model = pop_model,
+ss_aipe_composite_sem(model = analysis_model, true_model = true_model,
                       parameters = c("a", "b", "ab"),
-                      desired_width = c(a = 0.35, b = 0.40, ab = 0.25),
-                      N = 200, G = 20, seed = 113)
-#>  term                    value
-#>  specified_N             200  
-#>  composite_assurance     0.35 
-#>  mean_width_a            0.34 
-#>  mean_width_b            0.363
-#>  mean_width_ab           0.205
-#>  width_within_desired_a  0.65 
-#>  width_within_desired_b  0.7  
-#>  width_within_desired_ab 0.95 
-#>  desired_width_a         0.35 
-#>  desired_width_b         0.4  
-#>  desired_width_ab        0.25 
-#>  population_a            0.4  
-#>  population_b            0.5  
-#>  population_ab           0.2  
-#>  conf_level              0.95 
-#>  replications            20   
-#>  converged_replications  20   
+                      width = c(a = 0.35, b = 0.40, ab = 0.25),
+                      specified_N = 200, G = 10, seed = 113)
+#>  term                   value
+#>  specified_N            200  
+#>  composite_assurance    0.100
+#>  mean_width_a           0.336
+#>  mean_width_b           0.384
+#>  mean_width_ab          0.212
+#>  pct_ci_less_width_a    0.500
+#>  pct_ci_less_width_b    0.600
+#>  pct_ci_less_width_ab   0.900
+#>  width_a                0.350
+#>  width_b                0.400
+#>  width_ab               0.250
+#>  true_a                 0.400
+#>  true_b                 0.500
+#>  true_ab                0.200
+#>  conf_level             0.950
+#>  replications           10   
+#>  converged_replications 10   
 #> 
 #> Confidence level: 95%
 ```

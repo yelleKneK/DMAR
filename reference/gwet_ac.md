@@ -2,9 +2,12 @@
 
 Computes Gwet's AC1 (nominal data; Gwet, 2008) and AC2 (ordinal data
 with user-supplied weights; Gwet, 2014) chance-corrected agreement
-coefficients for two or more raters. AC1/AC2 are more robust than
-Cohen's \\\kappa\\ to extreme marginal-prevalence imbalance and the
-trait-distribution paradox.
+coefficients for two or more raters. When one category is rare or very
+common, Cohen's \\\kappa\\ can be near zero even though the raters agree
+on almost every unit (the kappa paradox; Feinstein & Cicchetti, 1990).
+The chance-agreement term of AC1 and AC2 shrinks rather than grows as
+the prevalence becomes extreme, so the two coefficients stay near the
+observed agreement in that case (see Details).
 
 ## Usage
 
@@ -109,14 +112,14 @@ set.seed(113)
 r1 <- sample(c("A", "B", "C"), 50, replace = TRUE)
 r2 <- ifelse(runif(50) < 0.8, r1, sample(c("A", "B", "C"), 50, TRUE))
 gwet_ac(cbind(r1, r2))
-#>  term              value 
-#>  gwet_ac           0.881 
-#>  se                0.0578
-#>  lower_limit       0.764 
-#>  upper_limit       0.997 
-#>  percent_agreement 0.92  
-#>  chance_agreement  0.33  
-#>  n_units           50    
+#>  term              value
+#>  gwet_ac           0.881
+#>  se                0.058
+#>  ci_lower          0.764
+#>  ci_upper          0.997
+#>  percent_agreement 0.920
+#>  chance_agreement  0.330
+#>  n_units           50   
 #> 
 #> Confidence level: 95%
 
@@ -125,14 +128,14 @@ set.seed(113)
 r1 <- sample(1:5, 60, replace = TRUE)
 r2 <- pmin(5, pmax(1, r1 + sample(-1:1, 60, replace = TRUE)))
 gwet_ac(cbind(r1, r2), weights = "linear")
-#>  term              value 
-#>  gwet_ac           0.67  
-#>  se                0.0405
-#>  lower_limit       0.589 
-#>  upper_limit       0.751 
-#>  percent_agreement 0.867 
-#>  chance_agreement  0.596 
-#>  n_units           60    
+#>  term              value
+#>  gwet_ac           0.670
+#>  se                0.041
+#>  ci_lower          0.589
+#>  ci_upper          0.751
+#>  percent_agreement 0.867
+#>  chance_agreement  0.596
+#>  n_units           60   
 #> 
 #> Confidence level: 95%
 ```

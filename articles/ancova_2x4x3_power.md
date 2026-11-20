@@ -107,7 +107,7 @@ calculation: the error variance shrinks by 1 - $`R^2`$ (so the operative
 effect size grows to *f* / sqrt(1 - $`R^2`$)), and two error degrees of
 freedom are spent.
 [`ss_power_factorial_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_factorial_ancova.md)
-does the accounting; with `covariate_R2 = 0, n_covariates = 0` it
+does the accounting; with `true_covariate_R2 = 0, n_covariates = 0` it
 reduces to the plain ANOVA planner
 [`ss_power_factorial_anova()`](https://yelleknek.github.io/DMAR/reference/ss_power_factorial_anova.md).
 
@@ -120,8 +120,8 @@ effects <- list(A = 1, B = 2, C = 3,
                 ABC = c(1, 2, 3))
 plan <- function(R2, q) {
   sapply(names(effects), function(e)
-    ss_power_factorial_ancova(c(2, 4, 3), effects[[e]], f = f_target[e],
-                              covariate_R2 = R2, n_covariates = q,
+    ss_power_factorial_ancova(c(2, 4, 3), effects[[e]], true_f = f_target[e],
+                              true_covariate_R2 = R2, n_covariates = q,
                               desired_power = .80)$value[1])
 }
 tab <- cbind(anova      = plan(0,    0),
@@ -282,9 +282,9 @@ cell_grid <- expand.grid(A = 1:2, B = 1:4, C = 1:3)
 [`contrast_adjusted()`](https://yelleknek.github.io/DMAR/reference/contrast_adjusted.md)
 does the linear-combination arithmetic: given the fitted model and a
 weight for each cell, it returns the contrast of covariate-adjusted cell
-means, its confidence interval on the residual degrees of freedom, and
-the accompanying statistic and -value, all at full precision through the
-`dmar_tbl` display layer.
+means, its *t* confidence interval on the residual degrees of freedom,
+and the accompanying *t* statistic and *p*-value, all at full precision
+through the `dmar_tbl` display layer.
 
 **Comparison 1.** The complex comparison on the four-level factor B with
 weights (1/3, 1/3, 1/3, -1): does the average of the first three B
@@ -297,13 +297,13 @@ L1 <- w_B[cell_grid$B] / (2 * 3)        # spread over the 2 x 3 cells of A x C
 contrast_adjusted(fit_cm, contrast = L1)
 ```
 
-| term        | value     |
-|:------------|:----------|
-| contrast    | -6.22     |
-| lower_limit | -8.52     |
-| upper_limit | -3.92     |
-| t           | -5.32     |
-| p           | \< 0.0001 |
+| term     | value     |
+|:---------|:----------|
+| contrast | -6.221    |
+| ci_lower | -8.524    |
+| ci_upper | -3.918    |
+| t_value  | -5.318    |
+| p_value  | \< 0.0001 |
 
 Confidence level: 95%
 
@@ -317,13 +317,13 @@ L2 <- ifelse(cell_grid$C %in% c(1, 2), w_B[cell_grid$B] / (2 * 2), 0)
 contrast_adjusted(fit_cm, contrast = L2)
 ```
 
-| term        | value     |
-|:------------|:----------|
-| contrast    | -5.8      |
-| lower_limit | -8.61     |
-| upper_limit | -2.99     |
-| t           | -4.06     |
-| p           | \< 0.0001 |
+| term     | value     |
+|:---------|:----------|
+| contrast | -5.799    |
+| ci_lower | -8.613    |
+| ci_upper | -2.985    |
+| t_value  | -4.058    |
+| p_value  | \< 0.0001 |
 
 Confidence level: 95%
 

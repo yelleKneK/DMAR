@@ -3,7 +3,7 @@
 Computes the asymptotic (large-sample) variance of the intraclass
 correlation coefficient (ICC) for any of the six classical Shrout-Fleiss
 (1979) forms, given a value of the population ICC, the number of
-subjects \\n\\, and the number of raters \\k\\. The single-rater forms
+subjects \\N\\, and the number of raters \\k\\. The single-rater forms
 use Smith's (1956) one-way-ANOVA asymptotic variance, equivalently the
 Fisher (1925) information-matrix result, and the average-of-\\k\\ forms
 use a delta method transformation through the Spearman-Brown relation.
@@ -11,19 +11,19 @@ use a delta method transformation through the Spearman-Brown relation.
 ## Usage
 
 ``` r
-var_icc(rho, n, k, type = "ICC(1,1)")
+var_icc(icc, N, n_raters, type = "ICC(1,1)")
 ```
 
 ## Arguments
 
-- rho:
+- icc:
 
-  The intraclass correlation coefficient at which the asymptotic
-  variance is evaluated, on the scale matching `type`: for the
-  single-rater types (`"ICC(1,1)"`, `"ICC(2,1)"`, `"ICC(3,1)"`) supply
-  the single-rater ICC; for the average-of-\\k\\ types (`"ICC(1,k)"`,
-  `"ICC(2,k)"`, `"ICC(3,k)"`) supply the average-of-\\k\\ ICC. Must lie
-  in \\\[0, 1\]\\.
+  The intraclass correlation coefficient (\\\rho\\ in the formulas) at
+  which the asymptotic variance is evaluated, on the scale matching
+  `type`: for the single-rater types (`"ICC(1,1)"`, `"ICC(2,1)"`,
+  `"ICC(3,1)"`) supply the single-rater ICC; for the average-of-\\k\\
+  types (`"ICC(1,k)"`, `"ICC(2,k)"`, `"ICC(3,k)"`) supply the
+  average-of-\\k\\ ICC. Must lie in \\\[0, 1\]\\.
 
   **Population value or sample value?** The formula is derived in terms
   of the unknown population value \\\rho\\. In applied work \\\rho\\ is
@@ -38,13 +38,14 @@ var_icc(rho, n, k, type = "ICC(1,1)")
   the call site but have different conceptual content; the plug-in
   case (ii) yields a consistent (not exact) estimator of the variance.
 
-- n:
+- N:
 
-  Number of subjects (targets) rated.
+  Total sample size: the number of subjects (targets) rated.
 
-- k:
+- n_raters:
 
-  Number of raters (or repeated measurements) per subject.
+  Number of raters (or repeated measurements) per subject, \\k\\ in the
+  formulas and in the names of the ICC forms.
 
 - type:
 
@@ -62,16 +63,16 @@ A one-row `data.frame` with columns `term` (always `"var_icc"`) and
 ## Details
 
 **Single-rater forms.** For the single-rater intraclass correlation in a
-balanced design with \\n\\ subjects and \\k\\ measurements per subject,
+balanced design with \\N\\ subjects and \\k\\ measurements per subject,
 the standard large-sample variance derived from the Fisher information
 matrix is (Smith, 1956; Donner, 1986; Searle, 1971, ch. 11):
 \$\$\mathrm{Var}(\hat\rho) \\\approx\\ \frac{2 (1 - \rho)^2 \bigl(1 +
-(k-1)\rho\bigr)^2} {n\\k\\(k - 1)}.\$\$ This expression is exact under
+(k-1)\rho\bigr)^2} {N\\k\\(k - 1)}.\$\$ This expression is exact under
 the one-way random-effects model (`ICC(1,1)`) and serves as the standard
 large-sample approximation for the two-way single-rater forms
 (`ICC(2,1)`, `ICC(3,1)`) as well; differences with the exact two-way
-variance vanish at order \\1/n\\ (Bonett, 2002; Burdick & Graybill,
-1992). For small \\n\\ or moderate \\k\\ where exact two-way inference
+variance vanish at order \\1/N\\ (Bonett, 2002; Burdick & Graybill,
+1992). For small \\N\\ or moderate \\k\\ where exact two-way inference
 matters, prefer the *F*-distribution-based confidence intervals returned
 by [`icc`](https://yelleknek.github.io/DMAR/reference/icc.md), which
 follow Shrout and Fleiss (1979) directly.
@@ -79,7 +80,7 @@ follow Shrout and Fleiss (1979) directly.
 **Average-of-*k* forms.** Applying the Spearman-Brown transformation
 \\\rho_k = k\rho / \[1 + (k - 1)\rho\]\\ together with the delta method
 gives the closed-form \$\$\mathrm{Var}(\hat\rho_k) \\\approx\\
-\frac{2\\k\\(1 - \rho_k)^2}{n\\(k - 1)},\$\$ expressed directly in the
+\frac{2\\k\\(1 - \rho_k)^2}{N\\(k - 1)},\$\$ expressed directly in the
 average-level ICC \\\rho_k\\ (so the user need not invert Spearman-Brown
 when working with reliability of composites). The reduction to this form
 follows from the substitutions \\1 - \rho = k(1 - \rho_k)/\[k -
@@ -138,9 +139,9 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # Single-rater one-way ICC at rho = .60 with 30 subjects and 4 raters.
-var_icc(rho = 0.60, n = 30, k = 4, type = "ICC(1,1)")
-#>  term    value  
-#>  var_icc 0.00697
+var_icc(icc = 0.60, N = 30, n_raters = 4, type = "ICC(1,1)")
+#>  term    value
+#>  var_icc 0.007
 
 # Same study, but expressed at the average-of-4-rater level. The
 # Spearman-Brown relation carries the single-rater value of .60 up
@@ -148,13 +149,13 @@ var_icc(rho = 0.60, n = 30, k = 4, type = "ICC(1,1)")
 rho_k <- 4 * 0.60 / (1 + 3 * 0.60)
 rho_k
 #> [1] 0.8571429
-var_icc(rho = rho_k, n = 30, k = 4, type = "ICC(1,k)")
-#>  term    value  
-#>  var_icc 0.00181
+var_icc(icc = rho_k, N = 30, n_raters = 4, type = "ICC(1,k)")
+#>  term    value
+#>  var_icc 0.002
 
 # Two-way mixed-model consistency ICC, which uses the same one-way
 # asymptotic variance as a large-sample approximation (see Details).
-var_icc(rho = 0.60, n = 30, k = 4, type = "ICC(3,1)")
-#>  term    value  
-#>  var_icc 0.00697
+var_icc(icc = 0.60, N = 30, n_raters = 4, type = "ICC(3,1)")
+#>  term    value
+#>  var_icc 0.007
 ```

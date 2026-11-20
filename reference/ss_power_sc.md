@@ -9,18 +9,18 @@ per-group sample size, return the realized statistical power.
 
 ``` r
 ss_power_sc(
-  psi_standardized,
+  true_std_contrast,
   c_weights,
   desired_power = 0.85,
   alpha_level = 0.05,
-  n = NULL,
+  specified_n_per_group = NULL,
   directional = FALSE
 )
 ```
 
 ## Arguments
 
-- psi_standardized:
+- true_std_contrast:
 
   The population standardized contrast effect, \\\psi / \sigma\\, where
   \\\sigma\\ is the within-group standard deviation
@@ -39,7 +39,7 @@ ss_power_sc(
 
   Type I error rate (default 0.05)
 
-- n:
+- specified_n_per_group:
 
   Per-group sample size (assumed balanced); if specified, returns the
   realized power
@@ -47,7 +47,7 @@ ss_power_sc(
 - directional:
 
   Logical: `TRUE` for a one-sided test (in the same sign as
-  `psi_standardized`), `FALSE` (default) for a two-sided test
+  `true_std_contrast`), `FALSE` (default) for a two-sided test
 
 ## Value
 
@@ -63,11 +63,12 @@ it in broom convention.
 Under the alternative hypothesis the contrast *t*-statistic follows a
 noncentral *t*-distribution with degrees of freedom \\N - J\\ (\\J =
 \\`length(c_weights)`) and noncentrality parameter \\\lambda = \psi^\* /
-\sqrt{\sum c_j^2 / n}\\, where \\\psi^\*\\ is the standardized contrast.
+\sqrt{\sum c_j^2 / n}\\, where \\\psi^\*\\ is the standardized contrast,
+`true_std_contrast`.
 
 The function searches over per-group sample sizes \\n\\ until power
-first reaches `desired_power`; when `n` is supplied it returns the
-realized power.
+first reaches `desired_power`; when `specified_n_per_group` is supplied
+it returns the realized power.
 
 ## References
 
@@ -97,6 +98,7 @@ Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_aipe_mixed_effects()`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -133,17 +135,18 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Power for a standardized contrast of 0.5 across 4 groups,
 # contrast (G1 + G2)/2 vs (G3 + G4)/2, desired power = .80
-ss_power_sc(psi_standardized = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
+ss_power_sc(true_std_contrast = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
             desired_power = 0.80)
 #>  term                  value
 #>  necessary_n_per_group 32   
 #>  actual_power          0.801
-#>  noncentral_t_parm     2.83 
+#>  noncentral_t_parm     2.828
 
 # Realized power at n = 30 per group
-ss_power_sc(psi_standardized = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5), n = 30)
+ss_power_sc(true_std_contrast = 0.5, c_weights = c(0.5, 0.5, -0.5, -0.5),
+            specified_n_per_group = 30)
 #>  term                  value
 #>  specified_n_per_group 30   
 #>  actual_power          0.775
-#>  noncentral_t_parm     2.74 
+#>  noncentral_t_parm     2.739
 ```

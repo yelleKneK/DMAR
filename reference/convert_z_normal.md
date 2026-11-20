@@ -65,11 +65,11 @@ Ken Kelley <kkelley@nd.edu>
 # A z value of 1.96 on the standard normal distribution maps to the
 # corresponding point on a normal distribution with mean 100 and sd 15.
 convert_z_normal(z = 1.96, mean = 100, sd = 15)
-#>  term         value
-#>  value_from_z 129  
+#>  term         value  
+#>  value_from_z 129.400
 
 # With the default standard normal target, the value is returned unchanged.
 convert_z_normal(z = 1.96)
 #>  term         value
-#>  value_from_z 1.96 
+#>  value_from_z 1.960
 ```

@@ -74,10 +74,16 @@ contrast_test(
 ## Value
 
 A `data.frame` with one row per contrast and columns `contrast`,
-`estimate`, `se`, `t`, `df`, `p_value`, `p_adjusted`, `ci_lower`, and
-`ci_upper`. The adjustment, confidence level, and variance assumption
-are stored as `attr(*, "adjust")`, `attr(*, "conf_level")`, and
-`attr(*, "var_equal")`. The table prints through the
+`estimate`, `se`, `t_value`, `df`, `p_value`, `p_adjusted`, `ci_lower`,
+and `ci_upper`. The adjustment, confidence level, and variance
+assumption are stored as `attr(*, "adjust")`, `attr(*, "conf_level")`,
+and `attr(*, "var_equal")`. With `adjust` `"bonferroni"`, `"scheffe"`,
+or `"tukey"`, the recorded level is the simultaneous level of the family
+of intervals, the convention of the post hoc intervals and of
+[`pairwise_within`](https://yelleknek.github.io/DMAR/reference/pairwise_within.md)
+with `bonferroni_ci = TRUE`; under Bonferroni the line beneath the table
+also names the level of each interval, \\1 - \alpha / m\\. The table
+prints through the
 [`dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)
 display layer and works with
 [`tidy`](https://generics.r-lib.org/reference/tidy.html) and
@@ -111,9 +117,20 @@ are computed as follows.
   \\\sqrt{(k-1)\\ F\_{1-\alpha,\\k-1,df}}\\.
 
 - `"tukey"`: requires every contrast to be pairwise. Uses the
-  studentized range distribution (`ptukey`/`qtukey`) so that
-  \\p\_{\text{adj}} = 1 - \mathrm{ptukey}(\|t\|\sqrt{2}; k, df)\\ and
-  the CI uses \\q\_{1-\alpha,\\k,df} / \sqrt{2}\\.
+  studentized range distribution \\Q\_{k, df}\\, so that
+  \\p\_{\text{adj}} = P(Q\_{k, df} \> \|t\|\sqrt{2})\\ and the CI uses
+  \\q\_{1-\alpha,\\k,df} / \sqrt{2}\\. Both come from base R's
+  [`ptukey`](https://rdrr.io/r/stats/Tukey.html) and
+  [`qtukey`](https://rdrr.io/r/stats/Tukey.html) where those are
+  accurate, and from the exact distribution where they are not (at small
+  df, for example fewer than 9 df with up to 6 groups; from 10000 to
+  \\10^8\\ df; at confidence levels above .999; with more than 50
+  groups, below the .75 point of the distribution (.80 with more than
+  1000 groups); and wherever `qtukey` stops short of its root; with 20
+  groups and 2 df `qtukey(.99, 20, 2)` is 44.526 where the exact value
+  is 37.943);
+  [`cv_tukey_hsd`](https://yelleknek.github.io/DMAR/reference/cv_tukey_hsd.md)
+  describes the computation and the regions.
 
 - `"holm"`, `"hochberg"`, `"BH"`, `"BY"`:
   [`p.adjust`](https://rdrr.io/r/stats/p.adjust.html) is applied to the
@@ -142,6 +159,10 @@ ed.). Routledge.
 Scheffe, H. (1953). A method for judging all contrasts in the analysis
 of variance. *Biometrika, 40*, 87–104.
 
+Smith, J. E., Meyers, R. J., & Delaney, H. D. (1998). The community
+reinforcement approach with homeless alcohol-dependent individuals.
+*Journal of Consulting and Clinical Psychology, 66*(3), 541–548.
+
 Tukey, J. W. (1953). The problem of multiple comparisons. Unpublished
 manuscript, Princeton University.
 
@@ -160,11 +181,15 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -190,29 +215,29 @@ Ken Kelley <kkelley@nd.edu>
 # treatment study.
 fit <- aov(bdi_post ~ condition, data = depression_bdi)
 contrast_test(fit, contrasts = "pairwise")
-#>  contrast            estimate se   t     df p_value p_adjusted ci_lower
-#>  placebo - ssri      4.9      2.81 1.74  27 0.0931  0.0931     -0.876  
-#>  wait_list - ssri    6.7      2.81 2.38  27 0.0246  0.0246     0.924   
-#>  wait_list - placebo 1.8      2.81 0.639 27 0.5279  0.5279     -3.98   
+#>  contrast            estimate se    t_value df p_value p_adjusted ci_lower
+#>  placebo - ssri      4.900    2.815 1.741   27 0.0931  0.0931     -0.876  
+#>  wait_list - ssri    6.700    2.815 2.380   27 0.0246  0.0246     0.924   
+#>  wait_list - placebo 1.800    2.815 0.639   27 0.5279  0.5279     -3.976  
 #>  ci_upper
-#>  10.7    
-#>  12.5    
-#>  7.58    
+#>  10.676  
+#>  12.476  
+#>  7.576   
 #> 
 #> Confidence level: 95%
 
 # Custom contrasts with a Tukey-protected family-wise error rate.
 contrast_test(fit, contrasts = "pairwise", adjust = "tukey")
-#>  contrast            estimate se   t     df p_value p_adjusted ci_lower
-#>  placebo - ssri      4.9      2.81 1.74  27 0.0931  0.2088     -2.08   
-#>  wait_list - ssri    6.7      2.81 2.38  27 0.0246  0.0617     -0.279  
-#>  wait_list - placebo 1.8      2.81 0.639 27 0.5279  0.7998     -5.18   
+#>  contrast            estimate se    t_value df p_value p_adjusted ci_lower
+#>  placebo - ssri      4.900    2.815 1.741   27 0.0931  0.2088     -2.079  
+#>  wait_list - ssri    6.700    2.815 2.380   27 0.0246  0.0617     -0.279  
+#>  wait_list - placebo 1.800    2.815 0.639   27 0.5279  0.7998     -5.179  
 #>  ci_upper
-#>  11.9    
-#>  13.7    
-#>  8.78    
+#>  11.879  
+#>  13.679  
+#>  8.779   
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95%, simultaneous interval (Tukey)
 
 # A user-defined contrast: the SSRI arm vs. the average of the placebo
 # and wait list arms. With levels ordered ssri, placebo, wait_list, the
@@ -222,24 +247,24 @@ contrast_test(
   contrasts = list("ssri vs non-drug arms" = c(1, -0.5, -0.5)),
   adjust = "scheffe"
 )
-#>  contrast              estimate se   t     df p_value p_adjusted ci_lower
-#>  ssri vs non-drug arms -5.8     2.44 -2.38 27 0.0247  0.0766     -12.1   
+#>  contrast              estimate se    t_value df p_value p_adjusted ci_lower
+#>  ssri vs non-drug arms -5.800   2.438 -2.379  27 0.0247  0.0766     -12.114 
 #>  ci_upper
 #>  0.514   
 #> 
-#> Confidence level: 95%
+#> Confidence level: 95%, simultaneous interval (Scheffe)
 
 # Welch-style inference: the wait list variance is about twice the
 # SSRI variance, so the pooled error term is worth questioning.
 contrast_test(fit, contrasts = "pairwise", var_equal = FALSE)
-#>  contrast            estimate se   t     df   p_value p_adjusted ci_lower
-#>  placebo - ssri      4.9      2.48 1.98  17.9 0.0638  0.0638     -0.313  
-#>  wait_list - ssri    6.7      2.93 2.28  16.2 0.0361  0.0361     0.489   
-#>  wait_list - placebo 1.8      3    0.599 16.8 0.5569  0.5569     -4.54   
+#>  contrast            estimate se    t_value df     p_value p_adjusted ci_lower
+#>  placebo - ssri      4.900    2.480 1.976   17.918 0.0638  0.0638     -0.313  
+#>  wait_list - ssri    6.700    2.933 2.285   16.202 0.0361  0.0361     0.489   
+#>  wait_list - placebo 1.800    3.003 0.599   16.764 0.5569  0.5569     -4.543  
 #>  ci_upper
-#>  10.1    
-#>  12.9    
-#>  8.14    
+#>  10.113  
+#>  12.911  
+#>  8.143   
 #> 
 #> Confidence level: 95%
 
@@ -248,13 +273,13 @@ contrast_test(fit, contrasts = "pairwise", var_equal = FALSE)
 # one pairwise contrast of the three treatment means.
 fit_drinks <- aov(log_drinks ~ treatment, data = drinks_trial)
 contrast_test(fit_drinks, contrasts = "pairwise")
-#>  contrast                    estimate se    t      df p_value p_adjusted
-#>  CRA - Standard              -0.454   0.198 -2.29  85 0.0242  0.0242    
-#>  CRA + Disulfiram - Standard -0.594   0.232 -2.57  85 0.0120  0.0120    
-#>  CRA + Disulfiram - CRA      -0.14    0.238 -0.589 85 0.5575  0.5575    
+#>  contrast                    estimate se    t_value df p_value p_adjusted
+#>  CRA - Standard              -0.454   0.198 -2.294  85 0.0242  0.0242    
+#>  CRA + Disulfiram - Standard -0.594   0.232 -2.567  85 0.0120  0.0120    
+#>  CRA + Disulfiram - CRA      -0.140   0.238 -0.589  85 0.5575  0.5575    
 #>  ci_lower ci_upper
-#>  -0.848   -0.0606 
-#>  -1.05    -0.134  
+#>  -0.848   -0.061  
+#>  -1.055   -0.134  
 #>  -0.612   0.332   
 #> 
 #> Confidence level: 95%
@@ -266,8 +291,8 @@ contrast_test(
   fit_drinks,
   contrasts = list("CRA arms vs Standard" = c(-1, 0.5, 0.5))
 )
-#>  contrast             estimate se   t     df p_value p_adjusted ci_lower
-#>  CRA arms vs Standard -0.524   0.18 -2.92 85 0.0045  0.0045     -0.882  
+#>  contrast             estimate se    t_value df p_value p_adjusted ci_lower
+#>  CRA arms vs Standard -0.524   0.180 -2.917  85 0.0045  0.0045     -0.882  
 #>  ci_upper
 #>  -0.167  
 #> 

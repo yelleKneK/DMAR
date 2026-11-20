@@ -213,10 +213,10 @@ contrast_test(aov(y ~ intensity),
               contrasts = list(linear    = op[, "linear"],
                                quadratic = op[, "quadratic"],
                                cubic     = op[, "cubic"]))
-#>  contrast  estimate se   t     df p_value  p_adjusted ci_lower ci_upper
-#>  linear    -9.63    1.39 -6.91 35 < 0.0001 < 0.0001   -12.5    -6.8    
-#>  quadratic 1.02     1.65 0.62  35 0.5390   0.5390     -2.32    4.37    
-#>  cubic     2.54     1.39 1.82  35 0.0771   0.0771     -0.291   5.36    
+#>  contrast  estimate se    t_value df p_value  p_adjusted ci_lower ci_upper
+#>  linear    -9.625   1.392 -6.913  35 < 0.0001 < 0.0001   -12.452  -6.799  
+#>  quadratic 1.022    1.647 0.620   35 0.5390   0.5390     -2.322   4.367   
+#>  cubic     2.536    1.392 1.821   35 0.0771   0.0771     -0.291   5.362   
 #> 
 #> Confidence level: 95%
 

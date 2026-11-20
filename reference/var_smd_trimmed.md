@@ -8,12 +8,12 @@ sizes (Keselman, Algina, Lix, Wilcox, & Deering, 2008).
 ## Usage
 
 ``` r
-var_smd_trimmed(population_smd_trimmed, n_1, n_2, trim = 0.2)
+var_smd_trimmed(true_smd_trimmed, n_1, n_2, trim = 0.2)
 ```
 
 ## Arguments
 
-- population_smd_trimmed:
+- true_smd_trimmed:
 
   Anticipated population value of the robust trimmed SMD \\\delta_R\\.
 
@@ -57,6 +57,9 @@ confidence interval in the two independent groups case. *Psychological
 Methods, 10*(3), 317–328.
 [doi:10.1037/1082-989X.10.3.317](https://doi.org/10.1037/1082-989X.10.3.317)
 
+Hedges, L. V., & Olkin, I. (1985). *Statistical methods for
+meta-analysis*. Academic Press.
+
 Kelley, K., & Rausch, J. R. (2006). Sample size planning for the
 standardized mean difference: Accuracy in parameter estimation via
 narrow confidence intervals. *Psychological Methods, 11*(4), 363–385.
@@ -99,7 +102,7 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # 1. Population delta_R = 0.5, n = 30 per group, 20% trim:
-var_smd_trimmed(population_smd_trimmed = 0.5, n_1 = 30, n_2 = 30)
+var_smd_trimmed(true_smd_trimmed = 0.5, n_1 = 30, n_2 = 30)
 #>  term            value
 #>  var_smd_trimmed 0.115
 

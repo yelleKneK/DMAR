@@ -174,20 +174,20 @@ suppressing it would hide the shape of the result, but it is flagged in
 
 **Simultaneous versus pointwise.** The classic critical value is
 \\t\_{1 - \alpha/2}\\, which controls the Type I error rate at a
-*single* covariate value fixed in advance. That is not what anyone
-actually does: the whole point of the procedure is to scan the covariate
-continuum and read off where the groups differ, which is a search over
-infinitely many tests. Potthoff (1964) gave the simultaneous critical
-value \\\sqrt{2 F\_{1 - \alpha; 2, \nu}}\\, which holds the error rate
-over the entire covariate range at once and is therefore the default
-here, and the value used in Maxwell, Delaney, and Kelley (2027, Chapter
-9). The simultaneous critical value is always the larger of the two, so
-its region of significance is always the more conservative one. With
-more than two groups the simultaneous guarantee applies to each pair
-over the covariate range, not to the family of pairs. For a Bonferroni
-protection across the pairs, divide the Type I error rate by the number
-of pairs before choosing `conf_level`: with three groups (three pairs)
-and a familywise rate of .05, pass `conf_level = 1 - .05 / 3`.
+*single* covariate value fixed in advance. The procedure, however, scans
+the covariate continuum and reads off where the groups differ, which is
+a search over infinitely many tests. Potthoff (1964) gave the
+simultaneous critical value \\\sqrt{2 F\_{1 - \alpha; 2, \nu}}\\, which
+holds the error rate over the entire covariate range at once and is
+therefore the default here, and the value used in Maxwell, Delaney, and
+Kelley (2027, Chapter 9). The simultaneous critical value is always the
+larger of the two, so its region of significance is always the more
+conservative one. With more than two groups the simultaneous guarantee
+applies to each pair over the covariate range, not to the family of
+pairs. For a Bonferroni protection across the pairs, divide the Type I
+error rate by the number of pairs before choosing `conf_level`: with
+three groups (three pairs) and a familywise rate of .05, pass
+`conf_level = 1 - .05 / 3`.
 
 **What the model may contain.** The model must contain exactly one
 interaction between a numeric covariate and a grouping factor, and the
@@ -232,12 +232,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`factorial_anova()`](https://yelleknek.github.io/DMAR/reference/factorial_anova.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
@@ -267,18 +271,18 @@ pygmalion$iq_post <- (pygmalion$iq_4 + pygmalion$iq_8) / 2
 fit <- lm(iq_post ~ iq_pre * treatment, data = pygmalion)
 
 regions_of_significance(fit)
-#>  pair              term                 value
-#>  Bloomer - Control lower_bound          104  
-#>  Bloomer - Control upper_bound          129  
-#>  Bloomer - Control region_code          2    
-#>  Bloomer - Control n_boundaries         2    
-#>  Bloomer - Control lower_bound_in_range 1    
-#>  Bloomer - Control upper_bound_in_range 1    
-#>  Bloomer - Control difference_intercept -8.64
-#>  Bloomer - Control difference_slope     0.122
-#>  Bloomer - Control critical_value       2.46 
-#>  Bloomer - Control df_error             306  
-#>  Bloomer - Control conf_level           0.95 
+#>  pair              term                 value  
+#>  Bloomer - Control lower_bound          103.892
+#>  Bloomer - Control upper_bound          128.680
+#>  Bloomer - Control region_code          2      
+#>  Bloomer - Control n_boundaries         2      
+#>  Bloomer - Control lower_bound_in_range 1      
+#>  Bloomer - Control upper_bound_in_range 1      
+#>  Bloomer - Control difference_intercept -8.637 
+#>  Bloomer - Control difference_slope     0.122  
+#>  Bloomer - Control critical_value       2.460  
+#>  Bloomer - Control df_error             306    
+#>  Bloomer - Control conf_level           0.950  
 #> 
 #> Confidence level: 95%
 
@@ -289,18 +293,18 @@ attr(regions_of_significance(fit), "pairs")$region
 # The pointwise (classic) critical value gives a wider region,
 # because it does not pay for scanning the whole covariate.
 regions_of_significance(fit, method = "pointwise")
-#>  pair              term                 value
-#>  Bloomer - Control lower_bound          97.2 
-#>  Bloomer - Control upper_bound          175  
-#>  Bloomer - Control region_code          2    
-#>  Bloomer - Control n_boundaries         2    
-#>  Bloomer - Control lower_bound_in_range 1    
-#>  Bloomer - Control upper_bound_in_range 0    
-#>  Bloomer - Control difference_intercept -8.64
-#>  Bloomer - Control difference_slope     0.122
-#>  Bloomer - Control critical_value       1.97 
-#>  Bloomer - Control df_error             306  
-#>  Bloomer - Control conf_level           0.95 
+#>  pair              term                 value  
+#>  Bloomer - Control lower_bound          97.218 
+#>  Bloomer - Control upper_bound          174.652
+#>  Bloomer - Control region_code          2      
+#>  Bloomer - Control n_boundaries         2      
+#>  Bloomer - Control lower_bound_in_range 1      
+#>  Bloomer - Control upper_bound_in_range 0      
+#>  Bloomer - Control difference_intercept -8.637 
+#>  Bloomer - Control difference_slope     0.122  
+#>  Bloomer - Control critical_value       1.968  
+#>  Bloomer - Control df_error             306    
+#>  Bloomer - Control conf_level           0.950  
 #> 
 #> Confidence level: 95%
 
@@ -312,40 +316,40 @@ x <- rnorm(n, 50, 10)
 y <- 2 + 0.5 * x + (g == "high") * (0.4 * x - 15) + rnorm(n, 0, 5)
 d <- data.frame(y, x, g)
 regions_of_significance(y ~ x * g, data = d)
-#>  pair           term                 value 
-#>  high - control lower_bound          -114  
-#>  high - control upper_bound          45    
-#>  high - control region_code          1     
-#>  high - control n_boundaries         2     
-#>  high - control lower_bound_in_range 0     
-#>  high - control upper_bound_in_range 1     
-#>  high - control difference_intercept -10.6 
-#>  high - control difference_slope     0.295 
-#>  high - control critical_value       2.47  
-#>  high - control df_error             144   
-#>  high - control conf_level           0.95  
-#>  low - control  lower_bound          <NA>  
-#>  low - control  upper_bound          <NA>  
-#>  low - control  region_code          4     
-#>  low - control  n_boundaries         0     
-#>  low - control  lower_bound_in_range <NA>  
-#>  low - control  upper_bound_in_range <NA>  
-#>  low - control  difference_intercept 5.58  
-#>  low - control  difference_slope     -0.141
-#>  low - control  critical_value       2.47  
-#>  low - control  df_error             144   
-#>  low - control  conf_level           0.95  
-#>  low - high     lower_bound          18.7  
-#>  low - high     upper_bound          43.2  
-#>  low - high     region_code          1     
-#>  low - high     n_boundaries         2     
-#>  low - high     lower_bound_in_range 0     
-#>  low - high     upper_bound_in_range 1     
-#>  low - high     difference_intercept 16.1  
-#>  low - high     difference_slope     -0.435
-#>  low - high     critical_value       2.47  
-#>  low - high     df_error             144   
-#>  low - high     conf_level           0.95  
+#>  pair           term                 value   
+#>  high - control lower_bound          -114.442
+#>  high - control upper_bound          45.033  
+#>  high - control region_code          1       
+#>  high - control n_boundaries         2       
+#>  high - control lower_bound_in_range 0       
+#>  high - control upper_bound_in_range 1       
+#>  high - control difference_intercept -10.564 
+#>  high - control difference_slope     0.295   
+#>  high - control critical_value       2.473   
+#>  high - control df_error             144     
+#>  high - control conf_level           0.950   
+#>  low - control  lower_bound          <NA>    
+#>  low - control  upper_bound          <NA>    
+#>  low - control  region_code          4       
+#>  low - control  n_boundaries         0       
+#>  low - control  lower_bound_in_range <NA>    
+#>  low - control  upper_bound_in_range <NA>    
+#>  low - control  difference_intercept 5.576   
+#>  low - control  difference_slope     -0.141  
+#>  low - control  critical_value       2.473   
+#>  low - control  df_error             144     
+#>  low - control  conf_level           0.950   
+#>  low - high     lower_bound          18.674  
+#>  low - high     upper_bound          43.238  
+#>  low - high     region_code          1       
+#>  low - high     n_boundaries         2       
+#>  low - high     lower_bound_in_range 0       
+#>  low - high     upper_bound_in_range 1       
+#>  low - high     difference_intercept 16.140  
+#>  low - high     difference_slope     -0.435  
+#>  low - high     critical_value       2.473   
+#>  low - high     df_error             144     
+#>  low - high     conf_level           0.950   
 #> 
 #> Confidence level: 95%
 ```

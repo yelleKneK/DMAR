@@ -44,10 +44,13 @@ A `data.frame` (class `dmar_tbl`) with one row per effect plus a
 `Residuals` row. Columns are the effect label (`effect`), the sum of
 squares (`SS`), degrees of freedom (`df`), the *F* statistic (`F_value`)
 and its *p*-value (`p_value`), and partial \\\eta^2\\ and partial
-\\\omega^2\\ with their lower and upper confidence limits. The chosen
-sum-of-squares type is recorded on the object (`attr(x, "ss_type")`) and
-printed beneath the table. The residual row carries only `SS` and `df`.
-Stored values keep full precision; the display rounds (see
+\\\omega^2\\ with their lower and upper confidence limits
+(`eta_squared_partial`, `eta_squared_partial_ci_lower`,
+`eta_squared_partial_ci_upper`, and the same three columns for
+`omega_squared_partial`). The chosen sum-of-squares type is recorded on
+the object (`attr(x, "ss_type")`) and printed beneath the table. The
+residual row carries only `SS` and `df`. Stored values keep full
+precision; the display rounds (see
 [`dmar_tbl`](https://yelleknek.github.io/DMAR/reference/dmar_tbl.md)).
 
 ## Details
@@ -101,7 +104,7 @@ comparison.
 **Effect sizes.** Partial \\\eta^2\\ and partial \\\omega^2\\ are formed
 for each effect from its *F*, its degrees of freedom, and the error
 degrees of freedom, with noncentral *F* confidence intervals
-([`ci_eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
+([`ci_eta_squared`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)).
 The confidence limits are those of the interval for the population
 proportion of variance the effect accounts for (Kelley, 2007). Partial
@@ -142,7 +145,7 @@ covariate-adjusted one-way design,
 for mixed-model (fixed and random) *F* ratios,
 [`manova_split_plot`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md)
 for the multivariate mixed design, and
-[`ci_eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md)
+[`ci_eta_squared`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md)
 /
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
 for the effect size intervals.
@@ -152,12 +155,16 @@ Other hypothesis tests:
 [`ancova()`](https://yelleknek.github.io/DMAR/reference/ancova.md),
 [`anova_within()`](https://yelleknek.github.io/DMAR/reference/anova_within.md),
 [`ci_dunnett()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett.md),
+[`ci_dunnett_t3()`](https://yelleknek.github.io/DMAR/reference/ci_dunnett_t3.md),
+[`ci_games_howell()`](https://yelleknek.github.io/DMAR/reference/ci_games_howell.md),
 [`ci_scheffe()`](https://yelleknek.github.io/DMAR/reference/ci_scheffe.md),
 [`ci_tukey_kramer()`](https://yelleknek.github.io/DMAR/reference/ci_tukey_kramer.md),
 [`compare_cov_structures()`](https://yelleknek.github.io/DMAR/reference/compare_cov_structures.md),
 [`contrast_test()`](https://yelleknek.github.io/DMAR/reference/contrast_test.md),
 [`correlations_test()`](https://yelleknek.github.io/DMAR/reference/correlations_test.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`manova_split_plot()`](https://yelleknek.github.io/DMAR/reference/manova_split_plot.md),
 [`mauchly_test()`](https://yelleknek.github.io/DMAR/reference/mauchly_test.md),
@@ -185,21 +192,26 @@ Ken Kelley <kkelley@nd.edu>
 pyg <- pygmalion
 pyg$grade_band <- factor(ifelse(pyg$grade <= 2, "lower", "upper"))
 factorial_anova(iq_gain ~ treatment * grade_band, data = pyg)
-#>  effect               SS    df  F_value p_value eta_squared_partial
-#>  treatment            1510  1   8.24    0.0044  0.0262             
-#>  grade_band           1830  1   10      0.0017  0.0317             
-#>  treatment:grade_band 1120  1   6.11    0.0140  0.0196             
-#>  Residuals            55900 306 <NA>    <NA>    <NA>               
-#>  eta_squared_partial_lower eta_squared_partial_upper omega_squared_partial
-#>  0.00257                   0.0703                    0.0228               
-#>  0.00453                   0.0785                    0.0283               
-#>  0.00071                   0.0598                    0.0162               
-#>  <NA>                      <NA>                      <NA>                 
-#>  omega_squared_partial_lower omega_squared_partial_upper
-#>  0.00257                     0.0703                     
-#>  0.00453                     0.0785                     
-#>  0.00071                     0.0598                     
-#>  <NA>                        <NA>                       
+#>  effect               SS        df  F_value p_value eta_squared_partial
+#>  treatment            1505.059  1   8.244   0.0044  0.026              
+#>  grade_band           1829.890  1   10.023  0.0017  0.032              
+#>  treatment:grade_band 1115.315  1   6.109   0.0140  0.020              
+#>  Residuals            55867.220 306 <NA>    <NA>    <NA>               
+#>  eta_squared_partial_ci_lower eta_squared_partial_ci_upper
+#>  0.003                        0.070                       
+#>  0.005                        0.079                       
+#>  0.001                        0.060                       
+#>  <NA>                         <NA>                        
+#>  omega_squared_partial omega_squared_partial_ci_lower
+#>  0.023                 0.003                         
+#>  0.028                 0.005                         
+#>  0.016                 0.001                         
+#>  <NA>                  <NA>                          
+#>  omega_squared_partial_ci_upper
+#>  0.070                         
+#>  0.079                         
+#>  0.060                         
+#>  <NA>                          
 #> 
 #> Sum of squares: Type III
 #> 
@@ -211,21 +223,26 @@ factorial_anova(iq_gain ~ treatment * grade_band, data = pyg)
 # lower limits are clamped to 0.
 factorial_anova(iq_gain ~ treatment * grade_band, data = pyg, ss_type = 2)
 #> Warning: The noncentral F lower-limit clamp in ci_nc_F() fired for 4 of the effect size confidence intervals; the affected lower limits were clamped to 0. See ?ci_nc_F for the meaning of the clamp.
-#>  effect               SS    df  F_value p_value eta_squared_partial
-#>  treatment            798   1   4.37    0.0374  0.0141             
-#>  grade_band           790   1   4.33    0.0384  0.0139             
-#>  treatment:grade_band 1120  1   6.11    0.0140  0.0196             
-#>  Residuals            55900 306 <NA>    <NA>    <NA>               
-#>  eta_squared_partial_lower eta_squared_partial_upper omega_squared_partial
-#>  0                         0.0504                    0.0108               
-#>  0                         0.0501                    0.0106               
-#>  0.00071                   0.0598                    0.0162               
-#>  <NA>                      <NA>                      <NA>                 
-#>  omega_squared_partial_lower omega_squared_partial_upper
-#>  0                           0.0504                     
-#>  0                           0.0501                     
-#>  0.00071                     0.0598                     
-#>  <NA>                        <NA>                       
+#>  effect               SS        df  F_value p_value eta_squared_partial
+#>  treatment            798.257   1   4.372   0.0374  0.014              
+#>  grade_band           789.695   1   4.325   0.0384  0.014              
+#>  treatment:grade_band 1115.315  1   6.109   0.0140  0.020              
+#>  Residuals            55867.220 306 <NA>    <NA>    <NA>               
+#>  eta_squared_partial_ci_lower eta_squared_partial_ci_upper
+#>  0.000                        0.050                       
+#>  0.000                        0.050                       
+#>  0.001                        0.060                       
+#>  <NA>                         <NA>                        
+#>  omega_squared_partial omega_squared_partial_ci_lower
+#>  0.011                 0.000                         
+#>  0.011                 0.000                         
+#>  0.016                 0.001                         
+#>  <NA>                  <NA>                          
+#>  omega_squared_partial_ci_upper
+#>  0.050                         
+#>  0.050                         
+#>  0.060                         
+#>  <NA>                          
 #> 
 #> Sum of squares: Type II
 #> 

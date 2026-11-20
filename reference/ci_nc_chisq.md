@@ -9,15 +9,14 @@ population noncentrality parameter. Together with
 is one of the low-level noncentral distribution workhorses on which the
 `ci_*` confidence interval functions are built; most analyses reach it
 through those functions rather than calling it directly. The function
-was `conf_limits_nc_chisq()` in earlier builds of DMAR and is
-`conf.limits.nc.chisq()` in MBESS; it is named into the `ci_*` family
-because a confidence interval is what it computes.
+corresponds to `conf.limits.nc.chisq()` in MBESS; its name places it in
+the `ci_*` family because a confidence interval is what it computes.
 
 ## Usage
 
 ``` r
 ci_nc_chisq(
-  chi_square = NULL,
+  chisq = NULL,
   conf_level = 0.95,
   df = NULL,
   alpha_lower = NULL,
@@ -30,7 +29,7 @@ ci_nc_chisq(
 
 ## Arguments
 
-- chi_square:
+- chisq:
 
   The observed chi square value
 
@@ -74,69 +73,82 @@ A `data.frame` with one row per confidence limit and the columns:
 
 - term:
 
-  Either `"lower_limit"` or `"upper_limit"`.
+  Either `"ci_lower"` or `"ci_upper"`.
 
 - value:
 
   The noncentrality parameter at that limit. `0` when `alpha_lower = 0`
   or the lower limit is unattainable; `Inf` when `alpha_upper = 0`; `NA`
-  when the observed `chi_square` is so small that even at \\\lambda =
-  0\\ the lower-tail probability is already at or below `alpha_upper`,
-  so the upper limit is undefined (a warning is issued).
+  when the observed `chisq` is so small that even at \\\lambda = 0\\ the
+  lower-tail probability is already at or below `alpha_upper`, so the
+  upper limit is undefined (a warning is issued).
 
 - prob_less:
 
-  (`verbose = TRUE`) The probability \\P(X \le \mathtt{chi\\square})\\
-  that an observation from the noncentral chi square distribution
-  centered at the row's limit falls at or below the observed
-  `chi_square`.
+  (`verbose = TRUE`) The probability \\P(X \le \mathtt{chisq})\\ that an
+  observation from the noncentral chi square distribution centered at
+  the row's limit falls at or below the observed `chisq`.
 
 - prob_greater:
 
   (`verbose = TRUE`) The complementary probability \\P(X \ge
-  \mathtt{chi\\square})\\. By construction this equals `alpha_lower` on
-  the `lower_limit` row and \\1 - \mathtt{alpha\\upper}\\ on the
-  `upper_limit` row.
+  \mathtt{chisq})\\. By construction this equals `alpha_lower` on the
+  `ci_lower` row and \\1 - \mathtt{alpha\\upper}\\ on the `ci_upper`
+  row.
 
 ## Details
 
 Each confidence limit is the noncentrality parameter \\\lambda \ge 0\\
 of a noncentral chi square distribution with `df` degrees of freedom
-whose appropriate tail at the observed `chi_square` contains the
-requested probability:
+whose appropriate tail at the observed `chisq` contains the requested
+probability:
 
-- the lower limit satisfies \\P(X \ge \mathtt{chi\\square}) =
+- the lower limit satisfies \\P(X \ge \mathtt{chisq}) =
   \mathtt{alpha\\lower}\\;
 
-- the upper limit satisfies \\P(X \le \mathtt{chi\\square}) =
+- the upper limit satisfies \\P(X \le \mathtt{chisq}) =
   \mathtt{alpha\\upper}\\.
 
 The two conditions run in opposite directions in \\\lambda\\: the
-lower-tail probability \\P(X \le \mathtt{chi\\square})\\ is continuous
-and strictly decreasing in the noncentrality parameter, so the
-upper-tail probability \\P(X \ge \mathtt{chi\\square})\\ is continuous
-and strictly increasing in it. The lower limit is the \\\lambda\\ at
-which the upper tail has grown to `alpha_lower`, and the upper limit is
-the \\\lambda\\ at which the lower tail has shrunk to `alpha_upper`.
-Each is therefore the unique non-negative root of a one-dimensional
-equation, and both are located with
-[`uniroot`](https://rdrr.io/r/stats/uniroot.html) on the decreasing
-lower-tail scale; `extendInt` is used to widen the search bracket if
-needed.
+lower-tail probability \\P(X \le \mathtt{chisq})\\ is continuous and
+strictly decreasing in the noncentrality parameter, so the upper-tail
+probability \\P(X \ge \mathtt{chisq})\\ is continuous and strictly
+increasing in it. The lower limit is the \\\lambda\\ at which the upper
+tail has grown to `alpha_lower`, and the upper limit is the \\\lambda\\
+at which the lower tail has shrunk to `alpha_upper`. Each is therefore
+the unique non-negative root of a one-dimensional equation, and both are
+located with [`uniroot`](https://rdrr.io/r/stats/uniroot.html) on the
+decreasing lower-tail scale; `extendInt` is used to widen the search
+bracket if needed.
 
 Because the noncentrality parameter is bounded below by zero, the lower
-limit is set to zero whenever the observed `chi_square` is smaller than
-the `alpha_lower` critical value of the central chi square distribution
+limit is set to zero whenever the observed `chisq` is smaller than the
+`alpha_lower` critical value of the central chi square distribution
 (i.e., the data is consistent with \\\lambda = 0\\ at the requested
 confidence level). A warning is issued in that case, and the achieved
 probabilities reported in the output reflect the actual values at
 \\\lambda = 0\\.
 
-Symmetrically, when the observed `chi_square` is so small that even at
+Symmetrically, when the observed `chisq` is so small that even at
 \\\lambda = 0\\ the lower-tail probability is already at or below
 `alpha_upper`, no \\\lambda \ge 0\\ places as much as `alpha_upper` mass
-at or below `chi_square`; the upper limit is undefined and is returned
-as `NA`, with a warning.
+at or below `chisq`; the upper limit is undefined and is returned as
+`NA`, with a warning.
+
+For a noncentrality above \\10^5\\, the distribution function is summed
+directly as the Poisson mixture of central chi square distributions it
+is, \\P(X \le x) = \sum_j \pi_j(\lambda/2) P(\chi^2\_{df + 2j} \le x)\\,
+where \\\pi_j(\mu)\\ is the Poisson probability of \\j\\ with mean
+\\\mu\\, over the terms that carry all but \\10^{-17}\\ of the Poisson
+mass in each tail. R's
+[`pchisq()`](https://rdrr.io/r/stats/Chisquare.html) loses accuracy
+above about \\10^5\\, as its help page warns, and above about \\2 \times
+10^6\\ its series stops before it reaches the bulk of the Poisson
+weights, which once collapsed both limits to a single value below the
+statistic. Such a noncentrality arises only from a statistic in the
+millions (a large model fitted to a very large sample); at and below
+\\10^5\\ the limits are those of
+[`pchisq()`](https://rdrr.io/r/stats/Chisquare.html).
 
 ## References
 
@@ -171,15 +183,15 @@ Ken Kelley <kkelley@nd.edu>
 
 ``` r
 # A typical call to the function.
-ci_nc_chisq(chi_square = 30, conf_level = .95, df = 15)
-#>          term     value prob_less prob_greater
-#> 1 lower_limit  1.407074     0.975        0.025
-#> 2 upper_limit 38.876511     0.025        0.975
+ci_nc_chisq(chisq = 30, conf_level = .95, df = 15)
+#>       term     value prob_less prob_greater
+#> 1 ci_lower  1.407074     0.975        0.025
+#> 2 ci_upper 38.876511     0.025        0.975
 
 # A one-sided (upper) confidence interval.
-ci_nc_chisq(chi_square = 30, alpha_lower = 0, alpha_upper = .05,
+ci_nc_chisq(chisq = 30, alpha_lower = 0, alpha_upper = .05,
                      conf_level = NULL, df = 15)
-#>          term   value prob_less prob_greater
-#> 1 lower_limit  0.0000      1.00         0.00
-#> 2 upper_limit 34.6284      0.05         0.95
+#>       term   value prob_less prob_greater
+#> 1 ci_lower  0.0000      1.00         0.00
+#> 2 ci_upper 34.6284      0.05         0.95
 ```

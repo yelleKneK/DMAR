@@ -136,7 +136,7 @@ Ken Kelley <kkelley@nd.edu>
 # per-comparison rate the adjustment spends on each test.
 cv_bonferroni_f(alpha_level = .05, df_denominator = 20, n_comparisons = 5)
 #>  term     value area_less area_greater
-#>  upper_cv 8.1   0.99      0.01        
+#>  upper_cv 8.096 0.990     0.010       
 
 # It is the F critical value read at alpha / C.
 cv_bonferroni_f(alpha_level = .05, df_denominator = 20, n_comparisons = 5,

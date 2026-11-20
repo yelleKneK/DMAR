@@ -14,42 +14,43 @@ unequal.
 
 ``` r
 simulate_ancova_data(
-  mu_y,
-  mu_x,
-  sigma_y,
-  sigma_x,
-  rho,
+  true_mean_Y,
+  true_mean_X,
+  true_sd_Y,
+  true_sd_X,
+  true_cor,
   a,
-  n,
-  randomized = TRUE
+  n_per_group,
+  randomized = TRUE,
+  seed = NULL
 )
 ```
 
 ## Arguments
 
-- mu_y:
+- true_mean_Y:
 
   A numeric vector of length `a` giving the population mean of \\Y\\ in
   each group.
 
-- mu_x:
+- true_mean_X:
 
   When `randomized = TRUE`, a single number giving the common population
   mean of \\X\\ across all groups. When `randomized = FALSE`, a numeric
   vector of length `a` giving the population covariate mean in each
   group.
 
-- sigma_y:
+- true_sd_Y:
 
   The population standard deviation of \\Y\\ (assumed common across
   groups).
 
-- sigma_x:
+- true_sd_X:
 
   The population standard deviation of \\X\\ (assumed common across
   groups).
 
-- rho:
+- true_cor:
 
   The population correlation between \\Y\\ and \\X\\. When
   `randomized = TRUE`, must be a single number (see Details). When
@@ -65,7 +66,7 @@ simulate_ancova_data(
   e.g., classrooms or schools randomly drawn from a population, the
   convention in this package is to use `J` instead.)
 
-- n:
+- n_per_group:
 
   A single number (equal sample size per group) or a numeric vector of
   length `a` giving the sample size in each group.
@@ -76,6 +77,13 @@ simulate_ancova_data(
   assignment of subjects to groups, so that the population covariate
   mean is the same in every group). `FALSE` for a non-randomized /
   preexisting-groups design.
+
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
 
 ## Value
 
@@ -107,14 +115,15 @@ distribution with mean \\(\mu\_{Y,j}, \mu\_{X,j})\\ and covariance
 \$\$\Sigma_j = \begin{pmatrix} \sigma_Y^2 & \rho_j\\\sigma_Y\\\sigma_X
 \\ \rho_j\\\sigma_Y\\\sigma_X & \sigma_X^2 \end{pmatrix}.\$\$
 
-**Why `rho` must be a single number when `randomized = TRUE`.** Random
-assignment forms each group as an exchangeable random sample from the
-same population. The bivariate distribution of \\(Y, X)\\ is therefore
-the same in every group, including the correlation. Allowing `rho` to
-differ across groups would silently break that interpretation and
-produce data that no randomized design could plausibly have generated.
-The function therefore stops with an error in that case; use
-`randomized = FALSE` if you genuinely want group-specific correlations.
+**Why `true_cor` must be a single number when `randomized = TRUE`.**
+Random assignment forms each group as an exchangeable random sample from
+the same population. The bivariate distribution of \\(Y, X)\\ is
+therefore the same in every group, including the correlation. Allowing
+`true_cor` to differ across groups would silently break that
+interpretation and produce data that no randomized design could
+plausibly have generated. The function therefore stops with an error in
+that case; use `randomized = FALSE` if you genuinely want group-specific
+correlations.
 
 **Convention on group labels.** The argument `a` is used here (and
 throughout DMAR's experimental-design functions) for the number of
@@ -149,13 +158,13 @@ Ken Kelley <kkelley@nd.edu>
 # 1. Randomized design, two groups, equal n.
 set.seed(113)
 simple <- simulate_ancova_data(
-  mu_y       = c(3, 5),
-  mu_x       = 10,
-  sigma_y    = 1,
-  sigma_x    = 2,
-  rho        = 0.8,
+  true_mean_Y = c(3, 5),
+  true_mean_X = 10,
+  true_sd_Y    = 1,
+  true_sd_X    = 2,
+  true_cor   = 0.8,
   a          = 2,
-  n          = 20
+  n_per_group = 20
 )
 head(simple)
 #>   group         y         x
@@ -167,23 +176,23 @@ head(simple)
 #> 6     1 0.6000121  6.949545
 
 # 2. Four preexisting groups with different correlations and unequal n.
-#    The first two groups share rho = 0.30; the second two share a larger
-#    rho = 0.60. The four groups are not used in the data-generation
-#    machinery beyond their per-group means and correlations -- they are
-#    just four distinct populations being sampled. In a downstream
+#    The first two groups share true_cor = 0.30; the second two share a larger
+#    true_cor = 0.60. The four groups enter the data generating mechanism
+#    only through their per-group means and correlations, as four
+#    distinct populations being sampled. In a downstream
 #    analysis these four groups could be cross-classified as a 2 x 2
 #    factorial design (e.g., the first factor distinguishing groups 1-2
 #    from groups 3-4, and the second factor distinguishing groups 1, 3
 #    from groups 2, 4) and analyzed via factorial ANCOVA.
 set.seed(113)
 preexisting <- simulate_ancova_data(
-  mu_y       = c(50, 55, 60, 65),
-  mu_x       = c(10, 12, 11, 13),
-  sigma_y    = 8,
-  sigma_x    = 3,
-  rho        = c(0.30, 0.30, 0.60, 0.60),
+  true_mean_Y = c(50, 55, 60, 65),
+  true_mean_X = c(10, 12, 11, 13),
+  true_sd_Y    = 8,
+  true_sd_X    = 3,
+  true_cor   = c(0.30, 0.30, 0.60, 0.60),
   a          = 4,
-  n          = c(40, 35, 45, 30),
+  n_per_group = c(40, 35, 45, 30),
   randomized = FALSE
 )
 aggregate(cbind(y, x) ~ group, data = preexisting,

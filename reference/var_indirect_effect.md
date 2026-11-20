@@ -11,17 +11,25 @@ the user can see the relative contributions of the higher-order terms.
 ## Usage
 
 ``` r
-var_indirect_effect(a, b, var_a, var_b, cov_ab = 0)
+var_indirect_effect(
+  reg_coef_a,
+  reg_coef_b,
+  var_reg_coef_a,
+  var_reg_coef_b,
+  cov_reg_coef_a_b = 0
+)
 ```
 
 ## Arguments
 
-- a, b:
+- reg_coef_a, reg_coef_b:
 
-  Anticipated population (or estimated) regression coefficients for \\X
-  \to M\\ and \\M \to Y\\ (typically on the standardized scale).
+  The regression coefficients \\a\\ of \\X \to M\\ and \\b\\ of \\M \to
+  Y\\: anticipated population values or estimates, on whatever scale the
+  analysis uses (raw or standardized); the variances below must be on
+  the same scale.
 
-- var_a, var_b:
+- var_reg_coef_a, var_reg_coef_b:
 
   Variances (squared standard errors) of \\\hat a\\ and \\\hat b\\. For
   standardized regression with no covariates, \\\mathrm{Var}(\hat a)
@@ -30,7 +38,7 @@ var_indirect_effect(a, b, var_a, var_b, cov_ab = 0)
   accounting for the correlation the \\a\\ path induces between the
   predictors of \\Y\\.
 
-- cov_ab:
+- cov_reg_coef_a_b:
 
   Optional covariance between \\\hat a\\ and \\\hat b\\. Defaults to 0
   (the assumption underlying the standard Sobel formula). In practice
@@ -44,6 +52,11 @@ A `data.frame` with rows for the four variance formulas; columns are
 `term` and `value`.
 
 ## Details
+
+In the formulas below \\a\\ and \\b\\ are `reg_coef_a` and `reg_coef_b`,
+\\\mathrm{Var}(\hat a)\\ and \\\mathrm{Var}(\hat b)\\ are
+`var_reg_coef_a` and `var_reg_coef_b`, and \\\mathrm{Cov}(\hat a, \hat
+b)\\ is `cov_reg_coef_a_b`.
 
 **Sobel (1982) first-order.** The delta method variance of \\\hat a \hat
 b\\ under independent \\\hat a\\, \\\hat b\\ is
@@ -92,7 +105,7 @@ Goodman, L. A. (1960). On the exact variance of products. *Journal of
 the American Statistical Association, 55*(292), 708–713.
 
 Lachowicz, M. J., Preacher, K. J., & Kelley, K. (2018). A novel measure
-of effect size for mediation analysis. *Psychological Methods, 23*,
+of effect size for mediation analysis. *Psychological Methods, 23*(2),
 244–261. [doi:10.1037/met0000165](https://doi.org/10.1037/met0000165)
 
 MacKinnon, D. P., Lockwood, C. M., Hoffman, J. M., West, S. G., &
@@ -115,7 +128,7 @@ effects in structural equation models. *Sociological Methodology, 13*,
 
 Tofighi, D., & Kelley, K. (2020). Improved inference in mediation
 analysis: Introducing the model-based constrained optimization
-procedure. *Psychological Methods, 25*, 496–515.
+procedure. *Psychological Methods, 25*(4), 496–515.
 [doi:10.1037/met0000259](https://doi.org/10.1037/met0000259)
 
 ## See also
@@ -138,20 +151,23 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. a = 0.40, b = 0.40, var_a = 0.02, var_b = 0.02, no covariance:
-var_indirect_effect(a = 0.40, b = 0.40, var_a = 0.02, var_b = 0.02)
-#>  term                   value 
-#>  var_sobel              0.0064
-#>  var_aroian             0.0068
-#>  var_goodman            0.006 
-#>  var_delta_second_order 0.0064
+# 1. Coefficients of 0.40 for both paths, each with a sampling variance
+#    of 0.02, and no covariance:
+var_indirect_effect(reg_coef_a = 0.40, reg_coef_b = 0.40,
+                    var_reg_coef_a = 0.02, var_reg_coef_b = 0.02)
+#>  term                   value
+#>  var_sobel              0.006
+#>  var_aroian             0.007
+#>  var_goodman            0.006
+#>  var_delta_second_order 0.006
 
 # 2. With a positive covariance between a-hat and b-hat:
-var_indirect_effect(a = 0.40, b = 0.40,
-                     var_a = 0.02, var_b = 0.02, cov_ab = 0.005)
-#>  term                   value 
-#>  var_sobel              0.0064
-#>  var_aroian             0.0068
-#>  var_goodman            0.006 
-#>  var_delta_second_order 0.008 
+var_indirect_effect(reg_coef_a = 0.40, reg_coef_b = 0.40,
+                    var_reg_coef_a = 0.02, var_reg_coef_b = 0.02,
+                    cov_reg_coef_a_b = 0.005)
+#>  term                   value
+#>  var_sobel              0.006
+#>  var_aroian             0.007
+#>  var_goodman            0.006
+#>  var_delta_second_order 0.008
 ```

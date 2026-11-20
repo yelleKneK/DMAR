@@ -26,7 +26,10 @@ glance(x, ...)
 
 ## Value
 
-A one-row `data.frame` in broom convention.
+A one-row `data.frame` in broom convention, with `alpha_lower` and
+`alpha_upper` after `conf_level` for an interval whose tail areas differ
+(see
+[`dmar_tidiers`](https://yelleknek.github.io/DMAR/reference/dmar_tidiers.md)).
 
 ## Author
 

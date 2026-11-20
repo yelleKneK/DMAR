@@ -67,6 +67,22 @@ standardized mean difference is not often reported, at least at the
 present time, it is nevertheless made available to those who are
 interested in calculating this quantity.
 
+The correction multiplies the estimate by \\J(\nu) = \Gamma(\nu/2) /
+\\\sqrt{\nu/2}\\\Gamma((\nu - 1)/2)\\\\ with \\\nu = n_C - 1\\ degrees
+of freedom, the degrees of freedom of the control group standard
+deviation. \\J(1) = 0\\: on 1 degree of freedom the mean of the estimate
+does not exist, so no multiple of it is unbiased, and the corrected
+value would be 0 whatever the data. A call with `unbiased = TRUE` and a
+control group of 2 is therefore refused, with a condition of class
+`dmar_hedges_correction_undefined` (see
+[`dmar_metadata`](https://yelleknek.github.io/DMAR/reference/dmar_metadata.md)).
+A control group of 1 given with summary statistics is refused with the
+same class for another reason: \\J(0)\\ is not defined, because one
+observation has no standard deviation. Use `unbiased = FALSE`, or a
+control group of at least 3. `unbiased = TRUE` from summary statistics
+without `n_C` is refused with a condition of class
+`dmar_argument_invalid`.
+
 ## References
 
 Glass, G. V. (1976). Primary, secondary, and meta-analysis of research.
@@ -104,7 +120,7 @@ g.T <- rnorm(n = 25, mean = .5, sd = 1)
 g.C <- rnorm(n = 25, mean = 0, sd = 1)
 smd_c(group_T = g.T, group_C = g.C)
 #>  term  value
-#>  smd_c 0.37 
+#>  smd_c 0.370
 
 M.T <- .66745
 M.C <- .24878
@@ -112,7 +128,7 @@ sd.c <- 1.1311
 n.c <- 25
 smd_c(mean_T = M.T, mean_C = M.C, s_C = sd.c)
 #>  term  value
-#>  smd_c 0.37 
+#>  smd_c 0.370
 smd_c(mean_T = M.T, mean_C = M.C, s_C = sd.c, n_C = n.c, unbiased = TRUE)
 #>  term  value
 #>  smd_c 0.358

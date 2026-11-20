@@ -12,10 +12,10 @@ noncentral *t* approach, in whichever metric the inputs are supplied.
 
 ``` r
 ci_reg_coef(
-  b_j,
-  SE_b_j = NULL,
-  s_Y = NULL,
-  s_X = NULL,
+  reg_coef_j = NULL,
+  se_reg_coef_j = NULL,
+  sd_Y = NULL,
+  sd_X = NULL,
   N,
   p,
   R2_Y_X = NULL,
@@ -25,26 +25,28 @@ ci_reg_coef(
   t_value = NULL,
   alpha_lower = NULL,
   alpha_upper = NULL,
-  noncentral = FALSE,
-  ...
+  noncentral = FALSE
 )
 ```
 
 ## Arguments
 
-- b_j:
+- reg_coef_j:
 
-  Value of the regression coefficient for the *j*th predictor variable
+  Value of the regression coefficient for the *j*th predictor variable,
+  or `NULL` (the default) when the other inputs determine it: `t_value`
+  with `R2_Y_X` and `R2_j_X_without_j`, or the three squared multiple
+  correlations, which fix its magnitude but not its sign (see Details)
 
-- SE_b_j:
+- se_reg_coef_j:
 
   Standard error for the *j*th predictor variable
 
-- s_Y:
+- sd_Y:
 
   Standard deviation of *Y*, the dependent variable
 
-- s_X:
+- sd_X:
 
   Standard deviation of \\X_j\\, the predictor variable of interest
 
@@ -70,7 +72,8 @@ ci_reg_coef(
 - conf_level:
 
   Desired level of confidence for the computed interval (i.e., 1 - the
-  Type I error rate)
+  Type I error rate). A level above .999999998, whose tail areas are
+  below 1e-9, is refused
 
 - R2_Y_X_without_j:
 
@@ -89,24 +92,28 @@ ci_reg_coef(
 
 - alpha_upper:
 
-  The Type I error rate for the upper confidence interval limit
+  The Type I error rate for the upper confidence interval limit. The
+  table records the coverage, `1 - alpha_lower - alpha_upper`, as its
+  level and, when the two tail areas differ, the areas themselves, which
+  the line beneath the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound. A
+  nonzero tail area below 1e-9 is refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - noncentral:
 
   `TRUE` or `FALSE`, specifying whether or not the noncentral approach
   to confidence intervals should be used
 
-- ...:
-
-  Optional additional specifications for nested functions
-
 ## Value
 
 A 3-row `data.frame` with columns `term`, `value`, `prob_less`, and
-`prob_greater`. The rows are ordered `"lower_limit"`, `"reg_coef"` (the
-regression coefficient point estimate), and `"upper_limit"`, so the
-point estimate sits between its confidence limits. The lower and upper
-rows give the confidence limits on the regression coefficient. The
+`prob_greater`. The rows are ordered `"ci_lower"`, `"reg_coef"` (the
+regression coefficient point estimate), and `"ci_upper"`, so the point
+estimate sits between its confidence limits. The lower and upper rows
+give the confidence limits on the regression coefficient. The
 `prob_less` and `prob_greater` columns report the achieved tail
 probabilities at each limit when the noncentral t method is used (they
 are `NA` for the `"reg_coef"` estimate row).
@@ -114,15 +121,55 @@ are `NA` for the `"reg_coef"` estimate row).
 ## Details
 
 For standardized variables, do not specify the standard deviation of the
-variables and input the standardized regression coefficient for `b_j`.
+variables and input the standardized regression coefficient for
+`reg_coef_j`.
 
-When `b_j` is reconstructed from squared multiple correlations (that is,
-from `R2_Y_X`, `R2_Y_X_without_j`, and `R2_j_X_without_j` rather than a
-supplied `b_j`, `SE_b_j`, or `t_value`), only the magnitude of the
-coefficient is identifiable; its sign is not. The positive root is
-returned and a warning is issued. If the coefficient is negative, negate
-the point estimate and swap and negate the confidence limits, or supply
-`b_j` directly.
+**Exactness.** For a coefficient in the units of the data, the central
+interval (`noncentral = FALSE`, the default) is exact under normal
+errors given the values of the predictors, and so for random predictors
+as well. The noncentral interval multiplies the confidence limits for
+the noncentrality parameter by the estimated standard error, while the
+noncentrality parameter is the coefficient divided by its population
+standard error, so that interval is approximate on either scale. In a
+simulation with one predictor held fixed and normal errors (4,000
+samples per condition, *N* of 15, 40, and 200, Monte Carlo standard
+errors of .001 to .004), the 95 percent noncentral interval for a
+coefficient in the units of the data covered .944 to .955 when the
+noncentrality parameter was 1, and from .961 (*N* = 200) to .993 (*N* =
+15) when it was 7; the central interval covered .943 to .953 in every
+condition.
+
+**Standardized data.** For a coefficient of standardized data, or one
+rescaled by the sample standard deviations, the standard error treats
+those standard deviations as fixed constants (Kelley & Maxwell, 2003,
+pp. 315–316). The standard deviation of *Y* varies from sample to sample
+in every design, and those of the predictors vary as well when the
+predictors are random, so this standard error is approximate either way
+and the interval does not have exactly its nominal coverage. In the
+simulation of multivariate normal data described in
+[`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md), the
+central 95 percent interval (the default here) covered the population
+standardized coefficient .957 to .993 of the time with a single random
+predictor correlated .3 to .7 with *Y*, .959 to .967 for coefficients of
+.34 to .52 among two to four random predictors correlated positively
+with *Y* and with one another and explaining less than 60 percent of its
+variance, and .952 to .956 in the conditions whose coefficient was 0 or
+near it, but only .882 to .952 for suppressors, and .938 and .881 with
+two uncorrelated predictors that explained 72 and 90 percent of the
+variance of *Y*. With the values of the predictors held fixed it covered
+.955 to .989 whenever the coefficient was not 0. The noncentral
+interval, the one
+[`ci_src`](https://yelleknek.github.io/DMAR/reference/ci_src.md)
+reports, covered more in every condition except those whose coefficient
+was 0 or near it, where the two agreed within Monte Carlo error.
+
+When `reg_coef_j` is reconstructed from squared multiple correlations
+(that is, from `R2_Y_X`, `R2_Y_X_without_j`, and `R2_j_X_without_j`
+rather than a supplied `reg_coef_j`, `se_reg_coef_j`, or `t_value`),
+only the magnitude of the coefficient is identifiable; its sign is not.
+The positive root is returned and a warning is issued. If the
+coefficient is negative, negate the point estimate and swap and negate
+the confidence limits, or supply `reg_coef_j` directly.
 
 ## Note
 
@@ -178,10 +225,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
 [`ci_sc()`](https://yelleknek.github.io/DMAR/reference/ci_sc.md),
@@ -202,11 +250,11 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-ci_reg_coef(b_j = 0.61319, SE_b_j = 0.16098, N = 30, p = 6)
-#>  term        value prob_less prob_greater
-#>  lower_limit 0.28  0.025     0.975       
-#>  reg_coef    0.613 <NA>      <NA>        
-#>  upper_limit 0.946 0.975     0.025       
+ci_reg_coef(reg_coef_j = 0.61319, se_reg_coef_j = 0.16098, N = 30, p = 6)
+#>  term     value prob_less prob_greater
+#>  ci_lower 0.280 0.025     0.975       
+#>  reg_coef 0.613 <NA>      <NA>        
+#>  ci_upper 0.946 0.975     0.025       
 #> 
 #> Confidence level: 95%
 ```

@@ -16,59 +16,69 @@ building and trimming a scale.
 
 ``` r
 irt_information(
-  a,
-  b = NULL,
+  discrimination,
+  threshold = NULL,
   item = NULL,
-  theta = seq(-4, 4, length.out = 81),
+  trait_value = seq(-4, 4, length.out = 81),
   grm = NULL
 )
 ```
 
 ## Arguments
 
-- a:
+- discrimination:
 
-  Discriminations, a numeric vector of positive values. Supply either
-  one value per item (named with the item names, or in the order the
-  items first appear in `item`) or one value per boundary row (constant
-  within an item). Not used when `grm` is supplied.
+  Discriminations (the \\a_i\\ of Details), a numeric vector of positive
+  values. Supply either one value per item (named with the item names,
+  or in the order the items first appear in `item`) or one value per
+  boundary row (constant within an item). Not used when `grm` is
+  supplied.
 
-- b:
+- threshold:
 
-  Boundary locations (category thresholds), a numeric vector with one
-  element per category boundary. An item with \\m\\ categories has \\m -
-  1\\ boundaries, which the model requires to be in ascending order
-  within the item. Not used when `grm` is supplied.
+  Boundary locations (category thresholds, the \\b\_{ik}\\ of Details),
+  a numeric vector with one element per category boundary. An item with
+  \\m\\ categories has \\m - 1\\ boundaries, which the model requires to
+  be in ascending order within the item. Not used when `grm` is
+  supplied.
 
 - item:
 
-  Item labels, a character or factor vector the same length as `b`
-  naming the item each boundary belongs to. When `NULL` (default), each
-  element of `b` is treated as its own dichotomous item, named `item_1`,
-  `item_2`, and so on, and `a` must then have the same length as `b`.
-  Not used when `grm` is supplied.
+  Item labels, a character or factor vector the same length as
+  `threshold` naming the item each boundary belongs to. When `NULL`
+  (default), each element of `threshold` is treated as its own
+  dichotomous item, named `item_1`, `item_2`, and so on, and
+  `discrimination` must then have the same length as `threshold`. Not
+  used when `grm` is supplied.
 
-- theta:
+- trait_value:
 
-  Latent trait values at which to evaluate the information functions.
-  Any finite numeric vector; the default, `seq(-4, 4, length.out = 81)`,
-  covers the range in which almost all of a standard normal trait
-  distribution falls, in steps of 0.1.
+  Latent trait values (the \\\theta\\ of Details) at which to evaluate
+  the information functions. Any finite numeric vector; the default,
+  `seq(-4, 4, length.out = 81)`, covers the range in which almost all of
+  a standard normal trait distribution falls, in steps of 0.1.
 
 - grm:
 
   Optionally, the result of
   [`irt_grm()`](https://yelleknek.github.io/DMAR/reference/irt_grm.md):
   a `data.frame` with one row per item and category boundary and columns
-  `item`, `a`, and `b` (a `category` column, when present, orders the
-  boundaries within an item). Supply this or the parameters, not both.
+  `item`; `a`, the item discrimination, read as `discrimination`; and
+  `b`, the boundary location (the item response theory threshold) of
+  each category boundary on the \\\theta\\ scale, read as `threshold` (a
+  `category` column, when present, orders the boundaries within an
+  item). The column `a` is taken to be in the normal ogive metric,
+  unless the table's `"metric"` attribute is `"logistic"`, as
+  `irt_grm(metric = "logistic")` records it; that `a` is divided by
+  1.702 before it is used. The column `b` is the same in either metric.
+  Supply this or the parameters, not both.
 
 ## Value
 
-A `data.frame` (class `dmar_tbl`) with one row per value of `theta` and
-columns:
+A `data.frame` (class `dmar_tbl`) with one row per value of
+`trait_value` and columns:
 
-- `theta`:
+- `trait_value`:
 
   The latent trait value, as supplied.
 
@@ -87,45 +97,47 @@ The result carries these attributes:
 
 - `"item_information"`:
 
-  A numeric matrix of item information with `theta` in the rows (row
-  names are the `theta` values) and items in the columns (column names
-  are the item names). Its row sums are `test_information`.
+  A numeric matrix of item information with `trait_value` in the rows
+  (row names are the `trait_value` values) and items in the columns
+  (column names are the item names). Its row sums are
+  `test_information`.
 
 - `"item"`:
 
   The item names, in the order they appear in the columns of
   `"item_information"`.
 
-- `"a"`:
+- `"discrimination"`:
 
   The discrimination used for each item, a numeric vector named by item.
 
-- `"b"`:
+- `"threshold"`:
 
   The boundary locations used, a numeric vector in item order and,
   within an item, in ascending order, named by the item each boundary
   belongs to.
 
-- `"theta_max_information"`:
+- `"trait_value_max_information"`:
 
-  The value of `theta` at which test information peaks on the supplied
-  grid (the first such value if there are ties). It is a grid value, not
-  the result of an optimization, so a finer `theta` locates the peak
-  more sharply.
+  The value of `trait_value` at which test information peaks on the
+  supplied grid (the first such value if there are ties). It is a grid
+  value, not the result of an optimization, so a finer `trait_value`
+  locates the peak more sharply.
 
 ## Details
 
-For item *i* with discrimination \\a_i\\ and ordered boundary locations
-\\b\_{i1} \< b\_{i2} \< \cdots \< b\_{i,m-1}\\ for *m* categories, the
-normal ogive graded response model of Samejima (1969) defines the
-boundary response function \$\$P^\*\_{ik}(\theta) = \Phi\[a_i (\theta -
-b\_{ik})\],\$\$ the probability of responding *above* boundary *k*, that
-is, in any category higher than the *k*th, with the conventions
-\\P^\*\_{i0} = 1\\ and \\P^\*\_{im} = 0\\. The category response
-function is the difference of adjacent boundary functions,
-\$\$P\_{ik}(\theta) = P^\*\_{i,k-1}(\theta) - P^\*\_{ik}(\theta),\$\$
-and differentiating with respect to \\\theta\\ gives
-\$\$P'\_{ik}(\theta) = a_i \\\phi\[a_i (\theta - b\_{i,k-1})\] -
+For item *i* with discrimination \\a_i\\ (`discrimination`) and ordered
+boundary locations \\b\_{i1} \< b\_{i2} \< \cdots \< b\_{i,m-1}\\
+(`threshold`) for *m* categories, at latent trait value \\\theta\\
+(`trait_value`), the normal ogive graded response model of Samejima
+(1969) defines the boundary response function \$\$P^\*\_{ik}(\theta) =
+\Phi\[a_i (\theta - b\_{ik})\],\$\$ the probability of responding
+*above* boundary *k*, that is, in any category higher than the *k*th,
+with the conventions \\P^\*\_{i0} = 1\\ and \\P^\*\_{im} = 0\\. The
+category response function is the difference of adjacent boundary
+functions, \$\$P\_{ik}(\theta) = P^\*\_{i,k-1}(\theta) -
+P^\*\_{ik}(\theta),\$\$ and differentiating with respect to \\\theta\\
+gives \$\$P'\_{ik}(\theta) = a_i \\\phi\[a_i (\theta - b\_{i,k-1})\] -
 \phi\[a_i (\theta - b\_{ik})\]\\,\$\$ where \\\phi\\ is the standard
 normal density and the density terms vanish at the two extreme
 categories (there is no \\b\_{i0}\\ and no \\b\_{im}\\). Item
@@ -140,7 +152,7 @@ across items, so an item's contribution can be read off directly and a
 pool can be assembled to cover a targeted range. And the reciprocal
 relation to the squared standard error means the peak of the curve
 locates where the scale estimates the trait most precisely, reported
-here as the `"theta_max_information"` attribute.
+here as the `"trait_value_max_information"` attribute.
 
 For a dichotomous item the model reduces to the two parameter normal
 ogive, whose information has the closed form \$\$I_i(\theta) =
@@ -200,17 +212,29 @@ Other multivariate and latent variable methods:
 [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md),
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
 [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
-[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md),
+[`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md),
 [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
+[`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
 [`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md),
 [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md),
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
 [`dmacs()`](https://yelleknek.github.io/DMAR/reference/dmacs.md),
 [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+[`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+[`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+[`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+[`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
 [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md),
 [`irt_grm()`](https://yelleknek.github.io/DMAR/reference/irt_grm.md),
 [`measurement_alignment()`](https://yelleknek.github.io/DMAR/reference/measurement_alignment.md),
 [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
 [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md),
+[`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
 [`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)
 
 ## Author
@@ -223,21 +247,21 @@ Ken Kelley <kkelley@nd.edu>
 # Three items: a five-category rating item and two dichotomous items.
 # The discriminations are named, so they are matched to the item labels.
 info <- irt_information(
-  a = c(mood_1 = 1.4, mood_2 = 0.9, mood_3 = 1.1),
-  b = c(-1.5, -0.5, 0.5, 1.5, 0.0, 0.8),
+  discrimination = c(mood_1 = 1.4, mood_2 = 0.9, mood_3 = 1.1),
+  threshold = c(-1.5, -0.5, 0.5, 1.5, 0.0, 0.8),
   item = c(rep("mood_1", 4), "mood_2", "mood_3")
 )
 head(info)
-#>  theta test_information se  
-#>  -4    0.00833          11  
-#>  -3.9  0.0126           8.91
-#>  -3.8  0.0187           7.31
-#>  -3.7  0.0275           6.04
-#>  -3.6  0.0396           5.03
-#>  -3.5  0.056            4.23
+#>  trait_value test_information se    
+#>  -4.000      0.008            10.958
+#>  -3.900      0.013            8.914 
+#>  -3.800      0.019            7.305 
+#>  -3.700      0.027            6.035 
+#>  -3.600      0.040            5.028 
+#>  -3.500      0.056            4.225 
 
 # Where does this three-item set measure most precisely?
-attr(info, "theta_max_information")
+attr(info, "trait_value_max_information")
 #> [1] 0.5
 
 # Each item's contribution; the rows sum to the test information.
@@ -251,7 +275,8 @@ head(attr(info, "item_information"))
 #> -3.5 0.048230063 0.007753454 3.295750e-05
 
 # A dichotomous item matches the two parameter normal ogive closed form.
-one <- irt_information(a = 1.5, b = 0.25, theta = c(-1, 0, 1))
+one <- irt_information(discrimination = 1.5, threshold = 0.25,
+                       trait_value = c(-1, 0, 1))
 z <- 1.5 * (c(-1, 0, 1) - 0.25)
 1.5^2 * dnorm(z)^2 / (pnorm(z) * (1 - pnorm(z)))
 #> [1] 0.3612187 1.3607816 0.8913543

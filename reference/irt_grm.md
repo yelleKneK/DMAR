@@ -2,8 +2,13 @@
 
 Estimates Samejima's (1969) graded response model for a set of ordered
 categorical items (Likert items, symptom severity ratings, rubric scored
-performance items) and reports each item's discrimination and its
-category boundary locations. The model is fitted as the single-factor
+performance items) and reports the item parameters in two columns: `a`,
+the item's discrimination, in the normal ogive metric by default or the
+logistic metric on request (`metric`), and `b`, the boundary location
+(the threshold, in item response theory terms) of each of the item's
+category boundaries, the value of the latent trait \\\theta\\, on the
+scale of a standard normal trait, at which a response above that
+boundary has probability .5. The model is fitted as the single-factor
 categorical factor analysis model it provably is (Takane and de Leeuw,
 1987), using lavaan's categorical estimator on the polychoric
 correlations, and the solution is then converted to the normal ogive (or
@@ -20,7 +25,8 @@ irt_grm(
   data,
   items = NULL,
   estimator = "WLSMV",
-  metric = c("normal_ogive", "logistic")
+  metric = c("normal_ogive", "logistic"),
+  rmsea_conf_level = 0.9
 )
 ```
 
@@ -67,6 +73,16 @@ irt_grm(
   returned table has the same columns and the same number of rows either
   way. The boundary locations `b` are identical under the two metrics.
 
+- rmsea_conf_level:
+
+  Confidence level of the RMSEA interval in the `"fit_measures"`
+  attribute (its `rmsea.ci.lower` and `rmsea.ci.upper`, with the level
+  in `rmsea.ci.level`). Defaults to 0.90, the conventional level, whose
+  limits decide the tests of close and not close fit at .05 (see
+  [`sem_fit_measures`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md)),
+  and the level lavaan uses; `rmsea_conf_level = 0.95` gives a 95
+  percent interval. The table itself has no intervals.
+
 ## Value
 
 A `data.frame` (class `dmar_tbl`) with one row per item and category
@@ -93,28 +109,40 @@ boundary and the columns
 
 - `tau`:
 
-  Standardized threshold \\\tau\_{ik}\\.
+  Standardized threshold \\\tau\_{ik}\\ of the factor analysis
+  parameterization: the cut on the item's latent response variate
+  \\X_i^{\*}\\, not the item response theory threshold `b`.
 
 - `a`:
 
-  Discrimination in the metric named by `metric`, repeated across the
-  item's boundaries.
+  The item discrimination \\a_i\\, the slope parameter of the item's
+  boundary response functions (the slope of each function at its
+  boundary location is proportional to it), repeated across the item's
+  boundaries. It is in the normal ogive metric under the default
+  `metric = "normal_ogive"` and in the logistic metric, 1.702 times the
+  normal ogive value, under `metric = "logistic"`; the `"metric"`
+  attribute records which.
 
 - `b`:
 
-  Boundary location \\b\_{ik}\\ on the \\\theta\\ scale.
+  The boundary location \\b\_{ik}\\ of category boundary \\k\\ of the
+  item, the item response theory threshold of that boundary: the value
+  of \\\theta\\, in the metric of a standard normal latent trait (mean
+  0, standard deviation 1), at which the probability of responding above
+  boundary \\k\\ is .5. It is the same under either `metric`.
 
 The attributes are `"fit"` (the fitted lavaan object), `"fit_measures"`
 (the full named numeric vector from
 [`lavaan::fitMeasures`](https://rdrr.io/pkg/lavaan/man/fitMeasures.html),
-unrounded), `"metric"` (the reported discrimination metric),
-`"estimator"`, `"n_categories"` (named integer vector of the number of
-observed categories per item), `"N"` (the analyzed sample size),
-`"factor_sign_flipped"` (a single logical recording whether the
-direction of the latent variable was reversed to satisfy the sign
-convention described in Details), and whichever of `"a_logistic"` or
-`"a_normal_ogive"` was not reported in the `a` column (a named numeric
-vector, one element per item).
+unrounded, with the RMSEA interval at `rmsea_conf_level`),
+`"rmsea_conf_level"` (that level), `"metric"` (the reported
+discrimination metric), `"estimator"`, `"n_categories"` (named integer
+vector of the number of observed categories per item), `"N"` (the
+analyzed sample size), `"factor_sign_flipped"` (a single logical
+recording whether the direction of the latent variable was reversed to
+satisfy the sign convention described in Details), and whichever of
+`"a_logistic"` or `"a_normal_ogive"` was not reported in the `a` column
+(a named numeric vector, one element per item).
 
 ## Details
 
@@ -207,9 +235,10 @@ and agree closely in practice, but they are different estimators and
 will not return identical numbers on a finite sample. Limited
 information estimation scales well to many items and brings the whole
 apparatus of factor analysis fit assessment (CFI, TLI, RMSEA) along with
-it; the fit measures are returned on the `"fit_measures"` attribute and
-the lavaan object itself on `"fit"`, so any lavaan accessor can be
-applied to the result.
+it; the fit measures, the RMSEA interval at `rmsea_conf_level` among
+them, are returned on the `"fit_measures"` attribute and the lavaan
+object itself on `"fit"`, so any lavaan accessor can be applied to the
+result.
 
 The model is unidimensional by construction. A standardized loading at
 or beyond one is an improper (Heywood) solution: the implied
@@ -220,6 +249,11 @@ number.
 This function requires lavaan to be installed.
 
 ## References
+
+Browne, M. W. (1984). Asymptotically distribution-free methods for the
+analysis of covariance structures. *British Journal of Mathematical and
+Statistical Psychology, 37*(1), 62–83.
+[doi:10.1111/j.2044-8317.1984.tb00789.x](https://doi.org/10.1111/j.2044-8317.1984.tb00789.x)
 
 Camilli, G. (1994). Teacher's corner: Origin of the scaling constant *d*
 = 1.7 in item response theory. *Journal of Educational and Behavioral
@@ -238,6 +272,11 @@ analytic and item response theory models. *Structural Equation Modeling,
 Muthén, B. (1984). A general structural equation model with dichotomous,
 ordered categorical, and continuous latent variable indicators.
 *Psychometrika, 49*(1), 115–132.
+
+Muthén, B., du Toit, S. H. C., & Spisic, D. (1997). *Robust inference
+using weighted least squares and quadratic estimating equations in
+latent variable modeling with categorical and continuous outcomes*.
+Unpublished technical report.
 
 Samejima, F. (1969). Estimation of latent ability using a response
 pattern of graded scores. *Psychometrika Monograph Supplement, 34*(4,
@@ -264,17 +303,29 @@ Other multivariate and latent variable methods:
 [`bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/bifactor_indices.md),
 [`cfa_1()`](https://yelleknek.github.io/DMAR/reference/cfa_1.md),
 [`cfa_2()`](https://yelleknek.github.io/DMAR/reference/cfa_2.md),
-[`cfa_k()`](https://yelleknek.github.io/DMAR/reference/cfa_k.md),
+[`ci_bifactor_indices()`](https://yelleknek.github.io/DMAR/reference/ci_bifactor_indices.md),
 [`ci_eigenvalue()`](https://yelleknek.github.io/DMAR/reference/ci_eigenvalue.md),
+[`common_method_adjusted_r()`](https://yelleknek.github.io/DMAR/reference/common_method_adjusted_r.md),
 [`common_method_marker()`](https://yelleknek.github.io/DMAR/reference/common_method_marker.md),
 [`common_method_single_factor()`](https://yelleknek.github.io/DMAR/reference/common_method_single_factor.md),
+[`compare_sem()`](https://yelleknek.github.io/DMAR/reference/compare_sem.md),
 [`dmacs()`](https://yelleknek.github.io/DMAR/reference/dmacs.md),
 [`ecvi()`](https://yelleknek.github.io/DMAR/reference/ecvi.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
+[`fa_bifactor()`](https://yelleknek.github.io/DMAR/reference/fa_bifactor.md),
+[`fa_confirmatory()`](https://yelleknek.github.io/DMAR/reference/fa_confirmatory.md),
+[`fa_second_order()`](https://yelleknek.github.io/DMAR/reference/fa_second_order.md),
+[`factor_congruence()`](https://yelleknek.github.io/DMAR/reference/factor_congruence.md),
+[`factor_scores()`](https://yelleknek.github.io/DMAR/reference/factor_scores.md),
 [`htmt()`](https://yelleknek.github.io/DMAR/reference/htmt.md),
 [`irt_information()`](https://yelleknek.github.io/DMAR/reference/irt_information.md),
 [`measurement_alignment()`](https://yelleknek.github.io/DMAR/reference/measurement_alignment.md),
 [`measurement_invariance()`](https://yelleknek.github.io/DMAR/reference/measurement_invariance.md),
 [`procrustes_phi()`](https://yelleknek.github.io/DMAR/reference/procrustes_phi.md),
+[`sem_exact_fit_bootstrap()`](https://yelleknek.github.io/DMAR/reference/sem_exact_fit_bootstrap.md),
+[`sem_fit_measures()`](https://yelleknek.github.io/DMAR/reference/sem_fit_measures.md),
+[`sem_information_criteria()`](https://yelleknek.github.io/DMAR/reference/sem_information_criteria.md),
+[`sem_residual_fit()`](https://yelleknek.github.io/DMAR/reference/sem_residual_fit.md),
 [`simple_structure()`](https://yelleknek.github.io/DMAR/reference/simple_structure.md)
 
 ## Author
@@ -303,84 +354,88 @@ responses <- as.data.frame(responses)
 grm <- irt_grm(responses)
 grm
 #>  item  factor category lambda tau    a     b     
-#>  item1 theta  1        0.779  -1.3   1.24  -1.66 
-#>  item1 theta  2        0.779  -0.496 1.24  -0.636
-#>  item1 theta  3        0.779  0.215  1.24  0.275 
-#>  item1 theta  4        0.779  0.869  1.24  1.11  
-#>  item2 theta  1        0.64   -0.979 0.832 -1.53 
-#>  item2 theta  2        0.64   -0.283 0.832 -0.442
-#>  item2 theta  3        0.64   0.279  0.832 0.437 
-#>  item2 theta  4        0.64   0.954  0.832 1.49  
-#>  item3 theta  1        0.856  -1.49  1.65  -1.74 
-#>  item3 theta  2        0.856  -0.617 1.65  -0.721
-#>  item3 theta  3        0.856  0.186  1.65  0.217 
-#>  item3 theta  4        0.856  0.873  1.65  1.02  
-#>  item4 theta  1        0.694  -0.954 0.964 -1.38 
-#>  item4 theta  2        0.694  -0.208 0.964 -0.3  
+#>  item1 theta  1        0.779  -1.296 1.244 -1.663
+#>  item1 theta  2        0.779  -0.496 1.244 -0.636
+#>  item1 theta  3        0.779  0.215  1.244 0.275 
+#>  item1 theta  4        0.779  0.869  1.244 1.115 
+#>  item2 theta  1        0.640  -0.979 0.832 -1.531
+#>  item2 theta  2        0.640  -0.283 0.832 -0.442
+#>  item2 theta  3        0.640  0.279  0.832 0.437 
+#>  item2 theta  4        0.640  0.954  0.832 1.492 
+#>  item3 theta  1        0.856  -1.485 1.652 -1.736
+#>  item3 theta  2        0.856  -0.617 1.652 -0.721
+#>  item3 theta  3        0.856  0.186  1.652 0.217 
+#>  item3 theta  4        0.856  0.873  1.652 1.021 
+#>  item4 theta  1        0.694  -0.954 0.964 -1.375
+#>  item4 theta  2        0.694  -0.208 0.964 -0.300
 #>  item4 theta  3        0.694  0.423  0.964 0.609 
-#>  item4 theta  4        0.694  1.2    0.964 1.73  
-#>  item5 theta  1        0.795  -1.21  1.31  -1.52 
-#>  item5 theta  2        0.795  -0.392 1.31  -0.493
-#>  item5 theta  3        0.795  0.322  1.31  0.405 
-#>  item5 theta  4        0.795  1.04   1.31  1.31  
-#>  item6 theta  1        0.742  -0.989 1.11  -1.33 
-#>  item6 theta  2        0.742  -0.237 1.11  -0.32 
-#>  item6 theta  3        0.742  0.419  1.11  0.565 
-#>  item6 theta  4        0.742  0.989  1.11  1.33  
+#>  item4 theta  4        0.694  1.200  0.964 1.730 
+#>  item5 theta  1        0.795  -1.207 1.311 -1.518
+#>  item5 theta  2        0.795  -0.392 1.311 -0.493
+#>  item5 theta  3        0.795  0.322  1.311 0.405 
+#>  item5 theta  4        0.795  1.042  1.311 1.310 
+#>  item6 theta  1        0.742  -0.989 1.106 -1.334
+#>  item6 theta  2        0.742  -0.237 1.106 -0.320
+#>  item6 theta  3        0.742  0.419  1.106 0.565 
+#>  item6 theta  4        0.742  0.989  1.106 1.334 
 
 # The generating discriminations, for comparison.
 a_pop
 #> [1] 1.2 0.9 1.5 1.0 1.3 1.1
 
-# Model fit travels with the item parameters.
-attr(grm, "fit_measures")[c("cfi", "tli", "rmsea", "srmr")]
-#>        cfi        tli      rmsea       srmr 
-#> 1.00000000 1.00131440 0.00000000 0.01127189 
+# Model fit travels with the item parameters, the RMSEA with its 90
+# percent interval.
+attr(grm, "fit_measures")[c("cfi", "tli", "rmsea", "rmsea.ci.lower",
+                            "rmsea.ci.upper", "rmsea.ci.level", "srmr")]
+#>            cfi            tli          rmsea rmsea.ci.lower rmsea.ci.upper 
+#>    1.000000000    1.001314397    0.000000000    0.000000000    0.008435663 
+#> rmsea.ci.level           srmr 
+#>    0.900000000    0.011271890 
 
 # The same fit reported with logistic slopes, about 1.702 times the
 # normal ogive slopes above; the boundary locations do not change.
 irt_grm(responses, metric = "logistic")
-#>  item  factor category lambda tau    a    b     
-#>  item1 theta  1        0.779  -1.3   2.12 -1.66 
-#>  item1 theta  2        0.779  -0.496 2.12 -0.636
-#>  item1 theta  3        0.779  0.215  2.12 0.275 
-#>  item1 theta  4        0.779  0.869  2.12 1.11  
-#>  item2 theta  1        0.64   -0.979 1.42 -1.53 
-#>  item2 theta  2        0.64   -0.283 1.42 -0.442
-#>  item2 theta  3        0.64   0.279  1.42 0.437 
-#>  item2 theta  4        0.64   0.954  1.42 1.49  
-#>  item3 theta  1        0.856  -1.49  2.81 -1.74 
-#>  item3 theta  2        0.856  -0.617 2.81 -0.721
-#>  item3 theta  3        0.856  0.186  2.81 0.217 
-#>  item3 theta  4        0.856  0.873  2.81 1.02  
-#>  item4 theta  1        0.694  -0.954 1.64 -1.38 
-#>  item4 theta  2        0.694  -0.208 1.64 -0.3  
-#>  item4 theta  3        0.694  0.423  1.64 0.609 
-#>  item4 theta  4        0.694  1.2    1.64 1.73  
-#>  item5 theta  1        0.795  -1.21  2.23 -1.52 
-#>  item5 theta  2        0.795  -0.392 2.23 -0.493
-#>  item5 theta  3        0.795  0.322  2.23 0.405 
-#>  item5 theta  4        0.795  1.04   2.23 1.31  
-#>  item6 theta  1        0.742  -0.989 1.88 -1.33 
-#>  item6 theta  2        0.742  -0.237 1.88 -0.32 
-#>  item6 theta  3        0.742  0.419  1.88 0.565 
-#>  item6 theta  4        0.742  0.989  1.88 1.33  
+#>  item  factor category lambda tau    a     b     
+#>  item1 theta  1        0.779  -1.296 2.117 -1.663
+#>  item1 theta  2        0.779  -0.496 2.117 -0.636
+#>  item1 theta  3        0.779  0.215  2.117 0.275 
+#>  item1 theta  4        0.779  0.869  2.117 1.115 
+#>  item2 theta  1        0.640  -0.979 1.416 -1.531
+#>  item2 theta  2        0.640  -0.283 1.416 -0.442
+#>  item2 theta  3        0.640  0.279  1.416 0.437 
+#>  item2 theta  4        0.640  0.954  1.416 1.492 
+#>  item3 theta  1        0.856  -1.485 2.812 -1.736
+#>  item3 theta  2        0.856  -0.617 2.812 -0.721
+#>  item3 theta  3        0.856  0.186  2.812 0.217 
+#>  item3 theta  4        0.856  0.873  2.812 1.021 
+#>  item4 theta  1        0.694  -0.954 1.640 -1.375
+#>  item4 theta  2        0.694  -0.208 1.640 -0.300
+#>  item4 theta  3        0.694  0.423  1.640 0.609 
+#>  item4 theta  4        0.694  1.200  1.640 1.730 
+#>  item5 theta  1        0.795  -1.207 2.231 -1.518
+#>  item5 theta  2        0.795  -0.392 2.231 -0.493
+#>  item5 theta  3        0.795  0.322  2.231 0.405 
+#>  item5 theta  4        0.795  1.042  2.231 1.310 
+#>  item6 theta  1        0.742  -0.989 1.883 -1.334
+#>  item6 theta  2        0.742  -0.237 1.883 -0.320
+#>  item6 theta  3        0.742  0.419  1.883 0.565 
+#>  item6 theta  4        0.742  0.989  1.883 1.334 
 
 # A subset of the items, selected by name, is fit on its own.
 irt_grm(responses, items = c("item1", "item3", "item5"))
-#>  item  factor category lambda tau    a    b     
-#>  item1 theta  1        0.772  -1.3   1.21 -1.68 
-#>  item1 theta  2        0.772  -0.496 1.21 -0.643
-#>  item1 theta  3        0.772  0.215  1.21 0.278 
-#>  item1 theta  4        0.772  0.869  1.21 1.13  
-#>  item3 theta  1        0.836  -1.49  1.52 -1.78 
-#>  item3 theta  2        0.836  -0.617 1.52 -0.738
-#>  item3 theta  3        0.836  0.186  1.52 0.222 
-#>  item3 theta  4        0.836  0.873  1.52 1.04  
-#>  item5 theta  1        0.814  -1.21  1.4  -1.48 
-#>  item5 theta  2        0.814  -0.392 1.4  -0.482
-#>  item5 theta  3        0.814  0.322  1.4  0.395 
-#>  item5 theta  4        0.814  1.04   1.4  1.28  
+#>  item  factor category lambda tau    a     b     
+#>  item1 theta  1        0.772  -1.296 1.213 -1.679
+#>  item1 theta  2        0.772  -0.496 1.213 -0.643
+#>  item1 theta  3        0.772  0.215  1.213 0.278 
+#>  item1 theta  4        0.772  0.869  1.213 1.126 
+#>  item3 theta  1        0.836  -1.485 1.524 -1.776
+#>  item3 theta  2        0.836  -0.617 1.524 -0.738
+#>  item3 theta  3        0.836  0.186  1.524 0.222 
+#>  item3 theta  4        0.836  0.873  1.524 1.045 
+#>  item5 theta  1        0.814  -1.207 1.402 -1.482
+#>  item5 theta  2        0.814  -0.392 1.402 -0.482
+#>  item5 theta  3        0.814  0.322  1.402 0.395 
+#>  item5 theta  4        0.814  1.042  1.402 1.280 
 
 # The boundary response function of the first item at theta = 0.
 first <- grm[grm$item == "item1", ]

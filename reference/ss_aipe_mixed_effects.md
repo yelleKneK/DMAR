@@ -1,95 +1,174 @@
 # AIPE Sample Size Planning for a Fixed Effect in a Two-Level Mixed-Effects Model
 
-Computes the minimum number of clusters (level-2 units) needed so that
-the confidence interval on a level-1 fixed-effect slope has expected
-full width no larger than \\\omega\\ (Kelley, 2007; Raudenbush & Liu,
-2001; Snijders & Bosker, 2012). The function inverts the closed-form
-approximation for the variance of a fixed-effect slope in a balanced
-two-level random-intercept model.
+Computes the smallest number of clusters (i.e., Level 2 units) for which
+the confidence interval for the fixed-effect slope of one predictor has
+an expected full width no larger than `width`, in a balanced two-level
+model with a random intercept. The predictor may be measured on the
+individuals (i.e., Level 1) or on the clusters (i.e., Level 2), and may
+be centered at its cluster mean, centered at its grand mean, or left as
+it is.
+[`ss_aipe_mixed_effects_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md)
+simulates the same design, analysis, and interval, so the two can be
+used together: plan here, then check the plan there, including under
+values other than the ones planned with.
 
 ## Usage
 
 ``` r
 ss_aipe_mixed_effects(
-  sigma2_y,
-  sigma2_x,
-  icc,
+  true_total_var,
+  true_var_X,
+  true_icc,
   width,
   cluster_size = 20L,
-  conf_level = 0.95
+  conf_level = 0.95,
+  predictor_level = 1,
+  centering = c("cluster_mean", "grand_mean", "none"),
+  true_icc_X = 0
 )
 ```
 
 ## Arguments
 
-- sigma2_y:
+- true_total_var:
 
-  Total variance of the outcome variable.
+  Population variance of the outcome given the predictor (a planning
+  value): the variance of the random intercept (between clusters) plus
+  the residual variance (within clusters). It is the name the total
+  variance has in the cluster randomized planners
+  ([`ss_aipe_crd`](https://yelleknek.github.io/DMAR/reference/ss_aipe_crd.md)).
 
-- sigma2_x:
+- true_var_X:
 
-  Variance of the level-1 predictor (covariate).
+  Population variance of the predictor (a planning value). For an
+  individual-level (i.e., Level 1) predictor it is the total variance
+  over individuals, between and within clusters together (see
+  `true_icc_X`); for a cluster-level (i.e., Level 2) predictor it is the
+  variance over clusters.
 
-- icc:
+- true_icc:
 
-  Intraclass correlation of the outcome.
+  Population intraclass correlation of the outcome given the predictor
+  (a planning value): the share of `true_total_var` that lies between
+  clusters. In \[0, 1).
 
 - width:
 
-  Target full CI width on the slope.
+  Desired full width of the confidence interval for the slope.
 
 - cluster_size:
 
-  Per-cluster sample size (number of level-1 units per level-2 unit).
-  Default `20L`.
+  Number of individuals (i.e., Level 1 units) in each cluster (i.e.,
+  Level 2 unit), the same in every cluster. Default `20L`.
 
 - conf_level:
 
   Confidence level. Default `0.95`.
 
+- predictor_level:
+
+  `1` (the default) for an individual-level predictor, which varies
+  within a cluster, or `2` for a cluster-level predictor, which is the
+  same for every individual of a cluster.
+
+- centering:
+
+  How the predictor enters the model. `"cluster_mean"` (the default)
+  subtracts each cluster's mean from its individuals' values, so the
+  slope is the within-cluster slope; it applies to an individual-level
+  predictor only. `"grand_mean"` subtracts the overall mean, and
+  `"none"` leaves the predictor as it is. These two give the same slope
+  and the same interval (only the intercept differs), and both are
+  offered so that the call can say what the analysis will do.
+
+- true_icc_X:
+
+  Population intraclass correlation of an individual-level predictor (a
+  planning value): the share of `true_var_X` that lies between clusters.
+  Default `0`, a predictor whose cluster means differ by sampling alone.
+  It is not used with `predictor_level = 2`.
+
 ## Value
 
-A `data.frame` with rows for the recommended number of clusters
+A `data.frame` with rows for the necessary number of clusters
 `necessary_n_clusters`, the implied total sample size `total_N`
-(`necessary_n_clusters * cluster_size`), the target `width`, the
-intraclass correlation `icc`, the `cluster_size`, and the resulting
-`ci_width_expected` (the expected full CI width at the recommended
-size).
+(`necessary_n_clusters * cluster_size`), the desired `width`, the
+`expected_width` at the necessary number of clusters, the degrees of
+freedom `df` of the interval's *t* quantile, and the inputs `true_icc`,
+`true_icc_X`, `cluster_size`, and `predictor_level`. The centering is
+recorded in `attr(x, "centering")`.
 
 ## Details
 
-**Variance of the slope.** For a level-1 predictor centered within
-cluster, the asymptotic variance of \\\hat\beta\\ is approximately
-\$\$\mathrm{Var}(\hat\beta) \\\approx\\ \frac{\sigma^2_y (1 - \rho_I)}{N
-\sigma^2_x},\$\$ where \\N = n\_{\mathrm{clusters}} \cdot m\\ is the
-total number of level-1 units, \\m\\ is the cluster size, and \\\rho_I\\
-the intraclass correlation. Because within-cluster centering removes the
-cluster-level variation from the predictor, the design effect \\1 +
-(m - 1) \rho_I\\ that inflates the variance of a cluster-level estimand
-does not appear here; clustering enters only through the residual
-variance \\\sigma^2_y (1 - \rho_I)\\. The function inverts this
-expression for \\N\\. No anticipated slope value is needed: \\\beta\\
-does not appear in the variance, so the recommended number of clusters
-is the same whatever the slope.
+**The model.** For individual \\i\\ of cluster \\k\\, \$\$y\_{ki} =
+\gamma_0 + \beta x\_{ki} + u_k + e\_{ki},\$\$ with \\u_k \sim N(0,
+\tau^2)\\ the random intercept of the cluster and \\e\_{ki} \sim N(0,
+\sigma^2)\\ the residual of the individual, in \\K\\ clusters of \\m\\
+individuals each. With \\V\\ for `true_total_var` and \\\rho\\ for
+`true_icc`, \\\tau^2 = \rho V\\ and \\\sigma^2 = (1 - \rho) V\\. The
+slope has the same value within and between clusters. Writing
+\\\sigma^2_X\\ for `true_var_X` and \\\rho_X\\ for `true_icc_X`, an
+individual-level predictor has variance \\\rho_X \sigma^2_X\\ between
+clusters and \\\sigma^2_W = (1 - \rho_X)\sigma^2_X\\ within them.
 
-**Scope.** Planning is for the most common single-level covariate case
-(random intercept, fixed slope, level-1 predictor centered within
-cluster). For cross-level interactions or random slopes, the variance
-formula changes and a Monte Carlo planner should be used instead
-(Schoemann, Boulton, & Short, 2017).
+**The interval planned for.** The interval is \\\hat\beta \pm t\_{1 -
+\alpha/2,\\ \nu}\\ \widehat{SE}(\hat\beta)\\, with \\\nu = K(m - 1) -
+1\\ for an individual-level predictor and \\\nu = K - 2\\ for a
+cluster-level predictor (the regression of \\K\\ cluster means). Its
+expected width is \\2\\ t\_{1 - \alpha/2,\\ \nu}\\
+E\[\widehat{SE}(\hat\beta)\]\\, and the function returns the smallest
+\\K\\ at which that is no larger than `width`. No value of the slope is
+needed: \\\beta\\ does not appear in any of the expressions below.
+
+**The expected standard error.** Each expression follows from the sums
+of squares of a balanced design.
+
+- *Individual-level predictor centered at its cluster mean.* The
+  estimate is the within-cluster slope, and for a normally distributed
+  predictor the expected standard error is exactly
+  \$\$E\[\widehat{SE}(\hat\beta)\] = \frac{\sigma}{\sigma_W \sqrt{K
+  (m - 1) - 1}}.\$\$ Clustering of the outcome enters only through
+  \\\sigma\\: the design effect \\1 + (m - 1)\rho\\ that inflates the
+  variance of a cluster-level quantity does not appear, because
+  centering removes the differences among clusters from both variables.
+
+- *Cluster-level predictor.* The estimate is the slope of the regression
+  of the cluster means of the outcome on the predictor, and for a
+  normally distributed predictor the expected standard error is exactly
+  \$\$E\[\widehat{SE}(\hat\beta)\] = \frac{\sqrt{\tau^2 + \sigma^2 /
+  m}}{\sigma_X \sqrt{K - 2}}.\$\$ Here the number of clusters is what
+  buys precision: as \\m\\ grows the numerator approaches \\\tau\\ and
+  not 0.
+
+- *Individual-level predictor centered at its grand mean, or not
+  centered.* The estimate pools the within-cluster and the
+  between-cluster information about the one slope, each weighted by its
+  precision, and to first order \$\$E\[\widehat{SE}(\hat\beta)\]^2
+  \approx \left\[ \frac{\\K (m - 1) - 1\\\\ \sigma^2_W}{\sigma^2} +
+  \frac{(K - 2)\\(\rho_X \sigma^2_X + \sigma^2_W / m)} {\tau^2 +
+  \sigma^2 / m} \right\]^{-1},\$\$ which reduces to the two expressions
+  above when either part is absent. It is never larger than the value
+  for the within-cluster slope, and the gain is what the assumption of
+  one slope within and between clusters buys; when that assumption is in
+  doubt, plan for the cluster-mean-centered analysis.
+
+In 4,000 simulated data sets for each of six designs (clusters of 5 to
+20, 9 to 44 clusters, intraclass correlations of .05 to .30), the mean
+width of the interval was within 0.3 percent of the expected width in
+the four designs with an exact expression, and 0.5 and 1.3 percent
+narrower than it in the two with a pooled slope, so the first-order
+expression errs toward a slightly larger number of clusters.
+[`ss_aipe_mixed_effects_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md)
+reports the mean width and the coverage for any design.
+
+**Scope.** One predictor, a random intercept, a fixed slope, and
+clusters of equal size. For random slopes, cross-level interactions, or
+unequal cluster sizes the variance changes and a Monte Carlo planner
+should be used (Schoemann, Boulton, & Short, 2017). The two-level
+random-intercept model is treated at length by Snijders and Bosker
+(2012).
 
 ## References
-
-Kelley, K. (2007). Confidence intervals for standardized effect sizes:
-Theory, application, and implementation. *Journal of Statistical
-Software, 20*(8), 1–24.
-[doi:10.18637/jss.v020.i08](https://doi.org/10.18637/jss.v020.i08)
-
-Raudenbush, S. W., & Liu, X.-F. (2001). Effects of study duration,
-frequency of observation, and sample size on power in studies of group
-differences in polynomial change. *Psychological Methods, 6*(4),
-387–401.
-[doi:10.1037/1082-989X.6.4.387](https://doi.org/10.1037/1082-989X.6.4.387)
 
 Schoemann, A. M., Boulton, A. J., & Short, S. D. (2017). Determining
 power and sample size for simple and complex mediation models. *Social
@@ -101,6 +180,8 @@ introduction to basic and advanced multilevel modeling* (2nd ed.). Sage.
 
 ## See also
 
+[`ss_aipe_mixed_effects_sensitivity`](https://yelleknek.github.io/DMAR/reference/ss_aipe_mixed_effects_sensitivity.md)
+to check a plan by simulation;
 [`ss_power_mixed_effects`](https://yelleknek.github.io/DMAR/reference/ss_power_mixed_effects.md),
 [`var_icc`](https://yelleknek.github.io/DMAR/reference/var_icc.md),
 [`ss_aipe_icc`](https://yelleknek.github.io/DMAR/reference/ss_aipe_icc.md)
@@ -113,6 +194,7 @@ confidence interval width.
 Other sample size for power:
 [`power_fisher_exact()`](https://yelleknek.github.io/DMAR/reference/power_fisher_exact.md),
 [`ss_power_R2()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2.md),
+[`ss_power_R2_change()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_change.md),
 [`ss_power_R2_sensitivity()`](https://yelleknek.github.io/DMAR/reference/ss_power_R2_sensitivity.md),
 [`ss_power_c()`](https://yelleknek.github.io/DMAR/reference/ss_power_c.md),
 [`ss_power_c_ancova()`](https://yelleknek.github.io/DMAR/reference/ss_power_c_ancova.md),
@@ -158,30 +240,57 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Plan a two-level study with cluster size 20, ICC = 0.10,
-#        sigma_y = 1, sigma_x = 1, target CI width = 0.20:
-ss_aipe_mixed_effects(sigma2_y = 1, sigma2_x = 1, icc = 0.10,
-                           width = 0.20, cluster_size = 20)
+# 1. An individual-level predictor centered at its cluster mean (the
+#    default): clusters of 20, intraclass correlation .10, unit
+#    variances, and a desired width of .20.
+ss_aipe_mixed_effects(true_total_var = 1, true_var_X = 1, true_icc = 0.10,
+                      width = 0.20, cluster_size = 20)
 #>  term                 value
-#>  necessary_n_clusters 18   
-#>  total_N              360  
-#>  width                0.2  
-#>  icc                  0.1  
+#>  necessary_n_clusters 19   
+#>  total_N              380  
+#>  width                0.200
+#>  expected_width       0.197
+#>  df                   360  
+#>  true_icc             0.100
+#>  true_icc_X           0    
 #>  cluster_size         20   
-#>  ci_width_expected    0.196
+#>  predictor_level      1    
 #> 
 #> Confidence level: 95%
 
-# 2. The same study with stronger clustering (ICC = 0.20):
-ss_aipe_mixed_effects(sigma2_y = 1, sigma2_x = 1, icc = 0.20,
-                           width = 0.20, cluster_size = 20)
+# 2. The same predictor not centered, when 30 percent of its variance
+#    lies between clusters.
+ss_aipe_mixed_effects(true_total_var = 1, true_var_X = 1, true_icc = 0.10,
+                      width = 0.20, cluster_size = 20,
+                      centering = "none", true_icc_X = 0.30)
 #>  term                 value
-#>  necessary_n_clusters 16   
-#>  total_N              320  
-#>  width                0.2  
-#>  icc                  0.2  
+#>  necessary_n_clusters 23   
+#>  total_N              460  
+#>  width                0.200
+#>  expected_width       0.200
+#>  df                   436  
+#>  true_icc             0.100
+#>  true_icc_X           0.300
 #>  cluster_size         20   
-#>  ci_width_expected    0.196
+#>  predictor_level      1    
+#> 
+#> Confidence level: 95%
+
+# 3. A cluster-level predictor: far more clusters are needed for the
+#    same width, because each cluster supplies one value of it.
+ss_aipe_mixed_effects(true_total_var = 1, true_var_X = 1, true_icc = 0.10,
+                      width = 0.20, cluster_size = 20,
+                      predictor_level = 2, centering = "grand_mean")
+#>  term                 value
+#>  necessary_n_clusters 61   
+#>  total_N              1220 
+#>  width                0.200
+#>  expected_width       0.198
+#>  df                   59   
+#>  true_icc             0.100
+#>  true_icc_X           0    
+#>  cluster_size         20   
+#>  predictor_level      2    
 #> 
 #> Confidence level: 95%
 ```

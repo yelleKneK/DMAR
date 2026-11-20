@@ -10,20 +10,20 @@ Useful for plotting the integrand and for diagnostic work.
 
 ``` r
 power_density_equivalence_md(
-  power_sigma,
+  sd_values,
   alpha_level,
-  theta1,
-  theta2,
-  diff,
-  sigma,
-  n,
-  nu
+  lower_bound,
+  upper_bound,
+  true_effect,
+  true_sd,
+  n_per_treatment,
+  df_error
 )
 ```
 
 ## Arguments
 
-- power_sigma:
+- sd_values:
 
   Numeric vector of \\\sigma\\ values at which to evaluate the
   integrand.
@@ -32,37 +32,50 @@ power_density_equivalence_md(
 
   Type I error rate for each of the two one-sided tests.
 
-- theta1:
+- lower_bound:
 
-  Lower limit of the equivalence interval on the appropriate scale
-  (regular or log).
+  Lower limit of the equivalence interval on the analysis scale: a
+  difference, or the logarithm of a ratio.
 
-- theta2:
+- upper_bound:
 
-  Upper limit of the equivalence interval on the appropriate scale
-  (regular or log).
+  Upper limit of the equivalence interval on the analysis scale: a
+  difference, or the logarithm of a ratio.
 
-- diff:
+- true_effect:
 
-  True difference in treatment means (ratio on the log scale) on the
-  appropriate scale.
+  The true (population) effect on the analysis scale: the difference in
+  treatment means, or the logarithm of their ratio.
 
-- sigma:
+- true_sd:
 
   \\\sqrt{\mathrm{error\\ variance}}\\.
 
-- n:
+- n_per_treatment:
 
-  Number of subjects per treatment.
+  Number of subjects who receive each treatment (the size of each group
+  in a parallel design; every subject in a crossover design), as in
+  [`power_equivalence_md`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md).
 
-- nu:
+- df_error:
 
-  Degrees of freedom for `sigma`.
+  Error degrees of freedom for `true_sd`.
 
 ## Value
 
-A `data.frame` with one row per supplied `power_sigma`, and columns
-`power_sigma` and `power_density`.
+A `data.frame` with one row per supplied `sd_values`, and columns
+`sd_values` and `power_density`.
+
+## Details
+
+**The analysis scale.** Unlike
+[`power_equivalence_md`](https://yelleknek.github.io/DMAR/reference/power_equivalence_md.md),
+which takes the bounds and the true effect on the original scale and
+logs ratios when `logscale = TRUE`, this function has no `logscale`
+argument and transforms nothing: `lower_bound`, `upper_bound`, and
+`true_effect` are on the scale of the analysis, differences of the
+means, or, for means compared on the log scale, logarithms of the ratios
+(`log(0.8)` for a ratio of 0.8).
 
 ## Note
 
@@ -82,7 +95,7 @@ sciences: An R package. *Behavior Research Methods, 39*(4), 979–984.
 
 Phillips, K. F. (1990). Power of the two one-sided tests procedure in
 bioequivalence. *Journal of Pharmacokinetics and Biopharmaceutics,
-18*(2), 139–144.
+18*(2), 137–144.
 [doi:10.1007/BF01063556](https://doi.org/10.1007/BF01063556)
 
 Schuirmann, D. J. (1987). A comparison of the two one-sided tests
@@ -97,7 +110,9 @@ Biopharmaceutics, 15*(6), 657–680.
 
 Other equivalence testing:
 [`equivalence_c()`](https://yelleknek.github.io/DMAR/reference/equivalence_c.md),
+[`equivalence_proportion_paired()`](https://yelleknek.github.io/DMAR/reference/equivalence_proportion_paired.md),
 [`equivalence_r()`](https://yelleknek.github.io/DMAR/reference/equivalence_r.md),
+[`equivalence_rmsea()`](https://yelleknek.github.io/DMAR/reference/equivalence_rmsea.md),
 [`equivalence_smd()`](https://yelleknek.github.io/DMAR/reference/equivalence_smd.md),
 [`plot_equivalence()`](https://yelleknek.github.io/DMAR/reference/plot_equivalence.md),
 [`power_equivalence_c()`](https://yelleknek.github.io/DMAR/reference/power_equivalence_c.md),
@@ -112,25 +127,36 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# Density at a single value of sigma:
-power_density_equivalence_md(power_sigma = 0.10, alpha_level = .05,
-                             theta1 = -.2, theta2 = .2, diff = .05,
-                             sigma = .20, n = 24, nu = 22)
-#>   power_sigma power_density
-#> 1         0.1    0.02297896
+# Density at a single value of true_sd:
+power_density_equivalence_md(sd_values = 0.10, alpha_level = .05,
+                             lower_bound = -.2, upper_bound = .2,
+                             true_effect = .05, true_sd = .20,
+                             n_per_treatment = 24, df_error = 22)
+#>   sd_values power_density
+#> 1       0.1    0.02297896
 
 # Vectorized over a grid:
 grid <- power_density_equivalence_md(
-  power_sigma = seq(0.01, 0.40, length.out = 50),
-  alpha_level = .05, theta1 = -.2, theta2 = .2, diff = .05,
-  sigma = .20, n = 24, nu = 22
+  sd_values = seq(0.01, 0.40, length.out = 50),
+  alpha_level = .05, lower_bound = -.2, upper_bound = .2,
+  true_effect = .05, true_sd = .20, n_per_treatment = 24, df_error = 22
 )
 head(grid)
-#>   power_sigma power_density
-#> 1  0.01000000  3.625481e-22
-#> 2  0.01795918  7.451634e-17
-#> 3  0.02591837  1.498398e-13
-#> 4  0.03387755  3.634158e-11
-#> 5  0.04183673  2.582758e-09
-#> 6  0.04979592  8.170958e-08
+#>    sd_values power_density
+#> 1 0.01000000  3.625481e-22
+#> 2 0.01795918  7.451634e-17
+#> 3 0.02591837  1.498398e-13
+#> 4 0.03387755  3.634158e-11
+#> 5 0.04183673  2.582758e-09
+#> 6 0.04979592  8.170958e-08
+
+# On the log scale the bounds and the true effect are logarithms of the
+# ratios: the ratios .8, 1.25, and 1.05 of power_equivalence_md(logscale =
+# TRUE) are given here as their logarithms.
+power_density_equivalence_md(sd_values = 0.10, alpha_level = .05,
+                             lower_bound = log(.8), upper_bound = log(1.25),
+                             true_effect = log(1.05), true_sd = .20,
+                             n_per_treatment = 18, df_error = 16)
+#>   sd_values power_density
+#> 1       0.1     0.1317922
 ```

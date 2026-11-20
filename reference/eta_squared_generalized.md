@@ -50,12 +50,20 @@ eta_squared_generalized(
 
 - SS_observed:
 
-  Sums of squares for the measured factors. Scalar or numeric vector
-  (option 2).
+  Sums of squares for the other sources in the denominator: the measured
+  factors, the interactions that contain one, and covariates, and in a
+  design with an `Error()` term the residuals of the strata other than
+  the effect's. Scalar or numeric vector (option 2).
 
 - SS_error:
 
-  Error (residual) sum of squares (option 2).
+  Error (residual) sum of squares of the focal effect: the sum of
+  squares its *F* test divides by, which in a design with an `Error()`
+  term is the residual of the effect's stratum (option 2). The estimate
+  depends on `SS_observed` and `SS_error` only through their sum, but
+  the parametric interval of
+  [`ci_eta_squared_generalized`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
+  is built on the *F* they imply.
 
 - F_effect:
 
@@ -63,20 +71,26 @@ eta_squared_generalized(
 
 - df_effect:
 
-  Numerator degrees of freedom for the focal effect (option 3).
+  Numerator degrees of freedom for the focal effect (option 3; accepted
+  with the sums of squares of option 2, which do not use it, as Details
+  explains).
 
 - F_observed:
 
-  Vector of *F*-values for the measured factors (option 3).
+  Vector of *F*-values for the other sources in the denominator, each
+  the source's mean square divided by the focal effect's error mean
+  square (option 3).
 
 - df_observed:
 
-  Numerator degrees of freedom for the measured factors, aligned with
+  Numerator degrees of freedom for those sources, aligned with
   `F_observed` (option 3).
 
 - df_error:
 
-  Error degrees of freedom (option 3).
+  Degrees of freedom of the focal effect's error term (option 3;
+  accepted with the sums of squares of option 2, which do not use it, as
+  Details explains).
 
 ## Value
 
@@ -95,25 +109,40 @@ The function accepts *one* of three input interfaces:
     within-subjects / mixed designs) together with an `observed` vector
     listing which factors are measured (rather than manipulated);
 
-2.  raw sums of squares: `SS_effect`, `SS_observed` (one value per
-    measured factor, or a scalar), and `SS_error`; or
+2.  raw sums of squares: `SS_effect`, `SS_observed` (a scalar, or one
+    value per other source in the denominator; see `SS_observed`), and
+    `SS_error`; or
 
 3.  raw *F*-values and degrees of freedom: `F_effect`, `df_effect`,
     `F_observed` (vector aligned with `df_observed`), and `df_error`.
 
-If the user supplies both the SS interface (option 2) and the F/df
+The estimate from sums of squares needs no degrees of freedom, while the
+parametric interval that
+[`ci_eta_squared_generalized`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
+builds from the same sums of squares needs `df_effect` and `df_error`,
+so the two are accepted with the sums of squares here and leave the
+estimate unchanged. With sums of squares, a call is read as the *F*/df
+interface only when it also gives `F_effect`, `F_observed`, or
+`df_observed`.
+
+If the user supplies both the SS interface (option 2) and the *F*/df
 interface (option 3), the function computes \\\eta^2_G\\ from each and
 compares the results to within a 1e-6 tolerance. When the two interfaces
 agree, the SS value is returned. When they disagree, the function stops
 with a detailed message reporting both values.
+[`ci_eta_squared_generalized`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md)
+refuses the two together, since they can agree on the estimate and still
+imply different *F* statistics for the effect, and so different
+intervals.
 
 **Formula.** \$\$\hat{\eta}^2_G =
 \frac{\mathit{SS}\_{\text{effect}}}{\mathit{SS}\_{\text{effect}} +
 \sum\_\text{obs} \mathit{SS}\_{\text{measured}} +
-\mathit{SS}\_{\text{error}}}.\$\$ For the F/df interface the equivalent
-ratio form is used, dividing through by \\\mathit{SS}\_{\text{error}}\\
-so that no total-N argument is required: \\\mathit{SS}\_i /
-\mathit{SS}\_{\text{error}} = F_i \cdot df_i / df\_{\text{error}}\\.
+\mathit{SS}\_{\text{error}}}.\$\$ For the *F*/df interface the
+equivalent ratio form is used, dividing through by
+\\\mathit{SS}\_{\text{error}}\\ so that no total-N argument is required:
+\\\mathit{SS}\_i / \mathit{SS}\_{\text{error}} = F_i \cdot df_i /
+df\_{\text{error}}\\.
 
 **Designs supported.**
 
@@ -131,7 +160,17 @@ so that no total-N argument is required: \\\mathit{SS}\_i /
   error stratum (both the between-subjects "subjects" stratum and any
   within-subjects error strata). This is the Olejnik & Algina (2003) /
   Bakeman (2005) rule that makes the subject-level variance act as an
-  "always-measured" contributor in repeated measures designs.
+  "always-measured" contributor in repeated measures designs. Each
+  effect must be tested in a single stratum, as it is when every subject
+  is observed equally often in every within-subjects condition, whatever
+  the sizes of the between-subjects groups, and every covariate is
+  constant within subjects. When observations are missing within
+  subjects, or a covariate varies within them,
+  [`aov()`](https://rdrr.io/r/stats/aov.html) divides the effect's sum
+  of squares among strata and tests the effect in each of them; no one
+  stratum's share is the effect's sum of squares, and Olejnik and Algina
+  (2003, p. 437) define the estimate for balanced designs, so the
+  function stops and names the effects and strata involved.
 
 **Focal-effect self-exclusion.** If the focal effect itself is listed in
 `observed`, the function excludes it from the observed-sum component
@@ -193,7 +232,6 @@ statistics: Measures of effect size for some common research designs.
 
 [`ci_eta_squared_generalized`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
 [`eta_squared`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
-[`eta_squared_partial`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`ci_omega_squared`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md)
 
 Other effect size estimates:
@@ -201,13 +239,11 @@ Other effect size estimates:
 [`cliff_delta()`](https://yelleknek.github.io/DMAR/reference/cliff_delta.md),
 [`correction_for_attenuation()`](https://yelleknek.github.io/DMAR/reference/correction_for_attenuation.md),
 [`eta_squared()`](https://yelleknek.github.io/DMAR/reference/eta_squared.md),
-[`eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/eta_squared_partial.md),
 [`expected_partial_r()`](https://yelleknek.github.io/DMAR/reference/expected_partial_r.md),
 [`expected_r()`](https://yelleknek.github.io/DMAR/reference/expected_r.md),
 [`expected_smd()`](https://yelleknek.github.io/DMAR/reference/expected_smd.md),
 [`nnt_from_smd()`](https://yelleknek.github.io/DMAR/reference/nnt_from_smd.md),
 [`omega_squared()`](https://yelleknek.github.io/DMAR/reference/omega_squared.md),
-[`omega_squared_partial()`](https://yelleknek.github.io/DMAR/reference/omega_squared_partial.md),
 [`probability_of_superiority_paired()`](https://yelleknek.github.io/DMAR/reference/probability_of_superiority_paired.md),
 [`proportion_of_superiority()`](https://yelleknek.github.io/DMAR/reference/proportion_of_superiority.md),
 [`responder_analysis()`](https://yelleknek.github.io/DMAR/reference/responder_analysis.md),

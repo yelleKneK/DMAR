@@ -8,70 +8,75 @@ Accuracy in Parameter Estimation (AIPE) Perspective for the
 
 ``` r
 ss_aipe_c_ancova_sensitivity(
-  true_error_var_ancova = NULL,
-  est_error_var_ancova = NULL,
-  true_error_var_anova = NULL,
-  est_error_var_anova = NULL,
-  rho,
-  est_rho = NULL,
+  true_var_error_ancova = NULL,
+  supposed_var_error_ancova = NULL,
+  true_var_error_anova = NULL,
+  supposed_var_error_anova = NULL,
+  true_cor,
+  supposed_cor = NULL,
   G = 10000,
-  mu_y,
-  sigma_y,
-  mu_x,
-  sigma_x,
+  true_mean_Y,
+  true_sd_Y,
+  true_mean_X,
+  true_sd_X,
   c_weights,
   width,
   conf_level = 0.95,
   assurance = NULL,
-  filename = NULL
+  filename = NULL,
+  seed = NULL
 )
 ```
 
 ## Arguments
 
-- true_error_var_ancova:
+- true_var_error_ancova:
 
   population error variance of the ANCOVA model
 
-- est_error_var_ancova:
+- supposed_var_error_ancova:
 
-  estimated error variance of the ANCOVA model
+  the supposed error variance of the ANCOVA model, the planning value
+  given to
+  [`ss_aipe_c_ancova`](https://yelleknek.github.io/DMAR/reference/ss_aipe_c_ancova.md)
+  to choose the sample size
 
-- true_error_var_anova:
+- true_var_error_anova:
 
   population error variance of the ANOVA model (i.e., excluding the
   covariate)
 
-- est_error_var_anova:
+- supposed_var_error_anova:
 
-  estimated error variance of the ANOVA model (i.e., excluding the
-  covariate)
+  the supposed error variance of the ANOVA model (i.e., excluding the
+  covariate), a planning value used with `supposed_cor`
 
-- rho:
+- true_cor:
 
   population correlation coefficient of the response and the covariate
 
-- est_rho:
+- supposed_cor:
 
-  estimated correlation coefficient of the response and the covariate
+  the supposed correlation coefficient of the response and the
+  covariate, a planning value used with `supposed_var_error_anova`
 
 - G:
 
   number of generations (i.e., replications) of the simulation
 
-- mu_y:
+- true_mean_Y:
 
   vector that contains the response's population mean of each group
 
-- sigma_y:
+- true_sd_Y:
 
   the population standard deviation of the response
 
-- mu_x:
+- true_mean_X:
 
   the population mean of the covariate
 
-- sigma_x:
+- true_sd_X:
 
   the population standard deviation of the covariate
 
@@ -104,39 +109,97 @@ ss_aipe_c_ancova_sensitivity(
   existing file at that path is appended to, and a throwaway run should
   point it at `tempfile(fileext = ".csv")`
 
+- seed:
+
+  `NULL` (the default) to draw from the current random number stream, or
+  a single number that makes the call reproducible; a supplied seed is
+  set for this call only, and the caller's random number state is
+  restored when the function returns.
+
 ## Value
 
 A `data.frame` with columns `term` and `value` summarizing the Monte
 Carlo sensitivity analysis across `G` replications. The `term` entries
-are: `mean_psi`, `median_psi`, `sd_psi` (summaries of the realized
-unstandardized contrast); `mean_ci_width`, `median_ci_width`,
+are: `mean_contrast`, `median_contrast`, `sd_contrast` (summaries of the
+realized unstandardized contrast); `mean_ci_width`, `median_ci_width`,
 `sd_ci_width` (summaries of the realized interval widths);
-`pct_ci_less_w` (proportion of intervals narrower than the planning
+`pct_ci_less_width` (proportion of intervals narrower than the planning
 target `width`); `pct_ci_miss_low` and `pct_ci_miss_high` (tail-specific
 empirical non-coverage of the population contrast); `total_type_I_error`
 (overall empirical non-coverage, the sum of the two tails);
 `mean_se_ratio` (mean ratio of the contrast standard error that ignores
 the covariate-imbalance term to the full ANCOVA standard error); and the
-input echoes `n_per_group`, `total_N`, `true_psi` (the population
-contrast implied by `mu_y` and `c_weights`), `est_error_var_ancova` (as
-supplied or as resolved from `est_error_var_anova` and `est_rho`),
-`rho`, `width`, `conf_level`, and `assurance` (present only when an
-assurance was supplied). The proportion rows are on the 0 to 1 scale,
-not percentages. The per-replication vectors (`psi_obs`, `se_psi`,
-`se_psi_restricted`, `width_obs`) are not returned; they are written to
-the comma separated file named by `filename` when one is supplied.
+input echoes `n_per_group`, `total_N`, `true_contrast` (the population
+contrast implied by `true_mean_Y` and `c_weights`),
+`supposed_var_error_ancova` (as supplied or as resolved from
+`supposed_var_error_anova` and `supposed_cor`), `true_cor`, `width`,
+`conf_level`, and `assurance` (present only when an assurance was
+supplied). The proportion rows are on the 0 to 1 scale, not percentages.
+The per-replication vectors (`contrast`, `se_contrast`,
+`se_contrast_restricted`, `width_obs`) are not returned; they are
+written to the comma separated file named by `filename` when one is
+supplied.
 
 ## Details
 
-The arguments `mu_y`, `mu_x`, `sigma_y`, and `sigma_x` are used to
-generate random data in the simulations for the sensitivity analysis.
-The value of `sigma_y` should be the same as the square root of
-`true_error_var_anova`.
+The arguments `true_mean_Y`, `true_mean_X`, `true_sd_Y`, and `true_sd_X`
+are used to generate random data in the simulations for the sensitivity
+analysis. The value of `true_sd_Y` should be the same as the square root
+of `true_var_error_anova`.
 
 So far this function is based on one-covariate randomized ANCOVA design
-only. The argument `mu_x` should be a single number, because it is
-assumed that the population mean of the covariate is equal across groups
-in randomized ANCOVA.
+only. The argument `true_mean_X` should be a single number, because it
+is assumed that the population mean of the covariate is equal across
+groups in randomized ANCOVA.
+
+## The record of the simulation
+
+Every sensitivity function of the package summarizes its replications
+over one denominator: the replications that produced a confidence
+interval (for a power sensitivity function, a test). The proportion of
+intervals that met the width target (`pct_ci_less_width`), the
+proportions of intervals that missed the true value, and the summaries
+of the widths are all taken over those replications. A replication
+without an interval is in none of these rows. It is counted, and the
+returned table carries the counts in its attribute `simulation`, a list
+read with `attr(x, "simulation")`:
+
+- `attempted`:
+
+  the number of replications asked for (`G`).
+
+- `returned`:
+
+  the number that produced an interval (a test).
+
+- `failed`:
+
+  the number that did not (`attempted - returned`).
+
+- `denominator`:
+
+  the number of replications the rows named above are taken over, which
+  is `returned`.
+
+- `width_target_probability`:
+
+  the proportion of the replications with an interval whose interval met
+  the width target, the value of the `pct_ci_less_width` row; `NA` for a
+  function or a call without a width target, and when no replication
+  produced an interval.
+
+- `width_target_mc_ci`:
+
+  the exact binomial (Clopper-Pearson) limits for that proportion, at
+  the confidence level of the table. They describe the error of the
+  simulation, which shrinks as `G` grows, and nothing else.
+
+A function that records more about its run adds elements to the list,
+and its help page names them. The line "Replications" beneath the
+printed table gives `G`, and the three counts when a replication was
+without an interval. With many replications without an interval the rows
+describe only the studies in which the interval could be formed, so
+`failed` is to be reported beside them.
 
 ## References
 
@@ -167,54 +230,63 @@ Ken Kelley <kkelley@nd.edu>
 # Monte Carlo sensitivity sweep; G is small here so the example runs quickly.
 # Raise G (e.g., G = 1000 or more) for a stable sensitivity analysis.
 set.seed(113)
-ss_aipe_c_ancova_sensitivity(true_error_var_ancova=30,
-                             est_error_var_ancova=30, rho=.2, mu_y=c(10,12,15,13), mu_x=2,
-                             G=50, sigma_x=1.3, sigma_y=2, c_weights=c(1,0,-1,0), width=3)
-#>  term                 value 
-#>  mean_psi             -4.98 
-#>  median_psi           -4.96 
-#>  sd_psi               0.26  
-#>  mean_ci_width        1.07  
-#>  median_ci_width      1.07  
-#>  sd_ci_width          0.0366
-#>  pct_ci_less_w        1     
-#>  pct_ci_miss_low      0.04  
-#>  pct_ci_miss_high     0.02  
-#>  total_type_I_error   0.06  
-#>  mean_se_ratio        0.999 
-#>  n_per_group          104   
-#>  total_N              416   
-#>  true_psi             -5    
-#>  est_error_var_ancova 30    
-#>  rho                  0.2   
-#>  width                3     
-#>  conf_level           0.95  
+ss_aipe_c_ancova_sensitivity(true_var_error_ancova = 30,
+                             supposed_var_error_ancova = 30,
+                             true_cor = .2, true_mean_Y = c(10, 12, 15, 13),
+                             true_mean_X = 2, true_sd_X = 1.3, true_sd_Y = 2,
+                             c_weights = c(1, 0, -1, 0), width = 3, G = 25)
+#>  term                      value 
+#>  mean_contrast             -4.985
+#>  median_contrast           -4.987
+#>  sd_contrast               0.287 
+#>  mean_ci_width             1.069 
+#>  median_ci_width           1.061 
+#>  sd_ci_width               0.038 
+#>  pct_ci_less_width         1.000 
+#>  pct_ci_miss_low           0.040 
+#>  pct_ci_miss_high          0.040 
+#>  total_type_I_error        0.080 
+#>  mean_se_ratio             0.999 
+#>  n_per_group               104   
+#>  total_N                   416   
+#>  true_contrast             -5    
+#>  supposed_var_error_ancova 30    
+#>  true_cor                  0.200 
+#>  width                     3     
+#>  conf_level                0.950 
+#> 
+#> Replications: 25
 #> 
 #> Confidence level: 95%
 
-ss_aipe_c_ancova_sensitivity(true_error_var_anova=36,
-                             est_error_var_anova=36, rho=.2, est_rho=.2, G=50,
-                             mu_y=c(10,12,15,13), mu_x=2, sigma_x=1.3, sigma_y=6,
-                             c_weights=c(1,0,-1,0), width=3, assurance=NULL)
-#>  term                 value 
-#>  mean_psi             -5    
-#>  median_psi           -4.94 
-#>  sd_psi               0.721 
-#>  mean_ci_width        3.02  
-#>  median_ci_width      3     
-#>  sd_ci_width          0.0912
-#>  pct_ci_less_w        0.5   
-#>  pct_ci_miss_low      0     
-#>  pct_ci_miss_high     0.02  
-#>  total_type_I_error   0.02  
-#>  mean_se_ratio        0.999 
-#>  n_per_group          119   
-#>  total_N              476   
-#>  true_psi             -5    
-#>  est_error_var_ancova 34.6  
-#>  rho                  0.2   
-#>  width                3     
-#>  conf_level           0.95  
+ss_aipe_c_ancova_sensitivity(true_var_error_anova = 36,
+                             supposed_var_error_anova = 36,
+                             true_cor = .2, supposed_cor = .2,
+                             true_mean_Y = c(10, 12, 15, 13), true_mean_X = 2,
+                             true_sd_X = 1.3, true_sd_Y = 6,
+                             c_weights = c(1, 0, -1, 0), width = 3,
+                             assurance = NULL, G = 25)
+#>  term                      value 
+#>  mean_contrast             -4.933
+#>  median_contrast           -4.936
+#>  sd_contrast               0.797 
+#>  mean_ci_width             2.989 
+#>  median_ci_width           2.991 
+#>  sd_ci_width               0.065 
+#>  pct_ci_less_width         0.600 
+#>  pct_ci_miss_low           0.040 
+#>  pct_ci_miss_high          0.000 
+#>  total_type_I_error        0.040 
+#>  mean_se_ratio             0.999 
+#>  n_per_group               119   
+#>  total_N                   476   
+#>  true_contrast             -5    
+#>  supposed_var_error_ancova 34.560
+#>  true_cor                  0.200 
+#>  width                     3     
+#>  conf_level                0.950 
+#> 
+#> Replications: 25
 #> 
 #> Confidence level: 95%
 ```

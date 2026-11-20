@@ -1,17 +1,18 @@
 # Asymptotic Variance of Coefficient Alpha (Cronbach, Guttman)
 
-Computes the asymptotic variance of the sample coefficient alpha
-(Guttman, 1945; Cronbach, 1951) under multivariate normality of the *p*
-item scores, using the closed form derived by van Zyl, Neudecker, & Nel
-(2000) under the assumption that the population covariance matrix has
-equal off-diagonals (the parallel-items model), along with the simpler
-Bonett (2002) approximation \\2p/(p-1) \cdot (1 - \alpha)^2 / (n - 1)\\
-that is widely used in planning.
+Computes two large-sample approximations to the variance of the sample
+coefficient alpha (Guttman, 1945; Cronbach, 1951) under multivariate
+normality of the *J* item scores and compound symmetry of their
+covariance matrix (equal item variances and equal covariances, the
+parallel-items model): the asymptotic variance of van Zyl, Neudecker,
+and Nel (2000), \\2J(1 - \alpha)^2 / ((J - 1)(N - 1))\\, and the
+variance that follows from Bonett (2002), \\2J(1 - \alpha)^2 / ((J -
+1)(N - 2))\\.
 
 ## Usage
 
 ``` r
-var_alpha(alpha, n, p_items)
+var_alpha(alpha, N, n_items)
 ```
 
 ## Arguments
@@ -20,47 +21,61 @@ var_alpha(alpha, n, p_items)
 
   Population coefficient alpha. Numeric scalar in \\\[0, 1)\\.
 
-- n:
+- N:
 
-  Sample size (number of *respondents*).
+  Total sample size (number of *respondents*).
 
-- p_items:
+- n_items:
 
-  Number of items contributing to the composite alpha coefficient.
+  Number of items contributing to the composite alpha coefficient (\\J\\
+  in the formulas); at least 2.
 
 ## Value
 
-A `data.frame` with rows for the van Zyl, Neudecker, & Nel (2000)
-exact-under-parallel-items variance and the Bonett (2002) simpler
-approximation; columns are `term` and `value`.
+A `data.frame` with columns `term` and `value` and two rows:
+`var_alpha_van_zyl`, the asymptotic variance of van Zyl, Neudecker, and
+Nel (2000), and `var_alpha_bonett`, the variance that follows from
+Bonett (2002).
 
 ## Details
 
-Companion to the existing reliability-coefficient infrastructure
-([`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md),
-[`reliability`](https://yelleknek.github.io/DMAR/reference/reliability.md))
-and a building block for AIPE planning around alpha.
+For an interval estimate of alpha from data see
+[`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md)
+and
+[`reliability`](https://yelleknek.github.io/DMAR/reference/reliability.md);
+for sample size planning see
+[`ss_aipe_reliability`](https://yelleknek.github.io/DMAR/reference/ss_aipe_reliability.md).
 
-**van Zyl-Neudecker-Nel (2000) variance.** Under multivariate normality
-and the parallel-items model (all items have equal variances and equal
-pairwise covariances), the asymptotic variance of the maximum likelihood
-estimator of alpha is \$\$\mathrm{Var}(\hat\alpha) \\=\\ \frac{2 p (1 -
-\alpha)^2}{(p - 1)(n - 2)}.\$\$ This is one of two closed forms van Zyl
-et al. derive; the more general (non-parallel) form involves matrix
-expressions and is implemented separately by the existing reliability
-infrastructure.
+**van Zyl, Neudecker, and Nel (2000).** Under multivariate normality and
+compound symmetry, van Zyl et al. show that
+\\n\\\mathrm{Var}(\hat\alpha)\\ tends to \\2J(1 - \alpha)^2 / (J - 1)\\
+as \\n\\ grows, where \\n = N - 1\\ is the degrees of freedom of the
+item covariance matrix (their Equation 13). The asymptotic variance is
+therefore \$\$\mathrm{Var}(\hat\alpha) \\\approx\\ \frac{2 J (1 -
+\alpha)^2}{(J - 1)(N - 1)}.\$\$ Without compound symmetry the asymptotic
+variance is a function of the whole item covariance matrix (their
+Equation 21);
+[`reliability_alpha`](https://yelleknek.github.io/DMAR/reference/reliability_alpha.md)
+uses that general form for its `"ml"` interval, and at a compound
+symmetric covariance matrix it equals the form above.
 
-**Bonett (2002) approximation.** Bonett (2002) gives the easy planning
-form \$\$\mathrm{Var}(\hat\alpha) \\\approx\\ \frac{2 p}{(p - 1)} \cdot
-\frac{(1 - \alpha)^2}{n - 1}.\$\$ This differs from the van Zyl form
-only in the denominator (\\n-1\\ vs.\\ \\n-2\\) and converges to the
-same value for moderate \\n\\. Bonett's version is what most sample size
-tables use.
+**Bonett (2002).** Bonett (2003, Equations 2 and 4), citing Bonett
+(2002), uses \\2J / ((J - 1)(N - 2))\\ as the large-sample variance of
+\\\ln(1 - \hat\alpha)\\ under the same assumptions. Carried to the alpha
+scale by the delta method it gives \$\$\mathrm{Var}(\hat\alpha)
+\\\approx\\ \frac{2 J (1 - \alpha)^2}{(J - 1)(N - 2)}.\$\$
 
-**When to use which.** For inference (a CI on \\\alpha\\), the van Zyl
-form is preferable, especially at small \\n\\; for sample size
-*planning* the difference is immaterial and the Bonett form is widely
-cited and easier to invert.
+**Comparing the two.** The two forms differ only in the denominator: the
+form with \\N - 2\\ is the form with \\N - 1\\ times \\(N - 1)/(N -
+2)\\, and a sample size chosen to reach a target variance is one larger
+with the \\N - 2\\ denominator than with \\N - 1\\. Both are
+large-sample approximations. Under multivariate normality and compound
+symmetry the exact variance of \\\hat\alpha\\ for \\N \> 5\\ is
+\$\$\frac{2 (1 - \alpha)^2 n (nJ - 2)}{(J - 1)(n - 2)^2 (n - 4)}, \quad
+n = N - 1\$\$ (van Zyl, Neudecker, & Nel, 2000, Equation 12). It is
+larger than both forms, and the form with \\N - 2\\ is the closer of the
+two: with \\J = 5\\ the exact variance is 2.53 times that form at \\N =
+10\\, 1.27 times at \\N = 30\\, and 1.07 times at \\N = 100\\.
 
 ## References
 
@@ -68,6 +83,10 @@ Bonett, D. G. (2002). Sample size requirements for testing and
 estimating coefficient alpha. *Journal of Educational and Behavioral
 Statistics, 27*(4), 335–340.
 [doi:10.3102/10769986027004335](https://doi.org/10.3102/10769986027004335)
+
+Bonett, D. G. (2003). Sample size requirements for comparing two alpha
+coefficients. *Applied Psychological Measurement, 27*(1), 72–74.
+[doi:10.1177/0146621602239477](https://doi.org/10.1177/0146621602239477)
 
 Cronbach, L. J. (1951). Coefficient alpha and the internal structure of
 tests. *Psychometrika, 16*(3), 297–334.
@@ -126,19 +145,19 @@ Ken Kelley <kkelley@nd.edu>
 ## Examples
 
 ``` r
-# 1. Variance of alpha = 0.80 from a 10-item test with n = 100.
-var_alpha(alpha = 0.80, n = 100, p_items = 10)
-#>  term              value   
-#>  var_alpha_van_zyl 0.000907
-#>  var_alpha_bonett  0.000898
+# 1. Variance of alpha = 0.80 from a 10-item test with N = 100.
+var_alpha(alpha = 0.80, N = 100, n_items = 10)
+#>  term              value
+#>  var_alpha_van_zyl 0.001
+#>  var_alpha_bonett  0.001
 
-# 2. Variance shrinks with n and grows as alpha moves away from 1:
-var_alpha(alpha = 0.90, n = 50,  p_items = 5)
-#>  term              value   
-#>  var_alpha_van_zyl 0.000521
-#>  var_alpha_bonett  0.00051 
-var_alpha(alpha = 0.90, n = 500, p_items = 5)
-#>  term              value   
-#>  var_alpha_van_zyl 5.02e-05
-#>  var_alpha_bonett  5.01e-05
+# 2. Variance shrinks with N and grows as alpha moves away from 1:
+var_alpha(alpha = 0.90, N = 50,  n_items = 5)
+#>  term              value
+#>  var_alpha_van_zyl 0.001
+#>  var_alpha_bonett  0.001
+var_alpha(alpha = 0.90, N = 500, n_items = 5)
+#>  term              value
+#>  var_alpha_van_zyl 0.000
+#>  var_alpha_bonett  0.000
 ```

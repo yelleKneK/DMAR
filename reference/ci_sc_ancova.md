@@ -9,13 +9,13 @@ excluding the covariate) or of the ANCOVA model.
 
 ``` r
 ci_sc_ancova(
-  psi = NULL,
+  contrast = NULL,
   adj_means = NULL,
   s_anova = NULL,
   s_ancova = NULL,
   standardizer = "s_ancova",
   c_weights,
-  n,
+  n_per_group,
   cov_means,
   SSwithin_x,
   conf_level = 0.95
@@ -24,7 +24,7 @@ ci_sc_ancova(
 
 ## Arguments
 
-- psi:
+- contrast:
 
   Unstandardized contrast of adjusted means
 
@@ -36,12 +36,14 @@ ci_sc_ancova(
 - s_anova:
 
   The standard deviation of the errors from the ANOVA model (i.e., the
-  square root of the mean square error from ANOVA)
+  square root of the mean square error from ANOVA); required, as a
+  single positive number, when `standardizer = "s_anova"`
 
 - s_ancova:
 
   The standard deviation of the errors from the ANCOVA model (i.e., the
-  square root of the mean square error from ANCOVA)
+  square root of the mean square error from ANCOVA); required, as a
+  single positive number, with either standardizer
 
 - standardizer:
 
@@ -54,7 +56,7 @@ ci_sc_ancova(
   sum to 1 and the negative *c*-weights sum to -1; i.e., use fractional
   values not integers).
 
-- n:
+- n_per_group:
 
   Either a single number that indicates the sample size per group, or a
   vector that contains the sample size of each group
@@ -71,16 +73,18 @@ ci_sc_ancova(
 - conf_level:
 
   The desired confidence interval coverage, (i.e., 1 - Type I error
-  rate)
+  rate). A level above .999999998, whose tail areas are below 1e-9, is
+  refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md))
 
 ## Value
 
 A 3-row `data.frame` with columns `term` and `value` (numeric). The
-`term` values are `"lower_limit"` (the lower confidence limit on the
-standardized ANCOVA contrast), `"psi"` (the standardized contrast), and
-`"upper_limit"` (the upper limit). The divisor used in standardization
-(either `"s_anova"` or `"s_ancova"`) is attached as the `"standardizer"`
-attribute of the returned data.frame.
+`term` values are `"ci_lower"` (the lower confidence limit on the
+standardized ANCOVA contrast), `"std_contrast"` (the standardized
+contrast), and `"ci_upper"` (the upper limit). The divisor used in
+standardization (either `"s_anova"` or `"s_ancova"`) is attached as the
+`"standardizer"` attribute of the returned data.frame.
 
 ## Details
 
@@ -110,9 +114,9 @@ Be sure to use the standard deviations and not the error variances for
 come from the source tables (i.e., do not use the variance of the errors
 but rather use its square root, the standard deviation).
 
-If `n` receives a single number, that number is considered as the sample
-size per group. If `n` is assigned to a vector, the vector is considered
-as the sample size of each group.
+If `n_per_group` receives a single number, that number is considered as
+the sample size per group. If `n_per_group` is assigned to a vector, the
+vector is considered as the sample size of each group.
 
 Be sure to use fractional *c*-weights when doing complex contrasts (not
 integers) to specify `c_weights`. For example, in an ANCOVA of four
@@ -147,9 +151,9 @@ experiments and analyzing data: A model comparison perspective* (4th
 ed.). Routledge. (See Chapter 9.)
 
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
-estimation and the evaluation of statistical methods. In L. L. Harlow,
-S. A. Mulaik, & J. H. Steiger (Eds.), *What if there were no
-significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 ## See also
 
@@ -165,10 +169,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -201,32 +206,32 @@ Ken Kelley <kkelley@nd.edu>
 # To obtained the confidence interval for the standardized adjusted mean difference
 # between group 1 and 2, using the ANCOVA error standard deviation:
 ci_sc_ancova(adj_means = c(7.5, 12, 14), s_ancova = 5.385165, c_weights = c(1, -1, 0),
-             n = 10, cov_means = c(17, 17.7, 17.4), SSwithin_x = 752.5)
-#>  term        value 
-#>  lower_limit -1.73 
-#>  psi         -0.836
-#>  upper_limit 0.0785
+             n_per_group = 10, cov_means = c(17, 17.7, 17.4), SSwithin_x = 752.5)
+#>  term         value 
+#>  ci_lower     -1.735
+#>  std_contrast -0.836
+#>  ci_upper     0.078 
 #> 
 #> Confidence level: 95%
 
 # Or, with less error in rounding:
 ci_sc_ancova(adj_means = c(7.54, 11.98, 13.98), s_ancova = 5.393, c_weights = c(-1, 0, 1),
-             n = 10, cov_means = c(17, 17.7, 17.4), SSwithin_x = 752.5)
-#>  term        value
-#>  lower_limit 0.249
-#>  psi         1.19 
-#>  upper_limit 2.12 
+             n_per_group = 10, cov_means = c(17, 17.7, 17.4), SSwithin_x = 752.5)
+#>  term         value
+#>  ci_lower     0.249
+#>  std_contrast 1.194
+#>  ci_upper     2.119
 #> 
 #> Confidence level: 95%
 
 # Now, using the standard deviation from ANOVA (and not ANCOVA as above), we have:
 ci_sc_ancova(adj_means = c(7.54, 11.98, 13.98), s_anova = 6.294, s_ancova = 5.393,
-             c_weights = c(-1, 0, 1),n = 10, cov_means = c(17, 17.7, 17.4),
+             c_weights = c(-1, 0, 1),n_per_group = 10, cov_means = c(17, 17.7, 17.4),
              SSwithin_x = 752.5, standardizer = "s_anova", conf_level = .95)
-#>  term        value
-#>  lower_limit 0.214
-#>  psi         1.02 
-#>  upper_limit 1.82 
+#>  term         value
+#>  ci_lower     0.214
+#>  std_contrast 1.023
+#>  ci_upper     1.815
 #> 
 #> Confidence level: 95%
 
@@ -243,12 +248,12 @@ ms_within_x   <- ms_between_x / 0.756
 SSwithin_x_ex <- ms_within_x * (sum(n_ex) - length(n_ex))
 
 ci_sc_ancova(adj_means = c(63.88, 62.39, 56.48), s_ancova = 20.267,
-             c_weights = c(0.5, 0.5, -1), n = n_ex, cov_means = cov_means_ex,
+             c_weights = c(0.5, 0.5, -1), n_per_group = n_ex, cov_means = cov_means_ex,
              SSwithin_x = SSwithin_x_ex)
-#>  term        value
-#>  lower_limit -0.23
-#>  psi         0.328
-#>  upper_limit 0.884
+#>  term         value 
+#>  ci_lower     -0.230
+#>  std_contrast 0.328 
+#>  ci_upper     0.884 
 #> 
 #> Confidence level: 95%
 ```

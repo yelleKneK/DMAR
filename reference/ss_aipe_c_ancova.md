@@ -12,9 +12,9 @@ corresponding ANOVA design requires.
 
 ``` r
 ss_aipe_c_ancova(
-  error_var_ancova = NULL,
-  error_var_anova = NULL,
-  rho = NULL,
+  true_var_error_ancova = NULL,
+  true_var_error_anova = NULL,
+  true_cor = NULL,
   c_weights,
   width,
   conf_level = 0.95,
@@ -24,17 +24,17 @@ ss_aipe_c_ancova(
 
 ## Arguments
 
-- error_var_ancova:
+- true_var_error_ancova:
 
   The population error variance of the ANCOVA model (i.e., the mean
   square within of the ANCOVA model)
 
-- error_var_anova:
+- true_var_error_anova:
 
   The population error variance of the ANOVA model (i.e., the mean
   square within of the ANOVA model)
 
-- rho:
+- true_cor:
 
   The population correlation coefficient of the response and the
   covariate
@@ -76,8 +76,8 @@ coefficient of the response and the covariate is also needed.
 ## References
 
 Kelley, K., Maxwell, S. E., & Rausch, J. R. (2003). Obtaining power or
-obtaining precision: Delineating methods of sample size planning.
-*Evaluation and the Health Professions, 26*(3), 258–287.
+obtaining precision: Delineating methods of sample-size planning.
+*Evaluation & the Health Professions, 26*(3), 258–287.
 [doi:10.1177/0163278703255242](https://doi.org/10.1177/0163278703255242)
 
 Lai, K., & Kelley, K. (2012). Accuracy in parameter estimation for
@@ -116,7 +116,7 @@ Ken Kelley <kkelley@nd.edu>
 # that, with 90 percent certainty, the obtained 95 percent full
 # confidence interval width is no wider than 3:
 
-ss_aipe_c_ancova(error_var_anova = 40, rho = .22, c_weights = c(1, -0.5, -0.5),
+ss_aipe_c_ancova(true_var_error_anova = 40, true_cor = .22, c_weights = c(1, -0.5, -0.5),
                  width = 3, assurance = .90)
 #>  term                  value
 #>  necessary_n_per_group 109  

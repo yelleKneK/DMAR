@@ -32,7 +32,8 @@ mlmr(
   auxiliary = NULL,
   effect_sizes = TRUE,
   enforce_es_bounds = FALSE,
-  ...
+  ...,
+  wald_df = Inf
 )
 ```
 
@@ -84,8 +85,13 @@ mlmr(
 
 - B:
 
-  Integer; number of bootstrap resamples when `ci_method = "boot"`.
-  Defaults to `1000`.
+  Number of bootstrap resamples when `ci_method = "boot"`, a single
+  whole number. Default `1000`, because every resample refits the model.
+  The fewest accepted is 400 at the default `conf_level` (200 at 0.90,
+  and 2000 at 0.99, which the default does not meet); a smaller `B` is
+  refused before anything is computed (class `dmar_count_invalid`). See
+  *Bootstrap replications* under *Details* and
+  [`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md).
 
 - boot_type:
 
@@ -96,11 +102,11 @@ mlmr(
 - boot_seed:
 
   Integer or `NULL`; optional seed for the bootstrap resampling RNG. The
-  default `NULL` leaves the user's current RNG state untouched, so
-  successive bootstrap calls draw fresh resamples; supply an integer to
-  make the bootstrap reproducible. When supplied, the function seeds the
-  RNG locally and restores the prior state on exit so the user's global
-  RNG is not polluted.
+  default `NULL` draws the resamples from, and advances, the current
+  random number stream, so successive bootstrap calls draw fresh
+  resamples; supply an integer to make the bootstrap reproducible. When
+  supplied, the function seeds the RNG locally and restores the prior
+  state on exit so the user's global RNG is not polluted.
 
 - estimator:
 
@@ -111,10 +117,9 @@ mlmr(
   statistic, recommended when the conditional distribution of *Y*
   departs from normality and FIML is in use (Yuan & Bentler, 2000).
   `MLM` is Satorra- Bentler scaled \\\chi^2\\ statistics under complete
-  data (Satorra & Bentler, 1994). `GLS` is generalized least squares, an
-  alternative ML-family estimator that is less commonly used in modern
-  practice. The ordinal-data estimators (`"DWLS"`, `"WLS"`, `"ULS"` and
-  their robust variants) are intentionally not exposed; for ordinal
+  data (Satorra & Bentler, 1994). `GLS` is normal theory generalized
+  least squares. The ordinal-data estimators (`"DWLS"`, `"WLS"`, `"ULS"`
+  and their robust variants) are intentionally not exposed; for ordinal
   outcomes, fit a different model class.
 
 - se:
@@ -140,18 +145,25 @@ mlmr(
   Character vector of variable names in `data` to include as auxiliary
   variables, or `NULL` (default) for none. Auxiliaries are entered as
   saturated correlates (Graham, 2003): correlated with the outcome
-  residual, every predictor, and each other, but not as predictors, so
-  the regression coefficients keep their meaning while the full
-  information maximum likelihood draws on the auxiliaries' observed
+  residual, every predictor, and each other, but not as predictors,
+  while the predictors keep their free covariances, so the model is
+  saturated, the regression coefficients keep their meaning, and the
+  full information maximum likelihood draws on the auxiliaries' observed
   values (the inclusive analysis strategy; Collins, Schafer, & Kam,
   2001). A name in `auxiliary` must be numeric, must be present in
   `data`, must not appear in `formula`, and requires `fixed_x = FALSE`.
+  Auxiliaries are refused with `missing = "listwise"`, which would drop
+  every row on which an auxiliary is missing and so change the sample
+  the coefficients describe, and with `missing = "pairwise"` or
+  `"available.cases"`, which compute the moments from each pair of
+  variables on its own, so that an auxiliary would leave every estimate
+  unchanged.
 
 - effect_sizes:
 
   Logical; whether to compute regression effect sizes (standardized
   betas, semi-partial \\R^2\\, Cohen's \\f^2\\ per predictor, and the
-  overall LR omnibus test). Defaults to `TRUE`. Disabling saves \\K +
+  overall LR omnibus test). Defaults to `TRUE`. Disabling saves \\p +
   1\\ additional lavaan refits.
 
 - enforce_es_bounds:
@@ -171,6 +183,22 @@ mlmr(
 
   Additional arguments forwarded to
   [`lavaan`](https://rdrr.io/pkg/lavaan/man/lavaan.html).
+
+- wald_df:
+
+  The reference distribution of the Wald interval and of the *p*-values:
+  `Inf` (the default), the normal distribution; a single positive
+  number, the degrees of freedom of a *t* distribution for every
+  coefficient; or `"missing_information"`, von Hippel's (2016) degrees
+  of freedom \\\max\\3, N(1 - \gamma_j) - k\\\\ for each coefficient,
+  from its fraction of missing information \\\gamma_j\\. A finite value
+  or the keyword requires `ci_method = "wald"`. The keyword is an error
+  where, with values missing, lavaan fit the complete cases in place of
+  the FIML fit that `missing = "fiml"` asks for, as it does for
+  `se = "robust.sem"` or a test statistic of the Satorra-Bentler kind
+  passed through `...`; with no value missing that fit is the FIML fit,
+  and the keyword gives \\N - k\\. It follows `...`, so it must be named
+  in full. See *Details*.
 
 ## Value
 
@@ -213,19 +241,31 @@ structure of an `lm` fit:
 
   Which method was used to compute `ci`.
 
+- `B`, `B_used`, `n_dropped`, `B_required`, `bootstrap_status`:
+
+  Present only with `ci_method = "boot"`: the resamples requested, the
+  number the intervals rest on, their difference, the fewest resamples a
+  request may ask for, and the verdict (`"complete"`, `"dropped"`,
+  `"exploratory"`, `"insufficient_count"`, or `"insufficient_share"`;
+  under the last two the limits are `NA`). See *Bootstrap replications*
+  under Details.
+
 - `conf_level`:
 
   The confidence level used.
 
 - `coef_table`:
 
-  A `data.frame` with columns `term`, `estimate`, `se`, `z_value`,
-  `p_value`, `ci_lower`, `ci_upper`.
+  A `data.frame` with columns `term`, `estimate`, `se`,
+  `test_statistic`, `p_value`, `ci_lower`, `ci_upper`, carrying the
+  confidence level in its `conf_level` attribute, so that
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md)
+  on a row reports it.
 
 - `sigma2`:
 
   Residual variance of *Y*, on the maximum likelihood scale (divisor
-  *N*, not \\N - K - 1\\).
+  *N*, not \\N - p - 1\\).
 
 - `R2`:
 
@@ -272,6 +312,15 @@ structure of an `lm` fit:
   The underlying lavaan fit object, returned for advanced users who want
   to apply lavaan accessors directly.
 
+The object carries the attribute `wald_df`, the degrees of freedom of
+the *t* reference of the Wald interval and the *p*-values: `Inf` for the
+normal reference, the number supplied, or under
+`wald_df = "missing_information"` a named vector with one value per
+coefficient. In the last case the attribute `wald_df_table` is the
+[`df_missing`](https://yelleknek.github.io/DMAR/reference/df_missing.md)
+table the values came from, with each coefficient's fraction of missing
+information, \\N\\, \\k\\, and whether the floor applied.
+
 ## Details
 
 **Why a separate function from `lm`.** `lm` uses ordinary least squares
@@ -282,9 +331,10 @@ First, when a predictor is missing on some rows, listwise deletion can
 be biased if the missingness mechanism depends on other observed
 variables (the missing at random or MAR pattern). Full information
 maximum likelihood (FIML) jointly models the distribution of \\(Y, X_1,
-\ldots, X_K)\\ and yields consistent regression estimates under MAR,
-while listwise estimates can be biased away from the population values
-(Enders, 2010; Schafer & Graham, 2002).
+\ldots, X_p)\\, the outcome and the \\p\\ predictors, and yields
+consistent regression estimates under MAR, while listwise estimates can
+be biased away from the population values (Enders, 2010; Schafer &
+Graham, 2002).
 
 Second, the joint likelihood estimates the predictor distribution as
 well, so quantities that depend on the predictor moments (the
@@ -293,33 +343,43 @@ variances and covariances) draw on every row with an observed predictor,
 not only the rows that are complete on the outcome. When the missing
 values are confined to the outcome, however, the unstandardized slopes
 and their standard errors match listwise deletion up to the maximum
-likelihood \\N\\ versus \\N - K - 1\\ variance divisor. The rows with an
+likelihood \\N\\ versus \\N - p - 1\\ variance divisor. The rows with an
 observed predictor but a missing outcome inform the marginal
 distribution of *X*, not the conditional distribution of *Y* given *X*
 that identifies the slopes, so they leave the slope estimates and their
 conditional-model standard errors unchanged.
 
-The full information advantage is largest when (i) any predictors are
-missing on some rows, (ii) auxiliary variables that correlate with the
-outcome or with the missingness mechanism are supplied through
-`auxiliary` (see below), or (iii) the bootstrap is used to obtain
-inference that does not depend on the multivariate normality assumption.
+Full information estimation differs from listwise deletion in the slope
+estimates themselves when any predictors are missing on some rows, or
+when auxiliary variables that correlate with the outcome or with the
+missingness mechanism are supplied through `auxiliary` (see below). The
+bootstrap gives inference that does not depend on the multivariate
+normality assumption.
 
 **Auxiliary variables.** A variable that is not part of the regression
 but is correlated with the outcome or with the missingness can be
 supplied through `auxiliary`. Auxiliaries are added to the model as
 saturated correlates (Graham, 2003): each one is correlated with the
 residual of the outcome, with every predictor, and with every other
-auxiliary, but is never entered as a predictor. The focal regression
-coefficients keep their meaning (on complete data they are unchanged to
-working precision), while the full information maximum likelihood uses
-the auxiliaries' observed values to make the MAR assumption hold
-conditional on more of the observed data and to recover information that
-listwise deletion discards. This is the inclusive analysis strategy of
-Collins, Schafer, and Kam (2001): a variable that predicts the
-missingness or the incomplete outcome belongs in the analysis even when
-it is of no substantive interest. Auxiliary variables must be numeric
-and require `fixed_x = FALSE` (the default).
+auxiliary, but is never entered as a predictor, and the predictors keep
+their free means, variances, and covariances. The model over the
+outcome, the predictors, and the auxiliaries is then saturated (its chi
+square is zero on zero degrees of freedom), so the auxiliaries impose no
+restriction and the focal regression coefficients keep their meaning: on
+complete data they equal those of
+[`lm()`](https://rdrr.io/r/stats/lm.html) to working precision, and with
+missing values they are the regression implied by the full information
+maximum likelihood estimates of the means and covariances of every
+variable, auxiliaries included, which
+[`cov_fiml`](https://yelleknek.github.io/DMAR/reference/cov_fiml.md)
+computes. The full information maximum likelihood uses the auxiliaries'
+observed values to make the MAR assumption hold conditional on more of
+the observed data and to recover information that listwise deletion
+discards. This is the inclusive analysis strategy of Collins, Schafer,
+and Kam (2001): a variable that predicts the missingness or the
+incomplete outcome belongs in the analysis even when it is of no
+substantive interest. Auxiliary variables must be numeric and require
+`fixed_x = FALSE` (the default).
 
 **Why likelihood ratio confidence intervals by default.** Wald intervals
 (point estimate \\\pm\\ \\z\_{1 - \alpha/2}\\ standard error) are
@@ -335,6 +395,74 @@ parameter constrained. The examples below ask for the Wald and bootstrap
 intervals so the help page stays quick; a reported analysis leaves
 `ci_method` at its default.
 
+**A *t* reference distribution for the Wald interval.** The Wald
+interval and every *p*-value refer the ratio of a coefficient to its
+standard error to the normal distribution, which treats the standard
+error as known. That holds only in the limit: in small samples, and more
+so when values are missing, the normal intervals are too short. In von
+Hippel's (2016, pp. 432–433) simulations of bivariate normal data with
+half of one variable missing, the normal FIML intervals for the
+intercept and slope of a regression covered 5 to 6 points below the
+nominal 95% at *n* = 25, and 0 to 3 points below it at *n* = 100. He
+kept the maximum likelihood estimate and its standard error and replaced
+the normal quantile with a *t* quantile (his Eq. 29), on degrees of
+freedom that take the missing information into account. With
+`ci_method = "wald"`, `wald_df` does this. A number refers every
+coefficient's interval and *p*-value to the *t* distribution on that
+many degrees of freedom. The keyword `"missing_information"` applies von
+Hippel's rule for regression coefficients (his Eqs. 31 and 34) to each
+coefficient separately, \$\$\nu_j = \max\\3, N(1 - \gamma_j) - k\\,\$\$
+the complete data degrees of freedom \\N - k\\ of a regression with
+\\k\\ parameters (the slopes and the intercept) with the sample size
+replaced by the coefficient's effective sample size, where \\N\\ is the
+number of cases the fit used and \\\gamma_j\\ the coefficient's fraction
+of missing information. The fraction is estimated from the fit as
+[`fraction_missing_information`](https://yelleknek.github.io/DMAR/reference/fraction_missing_information.md)
+estimates it, by the unstructured information of Chen and Savalei
+(2021), which cannot be negative. The model leaves the means and
+covariances of the outcome, the predictors, and any auxiliary variables
+unrestricted (it is saturated), and the three estimators of Chen and
+Savalei then coincide up to numerical error (Chen & Savalei, 2021, pp.
+3, 9), so the fraction agrees with lavaan's
+`parameterEstimates(fit, fmi = TRUE)` to the precision of lavaan's own
+computation. Unlike lavaan's, its computation does not depend on the
+units of the variables: an outcome measured in dollars, with a standard
+deviation of 100,000,000, gets the degrees of freedom it gets in
+millions of dollars (see
+[`fraction_missing_information`](https://yelleknek.github.io/DMAR/reference/fraction_missing_information.md)).
+It is computed at the fit's estimates, which lavaan can leave short of
+the maximum of the likelihood for variables measured in small units
+(with every standard deviation near .003 the intercept's degrees of
+freedom moved by .15); the call then warns, and `rescale_data = TRUE`,
+passed through `...` to lavaan, is the remedy. A fraction that cannot be
+computed stops the call with the reason, rather than leave a coefficient
+with no degrees of freedom. A coefficient estimated mostly from fully
+observed variables keeps nearly all of the complete data degrees of
+freedom, and with no missing values every coefficient has \\N - k\\. The
+floor of 3 keeps a *t* distribution with finite variance when the
+estimated fraction is near one.
+[`df_missing`](https://yelleknek.github.io/DMAR/reference/df_missing.md)
+computes the same degrees of freedom from any fractions of missing
+information, and its help page describes both of von Hippel's rules and
+the evidence for them; the table it returns for the fit is the
+`wald_df_table` attribute. Two cautions. The *t* interval is an
+approximation, since the small-sample distribution of a maximum
+likelihood estimate from incomplete data is not exactly *t* (von Hippel,
+2016, p. 431). And the standard error is the maximum likelihood one,
+whose variance estimate divides by \\N\\ rather than \\N - k\\, so with
+complete data the interval on \\N - k\\ degrees of freedom is shorter
+than the interval [`lm()`](https://rdrr.io/r/stats/lm.html) reports by
+the factor \\\sqrt{(N - k)/N}\\: von Hippel's construction pairs the
+maximum likelihood standard error with the *t* quantile, and it is
+reproduced here as he published it, without a variance correction. The
+default, `Inf`, is the normal reference. The `test_statistic` column
+holds the ratio of the estimate to its standard error, the same number
+under either reference.
+[`summary()`](https://rdrr.io/r/base/summary.html) heads the printed
+coefficient table `t value` and `Pr(>|t|)` under a *t* reference, as
+[`summary.lm()`](https://rdrr.io/r/stats/summary.lm.html) does, and
+names the degrees of freedom directly beneath it.
+
 **The bootstrap interval.** With `ci_method = "boot"` the rows of `data`
 are resampled with replacement `B` times (1000 by default) and the model
 is refit on each resample; with `boot_type = "bollen.stine"` the
@@ -343,19 +471,45 @@ model (Bollen & Stine, 1992), a model-based bootstrap. Only the
 percentile interval is offered: each coefficient's limits are the
 empirical quantiles of its resampled estimates (Efron & Tibshirani,
 1993); there is no bias-corrected and accelerated (BCa) or bootstrap
-standard error variant. Resamples on which the refit does not converge
-are dropped, and the interval is computed from the resamples that return
-a value. The default `B = 1000` is adequate for the central quantiles a
-percentile interval uses; raising it tightens the Monte Carlo error of
+standard error variant. Raising `B` tightens the Monte Carlo error of
 the reported limits. Bootstrap results vary from run to run; supply
 `boot_seed` for reproducibility.
+
+**Bootstrap replications.** Each coefficient's limits are quantiles of
+its `B` resampled estimates, so the interval is run only when `B` puts
+at least 10 resamples beyond each limit (400 at the 95 percent level). A
+replication in which some coefficient is undefined (the refit fails or
+does not converge, or returns a coefficient that is not a finite number)
+is dropped and counted, never replaced, and the interval is computed
+from the rest. The result records `B` (requested), `B_used` (the number
+the interval rests on), `n_dropped`, and `B_required` (the fewest
+replications a request may ask for; that count is held to `B`, not to
+`B_used`) as elements of the fitted object, and
+[`print()`](https://rdrr.io/r/base/print.html) and
+[`summary()`](https://rdrr.io/r/base/summary.html) state them in one
+line, with `bootstrap_status` (`"complete"`, `"dropped"`,
+`"exploratory"`, `"insufficient_count"`, or `"insufficient_share"`). One
+warning of class `dmar_bootstrap_replications_dropped` states the counts
+when any replication was dropped, with a caution when the dropped
+replications are at least the 2.5 percent of `B` that lies beyond one
+limit at the 95 percent level, because they could then decide by
+themselves where that limit falls. When more than half were dropped, the
+limits of every coefficient are `NA`, the estimate is returned, and the
+warning has class `dmar_bootstrap_insufficient`. Such a resample is
+dropped for every coefficient, so all intervals rest on the same
+resamples. `options(dmar.bootstrap_exploratory = TRUE)` lets a smaller
+`B` (2 or more) run for a first look or a demonstration; every such call
+gives a warning of class `dmar_bootstrap_exploratory` and the result is
+not one to report. See
+[`dmar_bootstrap`](https://yelleknek.github.io/DMAR/reference/dmar_bootstrap.md)
+for the rule and its reasons.
 
 **Model representation.** Internally the model is fit through lavaan as
 a structural equation model in which *Y* is regressed on the predictors
 and (when `fixed_x = FALSE`) the predictor distribution is also
 estimated. With `fixed_x = FALSE` and complete data, point estimates of
 the slopes are identical to `lm` and the residual variance differs only
-by the usual \\N\\ versus \\N - K - 1\\ divisor.
+by the usual \\N\\ versus \\N - p - 1\\ divisor.
 
 **Caveats.** The function assumes that, conditional on the modeled
 predictors, the dependent variable is normally distributed with constant
@@ -372,6 +526,11 @@ Bollen, K. A., & Stine, R. A. (1992). Bootstrapping goodness of fit
 measures in structural equation models. *Sociological Methods &
 Research, 21*, 205–229.
 [doi:10.1177/0049124192021002004](https://doi.org/10.1177/0049124192021002004)
+
+Chen, L., & Savalei, V. (2021). Three sample estimates of fraction of
+missing information from full information maximum likelihood. *Frontiers
+in Psychology, 12*, 667802.
+[doi:10.3389/fpsyg.2021.667802](https://doi.org/10.3389/fpsyg.2021.667802)
 
 Collins, L. M., Schafer, J. L., & Kam, C.-M. (2001). A comparison of
 inclusive and restrictive strategies in modern missing data procedures.
@@ -404,6 +563,11 @@ research* (pp. 399–419). Sage.
 Schafer, J. L., & Graham, J. W. (2002). Missing data: Our view of the
 state of the art. *Psychological Methods, 7*, 147–177.
 [doi:10.1037/1082-989X.7.2.147](https://doi.org/10.1037/1082-989X.7.2.147)
+
+von Hippel, P. T. (2016). New confidence intervals and bias comparisons
+show that maximum likelihood can beat multiple imputation in small
+samples. *Structural Equation Modeling, 23*(3), 422–437.
+[doi:10.1080/10705511.2015.1047931](https://doi.org/10.1080/10705511.2015.1047931)
 
 Yuan, K.-H., & Bentler, P. M. (2000). Three likelihood-based methods for
 mean and covariance structure analysis with nonnormal missing data.
@@ -501,21 +665,25 @@ summary(fit_mlmr)
 # bootstrap interval because those refits take longer than a help
 # page should. The bootstrap resamples rows and takes percentile
 # limits; it is what to ask for when the normality the likelihood
-# assumes is doubtful. B = 20 keeps the example quick, since every
-# resample refits the model; a reported interval deserves the
-# default B = 1000. boot_seed fixes the resamples, so the limits
-# are reproducible rather than moving from run to run, and
+# assumes is doubtful. Every resample refits the model. B = 10 keeps
+# the example quick and is below the 400 a reported interval needs;
+# the option lets it run and the warning says so. A reported interval
+# deserves the default B = 1000. boot_seed fixes the resamples, so
+# the limits are reproducible rather than moving from run to run, and
 # effect_sizes = FALSE skips the effect size refits, which
 # summary() above already showed.
+old <- options(dmar.bootstrap_exploratory = TRUE)
 fit_boot <- mlmr(t6_paragraph_comprehension ~ t5_general_information +
                    t9_word_meaning, data = holzinger_swineford,
-                 ci_method = "boot", B = 20, boot_seed = 113,
+                 ci_method = "boot", B = 10, boot_seed = 113,
                  effect_sizes = FALSE)
+#> Warning: mlmr(): B = 10 is below the 400 replications a 95% interval is reported from (10 beyond each limit). The limits are shown because options(dmar.bootstrap_exploratory = TRUE) is set. With 10 replications each limit rests on about 0.3 of them and will move from seed to seed; use the result to explore or to demonstrate, and report an interval only from B of at least 400. B, B_used, and B_required are recorded in the result.
+options(old)
 confint(fit_boot)
-#>                            2.5 %    97.5 %
-#> (Intercept)            1.7855654 3.0635064
-#> t5_general_information 0.0640120 0.1012809
-#> t9_word_meaning        0.1731662 0.2686039
+#>                             2.5 %    97.5 %
+#> (Intercept)            1.71871728 2.9437862
+#> t5_general_information 0.06784019 0.1001241
+#> t9_word_meaning        0.20867244 0.2509053
 
 # Missing values on a predictor are where maximum likelihood and
 # least squares part company. The full information likelihood keeps
@@ -548,8 +716,10 @@ c(N_fiml = nobs(fit_fiml), N_listwise = nobs(fit_lwd))
 # the likelihood can draw on it for the rows where t26_flags is
 # missing while the coefficients keep their meaning. Continuing from
 # the model above, the coefficients move a little and the slope
-# standard errors shrink: the information the auxiliary recovers
-# shows mostly as precision.
+# standard errors shrink a little: among the 145 students who took
+# t26_flags its correlation with t13 is .34, so the auxiliary
+# restores only part of the information the missing scores would
+# have carried.
 fit_aux <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
                   t26_flags, data = holzinger_swineford,
                 ci_method = "wald",
@@ -557,13 +727,58 @@ fit_aux <- mlmr(t6_paragraph_comprehension ~ t7_sentence +
                 effect_sizes = FALSE)
 cbind(no_aux = coef(fit_fiml), aux = coef(fit_aux))
 #>                  no_aux         aux
-#> (Intercept) -0.43354809 -0.70314266
-#> t7_sentence  0.47191824  0.48769430
-#> t26_flags    0.04019371  0.03882967
+#> (Intercept) -0.43354809 -0.43606955
+#> t7_sentence  0.47191824  0.47561312
+#> t26_flags    0.04019371  0.03811271
 cbind(se_no_aux = sqrt(diag(vcov(fit_fiml))),
       se_aux = sqrt(diag(vcov(fit_aux))))
 #>              se_no_aux     se_aux
-#> (Intercept) 0.79537553 0.90784294
-#> t7_sentence 0.03046276 0.02690659
-#> t26_flags   0.02506817 0.02354469
+#> (Intercept) 0.79537553 0.81583455
+#> t7_sentence 0.03046276 0.02967365
+#> t26_flags   0.02506817 0.02477070
+
+# With most of a variable missing, the normal reference understates the
+# uncertainty in a small sample. Here the outcome t26_flags is observed
+# for 145 of the 301 students, and wald_df = "missing_information"
+# refers each coefficient to t on von Hippel's degrees of freedom,
+# N(1 - FMI) - k, fewer than half of the N - k = 298 that complete
+# data would give. The summary lists each coefficient's fraction of
+# missing information and degrees of freedom under the intervals.
+fit_t <- mlmr(t26_flags ~ t1_visual_perception + t4_lozenges,
+              data = holzinger_swineford, ci_method = "wald",
+              wald_df = "missing_information", effect_sizes = FALSE)
+summary(fit_t)
+#> 
+#> Call:
+#> mlmr(formula = t26_flags ~ t1_visual_perception + t4_lozenges, 
+#>     data = holzinger_swineford, ci_method = "wald", effect_sizes = FALSE, 
+#>     wald_df = "missing_information")
+#> 
+#> Missing data: fiml | Estimator: ML | SE: standard
+#> Sample size (used by lavaan): 301   Complete cases: 145
+#> 
+#> Coefficients:
+#>                      Estimate Std. Error t value Pr(>|t|)    
+#> (Intercept)          19.70907    2.54234   7.752 1.76e-12 ***
+#> t1_visual_perception  0.38411    0.09366   4.101 7.03e-05 ***
+#> t4_lozenges           0.32774    0.07786   4.209 5.03e-05 ***
+#> ---
+#> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#> Wald intervals and p-values: t reference on von Hippel's (2016) missing
+#> information degrees of freedom, max(3, N(1 - FMI) - k), with N = 301 and k =
+#> 3:
+#>    term                 fmi   df   
+#>    (Intercept)          0.530 138.4
+#>    t1_visual_perception 0.536 136.5
+#>    t4_lozenges          0.598 118.0
+#> 
+#> Confidence intervals (method: wald, level = 0.95):
+#>                        2.5 %  97.5 %
+#> (Intercept)          14.6822 24.7359
+#> t1_visual_perception  0.1989  0.5693
+#> t4_lozenges           0.1736  0.4819
+#> 
+#> Residual std. error (ML): 6.945 on 142 residual degrees of freedom
+#> Model implied R-squared: 0.3228,   Adjusted R-squared: 0.3132,   Cohen's f^2: 0.4766
+#> Log likelihood: -2556   AIC: 5131   BIC: 5164
 ```

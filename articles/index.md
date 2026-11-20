@@ -23,16 +23,22 @@
 - [Composite Sample Size Planning for SEM: A Simple Model and a Latent
   Growth
   Curve](https://yelleknek.github.io/DMAR/articles/composite_sem_planning.md):
+- [SEM Fit and Model Comparison: Definitions, Uncertainty, and
+  Use](https://yelleknek.github.io/DMAR/articles/sem_fit_measures.md):
 - [Reliability in DMAR: Choosing the Coefficient, Choosing the
   Interval](https://yelleknek.github.io/DMAR/articles/reliability.md):
 - [Maximum Likelihood Multiple Regression and Multivariate
   Regression](https://yelleknek.github.io/DMAR/articles/mlmr.md):
+- [Missing Data: What the Missing Values
+  Cost](https://yelleknek.github.io/DMAR/articles/missing_data.md):
 - [Visualizing Effect Sizes and Distributions With
   DMAR](https://yelleknek.github.io/DMAR/articles/effect-size-visualization.md):
 - [How DMAR's Functions Fit Together: A Deep
   Dive](https://yelleknek.github.io/DMAR/articles/function_interactions.md):
 - [Sums of Squares in Nonorthogonal
   Designs](https://yelleknek.github.io/DMAR/articles/sums_of_squares.md):
+- [Classical Tests as Path Models in
+  lavaan](https://yelleknek.github.io/DMAR/articles/anova_as_path_model.md):
 
 ### Case studies
 

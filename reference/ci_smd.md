@@ -3,15 +3,15 @@
 Constructs an exact-coverage confidence interval for the population
 standardized mean difference \\\delta = (\mu_1 - \mu_2)/\sigma\\
 (Cohen's *d* when expressed as a sample quantity) for two independent
-groups under bivariate normality with equal variances. The interval is
-obtained by inverting the noncentral *t* sampling distribution of the
-rescaled statistic \\t = \hat d \sqrt{n_1 n_2 / (n_1 + n_2)}\\, which
-under the independent groups equal variances model is exactly noncentral
-*t* with \\n_1 + n_2 - 2\\ degrees of freedom and noncentrality
-parameter \\\lambda = \delta \sqrt{n_1 n_2 / (n_1 + n_2)}\\ (Hedges,
-1981). The confidence limits are then rescaled back to the \\\delta\\
-metric. This is the same construction Steiger and Fouladi (1997) and
-Kelley (2007) describe for noncentral effect size CIs.
+groups whose scores are normal within each group with a common variance.
+The interval is obtained by inverting the noncentral *t* sampling
+distribution of the rescaled statistic \\t = \hat d \sqrt{n_1 n_2 /
+(n_1 + n_2)}\\, which under the independent groups equal variances model
+is exactly noncentral *t* with \\n_1 + n_2 - 2\\ degrees of freedom and
+noncentrality parameter \\\lambda = \delta \sqrt{n_1 n_2 / (n_1 +
+n_2)}\\ (Hedges, 1981). The confidence limits are then rescaled back to
+the \\\delta\\ metric. This is the same construction Steiger and Fouladi
+(1997) and Kelley (2007) describe for noncentral effect size CIs.
 
 ## Usage
 
@@ -52,7 +52,8 @@ ci_smd(
 
 - conf_level:
 
-  The confidence level (1-Type I error rate)
+  The confidence level (1-Type I error rate). A level above .999999998,
+  whose tail areas are below 1e-9, is refused
 
 - alpha_lower:
 
@@ -60,7 +61,15 @@ ci_smd(
 
 - alpha_upper:
 
-  The Type I error rate for the upper tail
+  The Type I error rate for the upper tail. The table records the
+  coverage, `1 - alpha_lower - alpha_upper`, as its level and, when the
+  two tail areas differ, the areas themselves, which the line beneath
+  the printed table,
+  [`results_sentence`](https://yelleknek.github.io/DMAR/reference/dmar_output_helpers.md),
+  and the `alpha_lower` and `alpha_upper` columns of `tidy()` state;
+  with a tail area of 0 the interval is a one-sided confidence bound. A
+  nonzero tail area below 1e-9 is refused (see "Small tail areas" in
+  [`ci_nc_t`](https://yelleknek.github.io/DMAR/reference/ci_nc_t.md)).
 
 - tol:
 
@@ -74,9 +83,9 @@ ci_smd(
 ## Value
 
 A 3-row `data.frame` with columns `term` and `value`. The `term` values
-are `"lower_limit"` (the lower bound of the confidence interval on the
+are `"ci_lower"` (the lower bound of the confidence interval on the
 standardized mean difference), `"smd"` (the point estimate), and
-`"upper_limit"` (the upper bound).
+`"ci_upper"` (the upper bound).
 
 ## Details
 
@@ -154,8 +163,8 @@ narrow confidence intervals. *Psychological Methods, 11*(4), 363–385.
 [doi:10.1037/1082-989X.11.4.363](https://doi.org/10.1037/1082-989X.11.4.363)
 
 Kelley, K., Maxwell, S. E., & Rausch, J. R. (2003). Obtaining power or
-obtaining precision: Delineating methods of sample size planning.
-*Evaluation and the Health Professions, 26*(3), 258–287.
+obtaining precision: Delineating methods of sample-size planning.
+*Evaluation & the Health Professions, 26*(3), 258–287.
 [doi:10.1177/0163278703255242](https://doi.org/10.1177/0163278703255242)
 
 Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). *Designing
@@ -169,9 +178,9 @@ Review of Psychology, 59*, 537–563.
 [doi:10.1146/annurev.psych.59.103006.093735](https://doi.org/10.1146/annurev.psych.59.103006.093735)
 
 Steiger, J. H., & Fouladi, R. T. (1997). Noncentrality interval
-estimation and the evaluation of statistical methods. In L. L. Harlow,
-S. A. Mulaik, & J. H. Steiger (Eds.), *What if there were no
-significance tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
+estimation and the evaluation of statistical models. In L. L. Harlow, S.
+A. Mulaik, & J. H. Steiger (Eds.), *What if there were no significance
+tests?* (pp. 221–257). Mahwah, NJ: Lawrence Erlbaum.
 
 ## See also
 
@@ -192,10 +201,11 @@ Other confidence intervals for effect sizes:
 [`ci_cv()`](https://yelleknek.github.io/DMAR/reference/ci_cv.md),
 [`ci_eta_squared()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared.md),
 [`ci_eta_squared_generalized()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_generalized.md),
-[`ci_eta_squared_partial()`](https://yelleknek.github.io/DMAR/reference/ci_eta_squared_partial.md),
 [`ci_mahalanobis()`](https://yelleknek.github.io/DMAR/reference/ci_mahalanobis.md),
 [`ci_omega_squared()`](https://yelleknek.github.io/DMAR/reference/ci_omega_squared.md),
 [`ci_pvaf()`](https://yelleknek.github.io/DMAR/reference/ci_pvaf.md),
+[`ci_ratio_of_means()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means.md),
+[`ci_ratio_of_means_paired()`](https://yelleknek.github.io/DMAR/reference/ci_ratio_of_means_paired.md),
 [`ci_rc()`](https://yelleknek.github.io/DMAR/reference/ci_rc.md),
 [`ci_reg_coef()`](https://yelleknek.github.io/DMAR/reference/ci_reg_coef.md),
 [`ci_rmsea()`](https://yelleknek.github.io/DMAR/reference/ci_rmsea.md),
@@ -218,17 +228,17 @@ Ken Kelley <kkelley@nd.edu>
 ``` r
 # Steiger and Fouladi (1997) example values.
 ci_smd(ncp = 2.6, n_1 = 10, n_2 = 10, conf_level = 1 - .05)
-#>  term        value
-#>  lower_limit 0.195
-#>  smd         1.16 
-#>  upper_limit 2.1  
+#>  term     value
+#>  ci_lower 0.195
+#>  smd      1.163
+#>  ci_upper 2.103
 #> 
 #> Confidence level: 95%
 ci_smd(ncp = 2.4, n_1 = 300, n_2 = 300, conf_level = 1 - .05)
-#>  term        value 
-#>  lower_limit 0.0355
-#>  smd         0.196 
-#>  upper_limit 0.356 
+#>  term     value
+#>  ci_lower 0.035
+#>  smd      0.196
+#>  ci_upper 0.356
 #> 
 #> Confidence level: 95%
 ```
