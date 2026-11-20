@@ -1,0 +1,141 @@
+#' Asymptotic Variance of the Partial Correlation Coefficient
+#'
+#' Computes the large-sample variance of the sample partial correlation
+#' coefficient \eqn{r_{XY \cdot Z_1 \cdots Z_{p-1}}} under multivariate
+#' normality. Two formulas are available: the first-order variance on
+#' the raw \eqn{r} scale (the default), and the variance
+#' \eqn{1/(N - p - 2)} of the Fisher's \emph{Z} transformation (Fisher,
+#' 1921, 1924), which is the appropriate quantity for constructing a
+#' confidence interval by transformation and back-transformation.
+#'
+#' @param r The sample partial correlation coefficient
+#'   \eqn{r_{XY \cdot Z_1 \cdots Z_{p-1}}}. Must be in \eqn{[-1, 1]}.
+#' @param N Total sample size.
+#' @param p Number of predictors in the regression of \emph{Y} on \emph{X}
+#'   and the variables partialed out, so \code{p - 1} variables are
+#'   partialed out and \code{p} is at least 2. A categorical variable with
+#'   \emph{a} levels counts as \emph{a} - 1 predictors. It is the \code{p}
+#'   of \code{\link{ss_power_R2}}, \code{\link{ci_R2}}, and
+#'   \code{\link{ci_reg_coef}}: the correlation concerns one predictor of a
+#'   regression with \code{p} predictors. In the notation of a model
+#'   comparison, \eqn{q} is the number of predictors removed from the full
+#'   model to give the restricted model (\eqn{q = p_{full} - p_{restricted}},
+#'   the predictors being tested), and the number of variables partialed out
+#'   is \eqn{p - q}; this correlation concerns one predictor, so \eqn{q = 1}
+#'   and \eqn{p - 1} variables are partialed out. Defaults to 2 (one variable
+#'   partialed out).
+#' @param fisher_z Logical. If \code{FALSE} (the default), the function
+#'   returns the raw-scale first-order variance. If
+#'   \code{TRUE}, it returns the variance of the Fisher's
+#'   \emph{Z} transformation \eqn{Z = \mathrm{arctanh}(r)} under the
+#'   Fisher (1924) reduction.
+#'
+#' @return A one-row \code{data.frame} with columns \code{term}
+#'   (either \code{"var_partial_r"} or \code{"var_fisher_z_partial_r"}) and
+#'   \code{value} (the requested variance).
+#'
+#' @details
+#' \strong{Raw scale, first-order variance.} The first-order variance of
+#' a simple correlation is \eqn{(1 - \rho^2)^2 / N} (Olkin & Finn, 1995,
+#' Equation 3). The sample partial correlation given \eqn{p - 1} variables
+#' is distributed as a simple correlation from \eqn{N - (p - 1)}
+#' observations, and the functions here use
+#' \deqn{\mathrm{Var}(\hat r_{XY \cdot Z}) \;\approx\;
+#'         \frac{(1 - \rho^2_{XY \cdot Z})^2}{N - p},}
+#' which differs from that at order \eqn{1/N^2}. The function evaluates
+#' this with \eqn{\hat r} substituted for \eqn{\rho}. Olkin and Finn
+#' (1995) give the variance of a simple correlation; the divisor
+#' \eqn{N - p} is this package's choice and is not taken from that
+#' article.
+#'
+#' \strong{Fisher's \emph{Z} Transformation.} Fisher (1921) showed that
+#' for a Pearson correlation, the transformation
+#' \eqn{Z = \tfrac{1}{2}\log\{(1+r)/(1-r)\} = \mathrm{arctanh}(r)} is
+#' approximately normal with variance \eqn{1/(N - 3)}. Fisher (1924,
+#' p. 330) showed that the partial correlation based on \eqn{N} observations with
+#' \eqn{p - 1} variables partialed out is distributed as a simple
+#' correlation from a sample reduced in size by \eqn{p - 1}; combined with
+#' the Fisher (1921) variance of \eqn{Z}, the Fisher's
+#' \emph{Z} transformation of \eqn{\hat r_{XY \cdot Z_1 \cdots Z_{p-1}}} is
+#' therefore approximately normal with variance \eqn{1/(N - p - 2)}. This
+#' is the standard ingredient for constructing a confidence interval on
+#' \eqn{\rho_{XY \cdot Z}} by transforming, building a Wald interval on
+#' \eqn{Z}, and back-transforming with \eqn{\tanh}.
+#'
+#' @references
+#' Cohen, J., Cohen, P., West, S. G., & Aiken, L. S. (2003).
+#'   \emph{Applied multiple regression/correlation analysis for the
+#'   behavioral sciences} (3rd ed.). Lawrence Erlbaum.
+#'
+#' Fisher, R. A. (1915). Frequency distribution of the values of the
+#'   correlation coefficient in samples from an indefinitely large
+#'   population. \emph{Biometrika, 10}(4), 507--521.
+#'
+#' Fisher, R. A. (1921). On the "probable error" of a coefficient of
+#'   correlation deduced from a small sample. \emph{Metron, 1}, 3--32.
+#'
+#' Fisher, R. A. (1924). The distribution of the partial correlation
+#'   coefficient. \emph{Metron, 3}, 329--332.
+#'
+#' Kelley, K., & Maxwell, S. E. (2003). Sample size for multiple
+#'   regression: Obtaining regression coefficients that are accurate,
+#'   not simply significant. \emph{Psychological Methods, 8}(3),
+#'   305--321. \doi{10.1037/1082-989X.8.3.305}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027).
+#'   \emph{Designing experiments and analyzing data: A model comparison
+#'   perspective} (4th ed.). Routledge. (See Chapter 4 on contrasts,
+#'   Chapter 5 on multiple comparisons, and Chapter 9 on ANCOVA.)
+#'
+#' Olkin, I., & Finn, J. D. (1995). Correlations redux.
+#'   \emph{Psychological Bulletin, 118}(1), 155--164.
+#'   \doi{10.1037/0033-2909.118.1.155}
+#'
+#' @examples
+#' # First-order variance for r_p = .35, N = 80, and two variables
+#' #     partialed out (p = 3 predictors: X and the two variables).
+#' var_partial_r(r = 0.35, N = 80, p = 3)
+#'
+#' # Variance of Fisher's Z transformation (Fisher, 1921, 1924) for the
+#' #     same setting, useful for building a CI on rho_p.
+#' var_partial_r(r = 0.35, N = 80, p = 3, fisher_z = TRUE)
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{var_semipartial_r}}, \code{\link{var_R2}},
+#'   \code{\link{convert_r_Z}}, \code{\link{ci_r}}
+#'
+#' @keywords design regression
+#'
+#' @export
+var_partial_r <- function(r, N, p = 2, fisher_z = FALSE) {
+  p <- .check_partial_p(p)
+  # The arithmetic below is written in J, the number of variables partialed
+  # out: N - J - 1 = N - p and N - J - 3 = N - p - 2.
+  J <- p - 1
+  if (!is.numeric(r) || length(r) != 1L || is.na(r) || abs(r) > 1) {
+    .dmar_refuse_argument("'r' must be a single number in [-1, 1].", arg = "r")
+  }
+  if (!is.numeric(N) || length(N) != 1L || N <= 0) {
+    .dmar_refuse_argument("'N' must be a single positive number.", arg = "N")
+  }
+  if (fisher_z) {
+    if (N - J - 3 <= 0) {
+      .dmar_refuse_argument(
+        "Need N > p + 2 for the Fisher's Z variance.", arg = NULL)
+    }
+    value <- 1 / (N - J - 3)
+    term  <- "var_fisher_z_partial_r"
+  } else {
+    if (N - J - 1 <= 0) {
+      .dmar_refuse_argument(c(
+        "Need N > p for the first-order variance of the partial ",
+        "correlation."), arg = NULL)
+    }
+    value <- (1 - r^2)^2 / (N - J - 1)
+    term  <- "var_partial_r"
+  }
+  out <- data.frame(term = term, value = value,
+                    stringsAsFactors = FALSE, row.names = NULL)
+  .as_dmar_tbl(out)
+}

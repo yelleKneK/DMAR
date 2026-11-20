@@ -1,0 +1,201 @@
+#' Bayesian One-Sample \emph{t} Analysis
+#'
+#' The Bayesian counterpart of the one-sample \emph{t} test. It reports the
+#' posterior distribution of the standardized effect
+#' \eqn{\delta = (\mu - \mu_0)/\sigma}, where \eqn{\mu_0} is
+#' \code{null_mean}, under the default
+#' Jeffreys-Zellner-Siow (JZS) prior, a Cauchy prior on \eqn{\delta} with
+#' Jeffreys priors on the nuisance parameters (the variance), summarized by
+#' its median, mean, a credible interval, and the direct probability
+#' statement \eqn{P(\delta > 0 \mid \mathrm{data})}. The JZS default Bayes
+#' factor (Rouder, Speckman, Sun, Morey, & Iverson, 2009) is also reported.
+#'
+#' The posterior is a \emph{probability statement} about the parameter given
+#' the model, the prior, and the data, and that is how these functions are
+#' meant to be read. A Bayes factor is a different kind of claim, a
+#' comparison of how well two models predicted the data, and it leans harder
+#' on the prior; it is reported because it may be helpful for some
+#' questions. Neither replaces the estimation-first habits of the rest of
+#' the package; \code{\link{ci_sm}} and \code{\link{ci_smd}} remain the
+#' frequentist complements.
+#'
+#' @param x Numeric vector of observations. Omit to supply summary
+#'   statistics instead.
+#' @param mean,sd,N Summary statistics: the sample mean, standard
+#'   deviation, and total sample size. The Bayes factor depends on the data only
+#'   through the \emph{t} statistic and \eqn{N}, so the summary form is
+#'   exact, not an approximation. Supply either \code{x} or all three
+#'   summary values, never both. An argument \code{n} is refused by name,
+#'   with a condition of class \code{dmar_argument_invalid}, since R would
+#'   otherwise match it to \code{null_mean} by its leading character and
+#'   take it as the comparison value.
+#' @param null_mean The comparison value for the mean under the point null,
+#'   \eqn{\mu_0} in the formulas (and the centering value for
+#'   \eqn{\delta}). Defaults to 0.
+#' @param prior_location Location of the Cauchy prior on \eqn{\delta}.
+#'   Defaults to 0, the JZS prior; a nonzero value centers the prior on an
+#'   expected effect (Gronau, Ly, & Wagenmakers, 2020).
+#' @param prior_mean,prior_sd Mean and standard deviation of a normal
+#'   prior on \eqn{\delta}, for prior beliefs stated as moments. Supplying
+#'   them selects the normal prior; they cannot be combined with the
+#'   Cauchy arguments. See the prior section of Details.
+#' @param prior_scale The way to adjust the prior. It is the scale (width)
+#'   \eqn{r} of the Cauchy prior on the standardized effect \eqn{\delta}
+#'   (the JZS prior), so a user who wants a more or less informative prior
+#'   sets \code{prior_scale}: larger values say larger effects are plausible
+#'   a priori, smaller values concentrate the prior near zero. The default
+#'   \eqn{\sqrt{2}/2 \approx 0.707} is the JZS \dQuote{medium} prior. Fully
+#'   custom or subjective priors beyond the Cauchy family are not supported
+#'   by the \pkg{BayesFactor} engine.
+#' @param conf_level Probability mass of the (central) credible interval.
+#'   Defaults to 0.95.
+#'
+#' @details
+#' With a Jeffreys prior on \eqn{(\mu_0, \sigma^2)} and
+#' \eqn{\delta \sim \mathrm{Cauchy}(0, r)}, all inference flows through
+#' the observed \emph{t} statistic, whose likelihood given \eqn{\delta} is
+#' noncentral \emph{t} with noncentrality \eqn{\delta \sqrt{N}}. The
+#' posterior of \eqn{\delta} is computed by quadrature (no Monte Carlo
+#' error) and the Bayes factor by the one-dimensional integral of that
+#' likelihood against the Cauchy prior, the exact JZS form. The noncentral
+#' \emph{t} density is exact: R's \code{dt()} is used where it is
+#' accurate, and elsewhere (a noncentrality above 37.62, where it rests on
+#' a normal approximation, more than 1,000 degrees of freedom, or
+#' \eqn{|t| < .1}, where it loses accuracy to cancellation) the density is
+#' integrated over the sampling distribution of the standard deviation. The raw-scale
+#' rows transform the \eqn{\delta} summaries through the sample standard
+#' deviation (a plug-in, as is conventional for reporting).
+#'
+#' @return A \code{data.frame} (class \code{dmar_tbl}) with the
+#'   posterior summaries of \eqn{\delta} (\code{delta_posterior_median},
+#'   \code{delta_posterior_mean}, \code{delta_lower}, \code{delta_upper},
+#'   \code{p_delta_positive}), the same summaries mapped to the raw mean
+#'   difference scale (\code{raw_*}), the Bayes factors (\code{bf_10},
+#'   \code{bf_01}), the observed \code{t} and \code{df}, the
+#'   \code{prior_scale}, and \code{N}.
+#'
+#'
+#' \strong{Specifying the prior.} The default prior on the standardized
+#' effect \eqn{\delta} is the JZS Cauchy centered at zero. Its
+#' \code{prior_scale} \eqn{r} is not a standard deviation: a Cauchy has
+#' no mean and no variance (those integrals diverge), so beliefs stated
+#' as prior moments cannot be expressed through it. What the scale does
+#' fix is the quartiles: half the prior mass lies within
+#' \eqn{\pm r} of the location, so the default \eqn{r = \sqrt{2}/2}
+#' says a 50 percent prior bet that \eqn{|\delta| < 0.71}. A directional
+#' prior keeps the Cauchy and moves \code{prior_location} (Gronau, Ly, &
+#' Wagenmakers, 2020). A researcher who thinks in prior moments instead
+#' sets \code{prior_mean} and \code{prior_sd}, which use a normal prior
+#' with exactly those moments; the two families are exclusive.
+#'
+#' The families are also linked by an exact identity: a Cauchy with
+#' location \eqn{\mu} and scale \eqn{r} is a normal prior
+#' \eqn{N(\mu, r^2/z^2)} whose \eqn{z} is standard normal, that is, a
+#' normal prior whose variance you are not sure of. Choosing the Cauchy
+#' is therefore choosing a normal prior with built-in doubt about its
+#' own width, which is why its tails are heavier and its Bayes factors
+#' more conservative. A normal matched to the Cauchy's interquartile
+#' range has \code{prior_sd = 1.4826 * prior_scale}. The full posterior
+#' of \eqn{\delta} is returned in the \code{"posterior"} attribute as a
+#' data frame of \code{delta} and \code{density}, so any posterior
+#' probability, not only the reported ones, can be computed from it.
+#'
+#' A standardized effect size enters through the summary form directly:
+#' an observed \emph{d} relative to \code{null_mean = 0} is
+#' \code{mean = d, sd = 1}.
+#'
+#'
+#' @references
+#' Gronau, Q. F., Ly, A., & Wagenmakers, E.-J. (2020). Informed
+#'   Bayesian t-tests. \emph{The American Statistician, 74}(2),
+#'   137--143. \doi{10.1080/00031305.2018.1562983}
+#'
+#' Rouder, J. N., Speckman, P. L., Sun, D., Morey, R. D., & Iverson, G.
+#'   (2009). Bayesian t tests for accepting and rejecting the null
+#'   hypothesis. \emph{Psychonomic Bulletin & Review, 16}(2), 225--237.
+#'   \doi{10.3758/PBR.16.2.225}
+#'
+#' Jeffreys, H. (1961). \emph{Theory of probability} (3rd ed.). Oxford
+#'   University Press.
+#'
+#' Zellner, A., & Siow, A. (1980). Posterior odds ratios for selected
+#'   regression hypotheses. In J. M. Bernardo, M. H. DeGroot, D. V.
+#'   Lindley, & A. F. M. Smith (Eds.), \emph{Bayesian statistics:
+#'   Proceedings of the First International Meeting} (pp. 585--603).
+#'   University of Valencia Press.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{bayes_paired_t}} and
+#'   \code{\link{bayes_independent_t}} for the two-sample designs;
+#'   \code{\link{ci_sm}} for the frequentist standardized mean.
+#'
+#' @family Bayesian t analyses
+#'
+#' @keywords htest
+#'
+#' @examples
+#' set.seed(113)
+#' x <- rnorm(40, mean = 0.4, sd = 1)
+#' bayes_one_sample_t(x)
+#'
+#' # Against a nonzero comparison value, with a wider prior.
+#' bayes_one_sample_t(x, null_mean = 0.1, prior_scale = 1)
+#'
+#' @export
+#' @importFrom stats sd
+bayes_one_sample_t <- function(x = NULL, null_mean = 0,
+                               mean = NULL, sd = NULL, N = NULL,
+                               prior_location = 0,
+                               prior_scale = sqrt(2) / 2,
+                               prior_mean = NULL, prior_sd = NULL,
+                               conf_level = 0.95) {
+  # R would match the DMAR 1.0.x name `n = ` to `null_mean` by its leading
+  # character and use the sample size as the comparison value. The name as
+  # written is read from the call and refused.
+  if ("n" %in% names(sys.call()))
+    .dmar_refuse_argument(c(
+      "'n' is not an argument of bayes_one_sample_t(). The sample size of ",
+      "the summary form is 'N', and the ",
+      "comparison value for the mean is 'null_mean'. R would match 'n' to ",
+      "'null_mean' by its leading character and take the sample size as the ",
+      "comparison value, which gives a wrong analysis, so the call is ",
+      "refused. Write the sample size as N = , for example ",
+      "bayes_one_sample_t(mean = .5, sd = 1, N = 30)."),
+      arg = "n")
+  prior <- .bayes_t_prior(prior_location, prior_scale, prior_mean, prior_sd,
+                          cauchy_args_supplied = !missing(prior_scale))
+  summaries <- !is.null(mean) || !is.null(sd) || !is.null(N)
+  if (is.null(x) && !summaries) {
+    .dmar_refuse_argument(c(
+      "Supply either raw data through 'x' or the summary statistics ",
+      "'mean', 'sd', and 'N'."), arg = c("x", "mean", "sd"))
+  }
+  if (!is.null(x) && summaries) {
+    .dmar_refuse_argument(c(
+      "Supply raw data through 'x' or summary statistics through ",
+      "'mean', 'sd', and 'N', not both."), arg = c("x", "mean", "sd"))
+  }
+  if (summaries) {
+    .bayes_t_check_summaries(mean = mean, sd = sd, n = N)
+  } else {
+    .bayes_t_check_x(x, "x")
+  }
+  if (!is.numeric(null_mean) || length(null_mean) != 1L || is.na(null_mean)) {
+    .dmar_refuse_argument("'null_mean' must be a single number.", arg = "null_mean")
+  }
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      is.na(conf_level) || conf_level <= 0 || conf_level >= 1) {
+    .dmar_refuse_argument(
+      "'conf_level' must be a single number in (0, 1).", arg = "conf_level")
+  }
+  if (!summaries) {
+    N    <- length(x)
+    sd   <- stats::sd(x)
+    mean <- base::mean(x)
+  }
+  tt <- (mean - null_mean) / (sd / sqrt(N))
+  .bayes_t_table(t_obs = tt, df = N - 1, n_eff = N, s_raw = sd,
+                 prior = prior, conf_level = conf_level,
+                 extra_terms = "N", extra_values = N)
+}

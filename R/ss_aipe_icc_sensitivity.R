@@ -1,0 +1,372 @@
+# Sensitivity analysis for AIPE on an intraclass correlation coefficient.
+#' Sensitivity Analysis for Sample Size Planning From the Accuracy in Parameter Estimation Perspective for an Intraclass Correlation Coefficient
+#'
+#' @description
+#' Quantifies how much misspecification of the population ICC can distort an
+#' AIPE-based sample size plan. Given a true (population) ICC and the value
+#' used in planning, the function simulates draws of size \eqn{n \times k}
+#' from the relevant variance-components model, computes the ICC and its
+#' \emph{F}-distribution confidence interval on each replication via
+#' \code{\link{icc}}, and summarizes how often the realized interval width
+#' is below the desired target and how often the interval covers the
+#' population value. This is the standard sensitivity-analysis workflow
+#' described in Kelley (2007) and Maxwell, Delaney, and Kelley (2027,
+#' Section 3.11 on sample size planning).
+#'
+#' @param true_icc Population intraclass correlation coefficient (the
+#'   data generating value), at the level matching \code{type}. Must lie in
+#'   \eqn{[0, 1)}.
+#' @param supposed_icc The supposed ICC, the planning value from which
+#'   \code{\link{ss_aipe_icc}} plans the study (a value the researcher
+#'   supposes, not an estimate computed from data). Supply this or
+#'   \code{specified_N} but not both.
+#' @param n_raters Number of raters (or repeated measurements) per subject; must
+#'   be at least 2.
+#' @param width Desired full width of the (back-transformed) confidence
+#'   interval on the ICC.
+#' @param assurance Probability with which the realized interval should be
+#'   no wider than \code{width} (must be \code{NULL} or strictly between
+#'   0 and 1; \code{NULL} means plan to the \emph{expected} width without
+#'   an assurance constraint).
+#' @param specified_N Pre-specified number of subjects to evaluate (use this
+#'   when you want the sensitivity results at a fixed \emph{n} rather than
+#'   at the \emph{n} that \code{\link{ss_aipe_icc}} would recommend);
+#'   incompatible with \code{supposed_icc}.
+#' @param conf_level Desired confidence level (i.e., 1 minus the Type I
+#'   error rate); default 0.95.
+#' @param type Which Shrout-Fleiss (1979) ICC form is being planned. One
+#'   of \code{"ICC(1,1)"} (default; one-way random model),
+#'   \code{"ICC(2,1)"} (two-way random model, absolute agreement),
+#'   \code{"ICC(3,1)"} (two-way mixed model, consistency), or the
+#'   average-of-\eqn{k} versions \code{"ICC(1,k)"}, \code{"ICC(2,k)"},
+#'   \code{"ICC(3,k)"}. The simulation generates data from the variance-
+#'   components model matching the requested type, so the realized ICC
+#'   on each replication is comparable to \code{true_icc}.
+#' @param G Number of Monte Carlo replications; defaults to 1000.
+#'   Increase (e.g., 5000 or 10000) for stable empirical-coverage
+#'   estimates.
+#' @param print_iter Logical. If \code{TRUE} the simulation prints the
+#'   iteration index after each replication (helpful for long runs);
+#'   default \code{FALSE}.
+#' @param filename An optional path for a comma separated file recording
+#'   every replication (the realized ICC, the two confidence limits, the
+#'   interval width, and the two tail-specific non-coverage indicators):
+#'   nothing is written when \code{filename} is \code{NULL} (the default),
+#'   a new file with a header row is created otherwise, an existing file
+#'   at that path is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
+#' @param seed \code{NULL} (the default) to draw from the current random
+#'   number stream, or a single number that makes the call reproducible; a
+#'   supplied seed is set for this call only, and the caller's random
+#'   number state is restored when the function returns.
+#'
+#' @details
+#' Sample size planning for the intraclass correlation coefficient under
+#' the Accuracy in Parameter Estimation framework chooses \emph{n} so that
+#' the expected (or, with assurance, the high-probability) confidence
+#' interval width is no larger than \code{width} (Bonett, 2002;
+#' Kelley & Maxwell, 2003). Because the procedure assumes the planning
+#' value \code{supposed_icc} matches the population value
+#' \code{true_icc}, in practice the realized width will deviate from the
+#' planned width whenever the planning value is wrong. This sensitivity
+#' analysis quantifies the deviation by Monte Carlo simulation: the
+#' planned \emph{n} is obtained from \code{\link{ss_aipe_icc}} with
+#' \code{supposed_icc}, then samples are drawn from the \emph{true}
+#' population (with population ICC \code{true_icc}) and the realized
+#' confidence interval widths are summarized.
+#'
+#' \strong{Data generating model.} For \code{type} starting with
+#' \code{"ICC(1,"} the simulation uses the one-way random model: each row
+#' (subject) gets a subject random effect, every cell adds independent
+#' Gaussian noise, and the population ICC equals
+#' \eqn{\sigma^2_{\mathrm{subj}} / (\sigma^2_{\mathrm{subj}} +
+#' \sigma^2_{\mathrm{err}})}. For \code{type} starting with \code{"ICC(2,"}
+#' the simulation also adds a rater random effect, so the population
+#' \code{ICC(2,1)} equals \eqn{\sigma^2_{\mathrm{subj}} /
+#' (\sigma^2_{\mathrm{subj}} + \sigma^2_{\mathrm{rater}} +
+#' \sigma^2_{\mathrm{err}})}. For \code{type} starting with \code{"ICC(3,"}
+#' the rater effect is fixed (centered constants), so the population
+#' \code{ICC(3,1)} equals \eqn{\sigma^2_{\mathrm{subj}} /
+#' (\sigma^2_{\mathrm{subj}} + \sigma^2_{\mathrm{err}})} but the
+#' two-way decomposition is used in the estimator. Within each cell, the
+#' total variance is unity by construction. For the single-rater forms
+#' \code{true_icc} therefore maps directly to the subject-variance share;
+#' for the average-of-\eqn{k} forms \code{true_icc} is first mapped to the
+#' single-rater scale through the inverse Spearman-Brown relation
+#' \eqn{\rho = \rho_k / [k - (k - 1)\rho_k]}, so that the population ICC
+#' at the average-of-\eqn{k} level equals \code{true_icc}. Coverage is
+#' checked against \code{true_icc} on its own scale, matching the scale on
+#' which \code{\link{icc}} reports each form.
+#'
+#' @return
+#' A \code{data.frame} with columns \code{term} and \code{value}
+#' summarizing the Monte Carlo results across the \code{G} replications.
+#' The \code{term} entries are: \code{"mean_icc"}, \code{"median_icc"},
+#' \code{"sd_icc"} (mean / median / SD of the \emph{G} observed ICC
+#' estimates); \code{"mean_ci_width"}, \code{"median_ci_width"},
+#' \code{"sd_ci_width"} (corresponding summaries of the realized interval
+#' widths); \code{"pct_ci_less_width"} (proportion of intervals at or below
+#' the planning width \code{width}); \code{"pct_ci_miss_low"} and
+#' \code{"pct_ci_miss_high"} (tail-specific non-coverage of
+#' \code{true_icc}); \code{"total_type_I_error"} (overall empirical
+#' non-coverage of \code{true_icc}); plus the input echoes
+#' \code{"total_N"}, \code{"n_raters"}, \code{"true_icc"},
+#' \code{"supposed_icc"}, \code{"width"}, \code{"conf_level"}, and
+#' \code{"assurance"} (present only when an assurance was supplied).
+#' The ICC type is not a row; it is stored as the \code{"icc_type"}
+#' attribute on the returned object so the \code{value} column stays
+#' numeric.
+#'
+#' @references
+#' Bonett, D. G. (2002). Sample size requirements for estimating intraclass
+#'   correlations with desired precision. \emph{Statistics in Medicine, 21}(9),
+#'   1331--1335. \doi{10.1002/sim.1108}
+#'
+#' Kelley, K. (2007). Confidence intervals for standardized effect sizes:
+#'   Theory, application, and implementation. \emph{Journal of Statistical
+#'   Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Kelley, K., & Maxwell, S. E. (2003). Sample size for multiple
+#'   regression: Obtaining regression coefficients that are accurate,
+#'   not simply significant. \emph{Psychological Methods, 8}(3),
+#'   305--321. \doi{10.1037/1082-989X.8.3.305}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#'   experiments and analyzing data: A model comparison perspective}
+#'   (4th ed.). Routledge. (See Chapters 10 and 11 on intraclass
+#'   correlation and reliability.)
+#'
+#' Shrout, P. E., & Fleiss, J. L. (1979). Intraclass correlations: Uses in
+#'   assessing rater reliability. \emph{Psychological Bulletin, 86}(2),
+#'   420--428.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{ss_aipe_icc}}, \code{\link{icc}}, \code{\link{var_icc}}
+#'
+#' @examples
+#' # Reduced G and a wide target width keep this Monte Carlo example fast;
+#' # raise G (e.g., 1000 or more) for stable empirical-coverage estimates.
+#'
+#' # Well-specified case: plan with the true population ICC.
+#' set.seed(113)
+#' ss_aipe_icc_sensitivity(
+#'   true_icc      = 0.70,
+#'   supposed_icc  = 0.70,
+#'   n_raters      = 3,
+#'   width         = 0.40,
+#'   conf_level    = 0.95,
+#'   G             = 25,
+#'   print_iter    = FALSE
+#' )
+#'
+#' # Misspecified case: the planner used .70 but the truth is .50.
+#' # The realized interval widths will tend to be wider than the target.
+#' set.seed(113)
+#' ss_aipe_icc_sensitivity(
+#'   true_icc      = 0.50,
+#'   supposed_icc  = 0.70,
+#'   n_raters      = 3,
+#'   width         = 0.40,
+#'   conf_level    = 0.95,
+#'   G             = 25,
+#'   print_iter    = FALSE
+#' )
+#'
+#' # Fixed-n mode: skip the planner and evaluate at a chosen sample size.
+#' set.seed(113)
+#' ss_aipe_icc_sensitivity(
+#'   true_icc    = 0.50,
+#'   specified_N = 40,
+#'   n_raters    = 3,
+#'   width       = 0.40,
+#'   G           = 25,
+#'   print_iter  = FALSE
+#' )
+#'
+#' @keywords design htest
+#'
+#' @seealso \code{\link{design_consequences}} for what a chosen design delivers:
+#'   power, the Type S (sign) and Type M (exaggeration) errors of the
+#'   significance filter, and the expected confidence interval width.
+#'
+#' @family AIPE sample size planning
+#'
+#' @inheritSection ss_aipe_cv_sensitivity The record of the simulation
+#' @export
+ss_aipe_icc_sensitivity <- function(true_icc = NULL, supposed_icc = NULL, n_raters, width,
+                                    assurance = NULL, specified_N = NULL,
+                                    conf_level = 0.95,
+                                    type = c("ICC(1,1)", "ICC(2,1)", "ICC(3,1)",
+                                             "ICC(1,k)", "ICC(2,k)", "ICC(3,k)"),
+                                    G = 1000, print_iter = FALSE,
+                                    filename = NULL,
+                                    seed = NULL) {
+  .dmar_check_conf_level(conf_level)
+  if (!missing(width)) .dmar_check_width(width)
+  .dmar_check_assurance_single(assurance)
+  type <- match.arg(type)
+  if (is.null(supposed_icc) && is.null(specified_N)) {
+    .dmar_refuse_argument(
+      "You must specify either 'supposed_icc' or 'specified_N'.",
+      arg = c("supposed_icc", "specified_N"))
+  }
+  if (!is.null(supposed_icc) && !is.null(specified_N)) {
+    .dmar_refuse_argument(
+      "You must specify 'supposed_icc' or 'specified_N', but not both.",
+      arg = c("supposed_icc", "specified_N"))
+  }
+  .check_filename(filename)
+  if (is.null(true_icc) || !is.numeric(true_icc) || true_icc < 0 || true_icc >= 1) {
+    .dmar_refuse_argument(
+      "'true_icc' must be a single value in [0, 1).", arg = "true_icc")
+  }
+  if (!is.numeric(n_raters) || length(n_raters) != 1L || n_raters < 2) {
+    .dmar_refuse_argument(
+      "'n_raters' must be a single integer >= 2.", arg = "n_raters")
+  }
+  if (!is.numeric(width) || length(width) != 1L || width <= 0) {
+    .dmar_refuse_argument(
+      "'width' must be a single positive number.", arg = "width")
+  }
+  G <- .dmar_check_count(G, "G")
+  .dmar_local_seed(seed)
+
+  # Resolve sample size.
+  if (!is.null(supposed_icc)) {
+    if (!is.numeric(supposed_icc) || supposed_icc < 0 || supposed_icc >= 1) {
+      .dmar_refuse_argument(
+        "'supposed_icc' must be a single value in [0, 1).",
+        arg = "supposed_icc")
+    }
+    plan <- ss_aipe_icc(true_icc = supposed_icc, n_raters = n_raters, width = width,
+                        conf_level = conf_level, type = type,
+                        assurance = assurance)
+    n <- plan$value[plan$term == "necessary_N"]
+  } else {
+    if (!is.numeric(specified_N) || length(specified_N) != 1L || specified_N < 2) {
+      .dmar_refuse_argument(
+        "'specified_N' must be a single integer >= 2.", arg = "specified_N")
+    }
+    n <- specified_N
+  }
+  n <- as.integer(n)
+
+  # Choose the data generating model from the planning type.
+  type_canon <- type
+  family <- if (grepl("^ICC\\(1,", type_canon)) "oneway"
+            else if (grepl("^ICC\\(2,", type_canon)) "tworandom"
+            else "twomixed"
+
+  # 'true_icc' arrives on the scale matching 'type'. The variance components
+  # live on the single-rater scale, so an average-of-k value is first mapped
+  # down through the inverse Spearman-Brown relation; the population ICC at
+  # the requested level then equals true_icc (for every family the
+  # Spearman-Brown map carries the single-rater share to the average-of-k
+  # ICC). Coverage below is still checked against true_icc itself, because
+  # icc() reports the average-of-k forms on the average-of-k scale.
+  average_k <- type_canon %in% c("ICC(1,k)", "ICC(2,k)", "ICC(3,k)")
+  rho_single <- if (average_k) true_icc / (n_raters - (n_raters - 1) * true_icc)
+                else true_icc
+
+  # Variance components such that the population ICC at the requested level
+  # equals true_icc and total variance equals 1.
+  sigma2_subj <- rho_single
+  sigma2_err  <- 1 - rho_single
+  sigma2_rater <- 0
+  if (family == "tworandom") {
+    # Distribute the non-subject share equally between rater and residual
+    # so total variance stays at 1 and ICC(2,1) = sigma2_subj.
+    sigma2_rater <- (1 - rho_single) / 2
+    sigma2_err   <- (1 - rho_single) / 2
+  }
+
+  # Storage.
+  icc_hat       <- numeric(G)
+  ci_lo         <- numeric(G)
+  ci_hi         <- numeric(G)
+  ci_width      <- numeric(G)
+  type_I_lower  <- logical(G)
+  type_I_upper  <- logical(G)
+
+  # Rater fixed effects (only used by family == "twomixed").
+  if (family == "twomixed") {
+    rater_fx <- seq(-1, 1, length.out = n_raters) * sqrt(3 * (1 - rho_single) / 2)
+    rater_fx <- rater_fx - mean(rater_fx)
+  } else {
+    rater_fx <- rep(0, n_raters)
+  }
+
+  for (g in seq_len(G)) {
+    if (isTRUE(print_iter)) cat(g, "\n")
+
+    # Subject random effect, replicated across the k columns.
+    alpha_i <- stats::rnorm(n, mean = 0, sd = sqrt(sigma2_subj))
+    M <- matrix(alpha_i, nrow = n, ncol = n_raters, byrow = FALSE)
+
+    # Optional rater random effect, replicated across the n rows.
+    if (family == "tworandom") {
+      beta_j <- stats::rnorm(n_raters, mean = 0, sd = sqrt(sigma2_rater))
+      M <- M + matrix(beta_j, nrow = n, ncol = n_raters, byrow = TRUE)
+    } else if (family == "twomixed") {
+      M <- M + matrix(rater_fx, nrow = n, ncol = n_raters, byrow = TRUE)
+    }
+
+    # Residual.
+    M <- M + matrix(stats::rnorm(n * n_raters, mean = 0, sd = sqrt(sigma2_err)),
+                    nrow = n, ncol = n_raters)
+
+    fit <- icc(M, type = type_canon, conf_level = conf_level)
+    icc_hat[g]      <- fit$value
+    ci_lo[g]        <- fit$ci_lower
+    ci_hi[g]        <- fit$ci_upper
+    ci_width[g]     <- fit$ci_upper - fit$ci_lower
+    type_I_lower[g] <- true_icc < fit$ci_lower
+    type_I_upper[g] <- true_icc > fit$ci_upper
+  }
+
+  if (!is.null(filename)) {
+    out_per_rep <- data.frame(
+      icc_hat = icc_hat, ci_lower = ci_lo, ci_upper = ci_hi,
+      ci_width = ci_width, type_I_lower = type_I_lower,
+      type_I_upper = type_I_upper
+    )
+    if (file.exists(filename) && file.size(filename) > 0) {
+      message("The file '", filename, "' already exists; the simulation results are appended to it.")
+      utils::write.table(out_per_rep, filename, sep = ",", row.names = FALSE,
+                         col.names = FALSE, append = TRUE)
+    } else {
+      utils::write.table(out_per_rep, filename, sep = ",", row.names = FALSE,
+                         append = FALSE)
+    }
+  }
+
+  out <- data.frame(
+    term  = c("mean_icc", "median_icc", "sd_icc",
+              "mean_ci_width", "median_ci_width", "sd_ci_width",
+              "pct_ci_less_width", "pct_ci_miss_low", "pct_ci_miss_high",
+              "total_type_I_error",
+              "total_N", "n_raters", "true_icc",
+              "supposed_icc", "width", "conf_level",
+              if (!is.null(assurance)) "assurance"),
+    value = c(mean(icc_hat, na.rm = TRUE),
+              stats::median(icc_hat, na.rm = TRUE),
+              stats::sd(icc_hat, na.rm = TRUE),
+              mean(ci_width, na.rm = TRUE),
+              stats::median(ci_width, na.rm = TRUE),
+              stats::sd(ci_width, na.rm = TRUE),
+              mean(ci_width <= width, na.rm = TRUE),
+              mean(type_I_lower, na.rm = TRUE),
+              mean(type_I_upper, na.rm = TRUE),
+              mean(type_I_lower | type_I_upper, na.rm = TRUE),
+              n, n_raters, true_icc,
+              if (is.null(supposed_icc)) NA_real_ else supposed_icc,
+              width, conf_level,
+              if (!is.null(assurance)) assurance),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+  attr(out, "icc_type") <- type_canon
+  .ss_sens_record(.as_dmar_tbl(out, conf_level = conf_level), G,
+                  !is.na(ci_width), conf_level)
+}

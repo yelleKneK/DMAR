@@ -1,0 +1,254 @@
+# Confidence interval for omega squared, total and partial (ANOVA effect size).
+#' Confidence Interval for Omega Squared (Effect Size for ANOVA)
+#'
+#' Computes the point estimate of omega squared (\eqn{\omega^2}) of each
+#' effect of an analysis of variance and an exact, noncentrality-based
+#' confidence interval for its population value, for the \emph{partial}
+#' and the \emph{total} estimand (see \code{\link{omega_squared}}). With
+#' \code{estimand = "all"}, the default, the function reports both; the
+#' interval from an effect's \emph{F} statistic is an interval for the
+#' partial value, and the total has one only where it equals the partial
+#' value, in a one-way design (see Details). \code{"total"} or
+#' \code{"partial"} reports one estimand. The function takes a fitted
+#' model (\code{\link[stats]{aov}}, \code{\link[stats]{lm}}, or an
+#' \code{aovlist} from \code{aov()} with an \code{Error()} term) or an
+#' \emph{F} statistic with its degrees of freedom and \emph{N}.
+#'
+#' @param object Optional. A fitted \code{\link[stats]{aov}},
+#'   \code{\link[stats]{lm}}, or \code{aovlist} object. When supplied, the
+#'   function returns one row per effect, with the stratum named for an
+#'   \code{aovlist}. Give either \code{object} or the \emph{F} interface,
+#'   not both.
+#' @param estimand Which estimand to report: \code{"all"} (the default,
+#'   both, with \code{NA} where the inputs determine no estimate or no
+#'   interval), \code{"total"}, or \code{"partial"}. An estimand asked for
+#'   by name for which the inputs determine no interval is refused (see
+#'   Details).
+#' @param F_value Observed \emph{F}-value from the fixed-effects ANOVA, or
+#'   a vector of the \emph{F} statistics of several effects tested against
+#'   the same error term.
+#' @param df_effect Numerator degrees of freedom for the effect (one value
+#'   for each effect, or one for all).
+#' @param df_error Error (residual) degrees of freedom.
+#' @param N Total sample size, the number of observations
+#'   (\code{\link[stats]{nobs}(object)} is used for a fitted model). For an
+#'   \emph{F} from a design with an \code{Error()} stratum, give the size
+#'   of the effect's stratum as \code{N}, as \code{\link{omega_squared}}
+#'   and \code{\link{ci_eta_squared}} use it for such a fit: the number of
+#'   subjects for an effect tested between subjects, and for an effect
+#'   tested within subjects the stratum's total degrees of freedom, which is
+#'   \code{df_effect + df_error} when the effect is the only one tested in
+#'   its stratum. \code{N} must be at least \code{df_effect + df_error}.
+#' @param conf_level Desired confidence coverage; default \code{0.95}. Used only
+#'   when \code{alpha_lower} and \code{alpha_upper} are both \code{NULL}.
+#' @param alpha_lower,alpha_upper Optional Type I error on the lower and upper
+#'   side. If both are \code{NULL}, a symmetric interval at \code{conf_level} is
+#'   used. If both are supplied, \code{conf_level} is recomputed as
+#'   \code{1 - alpha_lower - alpha_upper}.
+#'   The table records the coverage, \code{1 - alpha_lower - alpha_upper},
+#'   as its level and, when the two tail areas differ, the areas
+#'   themselves, which the line beneath the printed table,
+#'   \code{\link{results_sentence}}, and the \code{alpha_lower} and
+#'   \code{alpha_upper} columns of \code{tidy()} state; with a tail area
+#'   of 0 the interval is a one-sided confidence bound.
+#'
+#' @return A \code{data.frame} (class \code{dmar_ci_anova}, printed through
+#'   \code{\link{dmar_tbl}}) with one row per effect and the columns
+#'   \code{effect}; for each estimand reported, its estimate and limits,
+#'   \code{omega_squared_total}, \code{omega_squared_total_ci_lower},
+#'   \code{omega_squared_total_ci_upper}, \code{omega_squared_partial},
+#'   \code{omega_squared_partial_ci_lower}, and
+#'   \code{omega_squared_partial_ci_upper}; \code{stratum} (for an
+#'   \code{aovlist} fit); and \code{F_value}, \code{df_effect},
+#'   \code{df_error}, and \code{N}. With the \emph{F} interface
+#'   \code{effect} is \code{"overall"} (the names of \code{F_value}, when it
+#'   has them, or \code{effect_1}, \code{effect_2}, and so on, for several).
+#'   \code{N} is the number of observations; the estimate and limits of an
+#'   effect of an \code{aovlist} fit are computed with the size of its
+#'   stratum, as in \code{\link{ci_eta_squared}}. The table records the
+#'   confidence level of its intervals in its \code{conf_level} attribute
+#'   (\code{conf_level}, or \code{1 - alpha_lower - alpha_upper} when the
+#'   tail areas are supplied), which the console prints beneath it and
+#'   \code{\link{results_sentence}} reports; the \code{estimand} attribute
+#'   records the estimand asked for, and the \code{estimand_notes}
+#'   attribute names each estimate or interval that is \code{NA} with the
+#'   reason, which the console also prints. \code{\link[generics]{tidy}()}
+#'   gives one row per effect and estimand, with the limits in
+#'   \code{ci_lower} and \code{ci_upper} (see \code{\link{dmar_tidiers}}).
+#'
+#' @details
+#' \strong{Point estimates.} The estimates are those of
+#' \code{\link{omega_squared}}: the partial value, which for a fixed effect
+#' with \emph{F} on \eqn{df_{\text{effect}}} degrees of freedom and \emph{N}
+#' observations is
+#' \deqn{\hat{\omega}^2_{\text{partial}} = \frac{df_{\text{effect}} (F - 1)}{df_{\text{effect}} (F - 1) + N},}
+#' and the total value of a fitted model with one error stratum,
+#' \deqn{\hat{\omega}^2_{\text{total}} = \frac{\mathit{SS}_{\text{effect}} - df_{\text{effect}} \mathit{MS}_{\text{error}}}{\mathit{SS}_{\text{total}} + \mathit{MS}_{\text{error}}}}
+#' (Hays, 1994; Keppel, 1991; Olejnik & Algina, 2000, Table 10). In a
+#' one-way design the two are the same number. Values below zero are
+#' reported as zero. An \emph{F} statistic does not determine the total
+#' value, which the \emph{F} interface reports as \code{NA}, and a fit
+#' with an \code{Error()} term has no total \eqn{\omega^2} (see
+#' \code{\link{omega_squared}}).
+#'
+#' \strong{Confidence interval.} The CI is constructed by Steiger's (2004,
+#' Proposition 1) confidence interval transformation principle: a CI for the
+#' noncentrality parameter \eqn{\lambda} of the \emph{F} distribution is
+#' obtained (via \code{\link{ci_nc_F}}) and then mapped through
+#' \deqn{\omega^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N},}
+#' with the size of its stratum in place of \emph{N} for an effect of an
+#' \code{aovlist} fit. When the lower CI on \eqn{\lambda} is not
+#' identified (i.e., the observed \emph{F} is below the one-sided critical
+#' value), the lower limit on \eqn{\omega^2} is set to 0, matching the
+#' convention used in \code{\link{ci_pvaf}}. The population
+#' \eqn{\omega^2} and \eqn{\eta^2} are the same quantity, so the interval
+#' is the one \code{\link{ci_eta_squared}} gives (and, in a one-way
+#' design, \code{\link{ci_pvaf}}); the functions differ only in their
+#' \emph{sample} estimators (an implication of the confidence interval
+#' transformation principle of Steiger, 2004).
+#'
+#' \strong{Which estimand the interval is for.} For an effect tested
+#' between subjects, \eqn{\lambda/(\lambda + N)} is the population
+#' \emph{partial} value, the effect's share of the variance due to the
+#' effect and the error (Steiger, 2004, Eqs. 13 and 16), so the interval
+#' is for the partial \eqn{\omega^2}. In a one-way design that is also the
+#' total, and the interval of a fitted one-way model is reported for both
+#' estimands. For an effect of a design with other effects, the total
+#' depends on their noncentrality parameters too, which one \emph{F}
+#' statistic does not inform, and no interval is formed for it: with
+#' \code{estimand = "all"} its estimate is reported with \code{NA} limits,
+#' and \code{estimand = "total"} is refused with an error of class
+#' \code{dmar_estimand_undetermined}. The Details of
+#' \code{\link{ci_eta_squared}} give the sources and the within-subjects
+#' case.
+#'
+#' \strong{Sums of squares in factorial designs.} When a fitted model is
+#' supplied, the function reads the \emph{F}-values from \code{anova()}, which
+#' in base \R uses Type I (sequential) sums of squares. For balanced designs,
+#' Types I, II, and III give identical \emph{F}-values; for unbalanced designs
+#' they differ. If Type II or III \emph{F}-values are required, compute them
+#' with e.g.\ \code{car::Anova(object, type = 3)} and pass the relevant
+#' \emph{F} / df into the \emph{F} interface. See the Details of
+#' \code{\link{eta_squared}} on the coding of factors that Type III tests
+#' depend on. \code{\link{factorial_anova}} applies sum-to-zero contrasts
+#' itself and reports partial \eqn{\eta^2} and partial \eqn{\omega^2} with
+#' their confidence intervals for between-subjects factorial designs.
+#'
+#' @references
+#' Bargmann, R. E. (1970). Interpretation and use of a generalized
+#'   discriminant function. In R. C. Bose, I. M. Chakravarti, P. C.
+#'   Mahalanobis, C. R. Rao, & K. J. C. Smith (Eds.), \emph{Essays in
+#'   probability and statistics} (pp. 35--60). University of North
+#'   Carolina Press.
+#'
+#' Fleishman, A. I. (1980). Confidence intervals for correlation ratios.
+#'   \emph{Educational and Psychological Measurement, 40}(3), 659--670.
+#'   \doi{10.1177/001316448004000309}
+#'
+#' Hays, W. L. (1994). \emph{Statistics} (5th ed.). Fort Worth, TX:
+#'   Harcourt Brace College Publishers.
+#'
+#' Kelley, K. (2007). Confidence intervals for standardized effect
+#'   sizes: Theory, application, and implementation. \emph{Journal of Statistical
+#'   Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Kelley, K., & Preacher, K. J. (2012). On effect size.
+#'   \emph{Psychological Methods, 17}, 137--152. \doi{10.1037/a0028086}
+#'
+#' Keppel, G. (1991). \emph{Design and analysis: A researcher's handbook} (3rd
+#'   ed.). Prentice Hall.
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#'   experiments and analyzing data: A model comparison perspective}
+#'   (4th ed.). Routledge. (See Chapter 3 on \eqn{\omega^2} and its
+#'   interval, and Chapter 7 on factorial designs.)
+#'
+#' Olejnik, S., & Algina, J. (2000). Measures of effect size for comparative
+#'   studies: Applications, interpretations, and limitations.
+#'   \emph{Contemporary Educational Psychology, 25}(3), 241--286.
+#'   \doi{10.1006/ceps.2000.1040}
+#'
+#' Steiger, J. H. (2004). Beyond the \emph{F} test: Effect size confidence
+#'   intervals and tests of close fit in the analysis of variance and contrast
+#'   analysis. \emph{Psychological Methods, 9}(2), 164--182.
+#'   \doi{10.1037/1082-989X.9.2.164}
+#'
+#' Venables, W. (1975). Calculation of confidence intervals for
+#'   noncentrality parameters. \emph{Journal of the Royal Statistical
+#'   Society, Series B, 37}(3), 406--412.
+#'   \doi{10.1111/j.2517-6161.1975.tb01554.x}
+#'
+#' @seealso \code{\link{omega_squared}}, \code{\link{ci_eta_squared}},
+#'   \code{\link{ci_pvaf}}, \code{\link{ci_nc_F}}
+#'
+#' @examples
+#' # 1. The F interface. Bargmann's (1970) example, used in turn by
+#' #    Venables (1975), Fleishman (1980), and Steiger (2004): a one-way
+#' #    ANOVA with five groups of 11 and an observed F of 11.221 on 4 and
+#' #    50 df, at 95% and at 90%. F determines the partial value, which in
+#' #    a one-way design is the total.
+#' ci_omega_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55,
+#'                  estimand = "partial")
+#' ci_omega_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55,
+#'                  estimand = "partial", conf_level = 0.90)
+#'
+#' # 2. One-way ANOVA from a fitted model: mean IQ gain differs across
+#' #    the six grades of the pygmalion data (N = 310).
+#' fit_one <- aov(iq_gain ~ factor(grade), data = pygmalion)
+#' ci_omega_squared(fit_one)
+#'
+#' # 3. Two-factor ANOVA for the manipulated expectancy treatment and the
+#' #    measured grade classification (pygmalion data, N = 310). The
+#' #    treatment by grade interaction is weak here (F = 1.19), so the
+#' #    additive model is used.
+#' fit_additive <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
+#' ci_omega_squared(fit_additive)
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @keywords htest design
+#'
+#' @family confidence intervals for effect sizes
+#'
+#' @export
+#' @import stats
+
+ci_omega_squared <- function(
+  object      = NULL,
+  estimand    = c("all", "total", "partial"),
+  F_value     = NULL,
+  df_effect   = NULL,
+  df_error    = NULL,
+  N           = NULL,
+  conf_level  = 0.95,
+  alpha_lower = NULL,
+  alpha_upper = NULL
+) {
+  estimand <- .anova_es_estimand(estimand)
+  .dmar_check_conf_level(conf_level, null_ok = TRUE)
+  alphas <- .ci_eta_squared_alphas(conf_level, alpha_lower, alpha_upper)
+  spec <- .anova_es_spec("omega_squared", object = object,
+                         F_value = F_value, df_effect = df_effect,
+                         df_error = df_error, N = N, interval = TRUE)
+  est <- .anova_es_omega(spec)
+  # F determines neither the total nor its interval; the note says so
+  # in the terms of this function, which takes no sums of squares.
+  if (spec$route == "F")
+    est$total$reason <- .anova_es_reason("F_total_interval", "omega_squared")
+  if (estimand == "total" && !spec$one_way) {
+    .anova_es_refuse_estimand(
+      "ci_omega_squared", "total",
+      est$total$reason %||% .anova_es_reason("total_interval",
+                                             "omega_squared"))
+  }
+  limits <- .anova_es_limits(spec, estimand, "omega_squared",
+                             alphas$alpha_lower, alphas$alpha_upper)
+  # The table records the confidence level of its intervals (1 -
+  # alpha_lower - alpha_upper when the tail areas are supplied), so that
+  # the console prints it and results_sentence() reports it; through 1.0.1
+  # it recorded none, and a 90% interval was written "95% CI".
+  .anova_es_table("ci_omega_squared", "omega_squared", spec, est, estimand,
+                  limits = limits, conf_level = alphas$conf_level,
+                  tail_areas = .tail_areas(alphas$alpha_lower,
+                                           alphas$alpha_upper))
+}

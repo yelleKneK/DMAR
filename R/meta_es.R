@@ -1,0 +1,226 @@
+#' Random Effects Meta-Analysis of Generic Effect Sizes
+#'
+#' Pools independent effect sizes given their sampling variances: the general
+#' engine behind \code{\link{meta_smd}} and \code{\link{meta_r}}, exposed for
+#' any effect metric whose estimates are approximately normal with known
+#' variances. The random effects model is the default and the fit reports the
+#' full uncertainty picture in one table: the pooled estimate with its
+#' confidence interval, the between-study standard deviation tau, the
+#' between-study variance tau-squared with its Q-profile confidence
+#' interval, I-squared with an interval mapped from the tau-squared limits,
+#' H-squared, Cochran's Q test, and, always, a prediction interval for the
+#' effect in a new study. Reporting the prediction interval by default is
+#' deliberate: when heterogeneity is real, the confidence interval for the
+#' average effect understates what the next study will show, and the package
+#' treats \dQuote{where will the next study land} as part of the answer, not
+#' an option.
+#'
+#' @param yi Numeric vector of effect sizes, one per independent study.
+#' @param vi Sampling variances of \code{yi}, one per study.
+#' @param method Between-study variance estimator: \code{"reml"} (restricted
+#'   maximum likelihood, the default), \code{"pm"} (Paule-Mandel),
+#'   \code{"dl"} (DerSimonian-Laird), or \code{"fe"} (a fixed effect /
+#'   common effect analysis, which assumes tau-squared is zero and reports
+#'   no prediction interval).
+#' @param hartung_knapp Logical: apply the Hartung-Knapp-Sidik-Jonkman
+#'   small-sample adjustment (the pooled standard error rescaled from the
+#'   weighted residuals, with a \emph{t} reference on \eqn{k - 1} degrees of
+#'   freedom)? Default \code{TRUE}. The adjusted standard error is not
+#'   bounded below by the conventional one, so the interval can be narrower
+#'   than the normal interval; see \emph{The Hartung-Knapp adjustment} and
+#'   \emph{When q is small} in Details. Identical effect sizes give a zero
+#'   adjusted standard error and a warning; see \emph{Identical effect
+#'   sizes}. Ignored for \code{method = "fe"}.
+#' @param conf_level Confidence level for all intervals. Defaults to 0.95.
+#'
+#' @details
+#' The model is \eqn{y_i = \mu + u_i + e_i} with \eqn{u_i \sim N(0, \tau^2)}
+#' and \eqn{e_i \sim N(0, v_i)}, \eqn{v_i} treated as known. The
+#' \eqn{\tau^2} confidence interval inverts the generalized Q statistic
+#' (Viechtbauer, 2007); the I-squared interval maps the \eqn{\tau^2}
+#' interval through the typical within-study variance of Higgins and
+#' Thompson (2002). The prediction interval follows Higgins,
+#' Thompson, and Spiegelhalter (2009), using \emph{t} with \eqn{k - 2}
+#' degrees of freedom, and requires at least three studies.
+#'
+#' \strong{The Hartung-Knapp adjustment.} With weights
+#' \eqn{w_i = 1/(v_i + \hat{\tau}^2)} and pooled estimate \eqn{\hat{\mu}},
+#' the adjusted standard error is the conventional one,
+#' \eqn{(\sum w_i)^{-1/2}}, multiplied by \eqn{\sqrt{q}}, where
+#' \deqn{q = \frac{1}{k - 1} \sum_{i=1}^{k} w_i (y_i - \hat{\mu})^2}
+#' is the weighted residual mean square on \eqn{k - 1} degrees of freedom
+#' (Röver, Knapp, & Friede, 2015), and the interval is the pooled estimate
+#' plus and minus the \eqn{1 - \alpha/2} quantile of the \emph{t}
+#' distribution on \eqn{k - 1} degrees of freedom times that standard
+#' error. The function applies this, the unmodified method, as
+#' \code{test = "knha"} in \pkg{metafor} does: \eqn{q} is not replaced by
+#' \eqn{\max(1, q)}. With few studies the coverage of the adjusted
+#' interval is closer to the nominal level than that of the normal
+#' interval. The prediction interval uses the standard error of the pooled
+#' estimate that the confidence interval uses, so under the adjustment it
+#' narrows and widens with \eqn{q} as well.
+#'
+#' \strong{When q is small.} Because \eqn{q} is not replaced by
+#' \eqn{\max(1, q)}, the adjusted standard error is smaller than the
+#' conventional one whenever \eqn{q} is below 1, which is common (when the
+#' effects are homogeneous, in most samples). That alone does not make the
+#' interval narrower than the normal interval, since the adjusted interval
+#' uses a \emph{t} quantile on \eqn{k - 1} degrees of freedom: it is
+#' narrower exactly when \eqn{q} is below the squared ratio of the normal
+#' quantile to the \emph{t} quantile, which for a 95 percent interval is
+#' 0.02, 0.21, 0.50, and 0.75 at \eqn{k} = 2, 3, 5, and 10. A small
+#' \eqn{q} is part of the reference distribution of the method and not a
+#' fault in the data: when the weights are the true ones, the pooled
+#' estimate minus the mean effect, divided by the adjusted standard error,
+#' follows the \emph{t} distribution exactly, small values of \eqn{q}
+#' included. Röver, Knapp, and Friede (2015) describe the modification
+#' \eqn{\max(1, q)}, which never gives a standard error below the
+#' conventional one; it is not applied here. In the simulations run for
+#' this function the unmodified interval was at or near the nominal level
+#' when the effects were homogeneous or the studies equally precise, and
+#' below it (0.86 to 0.89 for a nominal 0.95, with the normal interval at
+#' 0.70 to 0.87) when one study was far more precise than the rest and the
+#' effects were heterogeneous. When the adjusted interval is much narrower
+#' than the conventional one, report both; \code{hartung_knapp = FALSE}
+#' gives the second. The attributes \code{hartung_knapp_q} and
+#' \code{se_conventional} hold \eqn{q} and the conventional standard
+#' error for that comparison. No warning is given for a \eqn{q} between 0
+#' and 1, which is the method working as defined.
+#'
+#' \strong{Identical effect sizes.} When every effect size is the same,
+#' exactly or up to rounding error, \eqn{q} is 0 and so is the adjusted
+#' standard error. The confidence interval and the prediction interval
+#' then have no width, and the \emph{t} statistic is infinite, or
+#' undefined when the common effect size is zero. That is the arithmetic
+#' of the method at its boundary and not evidence of an effect known
+#' exactly: each effect size still has its sampling variance, and
+#' identical values arise from coarse rounding, from one study entered
+#' more than once, or by chance with two or three studies. The function
+#' reports the numbers as computed, as \code{test = "knha"} in
+#' \pkg{metafor} does, and warns with a condition of class
+#' \code{dmar_meta_hk_zero_se} that states the conventional standard error
+#' and interval. The condition carries the number of studies as \code{n_studies},
+#' the pooled estimate as \code{estimate}, the conventional standard error
+#' as \code{se_conventional}, and the limits of the normal interval that
+#' standard error gives as \code{lower_conventional} and
+#' \code{upper_conventional}. For four effect sizes of 0.5 with sampling
+#' variances of 0.04, the adjusted limits are 0.5 and 0.5; the
+#' conventional standard error is 0.1 and the normal interval 0.304 to
+#' 0.696. The check is made on the effect sizes themselves: effect sizes
+#' that differ in any digit beyond rounding error (0.5 against
+#' \eqn{0.5 + 10^{-9}}) are not identical, give a small positive
+#' \eqn{q}, and raise no warning.
+#'
+#' I-squared is reported because readers expect it, but note its
+#' well-known limitation: it is a \emph{proportion} of variability, not an
+#' amount, so the same tau matched with larger studies yields a larger
+#' I-squared. The quantity with direct scientific meaning is tau (the
+#' between-study standard deviation, in the metric of \code{yi}) together
+#' with the prediction interval.
+#'
+#' @return A \code{data.frame} (class \code{dmar_meta}, a
+#'   \code{dmar_tbl}) with rows
+#'   \code{estimate}, \code{se}, \code{test_statistic} (the estimate
+#'   divided by \code{se}), \code{p_value},
+#'   \code{ci_lower} / \code{ci_upper}, \code{prediction_lower} /
+#'   \code{prediction_upper}, \code{tau2} with \code{tau2_ci_lower} /
+#'   \code{tau2_ci_upper}, \code{tau}, \code{I2} with limits, \code{H2},
+#'   \code{Q} / \code{Q_df} / \code{Q_p}, and \code{n_studies} (the number of studies, \eqn{k}). The estimator and
+#'   adjustment are recorded in the \code{"method"} and
+#'   \code{"hartung_knapp"} attributes. The reference distribution of
+#'   \code{test_statistic} and \code{p_value} depends on the adjustment,
+#'   and the attributes \code{test_distribution} and \code{test_df} record
+#'   it: \code{"t"} on \eqn{k - 1} degrees of freedom under the
+#'   Hartung-Knapp adjustment, \code{"normal"} (with \code{test_df}
+#'   \code{NA}) without it, as the line under the printed table says. The attributes
+#'   \code{hartung_knapp_q} (the weighted residual mean square \eqn{q})
+#'   and \code{se_conventional} are recorded whenever the adjustment is
+#'   applied. When the effect sizes are identical and the Hartung-Knapp
+#'   adjustment is applied, \code{se} is zero, the limits equal the
+#'   estimate, and the function warns (see \emph{Identical effect sizes}
+#'   in Details).
+#'
+#' @references
+#' DerSimonian, R., & Laird, N. (1986). Meta-analysis in clinical trials.
+#'   \emph{Controlled Clinical Trials, 7}(3), 177--188.
+#'
+#' Hartung, J., & Knapp, G. (2001). On tests of the overall treatment effect
+#'   in meta-analysis with normally distributed responses.
+#'   \emph{Statistics in Medicine, 20}(12), 1771--1782. \doi{10.1002/sim.791}
+#'
+#' Higgins, J. P. T., & Thompson, S. G. (2002). Quantifying heterogeneity in
+#'   a meta-analysis. \emph{Statistics in Medicine, 21}(11), 1539--1558.
+#'   \doi{10.1002/sim.1186}
+#'
+#' Higgins, J. P. T., Thompson, S. G., & Spiegelhalter, D. J. (2009). A
+#'   re-evaluation of random-effects meta-analysis. \emph{Journal of the
+#'   Royal Statistical Society: Series A, 172}(1), 137--159.
+#'   \doi{10.1111/j.1467-985X.2008.00552.x}
+#'
+#' Raudenbush, S. W. (1984). Magnitude of teacher expectancy effects on
+#'   pupil IQ as a function of the credibility of expectancy induction: A
+#'   synthesis of findings from 18 experiments. \emph{Journal of Educational
+#'   Psychology, 76}(1), 85--97.
+#'
+#' Röver, C., Knapp, G., & Friede, T. (2015). Hartung-Knapp-Sidik-Jonkman
+#'   approach and its modification for random-effects meta-analysis with
+#'   few studies. \emph{BMC Medical Research Methodology, 15}, Article 99.
+#'   \doi{10.1186/s12874-015-0091-1}
+#'
+#' Viechtbauer, W. (2007). Confidence intervals for the amount of
+#'   heterogeneity in meta-analysis. \emph{Statistics in Medicine, 26}(1),
+#'   37--52. \doi{10.1002/sim.2514}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{meta_smd}} and \code{\link{meta_r}} for the metric-
+#'   specific front ends; \code{\link{meta_contrast}} for focused moderator
+#'   contrasts; \code{\link{combine_p}} for combined significance tests;
+#'   \code{\link{plot_forest}} to see the studies and the pool together.
+#'
+#' @family meta-analysis
+#'
+#' @keywords models
+#'
+#' @examples
+#' # The teacher expectancy studies (Raudenbush, 1984), pooled in the d
+#' # metric with variances from the standard large-sample formula.
+#' data(teacher_expectancy)
+#' d <- teacher_expectancy$d
+#' n_e <- teacher_expectancy$n_experimental
+#' n_c <- teacher_expectancy$n_control
+#' v <- (n_e + n_c) / (n_e * n_c) + d^2 / (2 * (n_e + n_c))
+#' meta_es(d, v)
+#'
+#' # A fixed effect (common effect) analysis of the same studies.
+#' meta_es(d, v, method = "fe")
+#'
+#' # The adjusted standard error beside the conventional one. Five effect
+#' # sizes that agree closely give a weighted residual mean square q far
+#' # below 1, so the adjusted standard error is a small fraction of the
+#' # conventional one; both intervals are worth reporting.
+#' close <- meta_es(c(.30, .32, .29, .31, .33), c(.04, .05, .03, .06, .04))
+#' attr(close, "hartung_knapp_q")
+#' attr(close, "se_conventional")
+#' meta_es(c(.30, .32, .29, .31, .33), c(.04, .05, .03, .06, .04),
+#'         hartung_knapp = FALSE)
+#'
+#' @export
+meta_es <- function(yi, vi, method = c("reml", "pm", "dl", "fe"),
+                    hartung_knapp = TRUE, conf_level = 0.95) {
+  .meta_check_yivi(yi, vi)
+  method <- match.arg(method)
+  if (!is.logical(hartung_knapp) || length(hartung_knapp) != 1L ||
+      is.na(hartung_knapp)) {
+    .dmar_refuse_argument(
+      "'hartung_knapp' must be TRUE or FALSE.", arg = "hartung_knapp")
+  }
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      is.na(conf_level) || conf_level <= 0 || conf_level >= 1) {
+    .dmar_refuse_argument(
+      "'conf_level' must be a single number in (0, 1).", arg = "conf_level")
+  }
+  fit <- .meta_fit(yi, vi, method = method, hartung_knapp = hartung_knapp,
+                   conf_level = conf_level)
+  .meta_table(fit, conf_level = conf_level)
+}

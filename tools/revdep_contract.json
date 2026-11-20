@@ -1,0 +1,903 @@
+{
+  "about": "What DMAR's dependents rely on, as read and run by tools/revdep_contract.R; rewrite only with --update after the differences it reports have been reviewed and the dependents told.",
+  "taken": {
+    "date": "2026-11-15",
+    "from": "DMAR 1.1.0, source tree loaded with pkgload, commit c9968245"
+  },
+  "dependents": {
+    "SIEVER": {
+      "commit": "12be7ae",
+      "objects": ["average_variance_extracted", "bifactor_indices", "cfa_1", "ci_bifactor_indices", "ci_proportion", "common_method_marker", "common_method_single_factor", "content_validity_index", "cov_fiml", "dmacs", "ecvi", "fa_confirmatory", "fa_exploratory", "factor_count", "factor_scores", "fraction_missing_information", "holzinger_swineford", "htmt", "irt_grm", "irt_information", "kurtosis", "measurement_alignment", "measurement_invariance", "missing_coverage", "missing_patterns", "parallel_analysis", "plot_irt_information", "reliability_alpha", "reliability_H", "reliability_omega", "reliability_omega_categorical", "sem_exact_fit_bootstrap", "sem_fit_measures", "simple_structure", "skewness", "ss_aipe_reliability", "ss_aipe_rmsea"],
+      "references": {
+        "average_variance_extracted": ["DMAR:: in R/mod_validity.R", "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_ave.R"],
+        "bifactor_indices": ["DMAR:: in R/fct_bifactor_boot.R", "DMAR:: in R/fct_bifactor_models.R"],
+        "cfa_1": "DMAR:: in R/fct_reliability_boot.R",
+        "ci_bifactor_indices": "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_bifactor_boot.R",
+        "ci_proportion": "get(\"name\", <DMAR namespace>) in R/fct_dmar_contract.R",
+        "common_method_marker": "DMAR:: in R/fct_scoring.R",
+        "common_method_single_factor": "DMAR:: in R/mod_validity.R",
+        "content_validity_index": "DMAR:: in R/mod_content.R",
+        "cov_fiml": "DMAR:: in R/fct_retention.R",
+        "dmacs": "DMAR:: in R/fct_finalize_impact.R",
+        "ecvi": "DMAR:: in R/fct_invariance_models.R",
+        "fa_confirmatory": "DMAR:: in R/fct_efa_dmar.R",
+        "fa_exploratory": ["DMAR:: in R/fct_efa_dmar.R", "DMAR:: in R/fct_efa_point.R", "DMAR:: in R/fct_retention.R", "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_efa_dmar.R"],
+        "factor_count": "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_efa_dmar.R",
+        "factor_scores": "DMAR:: in R/fct_inference.R",
+        "fraction_missing_information": "DMAR:: in R/fct_missing_data.R",
+        "holzinger_swineford": "getExportedValue(\"DMAR\", \"name\") in R/utils_fixture.R",
+        "htmt": "DMAR:: in R/mod_validity.R",
+        "irt_grm": ["DMAR:: in R/fct_irt_evidence.R", "DMAR:: in R/mod_irt.R"],
+        "irt_information": ["get(\"name\", <DMAR namespace>) in R/fct_dmar_contract.R", "DMAR:: in R/fct_irt_evidence.R", "DMAR:: in R/mod_irt.R"],
+        "kurtosis": "DMAR:: in R/mod_screen.R",
+        "measurement_alignment": "DMAR:: in R/fct_finalize_alignment.R",
+        "measurement_invariance": "DMAR:: in R/fct_invariance_models.R",
+        "parallel_analysis": "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_retention.R",
+        "plot_irt_information": "DMAR:: in R/mod_irt.R",
+        "reliability_alpha": ["DMAR:: in R/fct_diagnostics.R", "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_reliability.R"],
+        "reliability_H": ["DMAR:: in R/fct_reliability.R", "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_reliability.R"],
+        "reliability_omega": ["DMAR:: in R/fct_one_factor.R", "DMAR:: in R/fct_reliability_boot.R"],
+        "reliability_omega_categorical": ["DMAR:: in R/fct_multiple_imputation.R", "DMAR:: in R/fct_one_factor.R", "getExportedValue(\"DMAR\", \"name\") in R/fct_reliability.R", "fun = \"name\" (called through getExportedValue(\"DMAR\", fun)) in R/fct_multiple_imputation.R"],
+        "sem_exact_fit_bootstrap": "DMAR:: in R/fct_models.R",
+        "sem_fit_measures": ["DMAR:: in R/fct_fit.R", "DMAR:: in R/fct_missing_data.R", "DMAR:: in R/fct_network.R", "DMAR:: in R/fct_result_context.R"],
+        "simple_structure": "DMAR:: in R/mod_efa.R",
+        "skewness": "DMAR:: in R/mod_screen.R",
+        "ss_aipe_reliability": ["DMAR:: in R/fct_inference.R", "DMAR:: in R/mod_reliab.R"],
+        "ss_aipe_rmsea": "DMAR:: in R/mod_cfa.R"
+      }
+    },
+    "SMSD": {
+      "commit": "abebd5b",
+      "objects": ["ci_crossed", "mr_cv", "mr_smd", "smd"],
+      "references": {
+        "ci_crossed": "DMAR:: in R/crossed_internals.R",
+        "mr_cv": ["DMAR:: in R/cv_dmar.R", "DMAR:: in R/seq_mr_cv.R"],
+        "mr_smd": "DMAR:: in R/seq_mr_smd.R",
+        "smd": ["importFrom(DMAR) in NAMESPACE", "DMAR:: in R/seq_mr_smd.R"]
+      }
+    }
+  },
+  "declared": {
+    "SIEVER": {
+      "missing_patterns": "named at run time: paste0(\"missing_\", kind) in R/fct_missing_data.R, after a test against getNamespaceExports(\"DMAR\")",
+      "missing_coverage": "named at run time: paste0(\"missing_\", kind) in R/fct_missing_data.R, after a test against getNamespaceExports(\"DMAR\")"
+    },
+    "SMSD": []
+  },
+  "objects": {
+    "average_variance_extracted": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "NULL",
+        "loadings": "NULL",
+        "conf_level": "0.95",
+        "ci_method": "c(\"none\", \"percentile\")",
+        "B": "1000L",
+        "seed": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "bifactor_indices": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "",
+        "general": "NULL",
+        "denominator": "c(\"model_implied\", \"observed\")"
+      },
+      "used_by": "SIEVER"
+    },
+    "cfa_1": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "items": "NULL",
+        "S": "NULL",
+        "N": "NULL",
+        "equal_loading": "FALSE",
+        "equal_error": "FALSE",
+        "estimator": "\"ML\"",
+        "missing": "\"fiml\"",
+        "se": "NULL",
+        "conf_level": "0.95",
+        "output": "c(\"verbose\", \"measurement\", \"summary\", \"standardized\", \"fit\")",
+        "...": "",
+        "wald_df": "Inf",
+        "rmsea_conf_level": "0.9"
+      },
+      "used_by": "SIEVER"
+    },
+    "ci_bifactor_indices": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "",
+        "general": "NULL",
+        "denominator": "c(\"model_implied\", \"observed\")",
+        "ci_method": "c(\"percentile\", \"bca\")",
+        "conf_level": "0.95",
+        "B": "1000L",
+        "seed": "NULL",
+        "ncpus": "1L",
+        "improper": "c(\"drop\", \"keep\")",
+        "progress": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "ci_crossed": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "ratings": "",
+        "conf_level": "0.95"
+      },
+      "used_by": "SMSD"
+    },
+    "ci_proportion": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "successes": "",
+        "N": "",
+        "conf_level": "0.95",
+        "method": "c(\"wilson\", \"wald\")"
+      },
+      "used_by": "SIEVER"
+    },
+    "common_method_marker": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "R": "",
+        "marker_r": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "common_method_single_factor": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "S": "NULL",
+        "R": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "content_validity_index": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "ratings": "",
+        "relevant": "c(3, 4)",
+        "essential": "NULL",
+        "conf_level": "0.95"
+      },
+      "used_by": "SIEVER"
+    },
+    "cov_fiml": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "aux": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "dmacs": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "NULL",
+        "reference": "NULL",
+        "focal": "NULL",
+        "factor_loading_reference": "NULL",
+        "factor_loading_focal": "NULL",
+        "intercept_reference": "NULL",
+        "intercept_focal": "NULL",
+        "mean_focal": "0",
+        "sd_focal": "1",
+        "sd_pooled": "NULL",
+        "item_names": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "ecvi": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "NULL",
+        "chisq": "NULL",
+        "df": "NULL",
+        "npar": "NULL",
+        "multiplier": "NULL",
+        "conf_level": "0.95"
+      },
+      "used_by": "SIEVER"
+    },
+    "fa_confirmatory": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "factors": "",
+        "S": "NULL",
+        "N": "NULL",
+        "M": "NULL",
+        "equal_loading": "FALSE",
+        "equal_intercept": "FALSE",
+        "equal_error": "FALSE",
+        "correlated_factors": "TRUE",
+        "meanstructure": "NULL",
+        "estimator": "\"ML\"",
+        "missing": "\"fiml\"",
+        "ordered": "NULL",
+        "se": "NULL",
+        "conf_level": "0.95",
+        "output": "c(\"verbose\", \"measurement\", \"summary\", \"standardized\", \"fit\")",
+        "...": "",
+        "wald_df": "Inf",
+        "rmsea_conf_level": "0.9"
+      },
+      "used_by": "SIEVER"
+    },
+    "fa_exploratory": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "nfactors": "1L",
+        "S": "NULL",
+        "N": "NULL",
+        "items": "NULL",
+        "estimator": "\"ML\"",
+        "missing": "\"fiml\"",
+        "ordered": "NULL",
+        "rotation": "\"oblimin\"",
+        "target": "NULL",
+        "conf_level": "0.95",
+        "rmsea_conf_level": "0.9",
+        "seed": "NULL",
+        "point_estimates_only": "FALSE"
+      },
+      "used_by": "SIEVER"
+    },
+    "factor_count": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "S": "NULL",
+        "N": "NULL",
+        "items": "NULL",
+        "max_factors": "NULL",
+        "estimator": "\"ML\"",
+        "missing": "\"fiml\"",
+        "ordered": "NULL",
+        "criterion": "\"BIC\"",
+        "conf_level": "0.9",
+        "B": "1000L",
+        "percentile": "0.95",
+        "seed": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "factor_scores": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "",
+        "data": "NULL",
+        "conf_level": "0.95"
+      },
+      "used_by": "SIEVER"
+    },
+    "fraction_missing_information": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "",
+        "information": "c(\"unstructured\", \"structured\", \"hessian\")",
+        "ci_method": "c(\"none\", \"percentile\")",
+        "conf_level": "0.95",
+        "B": "1000L",
+        "seed": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "holzinger_swineford": {
+      "kind": "dataset",
+      "class": "data.frame",
+      "names": ["id", "sex", "grade", "age", "month_since_birthday", "age_months", "age_years", "school", "t1_visual_perception", "t2_cubes", "t3_paper_form_board", "t4_lozenges", "t5_general_information", "t6_paragraph_comprehension", "t7_sentence", "t8_word_classification", "t9_word_meaning", "t10_addition", "t11_code", "t12_counting_groups_of_dots", "t13_straight_and_curved_capitals", "t14_word_recognition", "t15_number_recognition", "t16_figure_recognition", "t17_object_number", "t18_number_figure", "t19_figure_word", "t20_deduction", "t21_numerical_puzzles", "t22_problem_reasoning", "t23_series_completion", "t24_woody_mccall", "t25_paper_form_board_r", "t26_flags"],
+      "used_by": "SIEVER"
+    },
+    "htmt": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "blocks": "",
+        "B": "0",
+        "conf_level": "0.95",
+        "seed": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "irt_grm": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "items": "NULL",
+        "estimator": "\"WLSMV\"",
+        "metric": "c(\"normal_ogive\", \"logistic\")",
+        "rmsea_conf_level": "0.9"
+      },
+      "used_by": "SIEVER"
+    },
+    "irt_information": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "discrimination": "",
+        "threshold": "NULL",
+        "item": "NULL",
+        "trait_value": "seq(-4, 4, length.out = 81)",
+        "grm": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "kurtosis": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "x": "",
+        "na_rm": "TRUE"
+      },
+      "used_by": "SIEVER"
+    },
+    "measurement_alignment": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "items": "",
+        "group": "",
+        "model": "NULL",
+        "alignment": "c(\"fixed\", \"free\")",
+        "estimator": "\"ML\"",
+        "n_starts": "10",
+        "seed": "NULL",
+        "epsilon": "0.01"
+      },
+      "used_by": "SIEVER"
+    },
+    "measurement_invariance": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "model": "NULL",
+        "group": "",
+        "items": "NULL",
+        "levels": "NULL",
+        "ordered": "NULL",
+        "estimator": "\"ML\"",
+        "missing": "\"fiml\"",
+        "group_partial": "NULL",
+        "parameterization": "c(\"delta\", \"theta\")",
+        "...": ""
+      },
+      "used_by": "SIEVER"
+    },
+    "missing_coverage": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "items": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "missing_patterns": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "items": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "mr_cv": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "A": "",
+        "structural_cost": "",
+        "epsilon": "",
+        "sampling_cost": "",
+        "pilot": "FALSE",
+        "m0": "4",
+        "gamma": "0.49",
+        "verbose": "FALSE"
+      },
+      "used_by": "SMSD"
+    },
+    "mr_smd": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "A": "",
+        "structural_cost": "",
+        "epsilon": "",
+        "d": "",
+        "n_per_group": "",
+        "sampling_cost": "",
+        "pilot": "FALSE",
+        "m0": "4",
+        "gamma": "0.49"
+      },
+      "used_by": "SMSD"
+    },
+    "parallel_analysis": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "S": "NULL",
+        "N": "NULL",
+        "items": "NULL",
+        "missing": "\"fiml\"",
+        "ordered": "NULL",
+        "reference": "\"normal\"",
+        "B": "1000L",
+        "percentile": "0.95",
+        "conf_level": "0.95",
+        "seed": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "plot_irt_information": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "x": "",
+        "what": "c(\"test\", \"item\")",
+        "show_se": "TRUE",
+        "show_peak": "TRUE",
+        "palette": "\"okabe_ito\"",
+        "title": "NULL",
+        "xlab": "NULL",
+        "ylab": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "reliability_alpha": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "S": "NULL",
+        "N": "NULL",
+        "estimator": "c(\"analytic\", \"model_implied\")",
+        "missing": "c(\"fiml\", \"listwise\", \"two_stage\")",
+        "aux": "NULL",
+        "ci_method": "NULL",
+        "conf_level": "0.95",
+        "B": "10000",
+        "seed": "NULL",
+        "ncpus": "1L",
+        "improper": "c(\"keep\", \"drop\")",
+        "wald_df": "Inf",
+        "progress": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "reliability_H": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "loadings": "NULL",
+        "se_loadings": "NULL",
+        "conf_level": "0.95",
+        "fit": "NULL",
+        "factor": "NULL",
+        "group": "NULL",
+        "data": "NULL",
+        "S": "NULL",
+        "N": "NULL",
+        "vcov_loadings": "NULL",
+        "ci_method": "c(\"mlr_logistic\", \"mlr\", \"ml_logistic\", \"ml\", \"delta_logistic\", \"delta\", \"bootstrap_se\", \"bootstrap_se_logistic\", \"percentile\", \"bca\", \"none\")",
+        "missing": "c(\"fiml\", \"listwise\")",
+        "aux": "NULL",
+        "B": "10000",
+        "seed": "NULL",
+        "ncpus": "1L",
+        "progress": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "reliability_omega": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "NULL",
+        "S": "NULL",
+        "N": "NULL",
+        "ci_method": "c(\"mlr_logistic\", \"ml_logistic\", \"mlr\", \"ml\", \"likelihood\", \"adf\", \"adf_logistic\", \"feldt\", \"fisher\", \"bonett\", \"hakstian_whalen\", \"bootstrap_se\", \"bootstrap_se_logistic\", \"percentile\", \"bca\", \"none\")",
+        "denominator": "c(\"observed\", \"model_implied\")",
+        "missing": "c(\"fiml\", \"listwise\", \"two_stage\")",
+        "aux": "NULL",
+        "conf_level": "0.95",
+        "B": "10000",
+        "seed": "NULL",
+        "ncpus": "1L",
+        "improper": "c(\"keep\", \"drop\")",
+        "wald_df": "Inf",
+        "progress": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "reliability_omega_categorical": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "data": "",
+        "ci_method": "c(\"bca\", \"percentile\", \"bootstrap_se\", \"bootstrap_se_logistic\", \"none\")",
+        "conf_level": "0.95",
+        "B": "NULL",
+        "seed": "NULL",
+        "denominator": "c(\"observed\", \"model_implied\")",
+        "ncpus": "1L",
+        "missing": "c(\"listwise\", \"pairwise\", \"mi\")",
+        "aux": "NULL",
+        "impute": "c(\"pmm\", \"polr\")",
+        "imputations": "20L",
+        "progress": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "sem_exact_fit_bootstrap": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "",
+        "B": "1000",
+        "transformation": "c(\"common\", \"pattern\")",
+        "improper": "c(\"keep\", \"drop\")",
+        "conf_level": "0.95",
+        "seed": "NULL",
+        "ncpus": "1L"
+      },
+      "used_by": "SIEVER"
+    },
+    "sem_fit_measures": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "fit": "NULL",
+        "chisq": "NULL",
+        "df": "NULL",
+        "N": "NULL",
+        "baseline_chisq": "NULL",
+        "baseline_df": "NULL",
+        "p": "NULL",
+        "n_groups": "1",
+        "conf_level": "0.9",
+        "close_fit": "0.05",
+        "not_close_fit": "0.05",
+        "version": "c(\"auto\", \"standard\", \"scaled\", \"robust\")",
+        "sample_size_convention": "c(\"N-1\", \"N\")"
+      },
+      "used_by": "SIEVER"
+    },
+    "simple_structure": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "factor_loading_matrix": "",
+        "salient": "0.3",
+        "hyperplane": "0.1"
+      },
+      "used_by": "SIEVER"
+    },
+    "skewness": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "x": "",
+        "na_rm": "TRUE"
+      },
+      "used_by": "SIEVER"
+    },
+    "smd": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "group_1": "NULL",
+        "group_2": "NULL",
+        "mean_1": "NULL",
+        "mean_2": "NULL",
+        "s_1": "NULL",
+        "s_2": "NULL",
+        "s": "NULL",
+        "n_1": "NULL",
+        "n_2": "NULL",
+        "unbiased": "FALSE"
+      },
+      "used_by": "SMSD"
+    },
+    "ss_aipe_reliability": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "model": "NULL",
+        "type": "NULL",
+        "width": "NULL",
+        "true_cov_matrix": "NULL",
+        "conf_level": "0.95",
+        "assurance": "NULL",
+        "data": "NULL",
+        "n_items": "NULL",
+        "true_item_covariance": "NULL",
+        "true_factor_loading": "NULL",
+        "true_residual_var": "NULL",
+        "G_initial": "500",
+        "G": "5000",
+        "start_N": "NULL",
+        "verbose": "FALSE",
+        "fmi": "0",
+        "seed": "NULL"
+      },
+      "used_by": "SIEVER"
+    },
+    "ss_aipe_rmsea": {
+      "kind": "function",
+      "exported": true,
+      "formals": {
+        "true_rmsea": "",
+        "df": "",
+        "width": "",
+        "conf_level": "0.9"
+      },
+      "used_by": "SIEVER"
+    }
+  },
+  "calls": [
+    {
+      "label": "mr_cv, verbose",
+      "used_by": "SMSD",
+      "call": "DMAR::mr_cv(data = c(10, 12, 9, 15, 11, 14, 8, 13, 12, 16, 10, 11, 14, 9, 12, 13, 15, 11), A = 400000, sampling_cost = 75, gamma = 0.25, verbose = TRUE)",
+      "reads": {
+        "terms": [
+          "cv",
+          "risk",
+          "v2_n",
+          "mu_3_n",
+          "mu_4_n"
+        ],
+        "attributes": [
+          "criterion",
+          "is_satisfied",
+          "variance_unusable"
+        ]
+      },
+      "result": {
+        "class": ["dmar_mr", "dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": ["risk", "N", "cv", "v2_n", "mu_3_n", "mu_4_n", "criterion"],
+        "row_names": [],
+        "attributes": {
+          "criterion": {
+            "present": true,
+            "class": "numeric",
+            "length": 1
+          },
+          "is_satisfied": {
+            "present": true,
+            "class": "logical",
+            "length": 1
+          },
+          "variance_unusable": {
+            "present": true,
+            "class": "logical",
+            "length": 1
+          }
+        }
+      }
+    },
+    {
+      "label": "mr_cv, pilot",
+      "used_by": "SMSD",
+      "call": "DMAR::mr_cv(pilot = TRUE, A = 1e5, sampling_cost = 1, m0 = 4, gamma = 0.25)",
+      "reads": {
+        "terms": "pilot_N"
+      },
+      "result": {
+        "class": ["dmar_mr", "dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": "pilot_N",
+        "row_names": [],
+        "attributes": []
+      }
+    },
+    {
+      "label": "smd, unbiased = FALSE",
+      "used_by": "SMSD",
+      "call": "DMAR::smd(group_1 = c(48.1, 52.3, 45.9, 50.2, 55.0, 47.7, 49.8, 51.4), group_2 = c(53.2, 57.9, 50.1, 56.4, 54.8, 59.3, 52.0, 55.6), unbiased = FALSE)",
+      "reads": {
+        "terms": "smd"
+      },
+      "result": {
+        "class": ["dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": "smd",
+        "row_names": [],
+        "attributes": []
+      }
+    },
+    {
+      "label": "mr_smd, at a sample size",
+      "used_by": "SMSD",
+      "call": "DMAR::mr_smd(A = 10000, d = 0.5, n_per_group = 50, sampling_cost = 2, gamma = 0.25)",
+      "reads": {
+        "terms": "risk",
+        "attributes": [
+          "criterion",
+          "is_satisfied"
+        ]
+      },
+      "result": {
+        "class": ["dmar_mr", "dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": ["risk", "n_1", "n_2", "d"],
+        "row_names": [],
+        "attributes": {
+          "criterion": {
+            "present": true,
+            "class": "numeric",
+            "length": 1
+          },
+          "is_satisfied": {
+            "present": true,
+            "class": "logical",
+            "length": 1
+          }
+        }
+      }
+    },
+    {
+      "label": "mr_smd, pilot",
+      "used_by": "SMSD",
+      "call": "DMAR::mr_smd(pilot = TRUE, A = 1e6, sampling_cost = 5, m0 = 4, gamma = 0.25)",
+      "reads": {
+        "terms": "pilot_n_per_group"
+      },
+      "result": {
+        "class": ["dmar_mr", "dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": "pilot_n_per_group",
+        "row_names": [],
+        "attributes": []
+      }
+    },
+    {
+      "label": "ci_crossed",
+      "used_by": "SMSD",
+      "call": "DMAR::ci_crossed(matrix(c(7, 9, 6, 8, 10, 6, 8, 5, 9, 9, 8, 9, 7, 8, 11, 5, 7, 6, 7, 9, 6, 9, 7, 9, 10, 7, 8, 6, 8, 10, 8, 10, 8, 9, 12, 6, 8, 7, 8, 10, 7, 8, 7, 9, 11, 6, 9, 6, 8, 9, 9, 10, 8, 9, 11, 7, 8, 7, 9, 10), nrow = 12, ncol = 5), conf_level = 0.95)",
+      "reads": {
+        "terms": [
+          "ci_lower",
+          "grand_mean",
+          "ci_upper",
+          "se",
+          "df",
+          "var_unit",
+          "var_rater",
+          "var_residual"
+        ]
+      },
+      "result": {
+        "class": ["dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": ["ci_lower", "grand_mean", "ci_upper", "se", "df", "var_unit", "var_rater", "var_residual", "n_units", "n_raters"],
+        "row_names": [],
+        "attributes": []
+      }
+    },
+    {
+      "label": "ci_proportion",
+      "used_by": "SIEVER",
+      "call": "DMAR::ci_proportion(successes = 50L, N = 100L)",
+      "reads": {
+        "terms": [
+          "ci_lower",
+          "proportion",
+          "ci_upper"
+        ]
+      },
+      "result": {
+        "class": ["dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": ["ci_lower", "proportion", "ci_upper", "successes", "N"],
+        "row_names": [],
+        "attributes": []
+      }
+    },
+    {
+      "label": "irt_information",
+      "used_by": "SIEVER",
+      "call": "DMAR::irt_information(discrimination = 1, threshold = 0, trait_value = c(-1, 0, 1))",
+      "reads": {
+        "columns": [
+          "trait_value",
+          "test_information",
+          "se"
+        ],
+        "attributes": [
+          "discrimination",
+          "trait_value_max_information",
+          "item_information"
+        ]
+      },
+      "result": {
+        "class": ["dmar_tbl", "data.frame"],
+        "names": ["trait_value", "test_information", "se"],
+        "term": [],
+        "row_names": [],
+        "attributes": {
+          "discrimination": {
+            "present": true,
+            "class": "numeric",
+            "length": 1
+          },
+          "trait_value_max_information": {
+            "present": true,
+            "class": "numeric",
+            "length": 1
+          },
+          "item_information": {
+            "present": true,
+            "class": ["matrix", "array"],
+            "length": 3
+          }
+        }
+      }
+    },
+    {
+      "label": "reliability_alpha",
+      "used_by": "SIEVER",
+      "call": "DMAR::reliability_alpha(data = DMAR::holzinger_swineford[, c(\"t1_visual_perception\", \"t2_cubes\", \"t3_paper_form_board\", \"t4_lozenges\")])",
+      "reads": {
+        "terms": [
+          "estimate",
+          "se",
+          "ci_lower",
+          "ci_upper"
+        ]
+      },
+      "result": {
+        "class": ["dmar_reliability", "dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": ["estimate", "se", "se_transformed", "ci_lower", "ci_upper", "conf_level", "N", "N_complete", "n_items"],
+        "row_names": [],
+        "attributes": []
+      }
+    },
+    {
+      "label": "sem_fit_measures, from summary statistics",
+      "used_by": "SIEVER",
+      "call": "DMAR::sem_fit_measures(chisq = 85.3, df = 24, N = 301, baseline_chisq = 918.9, baseline_df = 36)",
+      "reads": [],
+      "result": {
+        "class": ["dmar_sem_fit", "dmar_tbl", "data.frame"],
+        "names": ["term", "value"],
+        "term": ["chi_square", "df", "p_chi_square", "rmsea", "rmsea_ci_lower", "rmsea_ci_upper", "close_fit_bound", "p_close_fit", "not_close_fit_bound", "p_not_close_fit", "cfi", "tli", "nfi", "ifi", "rni", "srmr", "gamma_hat", "gamma_hat_ci_lower", "gamma_hat_ci_upper", "adjusted_gamma_hat", "adjusted_gamma_hat_ci_lower", "adjusted_gamma_hat_ci_upper", "N", "n_groups"],
+        "row_names": [],
+        "attributes": []
+      }
+    }
+  ]
+}

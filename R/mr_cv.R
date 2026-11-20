@@ -1,0 +1,348 @@
+#' Minimum Risk Point Estimation of the Population Coefficient of Variation
+#'
+#' @description
+#' Sequential estimation of the coefficient of variation with minimum risk.
+#' The function implements the procedure of Chattopadhyay and Kelley (2016),
+#' which considers study cost and the accuracy of the estimated coefficient
+#' of variation together. For the variance of the sample coefficient of
+#' variation it uses an improved analytic solution, Equation 32 of Kelley,
+#' Darku, and Chattopadhyay (2018), in place of Equation 22 of the 2016
+#' article, which carries an error in its kurtosis term (see the part of
+#' Details on Equation 22). It returns the pilot
+#' sample size, or it evaluates the risk and the stopping rule on the
+#' observations collected so far and says whether sampling can stop.
+#'
+#' @param data A numeric vector of the observations collected so far (at least 4), from a quantity with a positive mean. It is needed when \code{pilot = FALSE}.
+#' @param A The structural cost divided by the square of \code{epsilon} (see Details), a single positive number. Give either \code{A} or both \code{structural_cost} and \code{epsilon}.
+#' @param structural_cost The structural cost: what one is willing to pay for the study apart from the cost of sampling (see Details), a single positive number.
+#' @param epsilon The maximum desired difference between the estimated coefficient of variation and the population value, a single positive number.
+#' @param sampling_cost The cost of collecting one more observation, a single positive number. For example, if each survey costs 10 dollars to distribute and score, \code{sampling_cost} would be 10 dollars per additional observation.
+#' @param pilot \code{TRUE} to plan the pilot sample size, or \code{FALSE} (the default) to evaluate the risk function and the stopping rule at the current sample size.
+#' @param m0 The smallest pilot sample size allowed: a whole number of at least 4 (the default), since the variance estimate needs four observations.
+#' @param gamma The exponent \eqn{\gamma} of the correction term \eqn{n^{-2\gamma}}{n^(-2 gamma)} in the stopping rule, which keeps sampling from stopping too early: a single number strictly between 0 and 1/2. Chattopadhyay and Kelley (2016) take \eqn{0 < \gamma < 1/2} and use .49 for practical purposes, the default.
+#' @param verbose If \code{TRUE}, rows with the quantities behind the stopping rule are added to the table; defaults to \code{FALSE}.
+#'
+#' @details
+#' The value of \code{epsilon} is context specific; the smaller the value the closer the estimated value will tend to be to the population value.
+#'
+#' When the aim of a study is to estimate a parameter accurately, such as
+#' the coefficient of variation, the structural cost and the maximum
+#' probable error of the estimate, \eqn{\epsilon}, are combined to form
+#' \eqn{A}, the structural cost divided by \eqn{\epsilon^2}: the price
+#' paid per squared unit of maximum probable error. The structural cost is
+#' the investment in the study apart from the cost of sampling; in a grant
+#' application it is the funds requested less those for sampling
+#' observations (Chattopadhyay & Kelley, 2016). A larger structural cost or
+#' a smaller \eqn{\epsilon} gives a larger \eqn{A}, and a larger \eqn{A}
+#' leads to a more expensive study, other things being equal. \eqn{A} is
+#' fixed before any data are collected, whether it is given directly or
+#' through its two components.
+#'
+#' The sampling cost is not fixed in advance, because the sample size needed
+#' to estimate the coefficient of variation accurately is unknown. The risk
+#' function of Chattopadhyay and Kelley (2016) adds the mean square error of
+#' the estimator, weighted by \eqn{A}, to the sampling cost \eqn{cn}, where
+#' \eqn{c} is \code{sampling_cost} and \eqn{n} the sample size. Their
+#' sequential procedure collects a pilot sample, then adds one observation
+#' at a time, and stops at the first \eqn{n} for which
+#' \eqn{n^2 \ge (A / c)(V_n^2 + n^{-2\gamma})}{n^2 >= (A / c)(V_n^2 + n^(-2 gamma))}
+#' (their Equation 23), where \eqn{V_n^2} estimates \eqn{\xi^2}{xi^2}, the
+#' variance of the limiting normal distribution of
+#' \eqn{\sqrt{n}(k_n - \kappa)}{sqrt(n) (k_n - kappa)}, with \eqn{k_n} the
+#' sample coefficient of variation and \eqn{\kappa}{kappa} the population
+#' value. Both sides of the rule are on the scale of \eqn{n^2}: the
+#' criterion the function reports is the right-hand side, and it is
+#' compared with the square of the sample size, not with the sample size.
+#' The row \code{N} of the table holds this \eqn{n}; \eqn{N^2}, here and in
+#' the line printed under the table, is its square.
+#' With \code{pilot = FALSE} the function evaluates the risk and the
+#' stopping rule at the current sample size; with \code{pilot = TRUE} it
+#' returns the pilot sample size
+#' \eqn{\max(m_0, \lceil (A / c)^{1/(2 + 2\gamma)} \rceil)}{max(m0, ceiling((A / c)^(1 / (2 + 2 gamma))))}.
+#' A sample size is a whole number, so the formula is rounded up, and a
+#' formula value that is itself a whole number is that number: with
+#' \eqn{A = 100{,}000}{A = 100,000}, \eqn{c = 1}, and \eqn{\gamma = .25}
+#' it is \eqn{100{,}000^{0.4} = 100}{100000^0.4 = 100}, which R computes as
+#' 100.00000000000003, and the pilot sample size is 100, not 101.
+#' \code{\link{mr_smd}} is the corresponding procedure for the standardized
+#' mean difference (Chattopadhyay & Kelley, 2017). For a confidence interval
+#' for the coefficient of variation of normally distributed scores, and for
+#' the sample size that makes it narrow, see \code{\link{ci_cv}} and
+#' \code{\link{ss_aipe_cv}} (Kelley, 2007).
+#'
+#' \subsection{The Variance Estimate}{
+#' For scores with mean \eqn{\mu}{mu}, variance \eqn{\sigma^2}{sigma^2},
+#' and third and fourth central moments \eqn{\mu_3}{mu_3} and
+#' \eqn{\mu_4}{mu_4},
+#' \deqn{\xi^2 = \frac{\mu_4}{4\mu^2\sigma^2} - \frac{\sigma^2}{4\mu^2} - \frac{\mu_3}{\mu^3} + \frac{\sigma^4}{\mu^4}}{xi^2 = mu_4 / (4 mu^2 sigma^2) - sigma^2 / (4 mu^2) - mu_3 / mu^3 + sigma^4 / mu^4}
+#' (Kelley, Darku, & Chattopadhyay, 2018, Equation 30). With the skewness
+#' \eqn{\gamma_1}{gamma_1} and the excess kurtosis \eqn{\gamma_2}{gamma_2}
+#' of the scores (neither is the exponent \eqn{\gamma}{gamma} of the
+#' stopping rule), this is
+#' \deqn{\xi^2 = \frac{\kappa^2}{2} + \kappa^4 - \kappa^3\gamma_1 + \frac{\kappa^2\gamma_2}{4}.}{xi^2 = kappa^2 / 2 + kappa^4 - kappa^3 gamma_1 + kappa^2 gamma_2 / 4.}
+#' \eqn{V_n^2} is the expression in moments with the sample mean, the
+#' sample variance, and the unbiased estimates of the third and fourth
+#' central moments in place of the population values (their Equation 32),
+#' each moment computed from the scores centered at their mean. It is consistent
+#' for \eqn{\xi^2}{xi^2} whenever the fourth moment is finite, so the
+#' procedure does not assume a specific distribution for the scores. The
+#' scores must have a positive mean: the coefficient of variation divides
+#' by the mean, and the procedure is for a quantity that cannot be negative
+#' (Chattopadhyay & Kelley, 2016, p. 627).
+#' }
+#'
+#' \subsection{A Zero or Negative Estimate}{
+#' \eqn{V_n^2} can be zero or negative in a small sample. A positive
+#' estimate enters the stopping rule and the risk as
+#' \eqn{\max(V_n^2, n^{-3})}{max(V_n^2, n^(-3))}, the estimator of
+#' Equation 31 of Kelley, Darku, and Chattopadhyay (2018). The bound is
+#' small beside the correction term of the rule: \eqn{n^{-3}}{n^(-3)} is
+#' \eqn{n^{2\gamma - 3}}{n^(2 gamma - 3)} times
+#' \eqn{n^{-2\gamma}}{n^(-2 gamma)}, which is \eqn{n^{-2.02}}{n^(-2.02)}
+#' times it at the default \eqn{\gamma}{gamma} and less than
+#' \eqn{n^{-2}}{n^(-2)} times it for any \eqn{\gamma}{gamma}. It replaces
+#' a positive estimate below \eqn{n^{-3}}{n^(-3)}. With a small coefficient
+#' of variation that is the usual case in a small sample: for normal scores
+#' \eqn{\xi^2}{xi^2} is close to \eqn{\kappa^2/2}{kappa^2 / 2}, which is
+#' below \eqn{n^{-3}}{n^(-3)} while \eqn{n} is below
+#' \eqn{(2/\kappa^2)^{1/3}}{(2 / kappa^2)^(1/3)}, about 27 observations for
+#' \eqn{\kappa = .01}{kappa = .01} and 9 for \eqn{\kappa = .05}{kappa = .05}.
+#' From the pilot sample size on, the bound adds less than 1 to the
+#' criterion, so it can change the decision only at the pilot sample size,
+#' and only when \eqn{N^2} there is within 1 of the criterion; the stop
+#' then usually comes one observation later.
+#'
+#' When the estimate is zero or negative (it is taken as 0 for scores that
+#' do not vary, for scores that differ only by rounding error, with a range
+#' of at most \eqn{10^{-10}}{1e-10} times the largest absolute score, such
+#' as equal gains computed as posttest minus pretest, and when it is within
+#' \eqn{10^{-10}}{1e-10} of the size of its four terms), the function reports the stopping rule as not met, with the
+#' risk and the criterion missing, and says so under the table; the next
+#' observation is collected and the rule is evaluated again. This is a
+#' deliberate departure from Equation 23 read literally, under which a
+#' negative \eqn{V_n^2} lowers the criterion and can end sampling at the
+#' pilot sample, and from Equation 31, which would put
+#' \eqn{n^{-3}}{n^(-3)} in place of such an estimate: the rule can then be
+#' met by a sample that says nothing usable about the variance.
+#' }
+#'
+#' \subsection{Large-Sample Properties}{
+#' The properties of the procedure are asymptotic (Chattopadhyay & Kelley,
+#' 2016). As \eqn{A / c} grows, the final sample size approaches the
+#' large-sample value \eqn{\sqrt{A / c}\,\xi}{sqrt(A / c) xi}, at which the
+#' approximate risk \eqn{A \xi^2 / n + cn}{A xi^2 / n + c n} is smallest.
+#' Short of that limit the procedure can stop early, on average, when the
+#' scores are skewed. In 20,000 simulated runs with
+#' \eqn{A = 5{,}000{,}000}{A = 5,000,000} and \eqn{c = 10}, the mean final
+#' sample size was 480 for gamma scores with \eqn{\kappa = .8}{kappa = .8},
+#' which is 0.94 of the large-sample value of 512, and 440 for lognormal
+#' scores with \eqn{\kappa = .6}{kappa = .6}, which is 0.81 of the
+#' large-sample value of 545.
+#' }
+#'
+#' \subsection{Equation 22 of Chattopadhyay and Kelley (2016)}{
+#' The variance estimate of this function improves on the one the 2016
+#' article uses, and its results therefore differ from the article's.
+#' Chattopadhyay and Kelley (2016) estimate \eqn{\xi^2}{xi^2} by their
+#' Equation 22, which the article prints in moments,
+#' \deqn{\frac{s_n^4}{4\bar{X}_n^4} + \frac{\hat{\mu}_{4n}}{4\bar{X}_n^4} + \frac{s_n^2}{2\bar{X}_n^2} - \frac{\hat{\mu}_{3n}}{\bar{X}_n^3},}{s^4 / (4 M^4) + mu4_hat / (4 M^4) + s^2 / (2 M^2) - mu3_hat / M^3,}
+#' and of whose four terms only the last is a term of Equation 32 of Kelley,
+#' Darku, and Chattopadhyay (2018). Written with the skewness and the
+#' excess kurtosis, Equation 22 estimates
+#' \eqn{\kappa^2/2 + \kappa^4 - \kappa^3\gamma_1 + \kappa^4\gamma_2/4}{kappa^2 / 2 + kappa^4 - kappa^3 gamma_1 + kappa^4 gamma_2 / 4},
+#' the first-order term of Bao (2009, Equation 3) as printed. That term is
+#' in error. Bao posted an erratum to the article on his web page at Purdue
+#' University (Bao, n.d.; the file is dated February 20, 2023), which says
+#' that the corrections were missed in proofreading and makes three: in
+#' the first line of the mean squared error of his Equation 3 (p. 293) the
+#' term \eqn{\alpha^4\gamma_2/(4n)}{alpha^4 gamma_2 / (4n)} should be
+#' \eqn{\alpha^2\gamma_2/(4n)}{alpha^2 gamma_2 / (4n)}, where
+#' \eqn{\alpha}{alpha} is the coefficient of variation and
+#' \eqn{\gamma_2}{gamma_2} the excess kurtosis; in the last line of his
+#' Remark 2 (p. 296) \eqn{\alpha^4\gamma_2}{alpha^4 gamma_2} should be
+#' \eqn{\alpha^2\gamma_2}{alpha^2 gamma_2}; and in the second line of
+#' the expression for \eqn{E(\lambda_{22})}{E(lambda_22)} (p. 295) the term
+#' \eqn{(3/n^2 + 1/n)\alpha^2\gamma_2}{(3 / n^2 + 1 / n) alpha^2 gamma_2}
+#' should be
+#' \eqn{(3/n^2 + 1/(n\alpha^2))\alpha^2\gamma_2}{(3 / n^2 + 1 / (n alpha^2)) alpha^2 gamma_2}.
+#' It credits Dennis Boos of North Carolina State University with finding
+#' the errors. The kurtosis term of the first-order variance is therefore
+#' \eqn{\kappa^2\gamma_2/4}{kappa^2 gamma_2 / 4}, as Equation 30 of the
+#' 2018 article has, and Equation 32, the estimate used here, is the sample
+#' version of that corrected variance. The two
+#' population values are equal only when the excess kurtosis is 0 or
+#' \eqn{\kappa = 1}{kappa = 1}; with positive excess kurtosis the value of
+#' Equation 22 is too small for \eqn{\kappa}{kappa} below 1 and too large
+#' above it. For gamma scores with \eqn{\kappa = .8}{kappa = .8},
+#' \eqn{\xi^2}{xi^2} is 0.525 and the value of Equation 22 is 0.304. In a
+#' sample the two estimates differ by
+#' \eqn{(k_n^2/4)(1 - k_n^2)(\hat{\mu}_{4n}/s_n^4 - 3)}{(k^2 / 4)(1 - k^2)(mu4_hat / s^4 - 3)},
+#' so the results of this function differ from those of the article for
+#' nearly any data, normal data included. For the article's example, the
+#' first of the Examples, the stopping rule is met at 35 observations with
+#' Equation 22, as the article reports, and is not met there with the
+#' variance estimate used here: the criterion is 1261.332 and
+#' \eqn{N^2} is 1225.
+#' }
+#'
+#' @return
+#' A \code{dmar_tbl} with columns \code{term} and \code{value}. With
+#' \code{pilot = FALSE} the rows are
+#' \item{risk}{The estimated risk at the current sample size,
+#'   \eqn{A V_n^2 / n + cn}{A V_n^2 / n + c n}, with
+#'   \eqn{\max(V_n^2, n^{-3})}{max(V_n^2, n^(-3))} for \eqn{V_n^2}.}
+#' \item{N}{The current sample size (the number of observations in
+#'   \code{data}).}
+#' \item{cv}{The current coefficient of variation.}
+#' With \code{verbose = TRUE} the rows \code{v2_n}, \code{mu_3_n} and
+#' \code{mu_4_n} (the unbiased estimates of the third and fourth central
+#' moments it is built from), and \code{criterion} follow. The row
+#' \code{v2_n} always holds the estimate \eqn{V_n^2} itself, also when
+#' \eqn{n^{-3}}{n^(-3)} was used in its place and when the estimate is zero
+#' or negative. The attribute \code{is_satisfied} is \code{TRUE} when the
+#' stopping rule is satisfied, so that sampling can stop; the attribute
+#' \code{criterion} holds
+#' \eqn{(A / c)(\max(V_n^2, n^{-3}) + n^{-2\gamma})}{(A / c)(max(V_n^2, n^(-3)) + n^(-2 gamma))},
+#' the value that \eqn{N^2} is compared with; and the attribute
+#' \code{variance_unusable} is \code{TRUE} when the estimate is zero,
+#' negative, or not finite. In that case \code{is_satisfied} is
+#' \code{FALSE}, and the row \code{risk}, the row \code{criterion}, and the
+#' attribute \code{criterion} are \code{NA}. The decision is printed under
+#' the table: whether the stopping rule is met, the two numbers compared,
+#' and whether to stop or to collect another observation. With
+#' \code{pilot = TRUE} the single row is \code{pilot_N}, the pilot sample
+#' size.
+#'
+#' @references
+#' Bao, Y. (n.d.). Erratum: \dQuote{Finite sample moments of the
+#'   coefficient of variation} [Econometric Theory 25(1) (2009) 291--297].
+#'   Department of Economics, Purdue University. Retrieved November 15,
+#'   2026, from
+#'   \url{https://web.ics.purdue.edu/~ybao/Research/erratum_BaoET.pdf}
+#'
+#' Bao, Y. (2009). Finite-sample moments of the coefficient of variation.
+#'   \emph{Econometric Theory, 25}(1), 291--297.
+#'   \doi{10.1017/S0266466608090555}
+#'
+#' Chattopadhyay, B., & Kelley, K. (2016). Estimation of the coefficient of
+#'   variation with minimum risk: A sequential method for minimizing
+#'   sampling error and study cost.
+#'   \emph{Multivariate Behavioral Research, 51}(5), 627--648.
+#'   \doi{10.1080/00273171.2016.1203279}
+#'
+#' Chattopadhyay, B., & Kelley, K. (2017). Estimating the standardized mean
+#'   difference with minimum risk: Maximizing accuracy and minimizing cost
+#'   with sequential estimation.
+#'   \emph{Psychological Methods, 22}(1), 94--113. \doi{10.1037/met0000089}
+#'
+#' Kelley, K. (2007). Sample size planning for the coefficient of variation
+#'   from the accuracy in parameter estimation approach.
+#'   \emph{Behavior Research Methods, 39}(4), 755--766.
+#'   \doi{10.3758/BF03192966}
+#'
+#' Kelley, K., Darku, F. B., & Chattopadhyay, B. (2018). Accuracy in
+#'   parameter estimation for a general class of effect sizes: A
+#'   sequential approach. \emph{Psychological Methods, 23}(2), 226--243.
+#'   \doi{10.1037/met0000127}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#'   experiments and analyzing data: A model comparison perspective}
+#'   (4th ed.). Routledge.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso
+#' \code{\link{ci_cv}}, \code{\link{cv}}, \code{\link{ss_aipe_cv}},
+#' \code{\link{mr_smd}}
+#'
+#' @examples
+#' # The example of Chattopadhyay and Kelley (2016): a structural cost of
+#' # 1000 and a maximum probable error of .05, so that A is 400000, with a
+#' # sampling cost of 75 per observation. The pilot sample size, from A or
+#' # from its two components:
+#' mr_cv(pilot = TRUE, A = 400000, sampling_cost = 75)
+#' mr_cv(pilot = TRUE, structural_cost = 1000, epsilon = .05, sampling_cost = 75)
+#'
+#' # The 18 pilot observations of the article. The line under the table
+#' # gives the decision.
+#' books <- c(36, 53, 19, 11, 10, 24, 14, 65, 18, 48, 25, 35, 13, 18, 3, 41, 5, 3)
+#' mr_cv(data = books, A = 400000, sampling_cost = 75)
+#'
+#' # The rule is not met, so one more observation is collected and the rule
+#' # is checked again, and so on. The article stops at 35 observations; with
+#' # the variance estimate used here the rule is not yet met there (see the
+#' # part of Details on Equation 22). The extra rows show what the decision
+#' # rests on.
+#' books <- c(books, 44, 26, 13, 39, 2, 3, 26, 22, 8, 15, 12, 22, 5, 21, 23, 40, 18)
+#' mr_cv(data = books, A = 400000, sampling_cost = 75, verbose = TRUE)
+#'
+#' # A complete run. The simulated scores stand in for observations that a
+#' # study would collect one at a time. The loop starts at the pilot sample
+#' # size, adds an observation whenever the rule is not met, and cannot go
+#' # past the scores on hand.
+#' set.seed(113)
+#' scores <- rgamma(1000, shape = 4, scale = 5)
+#' n <- mr_cv(pilot = TRUE, A = 100000, sampling_cost = 1)$value
+#' repeat {
+#'   check <- mr_cv(data = scores[1:n], A = 100000, sampling_cost = 1)
+#'   if (attr(check, "is_satisfied") || n == length(scores)) break
+#'   n <- n + 1
+#' }
+#' check
+#'
+#' @keywords misc design htest
+#'
+#' @export
+
+
+mr_cv <- function(data, A, structural_cost, epsilon, sampling_cost, pilot = FALSE, m0 = 4, gamma = .49, verbose = FALSE) {
+  .dmar_check_numbers(
+    "mr_cv", c("A", "structural_cost", "epsilon", "sampling_cost", "gamma"),
+    required = c("A", "structural_cost", "epsilon", "sampling_cost", "gamma"))
+  .mr_check_flag(pilot, "pilot")
+  .mr_check_flag(verbose, "verbose")
+  A <- .mr_resolve_A(A, structural_cost, epsilon,
+                     given = c(A = !missing(A),
+                               structural_cost = !missing(structural_cost),
+                               epsilon = !missing(epsilon)))
+  if (missing(sampling_cost)) .dmar_refuse_argument(c(
+    "'sampling_cost' must be given: the cost of collecting one more ",
+    "observation, a single positive finite number. The stopping rule and ",
+    "the pilot sample size both divide 'A' by it."), arg = "sampling_cost")
+  .mr_check_positive(sampling_cost, "sampling_cost",
+                     "the cost of collecting one more observation")
+  .mr_check_gamma(gamma, paste0(
+    "The stopping rule is defined for an exponent in that open interval ",
+    "(Chattopadhyay & Kelley, 2016, Equation 23)."))
+  m0 <- .dmar_check_count(m0, "m0", min = 4L, reason = paste0(
+    "The variance estimate needs four observations (Chattopadhyay & ",
+    "Kelley, 2016, Equation 24)."))
+  .mr_check_ratio(A, sampling_cost)
+
+  if (pilot) {
+    out <- data.frame(
+      term = "pilot_N",
+      value = .mr_pilot_size((A / sampling_cost)^(1 / (2 + 2 * gamma)), m0))
+    return(.as_dmar_tbl(out, subclass = "dmar_mr"))
+  }
+
+  if (missing(data)) .dmar_refuse_argument(c(
+    "'data' must be given when 'pilot' is FALSE: the stopping rule is ",
+    "evaluated on the observations collected so far. For the pilot sample ",
+    "size, which needs no data, set pilot = TRUE."), arg = "data")
+  .mr_cv_check_data(data)
+
+  est <- .mr_cv_estimate(data)
+  rule <- .mr_cv_rule(est$v2, est$n, A, sampling_cost, gamma)
+  out <- data.frame(
+    term  = c("risk", "N", "cv",
+              if (verbose) c("v2_n", "mu_3_n", "mu_4_n", "criterion")),
+    value = c(rule$risk, est$n, sqrt(est$s2) / est$mean,
+              if (verbose) c(est$v2, est$mu3, est$mu4, rule$criterion)))
+  # The decision, the criterion, and whether the variance estimate could be
+  # used are attributes, so that the value column stays numeric.
+  attr(out, "is_satisfied") <- rule$is_satisfied
+  attr(out, "criterion") <- rule$criterion
+  attr(out, "variance_unusable") <- rule$unusable
+  .as_dmar_tbl(out, subclass = "dmar_mr")
+}

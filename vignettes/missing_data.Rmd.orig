@@ -1,0 +1,1340 @@
+---
+title: "Missing Data: What the Missing Values Cost"
+author: "Ken Kelley"
+date: "`r format(Sys.Date(), '%B %Y')`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+    math_method: mathml
+vignette: >
+  %\VignetteIndexEntry{Missing Data: What the Missing Values Cost}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+options(width = 85)
+# Display helpers for the numbers quoted in the prose. They format only;
+# every stored value keeps full precision.
+f0 <- function(x) formatC(x, format = "f", digits = 0, big.mark = ",")
+f1 <- function(x) formatC(x, format = "f", digits = 1)
+f2 <- function(x) formatC(x, format = "f", digits = 2)
+f3 <- function(x) formatC(x, format = "f", digits = 3)
+p_text <- function(p) {
+  s <- format_p(p)
+  if (startsWith(s, "<")) s else paste("=", s)
+}
+```
+
+A missing value is information that was never collected, and an estimate
+computed from incomplete data is less precise than the same estimate from
+complete data would have been. How much less depends on the estimate, not on
+the share of values that are missing: a parameter estimated mostly from fully
+observed variables loses little, and one that rests on the incomplete
+variables can lose most of what complete data would have given it. An
+analysis of incomplete data has five questions to answer, and the functions
+below answer them.
+
+1. **What is missing?** The patterns of observed and missing values, and the
+   number of cases behind each variance and covariance, are the description a
+   reader needs before any model is fit.
+2. **Which estimators stay consistent?** Listwise deletion is consistent only
+   when values are missing completely at random. Full information maximum
+   likelihood (FIML), two-stage maximum likelihood, and multiple imputation
+   are consistent when values are missing at random given the variables in
+   the analysis.
+3. **What did the missing values cost?** The fraction of missing information
+   of a parameter is the share of its sampling variance that is due to the
+   missing values. In the terms of accuracy in parameter estimation (AIPE),
+   it gives the number of complete cases the incomplete data were worth, the
+   number of incomplete cases that would make up the loss, and how much wider
+   each confidence interval is than complete data would have made it.
+4. **What changes in a small sample?** A Wald interval refers its estimate to
+   the normal distribution, and when the effective sample size is small a
+   *t* reference distribution is the better approximation.
+5. **What follows for measurement and for the next study?** Reliability
+   coefficients, factor scores, and sample size plans each carry the missing
+   information forward.
+
+| Function | What it reports |
+|:--|:--|
+| `missing_patterns()` | The distinct patterns of observed and missing items, with their counts |
+| `missing_coverage()` | The number and proportion of cases that observed each pair of items |
+| `fa_confirmatory()` | A confirmatory factor model fitted by full information maximum likelihood, its default |
+| `fraction_missing_information()` | The fraction of missing information of every parameter, with the effective sample size, the target sample size, and the width inflation factor |
+| `cov_fiml()` | The maximum likelihood (EM) covariance matrix and means of incomplete items |
+| `df_missing()`, `wald_df` | Degrees of freedom for a *t* reference distribution from each parameter's fraction of missing information |
+| `df_barnard_rubin()` | Degrees of freedom for an estimate pooled over multiple imputations |
+| `fa_confirmatory(..., missing = "two_stage")` | Two-stage maximum likelihood, with its residual based test statistic and corrected fit indices |
+| `reliability_omega()`, `reliability_alpha()`, `reliability_omega_categorical()` | Reliability coefficients from incomplete items, with their intervals |
+| `factor_scores()` | Factor scores with standard errors, intervals, and determinacy for each missing data pattern |
+| `ss_aipe_reliability(..., fmi = )`, `ss_aipe_reliability_sensitivity()` | A sample size plan for a reliability interval that will be estimated from incomplete data, and its check by simulation |
+
+The models are fitted with lavaan (Rosseel, 2012), which must be installed to
+run the code below; the two sections that impute also use mice (van Buuren &
+Groothuis-Oudshoorn, 2011).
+
+## The Running Example
+
+Holzinger and Swineford (1939) gave ability tests to the seventh and eighth
+grade pupils of two Chicago schools, and `holzinger_swineford` holds the
+scores of all `r nrow(holzinger_swineford)` pupils. Four of the tests measured
+spatial ability: visual perception, cubes, paper form board, and lozenges.
+Two more, a revised paper form board and a flags test, were tried at the
+Grant-White school as experimental substitutes for the paper form board and
+lozenges tests and were never given at Pasteur. The six spatial tests are the
+running example.
+
+```{r data}
+library(DMAR)
+spatial <- c("t1_visual_perception", "t2_cubes", "t3_paper_form_board",
+             "t4_lozenges", "t25_paper_form_board_r", "t26_flags")
+d <- descriptives(holzinger_swineford[spatial])$descriptives
+print(d[, c("variable", "n", "n_missing", "mean", "sd")], digits = 3)
+table(holzinger_swineford$school)
+```
+
+```{r school-means, include = FALSE}
+hs <- holzinger_swineford
+by_school <- sapply(split(hs[spatial], hs$school), colMeans, na.rm = TRUE)
+n_gw <- sum(hs$school == "Grant-White")
+n_pa <- sum(hs$school == "Pasteur")
+N_all <- nrow(hs)
+```
+
+The revised paper form board and the flags test are missing for all
+`r n_pa` Pasteur pupils and observed for all `r n_gw` Grant-White pupils. The
+reason each value is missing is known, and it was a decision of the
+investigators rather than of the pupils, which makes these data a clear case
+to learn from. It is also a real one: the two schools differ, and the
+difference will matter.
+
+## Look Before Fitting
+
+The first description of incomplete data is the set of patterns in which the
+values are missing.
+
+```{r patterns}
+pat <- missing_patterns(holzinger_swineford, items = spatial)
+pat
+```
+
+A pattern is a string of 1s (observed) and 0s (missing), one character per
+test in the order of `spatial`. There are `r attr(pat, "n_patterns")`
+patterns, and the complete one holds the `r attr(pat, "N_complete")` pupils
+that listwise deletion would keep, `r f1(100 * attr(pat, "N_complete") / N_all)`
+percent of the sample. A FIML analysis uses every pupil with at least one
+observed test, here all `r N_all`. A case missing every item would be listed
+as its own pattern, since lavaan sets such cases aside without reporting
+them.
+
+The second description is the number of cases behind each covariance.
+
+```{r coverage}
+cov_pairs <- missing_coverage(holzinger_swineford, items = spatial)
+cov_pairs[cov_pairs$coverage < 1, ]
+```
+
+Every pair that involves the revised paper form board or the flags test was
+observed together by the same `r min(cov_pairs$n_both)` pupils. Coverage
+matters for two reasons. A covariance whose two variables were never observed
+together is not estimable from the data at all, and `cov_fiml()` refuses such
+a pair by name; planned missing designs are built so that no pair is empty.
+And when values are missing completely at random, the fraction of missing
+information of any parameter is bounded by the largest univariate and
+pairwise rates of missing values (Savalei & Rhemtulla, 2012, p. 490), here
+`r f3(1 - min(cov_pairs$coverage))`. Whether these values are missing
+completely at random is the next question.
+
+## Fitting by Full Information Maximum Likelihood
+
+### What Each Estimator Assumes
+
+Rubin (1976) distinguished three mechanisms. Values are missing completely at
+random (MCAR) when whether a value is missing is unrelated to anything in the
+data, observed or not. They are missing at random (MAR) when it may depend on
+values that were observed but, given those, not on the values that are
+missing. They are missing not at random (MNAR) when it depends on the missing
+values themselves. The three are statements about the variables in a given
+analysis, so a mechanism that is MNAR for one set of variables can be MAR for
+a larger set that includes the cause of the missingness.
+
+Listwise deletion analyzes the complete cases as if they were a random sample
+from the population, which they are under MCAR. When the values are not
+MCAR, the complete cases can be unrepresentative and its estimates biased;
+case deletion is generally valid only under MCAR (Schafer & Graham, 2002,
+p. 155). Even under MCAR it discards the observed values of every incomplete
+case. FIML maximizes the likelihood of each case's observed values. Under MAR,
+and when the parameters of the process that produced the missing values are
+distinct from those of the model, that process can be ignored in likelihood
+inference (Rubin, 1976), so FIML is consistent and efficient under MAR given
+the variables in the model, provided the model for those variables is right
+(Enders, 2010; Schafer & Graham, 2002). MAR cannot in general be tested
+from the data at hand (Schafer & Graham, 2002, p. 152), and no estimator
+discussed here protects against MNAR.
+
+### The Planned Missingness in These Data
+
+Listwise deletion of the six spatial tests analyzes the Grant-White pupils
+alone. For the four tests every pupil took, that is visibly a different
+population: the Pasteur pupils averaged
+`r f2(by_school["t4_lozenges", "Pasteur"])` on lozenges and the Grant-White
+pupils `r f2(by_school["t4_lozenges", "Grant-White"])`. The single-factor
+model, with each factor's variance fixed at 1 so that every loading is
+estimated, is fitted both ways. FIML, the default of `fa_confirmatory()`
+(written out here), makes the item means part of the model; the listwise fit
+is asked for with `missing = "listwise"`, and for the means with
+`meanstructure = TRUE`.
+
+```{r fit-spatial}
+spatial_factor <- list(spatial = spatial)
+fit_sp  <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+                 missing = "fiml", output = "fit")
+tab_sp  <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+                 missing = "fiml")
+tab_lw  <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+                 missing = "listwise", meanstructure = TRUE)
+
+# Estimate and 95% confidence interval of named rows, for display.
+est_ci <- function(tab, terms) {
+  i <- match(terms, tab$term)
+  sprintf("%.3f [%.3f, %.3f]", tab$estimate[i], tab$ci_lower[i],
+          tab$ci_upper[i])
+}
+means <- paste0("nu_spatial_", 1:6)
+# all_pupils is NA for the two tests no Pasteur pupil took.
+data.frame(test = spatial, all_pupils = colMeans(holzinger_swineford[spatial]),
+           fiml = est_ci(tab_sp, means), listwise = est_ci(tab_lw, means),
+           row.names = NULL)
+```
+
+For the four tests both schools took, FIML reproduces the means of all
+`r N_all` pupils (the `all_pupils` column), and listwise deletion reports the
+Grant-White means. The lozenges mean is
+`r f2(tab_lw$estimate[tab_lw$term == "nu_spatial_4"])` under listwise deletion
+and `r f2(tab_sp$estimate[tab_sp$term == "nu_spatial_4"])` under FIML. A
+missing data mechanism under which the complete cases score differently from
+the incomplete ones on an observed test is not MCAR, so the assumption
+listwise deletion needs fails here on evidence in the data.
+
+For the revised paper form board and the flags test, FIML moves the means a
+little, by what the four tests say about how the Pasteur pupils differ. That
+step is where its assumption sits. The values are missing because of the
+school a pupil attended, so they are MAR given the six tests if school carries
+no information about the two new tests beyond what the four old ones carry,
+which no Pasteur score on the new tests can confirm or refute. School itself
+cannot be added to the model to make the assumption hold: every pupil who
+took the new tests attended one school, so the data say nothing about how the
+new tests relate to school among pupils with the same other scores. MAR is the
+weaker assumption, not a verified one, and the FIML analysis is the one that
+uses everything the data hold under it.
+
+The measurement properties of the scale, with their 95% confidence
+intervals:
+
+```{r measurement}
+fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+      missing = "fiml", output = "measurement")
+fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+      missing = "listwise", output = "measurement")
+```
+
+```{r measurement-values, include = FALSE}
+m_fiml <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+                missing = "fiml", output = "measurement")
+m_lw <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+              missing = "listwise", output = "measurement")
+w <- function(tab, term) {
+  i <- match(term, tab$term)
+  tab$ci_upper[i] - tab$ci_lower[i]
+}
+```
+
+Omega, the reliability of the unit-weighted sum of the six tests (McDonald,
+1999), is `r f3(m_fiml$estimate[1])`, 95% CI
+[`r f3(m_fiml$ci_lower[1])`, `r f3(m_fiml$ci_upper[1])`], by FIML from all
+`r N_all` pupils, and `r f3(m_lw$estimate[1])`
+[`r f3(m_lw$ci_lower[1])`, `r f3(m_lw$ci_upper[1])`] from the
+`r n_gw` Grant-White pupils. The FIML interval is
+`r f2(w(m_fiml, "omega_spatial") / w(m_lw, "omega_spatial"))` times as wide as
+the listwise one. The intervals describe different populations, the two
+schools together and one school, and the FIML interval is the narrower
+because it also uses the `r n_pa` Pasteur pupils' scores on four of the six
+tests.
+
+### A Demonstration With a Known Answer
+
+With planned missingness the values that are missing were never observed, so
+no analysis can be checked against them. A demonstration with a known answer
+deletes values that were observed. Jöreskog (1969) fitted three correlated
+factors, visualization, verbal intelligence, and speed, to nine of these
+tests, and all nine were given at both schools. Here paragraph comprehension
+is deleted for some pupils, with a probability that is larger the lower a
+pupil scored on sentence completion, a test that stays in the model: the
+values are MAR given the nine tests and, by construction, not MCAR.
+
+```{r mar-demo}
+three <- list(
+  visual = c("t1_visual_perception", "t2_cubes", "t4_lozenges"),
+  verbal = c("t6_paragraph_comprehension", "t7_sentence", "t9_word_meaning"),
+  speed  = c("t10_addition", "t12_counting_groups_of_dots",
+             "t13_straight_and_curved_capitals"))
+nine <- unlist(three, use.names = FALSE)
+
+set.seed(113)
+mar <- holzinger_swineford[nine]
+z_sentence <- as.numeric(scale(mar$t7_sentence))
+p_missing <- plogis(-0.7 - 1.5 * z_sentence)
+mar$t6_paragraph_comprehension[runif(nrow(mar)) < p_missing] <- NA
+
+complete <- fa_confirmatory(data = holzinger_swineford, factors = three,
+                  missing = "fiml")
+listwise <- fa_confirmatory(data = mar, factors = three, missing = "listwise",
+                            meanstructure = TRUE)
+fiml     <- fa_confirmatory(data = mar, factors = three, missing = "fiml")
+
+rows <- c("nu_verbal_1", "lambda_verbal_1", "phi_visual_verbal",
+          "phi_verbal_speed", "omega_verbal")
+data.frame(term = rows, complete = est_ci(complete, rows),
+           listwise = est_ci(listwise, rows), fiml = est_ci(fiml, rows))
+```
+
+```{r mar-values, include = FALSE}
+n_del <- sum(is.na(mar$t6_paragraph_comprehension))
+ev <- function(tab, term) tab$estimate[match(term, tab$term)]
+i_nu <- match("nu_verbal_1", listwise$term)
+covers <- listwise$ci_lower[i_nu] <= ev(complete, "nu_verbal_1") &&
+  ev(complete, "nu_verbal_1") <= listwise$ci_upper[i_nu]
+covers_text <- if (covers) {
+  "although its interval still contains the complete data value"
+} else {
+  "with an interval that does not contain the complete data value"
+}
+```
+
+The deletion removed `r n_del` of the `r N_all` paragraph comprehension
+scores. The `complete` column is the analysis of the same pupils before
+anything was deleted, the answer the incomplete data should recover.
+Listwise deletion keeps the `r N_all - n_del` complete pupils, among whom
+pupils strong at sentence completion are more common than in the sample, and
+its mean for paragraph comprehension (`nu_verbal_1`) is
+`r f2(ev(listwise, "nu_verbal_1"))` against
+`r f2(ev(complete, "nu_verbal_1"))`, `r covers_text`; the correlation of the
+verbal factor with speed moves
+from `r f3(ev(complete, "phi_verbal_speed"))` to
+`r f3(ev(listwise, "phi_verbal_speed"))`. FIML, which keeps the sentence
+completion scores of the pupils whose paragraph comprehension is missing,
+gives `r f2(ev(fiml, "nu_verbal_1"))` and
+`r f3(ev(fiml, "phi_verbal_speed"))`, close to the complete data values on
+every row. Each column is one sample, so a single row can agree or disagree
+by chance. The direction of the listwise errors follows from which pupils it
+keeps; FIML's consistency rests on MAR, which holds here by construction, and
+on the model, which the nine tests fit only approximately (see
+`vignette("sem_fit_measures")`).
+
+### Auxiliary Variables
+
+MAR is a statement about the variables in the analysis. When whether a value
+is missing depends on a variable the model leaves out, the values can be MNAR
+for the model's variables and MAR once that variable is included. Including
+such variables costs little and can remove a bias that leaving them out would
+leave in place (Collins, Schafer, & Kam, 2001). Graham (2003) showed how to
+include them in a FIML structural equation model without changing the model:
+each auxiliary variable is a saturated correlate, correlated with every other
+auxiliary and with the residual of every indicator, so it adds information to
+the likelihood while the model's parameters keep their meaning and its degrees
+of freedom do not change. lavaan builds that block from its `aux` argument,
+which `fa_confirmatory()` passes through.
+
+In this demonstration sentence completion goes missing more often for pupils
+who scored low on word classification, a verbal test that is not in the
+model.
+
+```{r aux-demo}
+set.seed(113)
+aux_data <- holzinger_swineford[c(nine, "t8_word_classification")]
+z_word <- as.numeric(scale(aux_data$t8_word_classification))
+aux_data$t7_sentence[runif(nrow(aux_data)) < plogis(-0.7 - 1.5 * z_word)] <- NA
+
+no_aux   <- fa_confirmatory(data = aux_data[nine], factors = three, missing = "fiml")
+with_aux <- fa_confirmatory(data = aux_data, factors = three, missing = "fiml",
+                  aux = "t8_word_classification")
+
+rows <- c("nu_verbal_2", "lambda_verbal_2")
+data.frame(term = rows, complete = est_ci(complete, rows),
+           fiml = est_ci(no_aux, rows), fiml_aux = est_ci(with_aux, rows))
+```
+
+```{r aux-check, include = FALSE}
+n_del_aux <- sum(is.na(aux_data$t7_sentence))
+# The same fit as with_aux, as a lavaan object. Its NOTE and warning are
+# the ones printed above.
+fit_aux <- suppressWarnings(suppressMessages(
+  fa_confirmatory(data = aux_data, factors = three, missing = "fiml",
+        aux = "t8_word_classification", output = "fit")))
+theta <- lavaan::lavInspect(fit_aux, "theta")
+sigma <- lavaan::lavInspect(fit_aux, "implied")$cov
+min_resid_var <- min(diag(theta))
+min_eigen_theta <- min(eigen(theta, only.values = TRUE)$values)
+min_eigen_sigma <- min(eigen(sigma, only.values = TRUE)$values)
+```
+
+`r n_del_aux` sentence completion scores were deleted. Without the
+auxiliary, FIML learns about the pupils whose sentence completion is missing
+only through the other two verbal tests, which do not capture all of what
+word classification says about them. The sentence completion mean is
+`r f2(ev(complete, "nu_verbal_2"))` in the complete data,
+`r f2(ev(no_aux, "nu_verbal_2"))` by FIML without the auxiliary, and
+`r f2(ev(with_aux, "nu_verbal_2"))` with it, and the loading moves toward its
+complete data value in the same way.
+
+lavaan prints two things about the auxiliary fit. The note says that the
+auxiliary was added as a saturated correlate and is hidden from the output.
+The warning says that the covariance matrix of the residuals is not positive
+definite. That matrix includes the auxiliary, whose covariances with the
+verbal tests the saturated correlates specification must carry entirely
+through their residuals, since the auxiliary is not allowed to correlate with
+the factor. Word classification shares the verbal factor with the tests, so
+those residual covariances are large relative to the residual variances of
+three reliable tests, and the matrix has a negative eigenvalue
+(`r f2(min_eigen_theta)`). That is the expected signature of the
+specification, not an improper solution: every residual variance is positive
+(the smallest is `r f2(min_resid_var)`), and the model implied covariance
+matrix of the ten observed variables is positive definite (its smallest
+eigenvalue is `r f2(min_eigen_sigma)`).
+
+## What the Missing Values Cost
+
+### The Fraction of Missing Information
+
+The missing information principle (Orchard & Woodbury, 1972) divides the
+information complete data would carry about a parameter into the information
+the observed data carry and the information lost with the missing values. In
+large samples the inverse of the information is the sampling variance, so for
+parameter $j$ the fraction of missing information is
+
+\[
+\mathrm{FMI}_j = 1 - \frac{\mathrm{SE}^2_{C,j}}{\mathrm{SE}^2_{O,j}},
+\]
+
+where $\mathrm{SE}_{O,j}$ is the standard error of the FIML estimate and
+$\mathrm{SE}_{C,j}$ the standard error it would have had if the same cases had
+been observed completely (Savalei & Rhemtulla, 2012, Eq. 4). It is zero when
+nothing is missing and approaches one as the observed data say less about the
+parameter, and one minus the FMI is the asymptotic efficiency of the FIML
+estimate relative to the complete data one. `fraction_missing_information()`
+computes it for every free and defined parameter of a FIML fit. A percentile
+bootstrap interval is opt-in; 400 replications, the fewest a 95 percent
+interval is reported from (see `?dmar_bootstrap`), keep the vignette quick,
+and the default is 1000.
+
+```{r fmi}
+fmi <- fraction_missing_information(fit_sp, ci_method = "percentile",
+                                    B = 400, seed = 113)
+fmi[fmi$op %in% c("=~", ":="), ]
+```
+
+```{r fmi-values, include = FALSE}
+fv <- function(term, col = "fmi") fmi[[col]][match(term, fmi$term)]
+ld <- fmi$op == "=~"
+fmi_new <- fmi$fmi[ld][5:6]
+fmi_old <- fmi$fmi[ld][1:4]
+miss_rate <- n_pa / N_all
+om <- "omega_spatial"
+```
+
+The loadings of the revised paper form board and the flags test have FMIs of
+`r f3(fmi_new[1])` and `r f3(fmi_new[2])`, close to their missing rate of
+`r f3(miss_rate)`, and effective sample sizes of
+`r f0(fv("spatial =~ t25_paper_form_board_r", "N_effective"))` and
+`r f0(fv("spatial =~ t26_flags", "N_effective"))`: those loadings are
+estimated about as precisely as the `r n_gw` Grant-White pupils alone would
+estimate them, and the Pasteur pupils add almost nothing. The loadings of the
+four tests every pupil took still lose between `r f3(min(fmi_old))` and
+`r f3(max(fmi_old))` of their information, because each is estimated relative
+to a factor that is measured by four tests rather than six for half the
+pupils.
+
+Omega has an FMI of `r f3(fv(om))`, 95% CI [`r f3(fv(om, "fmi_ci_lower"))`,
+`r f3(fv(om, "fmi_ci_upper"))`]: about a quarter of the sampling variance of
+the reliability estimate is due to the two tests that were not given at
+Pasteur.
+
+### The Cost in Sample Size and Interval Width
+
+A Wald interval's width is proportional to the standard error, and the
+standard error to $1/\sqrt{N}$, so the FMI states the cost of the missing
+values in the terms in which accuracy in parameter estimation plans a study
+(Maxwell, Kelley, & Rausch, 2008). Savalei and Rhemtulla (2012, pp. 488--489)
+give three forms of it:
+
+- the effective sample size, $N(1 - \mathrm{FMI})$, the number of complete
+  cases that would estimate the parameter as precisely as the $N$ incomplete
+  cases did;
+- the target sample size, $N/(1 - \mathrm{FMI})$, the number of cases with the
+  same missing data that would match the precision of $N$ complete cases; and
+- the width inflation factor, $1/\sqrt{1 - \mathrm{FMI}}$, how many times
+  wider the confidence interval is than complete data would have made it. An
+  FMI of .56 widens it by half, and an FMI of .75 doubles it.
+
+For omega, the `r N_all` pupils carry the information of
+`r f0(fv(om, "N_effective"))` complete cases, the same precision with the same
+missing data would take `r f0(fv(om, "N_target"))` pupils, and the interval is
+`r f2(fv(om, "width_inflation"))` times as wide as complete data would have
+made it. Because the three are monotone functions of the FMI, the limits of
+its interval carry over: the effective sample size lies between
+`r f0(N_all * (1 - fv(om, "fmi_ci_upper")))` and
+`r f0(N_all * (1 - fv(om, "fmi_ci_lower")))`. Savalei and Rhemtulla (2012,
+p. 489) recommend reading the FMI as an effect size for the impact of the
+missing values on each parameter, not against a cutoff.
+
+### Three Estimators of the Same Fraction
+
+Chen and Savalei (2021) compared three estimates of the observed information
+behind $\mathrm{SE}_O$: the numeric Hessian of the log likelihood, which is
+lavaan's default and what `lavaan::parameterEstimates(fit, fmi = TRUE)`
+reports; the first term of the observed information evaluated at the model
+implied moments (structured); and the same term evaluated at the unrestricted
+moments (unstructured). The three are identical for a saturated model such as
+a regression, and in their simulations the unstructured estimate was much less
+likely to break down than the Hessian one and more precise than the
+structured one (Chen & Savalei, 2021, p. 15). It is DMAR's default. It also
+cannot be negative, which the other two can be.
+
+```{r fmi-estimators}
+fmi_s <- fraction_missing_information(fit_sp, information = "structured")
+fmi_h <- fraction_missing_information(fit_sp, information = "hessian")
+show <- function(x) formatC(ifelse(abs(x) < 5e-4, 0, x), format = "f",
+                            digits = 3)
+keep <- fmi$op %in% c("=~", "~1", ":=")
+data.frame(term = fmi$term[keep], unstructured = show(fmi$fmi[keep]),
+           structured = show(fmi_s$fmi[keep]),
+           hessian = show(fmi_h$fmi[keep]))
+```
+
+```{r fmi-estimators-values, include = FALSE}
+max_diff <- max(abs(c(fmi$fmi[keep] - fmi_s$fmi[keep],
+                      fmi$fmi[keep] - fmi_h$fmi[keep])))
+```
+
+The three estimates differ by at most `r f3(max_diff)` on these rows. The
+intercepts of the four
+fully observed tests show the difference in kind: their FMI is zero, which the
+unstructured estimate returns exactly and the other two miss by small negative
+amounts.
+
+### How Precise Is a Sample FMI?
+
+A sample FMI is an estimate, and an imprecise one. In the simulations of Chen
+and Savalei (2021, p. 14) it was nearly unbiased even at $N = 50$ but varied
+greatly from sample to sample; with 10 to 20 percent of all values missing,
+samples of several hundred gave reasonably precise estimates, and with 30
+percent missing it took more than 1,000. Here
+`r f1(100 * sum(is.na(holzinger_swineford[spatial])) / (N_all * length(spatial)))`
+percent of the values are missing and $N$ = `r N_all`, and the interval for
+omega's FMI, from `r f3(fv(om, "fmi_ci_lower"))` to
+`r f3(fv(om, "fmi_ci_upper"))`, shows what is left of that imprecision.
+Chen and Savalei list bootstrap intervals for the sample FMI as work still to
+be done (p. 15), so the interval's coverage has not been studied; it shows
+the sampling variability of the estimate, and its upper limit is the
+conservative value to carry into a plan, as the last section does.
+
+## The Maximum Likelihood Covariance Matrix for Exploratory Work
+
+Exploratory factor analysis and parallel analysis start from a covariance or
+correlation matrix. The complete case matrix of incomplete items is
+consistent in general only under MCAR, and the pairwise matrix estimates each
+covariance from a different subset of cases and need not be positive
+definite. `cov_fiml()` returns the maximum likelihood estimates of the
+covariance matrix and means under the multivariate normal model, the moments
+of the saturated model that the EM algorithm converges to, which are
+consistent under MAR given the variables included (Schafer & Graham, 2002).
+Here the six spatial tests are joined by five verbal tests, all given at both
+schools.
+
+```{r cov-fiml}
+verbal <- c("t5_general_information", "t6_paragraph_comprehension",
+            "t7_sentence", "t8_word_classification", "t9_word_meaning")
+eleven <- c(spatial, verbal)
+em <- cov_fiml(holzinger_swineford[eleven])
+c(N = em$N, N_complete = em$N_complete, patterns = em$patterns)
+```
+
+The matrix is the basis for exploratory decisions, the number of factors and
+a first look at the loadings. Below, an exploratory factor analysis of it by
+maximum likelihood, two factors rotated obliquely by direct oblimin with
+$\delta = 0$ (lavaan's `"oblimin"` at its default $\gamma = 0$), is set beside
+the same exploratory model fitted to the raw data twice: by two-stage
+estimation (`missing = "two.stage"`, the subject of a later section), which
+fits the model to the same EM moments and corrects the standard errors, and
+by FIML.
+
+```{r efa}
+efa_em <- lavaan::efa(sample.cov = em$S, sample.nobs = em$N,
+                      sample.cov.rescale = FALSE, nfactors = 2,
+                      rotation = "oblimin", output = "lavaan")
+efa_ts <- lavaan::efa(data = holzinger_swineford[eleven], nfactors = 2,
+                      rotation = "oblimin", missing = "two.stage",
+                      output = "lavaan")
+efa_fiml <- lavaan::efa(data = holzinger_swineford[eleven], nfactors = 2,
+                        rotation = "oblimin", missing = "ml",
+                        output = "lavaan")
+
+# The spatial tests' loadings on the factor that lozenges defines.
+pick <- function(s) {
+  load <- s[s$op == "=~", ]
+  f <- load$lhs[which.max(abs(load$est.std) *
+                          (load$rhs == "t4_lozenges"))]
+  load[load$lhs == f & load$rhs %in% spatial, ]
+}
+a   <- pick(lavaan::standardizedSolution(efa_em))
+two <- pick(lavaan::standardizedSolution(efa_ts))
+b   <- pick(lavaan::standardizedSolution(efa_fiml))
+print(data.frame(test = a$rhs, loading_em = a$est.std, se_em = a$se,
+                 loading_two_stage = two$est.std, se_two_stage = two$se,
+                 loading_fiml = b$est.std, se_fiml = b$se,
+                 row.names = NULL), digits = 3)
+```
+
+```{r efa-values, include = FALSE}
+ratio_ts <- setNames(two$se / a$se, a$rhs)
+ratio_fiml <- setNames(b$se / a$se, a$rhs)
+same_est <- max(abs(two$est.std - a$est.std))
+same_text <- if (same_est < 1e-6) {
+  "give the same loadings"
+} else {
+  paste("give loadings that differ by at most",
+        formatC(same_est, format = "e", digits = 1))
+}
+new2 <- c("t25_paper_form_board_r", "t26_flags")
+```
+
+The EM matrix and the two-stage fit `r same_text`, since both fit the model
+to the same moments, and the FIML loadings are similar without being
+identical, as a full information estimate need not equal a two-stage one. The
+matrix gives the exploratory decisions what they need. The standard errors
+are another matter. A program given `S` and `N` treats them as complete data
+on `N` cases, and the EM matrix of `r em$N` incomplete cases carries less
+information than that. The two-stage standard errors of the loadings of the
+revised paper form board and the flags test are
+`r f2(ratio_ts[new2[1]])` and `r f2(ratio_ts[new2[2]])` times the ones the EM
+matrix gave, and the FIML standard errors
+`r f2(ratio_fiml[new2[1]])` and `r f2(ratio_fiml[new2[2]])` times, of the
+order of the width inflation factors their FMIs implied in the confirmatory
+model, `r f2(fv("spatial =~ t25_paper_form_board_r", "width_inflation"))`
+and `r f2(fv("spatial =~ t26_flags", "width_inflation"))`. `em$N` counts the
+cases used; it is not an effective sample size (Enders & Peugh, 2004;
+Savalei & Bentler, 2009). Intervals, tests, and fit statistics for an
+exploratory solution come from a two-stage or a FIML fit. A parallel analysis
+that compares the eigenvalues of the EM matrix with those of random data
+faces the same choice of $N$ for the random data, and `em$N` does not express the parameter-specific
+information behind the matrix.
+
+This demonstration calls lavaan's EFA interface directly. DMAR's
+`fa_exploratory()`
+provides a common parameter table, confidence intervals, and explicit method
+metadata for its documented continuous and ordered analysis routes.
+
+### When an Unrestricted Estimate Is Unavailable
+
+An EM algorithm can converge to an interior stationary point even when the
+unrestricted normal likelihood has no finite global maximum. A complete-case
+count by itself is also insufficient. DMAR examines candidate variable sets
+and every row observing each set. A full-support affine collapse gives a
+sufficient unbounded-likelihood diagnosis; an overdetermined relation at
+numerical precision is reported separately as instability. A capped,
+near-singular iterate without such a certificate is a fitting failure,
+not proof of nonexistence. Failure to find one of these obstacles does not
+certify existence or uniqueness.
+
+This distinction changes what can be reported. Analytic alpha, an
+observed-denominator omega, FMI, and two-stage estimation need unrestricted moments.
+An otherwise proper, identified constrained FIML factor model can still
+supply its own estimates and H0-based uncertainty. In that case DMAR
+withholds H1-based fit indices and residual correlations and retains the
+qualification in the printed and exported results. A linked planned-missing
+form design can have the same distinction: factor structure can identify a
+relation whose unrestricted covariance no case observes.
+
+An incomplete-data correlation matrix used for parallel analysis does not
+come with one universal effective sample size. `parallel_analysis()` labels
+its reference size as a benchmark and distinguishes Monte Carlo uncertainty
+in null quantiles from sampling uncertainty in observed eigenvalues. Direct
+`fa_exploratory()` with FIML preserves the raw-data likelihood and its corresponding
+parameter uncertainty instead of treating estimated moments as complete data.
+
+## Small Samples: A *t* Reference Distribution
+
+### Maximum Likelihood
+
+A Wald interval is the estimate plus or minus a normal quantile times its
+standard error. The normal quantile treats the standard error as known,
+which it is only in the limit, and with few cases, or few effective cases
+once the missing information is subtracted, the interval is too short. Von
+Hippel (2016) kept the maximum likelihood estimate and its standard error and
+referred their ratio to a *t* distribution on degrees of freedom that shrink
+with the fraction of missing information; for a regression coefficient,
+
+\[
+\nu_j = \max\{3,\; N(1 - \mathrm{FMI}_j) - k\},
+\]
+
+the complete data degrees of freedom $N - k$ (with $k$ the slopes and the
+intercept) with $N$ replaced by the coefficient's effective sample size, and
+bounded below at 3. In his simulations of bivariate normal data with half of
+one variable missing, the normal FIML intervals for a regression's intercept
+and slope covered 5 to 6 points below the nominal 95 percent at $n = 25$, and
+the *t* intervals brought the coverage of most parameters to within 2 points
+of nominal (as summarized on the help page of `df_missing()`).
+
+A pilot of 50 pupils drawn at random from both schools shows the rule at
+work. Visual perception is regressed on lozenges and on the flags test, which
+only the Grant-White pupils in the pilot took. `mlmr()` fits the regression
+by FIML, and `wald_df = "missing_information"` applies von Hippel's rule to
+each coefficient.
+
+```{r pilot}
+set.seed(113)
+pilot <- holzinger_swineford[sample.int(nrow(holzinger_swineford), 50),
+                             c("t1_visual_perception", "t4_lozenges",
+                               "t26_flags")]
+colSums(is.na(pilot))
+
+fit_z <- mlmr(t1_visual_perception ~ t4_lozenges + t26_flags, data = pilot,
+              ci_method = "wald", effect_sizes = FALSE)
+fit_t <- mlmr(t1_visual_perception ~ t4_lozenges + t26_flags, data = pilot,
+              ci_method = "wald", effect_sizes = FALSE,
+              wald_df = "missing_information")
+summary(fit_t)
+```
+
+```{r pilot-values, include = FALSE}
+wt <- attr(fit_t, "wald_df_table")
+wdf <- setNames(wt$df, wt$term)
+widen <- (fit_t$ci[, 2] - fit_t$ci[, 1]) / (fit_z$ci[, 2] - fit_z$ci[, 1])
+names(widen) <- rownames(fit_t$ci)
+n_flags <- sum(!is.na(pilot$t26_flags))
+```
+
+Only `r n_flags` of the 50 pupils in the pilot took the flags test. The
+fractions of missing information under the coefficient table are high, and
+the degrees of freedom are low: `r f1(wdf["t26_flags"])` for the flags slope
+and `r f1(wdf["t4_lozenges"])` for the lozenges slope, against the
+`r 50 - 3` that complete data would give. The *t* intervals are wider than the
+normal ones by factors of `r f2(widen["t26_flags"])` and
+`r f2(widen["t4_lozenges"])`. The
+degrees of freedom are what `df_missing()` returns from the fraction of
+missing information table, and its second rule, von Hippel's general one,
+needs the complete data degrees of freedom instead:
+
+```{r df-missing}
+fmi_pilot <- fraction_missing_information(fit_z)
+slopes <- fmi_pilot[fmi_pilot$op == "~", ]
+df_missing(slopes, k = 3)
+df_missing(slopes, df_complete = 50 - 3, method = "complete_df")
+```
+
+Two cautions belong beside these numbers. The *t* distribution is an
+approximation, since the small-sample distribution of a FIML estimate is not
+exactly *t*. And with an FMI estimated from 50 cases, the degrees of freedom
+inherit the imprecision of the FMI described above.
+
+The numerical calibration figures below are conditional on the samples the
+study kept, which it selected with an H1 eligibility rule that is less strict
+than DMAR's affine-collapse diagnostic. That diagnostic can remove many more
+samples, especially in the smallest studies with many incomplete items, and
+the study did not establish coverage among the samples that diagnostic keeps. Replaying
+observed-data eligibility alone does not validate DMAR's FMI refits or
+information diagnostics. The degrees-of-freedom keyword is an approximate,
+opt-in rule, not a coverage guarantee. Alpha's FMI keyword is refused; a small
+selected pool with apparently favorable coverage would not justify enabling it.
+
+Von Hippel's evidence covers regression coefficients and moments. For factor
+loadings and omega, DMAR's own calibration study (one factor models fit by
+FIML, $N$ from 30 to 200, normal data fit by ML and nonnormal data by MLR,
+2000 replications in each of 60 conditions) found that the same rule with
+$k = 1$, $\max\{3,\; N(1 - \mathrm{FMI}) - 1\}$, brought the coverage of
+the loadings and of omega closer to 95 percent than the normal reference did
+(a mean distance of .017 and .018 from .95 in the small samples with missing
+values, against .025 and .024). Averaged over a condition's loadings, the
+coverage was at most 95.02 percent and omega's at most 95.5; with missing
+values no single loading's was above 96 (the highest was 95.95), and without
+them, where the rule is $t$ on $N - 1$, one reached 96.3, where the normal
+reference reached 96.2. So `fa_confirmatory()` accepts
+`wald_df = "missing_information"` for its loadings, whose other rows keep the
+normal reference (its omega, AVE, and *H* take limits formed on the logit
+scale, where the same rule overcovered omega, at up to 96.45 percent), and
+`reliability_omega()` accepts it for the model implied coefficient's `"ml"`
+and `"mlr"` intervals. For alpha the
+normal FIML interval was already close to nominal, the *t* reference came
+barely closer on average, and in one condition it covered 96.6 percent,
+above the 96 percent the study's decision rule allowed, so no rule passed
+(that condition is the one where the study's fit of alpha's saturated model
+converged in only half the replications, and without it the rule would have
+passed; the rule was fixed before the run).
+`reliability_alpha()` therefore takes a number through `wald_df`, the
+analyst's choice, as a check on how much a plausible number of degrees of
+freedom would widen its interval.
+
+### Multiple Imputation
+
+Multiple imputation fills each missing value with draws from its predictive
+distribution, analyzes each completed data set, and pools the results by
+Rubin's (1987) rules. With $m$ imputations, the within-imputation variance
+$\bar U$ (the mean squared standard error), and the between-imputation
+variance $B$ (the variance of the $m$ estimates), the total variance is
+$T = \bar U + (1 + 1/m)B$, and the share of it due to the missing values is
+the imputation estimate of the FMI. Barnard and Rubin (1999) gave degrees of
+freedom for the pooled *t* interval that do not exceed the complete data
+degrees of freedom, which Rubin's large-sample formula can. DMAR does not
+impute; `df_barnard_rubin()` pools what an imputation package produced. Here
+mice imputes the flags test by the normal linear model (`method = "norm"`),
+the model FIML assumes, 20 times.
+
+```{r mi}
+imp <- mice::mice(pilot, m = 20, method = "norm", seed = 113,
+                  printFlag = FALSE)
+fits <- lapply(seq_len(20), function(j)
+  lm(t1_visual_perception ~ t4_lozenges + t26_flags,
+     data = mice::complete(imp, j)))
+est <- t(sapply(fits, coef))
+u   <- t(sapply(fits, function(f) diag(vcov(f))))
+br  <- df_barnard_rubin(between = apply(est, 2, var), within = colMeans(u),
+                        m = 20, df_complete = 50 - 3)
+br
+
+pooled <- colMeans(est)
+crit <- qt(0.975, br$df)
+data.frame(term = names(pooled),
+           mi = sprintf("%.3f [%.3f, %.3f]", pooled,
+                        pooled - crit * sqrt(br$total_variance),
+                        pooled + crit * sqrt(br$total_variance)),
+           fiml = sprintf("%.3f [%.3f, %.3f]", coef(fit_t), fit_t$ci[, 1],
+                          fit_t$ci[, 2]))
+```
+
+```{r mi-values, include = FALSE}
+fiml_fmi <- setNames(wt$fmi, wt$term)
+mi_wider <- (2 * crit * sqrt(br$total_variance)) /
+  (fit_t$ci[, 2] - fit_t$ci[, 1])
+gamma_text <- if (all(br$gamma > fiml_fmi[br$term])) {
+  "higher than FIML's for every coefficient"
+} else if (all(br$gamma < fiml_fmi[br$term])) {
+  "lower than FIML's for every coefficient"
+} else {
+  "higher than FIML's for some coefficients and lower for others"
+}
+```
+
+The imputations' estimates of the FMI (`gamma`) are `r gamma_text`
+(`r f3(br$gamma[br$term == "t26_flags"])` against
+`r f3(fiml_fmi["t26_flags"])` for the flags slope), and
+the multiple imputation intervals are `r f2(min(mi_wider))` to
+`r f2(max(mi_wider))` times as wide as FIML's. Under the same normal model
+the two approaches estimate the same quantities, and they agree in large
+samples as the number of imputations grows; von Hippel's general rule
+(`method = "complete_df"` above) is the limit of Barnard and Rubin's degrees
+of freedom as it does. In a sample of 50 they need not agree: the
+between-imputation variance is estimated from 20 values, and the imputation
+model's parameters are drawn from their posterior on every imputation. Von
+Hippel (2016) compared the two in samples of 25 and 100, and his title states
+what he found, that maximum likelihood can beat multiple imputation in small
+samples. `floor = 0` reproduces Barnard and Rubin's formula, and with it the
+degrees of freedom that `pool()` in mice reports.
+
+## Two-Stage Maximum Likelihood
+
+A third consistent estimator under MAR fits the model in two stages (Yuan &
+Bentler, 2000; Savalei & Bentler, 2009). The first stage estimates the means
+and covariances by maximum likelihood under the saturated model, the EM
+moments of `cov_fiml()`, from every case and any auxiliary variables. The
+second fits the model to those moments as if they were complete data. The
+estimates are consistent under MAR and only marginally less efficient than
+FIML's (Savalei & Bentler, 2009), and auxiliary variables enter the first
+stage alone, which is simpler than the saturated correlates of FIML. What the
+second stage cannot give alone is a standard error or a test: it treats the EM
+moments as complete data, so its naive standard errors are too small and its
+naive chi square does not have a chi square distribution. `fa_confirmatory()` with
+`missing = "two_stage"` reports the two-stage sandwich standard errors and the
+residual based statistic of Savalei and Bentler (2009), which is
+asymptotically chi square and in their simulations outperformed the FIML
+likelihood ratio statistic.
+
+```{r two-stage}
+fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+      missing = "two_stage", output = "measurement")
+```
+
+```{r two-stage-values, include = FALSE}
+ts_tab <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+                missing = "two_stage")
+ts_m <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+              missing = "two_stage", output = "measurement")
+naive_ts <- -2 * (ev(ts_tab, "H0") - ev(ts_tab, "H1"))
+```
+
+Omega is `r f3(ts_m$estimate[1])` [`r f3(ts_m$ci_lower[1])`,
+`r f3(ts_m$ci_upper[1])`], against `r f3(m_fiml$estimate[1])`
+[`r f3(m_fiml$ci_lower[1])`, `r f3(m_fiml$ci_upper[1])`] by FIML. The fit of
+the model is where the two-stage approach earns its place. Zhang and Savalei
+(2023) showed that the RMSEA and CFI computed after FIML in the usual way do
+not estimate the values complete data would give, proposed corrected
+versions for FIML (FIML-C) and for two-stage estimation (TS), and found that
+both estimated the complete data values with little bias, while the usual
+FIML indices often performed poorly. Of their two-stage versions they
+recommend TS V2, whose correction rests on the sandwich of the observed and
+first order information of the saturated model, an estimate of the sampling
+covariance matrix of the EM moments that does not assume normality.
+`sem_fit_measures()` reports the corrected indices by default for both fits.
+With `missing = "two_stage"`, whose standard errors and residual based
+statistic are normal theory ones, the two-stage indices are the normal
+theory analog of TS V2, which puts the inverse of the observed information
+in place of the sandwich and which Zhang and Savalei did not study;
+`missing = "robust_two_stage"` gives TS V2 itself. The usual FIML indices
+are reported on request, and the usual two-stage ones are refused, since the
+naive statistic they rest on is not chi square distributed:
+
+```{r two-stage-fit}
+fit_ts <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+                missing = "two_stage", output = "fit")
+fm_fiml  <- sem_fit_measures(fit_sp)
+fm_naive <- sem_fit_measures(fit_sp, version = "standard")
+fm_ts    <- sem_fit_measures(fit_ts)
+fm_ts
+
+fit_row <- function(fm) {
+  vv <- function(t) fm$value[match(t, fm$term)]
+  c(chi_square = sprintf("%.2f", vv("chi_square")),
+    p = format_p(vv("p_chi_square")),
+    rmsea_90 = sprintf("%.3f [%.3f, %.3f]", vv("rmsea"),
+                       vv("rmsea_ci_lower"), vv("rmsea_ci_upper")),
+    cfi = sprintf("%.3f", vv("cfi")))
+}
+noquote(rbind(fiml_usual = fit_row(fm_naive),
+              fiml_corrected = fit_row(fm_fiml),
+              two_stage = fit_row(fm_ts)))
+```
+
+```{r fit-values, include = FALSE}
+fvv <- function(fm, t) fm$value[match(t, fm$term)]
+```
+
+The usual FIML RMSEA, `r f3(fvv(fm_naive, "rmsea"))`, understates the misfit
+that the corrected value, `r f3(fvv(fm_fiml, "rmsea"))`, estimates, and the
+usual CFI of `r f3(fvv(fm_naive, "cfi"))` overstates the fit relative to the
+corrected `r f3(fvv(fm_fiml, "cfi"))`; the two-stage indices are close to the
+corrected FIML ones. Treating the EM moments as complete data would have given a chi
+square of `r f2(naive_ts)` on `r fvv(fm_ts, "df")` degrees of freedom,
+$p$ `r p_text(stats::pchisq(naive_ts, fvv(fm_ts, "df"), lower.tail = FALSE))`,
+a rejection of the model; the residual based statistic is
+`r f2(fvv(fm_ts, "chi_square"))`, $p$ `r p_text(fvv(fm_ts, "p_chi_square"))`. The RMSEA
+intervals are at 90 percent, the conventional level and DMAR's default for
+every RMSEA interval, whose limits are then the two one-sided tests at .05
+(see `vignette("sem_fit_measures")`); `conf_level = 0.95` gives 95 percent
+intervals. Zhang and
+Savalei advise against mixing the two: an analysis estimated by FIML reports
+the FIML corrected indices, and two-stage indices belong with two-stage
+estimates.
+
+## Reliability Under Missing Data
+
+### Omega and Alpha by FIML
+
+`reliability_omega()` and `reliability_alpha()`, like `fa_confirmatory()`,
+fit incomplete items by FIML by default (`missing = "fiml"`), and they take
+`"two_stage"` and `aux` as well, so the reliability of a scale with incomplete
+items comes from every case; the calls below name the method, and
+`missing = "listwise"` asks for the complete cases alone. Robust omega, the
+default denominator, divides the variance the single factor accounts for by
+the composite variance estimated from the data (Kelley & Pornprasertmanit,
+2016); its interval is a bootstrap, here with 400 replications, the fewest
+a 95 percent percentile interval is reported from, where a reported analysis
+deserves the default 10000.
+
+```{r reliability}
+om_fiml <- reliability_omega(data = holzinger_swineford[spatial],
+                             missing = "fiml", ci_method = "percentile",
+                             B = 400, seed = 113)
+om_fiml
+om_lw <- reliability_omega(data = holzinger_swineford[spatial],
+                           missing = "listwise", ci_method = "percentile",
+                           B = 400, seed = 113)
+al_fiml <- reliability_alpha(data = holzinger_swineford[spatial],
+                             missing = "fiml")
+al_fiml
+```
+
+```{r reliability-values, include = FALSE}
+rv <- function(x, term) x$value[match(term, x$term)]
+```
+
+Robust omega is `r f3(rv(om_fiml, "estimate"))`, 95% CI
+[`r f3(rv(om_fiml, "ci_lower"))`, `r f3(rv(om_fiml, "ci_upper"))`],
+from all `r rv(om_fiml, "N")` pupils, against
+`r f3(rv(om_lw, "estimate"))` [`r f3(rv(om_lw, "ci_lower"))`,
+`r f3(rv(om_lw, "ci_upper"))`] from the `r rv(om_lw, "N")` complete
+cases. The table reports both `N` and `N_complete`, so the cost of listwise
+deletion is in view. Alpha by FIML is the classical coefficient computed from
+the FIML (EM) covariance matrix, `r f3(rv(al_fiml, "estimate"))`
+[`r f3(rv(al_fiml, "ci_lower"))`, `r f3(rv(al_fiml, "ci_upper"))`]; it
+assumes equal loadings, which these six tests do not have, and is reported
+here only beside omega.
+
+### Ordered Items: Pairwise Deletion and Multiple Imputation
+
+Categorical omega (Green & Yang, 2009) is the reliability of a sum of ordered
+categories. Its single-factor model is fitted to polychoric correlations by
+weighted least squares, which has no full information form here, so
+`reliability_omega_categorical()` offers two other treatments of incomplete
+rows besides listwise deletion. Pairwise deletion estimates each threshold and
+polychoric correlation from the rows that observe its items. It uses more of
+the data than listwise deletion, not a weaker assumption: without covariates
+in the model it is consistent only under MCAR (Asparouhov & Muthén, 2010), and
+under MAR Shi, Lee, Fairchild, and Maydeu-Olivares (2020) found its estimates
+severely biased. Multiple imputation is consistent under MAR given the items
+and any auxiliary variables. Its interval is bootstrap then impute (Schomaker
+& Heumann, 2018): each bootstrap sample of the incomplete rows is imputed
+several times, and the percentile interval of the replicate means is the
+confidence interval.
+
+The Holzinger and Swineford tests are scored as counts of correct answers,
+not as ordered categories, so for this section each test is cut at its
+quartiles into four ordered categories, as a four-point rating would record
+it.
+
+```{r categorical}
+cat4 <- as.data.frame(lapply(holzinger_swineford[spatial], function(x) {
+  cuts <- stats::quantile(x, c(0.25, 0.50, 0.75), na.rm = TRUE)
+  findInterval(x, cuts, left.open = TRUE) + 1L
+}))
+
+oc_lw <- reliability_omega_categorical(data = cat4,
+                                       ci_method = "percentile",
+                                       B = 400, seed = 113)
+oc_pw <- reliability_omega_categorical(data = cat4, missing = "pairwise",
+                                       ci_method = "percentile",
+                                       B = 400, seed = 113)
+oc_pw
+# B = 400 is the fewest replications a 95 percent percentile interval is
+# reported from and keeps the vignette quick; under imputation the default
+# is 1000.
+# ncpus = 2 spreads the replications over two processes, and a seed gives
+# the same result whatever ncpus is.
+oc_mi <- reliability_omega_categorical(data = cat4, missing = "mi",
+                                       ci_method = "percentile",
+                                       B = 400, seed = 113, ncpus = 2)
+oc_mi
+```
+
+```{r categorical-values, include = FALSE}
+oc_ci <- function(x) sprintf("%s [%s, %s]", f3(rv(x, "estimate")),
+                             f3(rv(x, "ci_lower")),
+                             f3(rv(x, "ci_upper")))
+imp_info <- attr(oc_mi, "imputation")
+```
+
+Listwise deletion gives `r oc_ci(oc_lw)` from the `r rv(oc_lw, "N")`
+Grant-White pupils, pairwise deletion `r oc_ci(oc_pw)`, and multiple
+imputation `r oc_ci(oc_mi)` from all `r rv(oc_mi, "N")`. Pairwise deletion
+estimates the thresholds of the two new tests and their correlations with the
+old ones from the Grant-White pupils, and the other correlations from both
+schools, which mixes two populations unless the values are MCAR, and the
+lozenges means showed that they are not. Imputation fills in the Pasteur
+pupils' categories on the new tests from their categories on the old ones, the
+same MAR assumption FIML made above. The three estimates are close in these
+data, which is a property of these data and not something to expect; the
+lines under the imputation table say how many imputations the point estimate
+averaged, the FMI the replications estimated for the coefficient, and how
+much the imputation noise widened the interval.
+
+## Factor Scores Under Missing Data
+
+Under FIML each case is scored from the items it answered, so the precision
+of a factor score depends on the case's missing data pattern.
+`factor_scores()` returns both standard scores, the regression score and the
+Bartlett score, with a standard error and an interval for every case, and the
+determinacy of each score, its correlation with the factor, for each pattern.
+
+```{r scores}
+scores <- factor_scores(fit_sp, data = holzinger_swineford)
+scores
+```
+
+```{r scores-values, include = FALSE}
+pt <- attr(scores, "patterns")
+det <- setNames(pt$determinacy_regression, pt$items_observed)
+se_reg <- setNames(pt$regression_se, pt$items_observed)
+H_sp <- tab_sp$estimate[tab_sp$term == "H_spatial"]
+```
+
+A Grant-White pupil, scored from six tests, has a score whose determinacy is
+`r f3(det["6"])`; a Pasteur pupil, scored from four, `r f3(det["4"])`, with a
+standard error of the regression score of `r f3(se_reg["4"])` against
+`r f3(se_reg["6"])`. For one factor the square of the determinacy is
+coefficient *H* (Hancock & Mueller, 2001), the reliability of the optimally
+weighted composite: `r f3(det["6"]^2)` for the complete pattern, the `H_spatial`
+of the FIML fit, `r f3(H_sp)`. A regression score computed this way, from each case's own
+observed items with the model's estimates, is what Estabrook and Neale (2013)
+call the full maximum likelihood score (as the help page of `factor_scores()`
+explains), and in their simulation it was more reliable under missing data
+than sum scores. The lines under
+the table say which score belongs where in a later analysis; for relations
+among factors, a latent variable model estimates them without the bias a
+regression among scores carries.
+
+## Planning the Next Study
+
+A reliability coefficient that will be estimated from incomplete data needs a
+larger sample for the same interval width. `ss_aipe_reliability()` takes the
+anticipated FMI of the coefficient through `fmi` and divides the complete data
+$N - 1$ by $1 - \mathrm{FMI}$. The planning FMI is not the proportion of
+missing values. It comes from a pilot study or a comparable data set analyzed
+the way the planned study will be, here the FMI of omega estimated above,
+and because a sample FMI is imprecise, the upper limit of its interval is the
+conservative choice. Suppose the next study gives the same six tests with the
+same planned missingness and wants a 95 percent interval for omega no wider
+than .10, with the loadings and error variances of the FIML fit as the
+planning values. They are taken on the scale of the test scores, as the fit
+estimated them: the planner plans for the coefficient of the scores as they
+are, the omega estimated above.
+
+```{r planning}
+# The unstandardized loadings and error variances of the FIML fit.
+lambda <- tab_sp$estimate[match(paste0("lambda_spatial_", 1:6), tab_sp$term)]
+psi <- tab_sp$estimate[match(paste0("psi_spatial_", 1:6), tab_sp$term)]
+fmi_omega <- fmi[fmi$term == "omega_spatial", ]
+
+plan_complete <- ss_aipe_reliability(model = "Congeneric",
+                                     type = "Factor Analytic", width = 0.10,
+                                     n_items = 6, true_factor_loading = lambda,
+                                     true_residual_var = psi)
+plan_missing <- ss_aipe_reliability(model = "Congeneric",
+                                    type = "Factor Analytic", width = 0.10,
+                                    n_items = 6, true_factor_loading = lambda,
+                                    true_residual_var = psi,
+                                    fmi = fmi_omega$fmi_ci_upper)
+plan_missing
+```
+
+```{r planning-values, include = FALSE}
+nn <- function(x) x$value[x$term == "necessary_N"]
+plan_point <- ss_aipe_reliability(model = "Congeneric",
+                                  type = "Factor Analytic", width = 0.10,
+                                  n_items = 6, true_factor_loading = lambda,
+                                  true_residual_var = psi,
+                                  fmi = fmi_omega$fmi)
+# The same fit standardized, which describes omega of standardized tests.
+std <- fa_confirmatory(data = holzinger_swineford, factors = spatial_factor,
+             missing = "fiml", output = "standardized")
+lambda_std <- std$est.std[std$op == "=~"]
+plan_std <- ss_aipe_reliability(model = "Congeneric",
+                                type = "Factor Analytic", width = 0.10,
+                                n_items = 6, true_factor_loading = lambda_std,
+                                true_residual_var = 1 - lambda_std^2)
+omega_std <- sum(lambda_std)^2 / (sum(lambda_std)^2 + sum(1 - lambda_std^2))
+item_var <- lambda^2 + psi
+```
+
+Complete data would need `r nn(plan_complete)` cases. Planned with the upper
+limit of the FMI interval, `r f3(fmi_omega$fmi_ci_upper)`, the study needs
+`r nn(plan_missing)`; planned with the point estimate,
+`r f3(fmi_omega$fmi)`, it would need `r nn(plan_point)`.
+
+The standardized loadings of the same fit would be the wrong planning values
+here. They describe omega of standardized tests, which is nearly the same
+number (`r f3(omega_std)` against `r f3(m_fiml$estimate[1])`) but not the same
+coefficient: the six tests' variances run from about
+`r round(min(item_var))` to `r round(max(item_var))`, and the sampling variance
+of omega depends on them. Planned from the standardized loadings, the
+complete data study would get `r nn(plan_std)` cases, about
+`r round(100 * (1 - nn(plan_std) / nn(plan_complete)))` percent too few for the
+coefficient estimated above.
+
+`ss_aipe_reliability_sensitivity()` checks such a plan by simulation. It
+simulates parallel items with each item score missing completely at random
+with probability `missing_prop`, analyzes every replication by FIML, and
+reports the realized interval widths together with the FMI the simulated
+missing data actually cost the coefficient. The check below simulates six
+parallel items whose reliability is the omega estimated above, with a
+`missing_prop` chosen so that the simulated data lose about the planned share
+of information. Every replication fits a model, so 100 replications keep the
+vignette quick where a reported check deserves 1000.
+
+```{r sensitivity}
+omega_hat <- m_fiml$estimate[m_fiml$term == "omega_spatial"]
+set.seed(113)
+check <- ss_aipe_reliability_sensitivity(
+  true_reliability = omega_hat, supposed_reliability = omega_hat,
+  n_items = 6, width = 0.10, estimator = "omega",
+  fmi = fmi_omega$fmi_ci_upper, missing_prop = 0.35, G = 100)
+check
+```
+
+```{r sensitivity-values, include = FALSE}
+sv <- function(term) check$value[match(term, check$term)]
+```
+
+The plan for parallel items called for `r sv("total_N")` cases. The simulated
+data realized a mean FMI of `r f3(attr(check, "mean_realized_fmi"))` for omega
+against the `r f3(fmi_omega$fmi_ci_upper)` planned, and the intervals averaged
+`r f3(sv("mean_ci_width"))` wide against the .10 planned. When the realized
+FMI is close to the planned one and the mean width near the target, the plan
+carries the missing data it was made for. The mechanism simulated here is
+MCAR spread over all six items, not the planned missingness of two tests, so
+the check speaks to the adjustment, not to this design's FMI; that comes from
+the pilot, and the mean realized FMI of a simulation that mimics the planned
+study is a planning value that does not suffer from the imprecision of one
+sample.
+
+## What to Report
+
+An analysis of incomplete data reports what was missing, how it was
+handled, under what assumption, and what it cost. For the spatial tests:
+
+> The revised paper form board and flags tests were given only at the
+> Grant-White school, so `r n_pa` of `r N_all` pupils
+> (`r f1(100 * miss_rate)` percent) have no score on either. The
+> single-factor model was fitted by full information maximum likelihood,
+> which assumes that the scores are missing at random given the six tests;
+> listwise deletion would have analyzed one school only, whose lozenges mean
+> differed from the other's by
+> `r f2(by_school["t4_lozenges", "Pasteur"] - by_school["t4_lozenges", "Grant-White"])`
+> points. Coefficient omega was `r f3(m_fiml$estimate[1])`, 95% CI
+> [`r f3(m_fiml$ci_lower[1])`, `r f3(m_fiml$ci_upper[1])`]. The fraction of
+> missing information for omega was `r f3(fv(om))`, 95% CI
+> [`r f3(fv(om, "fmi_ci_lower"))`, `r f3(fv(om, "fmi_ci_upper"))`]: the
+> `r N_all` pupils carried the information of about
+> `r f0(fv(om, "N_effective"))` complete cases, and the interval is
+> `r f2(fv(om, "width_inflation"))` times as wide as complete data would have
+> made it.
+
+## See Also
+
+- `vignette("mlmr")` for FIML regression and multivariate regression, and
+  when FIML is worth it over ordinary least squares.
+- `vignette("reliability")` for choosing the reliability coefficient and its
+  interval.
+- `vignette("sem_fit_measures")` for the fit measures of structural equation
+  models, including those after FIML and two-stage estimation.
+- `?fraction_missing_information`, `?missing_patterns`, `?missing_coverage`,
+  `?cov_fiml`, `?df_missing`, `?df_barnard_rubin`, `?factor_scores`, and
+  `?ss_aipe_reliability`.
+
+## References
+
+Asparouhov, T., & Muthén, B. (2010). *Weighted least squares estimation with
+missing data* (Mplus technical appendix). Muthén & Muthén.
+
+Barnard, J., & Rubin, D. B. (1999). Small-sample degrees of freedom with
+multiple imputation. *Biometrika, 86*(4), 948--955.
+<https://doi.org/10.1093/biomet/86.4.948>
+
+Chen, L., & Savalei, V. (2021). Three sample estimates of fraction of missing
+information from full information maximum likelihood. *Frontiers in
+Psychology, 12*, 667802. <https://doi.org/10.3389/fpsyg.2021.667802>
+
+Collins, L. M., Schafer, J. L., & Kam, C.-M. (2001). A comparison of
+inclusive and restrictive strategies in modern missing data procedures.
+*Psychological Methods, 6*(4), 330--351.
+<https://doi.org/10.1037/1082-989X.6.4.330>
+
+Enders, C. K. (2010). *Applied missing data analysis*. Guilford Press.
+
+Enders, C. K., & Peugh, J. L. (2004). Using an EM covariance matrix to
+estimate structural equation models with missing data: Choosing an adjusted
+sample size to improve the accuracy of inferences. *Structural Equation
+Modeling, 11*(1), 1--19.
+
+Estabrook, R., & Neale, M. (2013). A comparison of factor score estimation
+methods in the presence of missing data: Reliability and an application to
+nicotine dependence. *Multivariate Behavioral Research, 48*(1), 1--27.
+<https://doi.org/10.1080/00273171.2012.730072>
+
+Graham, J. W. (2003). Adding missing-data-relevant variables to FIML-based
+structural equation models. *Structural Equation Modeling, 10*(1), 80--100.
+<https://doi.org/10.1207/S15328007SEM1001_4>
+
+Green, S. B., & Yang, Y. (2009). Reliability of summed item scores using
+structural equation modeling: An alternative to coefficient alpha.
+*Psychometrika, 74*, 155--167.
+
+Hancock, G. R., & Mueller, R. O. (2001). Rethinking construct reliability
+within latent variable systems. In R. Cudeck, S. du Toit, & D. Sörbom (Eds.),
+*Structural equation modeling: Present and future* (pp. 195--216).
+Scientific Software International.
+
+Holzinger, K. J., & Swineford, F. (1939). *A study in factor analysis: The
+stability of a bi-factor solution* (Supplementary Educational Monographs,
+No. 48). University of Chicago Press.
+
+Jöreskog, K. G. (1969). A general approach to confirmatory maximum likelihood
+factor analysis. *Psychometrika, 34*, 183--202.
+
+Kelley, K., & Pornprasertmanit, S. (2016). Confidence intervals for
+population reliability coefficients: Evaluation of methods, recommendations,
+and software for composite measures. *Psychological Methods, 21*, 69--92.
+<https://doi.org/10.1037/a0040086>
+
+Maxwell, S. E., Kelley, K., & Rausch, J. R. (2008). Sample size planning for
+statistical power and accuracy in parameter estimation. *Annual Review of
+Psychology, 59*, 537--563.
+<https://doi.org/10.1146/annurev.psych.59.103006.093735>
+
+McDonald, R. P. (1999). *Test theory: A unified treatment*. Lawrence Erlbaum
+Associates.
+
+Orchard, T., & Woodbury, M. A. (1972). A missing information principle:
+Theory and applications. In *Proceedings of the Sixth Berkeley Symposium on
+Mathematical Statistics and Probability* (Vol. 1, pp. 697--715). University
+of California Press.
+
+Rosseel, Y. (2012). lavaan: An R package for structural equation modeling.
+*Journal of Statistical Software, 48*(2), 1--36.
+<https://doi.org/10.18637/jss.v048.i02>
+
+Rubin, D. B. (1976). Inference and missing data. *Biometrika, 63*(3),
+581--592. <https://doi.org/10.1093/biomet/63.3.581>
+
+Rubin, D. B. (1987). *Multiple imputation for nonresponse in surveys*.
+Wiley.
+
+Savalei, V., & Bentler, P. M. (2009). A two-stage approach to missing data:
+Theory and application to auxiliary variables. *Structural Equation
+Modeling, 16*(3), 477--497. <https://doi.org/10.1080/10705510903008238>
+
+Savalei, V., & Rhemtulla, M. (2012). On obtaining estimates of the fraction
+of missing information from full information maximum likelihood.
+*Structural Equation Modeling, 19*(3), 477--494.
+<https://doi.org/10.1080/10705511.2012.687669>
+
+Schafer, J. L., & Graham, J. W. (2002). Missing data: Our view of the state
+of the art. *Psychological Methods, 7*(2), 147--177.
+<https://doi.org/10.1037/1082-989X.7.2.147>
+
+Schomaker, M., & Heumann, C. (2018). Bootstrap inference when using multiple
+imputation. *Statistics in Medicine, 37*(14), 2252--2266.
+<https://doi.org/10.1002/sim.7654>
+
+Shi, D., Lee, T., Fairchild, A. J., & Maydeu-Olivares, A. (2020). Fitting
+ordinal factor analysis models with missing data: A comparison between
+pairwise deletion and multiple imputation. *Educational and Psychological
+Measurement, 80*(1), 41--66. <https://doi.org/10.1177/0013164419845039>
+
+van Buuren, S., & Groothuis-Oudshoorn, K. (2011). mice: Multivariate
+imputation by chained equations in R. *Journal of Statistical Software,
+45*(3), 1--67. <https://doi.org/10.18637/jss.v045.i03>
+
+von Hippel, P. T. (2016). New confidence intervals and bias comparisons show
+that maximum likelihood can beat multiple imputation in small samples.
+*Structural Equation Modeling, 23*(3), 422--437.
+<https://doi.org/10.1080/10705511.2015.1047931>
+
+Yuan, K.-H., & Bentler, P. M. (2000). Three likelihood-based methods for mean
+and covariance structure analysis with nonnormal missing data. *Sociological
+Methodology, 30*, 165--200.
+
+Zhang, X., & Savalei, V. (2023). New computations for RMSEA and CFI following
+FIML and TS estimation with missing data. *Psychological Methods, 28*(2),
+263--283. <https://doi.org/10.1037/met0000445>

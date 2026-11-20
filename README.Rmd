@@ -1,0 +1,342 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit README.Rmd and re-knit. -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.path = "man/figures/README-"
+)
+```
+
+# DMAR <img src="man/figures/logo.png" align="right" height="139" alt="DMAR hex logo" />
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/yelleKneK/DMAR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yelleKneK/DMAR/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/DMAR)](https://CRAN.R-project.org/package=DMAR)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22960335.svg)](https://doi.org/10.5281/zenodo.22960335)
+<!-- badges: end -->
+
+**DMAR** (Design, Measurement, and Analysis in R, pronounced "Dee-Mar") is a
+package for human-centered research: effect sizes, confidence intervals for
+effect sizes, sample size planning, reliability and agreement, mediation
+analysis (from the simple mediation model to likelihood ratio tests of
+arbitrary indirect effects, with moderated mediation probing), equivalence
+testing, meta-analysis, experimental and quasi-experimental designs, repeated
+measures, and model comparison-based inference. It draws on the psychometric and statistical traditions and reflects
+the methodological and applied research program of its author, Ken Kelley
+(University of Notre Dame). It aims to be methodologically sound and useful
+across psychology, sociology, education, management, marketing, and information
+systems, especially where the independent or dependent variables involve the
+person.
+
+## Installation
+
+```r
+# The released version, from CRAN:
+install.packages("DMAR")
+
+# The development version, from GitHub:
+# install.packages("remotes")
+remotes::install_github("yelleKneK/DMAR")
+```
+
+Each CRAN release is tagged on GitHub (`v1.0.0` for the first);
+between releases the GitHub copy carries the changes of the next one,
+listed in NEWS.
+
+R >= 4.0.0 is required. Most estimation, inference, and planning functions
+return a tidy `data.frame(term, value)` that composes naturally with `dplyr` /
+`ggplot2` pipelines and with `broom::tidy()` / `broom::glance()`. Heavier
+dependencies (e.g., `lavaan`, `lme4`, `OpenMx`) are in `Suggests` and gated by
+`requireNamespace()`; install them only when you need the functions that use
+them.
+
+## Function Families
+
+DMAR is organized into these function families:
+
+- **Effect size estimates.** `smd()`, `cles()`,
+  `proportion_of_superiority()` (sometimes called Cohen's U3),
+  `cliff_delta()`, `vargha_delaney_A()`, `cohen_f()`, `eta_squared()`,
+  `omega_squared()`, `nnt_from_smd()`.
+- **Confidence intervals for effect sizes.** `ci_smd()`, `ci_R2()`,
+  `ci_eta_squared()`, `ci_omega_squared()`, `ci_rmsea()`, `ci_cv()`,
+  `ci_c()`, `ci_sc()`, `ci_c_ancova()`, `ci_sc_ancova()`,
+  `ci_reg_coef()`, `ci_eigenvalue()`, `ci_mahalanobis()`,
+  `ci_ratio_of_means()` and `ci_ratio_of_means_paired()` (Fieller's
+  set), `ci_proportion_paired()` (two proportions on the same units),
+  `ci_crossed()` (units crossed with raters), and `ci_two_phase()` (a
+  costly measurement with an inexpensive proxy).
+- **Sample size planning under AIPE** (accuracy in parameter
+  estimation). The `ss_aipe_*()` family covers SMD, R², ω², CV,
+  partial / semipartial r, regression coefficients (standardized and
+  unstandardized), ANCOVA contrasts, RMSEA, SEM paths, polynomial
+  change, mixed-effects fixed effects, ICC, reliability, Cliff's
+  delta, a single mean (`ss_aipe_mean()`), crossed designs of units and
+  raters (`ss_aipe_crossed()`), and two-phase sampling
+  (`ss_aipe_two_phase()`, `ss_aipe_two_phase_cost()`). Most planners
+  have a Monte Carlo `*_sensitivity()` sibling that quantifies the impact
+  of misspecified planning values; `ss_aipe_two_phase_sensitivity()`
+  also evaluates the designs of `ss_aipe_two_phase_cost()`.
+- **Sample size planning under power.** `ss_power_R2()`,
+  `ss_power_R2_change()`,
+  `ss_power_smd()`, `ss_power_r()`, `ss_power_one_way_anova()`,
+  `ss_power_factorial_anova()`, `ss_power_rm_anova()`,
+  `ss_power_split_plot_anova()`, `ss_power_mixed_effects()`,
+  `ss_power_pcm()`, `ss_power_sem()`, `ss_power_contrast()`,
+  `power_fisher_exact()`.
+- **Minimum risk / sequential estimation.** `mr_smd()`, `mr_cv()`,
+  `ss_seq_c()` (with `ss_seq_c_sensitivity()`), and `ss_seq_two_phase()`
+  (a mean under two-phase sampling).
+- **Equivalence testing.** `equivalence_smd()`, `equivalence_r()`,
+  `equivalence_c()` (with nonsuperiority), `equivalence_rmsea()`,
+  `equivalence_proportion_paired()`, `ss_aipe_equivalence_smd()`.
+- **Reliability.** `reliability_alpha()`, `reliability_omega()`,
+  `reliability_omega_categorical()`, `reliability_H()`,
+  `reliability_kr20()`, `bifactor_indices()` and
+  `ci_bifactor_indices()` (omega hierarchical and its relatives),
+  `var_alpha()`, the umbrella `reliability()`, and
+  `ss_aipe_reliability()`.
+- **Factor analysis and structural equation models.**
+  `fa_confirmatory()` (with `cfa_1()` and `cfa_2()`),
+  `fa_exploratory()` (including target rotation), `factor_count()`,
+  `parallel_analysis()`, `fa_bifactor()`, `fa_second_order()`,
+  `factor_scores()`, `factor_congruence()`, `measurement_invariance()`,
+  `sem_fit_measures()`, `sem_residual_fit()`,
+  `sem_information_criteria()`, `sem_exact_fit_bootstrap()`,
+  `compare_sem()`, `sem_sam()`, `htmt()`, and the common method
+  variance procedures (`common_method_marker()`,
+  `common_method_adjusted_r()`, `common_method_single_factor()`).
+- **Missing data.** Full information maximum likelihood (the default
+  for continuous items in the factor analysis functions and in
+  `reliability_alpha()`, `reliability_omega()`, and `reliability_H()`)
+  and two-stage maximum likelihood (in `fa_confirmatory()`, `cfa_1()`,
+  `cfa_2()`, `measurement_invariance()`, `reliability_alpha()`, and
+  `reliability_omega()`), with `fraction_missing_information()`,
+  `missing_patterns()`, `missing_coverage()`, `cov_fiml()`,
+  `df_missing()`, and `df_barnard_rubin()` for what the missing values
+  cost.
+- **ANOVA / ANCOVA / contrasts.** `welch_t()`, `contrast_test()`,
+  `summary_t_test()`, `ancova()`, `mixed_anova()`, `manova_split_plot()`,
+  `anova_within()`, `anova_within_two_way()`, `pairwise_within()`,
+  `simple_effects_AB()`, `obrien_test()`, `mauchly_test()`,
+  `epsilon_corrections()`, `contrast_adjusted()`.
+- **Multiple-comparison procedures.** `ci_dunnett()`,
+  `ci_tukey_kramer()`, `ci_games_howell()`, `ci_dunnett_t3()`,
+  `ci_scheffe()`, and their critical-value helpers `cv_dunnett()`,
+  `cv_smm()`, `cv_scheffe()`, `cv_tukey_hsd()`, `cv_t()`, `cv_z()`.
+- **Agreement and reliability of raters.** `icc()`, `icc_lmer()`,
+  `cohen_kappa()`, `fleiss_kappa()`, `gwet_ac()`,
+  `krippendorff_alpha()`, `lin_ccc()`, `limits_of_agreement()`.
+- **Multilevel and multivariate methods.**
+  `mlmr()`, `mlmr_mv()`, `R2_mixed_effects()`, `R2_mixed_effects_decomposition()`,
+  `compare_cov_structures()`, `covmat_from_cfa()`, `cov_sem()`,
+  `procrustes_phi()`.
+- **Longitudinal designs.** `ss_aipe_pcm()`, `ss_power_pcm()`,
+  `plot_trajectories()`, `plot_trajectories_fitted()`,
+  `variance_components_mls()`.
+- **Design utilities.** `design_effect()` (Kish's design effect and DEFT),
+  `effects_coding()`, `helmert_coding()`, `is_orthogonal_set()`,
+  `simulate_anova_data()`, `simulate_ancova_data()`,
+  `simulate_regression_data()`.
+- **Parameterization conversions** (`convert_*`). Invertible maps
+  between equivalent metrics (`convert_r_Z` /  `convert_Z_r`,
+  `convert_R2_f` / `convert_f_R2`, `convert_lambda_R2` /
+  `convert_R2_lambda`, `convert_delta_lambda` /
+  `convert_lambda_delta`, `convert_d_r` / `convert_r_d`,
+  `convert_d_or` / `convert_or_d`, `convert_F_chisq` /
+  `convert_chisq_F`, `convert_cor_cov`).
+- **Plots.** `plot_smd()`, `plot_ci()`, and `plot_R2()` show an effect
+  size with its CI and, given the sample sizes, the sample size;
+  `plot_trajectories()` and `plot_trajectories_fitted()` show observed
+  and fitted individual trajectories.
+- **Variance utilities.** `var_smd()`, `var_R2()`, `var_r()`,
+  `var_partial_r()`, `var_semipartial_r()`, `var_cv()`,
+  `var_omega_squared()`, `var_alpha()`, `var_icc()`,
+  `var_indirect_effect()`.
+
+## Canonical Examples
+
+### 1. Standardized Mean Difference With a Noncentral *t* Confidence Interval
+
+```{r ex-smd}
+library(DMAR)
+
+# From summary statistics:
+smd(mean_1 = 60, mean_2 = 55, s_1 = 10, s_2 = 10, n_1 = 30, n_2 = 30)
+
+# CI on the standardized mean difference (Cohen's d) via the noncentral t:
+ci_smd(smd = 0.5, n_1 = 30, n_2 = 30, conf_level = 0.95)
+```
+
+### 2. R² With a Noncentral *F* Confidence Interval and AIPE Sample Size
+
+```{r ex-r2}
+ci_R2(R2 = 0.30, N = 100, p = 4, conf_level = 0.95)
+
+# What N is needed so the 95% CI on R^2 has full width <= 0.20?
+ss_aipe_R2(true_R2 = 0.30, width = 0.20, p = 4)
+```
+
+### 3. AIPE Planning With a Sensitivity Check
+
+```{r ex-aipe}
+# Plan N for a half-width of .10 on the SMD at a population SMD of 0.40.
+ss_aipe_smd(true_smd = 0.40, width = 0.20)
+
+# How does that plan hold up if the population SMD is actually 0.25?
+set.seed(113)
+ss_aipe_smd_sensitivity(
+  true_smd      = 0.25,
+  supposed_smd  = 0.40,
+  width         = 0.20,
+  G               = 200,
+  print_iter      = FALSE
+)
+```
+
+### 4. Welch's *t* Test With a Tidy Return
+
+```{r ex-welch}
+set.seed(113)
+x <- rnorm(20, mean = 100, sd = 15)
+y <- rnorm(20, mean = 110, sd = 25)
+welch_t(x, y, conf_level = 0.95)
+```
+
+### 5. Reliability With a Confidence Interval
+
+```{r ex-reliability}
+# Cronbach's alpha plus the Bonett (2002) CI from a covariance matrix.
+S <- matrix(
+  c(1.0, 0.6, 0.5, 0.5,
+    0.6, 1.0, 0.6, 0.5,
+    0.5, 0.6, 1.0, 0.6,
+    0.5, 0.5, 0.6, 1.0),
+  nrow = 4)
+reliability_alpha(S = S, N = 250, ci_method = "bonett")
+```
+
+### 6. Kish's Design Effect in a Clustered Sample
+
+```{r ex-design-effect}
+# 25 schools with attendance ranging from 0 (closed) to 30 (full class),
+# ICC = .10. How much clustering information do we actually have?
+sizes <- c(0, 0, 1, 1, 1, 2, 3, 5, 8, 10, 12, 15, 18, 20, 22,
+           22, 25, 26, 28, 28, 30, 30, 30, 30, 30)
+design_effect(cluster_sizes = sizes, icc = 0.10)
+```
+
+## Numerical Validation
+
+DMAR ships a dedicated numerical-correctness test suite
+(`tests/testthat/test-numerical-correctness.R` and companion files) that pins
+its output against authoritative reference implementations and published
+values, so results are reproducible and checkable:
+
+| Quantity | Reference | Agreement |
+|---|---|---|
+| Confidence intervals for R², SMD; noncentral *t* / *F* limits; AIPE sample sizes | `MBESS` | 1e-5 to 1e-6 (integer *N*) |
+| Within-subjects sphericity epsilons; factorial ANOVA / ANCOVA | `car` | machine precision |
+| CFA, coefficient omega, RMSEA | `lavaan`, `semTools` | machine precision |
+| `krippendorff_alpha()`, `gwet_ac()` | `irr`, `irrCAC` | machine precision (validated designs) |
+| `R2_mixed_effects()` (Nakagawa & Schielzeth), `R2_mixed_effects_decomposition()` (Rights & Sterba) | `r2mlm` | machine precision (validated model classes) |
+| Multiple-comparison critical values and CIs | `multcomp`, published tables | published values |
+| Dunnett's T3; the paired-proportion score interval; Fieller's ratio of means; bifactor and second-order omegas | `PMCMRplus`, `PropCIs`, `mratios`, `semTools` | pinned values, compared live by the maintainer's release tooling |
+
+The machine-precision rows hold for the model and design classes the test
+suite pins, including the boundary cases the tests cover. The
+mixed-effects R-squared functions match `r2mlm` and the direct Johnson
+quadratic form across random-intercept, correlated random-slope, split (`||`)
+random-slope, multi-slope, and nested two-level models; on split random-slope
+models `performance`/`insight` omits the random-slope variance, so DMAR agrees
+with `r2mlm` and the Johnson form there and not with `performance`. The
+agreement procedures match `irr` and `irrCAC` on the ordinary rating designs
+and on the boundary cases the tests cover: the zero-distance case of
+ratio-metric Krippendorff's alpha, all-missing units in `gwet_ac()`, and
+incomplete category sets in `cohen_kappa()`.
+
+## Learn More
+
+- **Package website:** <https://yelleknek.github.io/DMAR/>
+- **Start here:** `vignette("DMAR")` (overview), `vignette("dmar_output")`
+  (the tidy `dmar_tbl` output and `tidy()`/`glance()`/`as_kable()` methods),
+  `vignette("mbess_to_dmar")` (MBESS → DMAR migration).
+- **Full function reference** and topical articles are on the website under
+  *Reference* and *Articles*.
+
+## Relation to MBESS
+
+DMAR is a more general and greatly expanded reimagining
+of the **MBESS** package (Kelley, 2007a, *Journal of Statistical Software*,
+20(8), 1–24; 2007b, *Behavior Research Methods*, 39(4), 979–984), which
+has been on CRAN for about two decades.
+MBESS was named for the behavioral, educational, and social sciences,
+but the methods it implements apply across the empirical sciences, and
+DMAR is framed for that broader range. The
+notational and programming changes (uniform `snake_case`, tidy
+`data.frame(term, value)` returns, native `ggplot2` plotting, broader
+coverage of within-subjects, multivariate, mixed-effects, and
+sequential-estimation methods) were too extensive to ship under the
+MBESS name without breaking compatibility, so the work ships under a
+new name. MBESS remains on CRAN, and new methods are added to DMAR.
+See `vignette("mbess_to_dmar")` for the MBESS → DMAR migration
+mapping.
+
+## Relation to Maxwell, Delaney, and Kelley (MDK, 4th ed.)
+
+Many of the methods in DMAR are discussed in Maxwell, Delaney, and
+Kelley (2027), *Designing Experiments and Analyzing Data: A Model
+Comparison Perspective* (4th ed., Routledge). Functions cite the
+specific MDK chapter in their `@references` block where the
+underlying method is discussed in detail. DMAR is broader than MDK:
+it covers methods (e.g., minimum risk sequential estimation,
+equivalence testing, mediation effect size CIs, design effects for
+cluster sampling) that are outside the scope of a textbook on
+experimental design. Conversely, MDK covers conceptual material that
+falls outside the scope of an R package. The two are complementary.
+
+## Related Packages
+
+`BUCSS` (Bias and Uncertainty Corrected Sample Size; Kelley, Anderson,
+and Maxwell) plans the sample size of a future study for statistical
+power from the summary statistics of a prior study, correcting the
+prior study's effect for publication bias and for uncertainty. Ken
+Kelley is a coauthor of `BUCSS`. Its planners cover many of the
+designs of DMAR's `ss_power_*()` family; DMAR's power planners take
+the planning effect as given, and DMAR's `ss_aipe_*()` planners plan
+for the width of a confidence interval rather than for power.
+
+## Citation
+
+If you use DMAR in published work, please cite
+
+> Kelley, K. (2026). *DMAR: Design, Measurement, and Analysis in R*.
+> R package version 1.1.0. https://doi.org/10.5281/zenodo.22960335
+
+and, where appropriate, the original MBESS references for the
+methodological lineage:
+
+> Kelley, K. (2007). Confidence Intervals for Standardized Effect
+> Sizes: Theory, Application, and Implementation. *Journal of
+> Statistical Software*, 20(8), 1–24. <doi:10.18637/jss.v020.i08>
+
+> Kelley, K. (2007). Methods for the Behavioral, Educational, and
+> Social Sciences: An R package. *Behavior Research Methods*, 39(4),
+> 979–984. <doi:10.3758/BF03192993>
+
+`citation("DMAR")` reproduces the canonical BibTeX entry from R.
+
+## Feedback
+
+Bug reports, feature requests, and suggestions for new methods are
+welcomed by email to Ken Kelley <kkelley@nd.edu> (please put "DMAR"
+in the subject line). See <https://kenkelley.org> and
+<https://kenkelley.org/publications/> for related publications.

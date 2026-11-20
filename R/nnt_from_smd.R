@@ -1,0 +1,495 @@
+# Number needed to treat (NNT) from a standardized mean difference.
+#' Number Needed to Treat From a Standardized Mean Difference
+#'
+#' Converts a standardized mean difference to the success rate difference
+#' (SRD) of Kraemer and Kupfer (2006) and to its reciprocal, which they
+#' define as the number needed to treat (NNT) for a continuous outcome. The
+#' SRD is the probability that a randomly chosen treated person has a
+#' better outcome than a randomly chosen control person, minus the
+#' probability of the reverse. When sample sizes or confidence limits for
+#' the standardized mean difference are given, the function also returns
+#' the confidence interval for the SRD and the corresponding confidence set
+#' for the NNT, which is two intervals when the interval for the
+#' standardized mean difference includes zero.
+#'
+#' @param smd The standardized mean difference (Cohen's \emph{d}): the
+#'   treatment mean minus the control mean, with higher scores the better
+#'   outcome, divided by the pooled within-group standard deviation. A
+#'   single finite number. A negative value gives a negative SRD and a
+#'   negative NNT, read as the number needed to harm.
+#' @param n_1,n_2 Sample sizes of the treatment and control groups. Supply
+#'   both or neither. With both, the noncentral \emph{t} confidence interval
+#'   for the population standardized mean difference is computed
+#'   (\code{\link{ci_smd}}) and carried to the SRD and the NNT.
+#' @param conf_level Confidence level of the noncentral \emph{t} interval
+#'   when \code{n_1} and \code{n_2} are given. Default \code{0.95}. With
+#'   supplied limits, \code{conf_level} enters no computation: it is the
+#'   caller's statement of the level of those limits, and it is recorded
+#'   and printed only when it is given in the call.
+#' @param smd_ci_lower,smd_ci_upper Optional confidence limits for the population
+#'   standardized mean difference, computed elsewhere. Supply both or
+#'   neither, with \code{smd_ci_lower} not above \code{smd_ci_upper}. When
+#'   supplied they are used as given, the noncentral \emph{t} computation
+#'   is skipped, and \code{n_1} and \code{n_2} are not used. An estimate
+#'   outside its limits is accepted with a warning.
+#'
+#' @return A \code{data.frame} (class \code{dmar_nnt}, a \code{dmar_tbl})
+#'   with columns
+#'   \code{term} and \code{value}. Without an interval the rows are
+#'   \code{smd}, \code{srd} (the success rate difference), and \code{nnt}.
+#'   With an interval the rows are, in this order, \code{smd}, \code{srd},
+#'   \code{nnt}, \code{smd_ci_lower}, \code{smd_ci_upper}, \code{nnt_ci_lower},
+#'   \code{nnt_ci_upper}, \code{srd_ci_lower}, and \code{srd_ci_upper}.
+#'
+#'   What each row is: \code{smd} is the standardized mean difference as
+#'   given. \code{srd} is the success rate difference,
+#'   \eqn{2 \Phi(d / \sqrt{2}) - 1}. \code{nnt} is \code{1 / srd}.
+#'   \code{smd_ci_lower} and \code{smd_ci_upper} are the confidence limits for
+#'   the population standardized mean difference, computed from
+#'   \code{n_1} and \code{n_2} or as supplied. \code{nnt_ci_lower} and
+#'   \code{nnt_ci_upper} are the limits of the NNT when its confidence set
+#'   is one interval. \code{srd_ci_lower} and \code{srd_ci_upper} are the
+#'   limits of the SRD. The result is a \code{dmar_tbl}, so \code{tidy()},
+#'   \code{glance()}, and \code{rbind()} work on it as on any other. The
+#'   confidence level is in the \code{conf_level} attribute: with
+#'   \code{n_1} and \code{n_2} it is the level of the computed interval,
+#'   and with supplied limits it is recorded only when \code{conf_level}
+#'   is given in the call. With an interval the \code{ci_source}
+#'   attribute names \code{smd} as the estimate whose interval the others
+#'   are computed from, so that \code{\link{results_sentence}} reports the
+#'   SRD (\code{term = "nnt"} or \code{term = "smd"} for another) and
+#'   \code{tidy()} gives the confidence level on the rows of the SRD and
+#'   the NNT and not on those of \code{smd}.
+#'
+#'   \code{srd_ci_lower} and \code{srd_ci_upper} are the SRD at the two
+#'   limits of the standardized mean difference and always form an
+#'   ordinary interval. \code{nnt_ci_lower} and \code{nnt_ci_upper} depend
+#'   on where zero falls in the interval for the standardized mean
+#'   difference:
+#'   \itemize{
+#'     \item Zero outside the interval: \code{nnt_ci_lower} is
+#'       \code{1 / srd_ci_upper} and \code{nnt_ci_upper} is
+#'       \code{1 / srd_ci_lower}.
+#'     \item Lower limit exactly zero: \code{nnt_ci_lower} is
+#'       \code{1 / srd_ci_upper} and \code{nnt_ci_upper} is \code{Inf}.
+#'     \item Upper limit exactly zero and lower limit below zero:
+#'       \code{nnt_ci_lower} is \code{-Inf} and \code{nnt_ci_upper} is
+#'       \code{1 / srd_ci_lower}.
+#'     \item Zero strictly inside the interval: the confidence set for the
+#'       NNT is two intervals, which one lower and one upper limit cannot
+#'       hold, so \code{nnt_ci_lower} and \code{nnt_ci_upper} are
+#'       \code{NA}. The set is given in the \code{nnt_confidence_set}
+#'       attribute and in a line printed under the table.
+#'   }
+#'   In every case, each finite end of the confidence set for the NNT is
+#'   \code{1 / srd_ci_lower} or \code{1 / srd_ci_upper}.
+#'
+#'   A result with an interval carries two attributes. \code{nnt_set} is
+#'   \code{"interval"} or \code{"two_intervals"}. \code{nnt_confidence_set}
+#'   is a \code{data.frame} with columns \code{lower} and \code{upper} and
+#'   one row per interval of the set, in increasing order: one row for
+#'   \code{"interval"}, and for \code{"two_intervals"} the rows
+#'   (\code{-Inf}, \code{1 / srd_ci_lower}) and (\code{1 / srd_ci_upper},
+#'   \code{Inf}). The two attributes belong to the table itself:
+#'   \code{tidy()} and \code{glance()} return the rows without them, so
+#'   for a set of two intervals they show \code{nnt_ci_lower} and
+#'   \code{nnt_ci_upper} as \code{NA}; its finite ends are
+#'   \code{1 / srd_ci_lower} and \code{1 / srd_ci_upper}, which both carry. A
+#'   table made by \code{rbind()} or by taking rows keeps the attributes of
+#'   the first table, as every \code{dmar_tbl} does, so the line printed
+#'   beneath it describes that table.
+#'
+#'   The NNT of no effect is infinite: \code{nnt} is \code{Inf} when
+#'   \code{smd} is zero, and the sign of that infinity has no meaning.
+#'
+#' @details
+#' \strong{What is estimated.} Take one person at random from the treated
+#' population and one at random from the control population, with
+#' outcomes \eqn{Y_T} and \eqn{Y_C}, higher being better. The success
+#' rate difference is
+#' \deqn{\mathrm{SRD} = \Pr(Y_T > Y_C) - \Pr(Y_C > Y_T),}
+#' the probability that the treated person has the better outcome minus
+#' the probability that the control person has, and Kraemer and Kupfer
+#' (2006, p. 994) define the number needed to treat for a scaled outcome
+#' as its reciprocal,
+#' \deqn{\mathrm{NNT} = 1 / \mathrm{SRD}.}
+#' No response threshold enters: the comparison is between two people, not
+#' between each person and a cut. An SRD of 0.25 says that in 100 such
+#' pairs the treated person is ahead in about 25 more pairs than the
+#' control person is, and the NNT of 4 says that about 4 people must be
+#' treated for one more of those comparisons to favor treatment. A
+#' negative standardized mean difference gives a negative SRD and a
+#' negative NNT, read as the number needed to harm. A standardized mean
+#' difference of zero gives an SRD of zero and an infinite NNT (no
+#' advantage of either group).
+#'
+#' \strong{Assumptions, by the part each serves.} The point conversion
+#' assumes two independent normal populations and a standardized mean
+#' difference whose standardizer is the root mean square of the two
+#' population standard deviations, which the pooled standard deviation
+#' estimates under a common variance (or with equal sample sizes). The
+#' interval from \code{n_1} and \code{n_2} assumes normality and a common
+#' variance, the conditions of the noncentral \emph{t} interval for the
+#' standardized mean difference (\code{\link{ci_smd}}; Kelley, 2007).
+#' Supplied limits carry whatever assumptions produced them. When the
+#' populations are not normal, as with a skewed outcome, a ceiling or a
+#' floor, or an ordinal scale, the same standardized mean difference
+#' corresponds to a different \eqn{\Pr(Y_T > Y_C)}, and the SRD and the
+#' NNT computed here are then answers for a normal model that does not
+#' describe the data. How far off they are depends on the two
+#' distributions and is not quantified here. \code{\link{cliff_delta}}
+#' estimates the SRD itself from the two samples with no distributional
+#' model (Cliff's delta is the sample version of the same difference of
+#' probabilities), and \code{\link{vargha_delaney_A}} estimates
+#' \eqn{\Pr(Y_T > Y_C)}, counting half of each tie.
+#'
+#' \strong{The conversion.} Under the normal model the difference
+#' \eqn{Y_T - Y_C} is normal with mean \eqn{d} and variance 2 in units of
+#' the standardizer, so
+#' \deqn{\Pr(Y_T > Y_C) = \Phi(d / \sqrt{2}),}
+#' \deqn{\mathrm{SRD} = 2 \Phi(d / \sqrt{2}) - 1, \qquad
+#'       \mathrm{NNT} = \frac{1}{2 \Phi(d / \sqrt{2}) - 1}.}
+#' The function computes the SRD as
+#' \eqn{\mathrm{sign}(d) \Pr(\chi^2_1 \le d^2 / 2)}, which is the same
+#' number written without the subtraction, so that a standardized mean
+#' difference near zero loses no digits to it. The values below agree
+#' with Table 1 of Kraemer and Kupfer (2006, p. 992) to the decimals
+#' printed there, with one exception: at \emph{d} = 1.0 the table prints an
+#' SRD of .521, and the value is 0.5205, which is 0.520 to three decimals.
+#' \tabular{rrr}{
+#'   \emph{d} \tab SRD \tab NNT \cr
+#'   0.1 \tab 0.056 \tab 17.739 \cr
+#'   0.2 \tab 0.112 \tab 8.892 \cr
+#'   0.3 \tab 0.168 \tab 5.953 \cr
+#'   0.4 \tab 0.223 \tab 4.490 \cr
+#'   0.5 \tab 0.276 \tab 3.619 \cr
+#'   0.6 \tab 0.329 \tab 3.043 \cr
+#'   0.7 \tab 0.379 \tab 2.636 \cr
+#'   0.8 \tab 0.428 \tab 2.334 \cr
+#'   0.9 \tab 0.475 \tab 2.103 \cr
+#'   1.0 \tab 0.520 \tab 1.921
+#' }
+#'
+#' \strong{The confidence set, and why it can be two intervals.} The
+#' function starts from a confidence interval for the population
+#' standardized mean difference, either the noncentral \emph{t} interval
+#' computed from \code{n_1} and \code{n_2} or the limits supplied. Because
+#' the SRD is an increasing function of the standardized mean difference,
+#' the SRD at the two limits is a confidence interval for the SRD with
+#' the same coverage, and it is always an ordinary interval. The NNT is
+#' the reciprocal of the SRD, and the reciprocal is not continuous at
+#' zero, so what the interval for the SRD becomes depends on where zero
+#' falls:
+#' \itemize{
+#'   \item Zero outside the interval. The reciprocal reverses the order
+#'     of the limits: the interval for the NNT runs from
+#'     \eqn{1 / \mathrm{SRD}_{\mathrm{upper}}} to
+#'     \eqn{1 / \mathrm{SRD}_{\mathrm{lower}}}.
+#'   \item Lower limit exactly zero. The interval for the NNT runs from
+#'     \eqn{1 / \mathrm{SRD}_{\mathrm{upper}}} to infinity.
+#'   \item Upper limit exactly zero and lower limit below zero. The
+#'     interval runs from minus infinity to
+#'     \eqn{1 / \mathrm{SRD}_{\mathrm{lower}}}.
+#'   \item Zero strictly inside the interval. The SRD values from the
+#'     lower limit up to zero are sent to the NNT values from
+#'     \eqn{1 / \mathrm{SRD}_{\mathrm{lower}}} (negative) down to minus
+#'     infinity, and the SRD values from zero up to the upper limit are
+#'     sent to the NNT values from plus infinity down to
+#'     \eqn{1 / \mathrm{SRD}_{\mathrm{upper}}}. The confidence set is
+#'     therefore two intervals,
+#'     \eqn{\mathrm{NNT} \le 1 / \mathrm{SRD}_{\mathrm{lower}}} (harm) and
+#'     \eqn{\mathrm{NNT} \ge 1 / \mathrm{SRD}_{\mathrm{upper}}} (benefit),
+#'     which meet at infinity, the NNT of no effect (Altman, 1998).
+#'   \item No interval requested. Only \code{smd}, \code{srd}, and
+#'     \code{nnt} are returned.
+#' }
+#' One lower limit and one upper limit cannot hold a set of two intervals.
+#' Reading the two reciprocals as the ends of a single interval would
+#' describe the values between them, which are exactly the NNT values the
+#' data exclude, and would leave out the NNT of no effect, which the data
+#' include. For that case \code{nnt_ci_lower} and \code{nnt_ci_upper} are
+#' therefore \code{NA}, the set is in the \code{nnt_confidence_set}
+#' attribute, and a line under the printed table states it. In every case
+#' the confidence set for the NNT is the image of the interval for the
+#' standardized mean difference under a one-to-one transformation, so it
+#' holds the population NNT exactly when that interval holds the
+#' population standardized mean difference, and it has the same coverage.
+#' Kraemer and Kupfer (2006) call confidence intervals for the NNT
+#' \dQuote{not advisable} (pp. 992 to 993) and prefer the SRD for
+#' interval estimation (p. 994), which is why the limits of the SRD are
+#' reported here beside those of the NNT.
+#'
+#' \strong{Edge cases.}
+#' \itemize{
+#'   \item \code{smd = 0}: the SRD is 0 and \code{nnt} is \code{Inf}. The
+#'     sign of that infinity has no meaning.
+#'   \item A negative \code{smd}: the SRD and the NNT are negative, and
+#'     with both limits negative the interval for the NNT is an ordered
+#'     negative interval (for \eqn{d = -0.5} with 50 per group,
+#'     \eqn{-17.636} to \eqn{-2.109}).
+#'   \item A limit exactly zero: one end of the interval for the NNT is
+#'     infinite, as above; the set is one interval.
+#'   \item A very small \eqn{|d|}: the NNT is very large and is computed
+#'     without loss of digits (for \eqn{d = 10^{-8}}, about
+#'     \eqn{1.77 \times 10^{8}}). An SRD that underflows to zero gives an
+#'     infinite NNT with the sign of \eqn{d}.
+#'   \item Very small samples: the noncentral \emph{t} interval is wide,
+#'     includes zero for most values of \eqn{d}, and gives two intervals
+#'     (for \eqn{d = 0.5} with \code{n_1 = 1} and \code{n_2 = 2}, limits
+#'     for \eqn{d} of \eqn{-2.07} and 2.88).
+#'   \item An estimate outside the supplied limits is accepted with a
+#'     warning, and the rows are computed from the three numbers as given.
+#'   \item Supplied limits take precedence over \code{n_1} and
+#'     \code{n_2}, which are then neither used nor checked.
+#'   \item \code{conf_level} must be a single number in (0, 1) even when
+#'     it enters no computation; \code{NULL} is an error.
+#' }
+#'
+#' \strong{Which NNT this is.} The NNT returned here depends on the
+#' standardized mean difference alone. The NNT of evidence based medicine
+#' is the reciprocal of a difference between two response proportions at a
+#' stated threshold. Under the same normal model, with control response
+#' proportion \eqn{p_0}, that NNT is
+#' \deqn{1 / \bigl[\Phi\bigl(\Phi^{-1}(p_0) + d\bigr) - p_0\bigr],}
+#' which changes with \eqn{p_0} and, for a positive \emph{d}, is larger
+#' than the Kraemer and Kupfer NNT at every threshold. Its smallest value
+#' is \eqn{1 / [2 \Phi(d / 2) - 1]}, at \eqn{p_0 = \Phi(-d / 2)}. At
+#' \eqn{d = 0.5} the Kraemer and Kupfer NNT is 3.62; the threshold NNT is
+#' at least 5.07 (at \eqn{p_0 = 0.40}), 5.22 at \eqn{p_0 = 0.5}, and 6.01
+#' at \eqn{p_0 = 0.2}. The two are different quantities and neither is an
+#' approximation to the other, so a report should say which one it gives.
+#' Furukawa and Leucht (2011) compared the two conversions in individual
+#' patient data from antipsychotic trials and found the control event
+#' rate conversion closer to the observed NNTs: it fell inside the
+#' observed 95 percent interval in 35 of 36 comparisons, against 20 of 36
+#' for the conversion used here. For the NNT at a threshold computed from
+#' data, see \code{\link{responder_analysis}}.
+#'
+#' \strong{A worked example.}
+#' \code{nnt_from_smd(smd = 0.5, n_1 = 50, n_2 = 50)} returns an SRD of
+#' 0.276 and an NNT of 3.62: in 100 pairs of one treated and one control
+#' person the treated person is ahead in about 28 more pairs than the
+#' control person is, and about 3.6 people must be treated for one more
+#' such comparison to favor treatment. The 95 percent limits for the
+#' standardized mean difference are 0.101 and 0.897, which exclude zero.
+#' The SRD at those limits is 0.057 and 0.474, and the interval for the
+#' NNT is their reciprocals in reverse order, 2.11 to 17.64.
+#' \code{nnt_from_smd(smd = 0.2, n_1 = 50, n_2 = 50)} returns an SRD of
+#' 0.112 and an NNT of 8.89, with limits for the standardized mean
+#' difference of \eqn{-0.193} and 0.592, which include zero. The interval
+#' for the SRD, \eqn{-0.109} to 0.325, is an ordinary interval and is the
+#' one to report. \code{nnt_ci_lower} and \code{nnt_ci_upper} are \code{NA},
+#' and the line under the table gives the confidence set for the NNT as
+#' \dQuote{NNT <= -9.189 (harm) or NNT >= 3.079 (benefit)}: the data are
+#' compatible with a benefit as large as one more favorable comparison
+#' for every 3.1 people treated, with no effect (an infinite NNT), and
+#' with harm as large as one more unfavorable comparison for every 9.2
+#' people treated. A report of this result gives the estimate, 8.89, with
+#' both intervals of the set, or gives the SRD with its interval.
+#'
+#' @references
+#' Altman, D. G. (1998). Confidence intervals for the number needed to
+#'   treat. \emph{BMJ, 317}(7168), 1309--1312. \doi{10.1136/bmj.317.7168.1309}
+#'
+#' Furukawa, T. A., & Leucht, S. (2011). How to obtain NNT from Cohen's
+#'   \emph{d}: Comparison of two methods. \emph{PLoS ONE, 6}(4), e19070.
+#'   \doi{10.1371/journal.pone.0019070}
+#'
+#' Kelley, K. (2007). Confidence intervals for standardized effect sizes:
+#'   Theory, application, and implementation. \emph{Journal of Statistical
+#'   Software, 20}(8), 1--24. (The noncentral \emph{t} interval for the
+#'   standardized mean difference that is carried to the SRD and the NNT
+#'   here.) \doi{10.18637/jss.v020.i08}
+#'
+#' Kraemer, H. C., & Kupfer, D. J. (2006). Size of treatment effects and
+#'   their importance to clinical research and practice. \emph{Biological
+#'   Psychiatry, 59}(11), 990--996. \doi{10.1016/j.biopsych.2005.09.014}
+#'
+#' @seealso \code{\link{smd}} and \code{\link{ci_smd}} for the
+#'   standardized mean difference and its interval; \code{\link{cles}}
+#'   for \eqn{\Pr(Y_T > Y_C)} under the same normal model;
+#'   \code{\link{cliff_delta}} and \code{\link{vargha_delaney_A}} for
+#'   the same comparisons estimated without the normal model;
+#'   \code{\link{responder_analysis}} for the NNT at a threshold.
+#'
+#' @examples
+#' # 1. Point estimate only.
+#' nnt_from_smd(smd = 0.5)
+#'
+#' # 2. With the noncentral t interval from the sample sizes.
+#' nnt_from_smd(smd = 0.5, n_1 = 50, n_2 = 50, conf_level = 0.95)
+#'
+#' # 3. With limits for the standardized mean difference computed elsewhere.
+#' nnt_from_smd(smd = 0.5, smd_ci_lower = 0.20, smd_ci_upper = 0.80)
+#'
+#' # 4. An interval for the standardized mean difference that includes zero:
+#' #    two intervals for the NNT, printed under the table.
+#' nnt_from_smd(smd = 0.3, smd_ci_lower = -0.10, smd_ci_upper = 0.70)
+#'
+#' # 5. The same case from sample sizes, with the set as an attribute: one
+#' #    row per interval of the set.
+#' res <- nnt_from_smd(smd = 0.2, n_1 = 50, n_2 = 50)
+#' res
+#' attr(res, "nnt_set")
+#' attr(res, "nnt_confidence_set")
+#'
+#' # 6. A negative standardized mean difference: the number needed to harm,
+#' #    with an ordered negative interval.
+#' nnt_from_smd(smd = -0.5, n_1 = 50, n_2 = 50)
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @keywords htest
+#'
+#' @family effect size estimates
+#'
+#' @export
+
+nnt_from_smd <- function(smd,
+                         n_1 = NULL, n_2 = NULL,
+                         conf_level = 0.95,
+                         smd_ci_lower = NULL, smd_ci_upper = NULL) {
+  one_finite <- function(x) is.numeric(x) && length(x) == 1L && is.finite(x)
+  if (!one_finite(smd))
+    .dmar_refuse_argument("'smd' must be a single finite number.", arg = "smd")
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      is.na(conf_level) || conf_level <= 0 || conf_level >= 1)
+    .dmar_refuse_argument(
+      "'conf_level' must be a single number in (0, 1).", arg = "conf_level")
+
+  # Supplied limits take precedence over n_1 and n_2, which are then
+  # neither used nor checked (the documented behavior since 1.0.0).
+  has_limits <- !is.null(smd_ci_lower) || !is.null(smd_ci_upper)
+  level <- NULL
+  if (has_limits) {
+    if (is.null(smd_ci_lower) || is.null(smd_ci_upper))
+      .dmar_refuse_argument(
+        "Supply both 'smd_ci_lower' and 'smd_ci_upper', or neither.",
+        arg = c("smd_ci_lower", "smd_ci_upper"))
+    if (!one_finite(smd_ci_lower) || !one_finite(smd_ci_upper))
+      .dmar_refuse_argument(
+        "'smd_ci_lower' and 'smd_ci_upper' must each be a single finite number.",
+        arg = c("smd_ci_lower", "smd_ci_upper"))
+    if (smd_ci_lower > smd_ci_upper)
+      .dmar_refuse_argument(
+        "'smd_ci_lower' must not exceed 'smd_ci_upper'.",
+        arg = c("smd_ci_lower", "smd_ci_upper"))
+    if (smd < smd_ci_lower || smd > smd_ci_upper)
+      .dmar_warn(c(
+        "'smd' lies outside the interval from 'smd_ci_lower' to ",
+        "'smd_ci_upper'."), "result_qualified")
+    # The function does not know the level of limits it did not compute,
+    # so it records one only when the caller states it.
+    if (!missing(conf_level)) level <- conf_level
+  } else if (!is.null(n_1) || !is.null(n_2)) {
+    if (is.null(n_1) || is.null(n_2))
+      .dmar_refuse_argument(
+        "Supply both 'n_1' and 'n_2', or neither.", arg = c("n_1", "n_2"))
+    if (!one_finite(n_1) || !one_finite(n_2) || n_1 < 1 || n_2 < 1 ||
+        n_1 + n_2 <= 2)
+      .dmar_refuse_argument(c(
+        "'n_1' and 'n_2' must each be a single number of at least 1, ",
+        "with n_1 + n_2 greater than 2."), arg = c("n_1", "n_2"))
+    ncp_t <- smd * sqrt(as.numeric(n_1) * n_2 / (n_1 + n_2))
+    ci  <- ci_smd(ncp = ncp_t, n_1 = n_1, n_2 = n_2, conf_level = conf_level)
+    smd_ci_lower <- ci$value[ci$term == "ci_lower"]
+    smd_ci_upper <- ci$value[ci$term == "ci_upper"]
+    level <- conf_level
+  }
+
+  # SRD = 2 * pnorm(d / sqrt(2)) - 1, written as sign(d) * Pr(Z^2 <= d^2 / 2)
+  # so that a d near zero loses no digits to the subtraction.
+  srd_of <- function(d) sign(d) * stats::pchisq(d^2 / 2, df = 1)
+  # 1 / SRD. An SRD that underflowed to zero keeps the sign of its d; the
+  # NNT of d = 0 is Inf.
+  recip <- function(s, d) {
+    if (s != 0) return(1 / s)
+    if (d == 0) Inf else sign(d) * Inf
+  }
+
+  srd <- srd_of(smd)
+  out <- data.frame(
+    term  = c("smd", "srd", "nnt"),
+    value = c(smd, srd, recip(srd, smd)),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+
+  has_ci <- !is.null(smd_ci_lower)
+  if (has_ci) {
+    srd_lower <- srd_of(smd_ci_lower)
+    srd_upper <- srd_of(smd_ci_upper)
+    # The two ends of the reciprocal image of [srd_lower, srd_upper]: the
+    # end from the upper limit bounds the benefit side, the end from the
+    # lower limit the harm side. The case is decided on the limits for d,
+    # not on the SRD limits, which can underflow to zero.
+    end_upper <- recip(srd_upper, smd_ci_upper)
+    end_lower <- recip(srd_lower, smd_ci_lower)
+    if (smd_ci_lower < 0 && smd_ci_upper > 0) {
+      # Zero inside: (-Inf, 1 / srd_lower] and [1 / srd_upper, Inf), which
+      # meet at infinity (Altman, 1998). No single pair of limits.
+      nnt_set <- "two_intervals"
+      nnt_lower <- NA_real_
+      nnt_upper <- NA_real_
+      components <- data.frame(lower = c(-Inf, end_upper),
+                               upper = c(end_lower, Inf))
+    } else {
+      nnt_set <- "interval"
+      # An upper limit of exactly zero leaves the harm side unbounded below.
+      nnt_lower <- if (smd_ci_upper == 0 && smd_ci_lower < 0) -Inf else end_upper
+      nnt_upper <- end_lower
+      components <- data.frame(lower = nnt_lower, upper = nnt_upper)
+    }
+
+    # Rows 1 to 7 keep their 1.0.0 positions, the limits named for their
+    # estimate (smd_lower, smd_upper, nnt_lower, and nnt_upper in 1.0.0);
+    # the SRD limits follow them.
+    out <- rbind(
+      out,
+      data.frame(term  = c("smd_ci_lower", "smd_ci_upper",
+                           "nnt_ci_lower", "nnt_ci_upper",
+                           "srd_ci_lower", "srd_ci_upper"),
+                 value = c(smd_ci_lower, smd_ci_upper, nnt_lower, nnt_upper,
+                           srd_lower, srd_upper),
+                 stringsAsFactors = FALSE,
+                 row.names = NULL)
+    )
+    attr(out, "nnt_set") <- nnt_set
+    attr(out, "nnt_confidence_set") <- components
+  }
+
+  out <- .as_dmar_tbl(out, conf_level = level, subclass = "dmar_nnt")
+  # The table holds intervals for the standardized mean difference it was
+  # given, the NNT, and the SRD, each in rows named for its estimate. It
+  # names the standardized mean difference as the source of the other two,
+  # so that results_sentence() reports the SRD (its row comes before the
+  # NNT's, and its interval is always an interval) on the table, its
+  # tidy() rows, and its glance() row, and tidy() marks the level on the
+  # rows of the SRD and the NNT, as when the limits on d were named
+  # smd_lower and smd_upper.
+  if (has_ci) attr(out, "ci_source") <- "smd"
+  out
+}
+
+# The confidence set for the NNT when it is two intervals, in a line under
+# the table, at the console and in a knitted report alike (see
+# .dmar_tbl_footer() in R/dmar_output_helpers.R). Nothing is added for a
+# single interval, whose limits the table already shows.
+#' @exportS3Method .dmar_tbl_footer dmar_nnt
+#' @noRd
+.dmar_tbl_footer.dmar_nnt <- function(x, ...) {
+  .dmar_footer_add(NextMethod(), .nnt_footer_line(x, ...), "nnt_set")
+}
+
+# The line itself, broken for the console (a knitted report reads the break
+# as a space), with its two finite ends to `digits` decimal places.
+.nnt_footer_line <- function(x, digits = getOption("dmar.digits", 3L), ...) {
+  set <- attr(x, "nnt_confidence_set", exact = TRUE)
+  if (!identical(attr(x, "nnt_set", exact = TRUE), "two_intervals") ||
+      !is.data.frame(set) || nrow(set) != 2L) return(NULL)
+  sprintf(paste0("The interval for the SRD includes 0, so the confidence ",
+                 "set for the NNT is two intervals:\nNNT <= %s (harm) or ",
+                 "NNT >= %s (benefit), joined at infinity (Altman, 1998)"),
+          .dmar_fixed_text(set$upper[1L], digits),
+          .dmar_fixed_text(set$lower[2L], digits))
+}

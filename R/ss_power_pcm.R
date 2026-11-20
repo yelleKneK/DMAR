@@ -1,0 +1,357 @@
+#' Sample Size Planning for Power for Polynomial Change Models
+#'
+#' Returns power given the sample size, or sample size given the desired power,
+#' for the group difference in a polynomial change coefficient (a flat-line
+#' intercept, a linear slope, a quadratic acceleration, or any higher-order
+#' trend) in a two-group longitudinal design, following Raudenbush and Liu
+#' (2001). The trend whose group difference is tested is selected with
+#' \code{trend}; \code{trend = "linear"} (the default) reproduces the
+#' straight-line case.
+#'
+#' @param true_reg_coef The population value of the between-subject (i.e.,
+#'   Level 2) regression coefficient for the group by time interaction in the
+#'   polynomial change coefficient selected by \code{trend} (linear by
+#'   default), where the grouping variable is coded -.5 and .5 for the two
+#'   groups: the difference between the two groups' mean change
+#'   coefficients, in the units of the change coefficient (for a linear
+#'   trend, the units of the outcome per unit of time). Give this or
+#'   \code{true_std_reg_coef}, not both.
+#' @param true_std_reg_coef The same group difference standardized: the
+#'   unstandardized difference divided by the square root of
+#'   \code{true_var_trend}, the between-subject standard deviation of the
+#'   change coefficient (\eqn{\beta} in the formulas below; Raudenbush &
+#'   Liu, 2001, p. 391). Give this or \code{true_reg_coef}, not both; a call
+#'   that gives both or neither is refused with a condition of class
+#'   \code{dmar_argument_invalid}. Whichever is given, the table reports the
+#'   difference on both scales, in its rows \code{true_reg_coef} and
+#'   \code{true_std_reg_coef}.
+#' @param true_var_trend The true between-subject variance of the individuals' change
+#'   coefficient for the trend selected by \code{trend} (the variance of the
+#'   slopes for \code{trend = "linear"}); \eqn{\tau} in the formulas below, and
+#'   the quantity \code{\link{ss_aipe_pcm}} takes under the same name.
+#' @param true_var_error The true within-subject (i.e., Level 1) error variance
+#'   (\eqn{\sigma^2_e} in the formulas below), the quantity
+#'   \code{\link{ss_aipe_pcm}} takes under the same name.
+#' @param frequency Number of measurements per unit of time, where the unit is
+#'   the one in which \code{duration} is expressed. It need not be a whole
+#'   number; for example, \code{frequency = 0.5} means one measurement every
+#'   two time units. Together with \code{duration} it fixes the number of
+#'   equally spaced measurement occasions, \eqn{M = f \times D + 1}, with
+#'   \eqn{f} the frequency and \eqn{D} the duration.
+#' @param duration Length of the study in the chosen time unit (for example,
+#'   years, grades, or hours). Measurements are taken at
+#'   \eqn{M = f \times D + 1} equally spaced occasions spanning time 0 to
+#'   \code{duration}.
+#' @param desired_power Desired power, a single number strictly between 0
+#'   and 1
+#' @param specified_n_per_group Sample size in each of the two groups (the total is twice this); if specified, the function returns the power achieved at that size
+#' @param alpha_level Type I error rate
+#' @param directional Should a one (\code{TRUE}) or two (\code{FALSE}) tailed test be performed.
+#' @param trend The polynomial change coefficient whose group difference is
+#'   tested, given either as a name (\code{"intercept"}, \code{"linear"},
+#'   \code{"quadratic"}, \code{"cubic"}, \code{"quartic"}, ...) or as a
+#'   non-negative integer order (\code{0} = intercept / flat line, \code{1} =
+#'   linear, \code{2} = quadratic, ...). Defaults to \code{"linear"}. The design
+#'   must supply at least \eqn{p + 1} measurement occasions to estimate a
+#'   degree-\eqn{p} trend.
+#'
+#' @references
+#' Kelley, K., & Maxwell, S. E. (2008). Sample size planning with
+#'   applications to multiple regression: Power and accuracy for omnibus
+#'   and targeted effects. In P. Alasuutari, L. Bickman, & J. Brannen
+#'   (Eds.), \emph{The Sage handbook of social research methods}
+#'   (pp. 166--192). Sage.
+#'
+#' Kelley, K., & Rausch, J. R. (2011). Sample size planning for
+#'   longitudinal models: Accuracy in parameter estimation for polynomial
+#'   change parameters. \emph{Psychological Methods, 16}(4), 391--405.
+#'   \doi{10.1037/a0023352}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#'   experiments and analyzing data: A model comparison perspective}
+#'   (4th ed.). Routledge. (See Chapters 11, 15.)
+#'
+#' Maxwell, S. E., Kelley, K., & Rausch, J. R. (2008). Sample size planning
+#'   for statistical power and accuracy in parameter estimation.
+#'   \emph{Annual Review of Psychology, 59}, 537--563.
+#'   \doi{10.1146/annurev.psych.59.103006.093735}
+#'
+#' Raudenbush, S. W., & Liu, X.-F. (2001). Effects of study duration,
+#'   frequency of observation, and sample size on power in studies of
+#'   group differences in polynomial change.
+#'   \emph{Psychological Methods, 6}(4), 387--401.
+#'   \doi{10.1037/1082-989X.6.4.387}
+#'
+#' @return A \code{data.frame} (class \code{dmar_tbl}) with one row per
+#'   reported quantity in a \code{term} / \code{value} layout: the per-group
+#'   size per group (\code{necessary_n_per_group}, or \code{specified_n_per_group}
+#'   when \code{specified_n_per_group} is supplied) and the total (\code{total_N});
+#'   the achieved power (\code{actual_power}); the measurement schedule
+#'   (\code{frequency}, \code{duration}, \code{n_occasions}); the
+#'   polynomial order of the tested change coefficient (\code{polynomial_order},
+#'   0 = intercept, 1 = linear, 2 = quadratic, ...); the population change
+#'   difference unstandardized (\code{true_reg_coef}) and standardized
+#'   (\code{true_std_reg_coef}, the unstandardized difference divided by the
+#'   square root of \code{true_var_trend}), one of them the argument given
+#'   and the other the same difference on the other scale; the
+#'   within-subject (i.e., Level 1) error variance (\code{true_var_error});
+#'   the variance of the individuals' true change coefficients
+#'   (\code{true_var_trend}) and the sampling-error variance of one
+#'   individual's estimated change coefficient (\code{true_var_trend_error},
+#'   \eqn{V} below, the quantity of Kelley & Rausch, 2011, Equation 19, that
+#'   \code{\link{ss_aipe_pcm}} takes under the same name); the
+#'   change-coefficient reliability (\code{reliability}); and the
+#'   noncentrality parameter of the \emph{t} test
+#'   (\code{noncentral_t_parm}).
+#'
+#' @details
+#' The two groups each contain \eqn{N / 2} subjects measured on
+#' \eqn{M = f \times D + 1} equally spaced occasions. Each subject's degree-\eqn{p}
+#' polynomial change coefficient is estimated within subject; the test compares
+#' the two group means of that coefficient. The change coefficient is taken in
+#' the derivative-scaled metric (\eqn{p!} times the leading coefficient of
+#' \eqn{t^p}), the metric in which the Raudenbush and Liu (2001) constants
+#' apply.
+#'
+#' The within-subject sampling variance of the estimated coefficient, the
+#' row \code{true_var_trend_error}, is (Raudenbush & Liu, 2001, p. 392)
+#' \deqn{V = \sigma^2_e\, f^{2p}\,\frac{(M - p - 1)!}{K_p\,(M + p)!}, \qquad
+#'       \frac{1}{K_p} = \frac{(2p)!\,(2p+1)!}{(p!)^2},}
+#' so that \eqn{1/K_p = 1, 12, 720, 100800, \ldots} for \eqn{p = 0, 1, 2, 3,
+#' \ldots}. This \eqn{V} equals \eqn{(p!)^2} times the variance of the ordinary
+#' least squares estimate of the coefficient of \eqn{t^p}, reduces to
+#' \eqn{\sigma^2_e / M} at \eqn{p = 0} and to
+#' \eqn{12\,\sigma^2_e f^2 / [M(M^2 - 1)]} at \eqn{p = 1}. The slope reliability
+#' is \eqn{\tau / (\tau + V)} (their Equation 15), the variance of the
+#' between-group difference is \eqn{4(\tau + V)/N} (their Equation 10), and the
+#' \emph{t} test has \eqn{N - 2} degrees of freedom and noncentrality
+#' \eqn{\sqrt{N\,\beta^2\,[\tau/(\tau + V)]/4}} (their Equations 12 and 14),
+#' with \eqn{\beta} the standardized difference \code{true_std_reg_coef};
+#' given \code{true_reg_coef} instead, the noncentrality is the same
+#' quantity written in it,
+#' \eqn{\sqrt{N\,\gamma^2/[4(\tau + V)]}} with \eqn{\gamma} the
+#' unstandardized difference. The
+#' linear case reproduces the National Youth Survey benchmark in their Tables 1
+#' and 2; the general-\eqn{p} formula has been checked against the exact
+#' \eqn{(X'X)^{-1}} variance and against an end-to-end Monte Carlo power study
+#' for the quadratic trend.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @examples
+#' # The examples reproduce the National Youth Survey illustration of
+#' # Raudenbush and Liu (2001, p. 393). One observation per year
+#' # (frequency = 1) over a four-year study (duration = 4) gives
+#' # M = frequency * duration + 1 = 5 equally spaced occasions. The
+#' # standardized slope difference is -0.40, the slope variance is
+#' # 0.003, and the within-subject (i.e., Level 1) error variance is
+#' # 0.0262, so the slope reliability is 0.53.
+#'
+#' # (1) Power at a given sample size. With N = 238 (119 per group) the
+#' #     design has power 0.61 (Raudenbush and Liu, 2001, Table 1, D = 4,
+#' #     f = 1).
+#' ss_power_pcm(true_std_reg_coef = -.4, true_var_trend = .003, true_var_error = .0262,
+#'              frequency = 1, duration = 4, specified_n_per_group = 119)
+#'
+#' # (2) Sample size for a target power. Solving the same design for 0.80
+#' #     power returns N = 370 (185 per group), between their Table 2 cells
+#' #     N = 300 (power 0.71) and N = 400 (power 0.83).
+#' ss_power_pcm(true_std_reg_coef = -.4, true_var_trend = .003, true_var_error = .0262,
+#'              frequency = 1, duration = 4, desired_power = .80)
+#'
+#' # (3) Unstandardized slope. The unstandardized slope difference is the
+#' #     standardized one times the square root of true_var_trend, -0.40
+#' #     times the square root of 0.003, about -0.0219. Giving it as
+#' #     true_reg_coef reproduces the power of 0.61 from example (1).
+#' ss_power_pcm(true_reg_coef = -.0219, true_var_trend = .003, true_var_error = .0262,
+#'              frequency = 1, duration = 4, specified_n_per_group = 119)
+#'
+#' # (4) Longer study, same number of occasions. Doubling the duration to
+#' #     D = 8 while keeping M = 5 (so frequency = 0.5, one observation every
+#' #     two years) raises the slope reliability to 0.82 and power to about
+#' #     0.80. Spreading the same five occasions over a longer span sharply
+#' #     increases power (Raudenbush & Liu, 2001, p. 393).
+#' ss_power_pcm(true_std_reg_coef = -.4, true_var_trend = .003, true_var_error = .0262,
+#'              frequency = .5, duration = 8, specified_n_per_group = 119)
+#'
+#' # (5) More frequent sampling over a shorter span, same occasions. Halving
+#' #     the duration to D = 2 while keeping M = 5 (so frequency = 2) drops
+#' #     the slope reliability to 0.22 and power to about 0.31. Sampling more
+#' #     often over a shorter study does little for power (Raudenbush & Liu,
+#' #     2001, p. 393).
+#' ss_power_pcm(true_std_reg_coef = -.4, true_var_trend = .003, true_var_error = .0262,
+#'              frequency = 2, duration = 2, specified_n_per_group = 119)
+#'
+#' # (6) One-sided test. A directional test of the base design places the
+#' #     whole Type I error rate in the predicted tail, raising power from
+#' #     0.61 to about 0.73.
+#' ss_power_pcm(true_std_reg_coef = -.4, true_var_trend = .003, true_var_error = .0262,
+#'              frequency = 1, duration = 4, specified_n_per_group = 119, directional = TRUE)
+#'
+#' # (7) A higher-order trend. The same machinery plans power for the group
+#' #     difference in any polynomial change coefficient. Here the target is
+#' #     the quadratic trend (curvature / acceleration): with eight occasions
+#' #     (frequency = 1, duration = 7), a between-subject quadratic-coefficient
+#' #     variance 0.002, a within-subject (i.e., Level 1) error variance of
+#' #     0.05, and a
+#' #     standardized quadratic difference of 0.45, the design is planned for
+#' #     0.80 power. A quadratic trend needs at least three occasions; a cubic
+#' #     at least four (trend = "cubic" or trend = 3), and so on.
+#' ss_power_pcm(true_std_reg_coef = 0.45, true_var_trend = 0.002, true_var_error = 0.05,
+#'              frequency = 1, duration = 7, desired_power = .80,
+#'              trend = "quadratic")
+#'
+#' @keywords design
+#'
+#' @seealso \code{\link{design_consequences}} for what a chosen design delivers:
+#'   power, the Type S (sign) and Type M (exaggeration) errors of the
+#'   significance filter, and the expected confidence interval width.
+#'
+#' @family sample size for power
+#'
+#' @export
+
+ss_power_pcm <- function(true_reg_coef = NULL, true_std_reg_coef = NULL, true_var_trend, true_var_error,
+                         frequency, duration, desired_power = NULL,
+                         specified_n_per_group = NULL, alpha_level = 0.05, directional = FALSE,
+                         trend = "linear") {
+  .dmar_check_alpha_level(alpha_level)
+  .dmar_check_numbers("ss_power_pcm", c("frequency", "duration"), required = c("frequency", "duration"))
+
+  # The name of the argument says which scale the group difference in the
+  # change coefficient is on (Ken's ruling of 2026-11-11, replacing the
+  # standardized flag of DMAR 1.0.x): exactly one of true_reg_coef (in the
+  # units of the change coefficient) and true_std_reg_coef (divided by the
+  # between-subject SD of the change coefficient) is given. The two come
+  # first among the formals so that a positional 1.0.x call, whose first
+  # three values were beta, tau, and level_1_variance, gives both and is
+  # refused rather than read on the other scale.
+  if (is.null(true_reg_coef) == is.null(true_std_reg_coef))
+    .dmar_refuse_argument(c(
+      "Give exactly one of 'true_reg_coef' (the group difference in the ",
+      "change coefficient, in its own units) and 'true_std_reg_coef' (the ",
+      "same difference divided by the square root of 'true_var_trend'); ",
+      if (is.null(true_reg_coef)) "neither was given." else "both were given."),
+      arg = c("true_reg_coef", "true_std_reg_coef"))
+  standardized <- !is.null(true_std_reg_coef)
+  given <- if (standardized) true_std_reg_coef else true_reg_coef
+  given_name <- if (standardized) "true_std_reg_coef" else "true_reg_coef"
+  if (!is.numeric(given) || length(given) != 1L || !is.finite(given))
+    .dmar_refuse_argument(c(
+      "'", given_name, "' must be a single finite number."), arg = given_name)
+
+  # Exactly one of `specified_n_per_group` and `desired_power` is the unknown to solve for: supply
+  # `desired_power` to solve for the required sample size, or supply `specified_n_per_group` to
+  # solve for the power achieved at that sample size. Supplying neither leaves
+  # nothing to solve for (the routine would otherwise fail with an obscure
+  # length-zero error in the search loop); supplying both over-determines the
+  # problem.
+  if (is.null(specified_n_per_group) && is.null(desired_power))
+    .dmar_refuse_argument(c(
+      "Specify one of 'specified_n_per_group' or 'desired_power': supply 'desired_power' to ",
+      "solve for the required sample size, or 'specified_n_per_group' to solve for the ",
+      "achieved power."), arg = c("specified_n_per_group", "desired_power"))
+  if (!is.null(specified_n_per_group) && !is.null(desired_power))
+    .dmar_refuse_argument(c(
+      "Specify only one of 'specified_n_per_group' or 'desired_power', not both: the one left ",
+      "unspecified is the quantity this function solves for."),
+      arg = c("specified_n_per_group", "desired_power"))
+  if (!is.null(desired_power)) .dmar_check_desired_power(desired_power)
+
+  # Polynomial order of the change coefficient being tested: p = 0 the
+  # intercept (a flat line), 1 the linear slope, 2 the quadratic acceleration,
+  # and so on. The within-subject sampling variance V below is general in p
+  # through the Raudenbush and Liu (2001) constant K_p, with
+  # 1/K_p = (2p)! (2p+1)! / (p!)^2 (= 1, 12, 720, 100800, ... for p = 0, 1, 2,
+  # 3, ...); .pcm_sampling_variance() carries that closed form.
+  p <- .pcm_trend_order(trend)
+
+  # Number of equally spaced measurement occasions (Raudenbush & Liu, 2001,
+  # p. 392, lower left): M = f * D + 1.
+  M <- frequency * duration + 1
+
+  # The difference on both scales (Raudenbush & Liu, 2001, p. 391);
+  # `given` is the one supplied, on the scale `standardized` records.
+  if (standardized) {
+    beta_standardized <- true_std_reg_coef
+    beta_unstandardized <- true_std_reg_coef * sqrt(true_var_trend)
+  } else {
+    beta_standardized <- true_reg_coef / sqrt(true_var_trend)
+    beta_unstandardized <- true_reg_coef
+  }
+
+  if (is.null(specified_n_per_group)) {
+    # Power of the two-sided slope test at a candidate total sample size N_i.
+    power_at_N <- function(N_i) {
+      V <- .pcm_sampling_variance(true_var_error, frequency, M, p)
+      reliability <- true_var_trend / (true_var_trend + V)
+      lambda <- if (standardized) (N_i * given^2 * reliability) / 4 else
+        (given^2) / (4 * (true_var_trend + V) / N_i)
+      .power_noncentral_t(ncp = sqrt(lambda), df = N_i - 2,
+                          alpha_level = alpha_level, directional = directional)
+    }
+    # Fail fast when the target cannot be reached at any realistic size. A null
+    # slope (a difference of 0) has power equal to alpha_level at every N, so its power
+    # never reaches a higher target; a tiny nonzero slope reaches it only at an
+    # unusable size. Searching without a bound would not terminate.
+    N_max <- 1e7
+    if (power_at_N(N_max) < desired_power)
+      .dmar_refuse(c(
+        "Could not reach 'desired_power' at a total sample size up to ",
+        format(N_max, scientific = FALSE), "; the slope may be too small ",
+        "to detect at this power, or the target may be unreachable (a null ",
+        "slope has power equal to 'alpha_level' at every sample size)."),
+        "computation_failed")
+    N_i <- 4
+    repeat {
+      N_i <- N_i + 2
+      if (power_at_N(N_i) >= desired_power) break
+    }
+    # Recompute the design quantities the output reports at the resolved N_i.
+    V <- .pcm_sampling_variance(true_var_error, frequency, M, p) # R&L (2001) p. 392; general in p
+    var_beta <- 4 * (true_var_trend + V) / N_i                   # Equation 10
+    reliability <- true_var_trend / (true_var_trend + V)         # Equation 15
+    lambda <- if (standardized) (N_i * given^2 * reliability) / 4 else # Eq 14 / 12
+      (given^2) / var_beta
+    actual_power <- power_at_N(N_i)
+  }
+
+
+  if (is.null(desired_power)) {
+    V <- .pcm_sampling_variance(true_var_error, frequency, M, p) # R&L (2001) p. 392; general in p
+
+    specified_N <- 2 * specified_n_per_group   # the total, two equal groups
+    var_beta <- 4 * (true_var_trend + V) / specified_N
+    reliability <- true_var_trend / (true_var_trend + V) # Equation 15
+    if (standardized) {
+      lambda <- (specified_N * given^2 * reliability) / 4 # Equation 14
+    } else {
+      lambda <- (given^2) / var_beta # Equation 12
+    }
+    actual_power <- .power_noncentral_t(ncp = sqrt(lambda), df = specified_N - 2,
+                                        alpha_level = alpha_level,
+                                        directional = directional)
+    N_i <- specified_N
+  }
+
+  # One per-group size row named for its role replaces the MBESS-era ss_c
+  # and ss_t pair: the design is balanced by construction, so the control
+  # and treatment groups are the same size and two rows said one thing
+  # twice. The implied total stays as total_N. The change difference is
+  # reported on both scales, named for the two arguments (true_reg_coef and
+  # true_std_reg_coef; unstd_coefficient and std_coefficient in DMAR 1.0.x),
+  # and V, the sampling-error variance of one individual's estimated change
+  # coefficient, as true_var_trend_error, the name ss_aipe_pcm() gives it as
+  # an argument (error_var_of_slopes in DMAR 1.0.x).
+  size_term <- if (is.null(specified_n_per_group)) "necessary_n_per_group" else "specified_n_per_group"
+  return(
+    .as_dmar_tbl(data.frame(
+      term = c(size_term, 'total_N', 'actual_power', 'frequency', 'duration', 'n_occasions',
+               'polynomial_order', 'true_reg_coef', 'true_std_reg_coef', 'true_var_error', 'true_var_trend',
+               'true_var_trend_error', 'reliability', 'noncentral_t_parm'),
+      value = c(N_i / 2, N_i, actual_power, frequency, duration, M,
+                p, beta_unstandardized, beta_standardized, true_var_error, true_var_trend,
+                V, reliability, sqrt(lambda))),
+      subclass = "dmar_ss_power")
+  )
+}

@@ -1,0 +1,100 @@
+#' Covariance Coverage of Incomplete Data
+#'
+#' Reports, for every pair of items, the number and proportion of cases
+#' on which both were observed (the covariance coverage), with each item's
+#' own response rate on the diagonal. A covariance or a regression slope is
+#' informed most directly by the cases that observed both of its
+#' variables, so the coverage of a pair is a first, model-free look at how
+#' much data stand behind the parameters that involve it. Full information
+#' maximum likelihood (FIML) uses every case, and the other variables can
+#' carry information about a pair with low coverage, but a pair with no
+#' jointly observed case leaves its covariance with no direct information
+#' at all: its fraction of missing information is then one (Savalei &
+#' Rhemtulla, 2012, p. 488). \code{\link{fraction_missing_information}}
+#' gives that fraction for each parameter of a fitted model.
+#'
+#' @param data A \code{data.frame}.
+#' @param items Optional character vector naming the columns of
+#'   \code{data} to describe; \code{NULL} (the default) uses every column.
+#'   Any column type is allowed, since only whether a value is \code{NA}
+#'   matters.
+#'
+#' @details
+#' The denominator of every proportion is the number of cases with at
+#' least one observed item, the cases a FIML fit uses. That is the
+#' denominator of \code{lavaan::lavInspect(fit, "coverage")}, which the
+#' \code{matrix} attribute reproduces for a single group fit to the same
+#' items; cases with every item missing are counted in the
+#' \code{N_all_missing} attribute instead.
+#'
+#' @return A \code{data.frame} (class \code{dmar_tbl}) with one row per
+#'   pair of items, the item itself included, in the order of
+#'   \code{items} (the pairs \eqn{(i, j)} with \eqn{i \le j}), and the
+#'   columns \code{var_1}, \code{var_2}, \code{n_both} (the cases that
+#'   observed both; for \code{var_1 == var_2}, the cases that observed the
+#'   item), and \code{coverage} (\code{n_both} as a proportion of the
+#'   cases with at least one observed item). The attributes are
+#'   \code{matrix} (the symmetric coverage matrix), \code{N_used} (the
+#'   denominator), \code{N_all_missing}, and \code{min_coverage}.
+#'
+#' @references
+#' Savalei, V., & Rhemtulla, M. (2012). On obtaining estimates of the
+#'   fraction of missing information from full information maximum
+#'   likelihood. \emph{Structural Equation Modeling, 19}(3), 477--494.
+#'   \doi{10.1080/10705511.2012.687669}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{missing_patterns}} for the patterns behind the
+#'   coverage; \code{\link{fraction_missing_information}} for what the
+#'   missing values cost each parameter of a FIML fit.
+#'
+#' @family missing data
+#'
+#' @keywords manip
+#'
+#' @examples
+#' # The revised paper form board (t25) and the flags test (t26) were
+#' # given only at Grant-White, so every pair involving either is covered
+#' # by the 145 Grant-White pupils, 48 percent of the 301.
+#' spatial <- c("t1_visual_perception", "t2_cubes", "t3_paper_form_board",
+#'              "t4_lozenges", "t25_paper_form_board_r", "t26_flags")
+#' cov_tbl <- missing_coverage(holzinger_swineford, items = spatial)
+#' cov_tbl
+#' round(attr(cov_tbl, "matrix"), 2)
+#'
+#' @export
+missing_coverage <- function(data, items = NULL) {
+  observed <- .missing_item_frame(data, items)
+  items <- colnames(observed)
+  any_observed <- rowSums(observed) > 0L
+  N_used <- sum(any_observed)
+  if (N_used == 0L) {
+    .dmar_refuse_argument(c(
+      "Every case is missing every item, so there is no coverage to ",
+      "report."), arg = NULL)
+  }
+  obs_num <- observed[any_observed, , drop = FALSE]
+  storage.mode(obs_num) <- "double"
+  n_both <- crossprod(obs_num)
+  coverage <- n_both / N_used
+  dimnames(coverage) <- list(items, items)
+
+  p <- length(items)
+  idx <- which(upper.tri(diag(p), diag = TRUE), arr.ind = TRUE)
+  idx <- idx[order(idx[, "row"], idx[, "col"]), , drop = FALSE]
+  out <- data.frame(
+    var_1    = items[idx[, "row"]],
+    var_2    = items[idx[, "col"]],
+    n_both   = as.integer(n_both[idx]),
+    coverage = coverage[idx],
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+  out <- .as_dmar_tbl(out)
+  attr(out, "matrix") <- coverage
+  attr(out, "N_used") <- N_used
+  attr(out, "N_all_missing") <- sum(!any_observed)
+  attr(out, "min_coverage") <- min(coverage)
+  out
+}

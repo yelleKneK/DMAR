@@ -1,0 +1,291 @@
+# Probability of superiority (paired-samples design).
+#' Probability of Superiority for a Paired-Samples Design
+#'
+#' Takes paired observations and returns the probability of superiority
+#' for a paired design (Grissom & Kim, 2005, 2012), the probability that
+#' the second member of a pair scores higher than the first (a tied pair
+#' counting one half), with a confidence interval and the numbers of pairs
+#' won, lost, and tied. Only the order within each pair is used. It is the
+#' paired counterpart of \code{\link{vargha_delaney_A}} and
+#' \code{\link{cliff_delta}}, which are for two independent groups.
+#'
+#' @param x,y Paired numeric vectors of equal length. \eqn{x} and
+#'   \eqn{y} are interpreted as repeated measurements on the same
+#'   units (e.g., pre/post, condition 1 / condition 2, sibling-1 /
+#'   sibling-2). Logical vectors and ordered factors with the same levels
+#'   in the same order are also accepted, since only the order within each
+#'   pair is used. Pairs with a missing member are removed (see the
+#'   \code{n_missing} attribute). An unordered factor and a character
+#'   vector are refused; see \emph{What is refused, and why}.
+#' @param conf_level Confidence level. Default \code{0.95}.
+#'
+#' @return A \code{data.frame} (classes
+#'   \code{dmar_probability_of_superiority_paired} and \code{dmar_tbl})
+#'   with columns \code{term} and \code{value} and these rows:
+#'   \describe{
+#'   \item{\code{probability_of_superiority}}{The estimate
+#'     \eqn{\hat P_S}, the proportion of pairs with \eqn{y_i > x_i} plus
+#'     half the proportion of tied pairs.}
+#'   \item{\code{ci_lower}, \code{ci_upper}}{The confidence limits
+#'     at \code{conf_level}. Both equal the estimate when the estimated
+#'     variance is 0, and are then not a confidence interval.}
+#'   \item{\code{var_ps}}{The estimated variance of \eqn{\hat P_S}.}
+#'   \item{\code{wins_y_over_x}}{The number of complete pairs with
+#'     \eqn{y_i > x_i}.}
+#'   \item{\code{losses_y_under_x}}{The number with \eqn{y_i < x_i}.}
+#'   \item{\code{ties}}{The number with \eqn{y_i = x_i}.}
+#'   }
+#'   The table carries the attributes \code{conf_level}; \code{n_missing},
+#'   the number of pairs removed because a member was missing; and
+#'   \code{interval_degenerate}, present only when the estimated variance
+#'   is 0, with the value \code{"complete_separation"} or
+#'   \code{"no_variation"}. The \code{tidy()} and \code{glance()} verbs
+#'   (see \code{\link{dmar_tidiers}}) add a logical column
+#'   \code{interval_degenerate}.
+#'
+#' @details
+#' \strong{Estimand and interval.} For a pair \eqn{(X, Y)} drawn from the
+#' population of pairs,
+#' \deqn{P_S \;=\; \Pr(Y > X) + 0.5 \cdot \Pr(Y = X).}
+#' The sampling unit is the pair, and the \eqn{n} pairs are taken to be
+#' independent and identically distributed; nothing is assumed about the
+#' distribution of the scores or about the dependence within a pair. The
+#' interval is a large-sample confidence interval for \eqn{P_S}, formed on
+#' a transformed scale that keeps it inside \eqn{[0, 1]}. A value of 0.5
+#' says that neither member tends to score higher.
+#'
+#' \strong{Sample estimate.} With the score of pair \eqn{i}
+#' \deqn{s_i = \mathrm{I}(y_i > x_i) + 0.5 \cdot \mathrm{I}(y_i = x_i),}
+#' the estimate is the mean \eqn{\hat P_S = \bar s}: the proportion of
+#' pairs won by \eqn{y}, plus half the proportion tied. Being the mean of
+#' \eqn{n} independent scores with expectation \eqn{P_S}, it is unbiased.
+#' Each pair is compared directly, not through the difference
+#' \eqn{y_i - x_i}, so a pair of equal infinite values is a tie.
+#'
+#' \strong{Why a function for pairs.} \eqn{P_S} compares the two members
+#' of one pair. Vargha and Delaney's \emph{A} and Cliff's \eqn{\delta}
+#' compare an observation of one group with an observation of an unrelated
+#' unit in the other, which is a different quantity when the members of a
+#' pair are correlated, and the variance formulas of
+#' \code{\link{vargha_delaney_A}} and \code{\link{cliff_delta}} assume
+#' independent groups. Paired data therefore need the estimate and the
+#' variance given here.
+#'
+#' \strong{Variance and confidence interval.} The variance of the mean of
+#' \eqn{n} independent scores is the variance of a score divided by
+#' \eqn{n}, and the function estimates it by
+#' \deqn{\widehat{\mathrm{Var}}(\hat P_S) \;=\;
+#'   \frac{1}{n^2}\sum_{i=1}^{n} (s_i - \bar s)^2,}
+#' which uses the divisor \eqn{n} in the variance of the scores (it is
+#' \eqn{(n - 1)/n} times the estimate with the divisor \eqn{n - 1}). This
+#' is the row \code{var_ps}. The interval is formed for
+#' \eqn{d = 2 P_S - 1}, which lies in \eqn{[-1, 1]}, on the scale of
+#' \eqn{\mathrm{arctanh}(d)}, as the interval of \code{\link{cliff_delta}}
+#' is:
+#' \deqn{\tanh\!\left\{\mathrm{arctanh}(\hat d) \pm z_{1 - \alpha/2}\,
+#'   \frac{2\sqrt{\widehat{\mathrm{Var}}(\hat P_S)}}{1 - \hat d^2}
+#'   \right\},}
+#' and the two limits \eqn{d_L} and \eqn{d_U} are returned as
+#' \eqn{(d_L + 1)/2} and \eqn{(d_U + 1)/2}.
+#'
+#' \strong{Scale and missing values.} Only the order within each pair is
+#' used, so any increasing rescoring applied to both members gives the
+#' same result, and an ordinal response may be supplied as two ordered
+#' factors with the same levels. A pair with a missing member (\code{NA}
+#' or \code{NaN}) is removed, and the number removed is in the
+#' \code{n_missing} attribute. \code{x} and \code{y} must have the same
+#' length. Fewer than three complete pairs is an error, since no variance
+#' can be estimated.
+#'
+#' \strong{What is refused, and why.} The statistic uses the order of the
+#' observations and nothing else, so the function must be given objects
+#' whose order is the order meant. It refuses, with a condition of class
+#' \code{dmar_scores_not_ordered} (see \code{\link{dmar_metadata}}), an
+#' unordered factor (its codes follow the order of \code{levels()},
+#' alphabetical unless set, so the levels low, mid, high are stored as 2,
+#' 3, 1); a character vector (strings sort alphabetically, \code{"10"}
+#' before \code{"9"}); an ordered factor beside anything that is not an
+#' ordered factor with the same levels in the same order (each factor
+#' numbers its own levels from 1); time differences in different units, or
+#' one beside plain numbers (each such object is stored in its own units);
+#' a \code{Date} beside a \code{POSIXct}; and a list, data frame, or
+#' matrix of several columns. Nothing is computed in any of these cases.
+#' The message says which case applies and what to supply: an ordered
+#' factor with its levels from lowest to highest,
+#' \code{factor(x, levels = c("low", "mid", "high"), ordered = TRUE)}, or
+#' numeric scores.
+#'
+#' \strong{When the estimated variance is zero.} Two kinds of data give a
+#' variance estimate of exactly 0, and they are the only two.
+#' \emph{Complete separation}: every pair favors the same member, so the
+#' estimate is at the end of its range (0 or 1). \emph{No variation}:
+#' every pair is tied, so the estimate is 0.5. In both, the two limits are
+#' reported equal to the estimate, \code{var_ps} is 0, the table's
+#' \code{interval_degenerate} attribute names the case, and a warning of
+#' class \code{dmar_interval_degenerate} is given whose \code{reason}
+#' element is \code{"complete_separation"} or \code{"no_variation"}; the
+#' condition also carries \code{estimate} and \code{n} (the number of
+#' pairs), and its \code{limit_feng_cliff} is \code{NA}, since that limit
+#' is for two independent groups. The reported limits are not a confidence
+#' interval with the stated coverage. The zero describes the sample: the
+#' variance estimate measures how much the scores differ from one pair to
+#' the next, and when every pair favors the same member they do not
+#' differ. Complete separation is common when the effect is large and the
+#' pairs are few. Without ties, \eqn{n} pairs all favor the same member
+#' with probability \eqn{P_S^n + (1 - P_S)^n}: 0.47 for five pairs and
+#' 0.22 for ten when \eqn{P_S = 0.86}, and 0.82 and 0.66 when
+#' \eqn{P_S = 0.96}. In those samples the reported limits, both 0 or both
+#' 1, do not contain a population value inside (0, 1).
+#'
+#' Particular cases. Infinite values are ordered like any others, and a
+#' pair of equal infinite values is a tie. Wins together with ties, and no
+#' losses, give a positive variance and an ordinary interval (three wins
+#' and a tie give 0.875 with limits 0.502 and 0.980). The mark travels
+#' with the result: \code{\link{results_sentence}} writes the estimate and
+#' says that there is no confidence interval, the printed table says so
+#' beneath itself, and \code{tidy()} and \code{glance()} carry it in the
+#' column \code{interval_degenerate}. The randomization test for paired
+#' observations (\code{\link{randomization_test_paired}}) remains valid in
+#' both cases.
+#'
+#' \strong{Reading the output.} In the example below 20 of the 30 pairs
+#' have a higher \code{post} than \code{pre} score and none is tied, so
+#' \eqn{\hat P_S = 20/30 = 0.667}, with 95 percent limits 0.484 and 0.810.
+#'
+#' @references
+#' Grissom, R. J., & Kim, J. J. (2005). \emph{Effect sizes for research:
+#'   A broad practical approach}. Lawrence Erlbaum.
+#'
+#' Grissom, R. J., & Kim, J. J. (2012). \emph{Effect sizes for research:
+#'   Univariate and multivariate applications} (2nd ed.). Routledge.
+#'
+#' Vargha, A., & Delaney, H. D. (2000). A critique and improvement of
+#'   the CL common language effect size statistics of McGraw and Wong.
+#'   \emph{Journal of Educational and Behavioral Statistics, 25}(2),
+#'   101--132. \doi{10.3102/10769986025002101}
+#'
+#' @seealso \code{\link{cliff_delta}}, \code{\link{vargha_delaney_A}},
+#'   \code{\link{cles}}, \code{\link{randomization_test_paired}},
+#'   \code{\link{proportion_of_superiority}}
+#'
+#' @examples
+#' # 1. Paired pre/post data:
+#' set.seed(113)
+#' pre  <- rnorm(30, mean = 100, sd = 15)
+#' post <- pre + rnorm(30, mean =  5, sd = 10)
+#' probability_of_superiority_paired(x = pre, y = post)
+#'
+#' # 2. Every pair favors the same member: the estimated variance is 0,
+#' #    the two limits equal the estimate, and a warning says that they
+#' #    are not a confidence interval.
+#' all_up <- probability_of_superiority_paired(x = c(1, 2, 3, 4),
+#'                                             y = c(4, 5, 6, 7))
+#' all_up
+#' results_sentence(all_up)
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @keywords htest
+#'
+#' @family effect size estimates
+#'
+#' @export
+
+probability_of_superiority_paired <- function(x, y, conf_level = 0.95) {
+  .dominance_check_conf_level(conf_level)
+  scores <- .dominance_scores(x, y, "x", "y",
+                              "probability_of_superiority_paired",
+                              paired = TRUE)
+  x <- scores$x
+  y <- scores$y
+  if (length(x) < 3L)
+    .dmar_refuse_argument(
+      "Need at least 3 complete pairs to estimate the variance.", arg = NULL)
+
+  n <- length(x)
+  # Each pair is compared directly, not through y - x, so that a pair of
+  # equal infinite values is a tie.
+  wins_i   <- y > x
+  losses_i <- y < x
+  s <- ifelse(wins_i, 1, ifelse(losses_i, 0, 0.5))   # tie-split indicator
+  ps_hat <- mean(s)
+
+  wins   <- sum(wins_i)
+  losses <- sum(losses_i)
+  ties   <- n - wins - losses
+
+  # The variance of the mean of the n within-pair scores, with divisor n
+  # (not n - 1) in the variance of the scores.
+  var_ps <- sum((s - ps_hat)^2) / n^2
+
+  # Fisher-arctanh CI on the scale of 2 PS - 1, which lies in [-1, 1],
+  # back-transformed.
+  z_alpha <- stats::qnorm(1 - (1 - conf_level) / 2)
+  d_hat   <- 2 * ps_hat - 1
+  degenerate <- NULL
+  if (wins == n || losses == n) {
+    # Every pair favors the same member: the variance is 0 and arctanh(+/-1)
+    # diverges, so se_z is 0 / 0 = NaN. Report the degenerate boundary
+    # interval and flag it, as cliff_delta() does, rather than NaN limits.
+    degenerate <- .dominance_degenerate_interval(
+      "probability_of_superiority_paired", "complete_separation",
+      paste0("every pair favors the same member (probability of ",
+             "superiority = ", ps_hat, ")"),
+      estimate = ps_hat, n = n, conf_level = conf_level)
+    ps_lo <- ps_hi <- ps_hat
+  } else {
+    if (ties == n) {
+      # Every pair is tied: the variance is 0 here too, and the limits
+      # below are both 0.5.
+      degenerate <- .dominance_degenerate_interval(
+        "probability_of_superiority_paired", "no_variation",
+        "every pair is tied",
+        estimate = ps_hat, n = n, conf_level = conf_level)
+    }
+    z_d   <- atanh(d_hat)
+    se_z  <- 2 * sqrt(var_ps) / (1 - d_hat^2)
+    d_lo  <- tanh(z_d - z_alpha * se_z)
+    d_hi  <- tanh(z_d + z_alpha * se_z)
+    ps_lo <- (d_lo + 1) / 2
+    ps_hi <- (d_hi + 1) / 2
+  }
+
+  out <- data.frame(
+    term  = c("probability_of_superiority", "ci_lower", "ci_upper",
+              "var_ps", "wins_y_over_x", "losses_y_under_x", "ties"),
+    value = c(ps_hat, ps_lo, ps_hi, var_ps, wins, losses, ties),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+  out <- .as_dmar_tbl(out, conf_level = conf_level,
+                      subclass = "dmar_probability_of_superiority_paired")
+  attr(out, "n_missing") <- scores$n_missing
+  # Present only when the estimated variance is 0.
+  attr(out, "interval_degenerate") <- degenerate
+  out
+}
+
+# A table of probability_of_superiority_paired() says beneath itself when
+# its limits are not a confidence interval.
+#' @exportS3Method .dmar_tbl_footer dmar_probability_of_superiority_paired
+#' @noRd
+.dmar_tbl_footer.dmar_probability_of_superiority_paired <- function(x, ...) {
+  .dmar_footer_add(NextMethod(), .dominance_degenerate_footer(x),
+                   "interval_degenerate")
+}
+
+# The broom verbs are the long table's own with the logical column
+# interval_degenerate added, as for cliff_delta().
+#' @rdname dmar_tidiers
+#' @importFrom generics tidy
+#' @exportS3Method generics::tidy
+tidy.dmar_probability_of_superiority_paired <- function(x, ...) {
+  .dominance_mark_degenerate(NextMethod(), x)
+}
+
+#' @rdname dmar_tidiers
+#' @importFrom generics glance
+#' @exportS3Method generics::glance
+glance.dmar_probability_of_superiority_paired <- function(x, ...) {
+  .dominance_mark_degenerate(NextMethod(), x)
+}

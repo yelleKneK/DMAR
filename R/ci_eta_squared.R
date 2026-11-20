@@ -1,0 +1,427 @@
+# Confidence interval for eta squared, total and partial (effect size for ANOVA).
+#' Confidence Interval for Eta Squared (Effect Size for ANOVA)
+#'
+#' Computes the point estimate of eta squared (\eqn{\eta^2}) of each effect
+#' of an analysis of variance and an exact, noncentrality-based confidence
+#' interval for its population value, for the \emph{partial} and the
+#' \emph{total} estimand (see \code{\link{eta_squared}}). With
+#' \code{estimand = "all"}, the default, the function reports both; the
+#' interval from an effect's \emph{F} statistic is an interval for the
+#' partial value, and the total has one only where it equals the partial
+#' value, in a one-way design (see Details). \code{"total"} or
+#' \code{"partial"} reports one estimand.
+#'
+#' The function takes a fitted model (\code{\link[stats]{aov}},
+#' \code{\link[stats]{lm}}, or an \code{aovlist} from \code{aov()} with an
+#' \code{Error()} term) or an \emph{F} statistic with its degrees of
+#' freedom and \emph{N}. For factorial and within-subjects designs it
+#' returns one row per effect, the partial value computed against that
+#' effect's own error stratum.
+#'
+#' @param object Optional. A fitted model object of class
+#'   \code{\link[stats]{aov}}, \code{\link[stats]{lm}}, or \code{aovlist}
+#'   (multi-stratum aov fit, e.g.\
+#'   \code{aov(y ~ A + Error(subject/A), data = d)}). For multi-stratum fits
+#'   the function walks every error stratum and returns one row per
+#'   non-\code{Residuals} effect, identifying the stratum used. Give either
+#'   \code{object} or the \emph{F} interface, not both.
+#' @param estimand Which estimand to report: \code{"all"} (the default,
+#'   both, with \code{NA} where the inputs determine no estimate or no
+#'   interval), \code{"total"}, or \code{"partial"}. An estimand asked for
+#'   by name for which the inputs determine no interval is refused (see
+#'   Details).
+#' @param F_value Observed \emph{F}-value, or a vector of the \emph{F}
+#'   statistics of several effects tested against the same error term.
+#' @param df_effect Numerator degrees of freedom for the effect (one value
+#'   for each effect, or one for all).
+#' @param df_error Error (residual) degrees of freedom.
+#' @param N Total sample size, the total number of observations (derived
+#'   automatically from a fitted model, via
+#'   \code{\link[stats]{nobs}(object)} for single-stratum fits, or, for
+#'   \code{aovlist} fits, recovered as one more than the sum of the effect
+#'   and residual degrees of freedom across every stratum, which is the
+#'   total number of observations). The confidence limits for the
+#'   noncentrality parameter are converted into limits for \eqn{\eta^2}
+#'   with \code{N}. For an \emph{F} from a design with an \code{Error()}
+#'   stratum, give the size of the effect's stratum instead (see Details):
+#'   the number of subjects for an effect tested between subjects, and for
+#'   an effect tested within subjects the stratum's total degrees of
+#'   freedom, which is \code{df_effect + df_error} when the effect is the
+#'   only one tested in its stratum, not the number of rows of the data.
+#'   \code{N} must be at least \code{df_effect + df_error}.
+#' @param conf_level Desired confidence coverage; default \code{0.95}. Used only
+#'   when \code{alpha_lower} and \code{alpha_upper} are both \code{NULL}.
+#' @param alpha_lower,alpha_upper Optional Type I error on the lower and upper
+#'   side. If both are \code{NULL}, a symmetric interval at \code{conf_level} is
+#'   used. If both are supplied, \code{conf_level} is recomputed as
+#'   \code{1 - alpha_lower - alpha_upper}.
+#'   The table records the coverage, \code{1 - alpha_lower - alpha_upper},
+#'   as its level and, when the two tail areas differ, the areas
+#'   themselves, which the line beneath the printed table,
+#'   \code{\link{results_sentence}}, and the \code{alpha_lower} and
+#'   \code{alpha_upper} columns of \code{tidy()} state; with a tail area
+#'   of 0 the interval is a one-sided confidence bound.
+#'
+#' @return A \code{data.frame} (class \code{dmar_ci_anova}, printed through
+#'   \code{\link{dmar_tbl}}) with one row per effect and the columns
+#'   \code{effect}; for each estimand reported, its estimate and limits,
+#'   \code{eta_squared_total}, \code{eta_squared_total_ci_lower},
+#'   \code{eta_squared_total_ci_upper}, \code{eta_squared_partial},
+#'   \code{eta_squared_partial_ci_lower}, and
+#'   \code{eta_squared_partial_ci_upper}; \code{stratum} (for an
+#'   \code{aovlist} fit); and \code{F_value}, \code{df_effect},
+#'   \code{df_error}, and \code{N}. With the \emph{F} interface
+#'   \code{effect} is \code{"overall"} (the names of \code{F_value}, when it
+#'   has them, or \code{effect_1}, \code{effect_2}, and so on, for several).
+#'   \code{N} is the number of observations (for the \emph{F} interface,
+#'   \code{N} as supplied). The limits of the \emph{F} interface and of a
+#'   single-stratum fit are converted with that \code{N}; the limits of an
+#'   effect of an \code{aovlist} fit are converted with the size of its own
+#'   stratum (see Details), so that its row's \emph{F}, degrees of freedom,
+#'   and that size, passed to the \emph{F} interface, reproduce them. The
+#'   size is not a column of the table: it is the sum of the \code{Df}
+#'   column of the stratum's table in \code{summary(object)}, plus one for
+#'   the stratum that lies between subjects (\code{id} in
+#'   \code{Error(id / occasion)}). The table records the confidence level
+#'   of its intervals in its \code{conf_level} attribute
+#'   (\code{conf_level}, or \code{1 - alpha_lower - alpha_upper} when the
+#'   tail areas are supplied), which the console prints beneath it and
+#'   \code{\link{results_sentence}} reports; the \code{estimand} attribute
+#'   records the estimand asked for, and the \code{estimand_notes}
+#'   attribute names each estimate or interval that is \code{NA} with the
+#'   reason, which the console also prints. \code{\link[generics]{tidy}()}
+#'   gives one row per effect and estimand, with the limits in
+#'   \code{ci_lower} and \code{ci_upper} (see \code{\link{dmar_tidiers}}).
+#'
+#' @details
+#' \strong{Point estimates.} The partial value is
+#' \eqn{\hat{\eta}^2_{\text{partial}} = df_{\text{effect}} F /
+#' (df_{\text{effect}} F + df_{\text{error}})}, which equals
+#' \eqn{\mathit{SS}_{\text{effect}}/(\mathit{SS}_{\text{effect}} +
+#' \mathit{SS}_{\text{error}})}; the total value of a fitted model is
+#' \eqn{\mathit{SS}_{\text{effect}}/\mathit{SS}_{\text{total}}}, with the
+#' corrected total sum of squares. They are the estimates of
+#' \code{\link{eta_squared}}, whose Details describe the two estimands and
+#' the sums of squares of a fitted model. An \emph{F} statistic does not
+#' determine the total value, which the \emph{F} interface reports as
+#' \code{NA}.
+#'
+#' \strong{Confidence interval.} The interval rests on the two principles
+#' Steiger (2004, pp. 167--168) sets out. A confidence interval for the
+#' noncentrality parameter \eqn{\lambda} of the effect's \emph{F} test is
+#' found by inverting the noncentral \emph{F} distribution (via
+#' \code{\link{ci_nc_F}}), and because \eqn{\eta^2} is an increasing
+#' function of \eqn{\lambda}, the limits for \eqn{\lambda} map into limits
+#' for \eqn{\eta^2}:
+#' \deqn{\eta^2_{\text{bound}} = \frac{\lambda_{\text{bound}}}{\lambda_{\text{bound}} + N},}
+#' where \emph{N} is the number of observations for an effect tested
+#' between subjects and the size of the effect's error stratum for an
+#' effect of an \code{aovlist} fit (see below). When the observed \emph{F}
+#' is below the critical value that sets the lower limit, the lower limit
+#' for \eqn{\lambda}, and so for \eqn{\eta^2}, is 0. In a one-way design
+#' the interval is the one \code{\link{ci_pvaf}} and
+#' \code{\link{ci_omega_squared}} give, the population \eqn{\eta^2} and
+#' \eqn{\omega^2} being the same quantity; the functions differ there only
+#' in their point estimates.
+#'
+#' \strong{What the interval estimates: the partial value.} The population
+#' value of an effect's partial \eqn{\eta^2} is the value its sample
+#' counterpart converges to as the sample grows, which is how Steiger
+#' (2004, Eq. 35, p. 171) defines the population \eqn{\rho^2} of a one-way
+#' design. For an effect tested between subjects, in a one-way or a
+#' factorial design, \eqn{\lambda = N \sigma^2_{\text{effect}} /
+#' \sigma^2_e}, with \eqn{\sigma^2_{\text{effect}}} the variance of the
+#' effect over all \emph{N} observations and \eqn{\sigma^2_e} the
+#' within-cell variance, so the population partial \eqn{\eta^2},
+#' \eqn{\sigma^2_{\text{effect}} / (\sigma^2_{\text{effect}} + \sigma^2_e)},
+#' equals \eqn{\lambda/(\lambda + N)} at every sample size (Steiger, 2004,
+#' Eqs. 13, 15, 16, and 19, pp. 169--170, where it is written
+#' \eqn{\omega^2} and described as the proportion of the variance that
+#' remains after the other effects have been partialed out; Kelley, 2007,
+#' Eqs. 44, 45, and 50, p. 12). The interval converted with \emph{N} is
+#' therefore exact for it, and each effect of a fitted \code{aov} or
+#' \code{lm} model is converted with the number of observations.
+#'
+#' \strong{The total value.} The population total \eqn{\eta^2} of an
+#' effect, \eqn{\sigma^2_{\text{effect}}} as a proportion of the variance
+#' due to every effect of the design and the error, depends on the
+#' noncentrality parameters of the other effects as well as on the
+#' effect's own, and the distribution of one \emph{F} statistic carries no
+#' information about them. The intervals of Steiger (2004, pp. 169--171),
+#' Smithson (2003, pp. 43--44, where the correlation ratio of a factorial
+#' effect is \dQuote{a squared partial correlation}), and Fidler and
+#' Thompson (2001, Table 8) for the effects of a fixed-effects factorial
+#' design are intervals for the partial value. In a one-way design the
+#' effect and the error are the whole design, the total and the partial
+#' value are the same quantity, and the interval of a fitted one-way model
+#' is reported for both. For an effect of a design with other effects,
+#' and for every effect of an \code{aovlist} fit (whose total includes the
+#' differences among subjects), no interval is formed for the total: with
+#' \code{estimand = "all"} its estimate is reported with \code{NA}
+#' limits, and \code{estimand = "total"} is refused with an error of class
+#' \code{dmar_estimand_undetermined} (see \code{\link{dmar_metadata}}).
+#' The \emph{F} interface determines neither the total value nor its
+#' interval, since \emph{F} does not say whether the design has other
+#' effects; for a one-way design give the fitted model, or use
+#' \code{estimand = "partial"}, whose interval is then the total's too.
+#'
+#' \strong{A conversion with the degrees of freedom.} Smithson (2001,
+#' Eqs. 8 and 9, p. 618; 2003, Formulas 5.3 and 5.4, p. 43) defines the
+#' population \eqn{\eta^2} of a factorial effect in the same way, through
+#' the effect's variance over all \emph{N} cases, but converts the limits
+#' with \eqn{\lambda/(\lambda + u + v + 1)}, \emph{u} and \emph{v} being
+#' the effect and error degrees of freedom (2001, Eq. 11; 2003, Formula
+#' 5.6). That form comes from regression, where \eqn{u + v + 1} is the
+#' sample size (2001, Eq. 4, p. 612), and it agrees with his definition
+#' only when \eqn{u + v + 1 = N}, as in a one-way design. For a factorial
+#' effect it is a convention for the conversion rather than a definition
+#' of the parameter: its limits are exact for
+#' \eqn{\lambda/(\lambda + u + v + 1)}, a larger quantity that depends on
+#' the degrees of freedom of the design's other effects. For the 2 by 7
+#' design with four observations per cell that both Steiger (2004, p. 171)
+#' and Smithson (2001, p. 619) analyze, the 90\% limits for the interaction
+#' are [.008, .316] with \emph{N} = 56 and [.009, .346] with
+#' 6 + 42 + 1 = 49, and those for the row effect are [.009, .234] with
+#' \emph{N} = 56 and [.012, .280] with 1 + 42 + 1 = 44. Converted with 44,
+#' a 95\% interval for that row effect covers the population value 94.5\%
+#' of the time when the value is .02 and 91.9\% of the time when it is .40.
+#' Fidler and Thompson (2001, Table 8, p. 596) computed their fixed-effects
+#' factorial intervals with Smithson's syntax, from the \emph{F} values and
+#' their degrees of freedom alone. Supplying \eqn{u + v + 1} as \code{N}
+#' with \code{estimand = "partial"} reproduces such published limits.
+#'
+#' \strong{Within-subjects designs.} An effect of an \code{aovlist} fit is
+#' tested in its own error stratum, and the number of rows of the data is
+#' not a sample size for that test. Under compound symmetry, Steiger (2004,
+#' Eq. 58, p. 177) gives the noncentrality parameter of a one-way
+#' within-subjects design with \emph{n} subjects and \emph{p} occasions as
+#' \eqn{\lambda = n \sum_j (\mu_j - \mu)^2 / [\sigma^2 (1 - \rho)]}. The
+#' sums of squares for the occasions and for their error grow as
+#' \eqn{n \sum_j (\mu_j - \mu)^2} and \eqn{n (p - 1) \sigma^2 (1 - \rho)},
+#' so the value the sample partial \eqn{\eta^2} converges to is
+#' \eqn{\lambda/[\lambda + n(p - 1)]}, where \eqn{n(p - 1)} is the
+#' stratum's total degrees of freedom,
+#' \eqn{df_{\text{effect}} + df_{\text{error}}}. Under sphericity the same
+#' holds for every effect of a within-subjects stratum, with the stratum's
+#' total degrees of freedom (those of its effects and its error) in place
+#' of \eqn{n(p - 1)}, and each such effect is converted with that total.
+#' An effect in the between-subjects stratum of a mixed design is tested
+#' among the subjects' means, as an effect of a between-subjects design is
+#' tested among its observations, and is converted with the number of
+#' subjects, one more than that stratum's total degrees of freedom.
+#' Converted with the number of rows, \eqn{np}, the interval of a
+#' within-subjects effect is for \eqn{\lambda/(\lambda + np)}, a smaller
+#' quantity, which the sample partial \eqn{\eta^2} does not estimate. In
+#' the three-occasion analysis
+#' of \code{\link{pygmalion}} in \code{vignette("DMAR", package = "DMAR")},
+#' \emph{F}(2, 618) converted with the 930 rows gives the 95\% interval
+#' [.111, .194], which lies below the estimate of .212; converted with
+#' 2 + 618 = 620, the interval is [.157, .265].
+#'
+#' The literature cited here does not settle the within-subjects case.
+#' Steiger (2004, p. 176) restricts his procedures to completely
+#' between-subjects designs, noting that the noncentrality parameter of a
+#' repeated measures design confounds the effects of the treatments with
+#' the correlation among the observations (pp. 176--177), and the factorial
+#' examples of Smithson (2001, 2003) and Fidler and Thompson (2001) are
+#' between-subjects designs. The conversion of a within-subjects stratum
+#' given here follows from Steiger's Eq. 58 and rests, as the stratum's
+#' \emph{F} test does, on sphericity. A within-subjects partial
+#' \eqn{\eta^2} also leaves the differences among subjects out of its
+#' denominator, so it is not comparable with a partial \eqn{\eta^2} from a
+#' between-subjects design (Bakeman, 2005, p. 380).
+#'
+#' \strong{The \emph{F} interface.} The limits are converted with
+#' \code{N} as supplied. The function cannot tell a between-subjects
+#' factorial \emph{F}, for which the total sample size properly exceeds
+#' \eqn{df_{\text{effect}} + df_{\text{error}} + 1}, from a within-subjects
+#' \emph{F} given with the number of rows, so it does not warn; for an
+#' \emph{F} tested within subjects, supply the size of the effect's stratum
+#' as \code{N}.
+#'
+#' \strong{Designs supported.}
+#' \itemize{
+#'   \item \emph{Between-subjects ANOVA}: fitted \code{aov}/\code{lm}, or
+#'     \emph{F}, df, and \emph{N}. Each effect's limits are converted with
+#'     the number of observations.
+#'   \item \emph{Within-subjects or mixed ANOVA}: fitted \code{aovlist}.
+#'     Each effect's CI is built from its own stratum's \emph{F} and
+#'     residual \emph{df} and converted with the size of that stratum: the
+#'     number of subjects for the between-subjects stratum (the stratum of
+#'     the outermost term of \code{Error()}, such as \code{subject} in
+#'     \code{Error(subject/time)}) and the total degrees of freedom of a
+#'     within-subjects stratum. The \code{N} column reports the total
+#'     number of observations across all strata, and the \code{stratum}
+#'     column identifies which error term each row used.
+#' }
+#'
+#' \strong{Sums of squares in factorial designs.} When a fitted model is
+#' supplied, \emph{F}-values are read from \code{anova()} (single-stratum)
+#' or \code{summary()} (multi-stratum), both of which use Type I
+#' (sequential) sums of squares in base \R. For balanced designs Types
+#' I, II, and III agree; for unbalanced designs they differ. If Type II
+#' or III \emph{F}-values are required, compute them with e.g.\
+#' \code{car::Anova(object, type = 3)} and pass the relevant \emph{F},
+#' degrees of freedom, and \emph{N} into the \emph{F} interface. See the
+#' Details of \code{\link{eta_squared}} on the coding of factors that Type
+#' III tests depend on. \code{\link{factorial_anova}} applies sum-to-zero
+#' contrasts itself and reports partial \eqn{\eta^2} and partial
+#' \eqn{\omega^2} with their confidence intervals for between-subjects
+#' factorial designs.
+#'
+#' @references
+#' Bakeman, R. (2005). Recommended effect size statistics for repeated
+#'   measures designs. \emph{Behavior Research Methods, 37}(3), 379--384.
+#'   \doi{10.3758/BF03192707}
+#'
+#' Bargmann, R. E. (1970). Interpretation and use of a generalized
+#'   discriminant function. In R. C. Bose, I. M. Chakravarti, P. C.
+#'   Mahalanobis, C. R. Rao, & K. J. C. Smith (Eds.), \emph{Essays in
+#'   probability and statistics} (pp. 35--60). University of North
+#'   Carolina Press.
+#'
+#' Fidler, F., & Thompson, B. (2001). Computing correct confidence
+#'   intervals for ANOVA fixed- and random-effects effect sizes.
+#'   \emph{Educational and Psychological Measurement, 61}(4), 575--604.
+#'   \doi{10.1177/0013164401614003}
+#'
+#' Fleishman, A. I. (1980). Confidence intervals for correlation ratios.
+#'   \emph{Educational and Psychological Measurement, 40}(3), 659--670.
+#'   \doi{10.1177/001316448004000309}
+#'
+#' Kelley, K. (2007). Confidence intervals for standardized effect
+#'   sizes: Theory, application, and implementation. \emph{Journal of Statistical
+#'   Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Kelley, K., & Preacher, K. J. (2012). On effect size.
+#'   \emph{Psychological Methods, 17}, 137--152. \doi{10.1037/a0028086}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#'   experiments and analyzing data: A model comparison perspective}
+#'   (4th ed.). Routledge. (See Chapter 3 on \eqn{\eta^2}, Chapter 7 on
+#'   factorial designs, and Chapter 11 on generalized \eqn{\eta^2} for
+#'   within-subjects designs.)
+#'
+#' Smithson, M. (2001). Correct confidence intervals for various regression
+#'   effect sizes and parameters: The importance of noncentral distributions in
+#'   computing intervals. \emph{Educational and Psychological Measurement, 61},
+#'   605--632. \doi{10.1177/00131640121971392}
+#'
+#' Smithson, M. (2003). \emph{Confidence intervals}. Thousand Oaks, CA: Sage
+#'   Publications. \doi{10.4135/9781412983761}
+#'
+#' Steiger, J. H. (2004). Beyond the \emph{F} test: Effect size confidence
+#'   intervals and tests of close fit in the analysis of variance and contrast
+#'   analysis. \emph{Psychological Methods, 9}(2), 164--182.
+#'   \doi{10.1037/1082-989X.9.2.164}
+#'
+#' Venables, W. (1975). Calculation of confidence intervals for
+#'   noncentrality parameters. \emph{Journal of the Royal Statistical
+#'   Society, Series B, 37}(3), 406--412.
+#'   \doi{10.1111/j.2517-6161.1975.tb01554.x}
+#'
+#' @seealso \code{\link{eta_squared}}, \code{\link{ci_omega_squared}},
+#'   \code{\link{ci_pvaf}}, \code{\link{ci_nc_F}},
+#'   \code{\link{ci_eta_squared_generalized}}
+#'
+#' @examples
+#' # 1. The F interface. Bargmann's (1970) example, used in turn by
+#' #    Venables (1975), Fleishman (1980), and Steiger (2004): a one-way
+#' #    ANOVA with five groups of 11 and an observed F of 11.221 on 4 and
+#' #    50 df, at 90%. F determines the partial value, which in a one-way
+#' #    design is the total.
+#' ci_eta_squared(F_value = 11.221, df_effect = 4, df_error = 50, N = 55,
+#'                estimand = "partial", conf_level = 0.90)
+#'
+#' # 2. One-way ANOVA from a fitted model: mean IQ gain differs across
+#' #    the six grades of the pygmalion data (N = 310). The total and the
+#' #    partial value coincide, and so do their intervals.
+#' fit_one <- aov(iq_gain ~ factor(grade), data = pygmalion)
+#' ci_eta_squared(fit_one)
+#'
+#' # 3. Two-factor ANOVA for the manipulated expectancy treatment and the
+#' #    measured grade classification (pygmalion data, N = 310). The
+#' #    treatment by grade interaction is weak here (F = 1.19), so the
+#' #    additive model is used. The totals are reported without limits.
+#' fit_additive <- aov(iq_8 ~ treatment + factor(grade), data = pygmalion)
+#' ci_eta_squared(fit_additive)
+#'
+#' # 4. Within-subjects ANOVA. The partial value's interval is computed
+#' #    against the within-subjects error stratum, named in 'stratum'.
+#' set.seed(113)
+#' n <- 20
+#' rm_data <- data.frame(
+#'   subject = factor(rep(seq_len(n), each = 3)),
+#'   time    = factor(rep(c("Pre", "Mid", "Post"), n),
+#'                    levels = c("Pre", "Mid", "Post")),
+#'   y       = rnorm(n, sd = 1.5)[rep(seq_len(n), each = 3)] +
+#'             0.7 * rep(1:3, n) + rnorm(n * 3, sd = 1.2)
+#' )
+#' fit_rm <- aov(y ~ time + Error(subject/time), data = rm_data)
+#' ci_eta_squared(fit_rm, estimand = "partial")
+#'
+#' # 5. The size with which the limits are converted. The interaction of
+#' #    the 2 by 7 design with four observations per cell analyzed by
+#' #    Steiger (2004, p. 171), F = 2.50 on 6 and 42 df, at 90%: the
+#' #    total sample size of 56 gives the interval for the population
+#' #    partial eta squared, and 6 + 42 + 1 = 49 gives the limits that
+#' #    Smithson (2001) reports for the same F.
+#' ci_eta_squared(F_value = 2.50, df_effect = 6, df_error = 42, N = 56,
+#'                estimand = "partial", conf_level = 0.90)
+#' ci_eta_squared(F_value = 2.50, df_effect = 6, df_error = 42, N = 49,
+#'                estimand = "partial", conf_level = 0.90)
+#'
+#' # 6. A within-subjects F from a report: the three IQ occasions of the
+#' #    pygmalion data, F(2, 618) = 83.11 for 310 children. N is the
+#' #    620 degrees of freedom of the occasion stratum, not 930 rows.
+#' ci_eta_squared(F_value = 83.11, df_effect = 2, df_error = 618, N = 620,
+#'                estimand = "partial")
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @keywords htest design
+#'
+#' @family confidence intervals for effect sizes
+#'
+#' @export
+#' @import stats
+
+ci_eta_squared <- function(
+  object      = NULL,
+  estimand    = c("all", "total", "partial"),
+  F_value     = NULL,
+  df_effect   = NULL,
+  df_error    = NULL,
+  N           = NULL,
+  conf_level  = 0.95,
+  alpha_lower = NULL,
+  alpha_upper = NULL
+) {
+  estimand <- .anova_es_estimand(estimand)
+  .dmar_check_conf_level(conf_level, null_ok = TRUE)
+  alphas <- .ci_eta_squared_alphas(conf_level, alpha_lower, alpha_upper)
+  spec <- .anova_es_spec("eta_squared", object = object, F_value = F_value,
+                         df_effect = df_effect, df_error = df_error, N = N,
+                         interval = TRUE)
+  est <- .anova_es_eta(spec)
+  # F determines neither the total nor its interval; the note says so
+  # in the terms of this function, which takes no sums of squares.
+  if (spec$route == "F")
+    est$total$reason <- .anova_es_reason("F_total_interval", "eta_squared")
+  # The estimand is checked before any interval is computed, so that a
+  # refusal comes without a clamp warning from an interval not reported.
+  if (estimand == "total" && !spec$one_way) {
+    .anova_es_refuse_estimand(
+      "ci_eta_squared", "total",
+      est$total$reason %||% .anova_es_reason("total_interval", "eta_squared"))
+  }
+  limits <- .anova_es_limits(spec, estimand, "eta_squared",
+                             alphas$alpha_lower, alphas$alpha_upper)
+  # The table records the confidence level of its intervals, so that the
+  # console prints it and results_sentence() reports it; through 1.0.1 it
+  # recorded none, and a 90% interval was written "95% CI".
+  .anova_es_table("ci_eta_squared", "eta_squared", spec, est, estimand,
+                  limits = limits, conf_level = alphas$conf_level,
+                  tail_areas = .tail_areas(alphas$alpha_lower,
+                                           alphas$alpha_upper))
+}

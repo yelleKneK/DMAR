@@ -1,0 +1,217 @@
+# Sensitivity analysis for AIPE on omega squared.
+#' Sensitivity Analysis for Sample Size Planning From the AIPE Perspective for Omega Squared
+#'
+#' @description
+#' Quantifies how much misspecification of the population
+#' \eqn{\omega^2} distorts an AIPE-based sample size plan. The planner
+#' \code{\link{ss_aipe_omega_squared}} solves for the smallest \emph{N}
+#' that yields an expected CI width below the target at the planning
+#' value. Here we generate \code{G} datasets from a balanced one-way
+#' ANOVA with population \eqn{\omega^2 = }\code{true_omega_squared} and
+#' \code{df_effect + 1} groups at the planner-recommended \emph{N},
+#' compute the noncentral \emph{F} confidence interval on each
+#' replication via \code{\link{ci_omega_squared}}, and summarize the
+#' realized widths and coverage of \code{true_omega_squared}.
+#'
+#' @param true_omega_squared Population \eqn{\omega^2} (the
+#'   data generating value); in \eqn{[0, 1)}.
+#' @param supposed_omega_squared The supposed \eqn{\omega^2}, the
+#'   planning value from which \code{\link{ss_aipe_omega_squared}} plans the
+#'   study (not an estimate computed from data); supply this or
+#'   \code{specified_N} but not both.
+#' @param df_effect Numerator degrees of freedom for the omnibus
+#'   \emph{F}, equal to the number of groups minus 1.
+#' @param width Desired full width of the confidence interval on
+#'   \eqn{\omega^2}.
+#' @param specified_N Total sample size to evaluate (incompatible with
+#'   \code{supposed_omega_squared}).
+#' @param conf_level Confidence level (default \code{0.95}).
+#' @param assurance Optional assurance probability passed to
+#'   \code{\link{ss_aipe_omega_squared}} when resolving the planned
+#'   sample size.
+#' @param G Number of Monte Carlo replications (default 1000).
+#' @param print_iter Logical. Print iteration index per replication.
+#' @param filename Optional path for a comma separated file recording
+#'   every replication (the sample \eqn{\hat\omega^2}, the two confidence
+#'   limits, the interval width, and two indicators of whether the
+#'   interval missed \code{true_omega_squared} below or above): nothing is
+#'   written when \code{filename} is \code{NULL} (the default), a new file
+#'   with a header row is created otherwise, an existing file at that path
+#'   is appended to, and a throwaway run should point it at
+#'   \code{tempfile(fileext = ".csv")}.
+#' @param seed \code{NULL} (the default) to draw from the current random
+#'   number stream, or a single number that makes the call reproducible; a
+#'   supplied seed is set for this call only, and the caller's random
+#'   number state is restored when the function returns.
+#'
+#' @return A \code{data.frame} with rows for mean / median / SD of
+#'   the realized \eqn{\hat\omega^2} and interval width, the proportion
+#'   of intervals at or below \code{width}, tail-specific and overall
+#'   empirical non-coverage of \code{true_omega_squared}, and the input
+#'   echoes, including \code{assurance} (present only when an
+#' assurance was supplied).
+#'
+#' @references
+#' Kelley, K. (2007). Confidence intervals for standardized effect
+#'   sizes: Theory, application, and implementation. \emph{Journal of
+#'   Statistical Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Maxwell, S. E., Delaney, H. D., & Kelley, K. (2027). \emph{Designing
+#'   experiments and analyzing data: A model comparison perspective}
+#'   (4th ed.). Routledge. (See Chapter 3 on effect size measures.)
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{ss_aipe_omega_squared}}, \code{\link{ci_omega_squared}}
+#'
+#' @examples
+#' # Well-specified: planner used omega^2 = 0.10, truth is 0.10.
+#' # G is kept small here so the example runs quickly; raise it for a
+#' # stable sensitivity estimate.
+#' set.seed(113)
+#' ss_aipe_omega_squared_sensitivity(
+#'   true_omega_squared     = 0.10,
+#'   supposed_omega_squared = 0.10,
+#'   df_effect = 2, width = 0.10,
+#'   G = 25, print_iter = FALSE
+#' )
+#'
+#' @keywords design htest
+#'
+#' @seealso \code{\link{design_consequences}} for what a chosen design delivers:
+#'   power, the Type S (sign) and Type M (exaggeration) errors of the
+#'   significance filter, and the expected confidence interval width.
+#'
+#' @family AIPE sample size planning
+#'
+#' @inheritSection ss_aipe_cv_sensitivity The record of the simulation
+#' @export
+ss_aipe_omega_squared_sensitivity <- function(true_omega_squared = NULL,
+                                              supposed_omega_squared = NULL,
+                                              df_effect, width,
+                                              specified_N = NULL,
+                                              conf_level = 0.95,
+                                              assurance = NULL,
+                                              G = 1000, print_iter = FALSE,
+                                              filename = NULL,
+                                              seed = NULL) {
+  .dmar_check_conf_level(conf_level)
+  if (!missing(width)) .dmar_check_width(width)
+  .dmar_check_assurance_single(assurance)
+  if (is.null(supposed_omega_squared) && is.null(specified_N))
+    .dmar_refuse_argument(
+      "You must specify either 'supposed_omega_squared' or 'specified_N'.",
+      arg = c("supposed_omega_squared", "specified_N"))
+  if (!is.null(supposed_omega_squared) && !is.null(specified_N))
+    .dmar_refuse_argument(
+      "You must specify 'supposed_omega_squared' or 'specified_N', but not both.",
+      arg = c("supposed_omega_squared", "specified_N"))
+  if (is.null(true_omega_squared) || !is.numeric(true_omega_squared) ||
+      true_omega_squared < 0 || true_omega_squared >= 1)
+    .dmar_refuse_argument(
+      "'true_omega_squared' must be a single value in [0, 1).",
+      arg = "true_omega_squared")
+  if (!is.numeric(df_effect) || df_effect < 1)
+    .dmar_refuse_argument(
+      "'df_effect' must be a positive integer (groups - 1).", arg = "df_effect")
+  .check_filename(filename)
+  G <- .dmar_check_count(G, "G")
+  .dmar_local_seed(seed)
+
+  if (!is.null(supposed_omega_squared)) {
+    plan <- suppressWarnings(
+      ss_aipe_omega_squared(true_omega_squared = supposed_omega_squared,
+                            df_effect = df_effect, width = width,
+                            conf_level = conf_level, assurance = assurance)
+    )
+    N <- plan$value[plan$term == "necessary_N"]
+  } else {
+    N <- specified_N
+  }
+  N <- as.integer(N)
+  J <- as.integer(df_effect + 1)
+  n_per_group <- N %/% J
+  if (n_per_group < 2)
+    .dmar_refuse_argument("Resolved per-group sample size is < 2.", arg = NULL)
+  N <- n_per_group * J
+
+  # Group means chosen to deliver the requested population omega^2.
+  # For a balanced design with total variance 1, omega^2 = sigma2_alpha /
+  # (sigma2_alpha + sigma2_e), so set sigma2_alpha = true_omega_squared and
+  # sigma2_e = 1 - true_omega_squared; spread means symmetrically with
+  # variance equal to sigma2_alpha.
+  sigma2_e   <- 1 - true_omega_squared
+  sigma2_a   <- true_omega_squared
+  mu_centers <- seq(-1, 1, length.out = J)
+  mu_centers <- mu_centers - mean(mu_centers)
+  if (sigma2_a > 0) {
+    mu <- mu_centers * sqrt(sigma2_a / stats::var(mu_centers))
+  } else {
+    mu <- rep(0, J)
+  }
+
+  omega_hat <- numeric(G)
+  ci_lo     <- numeric(G)
+  ci_hi     <- numeric(G)
+  ci_width  <- numeric(G)
+  tI_lower  <- logical(G)
+  tI_upper  <- logical(G)
+
+  sd_e <- sqrt(sigma2_e)
+  for (g in seq_len(G)) {
+    if (isTRUE(print_iter)) cat(g, "\n")
+    y <- unlist(lapply(seq_len(J), function(j)
+      stats::rnorm(n_per_group, mean = mu[j], sd = sd_e)))
+    grp <- factor(rep(seq_len(J), each = n_per_group))
+    fit <- stats::aov(y ~ grp)
+    # ci_omega_squared() returns a wide data.frame with columns named
+    # "omega_squared_partial", "omega_squared_partial_ci_lower", ...; in
+    # this one-way design the partial value is the total.
+    ci <- suppressWarnings(ci_omega_squared(object = fit, estimand = "partial",
+                                            conf_level = conf_level))
+    om  <- as.numeric(ci$omega_squared_partial[1])
+    lo  <- as.numeric(ci$omega_squared_partial_ci_lower[1])
+    hi  <- as.numeric(ci$omega_squared_partial_ci_upper[1])
+    omega_hat[g] <- om
+    ci_lo[g]     <- lo
+    ci_hi[g]     <- hi
+    ci_width[g]  <- hi - lo
+    tI_lower[g]  <- true_omega_squared < lo
+    tI_upper[g]  <- true_omega_squared > hi
+  }
+
+  if (!is.null(filename)) {
+    per_rep <- data.frame(omega_hat = omega_hat, ci_lower = ci_lo,
+                          ci_upper = ci_hi, ci_width = ci_width,
+                          type_I_lower = tI_lower, type_I_upper = tI_upper)
+    .write_sensitivity_csv(per_rep, filename)
+  }
+
+  out <- data.frame(
+    term  = c("mean_omega_squared", "median_omega_squared", "sd_omega_squared",
+              "mean_ci_width", "median_ci_width", "sd_ci_width",
+              "pct_ci_less_width",
+              "pct_ci_miss_low", "pct_ci_miss_high", "total_type_I_error",
+              "total_N", "n_per_group",
+              "true_omega_squared", "supposed_omega_squared",
+              "width", "conf_level",
+              if (!is.null(assurance)) "assurance"),
+    value = c(mean(omega_hat, na.rm = TRUE),
+              stats::median(omega_hat, na.rm = TRUE),
+              stats::sd(omega_hat, na.rm = TRUE),
+              mean(ci_width, na.rm = TRUE),
+              stats::median(ci_width, na.rm = TRUE),
+              stats::sd(ci_width, na.rm = TRUE),
+              mean(ci_width <= width, na.rm = TRUE),
+              mean(tI_lower, na.rm = TRUE), mean(tI_upper, na.rm = TRUE),
+              mean(tI_lower | tI_upper, na.rm = TRUE),
+              N, n_per_group,
+              true_omega_squared,
+              if (is.null(supposed_omega_squared)) NA_real_ else supposed_omega_squared,
+              width, conf_level,
+              if (!is.null(assurance)) assurance),
+    stringsAsFactors = FALSE, row.names = NULL
+  )
+  .ss_sens_record(.as_dmar_tbl(out, conf_level = conf_level), G,
+                  !is.na(ci_width), conf_level)
+}

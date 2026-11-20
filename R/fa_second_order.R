@@ -1,0 +1,736 @@
+#' Second-Order Confirmatory Factor Analysis Model
+#'
+#' Fits the second-order factor model, in which first-order factors account
+#' for what the items of each subscale share and one or more second-order
+#' factors account for what the first-order factors share. The model is
+#' described as in \code{\link{fa_confirmatory}}, by naming the items of
+#' each first-order factor, together with the first-order factors of each
+#' second-order factor, and is fit by maximum likelihood to raw data (by
+#' full information maximum likelihood, the default, or after listwise
+#' deletion) or to a covariance matrix. The table reports the first-order
+#' and second-order loadings, the error variances, and the intercepts with
+#' their confidence intervals; the indices that describe how much of the
+#' total score and of each subscale score the second-order factor accounts
+#' for: omega and omega hierarchical (omega_H) for the total score, omega
+#' and omega hierarchical subscale (omega_HS) for each subscale score, the
+#' explained common variance (ECV), coefficient \emph{H}, and the maximal
+#' reliability, each with a delta method standard error and a confidence
+#' interval, and the percentage of uncontaminated correlations (PUC), which
+#' depends on the structure alone and so has neither; and the fit of the
+#' model. The Schmid-Leiman solution the estimates imply
+#' (Schmid & Leiman, 1957), the loadings of every item on the second-order
+#' factor and on what its first-order factor measures beyond it, is
+#' returned as an attribute.
+#'
+#' The model is also called the higher-order factor model, and sometimes
+#' the hierarchical factor model. The function is named for the structure
+#' it fits because Schmid and Leiman (1957) and Yung, Thissen, and McLeod
+#' (1999) use "hierarchical factor model" for the other model, the one with
+#' uncorrelated factors in layers, of which the bifactor model fit by
+#' \code{\link{fa_bifactor}} is the two-layer case.
+#'
+#' @inheritParams fa_confirmatory
+#' @param factors Named list of the first-order factors. Each element names
+#'   a first-order factor and gives the character vector of its items, two
+#'   or more; each item is listed under one first-order factor. An item
+#'   that is not a column of \code{data} or an item of \code{S} is refused
+#'   with an error of class \code{dmar_items_invalid} (see
+#'   \code{\link{dmar_metadata}}).
+#' @param second_order Named list of the second-order factors. Each element
+#'   names a second-order factor and gives the character vector of its
+#'   first-order factors, named as \code{factors} names them; each
+#'   first-order factor is listed under one second-order factor. One
+#'   second-order factor needs three or more first-order factors, or two
+#'   with \code{equal_second_order_loading}; with two or more second-order
+#'   factors, which are always correlated (uncorrelated second-order
+#'   factors are not offered), two first-order factors each are enough.
+#'   See \emph{Details} for the structures that are refused.
+#' @param equal_loading Logical, or a named logical vector with one element
+#'   per first-order factor. \code{TRUE} constrains the loadings of a
+#'   first-order factor's items to a single value. Defaults to
+#'   \code{FALSE}.
+#' @param equal_intercept Logical, or a named logical vector with one
+#'   element per first-order factor. \code{TRUE} constrains the intercepts
+#'   of a first-order factor's items to a single value; this requires the
+#'   mean structure. Defaults to \code{FALSE}.
+#' @param equal_error Logical, or a named logical vector with one element
+#'   per first-order factor. \code{TRUE} constrains the error variances of
+#'   a first-order factor's items to a single value. Defaults to
+#'   \code{FALSE}.
+#' @param equal_second_order_loading Logical, or a named logical vector
+#'   with one element per second-order factor. \code{TRUE} constrains the
+#'   loadings of a second-order factor's first-order factors to a single
+#'   value, so that they correlate equally with it. Defaults to
+#'   \code{FALSE}.
+#' @param meanstructure Logical or \code{NULL}. \code{NULL} (default)
+#'   models the mean structure exactly when it is needed: under FIML (the
+#'   default with raw data, so the item intercepts, the \code{nu} rows,
+#'   join the table), when any \code{equal_intercept} is \code{TRUE}, or
+#'   when \code{M} is supplied. \code{TRUE} models the intercepts
+#'   regardless (raw data or \code{M} required); \code{FALSE} suppresses
+#'   them, which FIML does not allow.
+#' @param estimator \code{"ML"} (default), maximum likelihood, or
+#'   \code{"MLR"}, maximum likelihood with standard errors and a test
+#'   statistic robust to nonnormality (raw data required). Ordered items
+#'   are not available.
+#' @param missing The missing data treatment for raw data: \code{"fiml"}
+#'   (default; full information maximum likelihood, which uses every case
+#'   with an observed item; \pkg{lavaan}'s name \code{"ml"} is accepted) or
+#'   \code{"listwise"}. The default is resolved as in
+#'   \code{\link{fa_confirmatory}}: with \code{se = "robust.sem"} or a test
+#'   statistic FIML cannot compute, the items are fit as they stand when
+#'   no item value is missing, and otherwise the call stops and names the
+#'   option to choose. Ignored with \code{S}.
+#' @param se Standard error method passed to \pkg{lavaan}. The default,
+#'   \code{NULL}, follows the estimator: \code{"standard"} for ML and
+#'   \code{"robust.huber.white"} for MLR. \code{"robust.sem"} requires
+#'   complete data and is refused with FIML, and \code{"none"} requests
+#'   point estimates only.
+#' @param conf_level Confidence level of the intervals for the parameters
+#'   and the indices. Defaults to 0.95. It does not reach the RMSEA
+#'   interval, whose level is \code{rmsea_conf_level}.
+#' @param rmsea_conf_level Confidence level of the RMSEA interval of the
+#'   fit rows, which the \code{rmsea_ci_level} row records. Defaults to
+#'   0.90, the conventional level, whose limits decide the tests of close
+#'   and not close fit at .05 (see \code{\link{sem_fit_measures}});
+#'   \code{rmsea_conf_level = 0.95} gives a 95 percent interval.
+#'   It sets the level in the table DMAR returns and in its
+#'   \code{glance()}; \code{output = "summary"} returns the \pkg{lavaan}
+#'   summary, which shows lavaan's 90 percent interval whatever this
+#'   argument is.
+#' @param output Format of the returned object:
+#'   \describe{
+#'     \item{\code{"verbose"}}{(default) The first-order loadings,
+#'       disturbance variances (fixed at 1), error variances, and
+#'       intercepts, the second-order loadings, variances (fixed at 1), and
+#'       correlations, then the indices, then the fit rows.}
+#'     \item{\code{"measurement"}}{The indices alone.}
+#'     \item{\code{"summary"}}{The \code{summary()} of the \pkg{lavaan}
+#'       fit (not a data frame).}
+#'     \item{\code{"standardized"}}{\code{lavaan::standardizedSolution()}
+#'       of the fit, whose rows for the second-order loadings are the
+#'       correlations of the first-order factors with their second-order
+#'       factor; the indices are not among its rows (see \emph{Details}).
+#'       Under \code{se = "none"} its \code{se}, \code{z}, \code{pvalue},
+#'       \code{ci.lower}, and \code{ci.upper} columns are \code{NA}.}
+#'     \item{\code{"fit"}}{The \pkg{lavaan} fit, which
+#'       \code{lavaan::lavTestLRT()} takes to test the model against the
+#'       bifactor model (see \emph{Details}).}
+#'   }
+#' @param \dots For \code{fa_second_order()}, additional arguments
+#'   forwarded to \code{\link[lavaan]{lavaan}} (for example
+#'   \code{cluster}); a \code{group} argument is an error, as in
+#'   \code{fa_confirmatory()}, and so is \code{ordered}. Unused by
+#'   \code{tidy()} and \code{glance()}.
+#' @param wald_df The reference distribution of the Wald intervals and
+#'   \emph{p}-values: \code{Inf} (the default), the normal distribution, or
+#'   a single positive number, the degrees of freedom of a \emph{t}
+#'   distribution for every parameter and index row (for the indices, on
+#'   the logit scale), as in \code{\link{fa_confirmatory}}. The keyword
+#'   \code{"missing_information"} is refused: the calibration study behind
+#'   it simulated one factor models, and nothing calibrates it for the
+#'   loadings of a second-order model or for its indices. It follows
+#'   \code{\dots}, so it must be named in full.
+#' @param x A \code{dmar_fa_second_order} table returned by
+#'   \code{fa_second_order()}.
+#'
+#' @details
+#' \strong{The model.} An item \eqn{i} of first-order factor \eqn{f} is
+#' \deqn{x_i = \nu_i + \lambda_i f + e_i,}{x_i = nu_i + lambda_i f + e_i,}
+#' and the first-order factor \eqn{f} of second-order factor \eqn{g} is
+#' \deqn{f = \gamma_f g + u_f,}{f = gamma_f g + u_f,}
+#' where the disturbance \eqn{u_f}{u_f} is the part of \eqn{f} that \eqn{g}
+#' does not account for. The model is identified as \pkg{lavaan}'s
+#' \code{std.lv = TRUE} identifies it: the variance of every second-order
+#' factor is fixed at 1 (and its mean at 0 when the mean structure is
+#' modeled), and so is the variance of every disturbance, so every
+#' first-order loading \eqn{\lambda_i}{lambda_i} and every second-order
+#' loading \eqn{\gamma_f}{gamma_f} is free. Both constraints are linear.
+#' The variance of \eqn{f} is then \eqn{1 + \gamma_f^2}{1 + gamma_f^2}, and
+#' its correlation with \eqn{g}, the standardized second-order loading, is
+#' \eqn{\gamma_f / \sqrt{1 + \gamma_f^2}}{gamma_f / sqrt(1 + gamma_f^2)}. Two
+#' or more second-order factors are correlated with each other (the
+#' \code{phi} rows), and the function offers correlated second-order
+#' factors only: uncorrelated ones would hold every first-order factor
+#' under one second-order factor uncorrelated with every first-order factor
+#' under another, and would leave a second-order factor of two first-order
+#' factors unidentified (\code{lavaan::cfa()} with \code{std.lv = TRUE}
+#' and \code{orthogonal = TRUE} fits that model). A factor fits as well
+#' reflected: a first-order factor with every one of its loadings and its
+#' second-order loading reversed in sign, a second-order factor with its
+#' second-order loadings and its correlations reversed. Each first-order
+#' factor is reported in the direction in which its loadings sum to a
+#' positive value, and then each second-order factor in the direction in
+#' which its second-order loadings do, so a subscale whose items are
+#' scored in reverse shows positive loadings and a negative second-order
+#' loading. A first-order factor under a second-order factor with equal
+#' loadings is not reflected alone, which would break the equality, and
+#' keeps the direction the common loading gives it. Should a reflection
+#' fail, a warning says so and the factor is reported as the optimizer left
+#' it, which changes the signs of its loadings and nothing else.
+#' Every loading, error variance, and intercept carries a label, as in
+#' \code{\link{fa_confirmatory}}, and the indices are \pkg{lavaan} defined
+#' parameters of those labels, so the fit itself gives each one a delta
+#' method standard error. The standardized solution is derived from this
+#' fit of the covariances (or of the raw data), not from a fit to
+#' correlations.
+#'
+#' \strong{Scope and identification.} A structure outside the model, or
+#' one the data cannot identify, is refused before anything is fit, with
+#' an error of class \code{dmar_second_order_unidentified} (which inherits
+#' \code{dmar_refusal}; see \code{\link{dmar_metadata}}) that names the
+#' factors or items at issue and gives the kind of refusal as its
+#' \code{reason} element, as in \code{\link{fa_bifactor}}. Not identified
+#' (\code{"unidentified"}): a first-order factor of one item, whose
+#' loading cannot be told apart from its error variance; a second-order
+#' factor of one first-order factor, which cannot be told apart from it;
+#' and one second-order factor over two first-order factors with free
+#' loadings, whose one correlation is the product of the two standardized
+#' loadings (equal loadings identify them). Outside the model
+#' (\code{"scope"}): an item under two first-order factors, or a
+#' first-order factor under two second-order factors. Names
+#' (\code{"names"}): an item or a first-order factor listed twice under
+#' one factor, a first-order factor under no second-order factor, and names
+#' that coincide. The identification checks run once the other arguments
+#' and the data have passed theirs. With two or more second-order factors,
+#' a second-order factor of two first-order factors is identified through
+#' the correlations of its first-order factors with those of the others,
+#' and is empirically underidentified when the second-order factors barely
+#' correlate. With incomplete raw data under FIML, first-order factors that
+#' no case observes together (no case has an item of one and an item of the
+#' other) are refused too, as \code{"unidentified"}, when the pairs of
+#' first-order factors the data do observe together do not identify the
+#' second-order loadings: three first-order factors under one second-order
+#' factor with one pair never observed together leave two correlations for
+#' three loadings, while four with one such pair leave five for four and
+#' are fit. When \pkg{lavaan}'s information matrix cannot be inverted,
+#' or is singular, whether it is the observed or the expected information,
+#' every standard error, test, and interval is \code{NA}, the maximal
+#' reliability's included, with a warning, as in \code{\link{fa_bifactor}}.
+#'
+#' \strong{A just identified structural part.} The second-order loadings
+#' and correlations account for the correlations of the first-order
+#' factors, \eqn{k(k - 1)/2}{k(k - 1)/2} of them for \eqn{k} first-order
+#' factors. Exactly three first-order factors under one second-order factor
+#' have three correlations and three second-order loadings, and two with equal
+#' loadings have one of each, so the second-order structure is just
+#' identified: it is another parameterization of the correlated factors
+#' model of the same first-order factors, which \code{\link{fa_confirmatory}}
+#' fits. Whenever that model's three correlations have a positive product
+#' and imply standardized second-order loadings below one in absolute value
+#' (its one correlation is positive, for two factors), the two models fit
+#' exactly alike, with the same chi square on the same degrees of freedom,
+#' and the test of fit says nothing about the second-order structure; a
+#' line under the table says so, and the \code{structural_df} attribute,
+#' the correlations less the second-order parameters, is 0. On
+#' \code{holzinger_swineford}, nine tests in three groups of three (visual
+#' perception, cubes, and lozenges; paragraph comprehension, sentence
+#' completion, and word meaning; addition, counting groups of dots, and
+#' straight and curved capitals) give a chi square of 85.31 on 24 degrees
+#' of freedom under both models. Four or more first-order factors leave
+#' the second-order structure something to test.
+#'
+#' \strong{The Schmid-Leiman solution.} Substituting the second line of the
+#' model into the first gives
+#' \deqn{x_i = \nu_i + \lambda_i \gamma_f g + \lambda_i u_f + e_i,}{x_i =
+#'   nu_i + lambda_i gamma_f g + lambda_i u_f + e_i,}
+#' a model in which every item loads on the second-order factor and on its
+#' first-order factor's disturbance, all of them uncorrelated with variance
+#' 1: the transformation of Schmid and Leiman (1957), which turns a
+#' second-order solution into one with uncorrelated factors in layers. In
+#' the standardized metric an item's loading on \eqn{g} is
+#' \eqn{\lambda^*_i \gamma^*_f}{lambda*_i gamma*_f} and its loading on
+#' \eqn{u_f}{u_f} is \eqn{\lambda^*_i \sqrt{1 - \gamma^{*2}_f}}{lambda*_i
+#' sqrt(1 - gamma*_f^2)}, with \eqn{\lambda^*_i}{lambda*_i} its standardized
+#' first-order loading and \eqn{\gamma^*_f}{gamma*_f} the standardized
+#' second-order loading of its factor (Yung, Thissen, & McLeod, 1999,
+#' Eqs. 4 and 10). These are the \code{general_loading} and
+#' \code{group_loading} columns of the \code{schmid_leiman} attribute,
+#' beside \code{item}, \code{factor} (the first-order factor),
+#' \code{second_order}, and \code{uniqueness}, one minus the sum of their
+#' squares. Within a first-order factor the ratio of the two loadings is
+#' \eqn{\gamma^*_f / \sqrt{1 - \gamma^{*2}_f}}{gamma*_f / sqrt(1 -
+#' gamma*_f^2)} for every item: the proportionality constraint by which the
+#' second-order model differs from a bifactor model with the same groups,
+#' whose general and group loadings are free (Yung, Thissen, & McLeod,
+#' 1999; Chen, West, & Sousa, 2006).
+#'
+#' \strong{The indices.} The indices are those of
+#' \code{\link{fa_bifactor}}, computed from the Schmid-Leiman loadings of
+#' the items of each second-order factor: in the unstandardized metric, the
+#' general loading \eqn{\lambda_i \gamma_f}{lambda_i gamma_f} and the group
+#' loading \eqn{\lambda_i}{lambda_i}, beside the error variance
+#' \eqn{\psi_i}{psi_i}, with model implied item variance
+#' \eqn{v_i = \lambda_i^2 (1 + \gamma_f^2) + \psi_i}{v_i = lambda_i^2 (1 +
+#' gamma_f^2) + psi_i}. The variance of the total score, the unweighted sum
+#' of the items of a second-order factor \eqn{g}, is
+#' \deqn{\sigma^2_X = (\textstyle\sum_i \lambda_i \gamma_{f(i)})^2 + \sum_f
+#'   (\sum_{i \in f} \lambda_i)^2 + \sum_i \psi_i,}{sigma^2_X = (sum_i
+#'   lambda_i gamma_f(i))^2 + sum_f (sum_{i in f} lambda_i)^2 + sum_i
+#'   psi_i,}
+#' and the rows are
+#' \describe{
+#'   \item{\code{omega_<g>}}{Omega for the total score, the share of
+#'     \eqn{\sigma^2_X}{sigma^2_X} that is not error variance: its
+#'     reliability with every factor counted as true score.}
+#'   \item{\code{omega_H_<g>}}{Omega hierarchical,
+#'     \eqn{(\sum_i \lambda_i \gamma_{f(i)})^2 / \sigma^2_X}{(sum_i lambda_i
+#'     gamma_f(i))^2 / sigma^2_X}: the share of the total score's variance
+#'     that is due to the second-order factor alone.}
+#'   \item{\code{omega_<f>}}{Omega for the subscale score of first-order
+#'     factor \eqn{f}, the sum of its items, \eqn{(\sum_{i \in f}
+#'     \lambda_i)^2 (1 + \gamma_f^2)}{(sum_{i in f} lambda_i)^2 (1 +
+#'     gamma_f^2)} over that score's variance, which adds
+#'     \eqn{\sum_{i \in f} \psi_i}{sum_{i in f} psi_i}: the omega that
+#'     \code{\link{fa_confirmatory}} reports for a factor, here at the
+#'     estimates of the second-order model.}
+#'   \item{\code{omega_HS_<f>}}{Omega hierarchical subscale,
+#'     \eqn{(\sum_{i \in f} \lambda_i)^2}{(sum_{i in f} lambda_i)^2} over the
+#'     same variance: the share of the subscale score's variance that is due
+#'     to the disturbance of \eqn{f}, what the subscale score says beyond
+#'     the second-order factor.}
+#'   \item{\code{ECV_<g>}, \code{ECV_<f>}}{The explained common variance,
+#'     formed from the standardized Schmid-Leiman loadings as
+#'     \code{\link{fa_bifactor}} forms it: for \eqn{g}, its share of the
+#'     common variance of its items; for \eqn{f}, the share of the common
+#'     variance of the items of \eqn{f} that is due to \eqn{g}, which in
+#'     this model is \eqn{\gamma^{*2}_f}{gamma*_f^2}, the squared
+#'     standardized second-order loading, since every item of \eqn{f}
+#'     divides its common variance in that proportion.}
+#'   \item{\code{H_<g>}, \code{H_<f>}}{Coefficient \emph{H} in the form of
+#'     Rodriguez, Reise, and Haviland (2016), the closed form of Hancock
+#'     and Mueller (2001) over the factor's Schmid-Leiman loadings with
+#'     every other source of an item's variance counted as its error.}
+#'   \item{\code{maximal_reliability_<g>},
+#'     \code{maximal_reliability_<f>}}{The maximal reliability under the
+#'     fitted model, \eqn{c' \Sigma^{-1} c}{c' Sigma^-1 c}, with \eqn{c}
+#'     the covariances of all of the items with the factor and
+#'     \eqn{\Sigma}{Sigma} their model implied covariance matrix: the
+#'     largest reliability any weighted sum of the items reaches as a
+#'     measure of \eqn{g}, or of the disturbance of \eqn{f}. With several
+#'     second-order factors, the items of the others count too, through the
+#'     correlations of the second-order factors.}
+#'   \item{\code{PUC_<g>}}{The percentage of uncontaminated correlations,
+#'     as a proportion: the share of the pairs of the items of \eqn{g} that
+#'     do not share a first-order factor. It depends on the structure, not
+#'     on the data, so it has no standard error or interval.}
+#' }
+#' With several second-order factors each one's rows describe the sum of
+#' its own items. Rodriguez, Reise, and Haviland (2016) describe how each
+#' index is read; the table reports the numbers with their uncertainty, and
+#' whether a total or subscale score is worth reporting is the researcher's
+#' judgment, on which the package draws no line. Omega, omega_H, and
+#' omega_HS describe unit-weighted sums of the items as they are scored, as
+#' in \code{\link{fa_bifactor}}; ECV, \emph{H}, the maximal reliability,
+#' and PUC do not depend on the metric of the items. With
+#' \code{output = "standardized"}, \pkg{lavaan} would evaluate the defined
+#' indices at the standardized values of their labels, and a standardized
+#' first-order loading is scaled by the whole variance of its factor, not
+#' by that of the disturbance the indices need, so the index rows are left
+#' out of that output, and \pkg{lavaan}'s warning that under
+#' \code{equal_loading} or \code{equal_error} their standardized values
+#' are ambiguous is not passed on.
+#'
+#' \strong{Intervals.} As in \code{\link{fa_bifactor}}: the standard errors
+#' of omega, omega_H, omega_HS, ECV, and \emph{H} are \pkg{lavaan}'s delta
+#' method standard errors of the defined parameters, that of the maximal
+#' reliability is the delta method's with the derivatives taken
+#' numerically, and the limits of every index are formed on the logit
+#' scale from that standard error and transformed back (Browne, 1982; the
+#' confidence interval transformation principle of Kelley, 2007), so they
+#' lie within (0, 1); the \code{se} column is the standard error of the
+#' index itself.
+#'
+#' \strong{The test against the bifactor model.} The second-order model is
+#' nested in the bifactor model whose group factors are its first-order
+#' factors: the bifactor model frees the proportionality constraint above
+#' (Yung, Thissen, & McLeod, 1999; Chen, West, & Sousa, 2006). With
+#' \code{output = "fit"} from both functions,
+#' \code{lavaan::lavTestLRT(fa_second_order(..., output = "fit"),
+#' fa_bifactor(..., output = "fit"))} gives the likelihood ratio test of the
+#' constraint, on as many degrees of freedom as there are items less
+#' first-order factors (Yung, Thissen, & McLeod, 1999), as the example
+#' shows. When the second-order structure is just identified the
+#' second-order fit is that of the correlated factors model, and the test
+#' compares the bifactor model with it. The comparison is for one
+#' second-order factor; the bifactor model of \code{\link{fa_bifactor}} has
+#' one general factor.
+#'
+#' \strong{Finding the maximum.} In the parameterization above a
+#' standardized second-order loading reaches one only as
+#' \eqn{\gamma_f}{gamma_f} runs off to infinity, the loadings
+#' \eqn{\lambda_i}{lambda_i} of its factor shrinking toward zero beside it,
+#' and \pkg{lavaan}'s optimizer can stop on the way at a point that is not
+#' the maximum of the likelihood, with other second-order loadings drifted
+#' far from their values there, or fail to converge. The function therefore
+#' fits the model a second time, in a parameterization that writes each
+#' first-order factor on the scale of its second-order factor,
+#' \eqn{f = g + u_f}{f = g + u_f}, with the variance of \eqn{u_f}{u_f},
+#' which is \eqn{1 / \gamma_f^2}{1 / gamma_f^2}, free and bounded below at
+#' zero, so that a standardized loading of one is a point the optimizer
+#' reaches; the equality constraints of the call hold exactly in it, as in
+#' the first. That fit starts from the first and, when the first did not
+#' converge, came near the boundary, or fell short, also from
+#' \pkg{lavaan}'s own starting values; the largest log likelihood is
+#' carried back to the parameterization above, so the estimates and the fit
+#' rows are those of the maximum, and \pkg{lavaan} accepts each fit only
+#' where its gradient is near zero. Log likelihoods are compared per case
+#' (two within 1e-6 per case are taken to be the same maximum), since the
+#' log likelihood is a sum over the cases and the comparison should not
+#' depend on their number. On \code{holzinger_swineford}, one
+#' second-order factor over the spatial, verbal, and speed tests of the
+#' example and the three tests with missing values (\code{t24_woody_mccall},
+#' \code{t25_paper_form_board_r}, and \code{t26_flags}) stopped at a chi
+#' square of 251.77 in the first parameterization, with three second-order
+#' loadings between 43 and 233; the maximum is 169.77. When the second fit
+#' cannot be made, a warning says that the maximum could not be confirmed
+#' and names any standardized second-order loading of .995 or more as
+#' possibly a point where the optimizer stopped; when neither fit
+#' converges, the error says so and names the standardized second-order
+#' loadings the first fit was taking toward one.
+#'
+#' \strong{Improper solutions.} As in \code{\link{fa_bifactor}}, a negative
+#' error variance makes the maximal reliabilities undefined, and with them
+#' the \emph{H} of a factor on which an item's standardized Schmid-Leiman
+#' loading reaches one and an omega whose items' error variances sum below
+#' zero; those rows are \code{NA}, with a warning that names the items
+#' (beside the warning of class \code{dmar_heywood_warning} that
+#' \code{\link{fa_confirmatory}} gives), and the \code{improper} attribute
+#' holds the negative error variances. When the likelihood has no maximum
+#' at all, flat or still rising as an error variance falls, the function
+#' stops for every \code{output}, as \code{\link{fa_bifactor}} does, with
+#' an error of class \code{dmar_no_maximum} that prints the \pkg{lavaan}
+#' code of the fit (with a standardized second-order loading at one, that
+#' of the second fit described above, in which the check is made); there,
+#' \code{bounds = "pos.var"} or a different model are the choices. The
+#' second order has improper
+#' solutions of its own, handled in the same way. A standardized
+#' second-order loading of one, a Heywood case at the second order, leaves
+#' the first-order factor's disturbance without variance (a
+#' parameterization that let that variance be negative would estimate it at
+#' or below zero). The loading is at one when the second fit above puts the
+#' variance of \eqn{u_f}{u_f} at its bound of zero (within 1e-6 of it, a
+#' standardized loading of .9999995 or more). The parameterization above
+#' has no point there, so the fit holds the loading within 5e-9 of one,
+#' where the log likelihood is within 1e-6 per case of its maximum, and
+#' that factor's second-order loading and its loadings on its disturbance
+#' have no finite estimate and are \code{NA}, as are the rows of its
+#' disturbance, omega_HS, ECV, \emph{H}, and the maximal reliability of
+#' that first-order factor. The other rows are those of the maximum, their
+#' standard errors computed with the loading held at one (with
+#' \code{se = "bootstrap"} they are \code{NA}, with a warning, since the fit
+#' at that point is computed without the optimizer and a bootstrap of it
+#' would not refit the samples); the fit rows are those of the model at its
+#' maximum, on its own degrees of freedom; and the factor's items have group
+#' loadings of zero in the Schmid-Leiman attribute. With \code{output =
+#' "fit"}, \code{"summary"}, or \code{"standardized"} the object holds the
+#' loading at that point, and a warning says so; with \code{se =
+#' "bootstrap"} that object carries no standard errors, tests, or intervals
+#' (lavaan's \code{se = "none"}). Under FIML, lavaan cannot form its robust
+#' CFI, TLI, RMSEA, and GFI for a fit computed at that point, so the
+#' \code{"summary"} output shows them as \code{NA}, with one warning in
+#' place of lavaan's. A correlation of two
+#' second-order factors beyond one in absolute value, which leaves the
+#' covariance matrix of the latent variables short of positive definite,
+#' leaves every maximal reliability \code{NA}, since each reads that
+#' correlation. A warning names the
+#' factors, and the \code{improper_second_order} attribute holds the
+#' standardized loadings at one and the correlations beyond one, named by
+#' their terms. Two second-order factors over two or three first-order
+#' factors each are prone to both: of the ten ways of placing five
+#' first-order factors of \code{holzinger_swineford} (spatial, verbal,
+#' speed, memory, and reasoning tests), two under one second-order factor
+#' and three under the other, every one puts the standardized second-order
+#' loading of the reasoning factor at one, and seven of them also give a
+#' correlation of the second-order factors beyond one.
+#'
+#' \strong{Ordered items.} \code{fa_second_order()} fits continuous items,
+#' and \code{ordered} is refused.
+#'
+#' Row names under \code{term}: \code{lambda_<factor>_<j>} (first-order
+#' loadings, numbered within the factor; \code{lambda_<factor>} when
+#' equated), \code{zeta_<factor>} (the disturbance variances, fixed at 1),
+#' \code{psi_<factor>_<j>} and \code{nu_<factor>_<j>} (the error variances
+#' and intercepts), \code{gamma_<second>_<factor>} (second-order loadings;
+#' \code{gamma_<second>} when equated), \code{phi_<second>} (the
+#' second-order variances, fixed at 1), \code{phi_<second>_<second>} (the
+#' correlations of the second-order factors), the indices above, and
+#' \code{\link{fa_confirmatory}}'s fit rows \code{chi_square} through
+#' \code{H1}, whose versions and the lines under the table are as there.
+#'
+#' @return
+#' For \code{output = "verbose"} (default) and \code{"measurement"}, a
+#' \code{data.frame} (classes \code{dmar_fa_second_order}, \code{dmar_tbl})
+#' with columns \code{syntax}, \code{term}, \code{estimate}, \code{se},
+#' \code{test_statistic}, \code{p_value}, \code{ci_lower}, and \code{ci_upper}.
+#' Its attributes record the model: \code{factors} and
+#' \code{second_order}; \code{equal}, a list naming the factors whose
+#' loadings, error variances, intercepts, and second-order loadings are
+#' equated; \code{has_means}; \code{structural_df}, the degrees of freedom
+#' of the second-order structure (0 when it is just identified);
+#' \code{omega_metric} (\code{"raw_item_sum"}); \code{improper}, the
+#' negative error variances named by item (empty for a proper solution);
+#' \code{improper_second_order}, the standardized second-order loadings
+#' at one and the second-order correlations beyond one, named by their
+#' terms (empty for a proper solution); \code{schmid_leiman}, the
+#' Schmid-Leiman solution described above; and
+#' \code{wald_df}. The verbose table also carries
+#' \code{fa_confirmatory()}'s \code{test}, \code{estimator},
+#' \code{missing}, \code{fit_indices}, and \code{fit_rows}. The printed
+#' header describes the model, and the lines under the table say what the
+#' indices describe. For \code{"summary"}, the \pkg{lavaan} summary; for
+#' \code{"standardized"}, the standardized solution with the
+#' \code{"wald_df"} attribute; for \code{"fit"}, the \pkg{lavaan} fit.
+#' \code{tidy()} gives the parameter and index rows and \code{glance()}
+#' one row of the fit rows and what produced them, as for
+#' \code{\link{fa_confirmatory}}.
+#'
+#' @references
+#' Browne, M. W. (1982). Covariance structures. In D. M. Hawkins (Ed.),
+#'   \emph{Topics in applied multivariate analysis} (pp. 72--141).
+#'   Cambridge, UK: Cambridge University Press.
+#'
+#' Chen, F. F., West, S. G., & Sousa, K. H. (2006). A comparison of
+#'   bifactor and second-order models of quality of life.
+#'   \emph{Multivariate Behavioral Research, 41}(2), 189--225.
+#'   \doi{10.1207/s15327906mbr4102_5}
+#'
+#' Hancock, G. R., & Mueller, R. O. (2001). Rethinking construct
+#'   reliability within latent variable systems. In R. Cudeck, S. du Toit,
+#'   & D. Sörbom (Eds.), \emph{Structural equation modeling: Present and
+#'   future} (pp. 195--216). Scientific Software International.
+#'
+#' Kelley, K. (2007). Confidence intervals for standardized effect sizes:
+#'   Theory, application, and implementation. \emph{Journal of Statistical
+#'   Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Rodriguez, A., Reise, S. P., & Haviland, M. G. (2016). Evaluating
+#'   bifactor models: Calculating and interpreting statistical indices.
+#'   \emph{Psychological Methods, 21}(2), 137--150.
+#'   \doi{10.1037/met0000045}
+#'
+#' Schmid, J., & Leiman, J. M. (1957). The development of hierarchical
+#'   factor solutions. \emph{Psychometrika, 22}(1), 53--61.
+#'   \doi{10.1007/BF02289209}
+#'
+#' Yung, Y.-F., Thissen, D., & McLeod, L. D. (1999). On the relationship
+#'   between the higher-order factor model and the hierarchical factor
+#'   model. \emph{Psychometrika, 64}(2), 113--128.
+#'   \doi{10.1007/BF02294531}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{fa_bifactor}} for the bifactor model of the same
+#'   groups, in which the second-order model is nested;
+#'   \code{\link{fa_confirmatory}} for the correlated factors model of the
+#'   first-order factors; \code{\link{reliability_omega}} and
+#'   \code{\link{reliability_H}}.
+#'
+#' @family multivariate and latent variable methods
+#'
+#' @keywords multivariate
+#'
+#' @examples
+#' data(holzinger_swineford)
+#' hs_factors <- list(
+#'   spatial = c("t1_visual_perception", "t2_cubes", "t4_lozenges"),
+#'   verbal  = c("t6_paragraph_comprehension", "t7_sentence",
+#'               "t9_word_meaning"),
+#'   speed   = c("t10_addition", "t12_counting_groups_of_dots",
+#'               "t13_straight_and_curved_capitals"),
+#'   memory  = c("t14_word_recognition", "t15_number_recognition",
+#'               "t17_object_number"))
+#' hs_second <- list(general = c("spatial", "verbal", "speed", "memory"))
+#'
+#' # One second-order factor over four first-order factors: the indices,
+#' # each with a delta method interval.
+#' so <- fa_second_order(holzinger_swineford, hs_factors, hs_second,
+#'                       output = "measurement")
+#' so
+#'
+#' # The Schmid-Leiman loadings the estimates imply.
+#' attr(so, "schmid_leiman")
+#'
+#' # The second-order model is the bifactor model of the same groups with
+#' # the general loadings proportional to the group loadings; the
+#' # likelihood ratio test of that constraint, on 12 - 4 = 8 degrees of
+#' # freedom.
+#' second_order_fit <- fa_second_order(holzinger_swineford, hs_factors,
+#'                                     hs_second, output = "fit")
+#' bifactor_fit <- fa_bifactor(holzinger_swineford, hs_factors,
+#'                             output = "fit")
+#' print_anova(lavaan::lavTestLRT(second_order_fit, bifactor_fit))
+#'
+#' @export
+fa_second_order <- function(data = NULL, factors, second_order, S = NULL,
+                            N = NULL, M = NULL, equal_loading = FALSE,
+                            equal_intercept = FALSE, equal_error = FALSE,
+                            equal_second_order_loading = FALSE,
+                            meanstructure = NULL, estimator = "ML",
+                            missing = "fiml", se = NULL, conf_level = 0.95,
+                            rmsea_conf_level = 0.90,
+                            output = c("verbose", "measurement", "summary",
+                                       "standardized", "fit"),
+                            ...,
+                            wald_df = Inf) {
+  output <- match.arg(output)
+  # Whether 'missing' was left at its default, read before anything else
+  # (see fa_confirmatory()).
+  missing_default <- base::missing(missing)
+  # Ordered items would reach lavaan through '...' (as would a name that
+  # partially matches its 'ordered' formal), and lavaan would fit them; the
+  # indices here describe sums of continuous items, so they are refused by
+  # name.
+  dot_names <- names(list(...))
+  if (!is.null(dot_names) &&
+      any(nzchar(dot_names) & startsWith("ordered", dot_names))) {
+    .dmar_refuse_argument(c(
+      "fa_second_order() fits continuous items by maximum likelihood, ",
+      "and ordered items are not available: its omega, omega_H, and ",
+      "omega_HS describe sums of the items as scored, and the ",
+      "coefficients of a sum of ordered categories are not implemented ",
+      "for the second-order model."), arg = NULL)
+  }
+  .fa_cfa_engine(..., data = data, factors = factors, S = S, N = N, M = M,
+                 equal_loading = equal_loading,
+                 equal_intercept = equal_intercept,
+                 equal_error = equal_error, correlated_factors = FALSE,
+                 meanstructure = meanstructure, estimator = estimator,
+                 missing = missing, ordered = NULL, se = se,
+                 conf_level = conf_level, rmsea_conf_level = rmsea_conf_level,
+                 output = output, wald_df = wald_df,
+                 missing_default = missing_default,
+                 structure = "second_order", second_order = second_order,
+                 equal_second_order_loading = equal_second_order_loading)
+}
+
+# The model introduces the table, at the console and in a knitted report
+# alike (the "header" block of .dmar_tbl_footer(), R/dmar_output_helpers.R),
+# and the lines under it say when the second-order structure is just
+# identified, what the omega rows describe, what a first-order factor's
+# rows mean, and which rows an improper solution left NA; the lines that
+# name the version of the fit rows follow, as for fa_confirmatory(). A
+# column subset of the table, which loses the attributes, prints the
+# default lines alone.
+#' @exportS3Method .dmar_tbl_footer dmar_fa_second_order
+#' @noRd
+.dmar_tbl_footer.dmar_fa_second_order <- function(x, ...) {
+  factors <- attr(x, "factors", exact = TRUE)
+  second_order <- attr(x, "second_order", exact = TRUE)
+  if (!is.list(factors) || !is.list(second_order)) return(NextMethod())
+  equal <- attr(x, "equal", exact = TRUE)
+  improper <- attr(x, "improper", exact = TRUE)
+  J <- lengths(factors)
+  over <- vapply(names(second_order), function(g) {
+    fs <- second_order[[g]]
+    paste0(g, " over ", paste0(fs, " (", J[fs], " items)", collapse = ", "))
+  }, character(1L))
+  several <- length(second_order) > 1L
+  parts <- c(
+    if (length(equal$loading)) {
+      paste0("loadings within ", paste(equal$loading, collapse = ", "))
+    },
+    if (length(equal$error)) {
+      paste0("error variances within ", paste(equal$error, collapse = ", "))
+    },
+    if (length(equal$intercept)) {
+      paste0("intercepts within ", paste(equal$intercept, collapse = ", "))
+    },
+    if (length(equal$second_order_loading)) {
+      paste0("second-order loadings of ",
+             paste(equal$second_order_loading, collapse = ", "))
+    })
+  header <- c(
+    paste0("Second-order model: ", paste(over, collapse = "; ")),
+    paste0("Every second-order factor's variance and every first-order ",
+           "factor's disturbance variance is fixed at 1",
+           if (several) "; the second-order factors are correlated",
+           if (length(parts)) {
+             paste0("; equal ", paste(parts, collapse = "; equal "))
+           }))
+  # The structural part is just identified only under one second-order
+  # factor, over exactly three first-order factors or over two with equal
+  # loadings (.fa_second_order_structural_df()); the line states which,
+  # and the condition under which the fit is the correlated factors
+  # model's.
+  identified <- if (isTRUE(attr(x, "structural_df", exact = TRUE) == 0) &&
+                    length(second_order) == 1L) {
+    g <- names(second_order)
+    fs <- second_order[[1L]]
+    if (length(fs) == 3L) {
+      paste0(
+        "With exactly three first-order factors under one second-order ",
+        "factor, the second-order structure is just identified: the three ",
+        "loadings on ", g, " are another way of writing the three ",
+        "correlations of ", paste(fs, collapse = ", "), ". The model then ",
+        "fits as fa_confirmatory()'s correlated factors model of the same ",
+        "factors does, with the same chi square on the same degrees of ",
+        "freedom, whenever those correlations have a positive product and ",
+        "imply standardized loadings below one, and its test of fit says ",
+        "nothing about the second-order structure")
+    } else {
+      paste0(
+        "With two first-order factors under one second-order factor and ",
+        "their loadings equated, the second-order structure is just ",
+        "identified: the one loading on ", g, " is another way of writing ",
+        "the one correlation of ", paste(fs, collapse = " and "), ". The ",
+        "model then fits as fa_confirmatory()'s correlated factors model of ",
+        "the same factors does, with the same chi square on the same ",
+        "degrees of freedom, whenever that correlation is positive, and its ",
+        "test of fit says nothing about the second-order structure")
+    }
+  }
+  metric <- paste0(
+    "omega, omega_H, and omega_HS describe unit-weighted sums of the items ",
+    "as scored; ECV, H, and maximal_reliability are formed from the ",
+    "Schmid-Leiman loadings (attribute schmid_leiman) and do not depend on ",
+    "the metric of the items; PUC depends on the structure alone, so it ",
+    "has no interval")
+  definitions <- paste0(
+    "For a first-order factor, omega is the reliability of the total score ",
+    "of its items, omega_HS the share of that score's variance due to the ",
+    "factor's disturbance (what the second-order factor does not account ",
+    "for), ECV the second-order factor's share of the items' common ",
+    "variance, and H and maximal_reliability describe the disturbance",
+    if (several) {
+      "; each second-order factor's rows describe the sum of its own items"
+    })
+  improper_so <- names(attr(x, "improper_second_order", exact = TRUE))
+  improper_so <- if (is.null(improper_so)) character(0) else improper_so
+  loading_so <- improper_so[startsWith(improper_so, "gamma_")]
+  phi_so <- improper_so[startsWith(improper_so, "phi_")]
+  improper_line <- if (length(improper) || length(improper_so)) {
+    paste0("Improper solution (",
+           paste(c(
+             if (length(improper)) {
+               paste0("a negative error variance for ",
+                      paste(names(improper), collapse = ", "))
+             },
+             if (length(loading_so)) {
+               paste0("a standardized second-order loading at one, ",
+                      paste(loading_so, collapse = ", "))
+             },
+             if (length(phi_so)) {
+               paste0("a second-order correlation beyond one, ",
+                      paste(phi_so, collapse = ", "))
+             }), collapse = "; "),
+           "): the rows the warning named are NA")
+  }
+  c(.dmar_footer_add(character(0), header, "header"), NextMethod(),
+    .dmar_footer_add(character(0), identified, "second_order_identified"),
+    .dmar_footer_add(character(0), metric, "second_order_metric"),
+    .dmar_footer_add(character(0), definitions, "second_order_definitions"),
+    .dmar_footer_add(character(0), improper_line, "second_order_improper"),
+    .dmar_footer_add(character(0), attr(x, "fit_rows", exact = TRUE),
+                     "fit_rows"))
+}
+
+#' @rdname fa_second_order
+#' @importFrom generics tidy
+#' @exportS3Method generics::tidy
+tidy.dmar_fa_second_order <- function(x, ...) .fa_cfa_tidy(x)
+
+#' @rdname fa_second_order
+#' @importFrom generics glance
+#' @exportS3Method generics::glance
+glance.dmar_fa_second_order <- function(x, ...) .fa_cfa_glance(x)

@@ -1,0 +1,375 @@
+# Sample size for AIPE on a single mean (one sample, or paired differences).
+#' Sample Size Planning for a Mean From the Accuracy in Parameter Estimation (AIPE) Perspective
+#'
+#' @description
+#' Plans the sample size \emph{N} needed for the confidence interval for a
+#' population mean to be sufficiently narrow, from the accuracy in
+#' parameter estimation (AIPE) perspective. The mean may be that of a
+#' single sample or the mean of paired differences: in a pretest-posttest
+#' or matched pairs design each unit contributes one difference score, the
+#' interval for the mean difference is the single sample interval computed
+#' on those scores, and the plan is the same with \code{true_sd} the standard
+#' deviation of the differences. Without an \code{assurance} the plan makes
+#' the expected width of the interval no wider than \code{width}; with one,
+#' it makes the realized width no wider than \code{width} with that
+#' probability.
+#'
+#' @param true_sd The planning value of the population standard deviation of
+#'   the scores whose mean is estimated. For a paired design it is the
+#'   standard deviation of the differences, which for two measures with
+#'   standard deviations \eqn{\sigma_1}{sigma1} and \eqn{\sigma_2}{sigma2}
+#'   and correlation \eqn{\rho}{rho} is
+#'   \eqn{\sqrt{\sigma_1^2 + \sigma_2^2 -
+#'   2\rho\,\sigma_1\sigma_2}}{sqrt(sigma1^2 + sigma2^2 - 2 rho sigma1 sigma2)}.
+#'   Must be positive.
+#' @param width The desired full width of the confidence interval (twice
+#'   its half-width), in the units of the scores.
+#' @param conf_level The confidence level of the interval (default
+#'   \code{0.95}).
+#' @param assurance \code{NULL} (the default) to plan the expected width,
+#'   or the desired probability, strictly between 0.5 and 1, that the
+#'   realized width will be no wider than \code{width}.
+#' @param true_kurtosis The planning value of the population excess kurtosis of
+#'   the scores, on the scale \code{\link{kurtosis}} reports (0 for a normal
+#'   population). It enters only the assurance adjustment (see Details). The
+#'   default 0 is normal theory. The value must be greater than -2: no
+#'   distribution has an excess kurtosis below -2, and only a population of
+#'   two equally likely values reaches it. A pilot's \code{kurtosis()} can
+#'   usually be passed as it is, but \code{kurtosis()} corrects its estimate
+#'   for small-sample bias, and for a pilot whose scores take nearly two
+#'   values it can return -2 or less (\code{kurtosis(rep(c(0, 1), 123))} is
+#'   about -2.016), which is refused. Such a pilot says the population is
+#'   close to that two-valued limit. Pass instead a value a little above -2,
+#'   such as -1.9, or 0, the normal theory plan, which for an assurance of
+#'   .80 or more is never the smaller of the two.
+#'
+#' @return A \code{data.frame} of class \code{dmar_ss_aipe} with columns
+#'   \code{term} and \code{value} and the rows \code{necessary_N} (the
+#'   planned sample size), \code{expected_width} (the expected width of the
+#'   interval at that size under normality), the input echoes \code{true_sd},
+#'   \code{width}, and \code{conf_level}, and, when an assurance was
+#'   supplied, \code{assurance} and \code{true_kurtosis}.
+#'
+#' @details
+#' \strong{The interval.} The \eqn{100(1 - \alpha)}{100(1 - alpha)}\%
+#' interval for the mean is
+#' \eqn{\bar{y} \pm t_{1-\alpha/2,\,N-1}\,
+#' S/\sqrt{N}}{ybar +/- t(1 - alpha/2, N - 1) S / sqrt(N)},
+#' the interval \code{t.test()} reports for a single sample and for paired
+#' data. Its full width
+#' \eqn{W = 2\, t_{1-\alpha/2,\,N-1}\,
+#' S/\sqrt{N}}{W = 2 t(1 - alpha/2, N - 1) S / sqrt(N)}
+#' is random because the sample standard deviation \eqn{S} is, so a plan is
+#' a statement either about the expected width or about the probability
+#' that \eqn{W} is no larger than the desired width
+#' \eqn{\omega}{omega}. These are the two criteria Kelley and Rausch (2006)
+#' developed for the standardized mean difference and that Kelley,
+#' Maxwell, and Rausch (2003) developed for the unstandardized mean
+#' difference.
+#'
+#' \strong{Expected width.} Without an assurance, \code{necessary_N} is the
+#' smallest \emph{N} at which
+#' \deqn{E(W) = 2\, t_{1-\alpha/2,\,N-1}\, c_4(N)\, \sigma / \sqrt{N} \le
+#'   \omega,}{E(W) = 2 t(1 - alpha/2, N - 1) c4(N) sigma / sqrt(N) <= omega,}
+#' where, under normality,
+#' \deqn{c_4(N) = \frac{E(S)}{\sigma} = \sqrt{\frac{2}{N - 1}}\,
+#'   \frac{\Gamma(N/2)}{\Gamma((N -
+#'   1)/2)}.}{c4(N) = E(S)/sigma = sqrt(2/(N - 1)) Gamma(N/2) / Gamma((N - 1)/2).}
+#' The expected width is therefore exact under normality. It falls as
+#' \emph{N} rises, so the criterion, once met, holds at every larger
+#' \emph{N}. The \code{expected_width} row reports it at
+#' \code{necessary_N}.
+#'
+#' \strong{How the plan differs from \code{ss_aipe_c()}.}
+#' \code{\link[=ss_aipe_c]{ss_aipe_c()}}, which plans a contrast among
+#' independent groups, sets \eqn{S} equal to \eqn{\sigma}{sigma} in the
+#' width. Because
+#' \eqn{E(S) = c_4(N)\,\sigma < \sigma}{E(S) = c4(N) sigma < sigma}, the
+#' width it plans is larger than the expected width, and the same rule
+#' applied to a single mean gives either the \emph{N} returned here or one
+#' more. With an assurance the difference disappears: the criterion is
+#' then the probability that \eqn{S} is small enough, which does not
+#' involve \eqn{E(S)}, and under normality it is the criterion
+#' \code{ss_aipe_c()} uses for a contrast, here applied to a single mean.
+#' (\code{ss_aipe_c()} cannot plan a single mean, since it requires
+#' contrast weights that sum to zero.)
+#'
+#' \strong{Assurance.} With assurance \eqn{\gamma}{gamma},
+#' \code{necessary_N} is the smallest \emph{N} from which
+#' \eqn{P(W \le \omega) \ge \gamma}{P(W <= omega) >= gamma} holds at every
+#' larger \emph{N}. Because \eqn{W \le \omega}{W <= omega} exactly when
+#' \deqn{\frac{S^2}{\sigma^2} \le \frac{N \omega^2}{4\,
+#'   t^2_{1-\alpha/2,\,N-1}\,
+#'   \sigma^2},}{S^2/sigma^2 <= N omega^2 / [4 t(1 - alpha/2, N - 1)^2 sigma^2],}
+#' the probability is that of \eqn{S^2} falling below a bound. Under
+#' normality \eqn{(N - 1) S^2/\sigma^2}{(N - 1) S^2 / sigma^2} is chi
+#' square on \eqn{N - 1} degrees of freedom, so the probability is exact,
+#' and the criterion, once met, holds at every larger \emph{N};
+#' \code{necessary_N} is then simply the smallest \emph{N} at which
+#' \eqn{P(W \le \omega) \ge \gamma}{P(W <= omega) >= gamma}. The two
+#' readings part only under the kurtosis adjustment (see below).
+#'
+#' \strong{Kurtosis.} For \emph{N} independent scores whose excess kurtosis
+#' is \eqn{\kappa}{kappa}, the variance of the sample variance is
+#' \deqn{\mathrm{Var}(S^2) = \sigma^4 \left\{\frac{2}{N - 1} +
+#'   \frac{\kappa}{N}\right\},}{Var(S^2) = sigma^4 [2 / (N - 1) + kappa / N],}
+#' against \eqn{2\sigma^4/(N - 1)}{2 sigma^4 / (N - 1)} under normality.
+#' With a nonzero \code{true_kurtosis} the chi square law is replaced by a scaled
+#' chi square,
+#' \eqn{S^2/\sigma^2 \approx \chi^2_\nu/\nu}{S^2 / sigma^2 ~ chisq(nu) / nu},
+#' with
+#' \deqn{\nu = \frac{2}{2/(N - 1) + \kappa/N}}{nu = 2 / [2 / (N - 1) + kappa / N]}
+#' chosen so that the approximation has the exact mean and variance of
+#' \eqn{S^2/\sigma^2}{S^2 / sigma^2}; \eqn{\nu = N - 1}{nu = N - 1} when
+#' \eqn{\kappa = 0}{kappa = 0}. Tails heavier than the normal's
+#' (\eqn{\kappa > 0}{kappa > 0}) make \eqn{S} more variable, and for an
+#' assurance of .80 or more they make it harder to reach, while lighter
+#' tails (\eqn{\kappa < 0}{kappa < 0}, as for scores on a bounded scale)
+#' make it easier. Precisely, with an assurance of .80 or more, when the
+#' plan made with a given \eqn{\kappa}{kappa} has at least
+#' \eqn{\kappa + 3}{kappa + 3} observations, no smaller planning value of
+#' \eqn{\kappa}{kappa} gives a larger plan, so an overstated
+#' \eqn{\kappa}{kappa} errs on the side of a larger \emph{N}. With an
+#' assurance close to one half the criterion turns instead on the median of
+#' \eqn{S^2}, which heavier tails pull further below
+#' \eqn{\sigma^2}{sigma^2}, and a larger \eqn{\kappa}{kappa} can give a
+#' slightly smaller plan. The argument is on the excess scale of
+#' \code{\link{kurtosis}}, so \code{kurtosis(pilot)} can usually be passed
+#' as it is (see the \code{true_kurtosis} argument for a pilot that gives -2 or
+#' less). A pilot's kurtosis is itself imprecise. The kurtosis does not
+#' enter the expected width plan: there it would lower \eqn{E(S)} by a
+#' relative amount of about \eqn{\kappa/(8N)}{kappa / (8N)} and \emph{N} by
+#' about \eqn{\kappa/4}{kappa / 4}, less than one when
+#' \eqn{|\kappa| < 4}{|kappa| < 4}, so the plan keeps normal theory's
+#' \eqn{c_4(N)}{c4(N)} and the function warns when a nonzero
+#' \code{true_kurtosis} is supplied without an \code{assurance}.
+#'
+#' The two-moment approximation is coarse when \eqn{\kappa}{kappa} is large
+#' and \emph{N} is small. Once \emph{N} is below about
+#' \eqn{\kappa/2}{kappa / 2}, \eqn{\nu}{nu} is below one, and the smaller
+#' \eqn{\nu}{nu} is, the more of the scaled chi square's probability sits
+#' near zero, much as most small samples from a population with heavy
+#' tails miss the tails. The
+#' probability can then meet the assurance at a very small \emph{N}, fall
+#' below it over a stretch of larger \emph{N}, and meet it again. This is
+#' where the definition above matters: \code{necessary_N} is the start of
+#' the stretch over which the criterion holds at every larger \emph{N}, not
+#' the first \emph{N} at which it holds, and in this region a larger
+#' \eqn{\kappa}{kappa} can give a smaller plan. The function finds that
+#' \emph{N} exactly: it bounds the criterion over whole ranges of \emph{N},
+#' using only that \eqn{\nu}{nu} and the bound on
+#' \eqn{S^2/\sigma^2}{S^2 / sigma^2} both rise with \emph{N} and that a
+#' chi square quantile rises with its degrees of freedom, and evaluates it
+#' directly where the bounds cannot decide.
+#' \code{\link[=ss_aipe_mean_sensitivity]{ss_aipe_mean_sensitivity()}},
+#' with a pilot's scores as the population, checks a plan without the
+#' approximation, and it also shows the coverage of the \emph{t} interval
+#' under the shape of those scores, which the plan does not address.
+#'
+#' \strong{When no planning value is trustworthy.} A fixed \emph{N} is only
+#' as good as the planning value of \eqn{\sigma}{sigma}. Sequential
+#' fixed-width confidence interval procedures for a mean keep sampling
+#' until the interval reaches the target width and need no planning value
+#' of \eqn{\sigma}{sigma}.
+#'
+#' @references
+#' Kelley, K., Maxwell, S. E., & Rausch, J. R. (2003). Obtaining power or
+#'   obtaining precision: Delineating methods of sample-size planning.
+#'   \emph{Evaluation & the Health Professions, 26}(3), 258--287.
+#'   \doi{10.1177/0163278703255242}
+#'
+#' Kelley, K., & Rausch, J. R. (2006). Sample size planning for the
+#'   standardized mean difference: Accuracy in parameter estimation via
+#'   narrow confidence intervals. \emph{Psychological Methods, 11}(4),
+#'   363--385. \doi{10.1037/1082-989X.11.4.363}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{ss_aipe_mean_sensitivity}} for a Monte Carlo check
+#'   of a plan; \code{\link{ss_aipe_c}} for a contrast among independent
+#'   groups; \code{\link{ss_aipe_sm}} for the standardized mean;
+#'   \code{\link{kurtosis}}; \code{\link{design_consequences}} for what a
+#'   chosen design delivers: power, the Type S (sign) and Type M
+#'   (exaggeration) errors of the significance filter, and the expected
+#'   confidence interval width.
+#'
+#' @examples
+#' # A pilot: the IQ gains (end of year minus pretest) of the 246 children
+#' # in the control group of the pygmalion data. A gain is a paired
+#' # difference, so its mean is planned as a single mean.
+#' gain <- pygmalion$iq_gain[pygmalion$treatment == "Control"]
+#' sd(gain)
+#' kurtosis(gain)
+#'
+#' # The N at which the expected full width of the 95 percent interval for
+#' # the mean gain is at most 4 IQ points.
+#' ss_aipe_mean(true_sd = sd(gain), width = 4)
+#'
+#' # With 90 percent assurance that the realized width is at most 4 points,
+#' # first under normal theory and then with the heavier than normal tails
+#' # the pilot shows.
+#' ss_aipe_mean(true_sd = sd(gain), width = 4, assurance = 0.90)
+#' ss_aipe_mean(true_sd = sd(gain), width = 4, assurance = 0.90,
+#'              true_kurtosis = kurtosis(gain))
+#'
+#' @keywords design
+#'
+#' @family AIPE sample size planning
+#'
+#' @export
+ss_aipe_mean <- function(true_sd, width, conf_level = 0.95, assurance = NULL,
+                         true_kurtosis = 0) {
+  if (!is.numeric(true_sd) || length(true_sd) != 1L ||
+      !is.finite(true_sd) || true_sd <= 0)
+    .dmar_refuse_argument(
+      "'true_sd' must be a single finite positive number.", arg = "true_sd")
+  if (!is.numeric(width) || length(width) != 1L || !is.finite(width) ||
+      width <= 0)
+    .dmar_refuse_argument(
+      "'width' must be a single finite positive number.", arg = "width")
+  if (!is.numeric(conf_level) || length(conf_level) != 1L ||
+      !is.finite(conf_level) || conf_level <= 0 || conf_level >= 1)
+    .dmar_refuse_argument(
+      "'conf_level' must be a single number strictly between 0 and 1.",
+      arg = "conf_level")
+  if (!is.null(assurance) &&
+      (!is.numeric(assurance) || length(assurance) != 1L ||
+       !is.finite(assurance) || assurance <= 0.5 || assurance >= 1))
+    .dmar_refuse_argument(c(
+      "'assurance' must be NULL or a single number strictly between ",
+      "0.5 and 1."), arg = "assurance")
+  if (!is.numeric(true_kurtosis) || length(true_kurtosis) != 1L ||
+      !is.finite(true_kurtosis) || true_kurtosis <= -2)
+    .dmar_refuse_argument(c(
+      "'true_kurtosis' must be a single finite number greater than -2 (the ",
+      "excess kurtosis, 0 for a normal population); for a pilot whose ",
+      "kurtosis() is -2 or less, see the 'true_kurtosis' argument of ",
+      "?ss_aipe_mean."), arg = "true_kurtosis")
+  if (is.null(assurance) && true_kurtosis != 0)
+    .dmar_warn(c(
+      "'true_kurtosis' enters only the assurance adjustment and is unused ",
+      "when 'assurance' is NULL; the expected width is planned under ",
+      "normality."), "argument_ignored")
+
+  q <- 1 - (1 - conf_level) / 2
+  h <- width / 2
+
+  # The size that would suffice with the normal quantile and S fixed at
+  # sigma. It is a lower bound for the expected width plan, since
+  # t_{q, N-1} c4(N) exceeds z_q at every N, and it starts the search.
+  n_z <- (stats::qnorm(q) * true_sd / h)^2
+  if (n_z > 1e15)
+    .dmar_refuse_argument(c(
+      "The width is so narrow relative to 'true_sd' that the planned ",
+      "sample size would exceed 1e15."), arg = "true_sd")
+
+  t_q <- function(n) stats::qt(q, n - 1)
+  expected_width <- function(n) 2 * t_q(n) * .c4(n) * true_sd / sqrt(n)
+
+  # Each criterion comes with two certificates for the search (see
+  # .aipe_mean_search() below): holds_from(n), TRUE only when the criterion
+  # holds at n and at every larger N, and holds_on(a, b), TRUE only when it
+  # holds at every N from a to b. A certificate may decline when the
+  # criterion does hold, which costs only further evaluation; it must never
+  # accept when the criterion fails somewhere.
+  if (is.null(assurance)) {
+    # E(W) falls as N rises, so the criterion, once met, holds at every
+    # larger N, and meeting it at a certifies everything from a up.
+    meets <- function(n) expected_width(n) <= width
+    holds_from <- meets
+    holds_on <- function(a, b) meets(a)
+  } else {
+    # Degrees of freedom of the scaled chi square matched to the mean and
+    # variance of S^2 / sigma^2; nu = N - 1 when true_kurtosis = 0. W <= width
+    # exactly when S^2 / sigma^2 <= bound(n).
+    nu <- function(n) 2 / (2 / (n - 1) + true_kurtosis / n)
+    bound <- function(n) n * h^2 / (t_q(n)^2 * true_sd^2)
+    meets <- function(n) {
+      stats::pchisq(nu(n) * bound(n), nu(n)) >= assurance
+    }
+    # Away from normality the criterion need not be monotone in N (see
+    # Details), so the certificates rest only on three facts: bound(n) rises
+    # with N (N rises and t falls); nu(n) rises with N for any kurtosis
+    # greater than -2 (the derivative of its denominator, -2 / (n - 1)^2 -
+    # true_kurtosis / n^2, is negative); and qchisq(assurance, nu) rises with nu,
+    # since the chi square is stochastically increasing in its degrees of
+    # freedom. Over a to b, then, nu(N) bound(N) >= nu(a) bound(a) and
+    # qchisq(assurance, nu(N)) <= qchisq(assurance, nu(b)), which gives
+    # holds_on(). For holds_from(), Cantelli's inequality,
+    # P(X - nu >= t) <= 2 nu / (2 nu + t^2) for X chi square on nu degrees
+    # of freedom, gives qchisq(assurance, nu) / nu <= 1 +
+    # sqrt(2 assurance / ((1 - assurance) nu)), a bound that falls as nu
+    # rises; once bound(n) reaches it, the criterion holds at n and beyond.
+    # The factor tol keeps rounding in qt() and qchisq() from certifying an
+    # N at the edge of the criterion.
+    tol <- 1 + 1e-12
+    holds_from <- function(n) {
+      bound(n) >= tol * (1 + sqrt(2 * assurance / ((1 - assurance) * nu(n))))
+    }
+    holds_on <- function(a, b) {
+      nu(a) * bound(a) >= tol * stats::qchisq(assurance, nu(b))
+    }
+  }
+
+  n <- .aipe_mean_search(meets, holds_from, holds_on, start = n_z)
+
+  out <- data.frame(
+    term  = c("necessary_N", "expected_width", "true_sd", "width", "conf_level",
+              if (!is.null(assurance)) c("assurance", "true_kurtosis")),
+    value = c(n, expected_width(n), true_sd, width, conf_level,
+              if (!is.null(assurance)) c(assurance, true_kurtosis)),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+  .as_dmar_tbl(out, conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
+
+# The search behind ss_aipe_mean(): the smallest N >= 2 from which a
+# criterion holds at every larger N. meets(n) evaluates the criterion at
+# one N; holds_from(n) and holds_on(a, b) are the certificates described
+# in ss_aipe_mean(). The search doubles from `start` to a point u from
+# which the criterion is certain to hold, then looks for the largest N
+# below u at which it fails. It works down a binary partition of 2:(u - 1)
+# kept as a stack, upper part on top: a part [a, b] is settled when the
+# criterion fails at b (every larger N is then known to meet it, so b is
+# the largest failure) or when it is certified over the whole part, and
+# is split in two otherwise. The answer is one more than the largest
+# failure, or 2 when there is none. A certified part needs no further
+# evaluation, so a plan in the billions takes a few hundred evaluations,
+# and a criterion that falls and rises again over small N, as the
+# assurance can with a large kurtosis, is still searched in full.
+.aipe_mean_search <- function(meets, holds_from, holds_on, start) {
+  u <- max(2, ceiling(start))
+  while (!holds_from(u)) {
+    u <- 2 * u
+    if (u > 2^52)
+      .dmar_refuse_argument(c(
+        "The sample size search found no N below 4.5e15 from which the ",
+        "criterion is certain to hold; the width is too narrow relative ",
+        "to 'true_sd' for this assurance and kurtosis."), arg = "true_sd")
+  }
+  lo <- 2
+  hi <- u - 1
+  max_parts <- 1e6
+  parts <- 0
+  while (length(lo)) {
+    top <- length(lo)
+    a <- lo[top]
+    b <- hi[top]
+    lo <- lo[-top]
+    hi <- hi[-top]
+    if (b < a) next
+    if (!meets(b)) return(b + 1)
+    parts <- parts + 1
+    if (parts > max_parts)
+      .dmar_refuse_argument(c(
+        "The sample size search did not settle within ",
+        format(max_parts, scientific = FALSE), " steps."), arg = NULL)
+    if (a < b && !holds_on(a, b - 1)) {
+      m <- floor((a + b - 1) / 2)
+      lo <- c(lo, a, m + 1)
+      hi <- c(hi, m, b - 1)
+    }
+  }
+  2
+}

@@ -1,0 +1,1179 @@
+#' Multiple-Factor Confirmatory Factor Analysis Model
+#'
+#' Fits a confirmatory factor analysis model with one or more factors,
+#' where each factor is specified by naming its indicator variables and
+#' the measurement structure is specified by describing what is
+#' constrained (\code{equal_loading}, \code{equal_intercept},
+#' \code{equal_error}) rather than by more technical terms. The function then
+#' reports which classical measurement structure the description implies
+#' (congeneric, essentially tau-equivalent, tau-equivalent, essentially
+#' parallel, or parallel), the parameter estimates with confidence
+#' intervals, fit information, and, per factor, coefficient omega, the
+#' average variance extracted (AVE), and coefficient \emph{H}, each with a
+#' delta method standard error and confidence interval computed by
+#' \pkg{lavaan} from defined parameters (no additional packages are
+#' involved). \code{cfa_k()} is an alias of this function.
+#'
+#' With \code{ordered} items, the model is fit by WLSMV to polychoric
+#' correlations with thresholds. A sum score of ordered items lives on
+#' the metric of the observed categories, not on the latent response
+#' metric of the polychoric loadings, so for a factor whose items are
+#' ordered the reported omega is categorical omega, the reliability of
+#' the sum of the observed categories (Green & Yang, 2009), computed from
+#' the same fit with the total variance built from the unrestricted
+#' polychoric correlations (Kelley & Pornprasertmanit, 2016, Eq. 18),
+#' the default denominator of \code{\link{reliability_omega_categorical}};
+#' the substitution is announced in a message and recorded in the
+#' \code{omega_metric} attribute, and the delta method interval columns
+#' are \code{NA} for those rows because the delta method interval
+#' describes the latent response metric. When the data do not determine
+#' a polychoric correlation among a factor's items (a bivariate table
+#' with empty cells, as two items skewed in opposite directions
+#' produce), that factor's omega is \code{NA} with a warning naming the
+#' pair. AVE and
+#' coefficient \emph{H} concern the latent
+#' response correlations themselves and are reported unchanged on that
+#' metric. An improper solution (a negative error variance) leaves some
+#' of these properties undefined, and their rows are then \code{NA} with
+#' a warning; see \emph{Details}. For a bootstrap confidence interval on a
+#' categorical omega,
+#' use \code{\link{reliability_omega_categorical}} on the factor's
+#' items.
+#'
+#' @param data A raw data matrix or data frame, rows are respondents and
+#'   columns include the items named in \code{factors}. Supply exactly
+#'   one of \code{data} or \code{S}.
+#' @param S A symmetric covariance matrix of the items, with dimnames
+#'   naming the items; \code{N} is then required. Supply exactly one of
+#'   \code{data} or \code{S}.
+#' @param factors Named list. Each element names a factor and gives the
+#'   character vector of its indicator columns (two or more per factor;
+#'   three or more when only one factor is specified). Each item loads on
+#'   exactly one factor (simple structure).
+#'   An item that is not a column of \code{data} or an item of \code{S}
+#'   is refused with an error of class \code{dmar_items_invalid} (see
+#'   \code{\link{dmar_metadata}}).
+#' @param N Total sample size. Required with \code{S}; ignored (inferred
+#'   from the rows) with \code{data}.
+#' @param M Optional named numeric vector of item means, used with a
+#'   covariance matrix to model the mean structure (required there when
+#'   \code{equal_intercept} is used). Ignored for raw data.
+#' @param equal_loading Logical, or a named logical vector with one
+#'   element per factor. \code{TRUE} constrains the loadings within a
+#'   factor to a single value (across factors nothing is equated).
+#'   Defaults to \code{FALSE}.
+#' @param equal_intercept Logical, or a named logical vector with one
+#'   element per factor. \code{TRUE} constrains the item intercepts
+#'   within a factor to a single value; this requires the mean structure
+#'   (raw data, or \code{M} with a covariance matrix). Defaults to
+#'   \code{FALSE}.
+#' @param equal_error Logical, or a named logical vector with one element
+#'   per factor. \code{TRUE} constrains the error variances within a
+#'   factor to a single value. Defaults to \code{FALSE}.
+#' @param correlated_factors Logical. If \code{TRUE} (default) the
+#'   factors covary freely; because each factor variance is fixed to 1,
+#'   the \code{phi} terms for factor pairs are the latent correlations.
+#'   If \code{FALSE} the factor covariances are fixed to zero.
+#' @param meanstructure Logical or \code{NULL}. \code{NULL} (default)
+#'   models the mean structure exactly when it is needed: under FIML or
+#'   two-stage estimation of raw data (the default, so the item intercepts,
+#'   the \code{nu} rows, join the table), when any
+#'   \code{equal_intercept} is \code{TRUE}, or when \code{M} is supplied.
+#'   Set \code{TRUE} to model intercepts regardless (raw data or \code{M}
+#'   required), or \code{FALSE} to suppress them (an error if
+#'   \code{equal_intercept} is used).
+#' @param estimator Character; estimator passed to \pkg{lavaan}. Must be
+#'   one of \code{"ML"} (default; maximum likelihood, fully efficient
+#'   under multivariate normality), \code{"MLR"} (robust maximum
+#'   likelihood, raw data required: maximum likelihood estimates with the
+#'   test statistic corrected for nonnormality, the scaled statistic of Satorra and
+#'   Bentler, 1994, in the form Yuan and Bentler, 2000, gave it for
+#'   incomplete data; its matching Huber-White sandwich standard errors
+#'   are used when \code{se} is omitted), \code{"WLS"} (the
+#'   asymptotic distribution free estimator of
+#'   Browne, 1984; raw data and a large sample required),
+#'   \code{"WLSMV"} (diagonally weighted least squares with mean- and
+#'   variance-adjusted test statistic; Muthén, 1984; Muthén, du Toit, &
+#'   Spisic, 1997; the standard choice for ordered categorical items,
+#'   and what \code{ordered} switches to), or \code{"GLS"}
+#'   (generalized least squares; Browne, 1974). With a robust estimator
+#'   the reported fit indices are the robust versions.
+#' @param missing Character; missing-data handling when raw data are
+#'   supplied: \code{"fiml"} (default; full information maximum
+#'   likelihood, which uses every case with an observed item;
+#'   \pkg{lavaan}'s name \code{"ml"} is accepted), \code{"listwise"}
+#'   (listwise deletion),
+#'   \code{"pairwise"} (passed to \pkg{lavaan}, for ordered items),
+#'   \code{"two_stage"} (two-stage maximum likelihood with normal theory
+#'   standard errors and test), or \code{"robust_two_stage"} (two-stage
+#'   maximum likelihood with standard errors and test robust to
+#'   nonnormality); lavaan's spellings \code{"two.stage"} and
+#'   \code{"robust.two.stage"} are accepted for the last two. See
+#'   \emph{Details} for two-stage estimation. Ignored with \code{S},
+#'   except that a two-stage request with \code{S} is an error, since a
+#'   covariance matrix has no incomplete cases. With \code{ordered}
+#'   items, \code{"ml"}/\code{"fiml"} and the two-stage options are not
+#'   available; use \code{"pairwise"} or \code{"listwise"}. FIML needs a
+#'   maximum likelihood estimator of continuous items with normal theory
+#'   or Huber-White standard errors. When the default meets ordered items,
+#'   a least squares estimator (\code{"WLS"}, \code{"WLSMV"},
+#'   \code{"GLS"}), \code{se = "robust.sem"}, or a Satorra-Bentler kind
+#'   of test passed through \code{...}, the items are fitted as they
+#'   stand if no item value is missing (listwise deletion then deletes
+#'   nothing), and otherwise the call stops and names the option to
+#'   choose, rather than deleting cases unasked. With complete data FIML
+#'   and listwise deletion give the same estimates and the same chi
+#'   square, and for \code{estimator = "ML"} the same fit indices; the
+#'   standard errors differ slightly, since FIML takes them from the
+#'   observed information, as \pkg{lavaan} does and as Savalei (2010)
+#'   recommends with incomplete data, and listwise deletion from the
+#'   expected information.
+#' @param ordered Ordered categorical items: \code{NULL} (none, the
+#'   default), \code{TRUE} (every item), or a character vector of item
+#'   names. Requires raw data. Each factor must be all ordered or all
+#'   continuous. Declaring ordered items switches the estimator to
+#'   \code{"WLSMV"} (with a message, unless a categorical estimator was
+#'   requested), fits thresholds in place of intercepts, and reports
+#'   each ordered factor's omega on the categorical sum score metric
+#'   (categorical omega with the unrestricted polychoric denominator);
+#'   see \emph{Details}.
+#' @param se Standard error method passed to \pkg{lavaan}. The default,
+#'   \code{NULL}, follows the estimator: model-based \code{"standard"}
+#'   errors for ML, GLS and WLS; Huber-White sandwich
+#'   \code{"robust.huber.white"} errors for MLR; and
+#'   \code{"robust.sem"} errors for WLSMV. Explicit compatible choices
+#'   are retained. The ML and MLR point estimates use the same likelihood;
+#'   their standard errors and tests use different reference assumptions.
+#'   This difference does not depend on whether optimization is iterative
+#'   or an equivalent solution is computed analytically.
+#'   \code{"robust.sem"} requires complete data and is refused with FIML;
+#'   use \code{"robust.huber.white"} to retain incomplete respondents.
+#'   No standard-error request silently changes the missing-data treatment.
+#'   \code{"none"} requests point estimates only. Under two-stage
+#'   estimation the matching corrected two-stage errors are used;
+#'   \code{se} must be \code{NULL}, \code{"standard"}, or \code{"none"}.
+#'   MLR and Huber-White errors require raw data. Robust SEM errors from
+#'   covariance input require ML and a matching \code{NACOV} in \code{...}.
+#' @param conf_level Confidence level for the parameter confidence
+#'   intervals, including the delta method intervals for omega, AVE, and
+#'   \emph{H}. Defaults to 0.95. It does not reach the RMSEA interval,
+#'   whose level is \code{rmsea_conf_level}.
+#' @param rmsea_conf_level Confidence level of the RMSEA interval of the
+#'   fit rows, which the \code{rmsea_ci_level} row records. Defaults to
+#'   0.90, the conventional level, whose limits decide the tests of close
+#'   and not close fit at .05 (see \code{\link{sem_fit_measures}});
+#'   \code{rmsea_conf_level = 0.95} gives a 95 percent interval.
+#'   It sets the level in the table DMAR returns and in its
+#'   \code{glance()}; \code{output = "summary"} returns the \pkg{lavaan}
+#'   summary, which shows lavaan's 90 percent interval whatever this
+#'   argument is.
+#' @param output Format of the returned object:
+#'   \describe{
+#'     \item{\code{"verbose"}}{(default) Parameter estimates with
+#'       confidence intervals, the per-factor defined parameters
+#'       (\code{loading_sum}, \code{error_sum}, \code{omega}, \code{ave},
+#'       \code{H}), and fit information.}
+#'     \item{\code{"measurement"}}{The measurement-property rows only:
+#'       per factor \code{omega}, \code{ave}, and \code{H} (with delta
+#'       method standard errors and confidence intervals), the latent
+#'       correlation \code{phi} for every factor pair (with its
+#'       confidence interval), and, for raw data, the
+#'       heterotrait-monotrait ratio \code{htmt} for every factor pair
+#'       via \code{\link{htmt}}.}
+#'     \item{\code{"summary"}}{The raw \code{summary()} output from
+#'       \pkg{lavaan} (not a data frame).}
+#'     \item{\code{"standardized"}}{The standardized parameter estimates
+#'       from \code{lavaan::standardizedSolution()}, whose defined rows
+#'       describe the standardized items: \code{omega} there is the
+#'       reliability of the unit-weighted sum of the standardized items,
+#'       while \code{ave} and \code{H} do not depend on the metric of the
+#'       items and equal the rows of the other tables. For a factor with
+#'       \code{equal_loading} or \code{equal_error} these rows are
+#'       computed from each item's own standardized loading and error
+#'       variance (see \emph{The standardized solution} under
+#'       \emph{Details} of \code{\link{fa_confirmatory}}). Under
+#'       \code{se = "none"} the \code{se}, \code{z}, \code{pvalue},
+#'       \code{ci.lower}, and \code{ci.upper} columns are \code{NA}.}
+#'     \item{\code{"fit"}}{The raw \pkg{lavaan} fit object. Escape hatch
+#'       for direct lavaan access, including likelihood ratio tests
+#'       between two \code{fa_confirmatory()} fits via
+#'       \code{lavaan::lavTestLRT()}.}
+#'   }
+#' @param \dots Additional arguments forwarded to
+#'   \code{\link[lavaan]{lavaan}} (e.g., \code{cluster} or
+#'   \code{bootstrap}). A \code{group} argument is an error: see
+#'   \emph{Details} for why, and \code{\link{measurement_invariance}} for
+#'   the model in several groups.
+#' @param wald_df The reference distribution of the Wald intervals and
+#'   \emph{p}-values of the parameter rows: \code{Inf} (the default), the
+#'   normal distribution, which leaves \pkg{lavaan}'s intervals and
+#'   \emph{p}-values as they are; a single positive number, the degrees
+#'   of freedom of a \emph{t} distribution for every parameter row, the
+#'   intervals and \emph{p}-values recomputed from the same estimates and
+#'   standard errors; or \code{"missing_information"}, von Hippel's
+#'   (2016) degrees of freedom
+#'   \eqn{\max\{3, N(1 - \gamma_j) - 1\}}{max(3, N(1 - gamma_j) - 1)}
+#'   for each loading, from its fraction of missing
+#'   information \eqn{\gamma_j} (\eqn{N - 1} with complete data), with
+#'   every other row left on the normal reference. A number applies to
+#'   the tables of \code{output = "verbose"}, \code{"measurement"}, and
+#'   \code{"standardized"}, the keyword to that of \code{"verbose"} only
+#'   (the \code{"measurement"} table has no loading), and either needs standard errors other
+#'   than \code{"none"} and \code{"bootstrap"}; the keyword also needs
+#'   the fits its calibration covers, maximum likelihood (\code{estimator
+#'   = "ML"} or \code{"MLR"}) of continuous items by FIML or with complete
+#'   data, with normal theory or Huber-White standard errors. Anything
+#'   else is an error that says why. It follows \code{\dots}, so it must
+#'   be named in full. See \emph{Details}.
+#'
+#' @details
+#' \code{\link{cfa_1}} and \code{\link{cfa_2}} are convenience wrappers
+#' around this function for the one and two factor cases: \code{cfa_1()}
+#' takes a vector of items and fits one factor over them, and
+#' \code{cfa_2()} takes the items of each of two factors. Both forward
+#' every argument here, so their results are this function's results,
+#' with the factors named \code{f1} (and \code{f2}).
+#'
+#' \strong{Describing the model instead of naming it.} The classical
+#' measurement structures are nested patterns of within-factor equality
+#' constraints (Lord & Novick, 1968; Graham, 2006):
+#' \describe{
+#'   \item{congeneric}{loadings, intercepts, and error variances all
+#'     free.}
+#'   \item{essentially tau-equivalent}{equal loadings; intercepts and
+#'     error variances free.}
+#'   \item{tau-equivalent}{equal loadings and equal intercepts; error
+#'     variances free.}
+#'   \item{essentially parallel}{equal loadings and equal error
+#'     variances; intercepts free.}
+#'   \item{parallel}{equal loadings, equal intercepts, and equal error
+#'     variances.}
+#' }
+#' The caller states the constraints; the function reports the implied
+#' name, per factor, in the printed header and in the \code{"model"}
+#' attribute of the returned table. The distinction between
+#' tau-equivalent and essentially tau-equivalent (and between parallel
+#' and essentially parallel) lives entirely in the mean structure: the
+#' covariance structure of the two members of each pair is identical, so
+#' without intercepts in the model only the "essentially" form can be
+#' claimed. That is why \code{equal_intercept} requires raw data or
+#' \code{M}: covariances alone cannot speak to it. A constraint pattern
+#' outside the classical list (for example equal error variances with
+#' free loadings) is fit as requested and labeled descriptively, since it
+#' has no conventional name.
+#'
+#' Identification fixes each factor variance to 1 (and each factor mean
+#' to 0 when the mean structure is modeled), so all loadings are
+#' estimated and within-factor equality constraints are meaningful. Two
+#' \code{fa_confirmatory()} fits that differ only in descriptor settings are nested,
+#' so \code{output = "fit"} feeds \code{lavaan::lavTestLRT()} directly
+#' (with \code{estimator = "MLR"}, lavaan applies the scaled difference
+#' test).
+#'
+#' \strong{Measurement properties.} For factor \eqn{f} with
+#' unstandardized loadings \eqn{\lambda_j} and error variances
+#' \eqn{\psi_j} (factor variance 1):
+#' coefficient omega
+#' \eqn{= (\sum_j \lambda_j)^2 / ((\sum_j \lambda_j)^2 + \sum_j \psi_j)}
+#' (McDonald, 1999), the reliability of the unit-weighted composite;
+#' the average variance extracted
+#' \eqn{= J^{-1} \sum_j \lambda_j^2 / (\lambda_j^2 + \psi_j)}
+#' (Fornell & Larcker, 1981), the mean proportion of item variance the
+#' factor accounts for; and coefficient
+#' \eqn{H = (1 + (\sum_j \lambda_j^2/\psi_j)^{-1})^{-1}}
+#' (Hancock & Mueller, 2001), the reliability of the optimally weighted
+#' composite, which no single item can drag below its value for any
+#' subset. All three are computed as \pkg{lavaan} defined parameters, so
+#' each carries a delta method standard error and a \code{conf_level}
+#' confidence interval in the same table as the model parameters. The
+#' limits of all three are formed on the logit scale from that standard
+#' error and transformed back to the scale of the coefficient (Browne,
+#' 1982; the confidence interval transformation principle of Kelley, 2007:
+#' the limits of a monotone transformation of a parameter are the
+#' transformation of its limits), as \code{\link{reliability_H}} and
+#' \code{\link{fa_exploratory}} form those of \emph{H} by default, so
+#' they lie within (0, 1) and are asymmetric near one, as the sampling
+#' distribution of a high reliability is; for \emph{H} with one factor
+#' they are the limits those two functions give the same fit. The
+#' \code{se} column is the standard error of the coefficient itself.
+#' \pkg{lavaan}'s own limits for these defined parameters, the estimate
+#' plus or minus the normal quantile times the standard error, can exceed
+#' one.
+#'
+#' \strong{The standardized solution.} With \code{output =
+#' "standardized"} the defined rows are evaluated at the standardized
+#' values: the standardized loading
+#' \eqn{s_j = \lambda_j / (\lambda_j^2 + \psi_j)^{1/2}}{s_j = lambda_j /
+#' sqrt(lambda_j^2 + psi_j)} and error variance
+#' \eqn{e_j = \psi_j / (\lambda_j^2 + \psi_j)}{e_j = psi_j / (lambda_j^2 +
+#' psi_j)} of each item take the places of \eqn{\lambda_j} and
+#' \eqn{\psi_j} in the formulas above (for an ordered item, those of its
+#' latent response). Omega is then the reliability of the unit-weighted
+#' sum of the standardized items, which differs from the omega of the
+#' sum of the items as they are scored whenever the items' variances
+#' differ; the average variance extracted and \emph{H} are the same on
+#' either scale. \pkg{lavaan} evaluates a defined parameter at the
+#' standardized values of the labels it names, and a label that
+#' \code{equal_loading} or \code{equal_error} gives several items has one
+#' unstandardized value but a standardized value for each item, which
+#' differ when the items' variances differ; \pkg{lavaan} uses the first
+#' item's. For such a factor the rows are computed here from every
+#' item's own \eqn{s_j} and \eqn{e_j}, with delta method standard errors
+#' from their derivatives with respect to the free parameters and
+#' \pkg{lavaan}'s covariance matrix of the estimates (under \code{se =
+#' "bootstrap"}, from \pkg{lavaan}'s bootstrap draws), and with the test
+#' statistic and \emph{p}-value, as \pkg{lavaan} forms them for every
+#' other row. \code{\link{fa_bifactor}} does the same for its indices.
+#'
+#' \strong{Improper solutions.} When the error variance \eqn{\psi_j} of
+#' an item is estimated below zero (a Heywood case; for an ordered item,
+#' the residual variance of its latent response, which the theta
+#' parameterization estimates), the item's communality
+#' \eqn{\lambda_j^2 / (\lambda_j^2 + \psi_j)} exceeds one. The average
+#' variance extracted averages the communalities, and coefficient
+#' \emph{H}, the largest reliability that a weighted sum of the items
+#' attains, is at least that communality, since the item weighted alone
+#' attains it; for such a factor neither is a proportion of variance, so
+#' its \code{ave} and \code{H} rows are \code{NA}, with a warning naming
+#' the items and their communalities. Omega, the reliability of the
+#' unit-weighted sum, depends on the error variances only through their
+#' sum, and while that sum is positive it remains a proportion and is
+#' reported, as \code{\link{reliability_omega}} reports it, beside the
+#' warning; when the sum is negative the model implies a negative error
+#' variance for the sum score and an omega above one, and the
+#' \code{omega} row is \code{NA} as well. Categorical omega is not
+#' defined for an improper ordered solution, so an ordered factor's
+#' \code{omega} row is \code{NA} whenever one of its items is improper.
+#' On \code{holzinger_swineford}, a factor measured by visual perception
+#' and lozenges alone, beside one measured by general information,
+#' paragraph comprehension, and sentence completion, gives visual
+#' perception an error variance below zero and the first factor an
+#' \emph{H} of 1.32; that row is \code{NA}, while its omega, .71, is
+#' reported. A negative error variance can also mean that the likelihood
+#' has no maximum, the variance falling without bound while the
+#' likelihood still rises and \pkg{lavaan}'s optimizer stopping where its
+#' steps stop gaining; the function checks for this by fitting the model
+#' again with the variance held further out (see \code{\link{fa_bifactor}})
+#' and, when the log likelihood there is higher or lower by no more than
+#' \eqn{10^{-6}} per case, stops for every
+#' \code{output} with an error of class \code{dmar_no_maximum} that
+#' prints the \pkg{lavaan} code of the fit, where
+#' \code{bounds = "pos.var"} (also accepted through \code{\dots} here) or
+#' a different model are the choices. The
+#' \pkg{lavaan} fit (\code{output = "fit"}) keeps the defined parameters
+#' as \pkg{lavaan} computes them.
+#'
+#' \strong{Discriminant validity.} Three complementary readings come from
+#' \code{output = "measurement"}: (a) the latent correlation \code{phi}
+#' for a factor pair, with a confidence interval whose upper limit near 1
+#' means the data cannot distinguish the two factors; (b) the Fornell and
+#' Larcker (1981) comparison, which asks whether each factor's \code{ave}
+#' exceeds the squared \code{phi} of its pairs (the factor should share
+#' more variance with its own items than with the other factor); and (c)
+#' for raw data, the model-free \code{htmt} ratio (Henseler, Ringle, &
+#' Sarstedt, 2015). A pair whose ratio the data leave undefined, as when
+#' some items of two factors are never observed together in a planned
+#' missing data design whose forms share other items, has an \code{htmt}
+#' row of \code{NA}, with a warning that names it, while the model based
+#' rows are reported: FIML (or two-stage estimation) estimates the latent
+#' correlation from the pairs of their items that are observed together,
+#' through the factor structure. When no item of one factor is ever
+#' observed with an item of the other, as when the two factors were given
+#' to different respondents, the latent correlation enters the likelihood
+#' only through covariances the data never observe, so it is not
+#' identified (the likelihood is flat in it, and \pkg{lavaan} leaves it at
+#' its starting value with no standard error, or under two-stage
+#' estimation fits it to an arbitrary covariance), and \code{fa_confirmatory()}
+#' refuses the fit, naming the pair: fit each factor alone, whose
+#' \code{omega}, \code{ave}, and \code{H} are identified, or link the
+#' forms with items given on both (\code{\link{missing_coverage}} reports
+#' the cases behind every pair of items). Orthogonal factors (\code{correlated_factors = FALSE}) are
+#' not refused: their correlation is fixed at 0 rather than estimated, so
+#' nothing is left unidentified, and since the likelihood then separates
+#' into the parts of the factors' items, each factor's \code{omega},
+#' \code{ave}, and \code{H}, with their standard errors, are those of its
+#' own one factor fit (to the accuracy of the optimizer). The fit rows of
+#' such a fit are \pkg{lavaan}'s, whose degrees of freedom count the
+#' covariances no case observes among the moments tested (\pkg{lavaan}
+#' warns that their coverage is zero), though the data cannot test them;
+#' each factor's fit is better judged from its own fit. More generally,
+#' when \pkg{lavaan} cannot compute the
+#' standard errors of a fit (its information matrix cannot be inverted,
+#' which suggests a parameter that is not identified at the estimates),
+#' every standard error, test, and interval is \code{NA}, with a warning
+#' of class \code{dmar_result_qualified}, rather than the 0 \pkg{lavaan}
+#' reports for the defined quantities. So they are when \pkg{lavaan}
+#' computes them from an information matrix that is singular in the
+#' directions the equality constraints leave free (scaled to a unit
+#' diagonal, its smallest eigenvalue is below \eqn{10^{-6}}), which it
+#' inverts, sometimes with a warning that the covariance matrix of the
+#' estimates does not appear to be positive definite and sometimes with
+#' none, reporting finite values that do not estimate the sampling
+#' variability of the estimates: the observed information of
+#' a FIML fit and the
+#' expected information of a listwise fit or of a covariance matrix alike,
+#' as in \code{\link{fa_bifactor}}, \code{\link{fa_second_order}}, and
+#' \code{\link{reliability_H}}. The rows report the numbers and their uncertainty; the judgment
+#' is the researcher's.
+#'
+#' \strong{Two-stage estimation with incomplete data.} With
+#' \code{missing = "two_stage"} the model is estimated in two stages
+#' (Yuan & Bentler, 2000; Savalei & Bentler, 2009). The first stage
+#' estimates the means and covariances of the items by maximum likelihood
+#' under the saturated normal model (the EM estimates), from every case
+#' with an observed item and from any auxiliary variables named through
+#' \pkg{lavaan}'s \code{aux} argument, which enter this stage only, so the
+#' model itself is untouched by them. A case observed on an auxiliary
+#' variable but on no item is used as well: the first stage estimates the
+#' items and the auxiliaries jointly, so its auxiliary values inform the
+#' item moments, and its likelihood is summed over every case (Savalei &
+#' Bentler, 2009, Eq. 10). That is what makes the estimates consistent
+#' when the items go missing together at random given the auxiliary
+#' variables, the case an auxiliary is named for. \pkg{lavaan}'s two-stage
+#' estimator reads such a case in its first stage but leaves it out of its
+#' sample size, and that sample size turns the per case quantities of the
+#' two stages into every standard error (each too large by the square root
+#' of the ratio of the two counts), the test statistics, the fit indices,
+#' and the information criteria. The fit is therefore computed again with
+#' its sample size set to the cases the first stage read, from the same
+#' estimates (in one group they do not depend on the sample size), so that
+#' every number in the table, and in the \pkg{lavaan} fit of
+#' \code{output = "fit"}, counts them: \pkg{lavaan}'s \code{summary()} of
+#' that fit counts them as used, and \code{\link[lavaan]{lavTestLRT}} warns
+#' that a difference test between it and a fit \pkg{lavaan} made of the
+#' same data on its own sample size is invalid. A message says how many
+#' such cases there are, and a line under the table names the sample size.
+#' When the fit cannot be computed again, a warning says what rests on
+#' \pkg{lavaan}'s sample size instead. On six
+#' Holzinger and Swineford tests with the whole block missing for 77 of
+#' 301 pupils, at random given general information (the auxiliary), the
+#' standard error of a verbal loading of 2.840 is .190 rather than
+#' \pkg{lavaan}'s .220. Cases observed only on auxiliary variables are
+#' kept, as under FIML.
+#' Such cases still contribute to the observed-data likelihood through
+#' their auxiliary measurements.
+#' The second stage fits the model to those moments with the complete
+#' data maximum likelihood discrepancy function. The estimates are
+#' consistent when the data are missing at random, as FIML's are, and
+#' Savalei and Bentler (2009) found them only marginally less efficient.
+#' What the second stage cannot supply alone is
+#' a standard error or a test, because it treats the EM moments as the
+#' moments of complete data, which makes its naive chi square and standard
+#' errors too optimistic. The standard errors are therefore the two-stage
+#' sandwich of Savalei and Bentler (2009, Eq. 6), built from the observed
+#' information of the saturated model under missing data, and the
+#' \code{chi_square} row is their residual based statistic (Eq. 8; Eq. 14
+#' with auxiliary variables), which is referred to chi square on the
+#' model's degrees of freedom. In their simulations with normal data and
+#' 15 or 30 percent of the values missing it rejected a correct model in
+#' no more than 9 percent of the tests at the .05 level with samples of
+#' 200, where the FIML chi square reached 21.9 percent. With
+#' \code{missing = "robust_two_stage"} the standard errors are the
+#' sandwich that is robust to nonnormality (Yuan & Bentler, 2000) and the
+#' \code{chi_square} row is lavaan's scaled statistic, the pairing Savalei
+#' and Falk (2014) found to outperform robust FIML with incomplete
+#' nonnormal data. Under both, \code{cfi} and \code{rmsea} are lavaan's
+#' robust indices, which correct the complete data indices of the second
+#' stage for the missing data as Zhang and Savalei (2023) propose: each
+#' subtracts from the naive statistic \emph{T} an estimate \emph{c} of
+#' its expectation under the model, built from the asymptotic covariance
+#' matrix of the stage one moments. With \code{missing =
+#' "robust_two_stage"} that matrix is the sandwich of the observed and
+#' first order information of the saturated model, and the indices are
+#' their TS V2 (Table 2), the version they recommend after two-stage
+#' estimation, for incomplete nonnormal data as well. With \code{missing =
+#' "two_stage"} it is the inverse of the observed information, the form
+#' the sandwich takes under normality, so the indices are the normal
+#' theory analog of TS V2, which Zhang and Savalei did not study: it
+#' estimates the same population values and agrees closely with TS V2 when
+#' the data are normal, but it departs from TS V2 as the data depart from
+#' normality, where \code{"robust_two_stage"} gives TS V2 itself. On nine
+#' Holzinger and Swineford tests with 90 scores on each of two deleted at
+#' random, the two RMSEAs are .0869 and .0859. Zhang and Savalei define
+#' only the RMSEA and the CFI; the \code{tli} and \code{nnfi} rows apply
+#' the same correction to the Tucker-Lewis index, and the RMSEA interval
+#' inverts the scaled statistic \emph{T}/\emph{c} and rescales its limits
+#' by \emph{c}, both of them \pkg{lavaan}'s extensions. Indices from a
+#' FIML fit are never paired with two-stage estimates. The
+#' \code{AIC} and \code{BIC} rows are the two-stage information criteria of
+#' Lai (2021), built, like \code{H0} and \code{H1}, from the complete data
+#' normal log likelihood evaluated at the EM estimates; Lai shows that,
+#' unlike the FIML criteria, they select in large samples the model that
+#' complete data would select, and they are comparable only with other
+#' two-stage fits of the same variables (\code{\link{sem_information_criteria}}
+#' reports the same values). The difference \eqn{-2(H0 - H1)} is the naive
+#' statistic, which is not chi square distributed. Two nested two-stage
+#' fits from \code{output = "fit"} are compared with
+#' \code{lavaan::lavTestLRT()}, which applies the scaled difference test
+#' (Satorra & Bentler, 2001). The \code{test} attribute names the statistic
+#' in the \code{chi_square} row, and the lines under the printed table say
+#' which statistic and indices it reports. Two-stage estimation is a normal
+#' theory method for raw continuous data: ordered items, covariance input,
+#' and an estimator other than \code{"ML"} are refused, robustness coming
+#' from \code{"robust_two_stage"} rather than from \code{estimator =
+#' "MLR"}. Under \code{"two_stage"} the residual based statistic is
+#' refused, with a message that points to robust two-stage estimation,
+#' for a fit with sampling weights or clustered cases, inequality
+#' constraints, or a parameter on a bound passed through \code{\dots},
+#' since the statistic assumes independent, equally weighted cases and a
+#' projection on the parameters left free. The residual based statistic
+#' already sums the information of the saturated model over every case
+#' the first stage read, so the correction for cases observed on an
+#' auxiliary variable alone leaves it as it was.
+#'
+#' \strong{One group.} The model is fit in one group. Every loading, error
+#' variance, intercept, and factor correlation carries a label, which is
+#' how the equality descriptors and the defined parameters refer to it,
+#' and \pkg{lavaan} holds a label shared by several groups equal across
+#' them. With \code{group} passed through \code{\dots} the groups would
+#' therefore share every measurement parameter, with each factor's
+#' variance fixed at 1 (and its mean at 0) in every group: a model of
+#' complete invariance rather than a model fit by group, whose omega,
+#' \code{ave}, and \emph{H} belong to the pooled model rather than to any
+#' one group. A \code{group} argument is therefore an error.
+#' \code{\link{measurement_invariance}} fits the model in
+#' several groups, beginning with the configural model, which leaves every
+#' parameter free in each group; \code{\link{reliability_H}} reads
+#' \emph{H} for one factor in one group from its fit, and
+#' \code{\link{reliability_omega}} on one group's rows gives that group's
+#' omega.
+#'
+#' \strong{Confidence interval conventions.} Parameter rows (including
+#' omega, \code{ave}, \emph{H}, and \code{phi}) use \code{conf_level},
+#' 0.95 by default. The RMSEA interval uses \code{rmsea_conf_level}, 0.90 by
+#' default, the conventional level for the RMSEA, because a
+#' \eqn{100(1 - 2\alpha)} percent interval decides the one-sided tests of
+#' close and not close fit at level \eqn{\alpha} (MacCallum, Browne, &
+#' Sugawara, 1996, p. 136); the \code{rmsea_ci_level} row records that
+#' level, and the line beneath the printed table names it when it differs
+#' from \code{conf_level}.
+#'
+#' The parameter intervals are Wald intervals, the estimate plus or minus
+#' a normal quantile times its standard error, and the \emph{p}-values
+#' refer the ratio of the two (\code{test_statistic}) to the normal
+#' distribution. The normal reference treats the standard error as
+#' known, which it is only in the limit, and in small samples, more so
+#' with missing values, the intervals are too short (von Hippel, 2016).
+#' \code{wald_df} refers both to the \emph{t} distribution on that many
+#' degrees of freedom instead (von Hippel's Eq. 29): the limits become
+#' the estimate plus or minus the \emph{t} quantile times the same
+#' standard error (for the omega, AVE, and \emph{H} rows, on the logit
+#' scale) and the
+#' \emph{p}-value is \eqn{2 P(T_\nu > |z|)}; the
+#' \code{test_statistic} column holds the same ratio under either
+#' reference, and a line under the printed table names the reference distribution. One
+#' number applies to every parameter row, a sensitivity check of the
+#' analyst's own choosing. The fit rows, the RMSEA interval, categorical
+#' omega, and the HTMT rows are untouched.
+#'
+#' \strong{Degrees of freedom from the missing information.} With
+#' \code{wald_df = "missing_information"} each loading
+#' gets its own degrees of freedom by von Hippel's (2016, Eqs. 31 and 34)
+#' effective sample size rule with \eqn{k = 1},
+#' \deqn{\nu_j = \max\{3, N(1 - \gamma_j) - 1\},}{nu_j = max(3, N(1 -
+#' gamma_j) - 1),}
+#' where \eqn{N} is the number of cases the fit used and \eqn{\gamma_j}
+#' the parameter's fraction of missing information, estimated from the
+#' fit as \code{\link{fraction_missing_information}} estimates it (the
+#' unstructured estimator of Chen and Savalei, 2021, which cannot be
+#' negative); \code{\link{df_missing}} describes the rule and its floor.
+#' A loading of an item that is rarely missing keeps nearly \eqn{N - 1}
+#' degrees of freedom, and with complete data (listwise deletion, or a
+#' covariance matrix) every \eqn{\gamma_j} is 0 and every \eqn{\nu_j} is
+#' \eqn{N - 1}. The \code{"wald_df"} attribute holds each parameter's
+#' degrees of freedom, the \code{"wald_df_table"} attribute the
+#' \code{\link{df_missing}} table they came from, and the line under the
+#' printed table names the rule and the rows it applied to.
+#'
+#' The rule, and \eqn{k = 1} rather than \eqn{k} equal to the number of
+#' items or von Hippel's complete data rule (his Eq. 32) on \eqn{N - 1}
+#' or \eqn{N} less the number of items, come from a calibration study of
+#' these intervals under full information maximum likelihood (in the
+#' package's source repository, \code{methodology/missing_data}). It
+#' simulated one factor models as this function writes them (loadings
+#' from .8 to .5, the factor variance fixed at 1), with six items at
+#' \emph{N} = 30, 50, 100, and 200 and with 12 items at \emph{N} = 50
+#' and 100, normal data fit by ML with normal theory
+#' standard errors and nonnormal data (the factor and the errors drawn
+#' from a standardized chi square on 4 degrees of freedom, skewness 1.41
+#' and excess kurtosis 3) fit by MLR with Huber-White standard errors,
+#' with no missing values or with 15 or 30 percent of the values of half
+#' the items missing completely at random or at random, in 2000
+#' replications of each of 60 cells; a repetition of von Hippel's own
+#' design reproduced the coverage he published to within .012. Under a
+#' decision rule fixed before the run (mean absolute distance of the
+#' coverage from .95, over the cells with \eqn{N \le 100} and missing
+#' values, below the normal interval's; coverage above .96 in no cell; a
+#' mean distance within .005 of the best rule's; the simplest passing
+#' rule chosen, a cell's coverage being the mean over the target's
+#' parameters), \eqn{k = 1} passed for the loadings, with a mean
+#' distance of .0171 against .0247 for the normal reference and no
+#' cell's coverage, averaged over its loadings, above .9502 (single
+#' loadings, the largest of 384 with missing values, reached .9595, with a
+#' Monte Carlo standard error of .0044, and none exceeded .96), and for
+#' omega, .0180
+#' against .0242 with no coverage above .9550. It passed again within
+#' the normal theory cells and within
+#' the robust ones taken alone. With nonnormal data the intervals still
+#' covered below .95 (between .908 and .937 for the loadings, averaged
+#' over a cell's loadings), since the
+#' robust standard errors themselves are too small at these sample sizes:
+#' the \emph{t} reference narrows the shortfall and does not remove it.
+#'
+#' These coverage figures rest on the data sets that the study's
+#' eligibility rule for the unrestricted (H1) estimates admitted. The
+#' affine-collapse diagnostic sets aside some of those data sets, and the
+#' coverage over the data sets that remain has not been established.
+#' Replaying the eligibility rule on the raw data cannot by itself
+#' validate the refits of the fraction of missing information and the
+#' information diagnostics. The keyword is an approximate, opt-in rule,
+#' not a coverage guarantee.
+#'
+#' The keyword is restricted to the study's estimator and parameter types. The other
+#' parameter rows keep the normal reference: the study evaluated the
+#' unstandardized loadings and omega, not factor variances or
+#' correlations, intercepts, error variances, or the sums, AVE, and
+#' \emph{H} built from them, and nothing shows that the rule suits
+#' them; omega passed with its limits formed on its own scale, but its
+#' limits here are formed on the logit scale, where the study found the
+#' \emph{t} reference overcovered (.9645 with normal data), so it keeps
+#' the normal reference as \code{\link{reliability_omega}}'s logistic
+#' intervals do. It is an error with the \code{"measurement"} table,
+#' which has no loading, with the standardized solution, with an
+#' estimator other than ML and MLR or ordered items, with pairwise
+#' deletion or two-stage estimation (for which no fraction of missing
+#' information is computed), and with standard errors other than the
+#' normal theory and Huber-White ones (\code{se = "standard"} and
+#' \code{"robust.huber.white"}; \code{"robust.sem"} only under listwise
+#' deletion, or from a covariance matrix with the asymptotic covariance
+#' matrix of its moments passed to \pkg{lavaan} as \code{NACOV} through
+#' \code{...}, without which \pkg{lavaan} refuses it, since \pkg{lavaan}
+#' computes that sandwich from raw data or a supplied \code{NACOV}, and
+#' under FIML falls back to listwise deletion, so that \code{missing =
+#' "fiml"} would not be honored). More generally,
+#' it is an error wherever \pkg{lavaan} replaces the FIML fit that
+#' \code{missing = "fiml"} asks for with a fit to the complete cases,
+#' which it also does for a test statistic of the Satorra-Bentler kind
+#' passed through \code{\dots} (\code{test = "satorra.bentler"},
+#' \code{"mean.var.adjusted"}, \code{"scaled.shifted"}, and their
+#' corrected forms), whether or not a value is missing:
+#' \code{estimator = "MLR"}, whose scaled statistic is computed under
+#' FIML, or the test with \code{missing = "listwise"} is the
+#' alternative. It is an error, too, where
+#' \code{\link{fraction_missing_information}} cannot compute the fraction
+#' for the data: a pair of items that no case observes together, or an
+#' unrestricted estimate of the means and covariances that does not exist
+#' (see its \emph{Fits that are refused}). Under FIML the
+#' standard errors must come from the observed information computed from
+#' the Hessian of the fitted model, \pkg{lavaan}'s default there and the
+#' one the study used; the first order information and the observed
+#' information of the unrestricted model (\code{observed.information =
+#' "h1"}), which reach \pkg{lavaan} only through \code{\dots}, are an
+#' error. Under listwise deletion (or from a covariance matrix)
+#' \pkg{lavaan}'s normal theory standard errors use the expected
+#' information where the study's cells without missing values used the
+#' observed; at \emph{N} = 30 and 50 they
+#' are 1 to 2 percent shorter for the loadings and less than 1 percent
+#' shorter for omega, so the complete data intervals here are, if
+#' anything, slightly shorter than those the study evaluated, whose
+#' coverage with normal data, averaged over a cell's loadings, rose from
+#' between .936 and .946 to between .945 and .949 on \eqn{N - 1} degrees
+#' of freedom (single loadings between .934 and .963, where the normal
+#' reference reached .962).
+#' Several factors, equal loadings, and auxiliary variables are accepted,
+#' and the rule is applied to each loading as it stands, which
+#' the one factor models of the study support by analogy rather than
+#' directly.
+#'
+#' \strong{Which version of each fit row.} With complete continuous data
+#' and \code{estimator = "ML"} the fit rows are the standard ones, under
+#' FIML (the default) as under listwise deletion: with no value missing
+#' the FIML corrected indices described below equal them, and no line
+#' under the table names a version. With a
+#' robust or categorical estimator, \code{chi_square} is the scaled
+#' statistic and \code{cfi}, \code{tli}, \code{nnfi}, \code{rmsea}, and
+#' the RMSEA interval are \pkg{lavaan}'s robust versions, the corrections
+#' \code{\link{sem_fit_measures}} describes. One version holds all of
+#' those rows. For the older mean and variance adjusted statistic
+#' (\code{test = "mean.var.adjusted"} passed through \code{...}),
+#' \pkg{lavaan} computes no robust versions, and they are computed here as
+#' \code{\link{sem_fit_measures}} computes them: Savalei (2018) shows that
+#' the robust RMSEA and CFI do not depend on which corrected statistic
+#' accompanies them, so they equal those of the Satorra-Bentler statistic
+#' of the same fit. Where \pkg{lavaan} did not compute the robust indices
+#' of a maximum likelihood fit of continuous items with complete data, the
+#' rows hold the standard indices, which estimate the population values
+#' of the ML indices with the small sample bias corrected as if the data
+#' were normal, and not the scaled ones, which put the scaled statistic
+#' into the standard formulas and estimate population values that change
+#' with the kurtosis of the data (Savalei, 2018); after FIML or two-stage
+#' estimation, and for ordered items or a least squares estimator, they
+#' hold its scaled indices, or else its standard ones. A model
+#' with no degrees of freedom (one factor of three items, say) fits
+#' exactly in every version: its \code{cfi} is 1, the model term \eqn{T -
+#' c \cdot df} of every version being zero, and its \code{tli},
+#' \code{nnfi}, and \code{rmsea}, which divide by the degrees of freedom
+#' and are 0/0, take \pkg{lavaan}'s conventions for a model that fits
+#' exactly, 1 and 0, whatever the version, and no line under the table
+#' names a version for them, under FIML and after two-stage estimation as
+#' well (the \code{srmr} line and the two-stage lines on the test, the
+#' criteria, and the cases are kept). A model with no degrees of freedom whose
+#' statistic is not zero does not fit exactly, as when an inequality bound
+#' binds (lavaan's count of the degrees of freedom leaves it out): its
+#' \code{cfi} is formed from its statistic in the version its CFI alone
+#' decides, and its \code{tli}, \code{nnfi}, \code{rmsea}, and RMSEA
+#' limits, which divide by the degrees of freedom, are undefined and
+#' \code{NA}, as \code{\link{sem_fit_measures}} reports them, with a line
+#' under the table that says so. One factor of three variables correlated
+#' .8, .8, and .5, with \code{bounds = "pos.var"} passed through
+#' \code{...}, has a statistic of 32.8 on 0 degrees of freedom (\eqn{N} =
+#' 200) and a \code{cfi} of .925; its \code{tli}, \code{nnfi},
+#' \code{rmsea}, and RMSEA limits are \code{NA}, where \pkg{lavaan}
+#' reports the values of exact fit, 1 and 0, whenever the degrees of
+#' freedom are zero. Under
+#' FIML (\code{missing =
+#' "ml"} or \code{"fiml"}) the \code{chi_square} row is the FIML
+#' likelihood ratio statistic (its scaled version with \code{estimator =
+#' "MLR"}), and those rows are \pkg{lavaan}'s robust versions, which for a
+#' FIML fit are the corrected indices of Zhang and Savalei (2023): they
+#' evaluate the complete data fit function at the FIML estimates, with the
+#' saturated FIML estimates in place of the sample moments, and so
+#' approximate the indices complete data would give, where the usual
+#' indices computed from the \code{chi_square} row change with the amount
+#' of missing data. \pkg{lavaan} uses their version 6, which assumes
+#' normality, and their version 3, which does not, with \code{estimator =
+#' "MLR"}. Zhang and Savalei define only the RMSEA and the CFI; the TLI,
+#' the NNFI, and the RMSEA interval are \pkg{lavaan}'s extension of the
+#' same correction. \pkg{lavaan} cannot combine FIML with the
+#' Satorra-Bentler or the mean and variance adjusted statistic (\code{test
+#' = "satorra.bentler"} or \code{"mean.var.adjusted"} passed through
+#' \code{...}); an explicit FIML request with one of them stops rather
+#' than returning a fit to the complete cases, and the default fits the
+#' items as they stand when none is missing (see \code{missing}). The
+#' \code{srmr} row is the SRMR of the covariance residuals alone
+#' (\pkg{lavaan}'s \code{srmr_bentler_nomean} when the model has a mean
+#' structure), as \code{\link{sem_fit_measures}} reports it, so that the
+#' intercepts a FIML fit adds, whose residuals are zero, do not lower it
+#' (\pkg{lavaan}'s \code{srmr} of a model with a mean structure averages
+#' the mean residuals in). With
+#' auxiliary variables (\pkg{lavaan}'s \code{aux} under FIML) it is over
+#' the items alone, for the reason \code{\link{sem_fit_measures}} gives. A line
+#' under the printed table names the version of the indices after FIML
+#' with incomplete data, with \code{estimator = "MLR"}, and after
+#' two-stage estimation, when they fall back from the robust ones, and
+#' when DMAR computed them.
+#'
+#' Common row names under \code{term}: \code{lambda_<factor>_<j>}
+#' (loadings; \code{lambda_<factor>} when equated),
+#' \code{psi_<factor>_<j>} (error variances; \code{psi_<factor>} when
+#' equated), \code{nu_<factor>_<j>} (intercepts, when the mean structure
+#' is modeled; \code{nu_<factor>} when equated), \code{phi_<factor>}
+#' (factor variance, fixed to 1), \code{phi_<factor1>_<factor2>} (latent
+#' correlation), the per-factor defined parameters
+#' (\code{loading_sum_<factor>}, \code{error_sum_<factor>},
+#' \code{omega_<factor>}, \code{ave_<factor>}, \code{H_<factor>}), and
+#' the fit rows \code{chi_square}, \code{df}, \code{p_chi_square},
+#' \code{cfi}, \code{tli}, \code{nnfi}, \code{rmsea},
+#' \code{rmsea_ci_lower}, \code{rmsea_ci_upper}, \code{rmsea_ci_level},
+#' \code{srmr}, \code{AIC}, \code{BIC}, \code{H0}, \code{H1}.
+#'
+#' @return
+#' For \code{output = "verbose"} (default) and \code{output =
+#' "measurement"}, a \code{data.frame} (classes \code{dmar_fa_confirmatory},
+#' \code{dmar_cfa_k}, and \code{dmar_tbl}) with columns \code{syntax}, \code{term},
+#' \code{estimate}, \code{se}, \code{test_statistic}, \code{p_value},
+#' \code{ci_lower}, \code{ci_upper}. The \code{"model"} attribute is a
+#' named character vector giving, per factor, the implied classical
+#' structure; the printed header displays it. For \code{output =
+#' "verbose"} the \code{"test"} attribute names the statistic in the
+#' \code{chi_square} row: \code{"standard"}, \code{"scaled"} (a robust or
+#' categorical estimator), or, under the two-stage options, the two-stage
+#' residual based or scaled statistic; a two-stage fit also carries the
+#' \code{"two_stage"} attribute, a list with the method, the lines
+#' printed under the table, and, in \code{rows}, the cases the first stage
+#' read and \pkg{lavaan}'s count of them when an auxiliary variable was
+#' named, and the \code{"fit_rows"} attribute holds the
+#' lines that name the version of the indices after FIML estimation and
+#' the SRMR of a model with a mean structure (\code{NULL} when there are
+#' none). The tables of \code{"verbose"} and
+#' \code{"measurement"} also carry the \code{"wald_df"} attribute, the
+#' degrees of freedom of the \emph{t} reference of their intervals and
+#' \emph{p}-values (\code{Inf} for the normal one); under
+#' \code{wald_df = "missing_information"} it holds the degrees of
+#' freedom of each loading in the table, named by term (the
+#' other rows keep the normal reference), the \code{"wald_df_table"}
+#' attribute is the \code{\link{df_missing}} table they came from, and
+#' \code{"wald_df_rows"} names what they are. For \code{output =
+#' "summary"}, the \pkg{lavaan} summary object; for
+#' \code{"standardized"}, the standardized solution, with the same
+#' \code{"wald_df"} attribute; for \code{"fit"}, the \pkg{lavaan} fit
+#' object.
+#'
+#' @references
+#' Brosseau-Liard, P. E., & Savalei, V. (2014). Adjusting incremental fit
+#'   indices for nonnormality. \emph{Multivariate Behavioral Research,
+#'   49}(5), 460--470. \doi{10.1080/00273171.2014.933697}
+#'
+#' Brosseau-Liard, P. E., Savalei, V., & Li, L. (2012). An investigation of
+#'   the sample performance of two nonnormality corrections for RMSEA.
+#'   \emph{Multivariate Behavioral Research, 47}(6), 904--930.
+#'   \doi{10.1080/00273171.2012.715252}
+#'
+#' Browne, M. W. (1974). Generalized least squares estimators in the
+#'   analysis of covariance structures. \emph{South African Statistical
+#'   Journal, 8}, 1--24.
+#'
+#' Browne, M. W. (1982). Covariance structures. In D. M. Hawkins (Ed.),
+#'   \emph{Topics in applied multivariate analysis} (pp. 72--141).
+#'   Cambridge, UK: Cambridge University Press.
+#'
+#' Browne, M. W. (1984). Asymptotically distribution-free methods for the
+#'   analysis of covariance structures. \emph{British Journal of
+#'   Mathematical and Statistical Psychology, 37}, 62--83.
+#'
+#' Kelley, K. (2007). Confidence intervals for standardized effect sizes:
+#'   Theory, application, and implementation. \emph{Journal of Statistical
+#'   Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Muthén, B. (1984). A general structural equation model with
+#'   dichotomous, ordered categorical, and continuous latent variable
+#'   indicators. \emph{Psychometrika, 49}(1), 115--132.
+#'
+#' Muthén, B., du Toit, S. H. C., & Spisic, D. (1997). \emph{Robust
+#'   inference using weighted least squares and quadratic estimating
+#'   equations in latent variable modeling with categorical and continuous
+#'   outcomes}. Unpublished technical report.
+#'
+#' Satorra, A., & Bentler, P. M. (1994). Corrections to test statistics
+#'   and standard errors in covariance structure analysis. In A. von Eye &
+#'   C. C. Clogg (Eds.), \emph{Latent variables analysis: Applications for
+#'   developmental research} (pp. 399--419). Thousand Oaks, CA: Sage.
+#'
+#' Chen, L., & Savalei, V. (2021). Three sample estimates of fraction of
+#'   missing information from full information maximum likelihood.
+#'   \emph{Frontiers in Psychology, 12}, 667802.
+#'   \doi{10.3389/fpsyg.2021.667802}
+#'
+#' Fornell, C., & Larcker, D. F. (1981). Evaluating structural equation
+#'   models with unobservable variables and measurement error.
+#'   \emph{Journal of Marketing Research, 18}(1), 39--50.
+#'
+#' Graham, J. M. (2006). Congeneric and (essentially) tau-equivalent
+#'   estimates of score reliability: What they are and how to use them.
+#'   \emph{Educational and Psychological Measurement, 66}(6), 930--944.
+#'   \doi{10.1177/0013164406288165}
+#'
+#' Green, S. B., & Yang, Y. (2009). Reliability of summed item scores
+#'   using structural equation modeling: An alternative to coefficient
+#'   alpha. \emph{Psychometrika, 74}(1), 155--167.
+#'   \doi{10.1007/s11336-008-9099-3}
+#'
+#' Hancock, G. R., & Mueller, R. O. (2001). Rethinking construct
+#'   reliability within latent variable systems. In R. Cudeck, S. du
+#'   Toit, & D. Sörbom (Eds.), \emph{Structural equation modeling:
+#'   Present and future} (pp. 195--216). Scientific Software
+#'   International.
+#'
+#' Henseler, J., Ringle, C. M., & Sarstedt, M. (2015). A new criterion
+#'   for assessing discriminant validity in variance-based structural
+#'   equation modeling. \emph{Journal of the Academy of Marketing
+#'   Science, 43}(1), 115--135. \doi{10.1007/s11747-014-0403-8}
+#'
+#' Kelley, K., & Pornprasertmanit, S. (2016). Confidence intervals for
+#'   population reliability coefficients: Evaluation of methods,
+#'   recommendations, and software for composite measures.
+#'   \emph{Psychological Methods, 21}, 69--92. \doi{10.1037/a0040086}
+#'
+#' Lai, K. (2021). Using information criteria under missing data: Full
+#'   information maximum likelihood versus two-stage estimation.
+#'   \emph{Structural Equation Modeling, 28}(2), 278--291.
+#'   \doi{10.1080/10705511.2020.1780925}
+#'
+#' Lord, F. M., & Novick, M. R. (1968). \emph{Statistical theories of
+#'   mental test scores}. Addison-Wesley.
+#'
+#' MacCallum, R. C., Browne, M. W., & Sugawara, H. M. (1996). Power
+#'   analysis and determination of sample size for covariance structure
+#'   modeling. \emph{Psychological Methods, 1}(2), 130--149.
+#'   \doi{10.1037/1082-989X.1.2.130}
+#'
+#' McDonald, R. P. (1999). \emph{Test theory: A unified treatment}.
+#'   Erlbaum.
+#'
+#' Satorra, A., & Bentler, P. M. (2001). A scaled difference chi-square
+#'   test statistic for moment structure analysis. \emph{Psychometrika,
+#'   66}(4), 507--514. \doi{10.1007/BF02296192}
+#'
+#' Savalei, V. (2010). Expected versus observed information in SEM with
+#'   incomplete normal and nonnormal data. \emph{Psychological Methods,
+#'   15}(4), 352--367. \doi{10.1037/a0020143}
+#'
+#' Savalei, V. (2018). On the computation of the RMSEA and CFI from the
+#'   mean-and-variance corrected test statistic with nonnormal data in SEM.
+#'   \emph{Multivariate Behavioral Research, 53}(3), 419--429.
+#'   \doi{10.1080/00273171.2018.1455142}
+#'
+#' Savalei, V., & Bentler, P. M. (2009). A two-stage approach to missing
+#'   data: Theory and application to auxiliary variables. \emph{Structural
+#'   Equation Modeling, 16}, 477--497. \doi{10.1080/10705510903008238}
+#'
+#' Savalei, V., & Falk, C. F. (2014). Robust two-stage approach outperforms
+#'   robust full information maximum likelihood with incomplete nonnormal
+#'   data. \emph{Structural Equation Modeling, 21}(2), 280--302.
+#'   \doi{10.1080/10705511.2014.882692}
+#'
+#' von Hippel, P. T. (2016). New confidence intervals and bias comparisons
+#'   show that maximum likelihood can beat multiple imputation in small
+#'   samples. \emph{Structural Equation Modeling, 23}(3), 422--437.
+#'   \doi{10.1080/10705511.2015.1047931}
+#'
+#' Yuan, K.-H., & Bentler, P. M. (2000). Three likelihood-based methods for
+#'   mean and covariance structure analysis with nonnormal missing data.
+#'   \emph{Sociological Methodology, 30}, 165--200.
+#'
+#' Zhang, X., & Savalei, V. (2023). New computations for RMSEA and CFI
+#'   following FIML and TS estimation with missing data.
+#'   \emph{Psychological Methods, 28}(2), 263--283.
+#'   \doi{10.1037/met0000445}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso
+#' \code{\link{cfa_1}} and \code{\link{cfa_2}} for the one and two
+#' factor convenience wrappers; \code{\link{fa_bifactor}} for the bifactor
+#' model, a general factor beside group factors, and
+#' \code{\link{fa_second_order}} for second-order factors over the factors,
+#' both fit by the same engine;
+#' \code{\link{plot_fa_confirmatory}} to display the estimates and
+#' the equality question visually; \code{\link{reliability_omega}},
+#' \code{\link{reliability_H}}, \code{\link{average_variance_extracted}},
+#' and \code{\link{htmt}} for the measurement properties as standalone
+#' functions; \code{\link{measurement_invariance}} for the across-group
+#' analog of these within-factor constraints;
+#' \code{\link[lavaan]{lavaan}}, \code{\link[lavaan]{lavTestLRT}}.
+#'
+#' @family multivariate and latent variable methods
+#'
+#' @keywords multivariate
+#'
+#' @examples
+#' data(holzinger_swineford)
+#' hs_factors <- list(
+#'   verbal    = c("t6_paragraph_comprehension", "t7_sentence",
+#'                 "t9_word_meaning"),
+#'   deduction = c("t20_deduction", "t22_problem_reasoning",
+#'                 "t23_series_completion"))
+#'
+#' # Congeneric measurement model for both factors (the default:
+#' # nothing is constrained, and the header names the structure).
+#' fa_confirmatory(holzinger_swineford, hs_factors)
+#'
+#' # Equal loadings: equal_loading = TRUE equates the loadings within
+#' # every factor, and a descriptor can also differ by factor, as here,
+#' # where the verbal loadings are equated and the deduction loadings are
+#' # left free. Because only the covariance structure identifies this
+#' # constraint, the implied structure of the verbal factor is
+#' # essentially tau-equivalent, and the header names each factor's
+#' # structure separately.
+#' fa_confirmatory(holzinger_swineford, hs_factors,
+#'       equal_loading = c(verbal = TRUE, deduction = FALSE))
+#'
+#' # Measurement properties: omega, ave, and H per factor (each with a
+#' # delta method standard error and confidence interval), the latent
+#' # correlations, and the htmt ratios.
+#' fa_confirmatory(holzinger_swineford, hs_factors, output = "measurement")
+#'
+#' # Equal loadings and intercepts make the items tau-equivalent, and
+#' # equal error variances as well make them parallel, the structure
+#' # the header names here. The mean structure is added because
+#' # equal_intercept asks about it, so the nu terms join the table.
+#' fa_confirmatory(holzinger_swineford, hs_factors, equal_loading = TRUE,
+#'       equal_intercept = TRUE, equal_error = TRUE)
+#'
+#' # Ordered categorical items: two correlated factors of three
+#' # four-category items each, generated here. The model is fit by WLSMV
+#' # to polychoric correlations, and each ordered factor's omega is
+#' # reported on the categorical sum score metric (categorical omega),
+#' # which is why the interval columns of those two rows are NA.
+#' set.seed(113)
+#' n <- 200
+#' eta_a <- rnorm(n)
+#' eta_b <- 0.5 * eta_a + sqrt(1 - 0.5^2) * rnorm(n)
+#' lambda <- c(0.6, 0.7, 0.8)
+#' lat <- cbind(outer(eta_a, lambda), outer(eta_b, lambda)) +
+#'   matrix(rnorm(n * 6), n, 6) %*% diag(sqrt(1 - c(lambda, lambda)^2))
+#' likert <- as.data.frame(apply(lat, 2, function(x)
+#'   as.integer(cut(x, breaks = c(-Inf, -1, 0, 1, Inf)))))
+#' names(likert) <- paste0("item_", 1:6)
+#' fa_confirmatory(likert,
+#'       list(scale_a = paste0("item_", 1:3),
+#'            scale_b = paste0("item_", 4:6)),
+#'       ordered = TRUE, output = "measurement")
+#'
+#' # Two-stage maximum likelihood with incomplete data, here 60 scores on
+#' # one verbal test deleted at random. The chi_square row is the residual
+#' # based statistic of Savalei and Bentler (2009), the cfi and rmsea rows
+#' # are the normal theory analog of the two-stage indices of Zhang and
+#' # Savalei (2023), and the lines under the table say which statistic,
+#' # indices, and criteria are reported.
+#' hs_incomplete <- holzinger_swineford
+#' set.seed(113)
+#' hs_incomplete$t7_sentence[sample(301, 60)] <- NA
+#' fa_confirmatory(hs_incomplete, hs_factors, missing = "two_stage")
+#'
+#' # Does the equal-loadings description hold? Two fits that differ only
+#' # in a descriptor are nested, so output = "fit" hands them straight to
+#' # lavaan's likelihood ratio test.
+#' fit_free  <- fa_confirmatory(holzinger_swineford, hs_factors, output = "fit")
+#' fit_equal <- fa_confirmatory(holzinger_swineford, hs_factors,
+#'                    equal_loading = TRUE, output = "fit")
+#' lavaan::lavTestLRT(fit_free, fit_equal)
+#'
+#' @export
+fa_confirmatory <- function(data = NULL, factors, S = NULL, N = NULL, M = NULL,
+                  equal_loading = FALSE,
+                  equal_intercept = FALSE,
+                  equal_error = FALSE,
+                  correlated_factors = TRUE,
+                  meanstructure = NULL,
+                  estimator = "ML",
+                  missing = "fiml",
+                  ordered = NULL,
+                  se = NULL,
+                  conf_level = 0.95,
+                  output = c("verbose", "measurement", "summary",
+                             "standardized", "fit"),
+                  ...,
+                  wald_df = Inf,
+                  rmsea_conf_level = 0.90) {
+  output <- match.arg(output)
+  # Whether 'missing' was left at its default, read here, in the function
+  # the user called, before anything else: the default resolves differently
+  # from an explicit request (see .cfa_k_resolve_missing()), and the engine
+  # receives the answer rather than a supplied value.
+  missing_default <- base::missing(missing)
+  .fa_cfa_engine(..., data = data, factors = factors, S = S, N = N, M = M,
+                 equal_loading = equal_loading,
+                 equal_intercept = equal_intercept,
+                 equal_error = equal_error,
+                 correlated_factors = correlated_factors,
+                 meanstructure = meanstructure, estimator = estimator,
+                 missing = missing, ordered = ordered, se = se,
+                 conf_level = conf_level, rmsea_conf_level = rmsea_conf_level,
+                 output = output, wald_df = wald_df,
+                 missing_default = missing_default, structure = "correlated")
+}
+
+# The 1.0.0 name is the same function object, so the two cannot drift
+# apart in their arguments or defaults.
+#' @rdname fa_confirmatory
+#' @export
+cfa_k <- fa_confirmatory
+
+# The measurement structure each factor's constraints imply introduces
+# the table at the console and in a knitted report alike: the lines are
+# the "header" block of .dmar_tbl_footer() (R/dmar_output_helpers.R),
+# which print.dmar_tbl() prints above the table, knit_print() sets as
+# paragraphs before it, and as_kable() puts first in the caption. A
+# column subset of the table, which loses the model attribute, has no
+# header. The lines that name the version of the fit rows
+# (.cfa_k_fit_rows_lines(), stored in the "fit_rows" attribute) follow
+# the lines every table carries, the two-stage lines among them, as the
+# "fit_rows" block.
+#' @exportS3Method .dmar_tbl_footer dmar_fa_confirmatory
+#' @noRd
+.dmar_tbl_footer.dmar_fa_confirmatory <- function(x, ...) {
+  model <- attr(x, "model", exact = TRUE)
+  header <- if (!is.null(model)) {
+    c("Measurement structure, per factor:",
+      sprintf("  %s: %s", names(model), unname(model)))
+  }
+  c(.dmar_footer_add(character(0), header, "header"), NextMethod(),
+    .dmar_footer_add(character(0), attr(x, "fit_rows", exact = TRUE),
+                     "fit_rows"))
+}
+
+#' Tidy a Multiple-Factor CFA Fit
+#'
+#' Returns the parameter rows of a \code{\link{fa_confirmatory}} table (loadings,
+#' error variances, intercepts, latent correlations, and the defined
+#' measurement properties) in the column convention used by the
+#' \pkg{broom} ecosystem. Fit-information rows belong in
+#' \code{\link{glance.dmar_fa_confirmatory}}.
+#'
+#' @param x A \code{dmar_fa_confirmatory} object returned by \code{\link{fa_confirmatory}}.
+#' @param \dots Unused.
+#'
+#' @return A \code{data.frame} with columns \code{term},
+#'   \code{estimate}, \code{se}, \code{statistic},
+#'   \code{p_value}, \code{ci_lower}, \code{ci_upper},
+#'   \code{conf_level}, the level of the parameter intervals, and
+#'   \code{wald_df}, the degrees of freedom of the \emph{t} reference of the
+#'   row's interval and \emph{p}-value (\code{wald_df} in
+#'   \code{\link{fa_confirmatory}}), \code{Inf} for the normal reference. Under
+#'   \code{wald_df = "missing_information"} only the loadings and the
+#'   omega rows take a \emph{t} reference, so the column tells them from
+#'   the other rows, as it tells the rows of one fit from another's after
+#'   tables are stacked.
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @examples
+#' data(holzinger_swineford)
+#' res <- fa_confirmatory(holzinger_swineford,
+#'              list(verbal = c("t6_paragraph_comprehension",
+#'                              "t7_sentence", "t9_word_meaning"),
+#'                   deduction = c("t20_deduction",
+#'                                 "t22_problem_reasoning",
+#'                                 "t23_series_completion")))
+#' generics::tidy(res)
+#' generics::glance(res)
+#'
+#' @importFrom generics tidy
+#' @exportS3Method generics::tidy
+tidy.dmar_fa_confirmatory <- function(x, ...) .fa_cfa_tidy(x)
+
+#' Glance at a Multiple-Factor CFA Fit
+#'
+#' Returns a one-row \code{data.frame} of model-level summaries from a
+#' \code{\link{fa_confirmatory}} table, in the column convention used by the
+#' \pkg{broom} ecosystem.
+#'
+#' @param x A \code{dmar_fa_confirmatory} object returned by \code{\link{fa_confirmatory}}.
+#' @param \dots Unused.
+#'
+#' @return A one-row \code{data.frame} with columns \code{chi_square},
+#'   \code{df}, \code{p_value}, \code{cfi}, \code{tli}, \code{rmsea},
+#'   \code{rmsea_low}, \code{rmsea_high}, \code{srmr}, \code{AIC},
+#'   \code{BIC}, \code{logLik}, and the columns that say what produced
+#'   them, so that rows of different fits can be stacked and still read:
+#'   \code{estimator}; \code{missing}, the missing data method of the fit
+#'   (\code{"listwise"}, \code{"pairwise"}, \code{"fiml"},
+#'   \code{"two_stage"}, \code{"robust_two_stage"}, or \code{"none"} for
+#'   a covariance matrix); \code{test}, the statistic in \code{chi_square}
+#'   (\code{"standard"}, \code{"scaled"}, or a two-stage statistic);
+#'   \code{fit_indices}, the version of \code{cfi}, \code{tli}, and
+#'   \code{rmsea} (\code{"robust"}, \code{"scaled"}, or
+#'   \code{"standard"}); and \code{rmsea_ci_level}, the level of the RMSEA
+#'   interval (\code{rmsea_conf_level}, 0.90 by default, where the
+#'   \code{conf_level} column of \code{tidy()} is the level of the
+#'   parameter intervals). After two-stage estimation \code{logLik} is the complete data
+#'   normal log likelihood at the EM estimates and \code{AIC} and
+#'   \code{BIC} are the two-stage criteria of Lai (2021), comparable only
+#'   with two-stage fits of the same variables, not with a FIML or listwise
+#'   row; and the difference of two rows' \code{chi_square} or
+#'   \code{logLik} is not a chi square test of nested models under a scaled
+#'   or two-stage statistic (\code{lavaan::lavTestLRT()} on
+#'   \code{output = "fit"} gives the right one).
+#'
+#' @references
+#' Lai, K. (2021). Using information criteria under missing data: Full
+#'   information maximum likelihood versus two-stage estimation.
+#'   \emph{Structural Equation Modeling, 28}(2), 278--291.
+#'   \doi{10.1080/10705511.2020.1780925}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @importFrom generics glance
+#' @exportS3Method generics::glance
+glance.dmar_fa_confirmatory <- function(x, ...) .fa_cfa_glance(x)

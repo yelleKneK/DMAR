@@ -1,0 +1,742 @@
+#' Machine-Readable Metadata of a DMAR Result, and the Classes of Its Refusals
+#'
+#' Returns, in one list with fixed names, what a program built on DMAR
+#' needs to read beside the numbers of a result table: which estimator,
+#' standard errors, test, and missing data method produced it; which
+#' version of a fit measure was reported and what corrected it; how many
+#' cases and groups it rests on and, after two-stage estimation, how many
+#' rows each stage read; which auxiliary variables entered; whether the
+#' result is fully eligible or qualified by an unavailable unrestricted
+#' (H1) model; and the counts of a bootstrap. Every DMAR table already
+#' carries these as attributes, but under names that differ by family;
+#' this accessor reads them into one stable vocabulary, so that an
+#' application reads \code{dmar_metadata(x)$eligibility$status} rather than
+#' the attribute of the day. A field a result does not have is \code{NULL}.
+#'
+#' @param x A result table of a DMAR function (a \code{dmar_tbl}).
+#'
+#' @details
+#' \subsection{Fields}{
+#' \describe{
+#' \item{\code{result}}{The table's own class, the first element of
+#'   \code{class(x)} (\code{"dmar_sem_fit"}, \code{"dmar_reliability"},
+#'   \code{"dmar_fa_confirmatory"}, and so on), and \code{coefficient}, the
+#'   reliability coefficient a reliability table reports.}
+#' \item{\code{estimator}, \code{se_method}, \code{test}}{The point
+#'   estimator, the method of the standard errors, and the test statistic
+#'   actually used, as the function recorded them: lavaan's names for a
+#'   fitted model (\code{"ML"}, \code{"robust.huber.white"},
+#'   \code{"satorra.bentler (scaled)"}), the reliability family's names for
+#'   its own (\code{"analytic"}). The fit measure families record
+#'   lavaan's point estimator (\code{"ML"} for a fit requested with
+#'   \code{estimator = "MLR"}, whose robustness is in \code{se_method}
+#'   and \code{test}); the information criteria record the estimator as
+#'   requested (\code{"MLR"}).}
+#' \item{\code{missing}}{The missing data method as the function recorded
+#'   it: lavaan's names for a fitted model (\code{"listwise"},
+#'   \code{"ml"}, \code{"two.stage"}, \code{"robust.two.stage"}) and
+#'   DMAR's for its own arguments (\code{"fiml"}, \code{"two_stage"},
+#'   \code{"robust_two_stage"}, \code{"pairwise"}, \code{"none"} or
+#'   \code{"covariance input"} for a supplied matrix).}
+#' \item{\code{ci_method}, \code{wald_df}, \code{conf_level},
+#'   \code{rmsea_conf_level}, \code{tail_areas}, \code{denominator}}{How
+#'   an interval was formed: the method, the degrees of freedom of a Wald
+#'   interval (\code{Inf} for the normal), the level, the level of the
+#'   RMSEA interval, unequal tail areas when recorded, and the denominator
+#'   of an omega. \code{rmsea_conf_level} is the level the table records
+#'   for its RMSEA interval apart from its other intervals, 0.90 by default
+#'   (the fit rows of \code{\link{fa_confirmatory}}, \code{\link{cfa_1}},
+#'   \code{\link{cfa_2}}, \code{\link{fa_bifactor}}, and
+#'   \code{\link{fa_second_order}}, whose parameter intervals are at
+#'   \code{conf_level}, the fit line of \code{\link{fa_exploratory}}, and
+#'   the fit measures of \code{\link{irt_grm}}), or else, for a table whose
+#'   RMSEA interval is its own (\code{\link{sem_fit_measures}},
+#'   \code{\link{factor_count}}, \code{\link{ci_rmsea}},
+#'   \code{\link{equivalence_rmsea}}), the table's level; it is
+#'   \code{NULL} for a table with no RMSEA interval.}
+#' \item{\code{interval_degenerate}}{For a table of an order-based effect
+#'   size (\code{\link{vargha_delaney_A}}, \code{\link{cliff_delta}},
+#'   \code{\link{probability_of_superiority_paired}}) whose estimated
+#'   variance is 0, so that its two limits equal the estimate and are not
+#'   a confidence interval: \code{"complete_separation"} or
+#'   \code{"no_variation"}. \code{NULL} for a table with an interval.}
+#' \item{\code{version}, \code{version_reason}, \code{correction}}{For a
+#'   fit measure table, the version reported (\code{"standard"},
+#'   \code{"scaled"}, \code{"robust"}), why, and the correction behind a
+#'   robust version, from the \code{sem_fit} attribute (the information
+#'   criteria of \code{\link{sem_information_criteria}} record under
+#'   \code{sem_information}, read the same way).}
+#' \item{\code{N}, \code{groups}, \code{fit_rows}}{The cases the result
+#'   rests on, where the function records them (an attribute, or the
+#'   \code{N} row of a reliability table), and the number of groups;
+#'   after two-stage estimation, \code{fit_rows} is the record of the
+#'   rows the first stage read and lavaan counted in each group, how many
+#'   were observed on an auxiliary variable alone, and whether the fit was
+#'   computed again with all of them (\code{read}, \code{nobs},
+#'   \code{extra}, \code{corrected}, which is \code{NA} when no case
+#'   was observed on an auxiliary variable alone, and \code{reestimated},
+#'   whether that computation estimated a model that links the groups
+#'   again).}
+#' \item{\code{auxiliary}}{The auxiliary variables of a FIML or two-stage
+#'   fit, where the function recorded them.}
+#' \item{\code{eligibility}}{A list with \code{status}, \code{code}, and
+#'   \code{note}: \code{"eligible"} when nothing qualifies the result
+#'   (\code{code} and \code{note} then \code{NULL}), and
+#'   \code{"qualified"} with a code and the text of the warning the
+#'   function gave: \code{"h1_unavailable"} when the unrestricted (H1)
+#'   likelihood was unavailable and the constrained model's estimates were
+#'   retained with their H0-based uncertainty, and
+#'   \code{"two_stage_rows_unavailable"} when a two-stage fit whose first
+#'   stage read cases observed on an auxiliary variable alone could not be
+#'   computed again with every case, so that its standard errors and the
+#'   values that rest on lavaan's N are qualified (see \emph{Refusals} for
+#'   the cases where nothing is returned).}
+#' \item{\code{bootstrap}}{For a bootstrap result, a list with \code{B}
+#'   (attempted), \code{used}, \code{failed}, \code{improper}, and, where
+#'   the family records them, the finer counts of the reliability engine
+#'   (\code{returned}, \code{undetermined}, \code{not_converged},
+#'   \code{too_few_cases}), with \code{required}, the fewest replications a
+#'   request may ask for, and \code{status}, one of
+#'   \code{"complete"}, \code{"dropped"}, \code{"exploratory"},
+#'   \code{"insufficient_count"}, or \code{"insufficient_share"} (see
+#'   \code{\link{dmar_bootstrap}}).}
+#' \item{\code{simulation}}{For the table of a Monte Carlo sensitivity
+#'   function (the \code{ss_aipe_*_sensitivity()},
+#'   \code{ss_power_*_sensitivity()}, and \code{ss_seq_c_sensitivity()}
+#'   functions), the record of its run: a list with \code{attempted}
+#'   (the replications asked for), \code{returned} (those that produced
+#'   a confidence interval, or a test), \code{failed} (those that did
+#'   not), \code{denominator} (the replications the proportion, width,
+#'   and coverage rows are taken over, which is \code{returned}),
+#'   \code{width_target_probability}, and \code{width_target_mc_ci},
+#'   with any element the function adds (see the section on the record
+#'   of the simulation on \code{\link{ss_aipe_cv_sensitivity}}). For the
+#'   table of a standardized cluster randomized planner
+#'   (\code{\link{ss_aipe_crd_es}}) that simulated a width, the record of
+#'   the simulation of the design reported, with the same three counts,
+#'   a \code{denominator} that is \code{attempted} for an assured width,
+#'   and the elements that page lists (\code{failure_reasons},
+#'   \code{width_mc_ci}, and the totals of the search).
+#'   \code{NULL} for any other table.}
+#' \item{\code{transformation}, \code{methods}, \code{rotation},
+#'   \code{structure}}{Family specifics where they exist: the
+#'   transformation record of \code{\link{sem_exact_fit_bootstrap}}, the
+#'   score methods of \code{\link{factor_scores}} as a plain character
+#'   vector, the rotation and the fitted structure (covariance or
+#'   correlation) of \code{\link{fa_exploratory}}.}
+#' \item{\code{footer}}{The lines a table of the fit families prints
+#'   beneath itself, which state the version, the sample, and the
+#'   qualifications in words. It is \code{NULL} for other tables,
+#'   including one that prints a line of its own (the confidence set of
+#'   \code{\link{nnt_from_smd}} is in that table's
+#'   \code{nnt_confidence_set} attribute).}
+#' }
+#' The names are part of DMAR's interface: a field is added when a new
+#' family needs one and is not renamed or removed within a release cycle
+#' without a deprecation.
+#' }
+#'
+#' \subsection{Refusals}{
+#' When DMAR will not run an analysis as asked, it stops with the reason
+#' and what to do instead. Every error DMAR signals on purpose, from the
+#' check of an argument to a fit that did not converge, is a classed
+#' condition: it carries, beside its own class, the class
+#' \code{dmar_refusal} and a \code{code} element with the name of its own
+#' class without the \code{dmar_} prefix, so the refusals can be caught
+#' together with \code{tryCatch(expr, dmar_refusal = function(e) ...)} or
+#' each by its own class. An error that is not a \code{dmar_refusal} was
+#' not signaled by DMAR's own checks (it came from R, from another
+#' package, or from \code{match.arg()} for a choice that is not among an
+#' argument's values). The classes:
+#' \describe{
+#' \item{\code{dmar_h1_unavailable}}{The unrestricted (H1) likelihood of
+#'   a FIML or two-stage fit is unavailable (its affine-collapse diagnostic
+#'   fired), so a fit measure, a two-stage criterion, or an EFA
+#'   uncertainty that needs it is not computed; the condition carries the
+#'   diagnostic as \code{diagnostic}. The same name is the class of the
+#'   warning a function gives when it retains the constrained model's
+#'   estimates and qualifies them instead; \code{inherits(cnd, "error")}
+#'   tells the refusal from the qualification.}
+#' \item{\code{dmar_two_stage_rows_unavailable}}{A two-stage fit whose
+#'   first stage read cases observed on an auxiliary variable alone could
+#'   not be computed again with every case, so its fit measures are not
+#'   reported; the condition carries the row counts as \code{rows}.}
+#' \item{\code{dmar_inadmissible}}{A fitted model given to
+#'   \code{\link{sem_fit_measures}}, \code{\link{sem_residual_fit}},
+#'   \code{\link{sem_information_criteria}}, \code{\link{compare_sem}},
+#'   \code{\link{ecvi}}, or \code{\link{sem_exact_fit_bootstrap}} has an
+#'   inadmissible solution: \pkg{lavaan}'s post-estimation check, made on
+#'   the model's own parameters when the fit has auxiliary variables, finds
+#'   a negative variance estimate or a covariance matrix that is not
+#'   positive definite. The condition's \code{reason} element names each
+#'   failure once, in the order the check makes them:
+#'   \code{"negative_variance"}, \code{"cov.lv"} (the covariance matrix of
+#'   the latent variables), \code{"theta"} (that of the residuals of the
+#'   observed variables), or \code{"psi"} (that of the residuals of the
+#'   structural part of the model), the last three the names
+#'   \code{lavaan::lavInspect()} gives the matrices; \code{variables} holds
+#'   the variables with a negative variance estimate; \code{problems} is a
+#'   data frame with a row per failure and the columns \code{reason},
+#'   \code{group} (the label of the group, as \pkg{lavaan} gives it;
+#'   \code{NA} for a fit of one group), \code{level} (1 or 2 in a
+#'   multilevel fit; \code{NA} for a fit of one level), \code{variable}
+#'   (\code{NA} for a matrix), and \code{value} (the negative estimate, or
+#'   the smallest eigenvalue of the matrix); and \code{auxiliary} names the
+#'   auxiliary variables set aside (empty without them). The group here is
+#'   a label, a character string, where the refusals of
+#'   \code{\link{sem_exact_fit_bootstrap}} below carry the group's index,
+#'   a whole number counting the groups in \pkg{lavaan}'s order.}
+#' \item{\code{dmar_two_stage_fixed_x}}{The residual based statistic of a
+#'   normal theory two-stage fit, which \code{\link{sem_fit_measures}},
+#'   \code{\link{fa_confirmatory}}, and
+#'   \code{\link{measurement_invariance}} report, is refused for a fit
+#'   that conditions on observed exogenous variables (\code{fixed.x = TRUE}
+#'   or \code{conditional.x = TRUE}); the condition carries those variables
+#'   as \code{variables}, and the message says how to refit
+#'   (\code{fixed.x = FALSE}, with \code{conditional.x = FALSE} too for a
+#'   fit made with \code{conditional.x = TRUE}) and on which rows to keep
+#'   the fit's estimates.}
+#' \item{\code{dmar_exact_fit_bootstrap_scope}}{A fit that
+#'   \code{\link{sem_exact_fit_bootstrap}} does not take. The condition's
+#'   \code{reason} element says why: \code{"summary_data"} (a fit to
+#'   summary statistics), \code{"ordered"} (ordered indicators, named in
+#'   \code{variables}), \code{"estimator"} (an estimator other than maximum
+#'   likelihood, given as \code{estimator}), \code{"two_level"},
+#'   \code{"cluster"} (a cluster variable, given as \code{cluster}),
+#'   \code{"weights"} (sampling weights), \code{"two_stage"} (two-stage
+#'   estimation), \code{"fixed_x"} (a fit conditional on observed exogenous
+#'   variables, named in \code{variables}), \code{"missing_without_fiml"}
+#'   (missing values left in the analysis data of a fit not made by FIML,
+#'   as under pairwise deletion, with the group's index as
+#'   \code{group}), or \code{"no_test"} (no standard test statistic).}
+#' \item{\code{dmar_pattern_too_small}}{A missing data pattern with no more
+#'   rows than observed variables, which the pattern-wise transformation of
+#'   \code{\link{sem_exact_fit_bootstrap}} cannot use. The condition
+#'   carries the pattern's index among its group's patterns, numbered in
+#'   the order of their first rows (\code{pattern}), its rows (\code{n}),
+#'   the number and the names of the variables it observes (\code{p} and
+#'   \code{observed}), and the group's index (\code{group}).}
+#' \item{\code{dmar_transformation_undefined}}{The model based
+#'   transformation of \code{\link{sem_exact_fit_bootstrap}} is undefined
+#'   for a group's data or moments. The condition's \code{reason} element
+#'   says why: \code{"not_positive_definite"} (a covariance matrix, named
+#'   in \code{matrix}, is not positive definite),
+#'   \code{"no_mean_structure"}, \code{"nonpositive_variance"} (a saturated
+#'   variance is not positive), \code{"singular_pattern"} (the model
+#'   implied covariance matrix of the variables a pattern observes, the
+#'   pattern given as \code{pattern}, is singular), or, for the Newton
+#'   iteration of the common transformation, \code{"not_converged"},
+#'   \code{"singular_jacobian"}, or \code{"diverged"} (with the step as
+#'   \code{step}); \code{group} is the group's index.}
+#' \item{\code{dmar_log_ratio_undefined}}{\code{\link{ci_ratio_of_means}}
+#'   or \code{\link{ci_ratio_of_means_paired}} was asked for the log ratio
+#'   interval of a ratio whose numerator or denominator is not positive,
+#'   where the logarithm is undefined.}
+#' \item{\code{dmar_bootstrap_needs_data}}{One of the same two functions
+#'   was asked for a bootstrap interval from summary statistics, which
+#'   cannot be resampled.}
+#' \item{\code{dmar_items_invalid}}{The items to analyze cannot be read
+#'   from the input, whether they were named by \code{items} (in
+#'   \code{\link{fa_exploratory}}, \code{\link{factor_count}},
+#'   \code{\link{parallel_analysis}}, \code{\link{measurement_invariance}},
+#'   and \code{\link{measurement_alignment}}), by the factors of
+#'   \code{\link{fa_confirmatory}} and of the functions that fit through
+#'   it (\code{\link{cfa_1}}, \code{\link{cfa_2}},
+#'   \code{\link{fa_bifactor}}, and \code{\link{fa_second_order}}), or by
+#'   the model of \code{\link{measurement_invariance}} (a named list of
+#'   factors or \pkg{lavaan} syntax) or of \code{\link{sem_sam}}. The
+#'   condition's \code{reason} element says which check failed:
+#'   \code{"form"} (not a character vector, or a name is \code{NA}),
+#'   \code{"unknown"} (a name that is not a column of \code{data} or an
+#'   item of \code{S}, the empty name included), \code{"duplicate"} (a
+#'   name given twice), \code{"count"}
+#'   (fewer than three items), or, with raw data, \code{"data_names"} (two
+#'   columns of \code{data} share a name, or, with \code{items = NULL},
+#'   which makes every column an item, a column's name is empty or
+#'   \code{NA}); and \code{items} holds the names at issue, empty when the
+#'   failure is not about particular names. A model's structure is
+#'   checked first and without this class (too few items on a factor, an
+#'   item named twice among the factors), so from
+#'   \code{\link{fa_confirmatory}}, the functions that fit through it,
+#'   and the \code{model} of \code{\link{measurement_invariance}} the
+#'   reason is \code{"unknown"}, or \code{"form"} for a name that is
+#'   \code{NA}, and from
+#'   \code{\link{sem_sam}} \code{"unknown"} or \code{"data_names"}; the
+#'   \code{items} of \code{\link{measurement_invariance}} and
+#'   \code{\link{measurement_alignment}} can give any reason but
+#'   \code{"data_names"}. A target naming items the input lacks is
+#'   \code{dmar_target_invalid}.}
+#' \item{\code{dmar_htmt_blocks_invalid}}{The \code{blocks} of
+#'   \code{\link{htmt}} are not disjoint sets of distinct items under
+#'   distinct names. The condition's \code{reason} element says which
+#'   check failed: \code{"construct_names"} (a construct name given to two
+#'   or more blocks), \code{"repeated"} (an item listed more than once in
+#'   one block), \code{"shared"} (an item in two or more blocks), or
+#'   \code{"data_names"} (an item whose name belongs to two or more columns
+#'   of \code{data}); \code{blocks} names the blocks and \code{items} the
+#'   items at issue (empty for \code{"construct_names"}). The refusal is
+#'   made before any correlation is computed or any resample drawn. A
+#'   block that is not two or more columns of \code{data} is
+#'   \code{dmar_argument_invalid}.}
+#' \item{\code{dmar_target_invalid}}{The \code{target} of a target
+#'   rotation in \code{\link{fa_exploratory}} cannot be read as one (or a
+#'   target was given with another rotation, or none with a target
+#'   rotation); the condition's \code{reason} element says which check
+#'   failed: \code{"rotation"}, \code{"form"}, \code{"names"},
+#'   \code{"factors"}, \code{"values"}, \code{"none_specified"}, or
+#'   \code{"nfactors"}.}
+#' \item{\code{dmar_target_unidentified}}{The target does not identify
+#'   the rotation: \code{reason} is \code{"counts"} (too few specified
+#'   loadings in a column), \code{"duplicate"} (two columns specified
+#'   alike), or \code{"rank"} (the unrotated loadings of a column's
+#'   specified items have too low a rank), and \code{factors} names the
+#'   columns at issue.}
+#' \item{\code{dmar_group_coverage}}{Under full information maximum
+#'   likelihood, a group of \code{\link{measurement_invariance}} never
+#'   observes a variable of the model (or an auxiliary variable), or never
+#'   observes two of them together, so the ladder cannot be fitted; the
+#'   condition carries the variables a group never observes as
+#'   \code{unobserved} (a data frame with columns \code{group},
+#'   \code{variable}, and \code{n_group}, the cases of the group) and the
+#'   pairs as \code{pairs} (columns \code{group}, \code{variable_1}, and
+#'   \code{variable_2}).}
+#' \item{\code{dmar_bifactor_unidentified}}{A bifactor structure that
+#'   \code{\link{fa_bifactor}} will not fit; the condition carries the
+#'   factors and items at issue as \code{factors} and \code{items}, and
+#'   the kind of refusal as \code{reason}: \code{"unidentified"} (the data
+#'   cannot identify the structure), \code{"names"} (an item or factor
+#'   placed twice, or names that clash), or \code{"scope"} (a structure
+#'   outside the model the function fits, such as fewer than two group
+#'   factors, which need not be unidentified).}
+#' \item{\code{dmar_second_order_unidentified}}{A second-order structure
+#'   that \code{\link{fa_second_order}} will not fit; the condition
+#'   carries the factors and items at issue as \code{factors} and
+#'   \code{items}, and the kind of refusal as \code{reason}, with the
+#'   values of \code{dmar_bifactor_unidentified} (\code{"names"} also for
+#'   a first-order factor under no second-order factor, \code{"scope"} for
+#'   an item on two first-order factors or a first-order factor under two
+#'   second-order factors).}
+#' \item{\code{dmar_count_invalid}}{A number of resamples, permutations,
+#'   or replications that is not a single whole number in its admissible
+#'   range (2.5, a missing or infinite value, a vector, or a value below
+#'   the stated minimum). The condition carries the argument's name as
+#'   \code{arg} and its limits as \code{min} and \code{max}
+#'   (\code{NULL} when no maximum is stated).}
+#' \item{\code{dmar_semipartial_r_incoherent}}{A full-model \eqn{R^2}
+#'   smaller than the square of the semipartial correlation it is given
+#'   with, which no data can produce, in \code{\link{var_semipartial_r}},
+#'   \code{\link{ss_aipe_semipartial_r}}, and
+#'   \code{\link{ss_aipe_semipartial_r_sensitivity}}. The condition
+#'   carries the two values as \code{R2_full} and \code{r_sp}.}
+#' \item{\code{dmar_bca_undefined}}{\code{\link{mediate}} was asked for
+#'   the BCa interval of an indirect effect in data where the interval is
+#'   not defined: the indirect effect is not estimable with one of the
+#'   cases left out, so the jackknife acceleration has no value, or the
+#'   bias correction or the acceleration is not finite. The percentile
+#'   interval does not need these quantities.}
+#' \item{\code{dmar_scores_not_ordered}}{The observations given to an
+#'   order-based effect size (\code{\link{vargha_delaney_A}},
+#'   \code{\link{cliff_delta}},
+#'   \code{\link{probability_of_superiority_paired}}) have no common order:
+#'   an unordered factor, a character vector, an ordered factor beside
+#'   anything but an ordered factor with the same levels, time differences
+#'   in different units, a \code{Date} beside a \code{POSIXct}, or a
+#'   class or shape that is not a numeric vector. The message says which
+#'   case applies, what would have been computed, and what to supply.}
+#' \item{\code{dmar_studentized_statistic_undefined}}{\code{statistic = "t"}
+#'   in \code{\link{randomization_test}} or
+#'   \code{\link{randomization_test_paired}} for data whose observed
+#'   standard error is 0 with a nonzero mean difference (two constant
+#'   groups at different values; paired differences that are all the same
+#'   nonzero value), where the studentized statistic has no value. The
+#'   condition carries \code{reason} (\code{"constant_groups"} or
+#'   \code{"constant_differences"}), \code{alternative}, the group sizes
+#'   as \code{n_1} and \code{n_2} or the number of pairs as \code{n}, and
+#'   \code{p_value_mean}, the exact \emph{p}-value that
+#'   \code{statistic = "mean"} gives.}
+#' \item{\code{dmar_hedges_correction_undefined}}{\code{unbiased = TRUE}
+#'   in \code{\link{smd_c}} with a control group of 1 or 2, or in
+#'   \code{\link{smd}} with \eqn{n_1 + n_2} of 2 or 3. On 1 degree of
+#'   freedom the correction factor of Hedges (1981) is 0, so the corrected
+#'   estimate would be 0 whatever the data; on 0 degrees of freedom the
+#'   factor is not defined, because there is no standard deviation. The
+#'   condition carries \code{df}.}
+#' \item{\code{dmar_assurance_invalid}}{An \code{assurance} given to
+#'   \code{\link{ss_aipe_cv}} that is neither \code{NULL} nor a single
+#'   number strictly between 0 and 1. The condition carries the argument's
+#'   name as \code{arg} and the value given as \code{value}.}
+#' \item{\code{dmar_argument_invalid}}{A value, or a combination of
+#'   values, that a function cannot use and that has no class of its own:
+#'   the wrong type or length, a number outside its range, arguments that
+#'   cannot be given together or that are missing together, a column that
+#'   is not in the data, data or a fitted model the analysis does not
+#'   cover. It is the class of every argument check in the package. The
+#'   condition carries the name or names of the arguments at issue as
+#'   \code{arg}. \code{arg} is \code{NULL} when the refusal is not about
+#'   a named argument (a property of the data, a search that ran out of
+#'   room), and in some checks whose message names the argument only in
+#'   running text and not at its start. Among others it is
+#'   given by \code{\link{ss_power_R2_change}} (a \code{p_restricted} that
+#'   is not below \code{p_full}, squared multiple correlations that cannot
+#'   belong to nested models, an effect stated in more than one way); by
+#'   the partial and semipartial correlation functions for a \code{p}
+#'   below 2; by \code{\link{smd}} and \code{\link{smd_c}} for
+#'   \code{unbiased = TRUE} without the sample sizes, and by
+#'   \code{\link{smd}} for a group of one with its own standard
+#'   deviation; by \code{\link{ss_aipe_sc_ancova_sensitivity}} when a
+#'   sample size is to be planned and no \code{width} is given; and by
+#'   \code{\link{ss_aipe_R2_sensitivity}},
+#'   \code{\link{ss_aipe_cv_sensitivity}},
+#'   \code{\link{ss_aipe_cliff_delta_sensitivity}}, and
+#'   \code{\link{ss_aipe_reliability_sensitivity}} when both the estimate
+#'   to plan from and \code{specified_N} are given.}
+#' \item{\code{dmar_package_required}}{The analysis asked for needs a
+#'   package that is not installed (or, for \pkg{lavaan}, a newer version
+#'   than the one installed). The message names the package and how to
+#'   install it, and the condition carries its name as \code{package}.}
+#' \item{\code{dmar_computation_failed}}{The arguments were accepted, and
+#'   a computation made with them did not give a result: a search for a
+#'   sample size or for a confidence limit did not reach its target, a
+#'   model fitted for the analysis failed or gave no proper solution and
+#'   no more specific class applies (\code{dmar_not_converged},
+#'   \code{dmar_no_maximum}, \code{dmar_lavaan_error}), a refit or a
+#'   bootstrap failed, or a distribution could not be evaluated
+#'   accurately at the values reached. The message says which and what
+#'   to change.}
+#' \item{\code{dmar_internal_error}}{DMAR reached a state its own code
+#'   should not reach. The arguments are not at fault; please report the
+#'   call (see \code{BugReports} in the package's description).}
+#' \item{\code{dmar_desired_power_invalid}}{A \code{desired_power} that is
+#'   not a single number strictly between 0 and 1, in any power planner
+#'   (the \code{ss_power_} functions). The condition carries the argument's
+#'   name as \code{arg} and the value given as \code{value}.}
+#' \item{\code{dmar_effect_zero}}{A sample size was asked of
+#'   \code{\link{ss_power_R2}} or \code{\link{ss_power_R2_change}} for a
+#'   planning value under which the null hypothesis is true (a squared
+#'   multiple correlation, or a change in it, of 0), so that power equals
+#'   \code{alpha_level} at every sample size; or of
+#'   \code{\link{ss_power_reg_coef}} or \code{\link{ss_power_rc}} for a
+#'   regression coefficient whose effect is 0 at the planning values, with
+#'   a \code{desired_power} above \code{alpha_level}.}
+#' \item{\code{dmar_estimand_undetermined}}{An estimand asked for by name
+#'   (\code{estimand = "total"} or \code{"partial"}) of
+#'   \code{\link{eta_squared}}, \code{\link{omega_squared}},
+#'   \code{\link{ci_eta_squared}}, or \code{\link{ci_omega_squared}} that
+#'   the inputs do not determine, such as the total value from an
+#'   \emph{F} statistic, or a total for which no interval is formed. With
+#'   \code{estimand = "all"} the same estimand is reported as \code{NA}.
+#'   The condition carries \code{estimand} and the \code{reason}.}
+#' \item{\code{dmar_cost_ratio_invalid}}{A \code{cost_ratio} given to
+#'   \code{\link{ss_aipe_two_phase_cost}} that is not a single positive
+#'   number below 1. The condition carries the argument's name as
+#'   \code{arg} and the value given as \code{value}.}
+#' \item{\code{dmar_two_phase_no_design}}{Planning values for which
+#'   \code{\link{ss_aipe_two_phase_cost}} cannot represent the sizes of
+#'   a design as whole numbers (a width too narrow for the standard
+#'   deviation, or a proxy too inexpensive).}
+#' \item{\code{dmar_no_maximum}}{A factor analysis or structural equation
+#'   model fit whose likelihood has no maximum: an error variance ran off
+#'   below zero, and with it held further out (at ten times its estimate,
+#'   or one model implied variance below it, whichever is further) the log
+#'   likelihood is higher, or lower by no more than \eqn{10^{-6}} per
+#'   case, so the likelihood is still rising or flat along that ridge and
+#'   \pkg{lavaan}'s optimizer stopped at a point its starting values and
+#'   tolerance set; the estimates describe the optimizer rather than the
+#'   data. It comes from
+#'   \code{\link{fa_confirmatory}} (and \code{cfa_k()}, \code{\link{cfa_1}},
+#'   and \code{\link{cfa_2}}), \code{\link{fa_bifactor}},
+#'   \code{\link{fa_second_order}}, \code{\link{fa_exploratory}} (where it
+#'   is also a \code{dmar_efa_no_solution}, with \code{reason}
+#'   \code{"no maximum"}), \code{\link{measurement_invariance}},
+#'   \code{\link{measurement_alignment}}, the single-factor fits of
+#'   \code{\link{reliability_omega}} and \code{\link{reliability_H}}, and
+#'   the refits of \code{\link{ci_bifactor_indices}} and of
+#'   \code{reliability_H(fit = )}, for every \code{output}. It comes as
+#'   well from the fit of the analysis model to the population moments in
+#'   \code{\link{ss_aipe_composite_sem}}, \code{\link{ss_power_composite_sem}},
+#'   \code{\link{ss_aipe_sem_path}}, and
+#'   \code{\link{ss_aipe_sem_path_sensitivity}}, and from the \pkg{lavaan}
+#'   fit that the \pkg{OpenMx} fits of \code{\link{mediation_mbco}} start
+#'   from (DMAR's own, or one given as \code{model}). The condition
+#'   carries the variables as \code{variables} (with their groups as
+#'   \code{group}), their error variances where the optimizer stopped and
+#'   where the check held them as \code{estimate} and \code{fixed_at}, the
+#'   two log likelihoods as \code{loglik}, the check's tolerance and the
+#'   number of cases as \code{tolerance} and \code{N}, and the \pkg{lavaan}
+#'   code of the fit as \code{syntax} and \code{lavaan_call}, which the
+#'   message prints (leaving the syntax out when it is too long to print,
+#'   for R cuts an error message at 8170 bytes). Inside a bootstrap, such a
+#'   replication is counted among those that raised an error, and the run
+#'   goes on; in the Monte Carlo of a planner it is set aside as a
+#'   replication that did not converge. A function that reads only the chi
+#'   square of a fit, which does not depend on where on such a ridge the
+#'   optimizer stopped, does not check it:
+#'   \code{\link{ss_aipe_rmsea_sensitivity}} and
+#'   \code{\link{sem_exact_fit_bootstrap}}.}
+#' \item{\code{dmar_null_R2_unsupported}}{\code{\link{ss_power_R2}} was
+#'   given a nonzero \code{null_R2}. The function plans the omnibus test
+#'   only; the message gives the call to \code{\link{ss_power_R2_change}}
+#'   for the test of an increment. The condition carries \code{null_R2},
+#'   \code{true_R2}, \code{true_f2}, and \code{p}.}
+#' }
+#' The other refusals, each a \code{dmar_refusal} as well, are
+#' \code{dmar_fiml_unbounded} and \code{dmar_fiml_unstable} (the
+#' unrestricted FIML likelihood has no finite maximum for these data, or
+#' is numerically unstable; the condition carries the certificate as
+#' \code{diagnostic}), \code{dmar_efa_no_solution} (an exploratory fit
+#' that did not converge, is improper, or left its standard errors
+#' unavailable, as its \code{reason} element says; with the reason
+#' \code{"no maximum"} it is also a \code{dmar_no_maximum}),
+#' \code{dmar_not_converged} (a fit that did not
+#' converge, from \code{\link{fa_confirmatory}}, from
+#' \code{\link{measurement_invariance}}, where it carries the rung as
+#' \code{level} and that rung's \pkg{lavaan} code as \code{syntax} and
+#' \code{lavaan_call}, and from the functions that share the check of
+#' \code{\link{sem_fit_measures}}, those under \code{dmar_inadmissible},
+#' and from any other function that fits a model, or is given a fitted
+#' one, and reads its estimates; the refusal of a fit given to
+#' \code{\link{average_variance_extracted}},
+#' \code{\link{bifactor_indices}}, \code{\link{ci_bifactor_indices}},
+#' or \code{\link{dmacs}} carries the function as \code{fn} and the
+#' number of iterations \pkg{lavaan} ran as \code{iterations}),
+#' \code{dmar_lavaan_error}, \code{dmar_too_few_cases},
+#' \code{dmar_htmt_undefined}, \code{dmar_H_improper} (an improper
+#' solution given to \code{\link{reliability_H}} as a fit),
+#' \code{dmar_fmi_saturated_singular}, and
+#' \code{dmar_fmi_not_inverted}.
+#'
+#' A warning is a qualification of a result that is returned. Every
+#' warning DMAR signals on purpose is classed and carries its
+#' \code{code}, so it can be muffled or read by class from
+#' \code{withCallingHandlers()}. Two classes are general:
+#' \code{dmar_result_qualified} (the result is returned and the message
+#' states what to know before using it: an approximation that was used,
+#' an assumption the data do not meet, a quantity reported as \code{NA},
+#' cases or replications that were dropped) and
+#' \code{dmar_argument_ignored} (an argument that was given has no effect
+#' on this call, and the message says why). The others name one kind of
+#' qualification: \code{dmar_fmi_not_at_maximum},
+#' \code{dmar_heywood_warning} (an improper solution: a negative error
+#' variance or a standardized loading beyond one),
+#' \code{dmar_H_marginal_se} (an interval for coefficient H from the
+#' marginal standard errors of the loadings alone),
+#' \code{dmar_nc_F_clamp} (a lower confidence limit of a noncentrality
+#' parameter set to 0; see \code{\link{ci_nc_F}}),
+#' \code{dmar_two_stage_aux_only} (cases observed on an auxiliary
+#' variable alone, which \pkg{lavaan} leaves out of its count),
+#' \code{dmar_negative_reliability}, \code{dmar_two_stage_n},
+#' \code{dmar_semipartial_r_no_R2_full},
+#' \code{dmar_semipartial_r_rounded} (a full-model \eqn{R^2} below the
+#' squared semipartial correlation by no more than rounding to two
+#' decimals allows; the condition carries \code{R2_full} and \code{r_sp}),
+#' \code{dmar_nc_F_clamp_search} (the sample size search of
+#' \code{\link{ss_aipe_R2}} met the lower-limit clamp of
+#' \code{\link{ci_nc_F}} at intermediate sample sizes; given once per
+#' call, with the count as \code{n_evaluations}),
+#' \code{dmar_replications_without_interval},
+#' \code{dmar_replications_with_infinite_limit} (replications of
+#' \code{\link{ss_aipe_cv_sensitivity}} whose interval has an infinite
+#' upper limit; given once per call, with the count as
+#' \code{n_replications}),
+#' \code{dmar_uls_standard_statistic}, \code{dmar_bifactor_empirical},
+#' \code{dmar_smd_undefined}, \code{dmar_meta_hk_zero_se} (identical
+#' effect sizes under the Hartung-Knapp adjustment; the condition carries
+#' \code{n_studies}, \code{estimate}, \code{se_conventional},
+#' \code{lower_conventional}, and \code{upper_conventional}),
+#' \code{dmar_interval_degenerate} (an order-based effect size whose
+#' estimated variance is 0, with \code{reason}
+#' \code{"complete_separation"} or \code{"no_variation"}, the
+#' \code{estimate}, the sample sizes \code{n}, and
+#' \code{limit_feng_cliff}, the limit Feng and Cliff (2004) give for
+#' complete separation, which the function does not report),
+#' \code{dmar_bootstrap_replications_dropped} (a bootstrap or Monte
+#' Carlo interval dropped replications in which the statistic was
+#' undefined; the condition carries \code{B}, \code{B_used},
+#' \code{n_dropped}, \code{B_required}, \code{share_dropped},
+#' \code{caution}, and \code{status}),
+#' \code{dmar_bootstrap_insufficient} (more than half of the replications
+#' were dropped, or the adjusted positions of a BCa interval take more
+#' replications than were requested, and the limits are \code{NA}; the same
+#' fields, and for a BCa interval withheld at its
+#' adjusted positions also \code{positions} and \code{B_suggest}),
+#' \code{dmar_bootstrap_exploratory} (the result was computed from fewer
+#' replications than a reported result needs because
+#' \code{options(dmar.bootstrap_exploratory = TRUE)} is set; the same
+#' fields), and \code{dmar_bootstrap_note} (a BCa interval replaced by the
+#' percentile interval, or replicates that all have the same value, with
+#' every replication used), all four described in
+#' \code{\link{dmar_bootstrap}}. Each
+#' function's help says when.
+#'
+#' A refusal is never a table: when a function returns a table, its result
+#' is eligible or qualified, never refused.
+#'
+#' The errors \code{dmar_bootstrap_cancelled} and
+#' \code{dmar_progress_error} are not refusals. A bootstrap of the
+#' reliability family or of \code{\link{ci_bifactor_indices}} stops with
+#' the first when its \code{progress} callback returns \code{FALSE}, at
+#' the request of the application that called it, and with the second when
+#' the callback itself raises an error. Both carry \code{done} and
+#' \code{total}, the replications attempted and the number requested, and
+#' the second keeps the callback's own condition, with its class, as
+#' \code{parent}, so that an application can tell a failing callback from
+#' a failing analysis and still recognize a condition of its own behind it.
+#' }
+#'
+#' @return A named list with the fields above; a field the result does not
+#'   carry is \code{NULL}.
+#'
+#' @references
+#' Feng, D., & Cliff, N. (2004). Monte Carlo evaluation of ordinal d with
+#'   improved confidence interval. \emph{Journal of Modern Applied
+#'   Statistical Methods, 3}(2), 322--332. \doi{10.22237/jmasm/1099267560}
+#'
+#' Hedges, L. V. (1981). Distribution theory for Glass's estimator of
+#'   effect size and related estimators. \emph{Journal of Educational
+#'   Statistics, 6}(2), 107--128. \doi{10.3102/10769986006002107}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @seealso \code{\link{dmar_tbl}} for the table class and its display,
+#'   \code{\link{dmar_tidiers}} for \code{tidy()} and \code{glance()}, which
+#'   put the same metadata into columns of a data frame.
+#'
+#' @keywords utilities
+#'
+#' @examples
+#' x <- reliability_alpha(holzinger_swineford[c("t1_visual_perception",
+#'                                              "t2_cubes", "t4_lozenges")])
+#' m <- dmar_metadata(x)
+#' m$coefficient
+#' m$ci_method
+#' m$eligibility$status
+#'
+#' # Four items, so that the model has degrees of freedom to test (three
+#' # would make it saturated, which sem_fit_measures() qualifies).
+#' fit <- lavaan::cfa(
+#'   "visual =~ t1_visual_perception + t2_cubes + t3_paper_form_board +
+#'              t4_lozenges",
+#'   data = holzinger_swineford, std.lv = TRUE, estimator = "MLR")
+#' f <- dmar_metadata(sem_fit_measures(fit))
+#' f$version
+#' f$correction
+#'
+#' @export
+dmar_metadata <- function(x) {
+  if (!inherits(x, "dmar_tbl")) {
+    .dmar_refuse_argument(
+      "'x' must be a DMAR result table (a dmar_tbl).", arg = "x")
+  }
+  a <- function(name) attr(x, name, exact = TRUE)
+  first <- function(...) {
+    for (v in list(...)) if (!is.null(v)) return(v)
+    NULL
+  }
+  method <- a("method")
+  # The fit families record their method as a list (estimator, N,
+  # rotation). Other tables keep a character label there ("exact
+  # enumeration" for randomization_test(), "reml" for the meta-analysis
+  # functions, "regression" for ci_two_phase()), which has no such fields.
+  if (!is.list(method)) method <- NULL
+  # The fit measure families record under sem_fit; the information criteria
+  # under sem_information, with the same field names where both have one.
+  sem_fit <- first(a("sem_fit"), a("sem_information"))
+  two_stage <- a("two_stage")
+  boot <- a("bootstrap")
+  h1 <- a("h1_diagnostic")
+  # The bootstrap counts: the reliability engine's list, the exact fit
+  # bootstrap's sem_fit counts, or the bare B and B_used attributes.
+  bootstrap <- NULL
+  if (is.list(boot) && !is.data.frame(boot) && !is.null(boot$attempted)) {
+    bootstrap <- list(B = boot$attempted, used = boot$returned,
+                      failed = boot$failed, improper = boot$improper,
+                      improper_kept = boot$improper_kept,
+                      undetermined = boot$undetermined,
+                      not_converged = boot$not_converged,
+                      too_few_cases = boot$too_few_cases,
+                      required = first(boot$required, a("B_required")),
+                      status = first(boot$bootstrap_status,
+                                     a("bootstrap_status")))
+  } else if (!is.null(sem_fit$B)) {
+    bootstrap <- list(B = sem_fit$B, used = sem_fit$B_used,
+                      failed = sem_fit$B_failed, improper = sem_fit$B_improper,
+                      required = first(sem_fit$B_required, a("B_required")),
+                      status = first(sem_fit$bootstrap_status,
+                                     a("bootstrap_status")))
+  } else if (!is.null(a("B")) || !is.null(a("B_used"))) {
+    bootstrap <- list(B = a("B"), used = a("B_used"),
+                      failed = a("n_dropped"), improper = NULL,
+                      required = a("B_required"),
+                      status = a("bootstrap_status"))
+  }
+  fit_rows <- first(sem_fit$two_stage_rows, two_stage$rows, a("fit_rows"))
+  if (is.character(fit_rows)) fit_rows <- NULL
+  # The eligibility: an unavailable H1 model qualifies the result first;
+  # otherwise a two-stage fit that could not be computed again with every
+  # case its first stage read (its warning is rebuilt from the counts, so
+  # that the note is the text the function gave).
+  eligibility <- if (!is.null(h1)) {
+    list(status = "qualified", code = "h1_unavailable", note = h1)
+  } else if (isFALSE(fit_rows$corrected)) {
+    fun <- switch(class(x)[1L],
+                  dmar_measurement_invariance = "measurement_invariance",
+                  sub("^dmar_", "", class(x)[1L]))
+    note <- tryCatch(
+      .ts_all_rows_warning(fun, fit_rows,
+                           two_stage$lavaan_missing %||% "robust.two.stage"),
+      warning = conditionMessage)
+    list(status = "qualified", code = "two_stage_rows_unavailable",
+         note = if (is.character(note)) note)
+  } else {
+    list(status = "eligible", code = NULL, note = NULL)
+  }
+  # N where a family keeps it as a row of a long table rather than an
+  # attribute (the reliability family).
+  table_n <- if (!is.null(x$term) && !is.null(x$value)) {
+    n <- x$value[x$term %in% "N"]
+    if (length(n) == 1L && is.finite(n)) n
+  }
+  groups_attr <- a("groups")
+  # Whether the table's own interval is an RMSEA interval, held in rows or
+  # columns named for it (sem_fit_measures(), factor_count()) or as the
+  # interval of an rmsea row (ci_rmsea(), equivalence_rmsea()); its level
+  # is then the table's. A table whose RMSEA interval is at a level of its
+  # own records that level in its rmsea_conf_level attribute.
+  terms <- if (is.character(x[["term"]])) x[["term"]] else character(0)
+  rmsea_interval <- "rmsea_ci_lower" %in% c(terms, names(x)) ||
+    ("rmsea" %in% terms && "ci_lower" %in% terms)
+  list(
+    result = class(x)[1L],
+    coefficient = a("coefficient"),
+    estimator = first(method$estimator, sem_fit$estimator, a("estimator")),
+    se_method = first(method$se, a("se_type")),
+    test = first(sem_fit$test, a("test"), two_stage$test),
+    missing = first(method$missing, sem_fit$missing, a("missing")),
+    ci_method = a("ci_method"),
+    wald_df = a("wald_df"),
+    conf_level = a("conf_level"),
+    rmsea_conf_level = first(a("rmsea_conf_level"),
+                             if (rmsea_interval) a("conf_level")),
+    tail_areas = a("tail_areas"),
+    denominator = a("denominator"),
+    interval_degenerate = a("interval_degenerate"),
+    version = sem_fit$version,
+    version_reason = sem_fit$version_reason,
+    correction = sem_fit$correction,
+    N = first(method$N, sem_fit$N, a("N"), table_n),
+    groups = first(sem_fit$groups, a("ngroups"),
+                   if (is.character(groups_attr)) length(groups_attr) else
+                     groups_attr),
+    fit_rows = fit_rows,
+    auxiliary = first(a("auxiliary"), a("aux"), two_stage$aux),
+    eligibility = eligibility,
+    bootstrap = bootstrap,
+    simulation = a("simulation"),
+    transformation = a("transformation"),
+    methods = unname(a("methods")),
+    rotation = method$rotation,
+    structure = method$structure,
+    footer = first(sem_fit$footer, two_stage$footer, a("analysis_note"),
+                   if (is.character(a("fit_rows"))) a("fit_rows"))
+  )
+}

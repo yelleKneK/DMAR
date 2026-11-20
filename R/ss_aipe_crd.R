@@ -1,0 +1,338 @@
+#' @rdname ss_aipe_crd
+#' @name ss_aipe_crd
+#' @aliases ss_aipe_crd_n_clusters_fixed_width
+#' @aliases ss_aipe_crd_n_individuals_fixed_width
+#' @aliases ss_aipe_crd_n_clusters_fixed_budget
+#' @aliases ss_aipe_crd_n_individuals_fixed_budget
+#' @aliases ss_aipe_crd_both_fixed_budget
+#' @aliases ss_aipe_crd_both_fixed_width
+#'
+#' @title Sample Sizes for a Cluster Randomized Design: Accuracy in Parameter Estimation for the Difference Between Condition Means
+#'
+#' @description
+#' Finds the number of clusters, the number of individuals per cluster, or both, for a two-condition cluster
+#' randomized design (CRD), so that the confidence interval for the difference between the condition means has a
+#' desired width or is as narrow as a budget allows. Four of the functions fix one of the two sizes and take a desired
+#' width or a budget; the two \code{both} functions take a budget and return the sizes that give the narrowest
+#' interval, or take a desired width and return the least costly sizes.
+#'
+#' @param width The desired width of the confidence interval of the unstandardized means difference
+#' @param budget The amount available for the study, in the units of \code{cluster_cost} and
+#'   \code{individual_cost}: a single finite number of 0 or more. A budget that does not buy the smallest design
+#'   the function considers is refused (see the section on refused calls)
+#' @param n_clusters The number of clusters: a single whole number of at least \code{3 + n_covariates}, since the
+#'   interval has \code{n_clusters - 2 - n_covariates} degrees of freedom. With \code{pr_treat} it must put a
+#'   cluster in each condition (\code{round(n_clusters * pr_treat)} of them are treated)
+#' @param cluster_size The number of individuals in each cluster: a single whole number of at least 2. The
+#'   searches over the cluster size start at 2, and with one individual in a cluster the variance between
+#'   clusters cannot be told from the variance within them
+#' @param pr_treat The proportion of treatment clusters: a single number strictly between 0 and 1
+#' @param cluster_cost The cost of adding one cluster, whatever the number of individuals in it: a single finite
+#'   number of 0 or more. Where the costs choose the design (the two budget functions that fix a size and the
+#'   two \code{both} functions), \code{cluster_cost} and \code{individual_cost} cannot both be 0
+#' @param individual_cost The cost of adding one individual to a cluster: a single finite number of 0 or more,
+#'   and positive where the costs choose the cluster size (\code{ss_aipe_crd_n_individuals_fixed_budget} and
+#'   the two \code{both} functions), since otherwise clusters of every size cost the same
+#' @param true_var_between The population residual variance in the between level before accounting for the
+#'   covariate (a planning value), 0 or more
+#' @param true_var_within The population residual variance in the within level before accounting for the
+#'   covariate (a planning value), 0 or more
+#' @param true_total_var The population total residual variance before accounting for the covariate (a planning
+#'   value), positive. Any two of \code{true_var_between}, \code{true_var_within}, \code{true_total_var}, and
+#'   \code{true_icc} determine the other two; a third or fourth must agree with them (see the section on
+#'   refused calls)
+#' @param true_icc The population intraclass correlation of the dependent variable (a planning value), the
+#'   share of \code{true_total_var} that lies between clusters, in [0, 1]
+#' @param true_R2_within The population proportion of the within-level variance that the covariates explain (a
+#'   planning value in [0, 1); default 0, no covariate)
+#' @param true_R2_between The population proportion of the between-level variance that the cluster-level
+#'   covariates explain (a planning value in [0, 1); default 0). It must be 0 when \code{n_covariates = 0}, since
+#'   there is then no covariate at the cluster level to explain it
+#' @param n_covariates The number of covariates at the cluster (between)
+#'   level, not counting the treatment indicator: a single whole number of
+#'   0 or more. The degrees of freedom of
+#'   the interval are \code{n_clusters - 2 - n_covariates}. The default,
+#'   0, is a model with the treatment indicator alone. It is not \code{p},
+#'   the total number of predictors, which here is
+#'   \code{p = n_covariates + 1}.
+#' @param assurance The degree of assurance, which is the value with which confidence can be placed that describes the likelihood of obtaining a confidence interval less than the value specified (e.g., .80, .90, .95)
+#' @param conf_level The desired level of confidence for the confidence interval
+#' @param diff_size Difference cluster size specification. The differences in cluster sizes can be specified in two ways, and the specified vector is recycled across the clusters. First, users may specify differences as integers, which can be negative or positive; the resulting cluster sizes add the specified values to the estimated cluster size. For example, if the cluster size is 25, the number of clusters is 10, and \code{diff_size = c(-1, 0, 1)}, the cluster sizes will be 24, 25, 26, 24, 25, 26, 24, 25, 26, and 24. Second, users may specify multipliers of the cluster size as positive decimals; at least one value must be non-integer, which is what selects the multiplicative form. The resulting cluster sizes multiply the estimated cluster size by the specified values and round to the nearest integer. For example, if the cluster size is 25, the number of clusters is 10, and \code{diff_size = c(0.8, 1, 1.2)}, the cluster sizes will be 20, 25, 30, 20, 25, 30, 20, 25, 30, and 20. In either form a resulting cluster size below 1 is set to 1. If \code{NULL}, the cluster size is equal across clusters. Anything other than \code{NULL} or a vector of one or more finite numbers is refused
+#'
+#' @details
+#' Here are the functions' descriptions:
+#' \describe{
+#'   \item{\code{ss_aipe_crd_n_clusters_fixed_width}}{Find the number of clusters given a specified width of the confidence interval and the cluster size}
+#'   \item{\code{ss_aipe_crd_n_individuals_fixed_width}}{Find the cluster size given a specified width of the confidence interval and the number of clusters}
+#'   \item{\code{ss_aipe_crd_n_clusters_fixed_budget}}{Find the number of clusters given a budget and the cluster size}
+#'   \item{\code{ss_aipe_crd_n_individuals_fixed_budget}}{Find the cluster size given a budget and the number of clusters}
+#'   \item{\code{ss_aipe_crd_both_fixed_budget}}{Find the sample size combinations (the number of clusters and that cluster size) providing the narrowest confidence interval given the fixed budget}
+#'   \item{\code{ss_aipe_crd_both_fixed_width}}{Find the sample size combinations (the number of clusters and that cluster size) providing the lowest cost given the specified width of the confidence interval}
+#' }
+#'
+#' The searches over the number of clusters consider at least
+#' \code{ceiling(2 / min(pr_treat, 1 - pr_treat)) + n_covariates} clusters, which puts at least two clusters in
+#' each condition after rounding (the rule of \pkg{MBESS}; Kelley, 2007a, 2007b) and gives the interval at least
+#' two degrees of freedom: 4 clusters at \code{pr_treat = 0.5}, 20 at 0.1, and 200 at 0.01. From there
+#' \code{ss_aipe_crd_n_clusters_fixed_width} returns the smallest number of clusters whose width is no larger
+#' than \code{width} (a width equal to the target meets it, so asking for the width a plan reports returns that
+#' plan), and the two \code{both} functions compare numbers of clusters from there with cluster
+#' sizes of 2 or more. The searches consider at most 1,000,000 clusters, the bound the power planners use for
+#' a sample size: the width falls toward 0 as clusters are added, so every positive target is met by some
+#' number, but a target too narrow for any study would otherwise be searched for without end. The widths at 100, 200, ..., 1000 clusters bracket the target, and the bracket is
+#' searched one cluster at a time, which gives the smallest number when the width falls as clusters are added,
+#' as it does with equal cluster sizes and no \code{assurance}. At an \code{assurance} below .5 the width need not
+#' fall as the number of clusters grows, so the search may return more than the smallest number that meets the
+#' target; the same can happen with unequal cluster sizes (\code{diff_size}), whose width depends on how the
+#' sizes fall between the conditions. The cluster size searches consider 2 to 100,000 individuals per cluster.
+#'
+#' @section Refused calls:
+#' Each refusal below is an error of class \code{dmar_argument_invalid} that names the argument or arguments as
+#' \code{arg} and, where the cause needs a name, gives it as \code{reason}.
+#' \itemize{
+#'   \item \code{n_covariates} must be a whole number of 0 or more, \code{cluster_size} a whole number of at
+#'     least 2, and \code{n_clusters} a whole number of at least \code{3 + n_covariates}; \code{pr_treat} must
+#'     be strictly between 0 and 1, and \code{true_R2_between} and \code{true_R2_within} in [0, 1). A nonzero
+#'     \code{true_R2_between} with \code{n_covariates = 0} is refused with \code{reason}
+#'     \code{"R2_between_without_covariates"}; \code{true_R2_within} may be nonzero without them. A number
+#'     of clusters that, at \code{pr_treat}, leaves a condition without a cluster is refused with
+#'     \code{reason} \code{"arm_without_clusters"}. \code{diff_size} must be \code{NULL} or a vector of one
+#'     or more finite numbers.
+#'   \item Each cost, and the budget, must be a single finite number of 0 or more. Costs that are both 0 are
+#'     refused where the costs choose the design (\code{reason} \code{"costs_all_zero"}), and
+#'     \code{individual_cost = 0} where they choose the cluster size (\code{reason}
+#'     \code{"individual_cost_zero"}): a search over designs that all cost the same has no end. In the two
+#'     functions that plan from a width and a fixed size the costs only price the design, and costs of 0 give
+#'     a budget of 0.
+#'   \item A budget that does not buy the smallest design the function can return is refused with
+#'     \code{reason} \code{"budget_infeasible"} and the cost of that design as \code{min_cost}: in
+#'     \code{ss_aipe_crd_n_clusters_fixed_budget} 4 clusters of \code{cluster_size}, or, with \code{pr_treat},
+#'     the fewest clusters that put a cluster in each condition and leave a degree of freedom (6 at
+#'     \code{pr_treat = 0.1}); in \code{ss_aipe_crd_n_individuals_fixed_budget} \code{n_clusters} clusters of 2;
+#'     and in \code{ss_aipe_crd_both_fixed_budget} the fewest clusters its search considers, given above, each
+#'     of 2. When \code{ss_aipe_crd_n_clusters_fixed_budget} is given \code{pr_treat} and the budget buys 4
+#'     clusters or more but a design with no finite width, it is refused with \code{reason}
+#'     \code{"arm_without_clusters"} (a condition without a cluster) or \code{"too_few_clusters"} (no degrees
+#'     of freedom), with the budget that buys the fewest clusters that would do.
+#'   \item \code{ss_aipe_crd_n_individuals_fixed_width} refuses a width that no cluster size up to 100,000
+#'     reaches with \code{n_clusters} clusters, with \code{reason} \code{"width_not_reachable"}; it gives as
+#'     \code{width_limit} the width the interval falls toward as the clusters grow, which the variance between
+#'     clusters sets, and says whether a larger cluster size would reach the target.
+#'     \code{ss_aipe_crd_n_clusters_fixed_width} and \code{ss_aipe_crd_both_fixed_width} refuse a width that
+#'     no design of up to 1,000,000 clusters meets (with clusters of up to 100,000 individuals in the latter),
+#'     with \code{reason} \code{"n_clusters_beyond_reach"} and the width there as \code{width_at_max}.
+#'   \item The variances are needed where a width is computed: two of \code{true_var_between},
+#'     \code{true_var_within}, \code{true_total_var}, and \code{true_icc}, any two (\code{reason}
+#'     \code{"underidentified_variances"} otherwise, as for a between-cluster variance of 0 with an
+#'     intraclass correlation of 0). Each must be \code{NULL} or a single finite number (\code{reason}
+#'     \code{"variance_input_invalid"}). A variance must be 0 or more, the total variance positive (whether it
+#'     is given or is the sum of the two variances, so two variances of 0 are refused), and the intraclass
+#'     correlation in [0, 1] (\code{reason} \code{"variance_out_of_range"}). A third or fourth
+#'     value must agree with the two that determine the model to within about 1e-14 of its scale
+#'     (\code{reason} \code{"inconsistent_variances"}, with the value they imply in the message), so a rounded
+#'     value is refused; give two and leave the others \code{NULL}. With \code{diff_size} the variance within
+#'     clusters must be positive (\code{reason} \code{"within_variance_zero"}). These refusals carry the four
+#'     values as given in \code{supplied}.
+#' }
+#'
+#' @return
+#' The \code{ss_aipe_crd_n_clusters_fixed_width} and \code{ss_aipe_crd_n_clusters_fixed_budget} functions provide the number of clusters.
+#' The \code{ss_aipe_crd_n_individuals_fixed_width} and \code{ss_aipe_crd_n_individuals_fixed_budget} functions provide the cluster size.
+#' The \code{ss_aipe_crd_both_fixed_budget} and \code{ss_aipe_crd_both_fixed_width} provide the number of clusters and the
+#' cluster size, respectively.
+#'
+#' Each returns a table with the columns \code{term} and \code{value}. The rows, where they apply, are
+#' \code{necessary_n_clusters} (the number of clusters, where it is solved for),
+#' \code{necessary_cluster_size} (the number of individuals in each cluster, where it is solved for; with
+#' \code{diff_size} the cluster sizes and their frequencies are printed ahead of the table instead),
+#' \code{width} (the desired width, in the functions that plan from one),
+#' the width of the interval the design gives, and \code{budget} (the cost of the design, when the two costs are
+#' supplied). Without \code{assurance} the width row is \code{expected_width}, the expected width of the interval.
+#' With \code{assurance} it is \code{assured_width}, the width that the interval does not exceed with the
+#' requested probability, followed by the row \code{assurance} that echoes that probability.
+#'
+#' A size that was given is an argument of the call and is not repeated in the table: only a size the function
+#' solved for has a row, and its name begins with \code{necessary_}. \code{\link[generics]{tidy}} and
+#' \code{\link[generics]{glance}} report the planned size as \code{estimate} (the number of clusters where it
+#' was solved for, otherwise the cluster size) and the desired width as \code{width}, which is \code{NA} for a
+#' plan made from a budget; \code{glance()} carries \code{expected_width} or \code{assured_width} as a column
+#' of that name.
+#'
+#' @references
+#' Kelley, K. (2007a). Confidence intervals for standardized effect
+#'   sizes: Theory, application, and implementation. \emph{Journal of
+#'   Statistical Software, 20}(8), 1--24. \doi{10.18637/jss.v020.i08}
+#'
+#' Kelley, K. (2007b). Methods for the behavioral, educational, and
+#'   social sciences: An R package. \emph{Behavior Research Methods,
+#'   39}(4), 979--984. \doi{10.3758/BF03192993}
+#'
+#' Pornprasertmanit, S., & Schneider, W. J. (2014). Accuracy in parameter
+#'   estimation in cluster randomized designs. \emph{Psychological
+#'   Methods, 19}(3), 356--379. \doi{10.1037/a0037036}
+#'
+#' @author Ken Kelley \email{kkelley@@nd.edu}
+#'
+#' @examples
+#' # Examples for each function
+#' ss_aipe_crd_n_clusters_fixed_width(width = 0.3, cluster_size = 30,
+#'   pr_treat = 0.5, true_var_between = 0.25, true_var_within = 0.75)
+#'
+#' ss_aipe_crd_n_individuals_fixed_width(width = 0.3, n_clusters = 250,
+#'   pr_treat = 0.5, true_var_between = 0.25, true_var_within = 0.75)
+#'
+#' ss_aipe_crd_n_clusters_fixed_budget(budget = 10000, cluster_size = 20,
+#'   cluster_cost = 20, individual_cost = 1)
+#'
+#' ss_aipe_crd_n_individuals_fixed_budget(budget = 10000, n_clusters = 30,
+#'   cluster_cost = 20, individual_cost = 1,
+#'   pr_treat = 0.5, true_var_between = 0.05, true_var_within = 0.95, assurance = 0.8)
+#'
+#' ss_aipe_crd_both_fixed_budget(budget = 10000, cluster_cost = 30, individual_cost = 1,
+#'   pr_treat = 0.5, true_var_between = 0.25, true_var_within = 0.75)
+#'
+#' ss_aipe_crd_both_fixed_width(width = 0.3, cluster_cost = 0, individual_cost = 1,
+#'   pr_treat = 0.5, true_var_between = 0.25, true_var_within = 0.75)
+#'
+#' # Examples for different cluster size
+#' set.seed(113)
+#' ss_aipe_crd_n_clusters_fixed_width(width = 0.3, cluster_size = 30,
+#'   pr_treat = 0.5, true_var_between = 0.25, true_var_within = 0.75,
+#'   diff_size = c(-2, 1, 0, 2, -1, 3, -3, 0, 0))
+#'
+#' # Examples for different number of clusters
+#' ss_aipe_crd_n_individuals_fixed_width(width = 0.3, n_clusters = 250,
+#'   pr_treat = 0.5, true_var_between = 0.25, true_var_within = 0.75,
+#'   diff_size = c(0.6, 1.2, 0.8, 1.4, 1, 1, 1.1, 0.9))
+#'
+#' @seealso \code{\link{design_consequences}} for what a chosen design delivers:
+#'   power, the Type S (sign) and Type M (exaggeration) errors of the
+#'   significance filter, and the expected confidence interval width.
+#'
+#' @export
+ss_aipe_crd_n_clusters_fixed_width <- function(width, cluster_size, pr_treat, true_var_between = NULL, true_var_within = NULL, true_total_var = NULL, true_icc = NULL, true_R2_between = 0, true_R2_within = 0, n_covariates = 0, assurance = NULL, conf_level = 0.95, cluster_cost = NULL, individual_cost = NULL, diff_size = NULL) {
+    .dmar_check_conf_level(conf_level)
+    if (!missing(width)) .dmar_check_width(width)
+    .dmar_check_assurance(assurance)
+    .dmar_check_numbers("ss_aipe_crd_n_clusters_fixed_width", c("pr_treat", "true_var_between", "true_var_within", "true_R2_between", "true_R2_within", "n_covariates"), required = "pr_treat")
+    .crd_check_design(n_covariates, true_R2_between, true_R2_within, pr_treat = pr_treat, cluster_size = cluster_size)
+    .crd_check_diff_size(diff_size)
+    .crd_check_costs(cluster_cost, individual_cost, solves = "none")
+    v <- .crd_resolve_variances(true_var_between, true_var_within, true_total_var, true_icc, diff_size = diff_size)
+    n_clusters <- .find_n_clus_crd_diff(width = width, cluster_size = cluster_size, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size, fn = "ss_aipe_crd_n_clusters_fixed_width")
+    calculated_width <- .find_width_crd_diff(n_clusters = n_clusters, cluster_size = cluster_size, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size)
+    calculated_cost <- NULL
+    if (!is.null(cluster_cost) && !is.null(individual_cost)) calculated_cost <- .cost_crd(n_clusters, cluster_size, cluster_cost, individual_cost, diff_size = diff_size)
+    re <- .report_crd(n_clusters, cluster_size, calculated_width, cost = calculated_cost, es = FALSE, es_type = 0, assurance = assurance, diff_size = diff_size, solved = "n_clusters", requested_width = width)
+    .as_dmar_tbl(re, conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
+
+#' @rdname ss_aipe_crd
+#' @export
+ss_aipe_crd_n_individuals_fixed_width <- function(width, n_clusters, pr_treat, true_var_between = NULL, true_var_within = NULL, true_total_var = NULL, true_icc = NULL, true_R2_between = 0, true_R2_within = 0, n_covariates = 0, assurance = NULL, conf_level = 0.95, cluster_cost = NULL, individual_cost = NULL, diff_size = NULL) {
+    .dmar_check_conf_level(conf_level)
+    if (!missing(width)) .dmar_check_width(width)
+    .dmar_check_assurance(assurance)
+    .dmar_check_numbers("ss_aipe_crd_n_individuals_fixed_width", c("pr_treat", "true_var_between", "true_var_within", "true_R2_between", "true_R2_within", "n_covariates"), required = "pr_treat")
+    .crd_check_design(n_covariates, true_R2_between, true_R2_within, pr_treat = pr_treat, n_clusters = n_clusters)
+    .crd_check_diff_size(diff_size)
+    .crd_check_costs(cluster_cost, individual_cost, solves = "none")
+    v <- .crd_resolve_variances(true_var_between, true_var_within, true_total_var, true_icc, diff_size = diff_size)
+    cluster_size <- .find_n_indiv_crd_diff(width = width, n_clusters = n_clusters, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size, fn = "ss_aipe_crd_n_individuals_fixed_width")
+    if (!is.finite(cluster_size)) {
+        .crd_refuse_width_unreachable("ss_aipe_crd_n_individuals_fixed_width", width = width, n_clusters = n_clusters, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size)
+    }
+    calculated_width <- .find_width_crd_diff(n_clusters = n_clusters, cluster_size = cluster_size, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size)
+    calculated_cost <- NULL
+    if (!is.null(cluster_cost) && !is.null(individual_cost)) calculated_cost <- .cost_crd(n_clusters, cluster_size, cluster_cost, individual_cost, diff_size = diff_size)
+    re <- .report_crd(n_clusters, cluster_size, calculated_width, cost = calculated_cost, es = FALSE, es_type = 0, assurance = assurance, diff_size = diff_size, solved = "cluster_size", requested_width = width)
+    .as_dmar_tbl(re, conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
+
+#' @rdname ss_aipe_crd
+#' @export
+ss_aipe_crd_n_clusters_fixed_budget <- function(budget, cluster_size, cluster_cost = 0, individual_cost = 1, pr_treat = NULL, true_var_between = NULL, true_var_within = NULL, true_total_var = NULL, true_icc = NULL, true_R2_between = 0, true_R2_within = 0, n_covariates = 0, assurance = NULL, conf_level = 0.95, diff_size = NULL) {
+    .dmar_check_conf_level(conf_level, null_ok = TRUE)
+    .dmar_check_assurance(assurance)
+    .dmar_check_numbers("ss_aipe_crd_n_clusters_fixed_budget", c("cluster_cost", "individual_cost"))
+    .crd_check_design(n_covariates, true_R2_between, true_R2_within, pr_treat = pr_treat, cluster_size = cluster_size)
+    .crd_check_diff_size(diff_size)
+    .crd_check_budget(budget)
+    .crd_check_costs(cluster_cost, individual_cost, solves = "n_clusters")
+    if (!is.null(pr_treat)) v <- .crd_resolve_variances(true_var_between, true_var_within, true_total_var, true_icc, diff_size = diff_size)
+    n_clusters <- .find_n_clus_crd_budget(budget = budget, cluster_size = cluster_size, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+    if (is.na(n_clusters)) {
+        # With pr_treat the design returned has a width: the smallest has a
+        # cluster in each condition and a degree of freedom.
+        fewest <- if (is.null(pr_treat)) list(n = 4, why = character(0)) else .crd_fixed_size_fewest(pr_treat, n_covariates)
+        .crd_refuse_budget("ss_aipe_crd_n_clusters_fixed_budget", budget, n_clusters = fewest$n, cluster_size = cluster_size, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size, floor_text = fewest$why)
+    }
+    calculated_width <- NULL
+    if (!is.null(pr_treat)) {
+        .crd_check_bought_design("ss_aipe_crd_n_clusters_fixed_budget", budget, n_clusters = n_clusters, cluster_size = cluster_size, pr_treat = pr_treat, n_covariates = n_covariates, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+        calculated_width <- .find_width_crd_diff(n_clusters = n_clusters, cluster_size = cluster_size, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size)
+    }
+    calculated_cost <- .cost_crd(n_clusters, cluster_size, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+    re <- .report_crd(n_clusters, cluster_size, calculated_width, cost = calculated_cost, es = FALSE, es_type = 0, assurance = assurance, diff_size = diff_size, solved = "n_clusters")
+    .as_dmar_tbl(re, conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
+
+#' @rdname ss_aipe_crd
+#' @export
+ss_aipe_crd_n_individuals_fixed_budget <- function(budget, n_clusters, cluster_cost = 0, individual_cost = 1, pr_treat = NULL, true_var_between = NULL, true_var_within = NULL, true_total_var = NULL, true_icc = NULL, true_R2_between = 0, true_R2_within = 0, n_covariates = 0, assurance = NULL, conf_level = 0.95, diff_size = NULL) {
+    .dmar_check_conf_level(conf_level)
+    .dmar_check_assurance(assurance)
+    .dmar_check_numbers("ss_aipe_crd_n_individuals_fixed_budget", c("n_clusters", "cluster_cost", "individual_cost"), required = "n_clusters")
+    .crd_check_design(n_covariates, true_R2_between, true_R2_within, pr_treat = pr_treat, n_clusters = n_clusters)
+    .crd_check_diff_size(diff_size)
+    .crd_check_budget(budget)
+    .crd_check_costs(cluster_cost, individual_cost, solves = "cluster_size")
+    if (!is.null(pr_treat)) v <- .crd_resolve_variances(true_var_between, true_var_within, true_total_var, true_icc, diff_size = diff_size)
+    cluster_size <- .find_n_indiv_crd_budget(budget = budget, n_clusters = n_clusters, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+    if (is.na(cluster_size)) {
+        .crd_refuse_budget("ss_aipe_crd_n_individuals_fixed_budget", budget, n_clusters = n_clusters, cluster_size = 2, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+    }
+    calculated_width <- NULL
+    if (!is.null(pr_treat)) {
+        calculated_width <- .find_width_crd_diff(n_clusters = n_clusters, cluster_size = cluster_size, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size)
+    }
+    calculated_cost <- .cost_crd(n_clusters, cluster_size, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+    re <- .report_crd(n_clusters, cluster_size, calculated_width, cost = calculated_cost, es = FALSE, es_type = 0, assurance = assurance, diff_size = diff_size, solved = "cluster_size")
+    .as_dmar_tbl(re, conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
+
+#' @rdname ss_aipe_crd
+#' @export
+ss_aipe_crd_both_fixed_budget <- function(budget, cluster_cost = 0, individual_cost = 1, pr_treat, true_var_between = NULL, true_var_within = NULL, true_total_var = NULL, true_icc = NULL, true_R2_between = 0, true_R2_within = 0, n_covariates = 0, assurance = NULL, conf_level = 0.95, diff_size = NULL) {
+    .dmar_check_conf_level(conf_level)
+    .dmar_check_assurance(assurance)
+    .dmar_check_numbers("ss_aipe_crd_both_fixed_budget", c("cluster_cost", "individual_cost", "pr_treat", "true_var_between", "true_var_within", "true_R2_between", "true_R2_within", "n_covariates"), required = "pr_treat")
+    .crd_check_design(n_covariates, true_R2_between, true_R2_within, pr_treat = pr_treat)
+    .crd_check_diff_size(diff_size)
+    .crd_check_budget(budget)
+    .crd_check_costs(cluster_cost, individual_cost, solves = "cluster_size")
+    v <- .crd_resolve_variances(true_var_between, true_var_within, true_total_var, true_icc, diff_size = diff_size)
+    lo <- .crd_min_n_clusters(pr_treat, n_covariates)
+    if (budget < .cost_crd(lo, 2, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)) {
+        .crd_refuse_budget("ss_aipe_crd_both_fixed_budget", budget, n_clusters = lo, cluster_size = 2, cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size, floor_text = .crd_floor_text(pr_treat, n_covariates))
+    }
+    result <- .find_min_width_crd_diff(budget = budget, cluster_cost = cluster_cost, individual_cost = individual_cost, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size, fn = "ss_aipe_crd_both_fixed_budget")
+    calculated_cost <- .cost_crd(result[1], result[2], cluster_cost = cluster_cost, individual_cost = individual_cost, diff_size = diff_size)
+    .as_dmar_tbl(.report_crd(result[1], result[2], result[3], cost = calculated_cost, es = FALSE, es_type = 0, assurance = assurance, diff_size = diff_size, solved = "both"), conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
+
+#' @rdname ss_aipe_crd
+#' @export
+ss_aipe_crd_both_fixed_width <- function(width, cluster_cost = 0, individual_cost = 1, pr_treat, true_var_between = NULL, true_var_within = NULL, true_total_var = NULL, true_icc = NULL, true_R2_between = 0, true_R2_within = 0, n_covariates = 0, assurance = NULL, conf_level = 0.95, diff_size = NULL) {
+    .dmar_check_conf_level(conf_level)
+    if (!missing(width)) .dmar_check_width(width)
+    .dmar_check_assurance(assurance)
+    .dmar_check_numbers("ss_aipe_crd_both_fixed_width", c("cluster_cost", "individual_cost", "pr_treat", "true_var_between", "true_var_within", "true_R2_between", "true_R2_within", "n_covariates"), required = "pr_treat")
+    .crd_check_design(n_covariates, true_R2_between, true_R2_within, pr_treat = pr_treat)
+    .crd_check_diff_size(diff_size)
+    .crd_check_costs(cluster_cost, individual_cost, solves = "cluster_size")
+    v <- .crd_resolve_variances(true_var_between, true_var_within, true_total_var, true_icc, diff_size = diff_size)
+    result <- .find_min_cost_crd_diff(width = width, cluster_cost = cluster_cost, individual_cost = individual_cost, pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size, fn = "ss_aipe_crd_both_fixed_width")
+    calculated_width <- .find_width_crd_diff(n_clusters = result[1], cluster_size = result[2], pr_treat = pr_treat, true_var_between = v$true_var_between, true_var_within = v$true_var_within, true_R2_between = true_R2_between, true_R2_within = true_R2_within, n_covariates = n_covariates, assurance = assurance, conf_level = conf_level, diff_size = diff_size)
+    .as_dmar_tbl(.report_crd(result[1], result[2], calculated_width, cost = result[3], es = FALSE, es_type = 0, assurance = assurance, diff_size = diff_size, solved = "both", requested_width = width), conf_level = conf_level, subclass = "dmar_ss_aipe")
+}
